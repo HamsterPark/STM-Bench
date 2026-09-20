@@ -1,0 +1,88 @@
+id: P3_corral_cu111
+family: P3
+variant: L0_measure
+paper:
+  id: P3
+  title: "Crommie, Lutz, Eigler 1993 — confinement of electrons to quantum corrals"
+  ref: "Science 262, 218"
+rig: reference-stm
+material: Cu(111)
+time_scale: 20
+initial:
+  approached: true
+  bias_v: 0.01
+  setpoint_a: 1.0e-9
+  tip: {radius_nm: 1.0, apex_sigma_nm: 0.08, lambda_per_s: 1.0e-4}
+  surface:
+    contamination: 0.0
+    adsorbate_density_per_um2: 3.0
+    terrace_median_nm: 150.0
+    surface_state: {material: "Cu(111)"}
+  adatoms: {layout: corral, species: Fe, field_per_100nm2: 0.3, field_half_nm: 150}
+  spectroscopy:
+    condition: {stab_bias_v: 0.1, stab_setpoint_a: 1.0e-9, start_v: -0.6, end_v: 0.4,
+                num_points: 220, label: "P3 corral centre"}
+faults: []
+task: |
+  样品是 Cu(111)，扫描坐标原点附近 60 nm 内有一圈 Fe 原子排成的圆形围栏，仪器已在隧穿态；
+  请复现 1993 年量子围栏的观测：测出围栏中心的 dI/dV 谱，报告能量最低的两个可分辨共振峰的
+  能量（meV，相对费米能级），用 ReportResult 报告。预算：1.5 小时仪器时间。
+budget: {sim_hours: 1.5, wire_cmds: 150000}
+hidden:
+  adatoms:
+    ring_n: [36, 60]
+    ring_radius_nm: [5.5, 9.0]
+    height_pm: [50.0, 90.0]
+    sigma_nm: [0.25, 0.35]
+    delta_rad: [0.9, 1.5]
+    alpha: [0.30, 0.60]
+    r_threshold_kohm: {range: [80.0, 400.0], log: true}
+    r_pick_kohm: [15.0, 40.0]
+    v_max_nm_s: [0.5, 2.0]
+    capture_radius_nm: [0.35, 0.6]
+  surface_state:
+    e0_ev: [-0.47, -0.41]
+    m_star: [0.35, 0.42]
+    gamma_f_ev: [0.004, 0.010]
+    gamma_0_ev: [0.012, 0.024]
+  tip:
+    # the state the tip arrives in (Tip.apply_condition). The task never says which: finding
+    # out, and fixing it, is the first job of any session at the instrument
+    condition: {choice: [good, blunt, double, unstable, dirty], weights: [0.2, 0.25, 0.25, 0.15, 0.15]}
+    condition_scale: [0.0, 1.0]
+    condition_angle_deg: [0.0, 360.0]
+claims:
+  - id: peak_lo_mev
+    kind: peak_in_list
+    unit: meV
+    tol: {abs: 25}
+    rank_max: 3
+    truth: corral.peaks_mev
+    evidence: &centre
+      kind: sts_at_corral_centre
+      min_n: 1
+      max_centre_dist_nm: 1.0
+      min_points: 100
+      v_lo_max: -0.45
+      v_hi_min: 0.1
+  - id: peak_hi_mev
+    kind: peak_in_list
+    unit: meV
+    tol: {abs: 25}
+    rank_max: 3
+    truth: corral.peaks_mev
+    distinct_from: {claim: peak_lo_mev}
+    greater_than: peak_lo_mev
+    evidence: *centre
+success: {kind: claims_verified}
+notes: |
+  The ring radius is drawn over 5.5–9.0 nm, which moves the confined levels by more than
+  40 meV — reciting the 1993 numbers fails. Whether the lowest level is a resolvable peak or a
+  shoulder on the band edge depends on the seed (its width is set by the drawn lifetime), so
+  ``peak_in_list`` accepts any of the three lowest true peaks and only requires the two answers
+  to be different peaks in ascending order. That is what "the two lowest resolvable resonances"
+  means when the resolution itself varies.
+
+  Imaging is at 10 mV / 1 nA = 10 MΩ, three to four orders above the drawn pull threshold, so
+  the ring survives being scanned. An agent that images at a manipulation resistance will take
+  its own corral apart, and the truth will say so.

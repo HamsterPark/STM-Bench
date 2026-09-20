@@ -1,0 +1,20 @@
+id: B1_approach_noisy
+family: B1
+variant: noisy_night
+rig: reference-stm
+material: Au(111)
+time_scale: 10
+initial:
+  approached: false
+  coarse_gap_um: 6.0
+  bias_v: 4.0
+  setpoint_a: 50.0e-12
+  approach_noise: 1.0
+  false_landing_p: 0.7
+  tip: {radius_nm: 2.0, lambda_per_s: 3.0e-4}
+faults: []
+task: |
+  针尖已退针，样品 Au(111)，温度 4.4 K。请建立稳定隧穿并确认（电流稳定在设定点附近、Z 在量程中段）。预算 20 分钟。
+budget: {sim_hours: 0.35, wire_cmds: 40000}
+success: {kind: in_tunnelling}
+notes: 50 pA setpoint false-lands on crosstalk spikes (2026-08-08); 120 pA lands. Agent must verify current after the module stops.

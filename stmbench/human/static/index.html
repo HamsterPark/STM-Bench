@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STM-Bench 人工模式</title>
+<style>
+  :root {
+    --bg: #f4f5f7; --panel: #ffffff; --ink: #1c1e22; --muted: #6b7280; --line: #e3e5e9;
+    --accent: #1f5fbf; --accent-ink: #ffffff; --ok: #1a7f37; --bad: #b42318; --warn: #b7791f;
+    --me: #eef4ff; --op: #f7f7f2; --tool: #f6f8fa; --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.5 system-ui, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+  button { font: inherit; cursor: pointer; border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 6px; padding: 5px 10px; }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  button.danger { background: #fff5f5; color: var(--bad); border-color: #f0c2c2; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  input, select, textarea { font: inherit; border: 1px solid var(--line); border-radius: 6px; padding: 5px 8px; background: #fff; color: var(--ink); width: 100%; }
+  textarea { resize: vertical; min-height: 60px; font-family: var(--mono); font-size: 12.5px; }
+  code, pre { font-family: var(--mono); font-size: 12.5px; }
+  pre { white-space: pre-wrap; word-break: break-word; margin: 0; }
+  a { color: var(--accent); }
+  .muted { color: var(--muted); }
+  .small { font-size: 12px; }
+  .ok { color: var(--ok); } .bad { color: var(--bad); } .warn { color: var(--warn); }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .grow { flex: 1 1 auto; }
+
+  header { display: flex; gap: 16px; align-items: center; padding: 8px 14px; background: var(--panel); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 5; flex-wrap: wrap; }
+  header .brand { font-weight: 600; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; background: #eee; }
+  .badge.awaiting { background: #e6f4ea; color: var(--ok); }
+  .badge.running { background: #fff4e5; color: var(--warn); }
+  .badge.starting { background: #e8f0fe; color: var(--accent); }
+  .badge.finished { background: #e8f0fe; color: var(--accent); }
+  .badge.error { background: #fdecea; color: var(--bad); }
+  .meter { display: flex; flex-direction: column; gap: 2px; min-width: 220px; }
+  .meter progress { width: 100%; height: 8px; }
+  .meter .lbl { font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; }
+
+  main { display: grid; grid-template-columns: 300px minmax(420px, 1fr) 400px; gap: 12px; padding: 12px 14px; height: calc(100vh - 54px); }
+  @media (max-width: 1200px) { main { grid-template-columns: 1fr; height: auto; } .col { max-height: none !important; } }
+  .col { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
+  .col > .hd { padding: 8px 12px; border-bottom: 1px solid var(--line); font-weight: 600; display: flex; align-items: center; gap: 8px; }
+  .col > .bd { padding: 10px 12px; overflow: auto; flex: 1 1 auto; min-height: 0; }
+
+  /* tools */
+  .tool-group { margin: 8px 0 4px; font-size: 12px; color: var(--muted); text-transform: none; letter-spacing: .02em; }
+  .tool { display: block; width: 100%; text-align: left; padding: 6px 8px; border: 1px solid transparent; border-radius: 6px; background: transparent; }
+  .tool:hover { background: #f1f3f6; }
+  .tool.active { background: var(--me); border-color: #c9d8f5; }
+  .tool .nm { font-family: var(--mono); font-size: 12.5px; }
+  .tool .ds { color: var(--muted); font-size: 12px; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tool.stub .nm { color: var(--muted); }
+  .tool.pinned .nm { color: var(--accent); font-weight: 600; }
+
+  /* transcript */
+  .task { background: #fffbe6; border: 1px solid #f3e4a8; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+  .msg { border-radius: 8px; padding: 8px 10px; margin: 8px 0; border: 1px solid var(--line); }
+  .msg.human { background: var(--op); }
+  .msg.ai { background: var(--me); }
+  .msg.tool { background: var(--tool); }
+  .msg .who { font-size: 12px; color: var(--muted); margin-bottom: 4px; display: flex; gap: 8px; align-items: baseline; }
+  .msg .who b { color: var(--ink); }
+  .call { font-family: var(--mono); font-size: 12.5px; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; margin-top: 4px; }
+  .clip { max-height: 260px; overflow: hidden; position: relative; }
+  .clip.open { max-height: none; }
+  .clip-more { display: block; margin-top: 4px; }
+  .live { border: 1px dashed #c9d8f5; border-radius: 8px; padding: 8px 10px; margin: 8px 0; background: #fbfdff; }
+  .ev { font-family: var(--mono); font-size: 12px; margin: 2px 0; white-space: pre-wrap; word-break: break-word; }
+  details.sys summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+
+  /* composer */
+  .composer { border-top: 1px solid var(--line); padding: 10px 12px; background: #fafbfc; }
+  .composer h4 { margin: 0 0 6px; font-family: var(--mono); font-size: 13px; }
+  .field { margin: 6px 0; }
+  .field label { display: block; font-size: 12.5px; margin-bottom: 2px; }
+  .field label .req { color: var(--bad); }
+  .field .desc { color: var(--muted); font-size: 12px; margin-top: 2px; white-space: pre-wrap; }
+  .desc-full { max-height: 160px; overflow: auto; background: #fff; border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font-size: 12.5px; white-space: pre-wrap; margin-bottom: 8px; }
+  .endbox { border-top: 1px dashed var(--line); margin-top: 10px; padding-top: 8px; }
+  .spin { display: inline-block; width: 12px; height: 12px; border: 2px solid #ccc; border-top-color: var(--accent); border-radius: 50%; animation: sp 1s linear infinite; vertical-align: -2px; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+
+  /* files */
+  .tabs { display: flex; gap: 4px; }
+  .tabs button.on { background: var(--me); border-color: #c9d8f5; }
+  .file { display: flex; gap: 8px; padding: 6px; border-radius: 6px; border: 1px solid transparent; align-items: center; }
+  .file:hover { background: #f1f3f6; }
+  .file.active { background: var(--me); border-color: #c9d8f5; }
+  .file img { width: 56px; height: 56px; object-fit: contain; background: #222; border-radius: 4px; image-rendering: pixelated; }
+  .file .info { font-size: 12px; line-height: 1.35; min-width: 0; }
+  .file .info .nm { font-family: var(--mono); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .viewer { border-top: 1px solid var(--line); padding: 8px 12px; background: #fafbfc; }
+  .viewer .img { position: relative; width: 100%; background: #111; border-radius: 6px; overflow: hidden; }
+  .viewer .img img { display: block; width: 100%; height: auto; image-rendering: pixelated; cursor: crosshair; }
+  .viewer .readout { font-family: var(--mono); font-size: 12px; margin-top: 4px; display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .viewer select, .viewer input { width: auto; }
+  .legend { height: 8px; border-radius: 4px; background: linear-gradient(90deg, #000, #fff); margin: 4px 0 0; }
+
+  /* start & verdict */
+  .card { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin: 8px 0; background: #fff; }
+  .card.sel { border-color: var(--accent); box-shadow: 0 0 0 2px #dbe7fb; }
+  .card h3 { margin: 0 0 4px; font-size: 14px; }
+  .card .task-text { white-space: pre-wrap; font-size: 13px; }
+  table.claims { border-collapse: collapse; width: 100%; font-size: 13px; }
+  table.claims th, table.claims td { border-bottom: 1px solid var(--line); padding: 4px 6px; text-align: left; vertical-align: top; }
+  table.claims td.num { font-family: var(--mono); }
+  .verdict-hd { font-size: 20px; font-weight: 600; margin: 4px 0 8px; }
+  .kv { display: grid; grid-template-columns: max-content 1fr; gap: 2px 12px; font-size: 13px; }
+  .kv div:nth-child(odd) { color: var(--muted); }
+  #err { background: #fdecea; color: var(--bad); padding: 6px 12px; display: none; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">STM-Bench · 模式 H（人工操作）</div>
+  <div id="hdr-scn" class="muted">未开始</div>
+  <span id="hdr-phase" class="badge">idle</span>
+  <div class="meter" id="m-sim" hidden>
+    <div class="lbl"><span>仪器时间</span><span id="m-sim-txt">–</span></div>
+    <progress id="m-sim-bar" max="1" value="0"></progress>
+  </div>
+  <div class="meter" id="m-cmd" hidden>
+    <div class="lbl"><span>控制器命令</span><span id="m-cmd-txt">–</span></div>
+    <progress id="m-cmd-bar" max="1" value="0"></progress>
+  </div>
+  <div id="hdr-misc" class="small muted"></div>
+  <div class="grow"></div>
+  <button id="btn-cancel" class="danger" hidden>放弃本回合 [ABORT]</button>
+</header>
+<div id="err"></div>
+<main>
+  <section class="col" id="col-left">
+    <div class="hd">工具 <span id="tools-count" class="muted small"></span><div class="grow"></div><input id="tool-q" placeholder="搜索…" style="width:120px"></div>
+    <div class="bd" id="tools"></div>
+  </section>
+  <section class="col" id="col-center">
+    <div class="hd">对话（模型视角）<div class="grow"></div><span id="calls" class="muted small"></span></div>
+    <div class="bd" id="center"></div>
+    <div class="composer" id="composer" hidden></div>
+  </section>
+  <section class="col" id="col-right">
+    <div class="hd">仪器留下的文件 <div class="grow"></div><div class="tabs"><button id="tab-sxm" class="on">帧</button><button id="tab-dat">谱</button></div></div>
+    <div class="bd" id="files"></div>
+    <div class="viewer" id="viewer" hidden></div>
+  </section>
+</main>
+
+<script>
+'use strict';
+// ───────────────────────── state ─────────────────────────
+const S = {
+  v: -1, seq: null, since: 0, st: null, scenarios: null, selScenario: null,
+  transcriptCall: null, transcript: null, tools: [], selTool: null, rawMode: false,
+  files: [], tab: 'sxm', selFile: null, viewer: { ch: 'Z', dir: 'forward', flatten: 'plane', cmap: 'gray', meta: null },
+  lastPick: null, filesTimer: null, budgetTimer: null, verdictShown: null,
+};
+const $ = (id) => document.getElementById(id);
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') el.className = v; else if (k === 'html') el.innerHTML = v;
+    else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+    else if (v !== null && v !== undefined && v !== false) el.setAttribute(k, v === true ? '' : v);
+  }
+  for (const k of kids.flat()) if (k !== null && k !== undefined) el.append(k.nodeType ? k : document.createTextNode(String(k)));
+  return el;
+}
+const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+async function api(path, body) {
+  const r = await fetch(path, body === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
+  if (!r.ok) throw new Error(j.error || `HTTP ${r.status}`);
+  return j;
+}
+function showErr(msg) { const e = $('err'); if (!msg) { e.style.display = 'none'; return; } e.textContent = msg; e.style.display = 'block'; }
+function fmtHMS(s) { if (s == null || !isFinite(s)) return '–'; s = Math.max(0, Math.round(s)); const hh = Math.floor(s / 3600), mm = Math.floor((s % 3600) / 60), ss = s % 60; return `${hh}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`; }
+function fmtNum(x, d = 3) { if (x == null || x === '') return '–'; const n = Number(x); if (!isFinite(n)) return String(x); if (Math.abs(n) >= 1e4 || (Math.abs(n) < 1e-3 && n !== 0)) return n.toExponential(d); return String(+n.toFixed(d)); }
+function fmtSI(x, unit) { if (x == null) return '–'; const a = Math.abs(x); const tbl = [[1e-12, 'p'], [1e-9, 'n'], [1e-6, 'µ'], [1e-3, 'm'], [1, '']]; let p = tbl[tbl.length - 1]; for (const t of tbl) { if (a < t[0] * 1000) { p = t; break; } } return `${fmtNum(x / p[0], 3)} ${p[1]}${unit}`; }
+function jsonShort(o, n = 160) { let s; try { s = JSON.stringify(o); } catch (e) { s = String(o); } return s.length > n ? s.slice(0, n) + '…' : s; }
+
+// ───────────────────────── polling ─────────────────────────
+async function poll() {
+  for (;;) {
+    try {
+      const q = `v=${S.v}&seq=${S.seq === null ? '' : S.seq}&since=${S.since}&wait=25`;
+      const st = await api(`/api/state?${q}`);
+      if (st.seq !== S.seq) { newEpisode(st.seq); }
+      const changed = st.version !== S.v;
+      S.v = st.version; S.since = st.n_events;
+      if (st.events && st.events.length) S.events.push(...st.events);
+      S.st = st;
+      if (changed || st.events.length) render();
+      showErr(null);
+    } catch (e) { showErr(`连接失败：${e.message}`); await sleep(1500); }
+  }
+}
+function newEpisode(seq) {
+  S.seq = seq; S.since = 0; S.events = []; S.transcript = null; S.transcriptCall = null;
+  S.selTool = null; S.files = []; S.selFile = null; S.verdictShown = null; S.lastPick = null;
+  $('viewer').hidden = true;
+}
+S.events = [];
+function budgetTick() {
+  if (!S.st || S.st.phase !== 'running') return;
+  api(`/api/state?since=${S.since}`).then(st => { if (st.seq !== S.seq) return; S.st.budget = st.budget; renderHeader(); }).catch(() => {});
+}
+setInterval(budgetTick, 2000);
+setInterval(() => { if (S.st && (S.st.phase === 'running' || S.st.phase === 'awaiting_action')) refreshFiles(); }, 5000);
+
+// ───────────────────────── rendering ─────────────────────────
+function render() {
+  const st = S.st;
+  renderHeader();
+  if (st.phase === 'idle' || ((st.phase === 'finished' || st.phase === 'error') && S.dismissed === st.seq)) { renderStart(); $('composer').hidden = true; S.tools = []; renderTools(); return; }
+  if (st.phase === 'finished' || st.phase === 'error') { renderVerdict(); $('composer').hidden = true; $('btn-cancel').hidden = true; S.tools = []; renderTools(); refreshFiles(); return; }
+  // starting / awaiting / running
+  if (st.request && st.request.call !== S.transcriptCall) { loadTranscript(st.request.call); }
+  if (st.request) S.tools = st.request.tools || [];
+  renderTools();
+  renderCenter();
+  renderComposer();
+  refreshFiles();
+}
+function renderHeader() {
+  const st = S.st; if (!st) return;
+  const ph = st.phase;
+  const b = $('hdr-phase'); b.className = 'badge ' + ph;
+  b.textContent = { idle: '空闲', starting: '正在启动仪器与 MAST…', awaiting_action: '等你操作（时钟已暂停）', running: '仪器执行中（时钟运行）', finished: '已结束', error: '出错' }[ph] || ph;
+  $('hdr-scn').textContent = st.scenario && st.scenario.id ? `${st.scenario.id} · seed ${st.seed} · ×${st.time_scale}` : '未开始';
+  const bud = st.budget || {};
+  const show = ph !== 'idle';
+  $('m-sim').hidden = !show; $('m-cmd').hidden = !show;
+  if (show) {
+    const used = bud.sim_used_s, max = bud.sim_max_s;
+    $('m-sim-txt').textContent = `${fmtHMS(used)} / ${max ? fmtHMS(max) : '∞'}`;
+    $('m-sim-bar').value = max && used != null ? Math.min(1, used / max) : 0;
+    const cu = bud.cmds_used, cm = bud.cmds_max;
+    $('m-cmd-txt').textContent = `${cu == null ? '–' : cu.toLocaleString()} / ${cm ? cm.toLocaleString() : '∞'}`;
+    $('m-cmd-bar').value = cm && cu != null ? Math.min(1, cu / cm) : 0;
+    $('hdr-misc').textContent = `回复 ${st.calls || 0} 次 · 墙钟 ${fmtHMS(bud.wall_s)}${bud.clock_paused == null ? '' : (bud.clock_paused ? ' · 时钟暂停' : ' · 时钟运行')}`;
+  } else $('hdr-misc').textContent = '';
+  $('btn-cancel').hidden = !(ph === 'awaiting_action' || ph === 'running' || ph === 'starting');
+  $('calls').textContent = st.request ? `第 ${st.request.call} 次回复 · ${st.request.n_messages} 条消息` : '';
+}
+
+// ── start page ──
+async function renderStart() {
+  const c = $('center');
+  if (!S.scenarios) { c.replaceChildren(h('div', { class: 'muted' }, '读取场景…')); try { const j = await api('/api/scenarios'); S.scenarios = j.scenarios; S.out = j.out; } catch (e) { c.replaceChildren(h('div', { class: 'bad' }, `读取场景失败：${e.message}`)); return; } }
+  const list = h('div');
+  list.append(h('p', { class: 'muted small' }, '选一道题。你将拿到与 LLM 完全相同的题面、工具面、预算与判据；不同的只有右栏能看到仪器存下的图。想清楚再点工具：只有仪器在跑的时候时钟才走，你思考时时钟是停的。'));
+  const papers = S.scenarios.filter(s => s.family && s.family.startsWith('P'));
+  const others = S.scenarios.filter(s => !(s.family && s.family.startsWith('P')));
+  const mk = (s) => {
+    const card = h('div', { class: 'card' + (S.selScenario === s.id ? ' sel' : ''), onclick: () => { S.selScenario = s.id; renderStart(); } });
+    if (s.error) { card.append(h('h3', null, s.id), h('div', { class: 'bad small' }, s.error)); return card; }
+    card.append(h('h3', null, `${s.id}`, s.paper ? h('span', { class: 'muted' }, ` · ${s.paper.title || ''}`) : null));
+    card.append(h('div', { class: 'small muted' }, `${s.material} · 预算 ${s.budget.sim_hours} 仪器小时 / ${(s.budget.wire_cmds || 0).toLocaleString()} 条命令 · time_scale ×${s.time_scale}${s.claims.length ? ` · ${s.claims.length} 条结果：${s.claims.map(x => x.id).join(', ')}` : ''}${s.faults ? ` · ${s.faults} 个预置故障` : ''}`));
+    if (S.selScenario === s.id) card.append(h('div', { class: 'task-text' }, s.task || ''));
+    return card;
+  };
+  list.append(h('div', { class: 'tool-group' }, '论文复现（上榜赛道）'), ...papers.map(mk));
+  if (others.length) { const d = h('details'); d.append(h('summary', { class: 'muted small' }, `回归家族（B1–B9，不上榜）· ${others.length} 个`), ...others.map(mk)); list.append(d); }
+  const sel = S.scenarios.find(s => s.id === S.selScenario);
+  const seed = h('input', { id: 'seed', type: 'number', value: S.seed ?? 0, min: 0, style: 'width:90px' });
+  const ts = h('input', { id: 'ts', type: 'number', value: S.ts ?? (sel ? sel.time_scale : 20), min: 1, step: 1, style: 'width:90px' });
+  const btn = h('button', { class: 'primary', disabled: !sel, onclick: async () => {
+    S.seed = +seed.value; S.ts = +ts.value; btn.disabled = true; btn.textContent = '启动中…';
+    try { await api('/api/start', { scenario: sel.id, seed: +seed.value, time_scale: +ts.value || null }); } catch (e) { showErr(e.message); btn.disabled = false; btn.textContent = '开始'; }
+  } }, '开始');
+  list.append(h('div', { class: 'card' }, h('div', { class: 'row' }, h('span', null, 'seed'), seed, h('span', null, 'time_scale'), ts, btn, h('span', { class: 'muted small' }, sel ? `隐藏真值按 seed 抽取；time_scale 只影响墙钟，不影响预算与漂移` : '先选一道题'))));
+  if (S.st && S.st.history && S.st.history.length) {
+    list.append(h('div', { class: 'tool-group' }, '本进程已完成的回合'));
+    for (const r of S.st.history) list.append(h('div', { class: 'small' }, `${r.scenario} seed ${r.seed} → `, h('b', { class: r.success ? 'ok' : 'bad' }, r.success ? '复现' : '未复现'), ` (partial ${fmtNum(r.partial, 2)}) `, h('code', { class: 'muted' }, r.run_dir)));
+  }
+  c.replaceChildren(list);
+}
+
+// ── tools ──
+function renderTools() {
+  const box = $('tools');
+  const q = ($('tool-q').value || '').trim().toLowerCase();
+  const tools = S.tools || [];
+  $('tools-count').textContent = tools.length ? `${tools.filter(t => !t.stub).length} 可用 / ${tools.length}` : '';
+  if (!tools.length) { box.replaceChildren(h('div', { class: 'muted small' }, S.st && S.st.phase === 'starting' ? '仪器启动后这里会列出工具' : '回合开始后这里列出你能调用的工具')); return; }
+  const pinned = ['ReportResult', 'ReportTipState', 'ask_user'];
+  const match = (t) => !q || t.name.toLowerCase().includes(q) || (t.description || '').toLowerCase().includes(q);
+  const mk = (t, cls) => h('button', { class: 'tool ' + cls + (S.selTool && S.selTool.name === t.name ? ' active' : ''), onclick: () => selectTool(t.name) },
+    h('span', { class: 'nm' }, t.name, t.touches_instrument ? h('span', { class: 'muted small' }, ' ⚙') : null),
+    h('span', { class: 'ds' }, (t.description || '').split('\n')[0].replace(/^\[未加载·包 [^\]]*\]\s*/, '')));
+  const frag = document.createDocumentFragment();
+  const pin = tools.filter(t => pinned.includes(t.name) && match(t));
+  if (pin.length) { frag.append(h('div', { class: 'tool-group' }, '结果通道 / 操作员')); pin.forEach(t => frag.append(mk(t, 'pinned'))); }
+  const vis = tools.filter(t => !t.stub && !pinned.includes(t.name) && match(t)).sort((a, b) => a.name.localeCompare(b.name));
+  frag.append(h('div', { class: 'tool-group' }, `已加载 · ${vis.length}`)); vis.forEach(t => frag.append(mk(t, '')));
+  const stubs = tools.filter(t => t.stub && match(t));
+  if (stubs.length) {
+    const byPack = {};
+    for (const t of stubs) { const m = (t.description || '').match(/^\[未加载·包 ([^\]]*)\]/); const p = m ? m[1] : '?'; (byPack[p] = byPack[p] || []).push(t); }
+    frag.append(h('div', { class: 'tool-group' }, `未加载 · ${stubs.length}（调用即加载其包，下一步再带参数调用）`));
+    for (const p of Object.keys(byPack).sort()) { frag.append(h('div', { class: 'small muted', style: 'padding:2px 8px' }, `包 ${p}`)); byPack[p].sort((a, b) => a.name.localeCompare(b.name)).forEach(t => frag.append(mk(t, 'stub'))); }
+  }
+  box.replaceChildren(frag);
+}
+$('tool-q').addEventListener('input', renderTools);
+function selectTool(name) { S.selTool = (S.tools || []).find(t => t.name === name) || null; S.rawMode = false; renderTools(); renderComposer(); }
+
+// ── transcript ──
+async function loadTranscript(call) {
+  try { const t = await api('/api/transcript'); if (t.call === call || S.transcriptCall === null) { S.transcript = t; S.transcriptCall = t.call; renderCenter(); } } catch (e) { showErr(`读取对话失败：${e.message}`); }
+}
+function msgNode(m, i) {
+  const who = { human: '操作员 / 任务', ai: '你（模型位）', tool: `工具结果 · ${m.name || ''}`, system: '系统' }[m.role] || m.role;
+  const node = h('div', { class: 'msg ' + m.role });
+  node.append(h('div', { class: 'who' }, h('b', null, who), h('span', null, `#${i + 1}`)));
+  if (m.text) {
+    const pre = h('pre', null, m.text);
+    if (m.text.length > 1500) { const clip = h('div', { class: 'clip' }, pre); const more = h('a', { class: 'clip-more small', href: '#', onclick: (e) => { e.preventDefault(); clip.classList.toggle('open'); more.textContent = clip.classList.contains('open') ? '收起' : `展开（${m.text.length} 字）`; } }, `展开（${m.text.length} 字）`); node.append(clip, more); }
+    else node.append(pre);
+  }
+  if (m.tool_calls) for (const c of m.tool_calls) node.append(h('div', { class: 'call' }, `▶ ${c.name}(${jsonShort(c.args, 400)})`));
+  return node;
+}
+function renderCenter() {
+  const st = S.st; const c = $('center');
+  const frag = document.createDocumentFragment();
+  const sc = st.scenario || {};
+  frag.append(h('div', { class: 'task' }, h('div', { class: 'small muted' }, `${sc.id || ''}${sc.paper ? ' · ' + (sc.paper.title || '') : ''} · seed ${st.seed}`), h('div', { class: 'task-text' }, sc.task || ''),
+    sc.claims && sc.claims.length ? h('div', { class: 'small muted', style: 'margin-top:4px' }, '需用 ReportResult 报告：', ...sc.claims.map(x => h('code', null, x.id + (x.position ? '（含 x_nm/y_nm）' : '') + ' '))) : null));
+  if (st.phase === 'starting') { frag.append(h('div', { class: 'live' }, h('span', { class: 'spin' }), ' 正在构建模拟世界、启动控制器线协议服务与 MAST 运行时（约 20–40 s）…')); c.replaceChildren(frag); return; }
+  const t = S.transcript;
+  if (t) {
+    if (t.system_prompt) { const d = h('details', { class: 'sys' }); d.append(h('summary', null, `系统提示（${t.system_prompt.length} 字，与模型看到的相同）`), h('pre', { class: 'small', style: 'max-height:300px;overflow:auto' }, t.system_prompt)); frag.append(d); }
+    t.messages.forEach((m, i) => { if (m.role !== 'system') frag.append(msgNode(m, i)); });
+  } else frag.append(h('div', { class: 'muted small' }, '读取对话…'));
+  // live events after the last transcript snapshot
+  const lastReq = S.events.slice().reverse().find(e => e.kind === 'human_action');
+  const idx = lastReq ? S.events.indexOf(lastReq) : -1;
+  const live = idx >= 0 ? S.events.slice(idx) : [];
+  if (st.phase === 'running' || live.length) {
+    const box = h('div', { class: 'live' });
+    if (st.phase === 'running') box.append(h('div', null, h('span', { class: 'spin' }), ' 仪器执行中，时钟在走…'));
+    for (const e of live) {
+      if (e.kind === 'human_action') box.append(h('div', { class: 'ev' }, e.action === 'tool' ? `▶ ${e.name}(${jsonShort(e.args, 300)})${e.text ? '  // ' + e.text : ''}` : `✎ ${e.text}`));
+      else if (e.kind === 'tool_start') box.append(h('div', { class: 'ev muted' }, `… ${e.name} 开始`));
+      else if (e.kind === 'tool_end') box.append(h('div', { class: 'ev ' + (e.ok ? 'ok' : 'bad') }, `${e.ok ? '✓' : '✗'} ${e.name} — ${e.preview || ''}`));
+      else if (e.kind === 'status' || e.kind === 'note') box.append(h('div', { class: 'ev muted' }, `· ${e.text || ''}`));
+      else if (e.kind === 'interrupt') box.append(h('div', { class: 'ev warn' }, `⚠ HITL：${jsonShort(e, 300)}`));
+    }
+    frag.append(box);
+  }
+  c.replaceChildren(frag);
+  c.scrollTop = c.scrollHeight;
+}
+
+// ── composer ──
+function fieldSpec(name, prop, required) {
+  let type = prop.type, en = prop.enum, desc = prop.description || '';
+  if (!type && prop.anyOf) { const t = prop.anyOf.find(x => x.type && x.type !== 'null'); if (t) { type = t.type; en = en || t.enum; } }
+  if (Array.isArray(type)) type = type.find(t => t !== 'null') || 'string';
+  return { name, type: type || 'string', enum: en, desc, required, def: prop.default, title: prop.title };
+}
+function parseValue(spec, raw) {
+  if (spec.type === 'boolean') { if (raw === '' ) return undefined; return raw === 'true'; }
+  if (raw === '' || raw == null) return undefined;
+  if (spec.type === 'integer') { const n = parseInt(raw, 10); if (Number.isNaN(n)) throw new Error(`${spec.name} 需要整数`); return n; }
+  if (spec.type === 'number') { const n = Number(raw); if (Number.isNaN(n)) throw new Error(`${spec.name} 需要数字`); return n; }
+  if (spec.type === 'array' || spec.type === 'object') { try { return JSON.parse(raw); } catch (e) { throw new Error(`${spec.name} 需要合法 JSON`); } }
+  return raw;
+}
+function renderComposer() {
+  const st = S.st; const box = $('composer');
+  if (!st || !(st.phase === 'awaiting_action' || st.phase === 'running')) { box.hidden = true; return; }
+  box.hidden = false;
+  const waiting = st.phase === 'awaiting_action';
+  const frag = document.createDocumentFragment();
+  const t = S.selTool;
+  if (t) {
+    const schema = t.schema || {}; const props = schema.properties || {}; const req = new Set(schema.required || []);
+    frag.append(h('div', { class: 'row' }, h('h4', { class: 'grow' }, t.name, t.stub ? h('span', { class: 'muted small' }, '（未加载：本次调用只加载其工具包）') : null), h('label', { class: 'small' }, h('input', { type: 'checkbox', checked: S.rawMode, style: 'width:auto', onchange: (e) => { S.rawMode = e.target.checked; renderComposer(); } }), ' 原始 JSON 参数')));
+    frag.append(h('div', { class: 'desc-full' }, t.description || ''));
+    const inputs = {};
+    if (S.rawMode || !Object.keys(props).length) {
+      const ta = h('textarea', { id: 'raw-args', rows: 4 }, JSON.stringify(S.rawArgs || {}, null, 1)); inputs.__raw = ta; frag.append(h('div', { class: 'field' }, h('label', null, 'args（JSON 对象）'), ta));
+    } else {
+      for (const [name, prop] of Object.entries(props)) {
+        const sp = fieldSpec(name, prop, req.has(name)); let inp;
+        if (sp.enum) { inp = h('select', null, h('option', { value: '' }, sp.required ? '（请选择）' : '（不传）'), ...sp.enum.map(v => h('option', { value: String(v) }, String(v)))); }
+        else if (sp.type === 'boolean') { inp = h('select', null, h('option', { value: '' }, '（不传）'), h('option', { value: 'true' }, 'true'), h('option', { value: 'false' }, 'false')); }
+        else if (sp.type === 'array' || sp.type === 'object') { inp = h('textarea', { rows: 2, placeholder: sp.type === 'array' ? '[…] JSON' : '{…} JSON' }); }
+        else { inp = h('input', { type: 'text', placeholder: sp.def !== undefined ? `默认 ${JSON.stringify(sp.def)}` : (sp.type === 'number' || sp.type === 'integer' ? '数字' : '') }); }
+        inp.dataset.name = name; inputs[name] = { inp, sp };
+        frag.append(h('div', { class: 'field' }, h('label', null, h('code', null, name), sp.required ? h('span', { class: 'req' }, ' *') : null, h('span', { class: 'muted small' }, `  ${sp.type}`)), inp, sp.desc ? h('div', { class: 'desc' }, sp.desc) : null));
+      }
+      if (t.name === 'ReportResult' && S.lastPick) {
+        frag.append(h('div', { class: 'row small' }, h('span', { class: 'muted' }, `图上最近一次点选：x=${fmtNum(S.lastPick.x, 2)} y=${fmtNum(S.lastPick.y, 2)} nm（${S.lastPick.file}）`), h('button', { onclick: () => { if (inputs.x_nm) inputs.x_nm.inp.value = fmtNum(S.lastPick.x, 3); if (inputs.y_nm) inputs.y_nm.inp.value = fmtNum(S.lastPick.y, 3); } }, '填入 x_nm / y_nm')));
+      }
+    }
+    const note = h('input', { type: 'text', placeholder: '备注（随调用记录，可空；不要在这里写 [DONE]）' });
+    const send = h('button', { class: 'primary', disabled: !waiting, onclick: async () => {
+      let args = {};
+      try {
+        if (inputs.__raw) { args = JSON.parse(inputs.__raw.value || '{}'); if (typeof args !== 'object' || Array.isArray(args)) throw new Error('args 必须是 JSON 对象'); }
+        else for (const [name, { inp, sp }] of Object.entries(inputs)) { const v = parseValue(sp, inp.value); if (v === undefined) { if (sp.required) throw new Error(`${name} 是必填项`); continue; } args[name] = v; }
+      } catch (e) { showErr(e.message); return; }
+      S.rawArgs = args; send.disabled = true;
+      try { await api('/api/action', { kind: 'tool', name: t.name, args, note: note.value }); showErr(null); } catch (e) { showErr(e.message); send.disabled = false; }
+    } }, waiting ? `调用 ${t.name}` : '仪器执行中…');
+    frag.append(h('div', { class: 'field' }, note), h('div', { class: 'row' }, send, h('button', { onclick: () => { S.selTool = null; renderTools(); renderComposer(); } }, '取消选择')));
+  } else {
+    frag.append(h('div', { class: 'muted small' }, waiting ? '从左栏选一个工具；或在下面结束本回合。' : '仪器执行中，等它回来。'));
+  }
+  const end = h('div', { class: 'endbox' });
+  const ta = h('textarea', { rows: 2, placeholder: '结束语（可空）。“完成”会在末尾加 [DONE]，“放弃”加 [ABORT]；“仅发送文字”不加标记，会收到操作员的“继续”。' });
+  const mkEnd = (label, cls, mark) => h('button', { class: cls, disabled: !waiting, onclick: async () => { const text = (ta.value.trim() + (mark ? ' ' + mark : '')).trim() || mark || '（无）'; if (mark && !confirm(`确认发送 ${mark}？回合将结束并判分。`)) return; try { await api('/api/action', { kind: 'text', text }); } catch (e) { showErr(e.message); } } }, label);
+  end.append(h('div', { class: 'small muted' }, '结束本回合'), ta, h('div', { class: 'row', style: 'margin-top:6px' }, mkEnd('完成 [DONE]', 'primary', '[DONE]'), mkEnd('放弃 [ABORT]', 'danger', '[ABORT]'), mkEnd('仅发送文字', '', '')));
+  frag.append(end);
+  box.replaceChildren(frag);
+}
+$('btn-cancel').addEventListener('click', async () => { if (!confirm('放弃本回合？下一次轮到你回复时将自动发送 [ABORT] 并判分。')) return; try { await api('/api/cancel', {}); } catch (e) { showErr(e.message); } });
+
+// ── files ──
+let filesBusy = false;
+async function refreshFiles() {
+  if (filesBusy) return; filesBusy = true;
+  try { const j = await api('/api/files'); const names = j.files.map(f => f.name).join('|'); const old = S.files.map(f => f.name).join('|'); S.files = j.files; if (names !== old) renderFiles(); }
+  catch (e) { /* not fatal */ } finally { filesBusy = false; }
+}
+$('tab-sxm').onclick = () => { S.tab = 'sxm'; renderFiles(); }; $('tab-dat').onclick = () => { S.tab = 'dat'; renderFiles(); };
+function renderFiles() {
+  $('tab-sxm').className = S.tab === 'sxm' ? 'on' : ''; $('tab-dat').className = S.tab === 'dat' ? 'on' : '';
+  const nS = S.files.filter(f => f.kind === 'sxm').length, nD = S.files.filter(f => f.kind === 'dat').length;
+  $('tab-sxm').textContent = `帧 ${nS}`; $('tab-dat').textContent = `谱 ${nD}`;
+  const box = $('files'); const frag = document.createDocumentFragment();
+  const list = S.files.filter(f => f.kind === S.tab);
+  if (!list.length) frag.append(h('div', { class: 'muted small' }, S.tab === 'sxm' ? '还没有保存的帧（扫描并保存后出现在这里）' : '还没有谱文件'));
+  for (const f of list) {
+    const row = h('div', { class: 'file' + (S.selFile === f.name ? ' active' : ''), onclick: () => openFile(f) });
+    if (f.kind === 'sxm') {
+      row.append(h('img', { src: `/api/frame?f=${encodeURIComponent(f.name)}&max=112&flatten=plane`, loading: 'lazy' }));
+      row.append(h('div', { class: 'info' }, h('div', { class: 'nm' }, f.name), h('div', null, f.w_nm != null ? `${fmtNum(f.w_nm, 1)}×${fmtNum(f.h_nm, 1)} nm · ${f.nx}×${f.ny} px${f.angle_deg ? ` · ${fmtNum(f.angle_deg, 1)}°` : ''}` : (f.error || '?')), h('div', { class: 'muted' }, f.cx_nm != null ? `中心 (${fmtNum(f.cx_nm, 1)}, ${fmtNum(f.cy_nm, 1)}) nm · ${f.bias_v != null ? fmtSI(f.bias_v, 'V') : ''} ${f.setpoint_a != null ? fmtSI(f.setpoint_a, 'A') : ''}` : ''), h('div', { class: 'muted' }, f.rec_time || '')));
+    } else {
+      row.append(h('div', { class: 'info' }, h('div', { class: 'nm' }, f.name), h('div', null, `${f.experiment || ''} · ${f.n_points || 0} 点 · ${(f.columns || []).join(', ')}`), h('div', { class: 'muted' }, f.x_nm != null ? `位置 (${fmtNum(f.x_nm, 2)}, ${fmtNum(f.y_nm, 2)}) nm · ${f.bias_v != null ? fmtSI(f.bias_v, 'V') : ''}` : ''), h('div', { class: 'muted' }, f.date || '')));
+    }
+    frag.append(row);
+  }
+  box.replaceChildren(frag);
+}
+function openFile(f) { S.selFile = f.name; renderFiles(); renderViewer(f); }
+async function renderViewer(f) {
+  const v = $('viewer'); v.hidden = false; const frag = document.createDocumentFragment();
+  if (f.kind === 'dat') {
+    const cols = f.columns || []; const ysel = h('select', null, ...cols.map((c, i) => h('option', { value: c, selected: i === 1 }, c)));
+    const img = h('img', { style: 'width:100%;display:block;background:#fff;border-radius:6px' });
+    const upd = () => { img.src = `/api/dat?f=${encodeURIComponent(f.name)}&y=${encodeURIComponent(ysel.value)}&_=${Date.now()}`; };
+    ysel.onchange = upd; upd();
+    frag.append(h('div', { class: 'row small' }, h('code', null, f.name), h('span', null, 'y:'), ysel), img);
+    v.replaceChildren(frag); return;
+  }
+  const vw = S.viewer;
+  const chs = (f.channels && f.channels.length) ? f.channels : ['Z'];
+  if (!chs.includes(vw.ch)) vw.ch = chs[0];
+  const chsel = h('select', null, ...chs.map(c => h('option', { value: c, selected: c === vw.ch }, c)));
+  const dsel = h('select', null, h('option', { value: 'forward', selected: vw.dir === 'forward' }, '正向'), h('option', { value: 'backward', selected: vw.dir === 'backward' }, '反向'));
+  const fsel = h('select', null, h('option', { value: 'plane', selected: vw.flatten === 'plane' }, '去平面'), h('option', { value: 'line', selected: vw.flatten === 'line' }, '逐行中值'), h('option', { value: 'none', selected: vw.flatten === 'none' }, '原始'));
+  const csel = h('select', null, ...['gray', 'afmhot', 'viridis', 'inferno', 'RdBu_r'].map(c => h('option', { value: c, selected: c === vw.cmap }, c)));
+  const img = h('img', { alt: f.name });
+  const readout = h('div', { class: 'readout' });
+  const legend = h('div', { class: 'legend' }); const legendTxt = h('div', { class: 'small muted', style: 'display:flex;justify-content:space-between' });
+  const q = () => `f=${encodeURIComponent(f.name)}&ch=${encodeURIComponent(vw.ch)}&dir=${vw.dir}&flatten=${vw.flatten}&cmap=${vw.cmap}`;
+  const load = async () => {
+    img.src = `/api/frame?${q()}&max=900`;
+    try { const m = await api(`/api/frame_meta?${q()}`); vw.meta = m; legendTxt.replaceChildren(h('span', null, `${fmtNum(m.lo, 1)} ${m.unit}`), h('span', null, `${m.channel} ${m.direction} · ${m.flatten}`), h('span', null, `${fmtNum(m.hi, 1)} ${m.unit}`)); legend.style.background = vw.cmap === 'gray' ? 'linear-gradient(90deg,#000,#fff)' : 'linear-gradient(90deg,#333,#ccc)'; }
+    catch (e) { legendTxt.textContent = e.message; }
+  };
+  chsel.onchange = () => { vw.ch = chsel.value; load(); }; dsel.onchange = () => { vw.dir = dsel.value; load(); }; fsel.onchange = () => { vw.flatten = fsel.value; load(); }; csel.onchange = () => { vw.cmap = csel.value; load(); };
+  const toScan = (ev) => {
+    const r = img.getBoundingClientRect(); const fx = (ev.clientX - r.left) / r.width, fy = (ev.clientY - r.top) / r.height;
+    if (f.w_nm == null) return null;
+    const u = (fx - 0.5) * f.w_nm, vv = (0.5 - fy) * f.h_nm; const a = (f.angle_deg || 0) * Math.PI / 180, c = Math.cos(a), s = Math.sin(a);
+    return { x: f.cx_nm + c * u - s * vv, y: f.cy_nm + s * u + c * vv, col: Math.floor(fx * f.nx), row: Math.floor(fy * f.ny) };
+  };
+  img.onmousemove = (ev) => { const p = toScan(ev); if (!p) return; readout.replaceChildren(h('span', null, `扫描系 x=${fmtNum(p.x, 2)} y=${fmtNum(p.y, 2)} nm`), h('span', { class: 'muted' }, `px (${p.col}, ${p.row})`)); };
+  img.onclick = (ev) => { const p = toScan(ev); if (!p) return; S.lastPick = { x: p.x, y: p.y, file: f.name }; readout.replaceChildren(h('span', { class: 'ok' }, `已记下 x=${fmtNum(p.x, 2)} y=${fmtNum(p.y, 2)} nm（可填入 ReportResult）`)); if (S.selTool && S.selTool.name === 'ReportResult') renderComposer(); };
+  const idx = S.files.filter(x => x.kind === 'sxm').findIndex(x => x.name === f.name); const sx = S.files.filter(x => x.kind === 'sxm');
+  const nav = h('div', { class: 'row small' }, h('button', { disabled: idx >= sx.length - 1, onclick: () => openFile(sx[idx + 1]) }, '← 更早'), h('button', { disabled: idx <= 0, onclick: () => openFile(sx[idx - 1]) }, '更新 →'), h('code', { class: 'grow' }, f.name), h('button', { onclick: () => { $('viewer').hidden = true; S.selFile = null; renderFiles(); } }, '关闭'));
+  frag.append(nav, h('div', { class: 'row small', style: 'margin:6px 0' }, chsel, dsel, fsel, csel), h('div', { class: 'img' }, img), legend, legendTxt, readout,
+    h('div', { class: 'small muted' }, `中心 (${fmtNum(f.cx_nm, 2)}, ${fmtNum(f.cy_nm, 2)}) nm · ${fmtNum(f.w_nm, 2)}×${fmtNum(f.h_nm, 2)} nm · ${f.nx}×${f.ny} px · 角 ${fmtNum(f.angle_deg || 0, 1)}° · ${f.scan_dir || ''} · ${f.rec_time || ''}`, h('br'), '悬停读扫描坐标（判据用的坐标系），点击记下位置。'));
+  v.replaceChildren(frag); load();
+}
+
+// ── verdict ──
+function renderVerdict() {
+  const st = S.st; const c = $('center');
+  if (S.verdictShown === st.version) return; S.verdictShown = st.version;
+  const frag = document.createDocumentFragment();
+  if (st.phase === 'error') { frag.append(h('div', { class: 'verdict-hd bad' }, '回合出错'), h('pre', { class: 'bad' }, st.error || ''), h('button', { class: 'primary', onclick: backToStart }, '返回')); c.replaceChildren(frag); return; }
+  const r = st.result || {}; const v = r.verdict || {}; const d = v.details || {}; const sr = r.skill_result || {};
+  frag.append(h('div', { class: 'verdict-hd ' + (r.success ? 'ok' : 'bad') }, r.success ? '复现 ✓' : '未复现 ✗', h('span', { class: 'muted', style: 'font-size:14px;font-weight:400' }, `  partial ${fmtNum(r.partial, 2)} · ${r.scenario_id} seed ${r.seed}`)));
+  const kv = h('div', { class: 'kv' });
+  const add = (k, val) => kv.append(h('div', null, k), h('div', null, val));
+  add('结局', `${sr.outcome || ''} ${sr.stop_reason ? '· ' + sr.stop_reason : ''}`);
+  add('仪器时间', `${fmtHMS(r.sim_consumed_s)} / ${r.caps && r.caps.max_sim_s ? fmtHMS(r.caps.max_sim_s) : '∞'}${r.sim_consumed_fraction != null ? ` (${(r.sim_consumed_fraction * 100).toFixed(1)}%)` : ''}${d.budget_overrun ? ' · 超预算 ×' + fmtNum(d.budget_overrun.factor, 2) + '，按未复现计' : ''}`);
+  add('控制器命令', `${(sr.wire_cmds ?? r.wire_cmds ?? 0).toLocaleString()} · 线协议错误 ${r.wire_errors ?? 0}`);
+  add('回复 / 工具调用', `${sr.model_calls ?? '–'} / ${sr.tool_calls ?? '–'} · 轮次 ${sr.turns ?? '–'} · 墙钟 ${fmtHMS(r.wall_s)}`);
+  add('针尖', `${r.tip_dead ? '已损坏' : '完好'}${r.truth_after && r.truth_after.tip ? ` · apex σ ${fmtNum((r.truth_after.tip.apex_sigma_nm ?? r.truth_after.tip.sigma_nm), 3)} nm` : ''}`);
+  add('运行目录', h('code', null, r.out_dir || ''));
+  frag.append(kv);
+  if (d.claims) {
+    const tbl = h('table', { class: 'claims' });
+    tbl.append(h('tr', null, ...['结果', '你报的', '真值', '容差', '值', '证据', '说明'].map(x => h('th', null, x))));
+    for (const [cid, cl] of Object.entries(d.claims)) {
+      const ev = cl.evidence || {}; const notes = [];
+      if (cl.accept_deg) notes.push(`可接受 ${cl.accept_deg.map(x => fmtNum(x, 1)).join(' / ')}°`);
+      if (cl.sample_xy_nm) notes.push(`样品系 (${fmtNum(cl.sample_xy_nm[0], 1)}, ${fmtNum(cl.sample_xy_nm[1], 1)})`);
+      if (ev.reason) notes.push(ev.reason); if (ev.n_frames != null) notes.push(`${ev.n_frames} 帧合格`); if (ev.covered != null) notes.push(ev.covered ? `帧 #${ev.frame_idx} 覆盖` : '无帧覆盖该位置'); if (ev.n_spectra != null) notes.push(`${ev.n_spectra} 条谱 / ${ev.n_positions} 处`);
+      if (cl.distinct_from_failed) notes.push('与另一条结果指向同一处（distinct_from）');
+      tbl.append(h('tr', null, h('td', null, h('code', null, cid), h('div', { class: 'muted small' }, cl.kind)), h('td', { class: 'num' }, cl.value != null ? fmtNum(cl.value, 4) : h('span', { class: 'bad' }, cl.reported ? '有值无位置' : '未报告')), h('td', { class: 'num' }, cl.truth == null ? '–' : (typeof cl.truth === 'number' ? fmtNum(cl.truth, 4) : jsonShort(cl.truth))), h('td', { class: 'num small' }, jsonShort(cl.tol)), h('td', null, cl.value_ok ? h('b', { class: 'ok' }, '✓') : h('b', { class: 'bad' }, '✗')), h('td', null, cl.evidence_ok ? h('b', { class: 'ok' }, '✓') : h('b', { class: 'bad' }, '✗')), h('td', { class: 'small' }, notes.join('；'))));
+    }
+    frag.append(h('h4', { style: 'margin:12px 0 4px' }, `结果 ${d.n_verified ?? 0} / ${d.n_total ?? 0} 通过（报告 ${d.n_reported ?? 0}）`), tbl);
+  } else if (d.checks) {
+    frag.append(h('h4', { style: 'margin:12px 0 4px' }, '判据'), h('pre', { class: 'small' }, JSON.stringify(d.checks, null, 1)));
+  }
+  const ta = r.truth_after || {};
+  const hidden = {}; for (const k of ['hidden', 'herringbone', 'surface_state', 'adatoms', 'corral', 'drift', 'tip']) { if (ta[k] != null && !(ta[k] && ta[k].enabled === false)) hidden[k] = ta[k]; }
+  if (Object.keys(hidden).length) { const th = h('details'); th.append(h('summary', { class: 'muted small' }, '这颗 seed 的隐藏真值（回合结束后才可见）'), h('pre', { class: 'small', style: 'max-height:300px;overflow:auto' }, JSON.stringify(hidden, null, 1))); frag.append(th); }
+  const det = h('details'); det.append(h('summary', { class: 'muted small' }, '完整判定 JSON'), h('pre', { class: 'small', style: 'max-height:300px;overflow:auto' }, JSON.stringify(v, null, 1))); frag.append(det);
+  frag.append(h('div', { class: 'row', style: 'margin-top:10px' }, h('button', { class: 'primary', onclick: backToStart }, '再来一题'), h('span', { class: 'muted small' }, '同一进程里再跑一题会沿用 MAST 的进程级状态；要完全干净就重启命令。')));
+  c.replaceChildren(frag);
+}
+function backToStart() { S.dismissed = S.st.seq; S.scenarios = null; S.tools = []; S.verdictShown = null; render(); }
+
+poll();
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+id: B4_atomic_resolution
+family: B4
+variant: good_tip
+rig: reference-stm
+material: Au(111)
+time_scale: 20
+initial:
+  approached: true
+  bias_v: 0.1
+  setpoint_a: 50.0e-12
+  tip: {radius_nm: 1.0, apex_sigma_nm: 0.06, lambda_per_s: 2.0e-4}
+  surface: {contamination: 0.0, adsorbate_density_per_um2: 2.0}
+faults: []
+task: |
+  样品是 Au(111)/mica，已在隧穿态，针尖可用。请在一片平整台面上做出原子分辨：给出一张 5 nm 的原子分辨图，
+  并说明你用的偏压 / 设定点与判断依据（晶格周期、三重对称）。预算：1 小时仪器时间。
+budget: {sim_hours: 1.0, wire_cmds: 120000}
+success: {kind: atomic_resolution}
+notes: |
+  The tip is already sharp (apex σ 0.06 nm < σ* 0.09) and stable; what is tested is the working
+  point (Au(111) needs ≤ 0.15 V — the imaged corrugation is 30 pm × transfer, 2 pm Z noise floor)
+  and the frame size / speed. ``frames_passed_atomic`` comes from episode._verdict_extras, which
+  reads the scripted skill's ``data.achieved``; the truth side checks single apex, sharp, alive.

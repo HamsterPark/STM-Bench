@@ -1,0 +1,21 @@
+# STM-Bench runtime + test dependencies (Python 3.13).
+# Versions in brackets are what the suite was last run against (2026-08-28).
+# Prefer `pip install -e ".[dev,bench]"` (pyproject.toml is the source of truth);
+# this file exists for `pip install -r requirements.txt` workflows and CI caches.
+
+# stmsim (the simulator) needs only these three
+numpy>=2.0            # [2.4.4]
+scipy>=1.14           # [1.17.1]
+pyyaml>=6             # [6.0.3]
+
+# stmbench extras: calibration indices, Track A manifests, report tables
+pandas>=2.2           # [3.0.2]
+pyarrow>=15           # [24.0.0]
+
+# tests
+pytest>=8             # [9.0.3]
+
+# NOT on PyPI and NOT installed by this file:
+#   MAST v2 (the agent stack the benchmark drives) and its patched `nanonis_spm` client.
+#   Put <MAST checkout>/MASTv2 on PYTHONPATH or set MAST_ROOT — see README "Install".
+#   Everything that needs it is marked `requires_mast` and skips when it is absent.

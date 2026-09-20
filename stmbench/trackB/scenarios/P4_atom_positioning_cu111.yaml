@@ -1,0 +1,81 @@
+id: P4_atom_positioning_cu111
+family: P4
+variant: fe_on_cu
+paper:
+  id: P4
+  title: "Eigler & Schweizer 1990 — positioning single atoms with an STM (Fe/Cu(111) variant)"
+  ref: "Nature 344, 524"
+rig: reference-stm
+material: Cu(111)
+time_scale: 20
+initial:
+  approached: true
+  bias_v: 0.05
+  setpoint_a: 200.0e-12
+  tip: {radius_nm: 1.0, apex_sigma_nm: 0.08, lambda_per_s: 1.0e-4}
+  surface: {contamination: 0.0, adsorbate_density_per_um2: 3.0, terrace_median_nm: 150.0}
+  adatoms: {layout: single, species: Fe, target: any, target_dx_nm: 4.0, target_dy_nm: 0.0,
+            isolation_nm: 3.0, bystander_nm: 10.0, field_per_100nm2: 0.4, field_half_nm: 150}
+faults: []
+task: |
+  样品是 Cu(111)，表面稀疏地散落着 Fe 吸附原子（扫描坐标原点附近 30 nm 内就有孤立的），仪器已在隧穿态；
+  请复现 Eigler 与 Schweizer 1990 年的单原子定位实验：任选一个孤立的 Fe 原子（3 nm 内没有别的原子），
+  把它沿 +x 方向横向移动 4.0 nm 到最近的晶格位点；它周围 10 nm 内的其余原子不得移动或损毁。
+  用 ReportResult 报告该原子的最终位置（当前扫描坐标，nm）。预算：1.5 小时仪器时间。
+budget: {sim_hours: 1.5, wire_cmds: 200000}
+hidden:
+  adatoms:
+    n_bystanders: [2, 4]
+    height_pm: [50.0, 90.0]
+    sigma_nm: [0.25, 0.35]
+    r_threshold_kohm: {range: [80.0, 400.0], log: true}
+    r_pick_kohm: [15.0, 40.0]
+    v_max_nm_s: [0.5, 2.0]
+    capture_radius_nm: [0.35, 0.6]
+    p_slip: [0.002, 0.010]
+    p_slip_scan: [0.03, 0.10]
+  tip:
+    # the state the tip arrives in (Tip.apply_condition). The task never says which: finding
+    # out, and fixing it, is the first job of any session at the instrument
+    condition: {choice: [good, blunt, double, unstable, dirty], weights: [0.2, 0.25, 0.25, 0.15, 0.15]}
+    condition_scale: [0.0, 1.0]
+    condition_angle_deg: [0.0, 360.0]
+claims:
+  - id: target_site
+    kind: position
+    unit: nm
+    tol: {abs_nm: 0.16, report_nm: 0.6}
+    truth: adatoms.target
+    position: required
+    evidence:
+      kind: frame_covers_after
+      min_fov_nm: 6
+      max_nm_per_px: 0.1
+      after_event: adatom_hop
+  - id: bystander_max_shift_nm
+    kind: constraint
+    unit: nm
+    # the atoms born within bystander_nm of the chosen atom's start or goal — the chosen atom
+    # being the one target_site was matched to
+    truth: adatoms.target.candidates
+    of_claim: target_site
+    field: bystander_max_shift_nm
+    max: 0.2
+    evidence: {kind: events, event: adatom_hop, cause: folme, min_n: 1}
+success: {kind: claims_verified}
+notes: |
+  The pull threshold is drawn over 80–400 kΩ on a log scale, so there is no resistance that
+  always works: the agent has to lower R until the atom follows, which is what the 1990 paper
+  describes doing. Below the (also drawn) pick-up threshold the atom transfers to the tip
+  instead, and the tip then images and does spectroscopy differently — a physical consequence, not
+  a scoring penalty. Every atom carries its own ±18 % on that threshold, holds harder next to a
+  step or another atom, and the tip the session starts with may be blunt, double, unstable or
+  dirty — each grabs atoms differently (adatoms.grip_of).
+
+  Any isolated atom will do (target: any), because the deposit covers the whole surface: an
+  area wrecked by a crash or a pulse costs time, not the experiment. The report says which atom
+  was moved — ``target_site`` is matched to the moved atom nearest the reported place (within
+  ``report_nm``, through the covering frame's drift) and passes only when that atom sits **on
+  the lattice site d away from where it was born** and had no neighbour within isolation_nm.
+  ``bystander_max_shift_nm`` is then that atom's neighbourhood: every atom born within
+  bystander_nm of its start or goal, a lost one counting as moved.

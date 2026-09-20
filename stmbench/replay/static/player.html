@@ -1,0 +1,789 @@
+<title>STM 实验回放</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@700;900&display=swap">
+<style>
+  :root {
+    color-scheme: light;
+    --ground: #f2f4f7; --panel: #ffffff; --ink: #131722; --ink-2: #3a4152; --muted: #5f6677; --line: #dde1e9;
+    --accent: #2d5bba; --accent-ink: #ffffff; --accent-soft: #e6ecfa;
+    --truth: #6a4fc6; --truth-bg: #efebfa; --truth-line: #d8cff3; --truth-ink: #3b2a80;
+    --good: #1c7f52; --good-bg: #e3f3ea; --warn: #a8660b; --warn-bg: #fbefd9; --bad: #c0362c; --bad-bg: #fbe5e2;
+    --vacuum: #07090d; --scanline: #9ff3ff;
+    --metal-a: #6f7b8e; --metal-b: #e7ebf1; --metal-c: #56627a; --substrate: #c9a15b; --adatom: #f5c451; --glow: #6fd6ff;
+    --shadow: 0 1px 2px rgba(19, 23, 34, .06), 0 6px 18px rgba(19, 23, 34, .06);
+    --serif: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "SimSun", serif;
+    --sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", "Hiragino Sans GB", system-ui, sans-serif;
+    --mono: "DM Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --ground: #0d1016; --panel: #151a23; --ink: #e8ebf1; --ink-2: #c3c9d5; --muted: #9098a9; --line: #283040;
+      --accent: #7ea5ff; --accent-ink: #0d1016; --accent-soft: #1c2740;
+      --truth: #b09cff; --truth-bg: #1b1730; --truth-line: #342b5c; --truth-ink: #d9d0ff;
+      --good: #4cc38a; --good-bg: #13291f; --warn: #f0a33a; --warn-bg: #2d2211; --bad: #ff6b5e; --bad-bg: #331714;
+      --metal-a: #5b6679; --metal-b: #c9d1dd; --metal-c: #404a5d; --substrate: #a8854a; --adatom: #f2c14e;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --ground: #0d1016; --panel: #151a23; --ink: #e8ebf1; --ink-2: #c3c9d5; --muted: #9098a9; --line: #283040;
+    --accent: #7ea5ff; --accent-ink: #0d1016; --accent-soft: #1c2740;
+    --truth: #b09cff; --truth-bg: #1b1730; --truth-line: #342b5c; --truth-ink: #d9d0ff;
+    --good: #4cc38a; --good-bg: #13291f; --warn: #f0a33a; --warn-bg: #2d2211; --bad: #ff6b5e; --bad-bg: #331714;
+    --metal-a: #5b6679; --metal-b: #c9d1dd; --metal-c: #404a5d; --substrate: #a8854a; --adatom: #f2c14e;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); background: var(--ground); }
+  img { max-width: 100%; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 15px/1.65 var(--sans); }
+  .wrap { max-width: 1240px; margin: 0 auto; padding-inline: 20px; padding-block: 20px 0; }
+  h1, h2, h3 { text-wrap: balance; margin: 0; }
+  button, select { font: inherit; color: inherit; }
+  button:focus-visible, select:focus-visible, [tabindex]:focus-visible, summary:focus-visible, input:focus-visible {
+    outline: 2px solid var(--accent); outline-offset: 2px; }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+  .muted { color: var(--muted); }
+  .label { font-size: 12px; letter-spacing: .08em; color: var(--muted); font-weight: 500; }
+
+  /* ── header ── */
+  header.exhibit { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 28px; align-items: start; padding-bottom: 22px; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .06em; color: var(--muted); }
+  h1 { font-family: var(--serif); font-weight: 900; font-size: clamp(30px, 4.2vw, 46px); line-height: 1.15; margin-top: 6px; letter-spacing: .01em; }
+  .cite { margin-top: 6px; color: var(--ink-2); }
+  .cite .mono { font-size: 13px; color: var(--muted); }
+  .lede { margin-top: 12px; max-width: 62ch; color: var(--ink-2); }
+  .lede p { margin: 0 0 8px; }
+  .lede b { color: var(--ink); font-weight: 700; }
+  .verdict { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; margin-top: 14px; }
+  .pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 999px; font-weight: 700; font-size: 14px; }
+  .pill.good { background: var(--good-bg); color: var(--good); }
+  .pill.bad { background: var(--bad-bg); color: var(--bad); }
+  .pill.warn { background: var(--warn-bg); color: var(--warn); }
+  .who { font-size: 13px; color: var(--muted); }
+  .howto { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; box-shadow: var(--shadow); }
+  .howto h2 { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+  .howto p { margin: 0 0 8px; font-size: 14px; color: var(--ink-2); }
+  .howto .keys { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+  .key { border-radius: 10px; padding: 8px 10px; font-size: 13px; line-height: 1.5; }
+  .key.ai { background: var(--accent-soft); color: var(--ink); }
+  .key.truth { background: var(--truth-bg); color: var(--truth-ink); border: 1px solid var(--truth-line); }
+  .key b { display: block; font-size: 13px; }
+
+  /* ── stage ── */
+  .stage { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 18px; row-gap: 0;
+    grid-template-areas: "hA hT" "cap tip" "mon ideal" "mom map"; }
+  .cell { padding: 14px 18px; }
+  .ai { background: var(--panel); border-inline: 1px solid var(--line); }
+  .truth { background: var(--truth-bg); border-inline: 1px solid var(--truth-line); }
+  .colhead { display: flex; align-items: center; gap: 8px; border-top: 1px solid; border-radius: 14px 14px 0 0; padding-block: 12px 4px; }
+  .colhead.ai { border-color: var(--line); }
+  .colhead.truth { border-color: var(--truth-line); color: var(--truth-ink); }
+  .colhead h2 { font-size: 15px; font-weight: 700; }
+  .colhead .label { margin-left: auto; }
+  .colhead.truth .label { color: var(--truth); }
+  .foot { border-bottom: 1px solid; border-radius: 0 0 14px 14px; }
+  .foot.ai { border-color: var(--line); }
+  .foot.truth { border-color: var(--truth-line); }
+  #hA { grid-area: hA; } #hT { grid-area: hT; } #cap { grid-area: cap; } #tipc { grid-area: tip; }
+  #mon { grid-area: mon; } #idl { grid-area: ideal; } #mom { grid-area: mom; } #mapc { grid-area: map; }
+
+  /* caption */
+  .now { display: flex; flex-direction: column; gap: 8px; min-height: 100%; }
+  .status { display: inline-flex; align-self: flex-start; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; padding: 2px 10px; border-radius: 999px; background: var(--ground); color: var(--muted); }
+  .status.run { background: var(--accent-soft); color: var(--accent); }
+  .status.think { background: var(--ground); color: var(--muted); }
+  .status .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+  .status.run .dot { animation: pulse 1.1s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .25; } }
+  .doing { font-size: 20px; line-height: 1.45; font-weight: 700; color: var(--ink); min-height: 2.9em; }
+  .doing.stub { color: var(--muted); font-weight: 500; }
+  .reply { font-size: 13.5px; color: var(--ink-2); border-left: 3px solid var(--line); padding-left: 10px; }
+  .reply .mono { font-size: 12px; color: var(--muted); }
+  .said { font-size: 14px; background: var(--accent-soft); border-radius: 12px; padding: 8px 12px; color: var(--ink); }
+  .said b { color: var(--accent); margin-right: 4px; }
+
+  /* monitors */
+  .monitor { position: relative; width: 100%; aspect-ratio: 1; background: var(--vacuum); border-radius: 10px; overflow: hidden; }
+  .monitor canvas, .monitor img.fill { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+  .hud { position: absolute; left: 10px; right: 10px; display: flex; justify-content: space-between; gap: 8px; font-family: var(--mono); font-size: 11.5px; color: #e9edf5; pointer-events: none; text-shadow: 0 1px 2px rgba(0, 0, 0, .8); }
+  .hud.top { top: 8px; } .hud.bottom { bottom: 8px; justify-content: flex-end; }
+  .scalebar { position: absolute; left: 10px; bottom: 8px; display: flex; flex-direction: column; gap: 3px; font-family: var(--mono); font-size: 11.5px; color: #e9edf5; text-shadow: 0 1px 2px rgba(0, 0, 0, .8); pointer-events: none; white-space: nowrap; }
+  .scalebar i { display: block; width: 100%; height: 3px; background: #e9edf5; border-radius: 2px; box-shadow: 0 1px 2px rgba(0, 0, 0, .7); }
+  .placeholder { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: 10px; padding: 28px; color: #c9d0dc; font-size: 14px; line-height: 1.7; }
+  .placeholder .label { color: #8d96a8; }
+  .placeholder pre { margin: 0; white-space: pre-wrap; font-family: var(--sans); font-size: 13.5px; color: #dfe4ec; max-height: 70%; overflow: auto; }
+  .undercap { font-size: 13px; color: var(--muted); margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+  .truth .undercap { color: var(--truth-ink); opacity: .85; }
+
+  /* tip */
+  .tipcard { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; align-items: center; }
+  .tipcard svg { width: 100%; height: auto; display: block; }
+  .tipword { font-family: var(--serif); font-weight: 900; font-size: 30px; line-height: 1.2; color: var(--truth-ink); display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+  .chip { font-family: var(--sans); font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; }
+  .chip.good { background: var(--good-bg); color: var(--good); }
+  .chip.warn { background: var(--warn-bg); color: var(--warn); }
+  .chip.bad { background: var(--bad-bg); color: var(--bad); }
+  .tiptext { font-size: 14px; color: var(--truth-ink); margin-top: 4px; }
+  .tipnote { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .wob { animation: wobble .18s steps(2, jump-none) infinite alternate; transform-origin: 120px 110px; }
+  @keyframes wobble { from { transform: translate(-1.6px, .8px); } to { transform: translate(1.8px, -1px); } }
+  .glow { animation: glow 1.6s ease-in-out infinite; }
+  @keyframes glow { 50% { opacity: .25; } }
+
+  /* map */
+  .map { position: relative; width: 100%; aspect-ratio: 1; border-radius: 10px; overflow: hidden; background: #1b1f27; }
+  .map img { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .92; }
+  .map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--truth-ink); margin-top: 8px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .sw { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+  /* moments */
+  .moments { list-style: none; margin: 0; padding: 0; max-height: 420px; overflow: auto; display: flex; flex-direction: column; gap: 2px; }
+  .moments li button { width: 100%; text-align: left; display: grid; grid-template-columns: 64px 12px minmax(0, 1fr); gap: 8px; align-items: baseline;
+    background: none; border: 0; border-radius: 8px; padding: 6px 8px; cursor: pointer; }
+  .moments li button:hover { background: var(--ground); }
+  .moments li.future { opacity: .45; }
+  .moments li.current button { background: var(--accent-soft); }
+  .moments .t { font-family: var(--mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+  .moments .d { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); align-self: center; }
+  .d.good { background: var(--good); } .d.warn { background: var(--warn); } .d.bad { background: var(--bad); } .d.info { background: var(--accent); }
+  .moments .ti { font-size: 14px; color: var(--ink); }
+  .moments .tx { display: block; font-size: 12.5px; color: var(--muted); }
+
+  /* transport */
+  .transport { position: sticky; bottom: 0; z-index: 5; margin-top: 16px; background: color-mix(in srgb, var(--panel) 92%, transparent);
+    backdrop-filter: blur(8px); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow);
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom, 0px)); }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; }
+  .btn:hover { border-color: var(--accent); }
+  .btn.play { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); min-width: 104px; font-weight: 700; }
+  .btn svg { width: 16px; height: 16px; fill: currentColor; }
+  .clock { display: flex; flex-direction: column; line-height: 1.25; }
+  .clock .big { font-family: var(--mono); font-size: 18px; font-weight: 500; font-variant-numeric: tabular-nums; }
+  .clock small { font-size: 11.5px; color: var(--muted); }
+  .budget { display: flex; flex-direction: column; gap: 3px; min-width: 150px; font-size: 11.5px; color: var(--muted); }
+  .meter { height: 6px; border-radius: 3px; background: var(--ground); overflow: hidden; }
+  .meter i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+  .grow { flex: 1 1 auto; }
+  .speed { height: 36px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); padding: 0 8px; }
+  .toggle { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--ink-2); }
+  .track { position: relative; height: 34px; margin-top: 8px; cursor: pointer; touch-action: none; }
+  .lane { position: absolute; left: 0; right: 0; }
+  .lane.scans { top: 4px; height: 10px; background: var(--ground); border-radius: 5px; }
+  .lane.scans i { position: absolute; top: 0; height: 100%; background: color-mix(in srgb, #e1782f 70%, var(--panel)); border-radius: 3px; }
+  .lane.moments { top: 18px; height: 14px; }
+  .lane.moments i { position: absolute; top: 2px; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; border: 2px solid var(--panel); background: var(--accent); }
+  .lane.moments i.good { background: var(--good); } .lane.moments i.warn { background: var(--warn); } .lane.moments i.bad { background: var(--bad); }
+  .lane.moments i.info { background: color-mix(in srgb, var(--accent) 55%, var(--panel)); width: 8px; height: 8px; margin-left: -4px; top: 3px; border-width: 1px; }
+  .playhead { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--ink); border-radius: 1px; pointer-events: none; }
+  .playhead::after { content: ""; position: absolute; top: -4px; left: -4px; width: 10px; height: 10px; border-radius: 50%; background: var(--ink); }
+
+  /* toast */
+  .toast { position: fixed; left: 50%; top: calc(16px + env(safe-area-inset-top, 0px)); transform: translateX(-50%); z-index: 20; max-width: min(560px, calc(100vw - 32px));
+    padding: 10px 16px; border-radius: 12px; font-weight: 700; box-shadow: var(--shadow); border: 1px solid var(--line); background: var(--panel); transition: opacity .25s; }
+  .toast.good { color: var(--good); background: var(--good-bg); }
+  .toast.warn { color: var(--warn); background: var(--warn-bg); }
+  .toast.bad { color: var(--bad); background: var(--bad-bg); }
+  .toast small { display: block; font-weight: 400; color: var(--ink-2); font-size: 13px; margin-top: 2px; }
+
+  /* results */
+  .after { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 18px; margin-top: 22px; padding-bottom: 40px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+  .card h2 { font-size: 17px; margin-bottom: 10px; }
+  .headline { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 12px; margin-bottom: 12px; }
+  .headline .word { font-family: var(--serif); font-weight: 900; font-size: 28px; }
+  .headline .word.good { color: var(--good); } .headline .word.bad { color: var(--bad); }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: .04em; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  td { padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  td .note { display: block; font-size: 12.5px; color: var(--muted); margin-top: 3px; }
+  td.v { font-family: var(--mono); font-size: 13px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .quote { margin: 12px 0 0; padding: 10px 14px; background: var(--accent-soft); border-radius: 10px; font-size: 14px; }
+  .quote b { color: var(--accent); }
+  .small { font-size: 13px; color: var(--muted); }
+  dl.meta { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 12px; margin: 0; font-size: 13px; }
+  dl.meta dt { color: var(--muted); }
+  dl.meta dd { margin: 0; overflow-wrap: anywhere; }
+  details summary { cursor: pointer; font-weight: 500; }
+  details pre { white-space: pre-wrap; font: 13.5px/1.7 var(--sans); background: var(--ground); border-radius: 10px; padding: 10px 12px; margin: 8px 0 0; }
+  .err { background: var(--bad-bg); color: var(--bad); padding: 16px; border-radius: 12px; margin: 20px; }
+
+  @media (max-width: 900px) {
+    header.exhibit { grid-template-columns: 1fr; gap: 16px; }
+    .stage { grid-template-columns: minmax(0, 1fr); grid-template-areas: "hA" "cap" "mon" "mom" "hT" "tip" "ideal" "map"; }
+    #mom { border-bottom: 1px solid var(--line); border-radius: 0 0 14px 14px; margin-bottom: 18px; }
+    #cap .now { min-height: 0; }
+    .after { grid-template-columns: 1fr; }
+    .moments { max-height: 320px; }
+  }
+  @media (max-width: 520px) {
+    .wrap { padding-inline: 16px; }
+    .cell { padding: 12px 14px; }
+    .tipcard { grid-template-columns: 110px minmax(0, 1fr); }
+    .tipword { font-size: 24px; }
+    .doing { font-size: 17px; }
+    .howto .keys { grid-template-columns: 1fr; }
+    .budget { min-width: 120px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wob, .glow, .status.run .dot { animation: none; }
+    .toast { transition: none; }
+  }
+</style>
+
+<div class="wrap" id="app">
+  <header class="exhibit">
+    <div>
+      <div class="eyebrow" id="eyebrow">STM-Bench 回放</div>
+      <h1 id="title">STM 实验回放</h1>
+      <div class="cite" id="cite"></div>
+      <div class="lede" id="lede"></div>
+      <div class="verdict" id="verdict"></div>
+    </div>
+    <aside class="howto" id="howto">
+      <h2 id="intro-title">这是在看什么？</h2>
+      <div id="intro"></div>
+      <div class="keys">
+        <div class="key ai"><b id="key-ai">左边 · AI 的视角</b>它扫出来的图、它正在做的事、它说的话。</div>
+        <div class="key truth"><b>右边 · 只有你看得到</b>针尖此刻的样子、样品真实的样子。<span id="key-truth">AI 看不到这些。</span></div>
+      </div>
+    </aside>
+  </header>
+
+  <section class="stage" aria-label="回放">
+    <div class="cell ai colhead" id="hA">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="13" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 21h8M12 17v4" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+      <h2 id="ai-head">AI 的视角</h2><span class="label">它只看得到这些</span>
+    </div>
+    <div class="cell truth colhead" id="hT">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>
+      <h2>完整状态</h2><span class="label">评估参考信息</span>
+    </div>
+
+    <div class="cell ai" id="cap">
+      <div class="now">
+        <span class="status" id="status"><span class="dot"></span><span id="status-text">准备</span></span>
+        <div class="doing" id="doing">按下播放，从头看 AI 做这个实验。</div>
+        <div class="reply" id="reply" hidden></div>
+        <div class="said" id="said" hidden></div>
+      </div>
+    </div>
+    <div class="cell truth" id="tipc">
+      <div class="label" style="color: var(--truth)">针尖此刻</div>
+      <div class="tipcard">
+        <svg id="tipsvg" viewBox="0 0 240 170" role="img" aria-label="针尖示意图"></svg>
+        <div>
+          <div class="tipword"><span id="tipword">尖锐</span><span class="chip good" id="tipchip">良好</span></div>
+          <div class="tiptext" id="tiptext"></div>
+          <div class="tipnote" id="tipnote" hidden></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cell ai" id="mon">
+      <div class="monitor" id="monitor">
+        <canvas id="cv-ai" width="256" height="256" aria-label="AI 扫出的图"></canvas>
+        <div class="placeholder" id="ph-ai"><span class="label">AI 收到的任务</span><pre id="task"></pre></div>
+        <div class="hud top"><span id="ai-l"></span><span id="ai-r"></span></div>
+        <div class="hud bottom"><span id="ai-br"></span></div>
+        <div class="scalebar" id="ai-sb"></div>
+      </div>
+      <div class="undercap"><span>AI 扫出来的图，一行一行地画出来（真实仪器也是这样）。</span><span class="mono" id="ai-params"></span></div>
+    </div>
+    <div class="cell truth" id="idl">
+      <div class="monitor" id="idealbox">
+        <canvas id="cv-id" width="256" height="256" aria-label="完美针尖在同一位置会扫出的图"></canvas>
+        <div class="placeholder" id="ph-id"><span class="label">完美针尖会扫出的图</span><span id="ph-id-text">AI 开始扫描后，这里显示同一位置换一根完美针尖本该扫到的样子。</span></div>
+        <div class="hud top"><span id="id-l"></span><span></span></div>
+        <div class="scalebar" id="id-sb"></div>
+      </div>
+      <div class="undercap"><span>同一位置、同一时刻，换一根完美针尖、仪器也调好时本该扫到的样子。和左边不一样的地方，就是针尖或仪器造成的。</span></div>
+    </div>
+
+    <div class="cell ai foot" id="mom">
+      <div class="label" style="margin-bottom: 6px">关键时刻 · 点一下跳过去</div>
+      <ol class="moments" id="moments"></ol>
+    </div>
+    <div class="cell truth foot" id="mapc">
+      <div class="label" style="color: var(--truth); margin-bottom: 6px">样品全貌</div>
+      <div class="map" id="map">
+        <img id="map-img" alt="样品真实的样子">
+        <svg id="map-svg" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <div class="scalebar" id="map-sb"></div>
+        <div class="placeholder" id="ph-map" hidden></div>
+      </div>
+      <div class="legend" id="legend"></div>
+    </div>
+  </section>
+
+  <div class="transport" id="transport">
+    <div class="controls">
+      <button class="btn play" id="play" type="button" aria-label="播放"><svg viewBox="0 0 16 16" id="play-ico"><path d="M4 2.5v11l9-5.5z"/></svg><span id="play-text">播放</span></button>
+      <button class="btn" id="prev" type="button" aria-label="上一个关键时刻"><svg viewBox="0 0 16 16"><path d="M3 3h2v10H3zM14 3v10L6 8z"/></svg></button>
+      <button class="btn" id="next" type="button" aria-label="下一个关键时刻"><svg viewBox="0 0 16 16"><path d="M11 3h2v10h-2zM2 3v10l8-5z"/></svg></button>
+      <div class="clock"><span class="big" id="clock">0:00:00</span><small>实验时间（仪器时钟）</small></div>
+      <div class="budget"><span id="budget-text">预算</span><span class="meter"><i id="budget-bar" style="width: 0%"></i></span></div>
+      <span class="grow"></span>
+      <label class="toggle" for="autopause"><input type="checkbox" id="autopause"> 关键时刻自动暂停</label>
+      <label class="toggle" for="speed">速度
+        <select class="speed" id="speed">
+          <option value="30">×30</option>
+          <option value="60" selected>×60</option>
+          <option value="150">×150</option>
+          <option value="400">×400</option>
+        </select>
+      </label>
+    </div>
+    <div class="track" id="track" role="slider" tabindex="0" aria-label="实验时间轴" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="lane scans" id="lane-scans"></div>
+      <div class="lane moments" id="lane-moments"></div>
+      <div class="playhead" id="playhead" style="left: 0%"></div>
+    </div>
+  </div>
+
+  <section class="after">
+    <div class="card" id="result">
+      <h2>结果</h2>
+      <div class="headline" id="headline"></div>
+      <div class="tablewrap"><table id="claims"></table></div>
+      <p class="small" id="judging"></p>
+      <div class="quote" id="final" hidden></div>
+    </div>
+    <div class="card">
+      <h2>关于这次运行</h2>
+      <dl class="meta" id="meta"></dl>
+      <details style="margin-top: 12px"><summary>AI 收到的原题</summary><pre id="task2"></pre></details>
+    </div>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="replay.js"></script>
+<script>
+'use strict';
+(function () {
+  const R = window.REPLAY;
+  const $ = (id) => document.getElementById(id);
+  if (!R || !R.timeline) {
+    $('app').innerHTML = '<div class="err">没有找到回放数据（replay.js）。请用 python -m stmbench.cli replay 重新生成。</div>';
+    return;
+  }
+  const T = R.timeline, M = R.meta || {}, LAY = R.lay || {};
+  const ACTOR = M.actor || 'AI';
+  const A_ = /^[A-Za-z]/.test(ACTOR) ? ACTOR + ' ' : ACTOR;   // "AI 在想" but "操作员在想"
+  const S0 = T.sim_start, S1 = Math.max(T.sim_end, T.sim_start + 1e-6), SPAN = S1 - S0;
+  const NS = 'http://www.w3.org/2000/svg';
+
+  function h(tag, attrs, ...kids) {
+    const el = document.createElement(tag);
+    if (attrs) for (const [k, v] of Object.entries(attrs)) {
+      if (k === 'class') el.className = v; else if (k === 'text') el.textContent = v;
+      else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+      else if (v !== null && v !== undefined && v !== false) el.setAttribute(k, v === true ? '' : v);
+    }
+    for (const k of kids.flat()) if (k !== null && k !== undefined && k !== false) el.append(k.nodeType ? k : document.createTextNode(String(k)));
+    return el;
+  }
+  function s(tag, attrs) { const el = document.createElementNS(NS, tag); for (const [k, v] of Object.entries(attrs || {})) el.setAttribute(k, v); return el; }
+  function clockText(sim) { let t = Math.max(0, Math.round(sim - S0)); const hh = Math.floor(t / 3600), mm = Math.floor(t % 3600 / 60), ss = t % 60; return `${hh}:${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`; }
+  function words(sec) { sec = Math.max(0, sec); if (sec < 90) return `${Math.round(sec)} 秒`; const m = Math.round(sec / 60); return m < 60 ? `${m} 分钟` : `${Math.floor(m / 60)} 小时 ${m % 60} 分`; }
+  function num(x, d = 3) { if (x == null || !isFinite(x)) return '?'; if (x === 0) return '0'; const k = Math.max(0, d - 1 - Math.floor(Math.log10(Math.abs(x)))); return String(+x.toFixed(k)); }
+  function si(x, unit) { if (x == null) return ''; const a = Math.abs(x); for (const [f, p] of [[1e-12, 'p'], [1e-9, 'n'], [1e-6, 'µ'], [1e-3, 'm'], [1, '']]) if (a < f * 1000) return `${num(x / f)} ${p}${unit}`; return `${num(x)} ${unit}`; }
+  function lastAt(arr, t, key = 'sim') { let lo = 0, hi = arr.length - 1, ans = -1; while (lo <= hi) { const mid = (lo + hi) >> 1; if (arr[mid][key] <= t) { ans = mid; lo = mid + 1; } else hi = mid - 1; } return ans; }
+
+  // ── header ──
+  const P = LAY.paper || {};
+  document.title = M.page_title || document.title;
+  $('eyebrow').textContent = `STM-Bench 回放 · ${M.scenario_id || ''} · seed ${M.seed ?? ''}`;
+  $('title').textContent = P.title || (M.paper && M.paper.title) || 'STM 实验回放';
+  $('cite').append(P.who ? `复现 ${P.who} 的实验` : '', M.paper && M.paper.ref ? h('span', { class: 'mono' }, `　${M.paper.ref}`) : '');
+  if (P.background) $('lede').append(h('p', null, P.background));
+  if (P.goal) $('lede').append(h('p', null, h('b', null, `${A_}的任务：`), P.goal));
+  const used = T.sim_end - T.sim_start, budget = T.budget_s;
+  $('verdict').append(h('span', { class: 'pill ' + (M.success ? 'good' : 'bad') }, M.success ? '✓ 复现成功' : '✗ 没能复现'),
+    h('span', { class: 'who' }, `用了 ${words(used)}实验时间` + (budget ? `（预算 ${words(budget)}，用掉 ${Math.round(100 * used / budget)}%）` : '')));
+  $('verdict').append(h('div', { class: 'who', style: 'flex-basis: 100%' }, M.how || ''));
+  const I = LAY.intro || {};
+  if (I.title) $('intro-title').textContent = I.title;
+  for (const p of (I.paragraphs || [])) $('intro').append(h('p', null, p));
+  $('task').textContent = R.task || '（这次回放没有带原题）';
+  $('task2').textContent = R.task || '（这次回放没有带原题）';
+  $('ai-head').textContent = `${A_}的视角`;
+  $('key-ai').textContent = `左边 · ${A_}的视角`;
+  $('key-truth').textContent = `${A_}看不到这些。`;
+
+  // ── images ──
+  const FR = (T.frames || []).filter(f => f.png).sort((a, b) => a.sim0 - b.sim0);
+  const img = (src) => { const i = new Image(); i.decoding = 'async'; i.src = src; return i; };
+  for (const f of FR) { f._img = img(f.png); if (f.ideal) f._ideal = img(f.ideal); }
+  for (const f of FR) { f._img.onload = () => { dirty = true; paint(); }; if (f._ideal) f._ideal.onload = () => { dirty = true; paint(); }; }
+
+  // ── the clock: beats ──
+  const STEPS = T.steps || [];
+  function toolMin(st) {
+    const n = st.name || '';
+    if (st.stub) return 0.25;
+    if (/^Report/.test(n)) return 1.8;
+    if (/^(Verify|Measure|Select|Extract|detect|Detect|Fit|Invert|Assess|Analyze|Find|Locate|SetDrift)/.test(n)) return 1.0;
+    if (/^(Get|List|Read|load_tool_pack|search|skill|query)/.test(n)) return 0.25;
+    return 0.6;
+  }
+  let RATE = 60, BEATS = [], TOTAL = 0;
+  function buildBeats() {
+    const out = []; let cur = S0;
+    const push = (b) => { b.r0 = TOTAL; TOTAL += b.dur; b.r1 = TOTAL; out.push(b); };
+    TOTAL = 0;
+    for (const st of STEPS) {
+      if (st.sim0 > cur + 1e-6) push({ kind: 'idle', sim0: cur, sim1: st.sim0, dur: (st.sim0 - cur) / RATE });
+      const hold = (0.22 + Math.min(1.3, (st.think_s || 0) / 140)) * Math.min(1, Math.sqrt(60 / RATE));
+      push({ kind: 'think', sim0: st.sim0, sim1: st.sim0, dur: hold, step: st });
+      push({ kind: 'tool', sim0: st.sim0, sim1: st.sim1, dur: Math.max(toolMin(st) * Math.min(1, Math.sqrt(60 / RATE)), (st.sim1 - st.sim0) / RATE), step: st });
+      cur = Math.max(cur, st.sim1);
+    }
+    if (S1 > cur + 1e-6) push({ kind: 'idle', sim0: cur, sim1: S1, dur: (S1 - cur) / RATE });
+    push({ kind: 'end', sim0: S1, sim1: S1, dur: 0.001 });
+    BEATS = out;
+  }
+  function beatAt(r) { let lo = 0, hi = BEATS.length - 1, ans = 0; while (lo <= hi) { const mid = (lo + hi) >> 1; if (BEATS[mid].r0 <= r) { ans = mid; lo = mid + 1; } else hi = mid - 1; } return ans; }
+  function simAt(r) { const b = BEATS[beatAt(r)]; if (b.sim1 <= b.sim0 || b.dur <= 0) return b.sim0; return b.sim0 + Math.min(1, Math.max(0, (r - b.r0) / b.dur)) * (b.sim1 - b.sim0); }
+  function rAtSim(t) {
+    for (const b of BEATS) if ((b.kind === 'tool' || b.kind === 'idle') && b.sim1 > b.sim0 && t >= b.sim0 && t <= b.sim1) return b.r0 + (t - b.sim0) / (b.sim1 - b.sim0) * b.dur;
+    let best = BEATS[0]; for (const b of BEATS) if (b.sim0 <= t) best = b; return best.kind === 'think' ? best.r1 : best.r0;
+  }
+
+  // ── atoms over time ──
+  const AT = T.atoms;
+  const MOVES = AT ? (AT.moves || []).slice().sort((a, b) => a.sim - b.sim) : [];
+  let atomCache = { n: -1, st: null };
+  function atomsAt(t) {
+    const n = lastAt(MOVES, t) + 1;
+    if (n === atomCache.n) return atomCache.st;
+    const st = new Map(); for (const a of (AT ? AT.initial : [])) st.set(a.id, { ...a });
+    for (const m of MOVES.slice(0, n)) { const a = st.get(m.id) || { id: m.id, role: '' }; a.status = m.status || a.status; if (m.x != null) { a.x = m.x; a.y = m.y; } st.set(m.id, a); }
+    atomCache = { n, st }; return st;
+  }
+
+  // ── painters ──
+  let dirty = true, lastKey = '';
+  const cvA = $('cv-ai'), cvI = $('cv-id');
+  function frameAt(t) { const i = lastAt(FR, t, 'sim0'); return i >= 0 ? FR[i] : null; }
+  function rowsOf(f, t) { if (!f) return 0; if (t >= f.sim1) return f.rows_done; return Math.max(0, Math.min(f.rows_done, Math.floor((t - f.sim0) / Math.max(f.per_row_s || 1e-9, 1e-9)))); }
+  function scaleBar(el, w_nm) {
+    // the bar's width is a share of the picture it sits on (its containing block), so the
+    // length it names is the length it spans at any size
+    el.textContent = ''; if (!w_nm) { el.hidden = true; return; }
+    el.hidden = false;
+    const target = w_nm / 4, p = Math.pow(10, Math.floor(Math.log10(target))); let L = p; for (const m of [1, 2, 5]) if (m * p <= target) L = m * p;
+    el.style.width = `${(100 * L / w_nm).toFixed(3)}%`;
+    el.append(h('span', { text: L >= 1 ? `${num(L)} nm` : `${num(L * 1000)} pm` }), h('i'));
+  }
+  function drawFrame(cv, image, f, rows, full, scanning) {
+    const ctx = cv.getContext('2d');
+    const W = image.naturalWidth || f.geom.nx || 256, H = image.naturalHeight || f.geom.ny || 256;
+    if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+    ctx.imageSmoothingEnabled = false;
+    ctx.fillStyle = '#07090d'; ctx.fillRect(0, 0, W, H);
+    if (!image.complete || !image.naturalWidth) return;
+    const ny = f.geom.ny || H, frac = Math.min(1, rows / ny), up = f.scan_dir === 'up';
+    const shown = Math.round(frac * H);
+    if (full) ctx.drawImage(image, 0, 0, W, H);
+    else if (shown > 0) { if (up) ctx.drawImage(image, 0, H - shown, W, shown, 0, H - shown, W, shown); else ctx.drawImage(image, 0, 0, W, shown, 0, 0, W, shown); }
+    if (scanning) {                                  // the line the tip is on right now
+      const y = up ? H - shown : shown;
+      ctx.fillStyle = 'rgba(159, 243, 255, 0.95)'; ctx.fillRect(0, Math.max(0, Math.min(H - 1, y - 1)), W, Math.max(1, Math.round(H / 200)));
+    }
+  }
+  function paintMonitors(t, f, rows) {
+    const phA = $('ph-ai'), phI = $('ph-id');
+    if (!f) {
+      phA.hidden = false; phI.hidden = false;
+      for (const cv of [cvA, cvI]) { const c = cv.getContext('2d'); c.fillStyle = '#07090d'; c.fillRect(0, 0, cv.width, cv.height); }
+      for (const id of ['ai-l', 'ai-r', 'ai-br', 'id-l', 'ai-params']) $(id).textContent = '';
+      $('ai-sb').textContent = ''; $('id-sb').textContent = '';
+      return;
+    }
+    phA.hidden = true;
+    const scanning = t < f.sim1 && rows < f.rows_done;
+    drawFrame(cvA, f._img, f, rows, false, scanning);
+    const g = f.geom, n = FR.indexOf(f) + 1;
+    $('ai-l').textContent = `第 ${n} 幅 · ${num(g.w_nm)}×${num(g.h_nm)} nm`;
+    $('ai-r').textContent = scanning ? `扫描中 ${Math.round(100 * rows / (g.ny || f.rows_done))}%` : (f.rows_done < (g.ny || f.rows_done) ? `中途停了（${f.rows_done}/${g.ny} 行）` : '扫完了');
+    $('ai-br').textContent = `${g.nx}×${g.ny} 像素`;
+    scaleBar($('ai-sb'), g.w_nm);
+    $('ai-params').textContent = [f.bias_v != null ? `偏压 ${si(f.bias_v, 'V')}` : '', f.setpoint_a != null ? `电流 ${si(f.setpoint_a, 'A')}` : '', f.per_row_s ? `每行 ${num(f.per_row_s, 2)} s` : ''].filter(Boolean).join(' · ');
+    if (f._ideal) {
+      phI.hidden = true;
+      drawFrame(cvI, f._ideal, f, rows, true, scanning);
+      $('id-l').textContent = '同一位置 · 完美针尖';
+      scaleBar($('id-sb'), g.w_nm);
+    } else {
+      phI.hidden = false;
+      $('ph-id-text').textContent = R.truth && R.truth.available === false ? `这次回放没有真实样品：${R.truth.reason || ''}` : '这一幅没有对应的真实样品图。';
+    }
+  }
+
+  // tip cartoon
+  function tipPath(c) {
+    const b = c.blunt || 0, cx = 120;
+    if (c.broken) return `M74 0 L166 0 L144 64 L136 78 L127 70 L118 84 L109 72 L100 80 L96 64 Z`;
+    if ((c.points || 1) > 1) {
+      const n = c.points, spread = n === 2 ? 15 : 17, base = 94;
+      const xs = n === 2 ? [cx - spread, cx + spread * 0.7] : [cx - spread, cx, cx + spread];
+      const ys = n === 2 ? [114, 107] : [111, 115, 106];
+      let d = `M74 0 L166 0 L${cx + 30} ${base}`;
+      for (let i = xs.length - 1; i >= 0; i--) d += ` L${xs[i] + 6} ${base + 2} L${xs[i]} ${ys[i]} L${xs[i] - 6} ${base + 2}`;
+      return d + ` L${cx - 30} ${base} Z`;
+    }
+    const r = 2.5 + 20 * b, y = 112 - r;
+    return `M74 0 L166 0 L${cx + r} ${y} A ${r} ${r} 0 0 1 ${cx - r} ${y} Z`;
+  }
+  function paintTip(entry) {
+    const svg = $('tipsvg'); svg.textContent = '';
+    const look = entry ? entry.look : { level: 'good', title: '尖锐', text: '', cartoon: { points: 1, blunt: 0 } };
+    const c = look.cartoon || {};
+    const defs = s('defs'); const lg = s('linearGradient', { id: 'metal', x1: '0', x2: '1', y1: '0', y2: '0' });
+    lg.append(s('stop', { offset: '0', 'stop-color': 'var(--metal-a)' }), s('stop', { offset: '.45', 'stop-color': 'var(--metal-b)' }), s('stop', { offset: '1', 'stop-color': 'var(--metal-c)' }));
+    defs.append(lg); svg.append(defs);
+    for (let x = 8; x <= 232; x += 16) svg.append(s('circle', { cx: x, cy: 158, r: 8, fill: 'var(--substrate)', opacity: '.85' }));
+    const apexY = c.broken ? 84 : ((c.points || 1) > 1 ? 115 : 112 + (c.blunt || 0) * 8);
+    if (!c.broken) svg.append(s('ellipse', { cx: 120, cy: (apexY + 150) / 2, rx: 5 + (c.blunt || 0) * 10, ry: Math.max(4, (150 - apexY) / 2 - 2), fill: 'var(--glow)', opacity: '.55', class: 'glow' }));
+    const g = s('g', c.wobble ? { class: 'wob' } : {});
+    g.append(s('path', { d: tipPath(c), fill: 'url(#metal)', stroke: 'var(--metal-c)', 'stroke-width': '1.2', 'stroke-linejoin': 'round' }));
+    if (c.wobble) for (const [x, y] of [[108, 112], [121, 118], [133, 110], [115, 121]]) g.append(s('circle', { cx: x, cy: y, r: 5, fill: 'var(--metal-b)', stroke: 'var(--metal-c)', 'stroke-width': '1' }));
+    if (c.carried && !c.broken) g.append(s('circle', { cx: 120, cy: apexY + 6, r: 7, fill: 'var(--adatom)', stroke: '#8a6412', 'stroke-width': '1' }));
+    if (c.dirty && !c.broken) for (const [x, y, r] of [[113, apexY - 9, 4.5], [127, apexY - 14, 3.5], [121, apexY - 3, 3]]) g.append(s('circle', { cx: x, cy: y, r, fill: '#4a3f35', opacity: '.85' }));
+    svg.append(g);
+    if (c.broken) for (const [x, y] of [[70, 146], [168, 147], [150, 144]]) svg.append(s('path', { d: `M${x} ${y} l7 -6 l6 5 l-4 4 z`, fill: 'var(--metal-a)' }));
+    $('tipword').textContent = look.title;
+    const chip = $('tipchip'); chip.className = 'chip ' + look.level; chip.textContent = { good: '良好', warn: '需注意', bad: '失效' }[look.level] || look.level;
+    $('tiptext').textContent = look.text || '';
+  }
+
+  // map
+  const OV = R.truth && R.truth.overview;
+  const mapSvg = $('map-svg');
+  function toMap(x, y) { const [x0, y0, x1, y1] = OV.bbox; return [(x - x0) / (x1 - x0) * 1000, (y1 - y) / (y1 - y0) * 1000]; }
+  let mapKey = '';
+  function paintMap(t, f, rows) {
+    if (!OV) return;
+    const key = `${lastAt(FR, t, 'sim0')}|${rows}|${lastAt(MOVES, t)}|${f && t >= f.sim1}`;
+    if (key === mapKey && !dirty) return;
+    mapKey = key;
+    mapSvg.textContent = '';
+    const [x0, , x1] = OV.bbox, per = 1000 / (x1 - x0);
+    const shownFrames = FR.filter(q => q.sim0 <= t && q.corners);
+    for (const q of shownFrames) {
+      const pts = q.corners.map(p => toMap(p[0], p[1]).map(v => v.toFixed(1)).join(',')).join(' ');
+      const cur = q === f;
+      mapSvg.append(s('polygon', { points: pts, fill: cur ? 'rgba(126, 165, 255, 0.12)' : 'none', stroke: cur ? '#8fb0ff' : 'rgba(143, 176, 255, 0.45)', 'stroke-width': cur ? '2.2' : '1.2', 'vector-effect': 'non-scaling-stroke', 'stroke-dasharray': cur ? '' : '5 4' }));
+    }
+    if (AT && AT.ring) {
+      const [cx, cy] = toMap(AT.ring.centre[0], AT.ring.centre[1]);
+      mapSvg.append(s('circle', { cx, cy, r: AT.ring.radius_nm * per, fill: 'none', stroke: 'rgba(255, 255, 255, .35)', 'stroke-dasharray': '4 5', 'vector-effect': 'non-scaling-stroke' }));
+      for (const g of AT.ring.gaps || []) { const [gx, gy] = toMap(g[0], g[1]); mapSvg.append(s('circle', { cx: gx, cy: gy, r: Math.max(7, 0.3 * per), fill: 'none', stroke: '#7ee0a6', 'stroke-width': '1.6', 'vector-effect': 'non-scaling-stroke' })); }
+    }
+    if (AT && AT.target) {
+      const [tx, ty] = toMap(AT.target.site[0], AT.target.site[1]);
+      const rr = Math.max(14, 0.55 * per);
+      mapSvg.append(s('circle', { cx: tx, cy: ty, r: rr, fill: 'none', stroke: '#7ee0a6', 'stroke-width': '2', 'stroke-dasharray': '6 4', 'vector-effect': 'non-scaling-stroke' }));
+      const lbl = s('text', { x: tx, y: ty - rr - 8, 'text-anchor': 'middle', fill: '#7ee0a6', 'font-size': '30', 'font-family': 'Noto Sans SC, sans-serif' }); lbl.textContent = '目标'; mapSvg.append(lbl);
+      if (AT.target.start) { const [sx, sy] = toMap(AT.target.start[0], AT.target.start[1]); const d = 9; mapSvg.append(s('path', { d: `M${sx - d} ${sy - d} L${sx + d} ${sy + d} M${sx - d} ${sy + d} L${sx + d} ${sy - d}`, stroke: 'rgba(255,255,255,.55)', 'stroke-width': '1.6', 'vector-effect': 'non-scaling-stroke' })); }
+    }
+    const st = atomsAt(t), targetId = AT && AT.target ? AT.target.atom_id : null;
+    const ar = Math.max(11, (AT && AT.sigma_nm ? AT.sigma_nm * 1.5 : 0.4) * per);
+    const [bx0, by0, bx1, by1] = OV.bbox;
+    for (const a of st.values()) {
+      if (a.x == null || a.x < bx0 || a.x > bx1 || a.y < by0 || a.y > by1) continue;
+      const [ax, ay] = toMap(a.x, a.y);
+      if (a.status === 'lost') { const d = ar * 0.8; mapSvg.append(s('path', { d: `M${ax - d} ${ay - d} L${ax + d} ${ay + d} M${ax - d} ${ay + d} L${ax + d} ${ay - d}`, stroke: '#ff8a7d', 'stroke-width': '2', 'vector-effect': 'non-scaling-stroke' })); continue; }
+      if (a.status === 'on_tip') continue;
+      const isT = a.id === targetId;
+      mapSvg.append(s('circle', { cx: ax, cy: ay, r: isT ? ar * 1.15 : ar, fill: isT ? '#ffd166' : '#e8d9b0', stroke: isT ? '#fff4cf' : 'rgba(0,0,0,.35)', 'stroke-width': isT ? '2' : '1', 'vector-effect': 'non-scaling-stroke' }));
+    }
+    if (f && f.corners && t < f.sim1 + 1e-6) {
+      const ny = f.geom.ny || 1, fr = Math.min(1, rows / ny), up = f.scan_dir === 'up', k = up ? 1 - fr : fr;
+      const c = f.corners, L = [c[0][0] + (c[3][0] - c[0][0]) * k, c[0][1] + (c[3][1] - c[0][1]) * k], Rr = [c[1][0] + (c[2][0] - c[1][0]) * k, c[1][1] + (c[2][1] - c[1][1]) * k];
+      const [ax, ay] = toMap(L[0], L[1]), [bx, by] = toMap(Rr[0], Rr[1]);
+      if (rows < f.rows_done) mapSvg.append(s('line', { x1: ax, y1: ay, x2: bx, y2: by, stroke: '#9ff3ff', 'stroke-width': '2', 'vector-effect': 'non-scaling-stroke' }));
+    }
+  }
+  function setupMap() {
+    if (!OV) {
+      $('map-img').hidden = true; const ph = $('ph-map'); ph.hidden = false;
+      ph.textContent = R.truth && R.truth.reason ? `这次回放没有真实样品：${R.truth.reason}` : '这次回放没有真实样品。';
+      return;
+    }
+    $('map-img').src = OV.png;
+    const w = OV.bbox[2] - OV.bbox[0]; scaleBar($('map-sb'), w);
+    const lg = $('legend');
+    lg.append(h('span', null, h('i', { class: 'sw', style: 'border: 2px solid #8fb0ff' }), `${A_}扫过的地方`));
+    if (AT) lg.append(h('span', null, h('i', { class: 'sw', style: 'background: #e8d9b0; border-radius: 50%' }), '原子'));
+    if (AT && AT.target) lg.append(h('span', null, h('i', { class: 'sw', style: 'background: #ffd166; border-radius: 50%' }), '要搬的原子'), h('span', null, h('i', { class: 'sw', style: 'border: 2px dashed #7ee0a6; border-radius: 50%' }), '目标格点'));
+    lg.append(h('span', null, `样品在漂，所以框的位置会慢慢挪；白线是台阶边。`));
+  }
+
+  // caption
+  let lastMsg = -1;
+  function paintCaption(b, t) {
+    const st = $('status'), stT = $('status-text'), doing = $('doing'), reply = $('reply');
+    const step = b.step;
+    st.className = 'status'; doing.className = 'doing';
+    if (b.kind === 'end') { stT.textContent = '结束'; doing.textContent = M.success ? '实验结束：复现成功。' : '实验结束：没能复现。'; reply.hidden = true; }
+    else if (b.kind === 'idle' && !STEPS.length) { stT.textContent = '仪器在运转'; doing.textContent = '这次运行没有逐步的操作记录，这里只能看到仪器上发生了什么。'; reply.hidden = true; }
+    else if (b.kind === 'idle') { stT.textContent = t <= STEPS[0].sim0 ? '准备' : '仪器在运转'; doing.textContent = t <= STEPS[0].sim0 ? '仪器准备就绪，针尖已经靠近表面，等待第一个指令。' : `${A_}没有在操作，仪器继续运行。`; reply.hidden = true; }
+    else if (b.kind === 'think') {
+      st.className = 'status think'; stT.textContent = '思考中 · 仪器时钟暂停';
+      doing.textContent = `${A_}在想下一步…`;
+      const prev = STEPS[step.i - 1];
+      if (prev && prev.result) { reply.hidden = false; reply.replaceChildren(h('span', { class: 'mono' }, '仪器回复　'), prev.result); } else reply.hidden = true;
+      if ((step.think_s || 0) > 20) { reply.hidden = false; if (!(prev && prev.result)) reply.replaceChildren(); reply.append(h('span', { class: 'mono', style: 'display:block' }, `（实际想了 ${words(step.think_s)}；这段时间仪器时钟是停的，不算实验时间）`)); }
+    } else {
+      const dur = step.sim1 - step.sim0;
+      st.className = 'status run'; stT.textContent = step.stub ? '工具还没取出来' : (dur > 1 ? `仪器执行中 · 这一步用 ${words(dur)}` : '执行');
+      doing.textContent = step.caption + (step.stub ? '（工具还没取出来，这一下只是把它拿出来，没有执行）' : '');
+      if (step.stub) doing.className = 'doing stub';
+      if (step.result && (t >= step.sim1 - 1e-6) && (b.r1 - rt) < b.dur * 0.55) { reply.hidden = false; reply.replaceChildren(h('span', { class: 'mono' }, '仪器回复　'), step.result); } else reply.hidden = true;
+    }
+    const mi = lastAt(T.messages || [], t);
+    if (mi !== lastMsg) {
+      lastMsg = mi; const said = $('said');
+      if (mi >= 0) { said.hidden = false; said.replaceChildren(h('b', null, `${A_}说：`), T.messages[mi].text); } else said.hidden = true;
+    }
+  }
+
+  // moments
+  const MOM = (T.moments || []).slice().sort((a, b) => a.sim - b.sim);
+  const momEls = [];
+  function setupMoments() {
+    const ol = $('moments');
+    MOM.forEach((m, i) => {
+      const li = h('li', null, h('button', { type: 'button', onclick: () => seekSim(Math.max(S0, m.sim - 8)) },
+        h('span', { class: 't' }, clockText(m.sim)), h('span', { class: 'd ' + m.level }), h('span', { class: 'ti' }, m.title, m.text ? h('span', { class: 'tx' }, m.text) : null)));
+      momEls.push(li); ol.append(li);
+    });
+    const lane = $('lane-moments');
+    for (const m of MOM) lane.append(h('i', { class: m.level, style: `left: ${(100 * (m.sim - S0) / SPAN).toFixed(3)}%`, title: `${clockText(m.sim)} ${m.title}` }));
+    const sl = $('lane-scans');
+    for (const f of T.frames || []) sl.append(h('i', { style: `left: ${(100 * (f.sim0 - S0) / SPAN).toFixed(3)}%; width: ${Math.max(0.25, 100 * (f.sim1 - f.sim0) / SPAN).toFixed(3)}%`, title: f.file ? `扫描 ${num(f.geom ? f.geom.w_nm : f.w_nm)} nm` : '扫描（没保存）' }));
+  }
+  let curMom = -2;
+  function paintMoments(t) {
+    const i = lastAt(MOM, t);
+    if (i === curMom) return; curMom = i;
+    momEls.forEach((li, k) => { li.className = k > i ? 'future' : (k === i ? 'current' : ''); });
+    if (i >= 0 && momEls[i]) { const box = $('moments'); const el = momEls[i]; if (el.offsetTop < box.scrollTop || el.offsetTop > box.scrollTop + box.clientHeight - 40) box.scrollTop = el.offsetTop - 40; }
+  }
+
+  // transport
+  function paintClock(t) {
+    $('clock').textContent = clockText(t);
+    const b = T.budget_s; const used = t - S0;
+    $('budget-text').textContent = b ? `预算 ${words(b)} · 用掉 ${Math.round(100 * used / b)}%` : `已用 ${words(used)}`;
+    $('budget-bar').style.width = b ? `${Math.min(100, 100 * used / b).toFixed(2)}%` : '0%';
+    const pct = 100 * (t - S0) / SPAN;
+    $('playhead').style.left = `${pct.toFixed(3)}%`;
+    $('track').setAttribute('aria-valuenow', pct.toFixed(0));
+  }
+
+  // toast
+  let toastTimer = null;
+  function toast(m) {
+    const el = $('toast'); el.className = 'toast ' + m.level; el.replaceChildren(m.title, m.text ? h('small', null, m.text) : null); el.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 3200);
+  }
+
+  // ── main loop ──
+  let rt = 0, playing = false, lastTs = null, prevSim = S0;
+  function paint() {
+    const b = BEATS[beatAt(rt)], t = simAt(rt);
+    const f = frameAt(t), rows = rowsOf(f, t);
+    const key = `${f ? f.png : ''}|${rows}|${f && t >= f.sim1}`;
+    if (dirty || key !== lastKey) { paintMonitors(t, f, rows); lastKey = key; }
+    const ti = lastAt(T.tip || [], t);
+    if (ti !== paintTip._i || dirty) { paintTip._i = ti; paintTip(ti >= 0 ? T.tip[ti] : null); }
+    paintMap(t, f, rows);
+    paintCaption(b, t);
+    paintMoments(t);
+    paintClock(t);
+    if (playing) {
+      for (const m of MOM) {
+        if (m.sim > prevSim && m.sim <= t && (m.level !== 'info' || m.kind === 'report')) {
+          toast(m);
+          if ($('autopause').checked && m.level !== 'info') { setPlaying(false); rt = rAtSim(m.sim); }
+        }
+      }
+    }
+    prevSim = t; dirty = false;
+  }
+  function frame(ts) {
+    if (!playing) return;
+    if (lastTs !== null) rt = Math.min(TOTAL, rt + (ts - lastTs) / 1000);
+    lastTs = ts;
+    paint();
+    if (rt >= TOTAL) { setPlaying(false); return; }
+    requestAnimationFrame(frame);
+  }
+  function setPlaying(on) {
+    playing = on; lastTs = null;
+    $('play-text').textContent = on ? '暂停' : (rt >= TOTAL ? '重播' : '播放');
+    $('play').setAttribute('aria-label', on ? '暂停' : '播放');
+    $('play-ico').innerHTML = on ? '<path d="M4 2.5h3v11H4zM9 2.5h3v11H9z"/>' : '<path d="M4 2.5v11l9-5.5z"/>';
+    if (on) requestAnimationFrame(frame);
+  }
+  function seekSim(t) { rt = rAtSim(Math.min(S1, Math.max(S0, t))); prevSim = simAt(rt); dirty = true; paint(); if (!playing) setPlaying(false); }
+
+  $('play').addEventListener('click', () => { if (!playing && rt >= TOTAL) { rt = 0; prevSim = S0; } setPlaying(!playing); });
+  $('next').addEventListener('click', () => { const t = simAt(rt); const m = MOM.find(x => x.sim > t + 0.5); if (m) seekSim(m.sim); });
+  $('prev').addEventListener('click', () => { const t = simAt(rt); const c = MOM.filter(x => x.sim < t - 0.5); if (c.length) seekSim(c[c.length - 1].sim); else seekSim(S0); });
+  $('speed').addEventListener('change', (e) => { const t = simAt(rt); RATE = +e.target.value || 60; buildBeats(); rt = rAtSim(t); dirty = true; paint(); });
+  const track = $('track');
+  function seekFromEvent(e) { const r = track.getBoundingClientRect(); const x = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)); seekSim(S0 + x * SPAN); }
+  track.addEventListener('pointerdown', (e) => { track.setPointerCapture(e.pointerId); seekFromEvent(e); });
+  track.addEventListener('pointermove', (e) => { if (track.hasPointerCapture(e.pointerId)) seekFromEvent(e); });
+  track.addEventListener('keydown', (e) => { const t = simAt(rt); if (e.key === 'ArrowRight') { seekSim(t + SPAN / 50); e.preventDefault(); } if (e.key === 'ArrowLeft') { seekSim(t - SPAN / 50); e.preventDefault(); } });
+  document.addEventListener('keydown', (e) => {
+    if (e.target.closest && e.target.closest('input, select, textarea, button, .track')) return;
+    if (e.code === 'Space') { e.preventDefault(); $('play').click(); }
+  });
+
+  // ── results ──
+  function setupResults() {
+    const ok = !!M.success;
+    $('headline').append(h('span', { class: 'word ' + (ok ? 'good' : 'bad') }, ok ? '复现成功' : '没能复现'),
+      h('span', { class: 'small' }, `用了 ${words(T.sim_end - T.sim_start)}实验时间` + (T.budget_s ? `，预算的 ${Math.round(100 * (T.sim_end - T.sim_start) / T.budget_s)}%` : '')));
+    const tb = $('claims');
+    tb.append(h('thead', null, h('tr', null, h('th', null, '要报告的'), h('th', null, `${A_}的答案`), h('th', null, '真相'), h('th', null, '判定'))));
+    const body = h('tbody');
+    for (const c of T.claims || []) body.append(h('tr', null, h('td', null, c.label, c.note ? h('span', { class: 'note' }, c.note) : null), h('td', { class: 'v' }, c.ai), h('td', null, c.truth || '—'), h('td', null, h('span', { class: 'chip ' + (c.ok ? 'good' : 'bad') }, c.ok ? '✓ 对' : '✗ 不对'))));
+    tb.append(body);
+    $('judging').textContent = LAY.judging || '';
+    if (T.final_text) { const q = $('final'); q.hidden = false; q.append(h('b', null, `${A_}最后的总结：`), T.final_text); }
+    const meta = $('meta');
+    const row = (k, v) => { if (v === null || v === undefined || v === '') return; meta.append(h('dt', null, k), h('dd', null, v)); };
+    row('场景', `${M.scenario_id} · seed ${M.seed}`);
+    row('谁在操作', M.how);
+    row('运行编号', M.run_id);
+    row('时间轴', (T.clock || {}).source === 'stamped' ? '每一步都带着仪器时钟，逐条对齐' : ((T.clock || {}).source === 'calibrated' ? '历史记录：用仪器事件把每一步对到仪器时钟上（误差几秒）' : '只有仪器事件'));
+    row('针尖状态', T.tip_source === 'timeline' ? '每次变化都有记录' : (T.tip_source === 'reconstructed' ? '历史记录：只知道开始和结束，中间按撞针、脉冲等事件推算' : '没有记录'));
+    row('真实样品', R.truth && R.truth.available ? '按这次的 seed 离线重建，并和账本核对过' : (R.truth && R.truth.reason) || '无');
+    row('生成于', M.built);
+    if (T.tip_source === 'reconstructed') { const n = $('tipnote'); n.hidden = false; n.textContent = '历史记录只记下了开始和结束时的针尖，中间的变化是按撞针、脉冲这些事件推算的。'; }
+  }
+
+  buildBeats();
+  setupMap();
+  setupMoments();
+  setupResults();
+  // #t=<seconds of experiment time> opens the replay there (a link to one moment)
+  const hm = /(?:^#|&)t=(\d+(?:\.\d+)?)/.exec(location.hash || '');
+  if (hm) seekSim(S0 + parseFloat(hm[1])); else paint();
+})();
+</script>

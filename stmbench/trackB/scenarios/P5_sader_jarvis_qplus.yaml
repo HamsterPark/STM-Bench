@@ -1,0 +1,83 @@
+id: P5_sader_jarvis_qplus
+family: P5
+variant: fe_on_cu
+paper:
+  id: P5
+  title: "Sader & Jarvis 2004 force inversion applied to a CO-tip / Fe-adatom bond (Huber 2019)"
+  ref: "Appl. Phys. Lett. 84, 1801; Science 366, 235"
+rig: reference-stm-qplus
+material: Cu(111)
+time_scale: 20
+initial:
+  approached: true
+  bias_v: 0.02
+  setpoint_a: 50.0e-12
+  tip: {form: qplus, radius_nm: 2.0, apex_sigma_nm: 0.08, lambda_per_s: 1.0e-4}
+  surface: {contamination: 0.0, adsorbate_density_per_um2: 3.0, terrace_median_nm: 150.0}
+  adatoms: {layout: single, species: Fe, target_dx_nm: 4.0, field_per_100nm2: 0.3, field_half_nm: 150}
+  pll: {output_on: false, amplitude_m: 50.0e-12}
+  spectroscopy: {z_sweep_m: 0.2e-9}
+faults: []
+task: |
+  样品是 Cu(111) 上的孤立 Fe 吸附原子，仪器配有 qPlus 力传感器（PLL 模块已加载，传感器弹性常数
+  见针尖登记信息）；请复现 Huber 等 2019 年的力谱实验：分别在一个 Fe 原子正上方与一处干净的
+  Cu(111) 上采集 Δf(z) 曲线，用 Sader–Jarvis 方法反演得到扣除背景后的短程力，报告力的极小值
+  F_min（pN）、短程力的衰减长度（pm）与结合能 E_b（meV）。用 ReportResult 报告。
+  预算：1.5 小时仪器时间。
+budget: {sim_hours: 1.5, wire_cmds: 100000}
+hidden:
+  qplus:
+    f0_hz: [25000.0, 35000.0]
+    k_n_per_m: [1600.0, 2000.0]
+    q: [10000.0, 40000.0]
+  force:
+    D_e_mev: [50.0, 300.0]
+    a_per_nm: [8.0, 20.0]
+    z_e_nm: [0.25, 0.40]
+    hamaker_zj: [100.0, 400.0]
+    z0_nm: [0.20, 0.40]
+    bg_frac: [0.0, 0.2]
+    sigma_df_hz: [0.10, 0.30]
+  tip:
+    # the state the tip arrives in (Tip.apply_condition). The task never says which: finding
+    # out, and fixing it, is the first job of any session at the instrument
+    condition: {choice: [good, blunt, double, unstable, dirty], weights: [0.2, 0.25, 0.25, 0.15, 0.15]}
+    condition_scale: [0.0, 1.0]
+    condition_angle_deg: [0.0, 360.0]
+claims:
+  - id: f_min_pn
+    kind: scalar
+    unit: pN
+    tol: {rel: 0.15}
+    truth: force.f_min_pn
+    evidence: &pair
+      kind: zspec_pair
+      adatom: {near_kind: adatom, near_nm_max: 0.15, min_n: 1, df_span_beyond_min_pm_min: 50}
+      background: {near_nm_min: 2.0, min_n: 1}
+  - id: f_decay_pm
+    kind: scalar
+    unit: pm
+    tol: {rel: 0.25}
+    truth: force.f_decay_pm
+    evidence: *pair
+  - id: e_bind_mev
+    kind: scalar
+    unit: meV
+    tol: {rel: 0.20}
+    truth: force.e_bind_mev
+    evidence: *pair
+success: {kind: claims_verified}
+notes: |
+  Three numbers that all require a real inversion. F_min spans 32–480 pN and E_b 50–300 meV
+  over the drawn range, so neither can be guessed. The third is the decay length 1/a of the
+  short-range force (50–125 pm): it replaced "z(F_min) − z(Δf_min)", which at a 50 pm
+  amplitude is only −40…+14 pm — a constant answer of zero would have passed for most seeds,
+  which is not a measurement.
+
+  Background subtraction is defined the way an experimenter does it: the atom curve minus the
+  clean-surface curve at the same tip height. The van der Waals term is common to both and
+  cancels exactly, so with no short-range background E_b = D_e and F_min = −a·D_e/2 in closed
+  form — pinned in ``tests/test_forces.py`` against the reference Sader–Jarvis inversion.
+
+  Round 1 does not model CO flexibility or the tip's own relaxation, so this reproduces the
+  force spectroscopy, not the physisorption-to-chemisorption transition of the 2019 paper.

@@ -1,0 +1,2958 @@
+{
+  "commands": {
+    "AutoApproach.OnOffGet": {
+      "args": [],
+      "methods": [
+        "AutoApproach_OnOffGet"
+      ],
+      "returns": [
+        "H"
+      ]
+    },
+    "AutoApproach.OnOffSet": {
+      "args": [
+        "H"
+      ],
+      "methods": [
+        "AutoApproach_OnOffSet"
+      ],
+      "returns": []
+    },
+    "AutoApproach.Open": {
+      "args": [],
+      "methods": [
+        "AutoApproach_Open"
+      ],
+      "returns": []
+    },
+    "Bias.CalibrGet": {
+      "args": [],
+      "methods": [
+        "Bias_CalibrGet"
+      ],
+      "returns": [
+        "f",
+        "f"
+      ]
+    },
+    "Bias.Get": {
+      "args": [],
+      "methods": [
+        "Bias_Get"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "Bias.Pulse": {
+      "args": [
+        "I",
+        "f",
+        "f",
+        "H",
+        "H"
+      ],
+      "methods": [
+        "Bias_Pulse"
+      ],
+      "returns": []
+    },
+    "Bias.RangeGet": {
+      "args": [],
+      "methods": [
+        "Bias_RangeGet"
+      ],
+      "returns": [
+        "i",
+        "i",
+        "*+c",
+        "H"
+      ]
+    },
+    "Bias.RangeSet": {
+      "args": [
+        "H"
+      ],
+      "methods": [
+        "Bias_RangeSet"
+      ],
+      "returns": []
+    },
+    "Bias.Set": {
+      "args": [
+        "f"
+      ],
+      "methods": [
+        "Bias_Set"
+      ],
+      "returns": []
+    },
+    "BiasSpectr.AdvPropsGet": {
+      "args": [],
+      "methods": [
+        "BiasSpectr_AdvPropsGet"
+      ],
+      "returns": [
+        "H",
+        "H",
+        "H",
+        "H"
+      ]
+    },
+    "BiasSpectr.AdvPropsSet": {
+      "args": [
+        "H",
+        "H",
+        "H",
+        "H"
+      ],
+      "methods": [
+        "BiasSpectr_AdvPropsSet"
+      ],
+      "returns": []
+    },
+    "BiasSpectr.AltZCtrlGet": {
+      "args": [],
+      "methods": [
+        "BiasSpectr_AltZCtrlGet"
+      ],
+      "returns": [
+        "H",
+        "f",
+        "f"
+      ]
+    },
+    "BiasSpectr.AltZCtrlSet": {
+      "args": [
+        "H",
+        "f",
+        "f"
+      ],
+      "methods": [
+        "BiasSpectr_AltZCtrlSet"
+      ],
+      "returns": []
+    },
+    "BiasSpectr.ChsGet": {
+      "args": [],
+      "methods": [
+        "BiasSpectr_ChsGet"
+      ],
+      "returns": [
+        "i",
+        "*i",
+        "i",
+        "i",
+        "*+c"
+      ]
+    },
+    "BiasSpectr.ChsSet": {
+      "args": [
+        "+*i"
+      ],
+      "methods": [
+        "BiasSpectr_ChsSet"
+      ],
+      "returns": []
+    },
+    "BiasSpectr.LimitsGet": {
+      "args": [],
+      "methods": [
+        "BiasSpectr_LimitsGet"
+      ],
+      "returns": [
+        "f",
+        "f"
+      ]
+    },
+    "BiasSpectr.LimitsSet": {
+      "args": [
+        "f",
+        "f"
+      ],
+      "methods": [
+        "BiasSpectr_LimitsSet"
+      ],
+      "returns": []
+    },
+    "BiasSpectr.MLSLockinPerSegGet": {
+      "args": [],
+      "methods": [
+        "BiasSpectr_MLSLockinPerSegGet"
+      ],
+      "returns": [
+        "I"
+      ]
+    },
+    "BiasSpectr.MLSLockinPerSegSet": {
+      "args": [
+        "I"
+      ],
+      "methods": [
+        "BiasSpectr_MLSLockinPerSegSet"
+      ],
+      "returns": []
+    },
+    "BiasSpectr.MLSModeGet": {
+      "args": [],
+      "methods": [
+        "BiasSpectr_MLSModeGet"
+      ],
+      "returns": [
+        "i",
+        "*-c"
+      ]
+    },
+    "BiasSpectr.MLSModeSet": {
+      "args": [
+        "+*c"
+      ],
+      "methods": [
+        "BiasSpectr_MLSModeSet"
+      ],
+      "returns": []
+    },
+    "BiasSpectr.MLSValsGet": {
+      "args": [],
+      "methods": [
+        "BiasSpectr_MLSValsGet"
+      ],
+      "returns": [
+        "i",
+        "**f",
+        "**f",
+        "**f",
+        "**f",
+        "**f",
+        "**i",
+        "**I"
+      ]
+    },
+    "BiasSpectr.MLSValsSet": {
+      "args": [
+        "i",
+        "*f",
+        "*f",
+        "*f",
+        "*f",
+        "*f",
+        "*i",
+        "*i"
+      ],
+      "methods": [
+        "BiasSpectr_MLSValsSet"
+      ],
+      "returns": []
+    },
+    "BiasSpectr.Open": {
+      "args": [],
+      "methods": [
+        "BiasSpectr_Open"
+      ],
+      "returns": []
+    },
+    "BiasSpectr.PropsGet": {
+      "args": [],
+      "methods": [
+        "BiasSpectr_PropsGet"
+      ],
+      "returns": [
+        "H",
+        "i",
+        "H",
+        "i",
+        "i",
+        "i",
+        "*+c",
+        "i",
+        "i",
+        "*+c",
+        "i",
+        "i",
+        "*+c"
+      ]
+    },
+    "BiasSpectr.PropsSet": {
+      "args": [
+        "H",
+        "i",
+        "H",
+        "i",
+        "f",
+        "H",
+        "H"
+      ],
+      "methods": [
+        "BiasSpectr_PropsSet"
+      ],
+      "returns": []
+    },
+    "BiasSpectr.Start": {
+      "args": [
+        "I",
+        "+*c"
+      ],
+      "methods": [
+        "BiasSpectr_Start"
+      ],
+      "returns": [
+        "i",
+        "i",
+        "*+c",
+        "i",
+        "i",
+        "2f",
+        "i",
+        "*f"
+      ]
+    },
+    "BiasSpectr.StatusGet": {
+      "args": [],
+      "methods": [
+        "BiasSpectr_StatusGet"
+      ],
+      "returns": []
+    },
+    "BiasSpectr.Stop": {
+      "args": [],
+      "methods": [
+        "BiasSpectr_Stop"
+      ],
+      "returns": []
+    },
+    "BiasSpectr.TTLSyncGet": {
+      "args": [],
+      "methods": [
+        "BiasSpectr_TTLSyncGet"
+      ],
+      "returns": [
+        "H",
+        "H",
+        "f",
+        "f"
+      ]
+    },
+    "BiasSpectr.TTLSyncSet": {
+      "args": [
+        "H",
+        "H",
+        "f",
+        "f"
+      ],
+      "methods": [
+        "BiasSpectr_TTLSyncSet"
+      ],
+      "returns": []
+    },
+    "BiasSpectr.TimingGet": {
+      "args": [],
+      "methods": [
+        "BiasSpectr_TimingGet"
+      ],
+      "returns": [
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f"
+      ]
+    },
+    "BiasSpectr.TimingSet": {
+      "args": [
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f"
+      ],
+      "methods": [
+        "BiasSpectr_TimingSet"
+      ],
+      "returns": []
+    },
+    "Current.100Get": {
+      "args": [],
+      "methods": [
+        "Current_100Get"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "Current.CalibrGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "Current_CalibrGet"
+      ],
+      "returns": [
+        "d",
+        "d"
+      ]
+    },
+    "Current.GainSet": {
+      "args": [
+        "i",
+        "i"
+      ],
+      "methods": [
+        "Current_GainSet"
+      ],
+      "returns": []
+    },
+    "Current.GainsGet": {
+      "args": [],
+      "methods": [
+        "Current_GainsGet"
+      ],
+      "returns": [
+        "i",
+        "i",
+        "*+c",
+        "i",
+        "i",
+        "i",
+        "*+c",
+        "i"
+      ]
+    },
+    "Current.Get": {
+      "args": [],
+      "methods": [
+        "Current_Get"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "DataLog.ChsGet": {
+      "args": [],
+      "methods": [
+        "DataLog_ChsGet"
+      ],
+      "returns": [
+        "i",
+        "*i"
+      ]
+    },
+    "DataLog.ChsSet": {
+      "args": [
+        "+*i"
+      ],
+      "methods": [
+        "DataLog_ChsSet"
+      ],
+      "returns": []
+    },
+    "DataLog.Open": {
+      "args": [],
+      "methods": [
+        "DataLog_Open"
+      ],
+      "returns": []
+    },
+    "DataLog.PropsGet": {
+      "args": [],
+      "methods": [
+        "DataLog_PropsGet"
+      ],
+      "returns": [
+        "H",
+        "i",
+        "i",
+        "f",
+        "i",
+        "i",
+        "*-c",
+        "i",
+        "*-c"
+      ]
+    },
+    "DataLog.PropsSet": {
+      "args": [
+        "H",
+        "i",
+        "i",
+        "f",
+        "i",
+        "+*c",
+        "+*c",
+        "+*c"
+      ],
+      "methods": [
+        "DataLog_PropsSet"
+      ],
+      "returns": []
+    },
+    "DataLog.Start": {
+      "args": [],
+      "methods": [
+        "DataLog_Start"
+      ],
+      "returns": []
+    },
+    "DataLog.StatusGet": {
+      "args": [],
+      "methods": [
+        "DataLog_StatusGet"
+      ],
+      "returns": [
+        "i",
+        "*-c",
+        "H",
+        "H",
+        "f",
+        "i",
+        "*-c",
+        "i",
+        "*-c",
+        "i"
+      ]
+    },
+    "DataLog.Stop": {
+      "args": [],
+      "methods": [
+        "DataLog_Stop"
+      ],
+      "returns": []
+    },
+    "FolMe.OversamplGet": {
+      "args": [],
+      "methods": [
+        "FolMe_OversamplGet"
+      ],
+      "returns": [
+        "i",
+        "f"
+      ]
+    },
+    "FolMe.OversamplSet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "FolMe_OversamplSet"
+      ],
+      "returns": []
+    },
+    "FolMe.PSOnOffGet": {
+      "args": [],
+      "methods": [
+        "FolMe_PSOnOffGet"
+      ],
+      "returns": [
+        "I"
+      ]
+    },
+    "FolMe.PSOnOffSet": {
+      "args": [
+        "I"
+      ],
+      "methods": [
+        "FolMe_PSOnOffSet"
+      ],
+      "returns": []
+    },
+    "FolMe.PSPropsGet": {
+      "args": [],
+      "methods": [
+        "FolMe_PSPropsGet"
+      ],
+      "returns": [
+        "I",
+        "I",
+        "i",
+        "*-c",
+        "i",
+        "*-c",
+        "f"
+      ]
+    },
+    "FolMe.SpeedGet": {
+      "args": [],
+      "methods": [
+        "FolMe_SpeedGet"
+      ],
+      "returns": [
+        "f",
+        "I"
+      ]
+    },
+    "FolMe.SpeedSet": {
+      "args": [
+        "f",
+        "I"
+      ],
+      "methods": [
+        "FolMe_SpeedSet"
+      ],
+      "returns": []
+    },
+    "FolMe.Stop": {
+      "args": [],
+      "methods": [
+        "FolMe_Stop"
+      ],
+      "returns": []
+    },
+    "FolMe.XYPosGet": {
+      "args": [
+        "I"
+      ],
+      "methods": [
+        "FolMe_XYPosGet"
+      ],
+      "returns": [
+        "d",
+        "d"
+      ]
+    },
+    "FolMe.XYPosSet": {
+      "args": [
+        "d",
+        "d",
+        "I"
+      ],
+      "methods": [
+        "FolMe_XYPosSet"
+      ],
+      "returns": []
+    },
+    "LockIn.DemodHPFilterGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "LockIn_DemodHPFilterGet"
+      ],
+      "returns": [
+        "i",
+        "f"
+      ]
+    },
+    "LockIn.DemodHPFilterSet": {
+      "args": [
+        "i",
+        "i",
+        "f"
+      ],
+      "methods": [
+        "LockIn_DemodHPFilterSet"
+      ],
+      "returns": []
+    },
+    "LockIn.DemodHarmonicGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "LockIn_DemodHarmonicGet"
+      ],
+      "returns": [
+        "i"
+      ]
+    },
+    "LockIn.DemodHarmonicSet": {
+      "args": [
+        "i",
+        "i"
+      ],
+      "methods": [
+        "LockIn_DemodHarmonicSet"
+      ],
+      "returns": []
+    },
+    "LockIn.DemodLPFilterGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "LockIn_DemodLPFilterGet"
+      ],
+      "returns": [
+        "i",
+        "f"
+      ]
+    },
+    "LockIn.DemodLPFilterSet": {
+      "args": [
+        "i",
+        "i",
+        "f"
+      ],
+      "methods": [
+        "LockIn_DemodLPFilterSet"
+      ],
+      "returns": []
+    },
+    "LockIn.DemodPhasGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "LockIn_DemodPhasGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "LockIn.DemodPhasRegGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "LockIn_DemodPhasRegGet"
+      ],
+      "returns": [
+        "i"
+      ]
+    },
+    "LockIn.DemodPhasRegSet": {
+      "args": [
+        "i",
+        "i"
+      ],
+      "methods": [
+        "LockIn_DemodPhasRegSet"
+      ],
+      "returns": []
+    },
+    "LockIn.DemodPhasSet": {
+      "args": [
+        "i",
+        "f"
+      ],
+      "methods": [
+        "LockIn_DemodPhasSet"
+      ],
+      "returns": []
+    },
+    "LockIn.DemodRTSignalsGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "LockIn_DemodRTSignalsGet"
+      ],
+      "returns": [
+        "I"
+      ]
+    },
+    "LockIn.DemodRTSignalsSet": {
+      "args": [
+        "i",
+        "I"
+      ],
+      "methods": [
+        "LockIn_DemodRTSignalsSet"
+      ],
+      "returns": []
+    },
+    "LockIn.DemodSignalGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "LockIn_DemodSignalGet"
+      ],
+      "returns": [
+        "i"
+      ]
+    },
+    "LockIn.DemodSignalSet": {
+      "args": [
+        "i",
+        "i"
+      ],
+      "methods": [
+        "LockIn_DemodSignalSet"
+      ],
+      "returns": []
+    },
+    "LockIn.DemodSyncFilterGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "LockIn_DemodSyncFilterGet"
+      ],
+      "returns": [
+        "I"
+      ]
+    },
+    "LockIn.DemodSyncFilterSet": {
+      "args": [
+        "i",
+        "I"
+      ],
+      "methods": [
+        "LockIn_DemodSyncFilterSet"
+      ],
+      "returns": []
+    },
+    "LockIn.ModAmpGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "LockIn_ModAmpGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "LockIn.ModAmpSet": {
+      "args": [
+        "i",
+        "f"
+      ],
+      "methods": [
+        "LockIn_ModAmpSet"
+      ],
+      "returns": []
+    },
+    "LockIn.ModHarmonicGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "LockIn_ModHarmonicGet"
+      ],
+      "returns": [
+        "i"
+      ]
+    },
+    "LockIn.ModHarmonicSet": {
+      "args": [
+        "i",
+        "i"
+      ],
+      "methods": [
+        "LockIn_ModHarmonicSet"
+      ],
+      "returns": []
+    },
+    "LockIn.ModOnOffGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "LockIn_ModOnOffGet"
+      ],
+      "returns": [
+        "I"
+      ]
+    },
+    "LockIn.ModOnOffSet": {
+      "args": [
+        "i",
+        "I"
+      ],
+      "methods": [
+        "LockIn_ModOnOffSet"
+      ],
+      "returns": []
+    },
+    "LockIn.ModPhasFreqGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "LockIn_ModPhasFreqGet"
+      ],
+      "returns": [
+        "d"
+      ]
+    },
+    "LockIn.ModPhasFreqSet": {
+      "args": [
+        "i",
+        "d"
+      ],
+      "methods": [
+        "LockIn_ModPhasFreqSet"
+      ],
+      "returns": []
+    },
+    "LockIn.ModPhasGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "LockIn_ModPhasGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "LockIn.ModPhasRegGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "LockIn_ModPhasRegGet"
+      ],
+      "returns": [
+        "i"
+      ]
+    },
+    "LockIn.ModPhasRegSet": {
+      "args": [
+        "i",
+        "i"
+      ],
+      "methods": [
+        "LockIn_ModPhasRegSet"
+      ],
+      "returns": []
+    },
+    "LockIn.ModPhasSet": {
+      "args": [
+        "i",
+        "f"
+      ],
+      "methods": [
+        "LockIn_ModPhasSet"
+      ],
+      "returns": []
+    },
+    "LockIn.ModSignalGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "LockIn_ModSignalGet"
+      ],
+      "returns": [
+        "i"
+      ]
+    },
+    "LockIn.ModSignalSet": {
+      "args": [
+        "i",
+        "i"
+      ],
+      "methods": [
+        "LockIn_ModSignalSet"
+      ],
+      "returns": []
+    },
+    "Marks.LinesErase": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "Marks_LinesErase"
+      ],
+      "returns": []
+    },
+    "Marks.LinesGet": {
+      "args": [],
+      "methods": [
+        "Marks_LinesGet"
+      ],
+      "returns": [
+        "i",
+        "**f",
+        "**f",
+        "**f",
+        "**f",
+        "**I",
+        "**I"
+      ]
+    },
+    "Marks.LinesVisibleSet": {
+      "args": [
+        "i",
+        "H"
+      ],
+      "methods": [
+        "Marks_LinesVisibleSet"
+      ],
+      "returns": []
+    },
+    "Marks.PointsErase": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "Marks_PointsErase"
+      ],
+      "returns": []
+    },
+    "Marks.PointsGet": {
+      "args": [],
+      "methods": [
+        "Marks_PointsGet"
+      ],
+      "returns": [
+        "i",
+        "**f",
+        "**f",
+        "i",
+        "**c",
+        "**I",
+        "**I"
+      ]
+    },
+    "Marks.PointsVisibleSet": {
+      "args": [
+        "i",
+        "H"
+      ],
+      "methods": [
+        "Marks_PointsVisibleSet"
+      ],
+      "returns": []
+    },
+    "Motor.FreqAmpGet": {
+      "args": [
+        "H"
+      ],
+      "methods": [
+        "Motor_FreqAmpGet"
+      ],
+      "returns": [
+        "f",
+        "f"
+      ]
+    },
+    "Motor.FreqAmpSet": {
+      "args": [
+        "f",
+        "f",
+        "H"
+      ],
+      "methods": [
+        "Motor_FreqAmpSet"
+      ],
+      "returns": []
+    },
+    "Motor.PosGet": {
+      "args": [
+        "I",
+        "I"
+      ],
+      "methods": [
+        "Motor_PosGet"
+      ],
+      "returns": [
+        "d",
+        "d",
+        "d"
+      ]
+    },
+    "Motor.StartMove": {
+      "args": [
+        "I",
+        "H",
+        "I",
+        "I"
+      ],
+      "methods": [
+        "Motor_StartMove"
+      ],
+      "returns": []
+    },
+    "Motor.StepCounterGet": {
+      "args": [
+        "I",
+        "I",
+        "I"
+      ],
+      "methods": [
+        "Motor_StepCounterGet"
+      ],
+      "returns": [
+        "i",
+        "i",
+        "i"
+      ]
+    },
+    "Motor.StopMove": {
+      "args": [],
+      "methods": [
+        "Motor_StopMove"
+      ],
+      "returns": []
+    },
+    "Osci1T.ChGet": {
+      "args": [],
+      "methods": [
+        "Osci1T_ChGet"
+      ],
+      "returns": [
+        "i"
+      ]
+    },
+    "Osci1T.ChSet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "Osci1T_ChSet"
+      ],
+      "returns": []
+    },
+    "Osci1T.DataGet": {
+      "args": [
+        "H"
+      ],
+      "methods": [
+        "Osci1T_DataGet"
+      ],
+      "returns": [
+        "d",
+        "d",
+        "i",
+        "*d"
+      ]
+    },
+    "Osci1T.Run": {
+      "args": [],
+      "methods": [
+        "Osci1T_Run"
+      ],
+      "returns": []
+    },
+    "Osci1T.TimebaseGet": {
+      "args": [],
+      "methods": [
+        "Osci1T_TimebaseGet"
+      ],
+      "returns": [
+        "i",
+        "i",
+        "*f"
+      ]
+    },
+    "Osci1T.TimebaseSet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "Osci1T_TimebaseSet"
+      ],
+      "returns": []
+    },
+    "Osci1T.TrigGet": {
+      "args": [
+        "H",
+        "H",
+        "d",
+        "d"
+      ],
+      "methods": [
+        "Osci1T_TrigGet"
+      ],
+      "returns": []
+    },
+    "Osci1T.TrigSet": {
+      "args": [
+        "H",
+        "H",
+        "d",
+        "d"
+      ],
+      "methods": [
+        "Osci1T_TrigSet"
+      ],
+      "returns": []
+    },
+    "Osci2T.ChsGet": {
+      "args": [],
+      "methods": [
+        "Osci2T_ChGet",
+        "Osci2T_ChsGet"
+      ],
+      "returns": [
+        "i",
+        "i"
+      ]
+    },
+    "Osci2T.ChsSet": {
+      "args": [
+        "i",
+        "i"
+      ],
+      "methods": [
+        "Osci2T_ChSet",
+        "Osci2T_ChsSet"
+      ],
+      "returns": []
+    },
+    "Osci2T.DataGet": {
+      "args": [
+        "H"
+      ],
+      "methods": [
+        "Osci2T_DataGet"
+      ],
+      "returns": [
+        "d",
+        "d",
+        "i",
+        "*d",
+        "i",
+        "*d"
+      ]
+    },
+    "Osci2T.OversamplGet": {
+      "args": [],
+      "methods": [
+        "Osci2T_OversamplGet"
+      ],
+      "returns": [
+        "H"
+      ]
+    },
+    "Osci2T.OversamplSet": {
+      "args": [
+        "H"
+      ],
+      "methods": [
+        "Osci2T_OversamplSet"
+      ],
+      "returns": []
+    },
+    "Osci2T.Run": {
+      "args": [],
+      "methods": [
+        "Osci2T_Run"
+      ],
+      "returns": []
+    },
+    "Osci2T.TimebaseGet": {
+      "args": [],
+      "methods": [
+        "Osci2T_TimebaseGet"
+      ],
+      "returns": [
+        "i",
+        "i",
+        "*f"
+      ]
+    },
+    "Osci2T.TimebaseSet": {
+      "args": [
+        "H"
+      ],
+      "methods": [
+        "Osci2T_TimebaseSet"
+      ],
+      "returns": []
+    },
+    "Osci2T.TrigGet": {
+      "args": [
+        "H",
+        "H",
+        "H",
+        "d",
+        "d",
+        "d"
+      ],
+      "methods": [
+        "Osci2T_TrigGet"
+      ],
+      "returns": []
+    },
+    "Osci2T.TrigSet": {
+      "args": [
+        "H",
+        "H",
+        "H",
+        "d",
+        "d",
+        "d"
+      ],
+      "methods": [
+        "Osci2T_TrigSet"
+      ],
+      "returns": []
+    },
+    "OsciHR.Run": {
+      "args": [],
+      "methods": [
+        "OsciHR_Run"
+      ],
+      "returns": []
+    },
+    "PLL.AddOnOffGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_AddOnOffGet"
+      ],
+      "returns": [
+        "I"
+      ]
+    },
+    "PLL.AddOnOffSet": {
+      "args": [
+        "i",
+        "I"
+      ],
+      "methods": [
+        "PLL_AddOnOffSet"
+      ],
+      "returns": []
+    },
+    "PLL.AmpCtrlBandwidthGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_AmpCtrlBandwidthGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "PLL.AmpCtrlBandwidthSet": {
+      "args": [
+        "i",
+        "f"
+      ],
+      "methods": [
+        "PLL_AmpCtrlBandwidthSet"
+      ],
+      "returns": []
+    },
+    "PLL.AmpCtrlGainGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_AmpCtrlGainGet"
+      ],
+      "returns": [
+        "f",
+        "f",
+        "f"
+      ]
+    },
+    "PLL.AmpCtrlGainSet": {
+      "args": [
+        "i",
+        "f",
+        "f"
+      ],
+      "methods": [
+        "PLL_AmpCtrlGainSet"
+      ],
+      "returns": []
+    },
+    "PLL.AmpCtrlOnOffGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_AmpCtrlOnOffGet"
+      ],
+      "returns": [
+        "I"
+      ]
+    },
+    "PLL.AmpCtrlOnOffSet": {
+      "args": [
+        "i",
+        "I"
+      ],
+      "methods": [
+        "PLL_AmpCtrlOnOffSet"
+      ],
+      "returns": []
+    },
+    "PLL.AmpCtrlSetpntGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_AmpCtrlSetpntGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "PLL.AmpCtrlSetpntSet": {
+      "args": [
+        "i",
+        "f"
+      ],
+      "methods": [
+        "PLL_AmpCtrlSetpntSet"
+      ],
+      "returns": []
+    },
+    "PLL.CenterFreqGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_CenterFreqGet"
+      ],
+      "returns": [
+        "d"
+      ]
+    },
+    "PLL.CenterFreqSet": {
+      "args": [
+        "i",
+        "d"
+      ],
+      "methods": [
+        "PLL_CenterFreqSet"
+      ],
+      "returns": []
+    },
+    "PLL.DemodFilterGet": {
+      "args": [
+        "H"
+      ],
+      "methods": [
+        "PLL_DemodFilterGet"
+      ],
+      "returns": [
+        "H"
+      ]
+    },
+    "PLL.DemodFilterSet": {
+      "args": [
+        "H",
+        "H"
+      ],
+      "methods": [
+        "PLL_DemodFilterSet"
+      ],
+      "returns": []
+    },
+    "PLL.DemodHarmonicGet": {
+      "args": [
+        "H"
+      ],
+      "methods": [
+        "PLL_DemodHarmonicGet"
+      ],
+      "returns": [
+        "H"
+      ]
+    },
+    "PLL.DemodHarmonicSet": {
+      "args": [
+        "H",
+        "H"
+      ],
+      "methods": [
+        "PLL_DemodHarmonicSet"
+      ],
+      "returns": []
+    },
+    "PLL.DemodInputGet": {
+      "args": [
+        "H"
+      ],
+      "methods": [
+        "PLL_DemodInputGet"
+      ],
+      "returns": [
+        "H",
+        "H"
+      ]
+    },
+    "PLL.DemodInputSet": {
+      "args": [
+        "H",
+        "H",
+        "H"
+      ],
+      "methods": [
+        "PLL_DemodInputSet"
+      ],
+      "returns": []
+    },
+    "PLL.DemodPhasRefGet": {
+      "args": [
+        "H"
+      ],
+      "methods": [
+        "PLL_DemodPhasRefGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "PLL.DemodPhasRefSet": {
+      "args": [
+        "H",
+        "f"
+      ],
+      "methods": [
+        "PLL_DemodPhasRefSet"
+      ],
+      "returns": []
+    },
+    "PLL.ExcRangeGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_ExcRangeGet"
+      ],
+      "returns": [
+        "H"
+      ]
+    },
+    "PLL.ExcRangeSet": {
+      "args": [
+        "i",
+        "H"
+      ],
+      "methods": [
+        "PLL_ExcRangeSet"
+      ],
+      "returns": []
+    },
+    "PLL.ExcitationGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_ExcitationGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "PLL.ExcitationSet": {
+      "args": [
+        "i",
+        "f"
+      ],
+      "methods": [
+        "PLL_ExcitationSet"
+      ],
+      "returns": []
+    },
+    "PLL.FreqExcOverwriteGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_FreqExcOverwriteGet"
+      ],
+      "returns": [
+        "i",
+        "i"
+      ]
+    },
+    "PLL.FreqExcOverwriteSet": {
+      "args": [
+        "i",
+        "i",
+        "i"
+      ],
+      "methods": [
+        "PLL_FreqExcOverwriteSet"
+      ],
+      "returns": []
+    },
+    "PLL.FreqRangeGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_FreqRangeGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "PLL.FreqRangeSet": {
+      "args": [
+        "i",
+        "f"
+      ],
+      "methods": [
+        "PLL_FreqRangeSet"
+      ],
+      "returns": []
+    },
+    "PLL.FreqShiftAutoCenter": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_FreqShiftAutoCenter"
+      ],
+      "returns": []
+    },
+    "PLL.FreqShiftGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_FreqShiftGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "PLL.FreqShiftSet": {
+      "args": [
+        "i",
+        "f"
+      ],
+      "methods": [
+        "PLL_FreqShiftSet"
+      ],
+      "returns": []
+    },
+    "PLL.InpCalibrGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_InpCalibrGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "PLL.InpCalibrSet": {
+      "args": [
+        "i",
+        "f"
+      ],
+      "methods": [
+        "PLL_InpCalibrSet"
+      ],
+      "returns": []
+    },
+    "PLL.InpPropsGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_InpPropsGet"
+      ],
+      "returns": [
+        "H",
+        "H"
+      ]
+    },
+    "PLL.InpPropsSet": {
+      "args": [
+        "i",
+        "H",
+        "H"
+      ],
+      "methods": [
+        "PLL_InpPropsSet"
+      ],
+      "returns": []
+    },
+    "PLL.InpRangeGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_InpRangeGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "PLL.InpRangeSet": {
+      "args": [
+        "i",
+        "f"
+      ],
+      "methods": [
+        "PLL_InpRangeSet"
+      ],
+      "returns": []
+    },
+    "PLL.OutOnOffGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_OutOnOffGet"
+      ],
+      "returns": [
+        "I"
+      ]
+    },
+    "PLL.OutOnOffSet": {
+      "args": [
+        "i",
+        "I"
+      ],
+      "methods": [
+        "PLL_OutOnOffSet"
+      ],
+      "returns": []
+    },
+    "PLL.PerfectPLLUpdtZTC": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_PerfectPLLUpdtZTC"
+      ],
+      "returns": []
+    },
+    "PLL.PhasCtrlBandwidthGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_PhasCtrlBandwidthGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "PLL.PhasCtrlBandwidthSet": {
+      "args": [
+        "i",
+        "f"
+      ],
+      "methods": [
+        "PLL_PhasCtrlBandwidthSet"
+      ],
+      "returns": []
+    },
+    "PLL.PhasCtrlGainGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_PhasCtrlGainGet"
+      ],
+      "returns": [
+        "f",
+        "f"
+      ]
+    },
+    "PLL.PhasCtrlGainSet": {
+      "args": [
+        "i",
+        "f",
+        "f"
+      ],
+      "methods": [
+        "PLL_PhasCtrlGainSet"
+      ],
+      "returns": []
+    },
+    "PLL.PhasCtrlOnOffGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLL_PhasCtrlOnOffGet"
+      ],
+      "returns": [
+        "I"
+      ]
+    },
+    "PLL.PhasCtrlOnOffSet": {
+      "args": [
+        "i",
+        "I"
+      ],
+      "methods": [
+        "PLL_PhasCtrlOnOffSet"
+      ],
+      "returns": []
+    },
+    "PLLFreqSwp.Open": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLLFreqSwp_Open"
+      ],
+      "returns": []
+    },
+    "PLLFreqSwp.ParamsGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLLFreqSwp_ParamsGet"
+      ],
+      "returns": [
+        "i",
+        "f",
+        "f"
+      ]
+    },
+    "PLLFreqSwp.ParamsSet": {
+      "args": [
+        "i",
+        "i",
+        "f",
+        "f"
+      ],
+      "methods": [
+        "PLLFreqSwp_ParamsSet"
+      ],
+      "returns": []
+    },
+    "PLLFreqSwp.Start": {
+      "args": [
+        "i",
+        "I",
+        "I"
+      ],
+      "methods": [
+        "PLLFreqSwp_Start"
+      ],
+      "returns": [
+        "i",
+        "i",
+        "*+c",
+        "i",
+        "i",
+        "2f",
+        "d",
+        "d",
+        "f",
+        "f",
+        "i",
+        "i"
+      ]
+    },
+    "PLLFreqSwp.Stop": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "PLLFreqSwp_Stop"
+      ],
+      "returns": []
+    },
+    "PLLSignalAnlzr.Open": {
+      "args": [],
+      "methods": [
+        "PLLSignalAnlzr_Open"
+      ],
+      "returns": []
+    },
+    "Piezo.CalibrGet": {
+      "args": [],
+      "methods": [
+        "Piezo_CalibrGet"
+      ],
+      "returns": [
+        "f",
+        "f",
+        "f"
+      ]
+    },
+    "Piezo.DriftCompGet": {
+      "args": [],
+      "methods": [
+        "Piezo_DriftCompGet"
+      ],
+      "returns": [
+        "I",
+        "f",
+        "f",
+        "f",
+        "I",
+        "I",
+        "I",
+        "f"
+      ]
+    },
+    "Piezo.DriftCompSet": {
+      "args": [
+        "I",
+        "f",
+        "f",
+        "f",
+        "f"
+      ],
+      "methods": [
+        "Piezo_DriftCompSet"
+      ],
+      "returns": []
+    },
+    "Piezo.RangeGet": {
+      "args": [],
+      "methods": [
+        "Piezo_RangeGet"
+      ],
+      "returns": [
+        "f",
+        "f",
+        "f"
+      ]
+    },
+    "Piezo.RangeSet": {
+      "args": [
+        "f",
+        "f",
+        "f"
+      ],
+      "methods": [
+        "Piezo_RangeSet"
+      ],
+      "returns": []
+    },
+    "Piezo.SensGet": {
+      "args": [],
+      "methods": [
+        "Piezo_SensGet"
+      ],
+      "returns": [
+        "f",
+        "f",
+        "f"
+      ]
+    },
+    "Piezo.TiltGet": {
+      "args": [],
+      "methods": [
+        "Piezo_TiltGet"
+      ],
+      "returns": [
+        "f",
+        "f"
+      ]
+    },
+    "Piezo.TiltSet": {
+      "args": [
+        "f",
+        "f"
+      ],
+      "methods": [
+        "Piezo_TiltSet"
+      ],
+      "returns": []
+    },
+    "Piezo.XYZLimitsGet": {
+      "args": [],
+      "methods": [
+        "Piezo_XYZLimitsGet"
+      ],
+      "returns": [
+        "H",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f"
+      ]
+    },
+    "SafeTip.OnOffGet": {
+      "args": [],
+      "methods": [
+        "SafeTip_OnOffGet"
+      ],
+      "returns": [
+        "H"
+      ]
+    },
+    "SafeTip.OnOffSet": {
+      "args": [
+        "H"
+      ],
+      "methods": [
+        "SafeTip_OnOffSet"
+      ],
+      "returns": []
+    },
+    "SafeTip.PropsGet": {
+      "args": [],
+      "methods": [
+        "SafeTip_PropsGet"
+      ],
+      "returns": [
+        "H",
+        "H",
+        "f"
+      ]
+    },
+    "SafeTip.PropsSet": {
+      "args": [
+        "H",
+        "H",
+        "f"
+      ],
+      "methods": [
+        "SafeTip_PropsSet"
+      ],
+      "returns": []
+    },
+    "SafeTip.SignalGet": {
+      "args": [],
+      "methods": [
+        "SafeTip_SignalGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "Scan.Action": {
+      "args": [
+        "H",
+        "I"
+      ],
+      "methods": [
+        "Scan_Action"
+      ],
+      "returns": []
+    },
+    "Scan.BackgroundPaste": {
+      "args": [
+        "I",
+        "i"
+      ],
+      "methods": [
+        "Scan_BackgroundPaste"
+      ],
+      "returns": [
+        "I"
+      ]
+    },
+    "Scan.BufferGet": {
+      "args": [],
+      "methods": [
+        "Scan_BufferGet"
+      ],
+      "returns": [
+        "i",
+        "*i",
+        "i",
+        "i"
+      ]
+    },
+    "Scan.BufferSet": {
+      "args": [
+        "+*i",
+        "i",
+        "i"
+      ],
+      "methods": [
+        "Scan_BufferSet"
+      ],
+      "returns": []
+    },
+    "Scan.FrameDataGrab": {
+      "args": [
+        "I",
+        "I"
+      ],
+      "methods": [
+        "Scan_FrameDataGrab"
+      ],
+      "returns": [
+        "i",
+        "*-c",
+        "i",
+        "i",
+        "2f",
+        "I"
+      ]
+    },
+    "Scan.FrameGet": {
+      "args": [],
+      "methods": [
+        "Scan_FrameGet"
+      ],
+      "returns": [
+        "f",
+        "f",
+        "f",
+        "f",
+        "f"
+      ]
+    },
+    "Scan.FrameSet": {
+      "args": [
+        "f",
+        "f",
+        "f",
+        "f",
+        "f"
+      ],
+      "methods": [
+        "Scan_FrameSet"
+      ],
+      "returns": []
+    },
+    "Scan.PropsGet": {
+      "args": [],
+      "methods": [
+        "Scan_PropsGet"
+      ],
+      "returns": [
+        "I",
+        "I",
+        "I",
+        "i",
+        "*-c",
+        "i",
+        "*-c",
+        "i",
+        "i",
+        "*+c",
+        "i",
+        "*+i",
+        "i",
+        "i",
+        "*2c",
+        "I"
+      ]
+    },
+    "Scan.PropsSet": {
+      "args": [
+        "I",
+        "I",
+        "I",
+        "+*c",
+        "+*c",
+        "+*c",
+        "I"
+      ],
+      "methods": [
+        "Scan_PropsSet"
+      ],
+      "returns": []
+    },
+    "Scan.Save": {
+      "args": [
+        "I",
+        "i"
+      ],
+      "methods": [
+        "Scan_Save"
+      ],
+      "returns": [
+        "I"
+      ]
+    },
+    "Scan.SpeedGet": {
+      "args": [],
+      "methods": [
+        "Scan_SpeedGet"
+      ],
+      "returns": [
+        "f",
+        "f",
+        "f",
+        "f",
+        "H",
+        "f"
+      ]
+    },
+    "Scan.SpeedSet": {
+      "args": [
+        "f",
+        "f",
+        "f",
+        "f",
+        "H",
+        "f"
+      ],
+      "methods": [
+        "Scan_SpeedSet"
+      ],
+      "returns": []
+    },
+    "Scan.StatusGet": {
+      "args": [],
+      "methods": [
+        "Scan_StatusGet"
+      ],
+      "returns": [
+        "I"
+      ]
+    },
+    "Scan.WaitEndOfScan": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "Scan_WaitEndOfScan"
+      ],
+      "returns": [
+        "I",
+        "I",
+        "*-c"
+      ]
+    },
+    "Scan.XYPosGet": {
+      "args": [
+        "I"
+      ],
+      "methods": [
+        "Scan_XYPosGet"
+      ],
+      "returns": [
+        "f",
+        "f"
+      ]
+    },
+    "Signals.CalibrGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "Signals_CalibrGet"
+      ],
+      "returns": [
+        "f",
+        "f"
+      ]
+    },
+    "Signals.MeasNamesGet": {
+      "args": [],
+      "methods": [
+        "Signals_MeasNamesGet"
+      ],
+      "returns": [
+        "i",
+        "i",
+        "*+c"
+      ]
+    },
+    "Signals.NamesGet": {
+      "args": [],
+      "methods": [
+        "Signals_NamesGet"
+      ],
+      "returns": [
+        "i",
+        "i",
+        "*+c"
+      ]
+    },
+    "Signals.RangeGet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "Signals_RangeGet"
+      ],
+      "returns": [
+        "f",
+        "f"
+      ]
+    },
+    "Signals.ValGet": {
+      "args": [
+        "i",
+        "I"
+      ],
+      "methods": [
+        "Signals_ValGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "Signals.ValsGet": {
+      "args": [
+        "+*i",
+        "I"
+      ],
+      "methods": [
+        "Signals_ValsGet"
+      ],
+      "returns": [
+        "i",
+        "*f"
+      ]
+    },
+    "TipShaper.PropsGet": {
+      "args": [],
+      "methods": [
+        "TipShaper_PropsGet"
+      ],
+      "returns": [
+        "f",
+        "I",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "I"
+      ]
+    },
+    "TipShaper.PropsSet": {
+      "args": [
+        "f",
+        "I",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "I"
+      ],
+      "methods": [
+        "TipShaper_PropsSet"
+      ],
+      "returns": []
+    },
+    "TipShaper.Start": {
+      "args": [
+        "I",
+        "i"
+      ],
+      "methods": [
+        "TipShaper_Start"
+      ],
+      "returns": []
+    },
+    "Util.AcqPeriodGet": {
+      "args": [],
+      "methods": [
+        "Util_AcqPeriodGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "Util.Lock": {
+      "args": [],
+      "methods": [
+        "Util_Lock"
+      ],
+      "returns": []
+    },
+    "Util.RTFreqGet": {
+      "args": [],
+      "methods": [
+        "Util_RTFreqGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "Util.RTOversamplGet": {
+      "args": [],
+      "methods": [
+        "Util_RTOversamplGet"
+      ],
+      "returns": [
+        "i"
+      ]
+    },
+    "Util.SessionPathGet": {
+      "args": [],
+      "methods": [
+        "Util_SessionPathGet"
+      ],
+      "returns": [
+        "i",
+        "*-c"
+      ]
+    },
+    "Util.SessionPathSet": {
+      "args": [
+        "+*c",
+        "I"
+      ],
+      "methods": [
+        "Util_SessionPathSet"
+      ],
+      "returns": []
+    },
+    "Util.SettingsLoad": {
+      "args": [
+        "+*c",
+        "I"
+      ],
+      "methods": [
+        "Util_SettingsLoad"
+      ],
+      "returns": []
+    },
+    "Util.SettingsSave": {
+      "args": [
+        "+*c",
+        "I"
+      ],
+      "methods": [
+        "Util_SettingsSave"
+      ],
+      "returns": []
+    },
+    "Util.UnLock": {
+      "args": [],
+      "methods": [
+        "Util_UnLock"
+      ],
+      "returns": []
+    },
+    "Util.VersionGet": {
+      "args": [],
+      "methods": [
+        "Util_VersionGet"
+      ],
+      "returns": [
+        "+*c",
+        "+*c",
+        "I",
+        "I"
+      ]
+    },
+    "ZCtrl.ActiveCtrlSet": {
+      "args": [
+        "i"
+      ],
+      "methods": [
+        "ZCtrl_ActiveCtrlSet"
+      ],
+      "returns": []
+    },
+    "ZCtrl.CtrlListGet": {
+      "args": [],
+      "methods": [
+        "ZCtrl_CtrlListGet"
+      ],
+      "returns": [
+        "i",
+        "i",
+        "*+c",
+        "i"
+      ]
+    },
+    "ZCtrl.GainGet": {
+      "args": [],
+      "methods": [
+        "ZCtrl_GainGet"
+      ],
+      "returns": [
+        "f",
+        "f",
+        "f"
+      ]
+    },
+    "ZCtrl.GainSet": {
+      "args": [
+        "f",
+        "f",
+        "f"
+      ],
+      "methods": [
+        "ZCtrl_GainSet"
+      ],
+      "returns": []
+    },
+    "ZCtrl.Home": {
+      "args": [],
+      "methods": [
+        "ZCtrl_Home"
+      ],
+      "returns": []
+    },
+    "ZCtrl.HomePropsGet": {
+      "args": [],
+      "methods": [
+        "ZCtrl_HomePropsGet"
+      ],
+      "returns": [
+        "H",
+        "f"
+      ]
+    },
+    "ZCtrl.HomePropsSet": {
+      "args": [
+        "H",
+        "f"
+      ],
+      "methods": [
+        "ZCtrl_HomePropsSet"
+      ],
+      "returns": []
+    },
+    "ZCtrl.LimitsEnabledGet": {
+      "args": [],
+      "methods": [
+        "ZCtrl_LimitsEnabledGet"
+      ],
+      "returns": [
+        "I"
+      ]
+    },
+    "ZCtrl.LimitsEnabledSet": {
+      "args": [
+        "I"
+      ],
+      "methods": [
+        "ZCtrl_LimitsEnabledSet"
+      ],
+      "returns": []
+    },
+    "ZCtrl.LimitsGet": {
+      "args": [],
+      "methods": [
+        "ZCtrl_LimitsGet"
+      ],
+      "returns": [
+        "f",
+        "f"
+      ]
+    },
+    "ZCtrl.LimitsSet": {
+      "args": [
+        "f",
+        "f"
+      ],
+      "methods": [
+        "ZCtrl_LimitsSet"
+      ],
+      "returns": []
+    },
+    "ZCtrl.OnOffGet": {
+      "args": [],
+      "methods": [
+        "ZCtrl_OnOffGet"
+      ],
+      "returns": [
+        "I"
+      ]
+    },
+    "ZCtrl.OnOffSet": {
+      "args": [
+        "I"
+      ],
+      "methods": [
+        "ZCtrl_OnOffSet"
+      ],
+      "returns": []
+    },
+    "ZCtrl.SetpntGet": {
+      "args": [],
+      "methods": [
+        "ZCtrl_SetpntGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "ZCtrl.SetpntSet": {
+      "args": [
+        "f"
+      ],
+      "methods": [
+        "ZCtrl_SetpntSet"
+      ],
+      "returns": []
+    },
+    "ZCtrl.StatusGet": {
+      "args": [],
+      "methods": [
+        "ZCtrl_StatusGet"
+      ],
+      "returns": [
+        "H"
+      ]
+    },
+    "ZCtrl.SwitchOffDelayGet": {
+      "args": [],
+      "methods": [
+        "ZCtrl_SwitchOffDelayGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "ZCtrl.SwitchOffDelaySet": {
+      "args": [
+        "f"
+      ],
+      "methods": [
+        "ZCtrl_SwitchOffDelaySet"
+      ],
+      "returns": []
+    },
+    "ZCtrl.TipLiftGet": {
+      "args": [],
+      "methods": [
+        "ZCtrl_TipLiftGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "ZCtrl.TipLiftSet": {
+      "args": [
+        "f"
+      ],
+      "methods": [
+        "ZCtrl_TipLiftSet"
+      ],
+      "returns": []
+    },
+    "ZCtrl.Withdraw": {
+      "args": [
+        "I",
+        "i"
+      ],
+      "methods": [
+        "ZCtrl_Withdraw"
+      ],
+      "returns": []
+    },
+    "ZCtrl.WithdrawRateGet": {
+      "args": [],
+      "methods": [
+        "ZCtrl_WithdrawRateGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "ZCtrl.WithdrawRateSet": {
+      "args": [
+        "f"
+      ],
+      "methods": [
+        "ZCtrl_WithdrawRateSet"
+      ],
+      "returns": []
+    },
+    "ZCtrl.ZPosGet": {
+      "args": [],
+      "methods": [
+        "ZCtrl_ZPosGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "ZCtrl.ZPosSet": {
+      "args": [
+        "f"
+      ],
+      "methods": [
+        "ZCtrl_ZPosSet"
+      ],
+      "returns": []
+    },
+    "ZSpectr.AdvPropsGet": {
+      "args": [],
+      "methods": [
+        "ZSpectr_AdvPropsGet"
+      ],
+      "returns": [
+        "f",
+        "H",
+        "H",
+        "H"
+      ]
+    },
+    "ZSpectr.AdvPropsSet": {
+      "args": [
+        "f",
+        "H",
+        "H",
+        "H"
+      ],
+      "methods": [
+        "ZSpectr_AdvPropsSet"
+      ],
+      "returns": []
+    },
+    "ZSpectr.ChsGet": {
+      "args": [],
+      "methods": [
+        "ZSpectr_ChsGet"
+      ],
+      "returns": [
+        "i",
+        "*i",
+        "i",
+        "i",
+        "*+c"
+      ]
+    },
+    "ZSpectr.ChsSet": {
+      "args": [
+        "+*i"
+      ],
+      "methods": [
+        "ZSpectr_ChsSet"
+      ],
+      "returns": []
+    },
+    "ZSpectr.DigSyncGet": {
+      "args": [],
+      "methods": [
+        "ZSpectr_DigSyncGet"
+      ],
+      "returns": [
+        "H"
+      ]
+    },
+    "ZSpectr.DigSyncSet": {
+      "args": [
+        "H"
+      ],
+      "methods": [
+        "ZSpectr_DigSyncSet"
+      ],
+      "returns": []
+    },
+    "ZSpectr.Open": {
+      "args": [],
+      "methods": [
+        "ZSpectr_Open"
+      ],
+      "returns": []
+    },
+    "ZSpectr.PropsGet": {
+      "args": [],
+      "methods": [
+        "ZSpectr_PropsGet"
+      ],
+      "returns": [
+        "H",
+        "i",
+        "i",
+        "i",
+        "*+c",
+        "i",
+        "i",
+        "*+c",
+        "H",
+        "H"
+      ]
+    },
+    "ZSpectr.PropsSet": {
+      "args": [
+        "H",
+        "i",
+        "H",
+        "H",
+        "H",
+        "H"
+      ],
+      "methods": [
+        "ZSpectr_PropsSet"
+      ],
+      "returns": []
+    },
+    "ZSpectr.PulseSeqSyncGet": {
+      "args": [],
+      "methods": [
+        "ZSpectr_PulseSeqSyncGet"
+      ],
+      "returns": [
+        "H",
+        "I"
+      ]
+    },
+    "ZSpectr.PulseSeqSyncSet": {
+      "args": [
+        "H",
+        "I"
+      ],
+      "methods": [
+        "ZSpectr_PulseSeqSyncSet"
+      ],
+      "returns": []
+    },
+    "ZSpectr.RangeGet": {
+      "args": [],
+      "methods": [
+        "ZSpectr_RangeGet"
+      ],
+      "returns": [
+        "f",
+        "f"
+      ]
+    },
+    "ZSpectr.RangeSet": {
+      "args": [
+        "f",
+        "f"
+      ],
+      "methods": [
+        "ZSpectr_RangeSet"
+      ],
+      "returns": []
+    },
+    "ZSpectr.RetractDelayGet": {
+      "args": [],
+      "methods": [
+        "ZSpectr_RetractDelayGet"
+      ],
+      "returns": [
+        "f"
+      ]
+    },
+    "ZSpectr.RetractDelaySet": {
+      "args": [
+        "f"
+      ],
+      "methods": [
+        "ZSpectr_RetractDelaySet"
+      ],
+      "returns": []
+    },
+    "ZSpectr.RetractGet": {
+      "args": [],
+      "methods": [
+        "ZSpectr_RetractGet"
+      ],
+      "returns": [
+        "H",
+        "f",
+        "i",
+        "H"
+      ]
+    },
+    "ZSpectr.RetractSecondGet": {
+      "args": [],
+      "methods": [
+        "ZSpectr_RetractSecondGet"
+      ],
+      "returns": [
+        "i",
+        "f",
+        "i",
+        "H"
+      ]
+    },
+    "ZSpectr.RetractSecondSet": {
+      "args": [
+        "i",
+        "f",
+        "i",
+        "H"
+      ],
+      "methods": [
+        "ZSpectr_RetractSecondSet"
+      ],
+      "returns": []
+    },
+    "ZSpectr.RetractSet": {
+      "args": [
+        "H",
+        "f",
+        "i",
+        "H"
+      ],
+      "methods": [
+        "ZSpectr_RetractSet"
+      ],
+      "returns": []
+    },
+    "ZSpectr.Start": {
+      "args": [
+        "I",
+        "+*c"
+      ],
+      "methods": [
+        "ZSpectr_Start"
+      ],
+      "returns": [
+        "i",
+        "i",
+        "*+c",
+        "i",
+        "i",
+        "2f",
+        "i",
+        "*f"
+      ]
+    },
+    "ZSpectr.StatusGet": {
+      "args": [],
+      "methods": [
+        "ZSpectr_StatusGet"
+      ],
+      "returns": [
+        "I"
+      ]
+    },
+    "ZSpectr.Stop": {
+      "args": [],
+      "methods": [
+        "ZSpectr_Stop"
+      ],
+      "returns": []
+    },
+    "ZSpectr.TTLSyncGet": {
+      "args": [],
+      "methods": [
+        "ZSpectr_TTLSyncGet"
+      ],
+      "returns": [
+        "H",
+        "H",
+        "f",
+        "f"
+      ]
+    },
+    "ZSpectr.TTLSyncSet": {
+      "args": [
+        "H",
+        "H",
+        "f",
+        "f"
+      ],
+      "methods": [
+        "ZSpectr_TTLSyncSet"
+      ],
+      "returns": []
+    },
+    "ZSpectr.TimingGet": {
+      "args": [],
+      "methods": [
+        "ZSpectr_TimingGet"
+      ],
+      "returns": [
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f"
+      ]
+    },
+    "ZSpectr.TimingSet": {
+      "args": [
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f",
+        "f"
+      ],
+      "methods": [
+        "ZSpectr_TimingSet"
+      ],
+      "returns": []
+    }
+  },
+  "compatibility": "Legacy-compatible binary formats retained for commands implemented by stmsim. This registry is locally maintained; it does not claim to define the protocol or establish its provenance.",
+  "format": "stmsim-wire-registry-v1"
+}

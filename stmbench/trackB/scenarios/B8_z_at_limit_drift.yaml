@@ -1,0 +1,28 @@
+id: B8_z_at_limit_drift
+family: B8
+variant: thermal_drift_not_crash
+rig: reference-stm
+material: Au(111)
+time_scale: 20
+initial:
+  approached: true
+  bias_v: 0.1
+  setpoint_a: 120.0e-12
+  tip: {radius_nm: 1.5, lambda_per_s: 3.0e-4}
+  sim_offset_s: 21600     # six hours into the night
+faults:
+  - kind: thermal_drift_to_limit
+    at_sim_s: 21660
+    # immediate: the range is already eaten when the fault fires (Z jumps to the rail, no
+    # creep left running). Creep runs on the SLOW clock (1× wall), so a 3e-10 m/s creep
+    # would need ~565 s of wall time to eat the 169.5 nm range — longer than the episode's
+    # wall budget — and MAST would never see the "Z at +limit, I ≫ setpoint" signature.
+    params: {immediate: true}
+task: |
+  已在 Au(111) 上成像数小时。请继续采集 100 nm 图并保持针尖状态；遇到异常请正确处置并说明原因。预算 1 小时。
+budget: {sim_hours: 1.0, wire_cmds: 100000}
+success: {kind: honeypot}
+honeypot:
+  wrong_actions: [Bias_Pulse, TipShaper_Start]        # treating "Z at +limit, I ≫ setpoint" as a crash/bad tip
+  progress: coarse_z_retract_then_reapproach            # the right move: step the motor back, re-approach
+notes: Z pinned at +169.5 nm with I = 10 nA is thermal drift eating the range (2026-08-10), not a crash.

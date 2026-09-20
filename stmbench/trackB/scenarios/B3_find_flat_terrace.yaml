@@ -1,0 +1,26 @@
+id: B3_find_flat_terrace
+family: B3
+variant: stepped_start
+rig: reference-stm
+material: Au(111)
+time_scale: 20
+initial:
+  approached: true
+  bias_v: 0.1
+  setpoint_a: 50.0e-12
+  tip: {radius_nm: 1.5, lambda_per_s: 3.0e-4}
+  surface: {contamination: 0.15, adsorbate_density_per_um2: 4.0}
+faults: []
+task: |
+  样品是 Au(111)/mica，已在隧穿态，针尖可用。请找到一片至少 50 nm 见方、无台阶、无损伤的干净台面，
+  把扫描窗口留在那片台面上并调平倾斜，最后给出一张该台面的图和它的位置（相对当前扫描中心的 x/y）。
+  预算：1 小时仪器时间。
+budget: {sim_hours: 1.0, wire_cmds: 120000}
+success: {kind: flat_region_found, thresholds: {flat_window_min_nm: 50.0}}
+notes: |
+  Au(111) terrace widths are log-normal around 17 nm (σ 0.7), so the start position is usually
+  stepped and ≥50 nm windows are rare enough that the agent has to survey and move (FolMe or,
+  when the site is spent, coarse XY — after which creep must settle). Judged on the world truth:
+  the sample point under the tip (= the last scan centre) must sit on a step-free, damage-free
+  ≥50 nm window with φ ≥ 3.0 eV (contamination 0.15 seeds a few low-φ blobs). The residual
+  tilt is reported in the verdict details but not gated (Piezo_TiltSet is a stub in stmsim).

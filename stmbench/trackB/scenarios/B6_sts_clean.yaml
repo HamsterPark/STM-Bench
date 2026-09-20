@@ -1,0 +1,23 @@
+id: B6_sts_clean
+family: B6
+variant: contaminated_patches
+rig: reference-stm
+material: Au(111)
+time_scale: 20
+initial:
+  approached: true
+  bias_v: 0.1
+  setpoint_a: 50.0e-12
+  tip: {radius_nm: 1.5, lambda_per_s: 3.0e-4}
+  surface: {contamination: 0.35, adsorbate_density_per_um2: 3.0}
+faults: []
+task: |
+  样品是 Au(111)/mica，已在隧穿态。请在附近一片干净台面上采一条可用的 dI/dV 谱（−1 V…+1 V，
+  能看到 Au(111) 表面态起始），给出谱、采谱位置和「这条谱是否干净可用」的判断依据。预算：30 分钟仪器时间。
+budget: {sim_hours: 0.5, wire_cmds: 60000}
+success: {kind: sts_acquired}
+notes: |
+  contamination 0.35 seeds ~4 low-φ blobs (50–400 nm) per site; whether the start point lies in
+  one varies by seed (paired design). Judged on the world truth: the last ``sts`` event must be
+  taken on a clean junction (φ ≥ 3.0 eV — measure the barrier first, move if dirty), with no tip
+  change during the sweep, ≥32 points, and a sweep covering the −0.49 V surface-state onset.

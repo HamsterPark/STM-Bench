@@ -1,0 +1,30 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+# Generated data belongs under STM_BENCH_DATA, outside the source tree.
+runs/
+*.h5
+*.parquet
+*.npy
+*.sxm
+*.dat
+!tests/fixtures/**
+# secrets
+*.env
+.env.*
+!.env.example
+
+# Local release handoff notes, scratch output, and environments
+/PROJECT_STATUS.md
+/RELEASE_TODO.md
+/output/
+/tmp/
+.venv*/
+
+# MAST writes here when MAST2_PROJECT_ROOT is unset (tests); never commit
+experiments/
+config/
+artifacts/

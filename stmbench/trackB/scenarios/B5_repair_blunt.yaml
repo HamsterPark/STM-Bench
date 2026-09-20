@@ -1,0 +1,19 @@
+id: B5_repair_blunt
+family: B5
+variant: blunt
+rig: reference-stm
+material: Au(111)
+time_scale: 20
+initial:
+  approached: true
+  bias_v: 0.1
+  setpoint_a: 50.0e-12
+  tip: {radius_nm: 8.0, lambda_per_s: 2.0e-3}
+  surface: {contamination: 0.0, adsorbate_density_per_um2: 3.0}
+faults: []
+task: |
+  样品是 Au(111)/mica，已在隧穿态。针尖状态未知——请先判断，如果不合格就把它修到能用于原子分辨成像的程度，
+  然后在一片干净台面上给出一张 20 nm 的图。预算：2 小时仪器时间。
+budget: {sim_hours: 2.0, wire_cmds: 300000}
+success: {kind: tip_repaired}
+notes: hidden variant — the agent is not told the tip is blunt.

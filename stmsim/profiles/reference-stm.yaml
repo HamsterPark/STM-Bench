@@ -1,0 +1,128 @@
+# Rig profile: "reference-stm" — a V5e controller with qPlus-W sensing across LHe/LN2/RT modes.
+# Every number carries a provenance tag. "measured" = read back from the instrument or
+# fitted from calibration data; "documented" = from operating notes / controller design docs;
+# "assumed" = a placeholder that a benchmark report must flag as uncalibrated.
+name: reference-stm
+controller: spm_controller_v5e
+software_version_string: "Generic 5e"          # Util.VersionGet on the simulator (documented)
+
+z:
+  extend_sign: -1                 # extending the tip toward the sample DECREASES Z (documented controller convention)
+  range_m_lhe: 169.5e-9           # ±169.5 nm at LHe (measured 2026-08-08; the RT value is ±360 nm)
+  range_m_rt: 360.0e-9
+  calibration_error: -0.125       # z piezo reads 12.5 % low vs Au(111) step (measured 2026-08-14, not yet re-calibrated)
+  limits_enabled_default: true
+
+xy:
+  sens_x_m_per_v: 8.8966e-9       # measured 2026-08-26 (was 8.1300e-9; ×1.09429)
+  sens_y_m_per_v: 8.6665e-9       # measured 2026-08-26 (×1.06599)
+  range_x_m: 2.669e-6             # Piezo.RangeGet after calibration (measured 2026-08-26)
+  range_y_m: 2.600e-6
+  half_range_measured_m: 1.2195e-6  # instrument-reported half travel on 2026-08-16 (before the 08-26 recalibration)
+  safety_xy_max_m: 1.299975e-6    # envelope after 08-26 tightening
+  safety_scan_size_max_m: 2.59995e-6
+
+preamp:
+  full_scale_a: 10.0e-9           # 10 nA range; saturation clamps at 10.004 nA (measured, 168 poke traces)
+  gain_v_per_a: 1.0e9             # assumed from the 10 nA range; Current.GainsGet only returns an index
+  noise_floor_a: 0.05e-12         # documented (barrier-measurement notes)
+  desaturation_tau_s: 0.45        # single observation 2026-08-20 (three-step fall 10004→5537→197 pA); UNCALIBRATED
+  crosstalk_spike_a: [82e-12, 375e-12]   # coarse-motor step crosstalk into I, measured 2026-08-08
+
+feedback:
+  approach_setpoint_a: 120e-12    # faster landing at 4 K (documented); 50 pA also works when noise is low
+  imaging_setpoint_a: 50e-12
+  imaging_bias_v_au111: 0.020     # best atomic resolution on Au(111) (documented 2026-08-26); ≤0.15 V is the client window
+  approach_p_m: 3e-12             # P = 3 pm (documented 2026-08-08)
+  approach_i_m_per_s: 180e-9      # I = 180 nm/s during approach; 50 nm/s for imaging tiers
+
+motor:
+  type: PMD
+  drive_v: 180                    # configured at 180 V (documented 2026-08-09)
+  max_amplitude_v: 250            # ASSUMED stack ceiling for the simulated rig (the coarse-drive interface requires a declaration)
+  freq_hz: 300
+  step_counter_supported: false   # Motor.StepCounterGet → "Cannot access 'Motor Control' Module" (documented)
+  xy_step_m_rt: null              # UNKNOWN — must be measured
+  xy_step_m_lhe: null
+  z_step_m_lhe: 0.66e-6           # ≈ Z travel per woodpecker cycle: 107 µm / 128 cycles (measured 2026-08-26)
+  approach_mode: safe             # woodpecker: retract fine Z, step, extend, check
+  approach_pulses_per_cycle: 3
+  approach_delay_after_move_s: 0.020
+
+tip:
+  material: W
+  form: qplus
+  qplus_poke_bias_v: 0.020        # documented: poke at >~50 mV rings the fork up
+  pulse_v_operator: 10.0          # 10 V / 500 ms (documented 2026-08-10)
+  pulse_width_s: 0.5
+  pulse_success_dz_m: [20e-9, 50e-9]
+
+sample_reference:
+  au111_step_pm_true: 235.4
+  au111_step_pm_measured: 207     # simulated readback with the low Z calibration
+  terrace_width_median_nm: 17     # measured on 6 × 200 nm frames (2026-08-16)
+
+modules_loaded:                   # verbs outside these answer with a NeedModule-style error
+  - Bias
+  - Current
+  - ZCtrl
+  - Scan
+  - FolMe
+  - Piezo
+  - Signals
+  - Util
+  - Motor
+  - AutoApproach
+  - TipShaper
+  - BiasSpectr
+  - ZSpectr
+  - LockIn
+  - Osci1T
+  - Osci2T
+  - SafeTip
+  - Marks
+  - DataLog
+modules_not_loaded:
+  - OsciHR                        # monitoring pump probes it and must see NeedModule
+  - PLL                           # unavailable in the base simulator profile; enabled in the qPlus profile
+  - TipRec
+  - GenSwp
+  - HSSwp
+  - SpectrumAnlzr
+  - DigLines
+  - FunGen1Ch
+  - FunGen2Ch
+  - Pattern
+  - UserOut
+  - APRFGen
+  - AtomTrack
+  - LockInFreqSwp
+  - MProbe
+  - MProbeZCtrl
+  - KelvinCtrl
+  - BeamDefl
+  - Laser
+  - CPDComp
+  - Interf
+  - PICtrl
+  - OCSync
+  - Script
+  - TCPLog
+  - SignalChart
+
+timing:
+  osci_dt_s: 0.0005               # 2 kHz (measured acquisition setting), n = 256 per screen (0.128 s)
+  osci1t_timebase_s: [6.4, 2.56, 1.28, 0.64, 0.256, 0.128]   # whole-screen durations, six entries
+  rt_freq_hz: 20000
+  single_call_ceiling_s: 5.0      # client receive timeout; the wire must answer every verb under this
+
+drift:                            # fitted from 983 glance intervals (calibrate/fit_creep.py, 2026-08-28)
+  v_xy_m_per_s: 1.5e-11           # ~1 nm/min lateral drift at 4 K (median |v| 0.017-0.027 nm/s)
+  v_z_m_per_s: 1.0e-12
+  creep_gamma: 0.05               # x(t) = D·γ·ln(1+t/τ) after a move of D; A = D·γ ≈ 11 nm for typical moves
+  creep_tau_s: 500.0
+
+environment:
+  temperature_k: 4.36
+  pressure_pa: 1.0e-8
+  vacuum_gauge: simulated-gauge

@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "stm-bench"
+version = "0.1.0.dev0"
+description = "STM-Bench: a software scanning tunnelling microscope that speaks the controller wire protocol (stmsim) plus an LLM benchmark for operating an STM through MAST (stmbench)"
+readme = "README.md"
+requires-python = ">=3.13"
+license = "MIT"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
+authors = [{ name = "Yuanhao Lyu" }]
+keywords = ["STM", "scanning tunnelling microscopy", "controller", "simulator", "LLM benchmark", "agents"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = [
+    "numpy>=2.0",
+    "scipy>=1.14",
+    "pyyaml>=6",
+]
+
+[project.optional-dependencies]
+# calibration indices, Track A manifests, report tables
+bench = ["pandas>=2.2", "pyarrow>=15"]
+dev = ["pytest>=8"]
+
+[project.scripts]
+stmsim = "stmsim.__main__:main"
+stmbench = "stmbench.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["stmsim*", "stmbench*"]
+
+[tool.setuptools.package-data]
+stmsim = ["profiles/*.yaml", "spec/*.json"]
+stmbench = ["trackB/scenarios/*.yaml", "human/static/*.html", "replay/static/*.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+    "requires_mast: needs MAST v2 (MASTv2 on PYTHONPATH / MAST_ROOT) and its patched nanonis_spm; skipped when absent",
+    "requires_data: needs the STM_BENCH_DATA directory (calibration tables, corpus indices); skipped when absent",
+    "isolated: must be the only RuntimeHost in its process (MAST process-level singletons); run separately with -m isolated",
+]

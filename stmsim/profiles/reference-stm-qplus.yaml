@@ -1,0 +1,72 @@
+# The base profile with qPlus sensing and oscillation control enabled.
+#
+# Only what differs from reference-stm is listed: `extends` deep-merges the parent, and a list
+# replaces the parent's wholesale. Keeping one parent is deliberate — the two profiles cannot
+# drift apart, and every calibrated number (drift, hysteresis, preamp, motor) stays shared.
+name: reference-stm-qplus
+extends: reference-stm
+
+modules_loaded:
+  - Bias
+  - Current
+  - ZCtrl
+  - Scan
+  - FolMe
+  - Piezo
+  - Signals
+  - Util
+  - Motor
+  - AutoApproach
+  - TipShaper
+  - BiasSpectr
+  - ZSpectr
+  - LockIn
+  - Osci1T
+  - Osci2T
+  - SafeTip
+  - Marks
+  - DataLog
+  - PLL
+  - PLLFreqSwp
+
+modules_not_loaded:
+  - OsciHR
+  - TipRec
+  - GenSwp
+  - HSSwp
+  - SpectrumAnlzr
+  - DigLines
+  - FunGen1Ch
+  - FunGen2Ch
+  - Pattern
+  - UserOut
+  - APRFGen
+  - AtomTrack
+  - LockInFreqSwp
+  - MProbe
+  - MProbeZCtrl
+  - KelvinCtrl
+  - BeamDefl
+  - Laser
+  - CPDComp
+  - Interf
+  - PICtrl
+  - OCSync                        # analysis extensions remain unavailable in this profile
+  - PLLSignalAnlzr
+  - PLLZoomFFT
+  - PLLPhasSwp
+  - Script
+  - TCPLog
+  - SignalChart
+
+qplus:
+  f0_hz: 25296.2                  # measured on the configured sensor (2026-08-04)
+  k_n_per_m: 1800                 # nominal qPlus stiffness; not in any controller header
+  q: 25000
+  amplitude_default_m: 50.0e-12
+  input_calibration_m_per_v: 4.0e-9
+  amp_to_excitation_m_per_v: 2.0e-8
+  undriven_amplitude_floor_m: 8.0e-12   # measured: 7–8 pm with the drive off
+
+spectroscopy:
+  z_sweep_m: 0.2e-9               # sweeping toward the surface: 1 nm from a 0.5 nm gap crashes

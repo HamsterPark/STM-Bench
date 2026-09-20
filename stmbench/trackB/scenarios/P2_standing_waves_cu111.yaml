@@ -1,0 +1,112 @@
+id: P2_standing_waves_cu111
+family: P2
+variant: step_and_adatoms
+paper:
+  id: P2
+  title: "Crommie, Lutz, Eigler 1993 — standing waves in a two-dimensional electron gas"
+  ref: "Nature 363, 524 (with Hasegawa & Avouris, PRL 71, 1071)"
+rig: reference-stm
+material: Cu(111)
+time_scale: 20
+initial:
+  approached: true
+  bias_v: 0.05
+  setpoint_a: 1.0e-9
+  tip: {radius_nm: 1.2, apex_sigma_nm: 0.09, lambda_per_s: 1.5e-4}
+  surface:
+    contamination: 0.0
+    surface_state: {material: "Cu(111)"}
+  spectroscopy:
+    # the sample facts supplied before any dI/dV: where to stabilise, and the
+    # window to sweep. The window only has to contain the band edge, which the task says too.
+    condition: {stab_bias_v: 0.1, stab_setpoint_a: 1.0e-9, start_v: -0.6, end_v: 0.4,
+                num_points: 200, label: "P2 surface state"}
+faults: []
+task: |
+  样品是 Cu(111)，已在隧穿态；请复现 1993 年 Cu(111) 表面态电子驻波的观测：在台阶边或孤立吸附原子
+  附近，采集一组随距离与能量变化的 dI/dV 谱，由驻波波长随能量的变化拟合出表面态的带底 E0（meV）
+  与有效质量 m*（以电子质量为单位），用 ReportResult 报告。预算：3 小时仪器时间。
+budget: {sim_hours: 3.0, wire_cmds: 400000}
+hidden:
+  surface:
+    # dense enough that a 100 nm survey frame holds two to four isolated scatterers. The
+    # 3 / um2 default puts 0.03 in such a frame, and this paper is about scattering.
+    adsorbate_density_per_um2: [150.0, 400.0]
+  surface_state:
+    e0_ev: [-0.47, -0.41]
+    m_star: [0.35, 0.42]
+    gamma_f_ev: [0.004, 0.010]
+    gamma_0_ev: [0.012, 0.024]
+    step_r_up: [0.35, 0.65]
+    step_r_down: [0.25, 0.55]
+    step_phi_up_rad: [2.64, 3.64]
+    step_phi_down_rad: [2.64, 3.64]
+    point_delta_rad: [0.9, 1.5]
+    point_absorption: [0.30, 0.60]
+    step_height: [0.4, 0.8]
+  tip:
+    # the state the tip arrives in (Tip.apply_condition). The task never says which: finding
+    # out, and fixing it, is the first job of any session at the instrument
+    condition: {choice: [good, blunt, double, unstable, dirty], weights: [0.2, 0.25, 0.25, 0.15, 0.15]}
+    condition_scale: [0.0, 1.0]
+    condition_angle_deg: [0.0, 360.0]
+claims:
+  - id: e0_mev
+    kind: scalar
+    unit: meV
+    tol: {abs: 15}
+    truth: surface_state.e0_mev
+    evidence: &spectra
+      kind: spectra_near_scatterer
+      min_n: 8
+      min_positions: 6
+      near_nm: 8.0
+      min_points: 64
+      v_lo_max: -0.5
+      v_hi_min: 0.1
+  - id: m_eff
+    kind: scalar
+    unit: m_e
+    tol: {rel: 0.02}
+    truth: surface_state.m_star
+    evidence: *spectra
+success: {kind: claims_verified}
+notes: |
+  The generator is deliberately richer than the parabola the agent fits: an energy-dependent
+  lifetime, a complex reflection phase at the step (the Struve term), thermal and lock-in
+  broadening and a finite phase-coherence length all sit on top of E0 and m*.
+
+  **Tolerances, measured 2026-09-07** on the generator: twelve energies x 96 distances with
+  2 % noise, fitted through ``mast.vision.standing_wave.fit_dispersion``, over twelve draws of
+  the hidden block. |E0 error| had a median of 4.7 meV and a p90 of 6.0 meV; the relative m*
+  error a median of 0.5 % and a p90 of 0.8 %. The claims ask for 15 meV and 2 %, about twice
+  those p90s.
+
+  **What the instrument delivers is not yet that** (2026-09-07). The scripted baseline reaches
+  a dispersion with r2 ~= 0.88, but E0 lands about 60 meV high and m* about 30 % high, so mode
+  C reproduces 0/2. The gap is in the acquisition, not the analysis:
+
+  * the line is 45 spectra, and the wavevector needs three samples per half-wavelength, which
+    at the Fermi level is 1.5 nm — so the spectra have to sit under 0.5 nm apart and the line
+    still has to reach 13 nm out;
+  * that takes the better part of two hours of instrument time, over which the sample drifts.
+    The baseline re-locates the step before every batch of nine and measures each distance
+    against the edge as it was then, which is what an experimenter does, and it is still the
+    dominant error;
+  * dI/dV carries 3 % noise per point here against the 2 % the generator assumed.
+
+  The tolerances are NOT being widened to make this pass. What the paper's own experiment did
+  was take dI/dV *maps* — one frame per energy, a hundred times faster per distance point and
+  immune to drift within a frame — and the simulator does not fill a lock-in image channel yet
+  (docs/DESIGN.md section 9). That is the fix.
+
+  The scatterer is a step edge: ``LocateStepEdge`` reports where it runs, and a straight
+  reflector is the J0 the fit assumes. A point defect biases m* by about twenty percent,
+  because the LDOS around one goes as J0 squared with a Y0 cross term.
+
+  Adsorbate density is drawn over 150–400 / µm², which puts two to four scatterers in a 100 nm
+  survey frame — the 3 / µm² default puts 0.03 there, and this paper is about scattering. The
+  scatterer is a point defect rather than a step edge because a point defect is the one an
+  agent can locate: ``ExtractClusters`` reports cluster positions, while nothing in
+  the stack reports the geometry of a step. Eight spectra at six distinct places spanning
+  −0.5…+0.1 V is the minimum that constrains a dispersion at all.

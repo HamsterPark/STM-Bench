@@ -1,0 +1,129 @@
+id: P1_barth1990_au111
+family: P1
+variant: domains
+paper:
+  id: P1
+  title: "Barth, Brune, Ertl, Behm 1990 — Au(111) 22x sqrt(3) herringbone reconstruction"
+  ref: "Phys. Rev. B 42, 9307"
+rig: reference-stm
+material: Au(111)
+time_scale: 20
+initial:
+  approached: true
+  bias_v: 0.1
+  setpoint_a: 50.0e-12
+  tip: {radius_nm: 1.5, apex_sigma_nm: 0.07, lambda_per_s: 2.0e-4}
+  surface: {contamination: 0.0, adsorbate_density_per_um2: 150.0, terrace_median_nm: 250.0}
+faults: []
+task: |
+  样品是退火良好的 Au(111)/mica，已在隧穿态；请复现 Barth 等 1990 年对 Au(111) 22×√3 重构的
+  STM 观测：测出重构条纹的周期（垂直于条纹方向）与某一处的条纹取向（给出该处坐标），并找到至少
+  两个取向不同的旋转畴、分别报告其位置与取向。每个结果用 ReportResult 报告。预算：2 小时仪器时间。
+budget: {sim_hours: 3.0, wire_cmds: 400000}
+hidden:
+  herringbone:
+    period_nm: [6.0, 6.6]
+    chevron_period_nm: [22.0, 34.0]
+    arm_half_angle_deg: [8.0, 18.0]
+    amp_pm: [8.0, 15.0]
+    second_harmonic: [0.1, 0.4]
+    domain_spacing_nm: [200.0, 500.0]
+    boundary_width_nm: [2.0, 5.0]
+  tip:
+    # the state the tip arrives in (Tip.apply_condition). The task never says which: finding
+    # out, and fixing it, is the first job of any session at the instrument
+    condition: {choice: [good, blunt, double, unstable, dirty], weights: [0.2, 0.25, 0.25, 0.15, 0.15]}
+    condition_scale: [0.0, 1.0]
+    condition_angle_deg: [0.0, 360.0]
+claims:
+  - id: stripe_period_nm
+    kind: scalar
+    unit: nm
+    tol: {abs: 0.15}
+    truth: herringbone.period_along_arm_nm
+    evidence: {kind: frame, min_fov_nm: 100, max_nm_per_px: 0.4}
+  - id: stripe_orientation_deg
+    kind: angle
+    unit: deg
+    tol: {abs: 6, mod: 180}
+    truth: orientation_at
+    position: required
+    evidence: {kind: frame_covers, min_fov_nm: 40, max_nm_per_px: 0.5}
+  - id: domain_a_orientation_deg
+    kind: angle
+    unit: deg
+    tol: {abs: 6, mod: 180}
+    truth: orientation_at
+    position: required
+    evidence: {kind: frame_covers, min_fov_nm: 40, max_nm_per_px: 0.5}
+  - id: domain_b_orientation_deg
+    kind: angle
+    unit: deg
+    tol: {abs: 6, mod: 180}
+    truth: orientation_at
+    position: required
+    distinct_from: {claim: domain_a_orientation_deg, min_sep_deg: 30}
+    evidence: {kind: frame_covers, min_fov_nm: 40, max_nm_per_px: 0.5}
+success: {kind: claims_verified}
+notes: |
+  **What is measured.** The claim is the stripe period *along the arm*, not the mean of the
+  zigzag: the stripes run at ±alpha to the mean direction, so an FFT of a frame sees a
+  wavevector longer by 1/cos(alpha). ``herringbone.period_along_arm_nm`` is that number, and
+  it is what any measurement of a frame returns. Orientation claims are judged the same way —
+  the mean direction or either arm counts, because the frame's spectrum has a peak on each
+  arm and never on the mean between them.
+
+  **Tolerances, measured 2026-09-07** with the scripted baseline's own route (a 400 nm frame,
+  ``FindFlatRegion`` for step-free 120 nm windows, ``AssessHerringbone`` on each at 0.31
+  nm/px, the period taken as the median over the windows) across ten draws: |period error|
+  had a median of 0.007 nm, a p90 of 0.063 nm and a worst case of 0.136 nm; the orientation
+  error a median of 3.1° with the worst window at 6.6°, and under 1.4° on the 120 nm windows
+  the claim actually uses. The claims ask for 0.15 nm and 6°.
+
+  The period tolerance is set by the frame, not by the physics: 120 nm holds nineteen stripe
+  periods, so one FFT bin is a third of a nanometre and a reading can snap to a bin. Averaging
+  windows is what brings it back, and it is why the baseline never reports a single frame.
+
+  **Distinctness criterion.** A single domain
+  shows two stripe directions — the arms of its own zigzag, 2·alpha apart, and alpha is drawn
+  up to 18°. Two windows in the *same* domain can therefore report directions 36° apart and
+  look like two rotational domains. Comparing the truths at the two reported positions catches
+  it: seed 2's baseline did exactly this (89.4° and 121.6°, both in the domain at 105.5°) and
+  the claim failed, correctly. Rotational domains are 60° apart; anything less is one domain
+  measured twice.
+
+  **Budget rationale.** The original two hours predated the drift work. The task as it now
+  stands is: settle, take a frame that shows the reconstruction, characterise the drift there,
+  program the compensation, verify it helped, then survey enough windows for a median period
+  and walk far enough to reach a second rotational domain. Measured across seeds 0–4 on
+  2026-09-08 that takes 1.7–2.8 sim hours. Three hours covers it with room for an agent that
+  is less direct about it, and is still a real constraint — the earlier runs that spent
+  measurement-grade frames on registration went over it while verifying every claim.
+
+  The tolerances remain unchanged. The budget increase accounts for the measured acquisition
+  time while preserving the required measurement accuracy.
+
+  **Surface condition rationale.** Adsorbate density is 150 / µm² — one or two defects in
+  a 100 nm frame, which is what a well-prepared Au(111) actually looks like. It used to be
+  2 / µm², i.e. one defect per 700 nm square, leaving few registration features. The
+  reconstruction is a 6.3 nm grating, and a grating constrains only the component
+  across its stripes and only modulo one period, so a frame with nothing else in it cannot be
+  used to measure drift. Registration needs something aperiodic, and real surfaces have it.
+  (Measured on seed 0: the sample moved (−0.78, −1.09) nm between two frames of bare
+  herringbone and the correlation reported (−0.13, +0.75).)
+
+  **Terrace-width rationale (250 nm).** A step is 235 pm and the reconstruction
+  10, so a window with a step edge in it has its stripe peak dragged off by the step. On a
+  17 nm terrace no step-free window exists at all and the claim would be unmeasurable.
+
+  **Chevron-period scope.** The height field keeps the pre-domain expression
+  ``cos(2*pi*(u + s*zig(v)*v)/T)`` bit for bit, and in it the phase drifts linearly along the
+  stripe direction: consecutive elbows do not repeat, so there is no elbow spacing to measure.
+  (Real Au(111) shifts the stripes by a *bounded* triangle wave.) Measurements on eight seeds
+  agreed: a period was found in three or four of them, with a median error above 50 %. A claim
+  the instrument cannot deliver would weaken the measurement contract, so the elbow spacing stays in the
+  physics and out of the scoring. ``chevron_period_nm`` is still drawn per seed because it
+  sets the zigzag; it is simply not scored.
+
+  Adding a key to the ``hidden`` block reorders the draws for every seed, because the sampler
+  walks the keys in sorted order. Re-derive the tolerances if that happens.

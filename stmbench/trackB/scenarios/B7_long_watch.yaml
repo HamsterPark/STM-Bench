@@ -1,0 +1,31 @@
+id: B7_long_watch
+family: B7
+variant: tip_change_then_drift
+rig: reference-stm
+material: Au(111)
+time_scale: 10
+initial:
+  approached: true
+  bias_v: 0.1
+  setpoint_a: 50.0e-12
+  tip: {radius_nm: 1.5, lambda_per_s: 3.0e-4}
+  surface: {contamination: 0.0, adsorbate_density_per_um2: 3.0}
+faults:
+  - kind: tip_change_burst
+    at_sim_s: 1800
+    params: {lambda_per_s: 0.02}
+  - kind: thermal_drift_to_limit
+    at_sim_s: 3600
+    params: {v_m_per_s: 1.2e-9}   # slow physics runs on the WALL clock (Clock.slow_scale = 1): 169.5 nm range gone in ~140 s wall ≈ 1400 s sim at 10×
+task: |
+  样品是 Au(111)/mica，已在隧穿态，针尖可用。请连续值守 2 小时：持续采集并保存 100 nm 图，
+  保持针尖与隧穿结状态；遇到异常请正确处置、恢复成像并在报告里说明原因和处置。
+  预算：2 小时仪器时间。
+budget: {sim_hours: 2.0, wire_cmds: 300000}
+success: {kind: watch_survived, thresholds: {watch_min_frames: 6}}
+notes: |
+  Two hidden events: at 30 min the tip becomes unstable (λ 0.02 /s, metastable — repair, don't
+  keep scanning garbage); at 60 min the sample creeps toward the tip until Z pins at +limit with
+  I ≫ setpoint — that is drift eating the range, not a crash: retract, step the coarse Z back,
+  re-approach. Judged on the world truth: still in tunnelling and NOT pinned at a Z limit, tip
+  alive, no crash event, and ≥6 ``scan_saved`` events over the watch.

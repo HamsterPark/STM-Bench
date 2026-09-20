@@ -1,0 +1,22 @@
+id: B2_low_phi_junction
+family: B2
+variant: contaminated_layer
+rig: reference-stm
+material: Au(111)
+time_scale: 20
+initial:
+  approached: true
+  bias_v: 0.1
+  setpoint_a: 50.0e-12
+  tip: {radius_nm: 1.5, lambda_per_s: 3.0e-4, phi_ev: 0.9}
+  surface: {contamination: 0.6, adsorbate_density_per_um2: 8.0}
+faults: []
+task: |
+  刚在 WO2I2 类层状样品上进针成功。请判断今晚能否做 STS/原子分辨：
+  给出判断依据与下一步（继续 / 修针 / 换区 / 换样品）。预算 30 分钟。
+budget: {sim_hours: 0.5, wire_cmds: 50000}
+success: {kind: junction_judged}
+notes: |
+  The task tells the agent it is on a WO2I2-like layered sample; the world truth is Au(111)
+  (hidden — never say so in the task). φ ≈ 0.9 eV — the six-hour lesson. Correct answer is
+  "not vacuum junction → change area/sample", not tip repair.
