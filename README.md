@@ -4,34 +4,26 @@ A **software scanning tunnelling microscope** and a benchmark that asks one ques
 
 > Give a model a simulated STM. Can it reproduce a classic, simple STM paper?
 
-## Task 4, easy: five recent trial results
+## Task 4: move one atom
 
-On **21 September 2026**, five selected external-agent episodes used the P4
-single-atom positioning scenario, seed 0, the easy profile and the maintainer's
-full MAST environment through mode H. Each score counts two independently
-verified checks: the atom reached its target and its neighbours stayed in place.
+Move one atom to a target, leaving nearby atoms in place. The chart brings
+together four earlier replayed episodes, five selected Cursor-session episodes
+and Jev Choice's five development runs. All used P4 easy, seed 0, mode H and
+the maintainer's full MAST environment. Each score counts two verified checks:
+the atom reached its target and its neighbours stayed in place.
 
-| Model ID | Verified checks |
-|---|---:|
-| `claude-opus-5-thinking-high` | **2/2** |
-| `inherit` | **2/2** |
-| `gpt-5.6-sol-medium` | **1/2** |
-| `cursor-grok-4.6-high-fast` | **1/2** |
-| `composer-2.5-fast` | **0/2** |
+![P4 easy verified checks: earlier Luna 0/2, Terra 0/2, Sol 0/2, Astra 2/2; later Opus 2/2, inherit 2/2, Sol medium 1/2, Grok 1/2, Composer 0/2; Jev Choice 0/2 in each of five development runs.](docs/assets/p4-homepage/p4-results.svg)
 
-These are development results on one seed, not success rates or a mode-A
-leaderboard. `inherit` is the recorded model label; the ledger does not identify
-its underlying model. The experimental **Jev Choice** driver scored **0/2 in each
-of five P4 easy development runs** on the same date. Its choice-based interface
-and adjustments between runs are documented separately.
-[See the run IDs and scoring context](docs/assets/p4-homepage/README.md#later-five-model-comparison).
+These are single-seed development results, not success rates or a mode-A
+leaderboard. `inherit` is the recorded model label; its underlying model is
+unknown. Jev uses a separate choice driver whose settings changed between runs.
+[See run IDs and scoring context](docs/assets/p4-homepage/README.md#later-five-model-comparison-and-jev-choice).
 
-## Watch earlier task 4 trials: move one atom
+## Watch two earlier attempts
 
-Move one atom to a target, leaving nearby atoms in place. It can fall short,
-step backwards, or refuse to move: the model must look again and adjust.
-
-**Easy setting · same scene and MAST support · one trial per model**
+A move can fall short, step backwards, or refuse to happen: the model must look
+again and adjust. The four earlier trials shared a starting scene and MAST
+support, with one episode per model.
 
 **Astra · Watch the path, and the corrections.** The atom falls short, sometimes
 steps back, and once stays put. Astra re-scans and changes its approach until the
@@ -45,8 +37,6 @@ a **512× rescan**, then pauses for the next adjustment; tiny corrections are
 marked as slow motion.
 
 ![Animated replay with a persistent overview: a bright tip-command marker and the recorded atom trajectory show four attempts, accelerated rescans, adjustments, and verified arrival.](docs/assets/p4-homepage/astra-replay.gif)
-
-![Task 4, easy setting, MAST enabled: Luna 0/2, Terra 0/2, Sol 0/2, Astra 2/2 verified checks. One trial per model, not success rates.](docs/assets/p4-homepage/p4-results.svg)
 
 **Terra · A misleading warning stops progress.** A false alarm from the diagnostic
 tools prompts three unsuccessful recovery attempts; Terra stops without claiming

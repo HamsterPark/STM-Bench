@@ -6,12 +6,13 @@ in measured images, inspect what happened, and decide whether to change its
 settings, try again, or stop. The homepage shows Astra's successful correction
 loop and Terra's unsuccessful recovery from a diagnostic warning.
 
-![Four models, one trial each: Luna 0/2, Terra 0/2, Sol 0/2, Astra 2/2 verified checks.](p4-results.svg)
+![One P4 easy chart with the earlier four results, five Cursor-session results, and Jev Choice at 0/2 in each of five development runs.](p4-results.svg)
 
 The score counts **two verified task checks**: the atom is at its destination,
 and its neighbours are preserved. Verification includes the required measurement
 evidence. An unverified check does not mean a neighbour was moved or damaged.
-These single trials do not estimate success rates or establish a model ranking.
+These single-seed development results do not estimate success rates or establish
+a model ranking. Jev's row summarizes five runs with driver changes between them.
 
 ## Read the replays at your own pace
 
@@ -89,7 +90,7 @@ tool replies are truncated, so additional evaluation errors during the episode
 cannot be excluded. Terra attempted recovery, but neither it nor the support
 tools resolved the misleading diagnosis.
 
-## All four outcomes
+## Earlier four replayed outcomes
 
 | Model | Verified checks | Recorded atom hops | Saved scans | Recorded outcome |
 |---|---:|---:|---:|---|
@@ -105,7 +106,7 @@ and verification failure, with imperfect tool feedback also relevant. Sol's
 rejected calls contained actual parameter errors; its failure is not evidence
 that valid commands were rejected. Neither Terra nor Sol claimed completion.
 
-## Trial conditions and provenance
+## Earlier trial conditions and provenance
 
 Recorded **20–21 September 2026 (UTC)**. These are one-seed development trials,
 not a published mode-A leaderboard. **High difficulty was not tested in these
@@ -192,11 +193,12 @@ Rounded image estimates remain separate from the simulator's hop coordinates.
 
 The original ledgers remain unchanged. Raw acquisition files, full private
 ledgers, machine paths, and credentials are not published in these assets.
-The earlier four-model scorecard remains based on [results.json](results.json);
-the later comparison below does not change its scores, experimental conditions,
-or episode records.
+The merged scorecard draws its earlier four rows from [results.json](results.json),
+the next five from [cursor-results.json](cursor-results.json), and Jev's summary
+from [jev-results.json](jev-results.json). The figure combines published
+aggregates; it does not change experimental conditions or episode records.
 
-Regenerate the assets with Python, Matplotlib and Pillow installed:
+Regenerate the merged scorecard and replays with Python, Matplotlib and Pillow installed:
 
 ```bash
 python docs/assets/p4-homepage/generate_results.py
@@ -211,11 +213,11 @@ Regenerating the figures themselves uses the included images and JSON only.
 The root README uses relative image links and requires no live instrument
 connection or embedded script.
 
-## Later five-model comparison
+## Later five-model comparison and Jev Choice
 
-The homepage also lists five **21 September 2026 (UTC)** P4 easy, seed-0,
-mode-H development runs made in a Cursor session. This is a separate set of
-episodes from the four replayed above. Its [aggregate results](cursor-results.json)
+The merged homepage chart adds five **21 September 2026 (UTC)** P4 easy,
+seed-0, mode-H development runs made in a Cursor session. This is a separate
+set of episodes from the four replayed above. Their [aggregate results](cursor-results.json)
 retain the selected run IDs, verified-claim flags, hashes of the private
 `episode.json` files and recorded MAST/STM-Bench Git HEAD values. The
 private ledgers and raw acquisition files are not part of this repository.
@@ -242,9 +244,10 @@ uncommitted changes, so matching values do not prove that the executed code
 was identical across episodes or capture the entire private MAST environment.
 
 **Jev Choice is a separate experimental mode-H driver.** Its five P4 easy,
-seed-0 development runs on 21 September 2026 each scored **0/2**. The run IDs
+seed-0 development runs on 21 September 2026 each scored **0/2**. Their
+[aggregate record](jev-results.json) includes ledger hashes. The run IDs
 are `20260921T080649.097Z`, `20260921T082137.633Z`,
 `20260921T082629.363Z`, `20260921T083017.173Z` and
 `20260921T083739.917Z`. The driver offers finite choices derived from scans;
-its tracking and retry limits changed between runs. They are development
-iterations, not five independent samples or another model row in the table.
+its tracking and retry limits changed between runs. The chart's Jev row
+summarizes these development iterations, not five independent samples.

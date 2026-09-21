@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "title": "P4 easy: Jev Choice development runs",
+  "scenario": "P4_atom_positioning_cu111",
+  "difficulty": "easy",
+  "seed": 0,
+  "mode": "H",
+  "date_utc": "2026-09-21",
+  "driver": "Jev Choice",
+  "recorded_model_id": "jev-jev-latest",
+  "scope": "Five development iterations; tracking and retry settings changed between runs. Not independent samples or a mode-A leaderboard entry.",
+  "runs": [
+    {
+      "run_id": "20260921T080649.097Z",
+      "claims_verified": 0,
+      "claims_total": 2,
+      "episode_sha256": "77b1252f2f1a6dd70c9ed751337fbe88d21bf63b9a490da4ca12d185051dca97"
+    },
+    {
+      "run_id": "20260921T082137.633Z",
+      "claims_verified": 0,
+      "claims_total": 2,
+      "episode_sha256": "49b40f05c5b30780ac2482d524e5f221397b14edb761d5304226391c97760b59"
+    },
+    {
+      "run_id": "20260921T082629.363Z",
+      "claims_verified": 0,
+      "claims_total": 2,
+      "episode_sha256": "252274f2d172e31745c5019eeb3363d2abaa015beeda695c93ed47d36b762b91"
+    },
+    {
+      "run_id": "20260921T083017.173Z",
+      "claims_verified": 0,
+      "claims_total": 2,
+      "episode_sha256": "729bbb22fce4dc7f129ef335e83be0160221247847249379fd63e7426347ee24"
+    },
+    {
+      "run_id": "20260921T083739.917Z",
+      "claims_verified": 0,
+      "claims_total": 2,
+      "episode_sha256": "87f4dc55490b81ea4d6fb43efbf2cbbbe254bf8453c91df31c10ee6209262627"
+    }
+  ]
+}
