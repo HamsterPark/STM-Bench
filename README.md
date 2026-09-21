@@ -4,11 +4,29 @@ A **software scanning tunnelling microscope** and a benchmark that asks one ques
 
 > Give a model a simulated STM. Can it reproduce a classic, simple STM paper?
 
+## Watch task 4: move one atom
+
+Move one atom to a target, leaving nearby atoms in place. The benchmark checks
+what actually happened, alongside the model's report.
+
+![Task 4, easy setting, MAST enabled: Luna 0/2, Terra 0/2, Sol 0/2, Astra 2/2 verified checks. One trial per model, not success rates.](docs/assets/p4-homepage/p4-results.svg)
+
+| Astra · Verified success | Luna · Unsuccessful attempt |
+|:---:|:---:|
+| ![Astra finds an atom, checks each move, and adjusts until the atom reaches the target. Nearby atoms stay in place.](docs/assets/p4-homepage/astra-replay.gif) | ![Luna requests a move from an empty spot and reports success, but no atom moves.](docs/assets/p4-homepage/luna-replay.gif) |
+| Checks the result and adjusts until the atom arrives. | Reports completion, but no atom actually moves. |
+
+Same starting scene and MAST support, **easy setting**, one trial per model.
+The animations condense recorded positions into a simplified view.
+[Still frames and trial details](docs/assets/p4-homepage/README.md).
+
+## About the benchmark
+
 **Alpha research prototype.** This release contains the simulator, paper scenarios,
 measurement-aware judge, episode harness and replay tools. The simulator can be used without
 MAST; full benchmark episodes require the separate MAST runtime. There is no published
-mode-A leaderboard yet. The historical trials below predate the current physics and have
-not been rerun on this release.
+mode-A leaderboard yet. The older trials in the historical-evidence section predate the
+current physics and have not been rerun on this release.
 
 Driving the instrument is the core of the task and analysing the data is the support. There
 are no skill tiers and no human anchor: whether a person could do it is not the question.
