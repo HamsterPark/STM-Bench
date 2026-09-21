@@ -192,9 +192,9 @@ Rounded image estimates remain separate from the simulator's hop coordinates.
 
 The original ledgers remain unchanged. Raw acquisition files, full private
 ledgers, machine paths, and credentials are not published in these assets.
-The four-model scorecard remains based on [results.json](results.json); this
-presentation update does not change scores, experimental conditions, or episode
-records.
+The earlier four-model scorecard remains based on [results.json](results.json);
+the later comparison below does not change its scores, experimental conditions,
+or episode records.
 
 Regenerate the assets with Python, Matplotlib and Pillow installed:
 
@@ -210,3 +210,41 @@ files, run `export_evidence.py --replay-dir <replay-directory>` from this folder
 Regenerating the figures themselves uses the included images and JSON only.
 The root README uses relative image links and requires no live instrument
 connection or embedded script.
+
+## Later five-model comparison
+
+The homepage also lists five **21 September 2026 (UTC)** P4 easy, seed-0,
+mode-H development runs made in a Cursor session. This is a separate set of
+episodes from the four replayed above. Its [aggregate results](cursor-results.json)
+retain the selected run IDs, verified-claim flags, hashes of the private
+`episode.json` files and recorded MAST/STM-Bench Git HEAD values. The
+private ledgers and raw acquisition files are not part of this repository.
+
+| Model ID | Run ID | Verified checks |
+|---|---|---:|
+| `claude-opus-5-thinking-high` | `20260921T122033.249Z` | 2/2 |
+| `inherit` | `20260921T125317.144Z` | 2/2 |
+| `gpt-5.6-sol-medium` | `20260921T123906.982Z` | 1/2 |
+| `cursor-grok-4.6-high-fast` | `20260921T124053.618Z` | 1/2 |
+| `composer-2.5-fast` | `20260921T123918.571Z` | 0/2 |
+
+These runs used the same scenario contents and rig settings after accounting
+for the absolute rig path in each local profile: a sharp starting tip, no
+linear drift or creep, and electronic noise scaled to 0.25. All five ledgers
+record the same MAST and STM-Bench Git HEAD values. The `inherit` directory
+also contains an earlier 2/2 ledger; the table selects the later run named by
+its summary. A 1/2 for Sol or Grok means the neighbour-preservation check
+passed while target-site value verification failed. The scores describe
+verified claims for one seed, not model success rates or a mode-A ranking.
+`inherit` is the identifier recorded by the external driver; the ledger does
+not resolve it to an underlying provider model. Git HEAD does not include
+uncommitted changes, so matching values do not prove that the executed code
+was identical across episodes or capture the entire private MAST environment.
+
+**Jev Choice is a separate experimental mode-H driver.** Its five P4 easy,
+seed-0 development runs on 21 September 2026 each scored **0/2**. The run IDs
+are `20260921T080649.097Z`, `20260921T082137.633Z`,
+`20260921T082629.363Z`, `20260921T083017.173Z` and
+`20260921T083739.917Z`. The driver offers finite choices derived from scans;
+its tracking and retry limits changed between runs. They are development
+iterations, not five independent samples or another model row in the table.

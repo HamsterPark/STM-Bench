@@ -4,7 +4,29 @@ A **software scanning tunnelling microscope** and a benchmark that asks one ques
 
 > Give a model a simulated STM. Can it reproduce a classic, simple STM paper?
 
-## Watch task 4: move one atom
+## Task 4, easy: five recent trial results
+
+On **21 September 2026**, five selected external-agent episodes used the P4
+single-atom positioning scenario, seed 0, the easy profile and the maintainer's
+full MAST environment through mode H. Each score counts two independently
+verified checks: the atom reached its target and its neighbours stayed in place.
+
+| Model ID | Verified checks |
+|---|---:|
+| `claude-opus-5-thinking-high` | **2/2** |
+| `inherit` | **2/2** |
+| `gpt-5.6-sol-medium` | **1/2** |
+| `cursor-grok-4.6-high-fast` | **1/2** |
+| `composer-2.5-fast` | **0/2** |
+
+These are development results on one seed, not success rates or a mode-A
+leaderboard. `inherit` is the recorded model label; the ledger does not identify
+its underlying model. The experimental **Jev Choice** driver scored **0/2 in each
+of five P4 easy development runs** on the same date. Its choice-based interface
+and adjustments between runs are documented separately.
+[See the run IDs and scoring context](docs/assets/p4-homepage/README.md#later-five-model-comparison).
+
+## Watch earlier task 4 trials: move one atom
 
 Move one atom to a target, leaving nearby atoms in place. It can fall short,
 step backwards, or refuse to move: the model must look again and adjust.

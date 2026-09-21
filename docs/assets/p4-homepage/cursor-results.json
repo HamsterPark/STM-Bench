@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "title": "P4 easy: five selected Cursor-session trial results",
+  "scenario": "P4_atom_positioning_cu111",
+  "difficulty": "easy",
+  "seed": 0,
+  "mode": "H",
+  "date_utc": "2026-09-21",
+  "mast_support": "maintainer's full environment enabled",
+  "condition_notes": [
+    "Sharp single tip; no linear drift or creep; electronic noise amplitude scaled to 0.25.",
+    "The scenario profiles agree after removing their machine-specific rig paths; the rig files are identical.",
+    "The inherit directory contains two 2/2 ledgers; the latest run referenced by its summary is selected here. The underlying provider model is not identified."
+  ],
+  "score_definition": "Claims verified by the episode judge; target position and neighbour preservation, denominator 2.",
+  "scope": "Single-seed mode-H development comparison, not a success-rate estimate or a mode-A leaderboard.",
+  "recorded_git_heads": {
+    "mast_sha": "8f226475fa80cfd2e364cdf826c8c7ba9a6094f5",
+    "stmbench_sha": "1abed1d9d4a3fa7f018c792dba30140d5643c1c2"
+  },
+  "models": [
+    {
+      "model_id": "claude-opus-5-thinking-high",
+      "run_id": "20260921T122033.249Z",
+      "claims_verified": 2,
+      "claims_total": 2,
+      "target_position_verified": true,
+      "neighbour_preservation_verified": true,
+      "episode_sha256": "7eb04de094844d8d1acfbe0561bbdea6ed353bc798b441a43103f233a612b8f4"
+    },
+    {
+      "model_id": "inherit",
+      "run_id": "20260921T125317.144Z",
+      "claims_verified": 2,
+      "claims_total": 2,
+      "target_position_verified": true,
+      "neighbour_preservation_verified": true,
+      "episode_sha256": "35cf71da6e9bc623328206b827e5027adc3433fa3c80019efb7e94065a3d2a04"
+    },
+    {
+      "model_id": "gpt-5.6-sol-medium",
+      "run_id": "20260921T123906.982Z",
+      "claims_verified": 1,
+      "claims_total": 2,
+      "target_position_verified": false,
+      "neighbour_preservation_verified": true,
+      "episode_sha256": "ed25d18da181cdd61f310025c7ae2d60015fcac8c4c8a3478b62f1bbabecb1bb"
+    },
+    {
+      "model_id": "cursor-grok-4.6-high-fast",
+      "run_id": "20260921T124053.618Z",
+      "claims_verified": 1,
+      "claims_total": 2,
+      "target_position_verified": false,
+      "neighbour_preservation_verified": true,
+      "episode_sha256": "1083baac2af2c097eb8cd73685485098e9521f6e357c7c847b50660e75bd582d"
+    },
+    {
+      "model_id": "composer-2.5-fast",
+      "run_id": "20260921T123918.571Z",
+      "claims_verified": 0,
+      "claims_total": 2,
+      "target_position_verified": false,
+      "neighbour_preservation_verified": false,
+      "episode_sha256": "2c1ce06f7ce03f33e0ca6511fa5e0166802167a0c4f99aee8b4b5470134f1fe7"
+    }
+  ]
+}
