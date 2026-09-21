@@ -1,0 +1,1058 @@
+{
+  "schema_version": 1,
+  "model": "Astra",
+  "model_id": "gpt-6-astra",
+  "run_id": "20260921T065308.969Z",
+  "description": "Recorded command destinations for a post-episode tip marker, with separately recorded atom jumps. Marker interpolation is explanatory, not a measured continuous tip trajectory.",
+  "position_semantics": "Coordinates are successful MoveToXY command parameters (map_markers.meta.pos_src=param; status=done), not position readbacks. The first waypoint in each attempt is the approach destination; later waypoints are the commanded drag destinations.",
+  "time_semantics": {
+    "waypoint_sim": "Mapped approximately from the original local wall timestamp through the corresponding recorded tool_start and time_scale=20. The model-thinking pause is excluded by anchoring each attempt separately.",
+    "wall_timestamp_utc_offset_hours": 8,
+    "mapping_formula": "tool_start.sim_s + 20 * (waypoint_wall_epoch_s - tool_start.wall_epoch_s)",
+    "mapping_limit": "Tool-start/end consistency differs by less than 0.007 simulated seconds. A marker is recorded after a command returns; these times do not identify exact motion onset, continuous trajectory, or simultaneity with every atom hop.",
+    "atom_hop_sim": "Direct simulator event timestamp, not wall-time reconstruction.",
+    "suggested_playback_label": "EDITED SPEED for interpolated command motion. Exact numeric speedup is supported for full scan intervals separately."
+  },
+  "sources": {
+    "database_basename": "mast_experiments.db",
+    "table": "map_markers",
+    "selected_skill": "MoveToXY",
+    "rows": 93,
+    "driver_sha256": "98ab17b641a3d0e6da6e1117fea6f363bb3396643b7f7fb59bade4b05c877fab",
+    "episode_sha256": "1a14f1609f368d6c2184534ab41ac6ea401a61f8dc5a35304d9afa5350687790",
+    "events_sha256": "8879eae5f991ba79c9722d99e0fbc0292b4f6842cd13cc13961f3faab6f12a57",
+    "selected_marker_rows_sha256": "cd1cfb2e6459ad164090ab9bf16b3cead51ee986928a82c43090ba2eacc8e6bb"
+  },
+  "attempts": [
+    {
+      "attempt": 1,
+      "tool_call_id": "human-7",
+      "command_start_sim": 1469.3922461941838,
+      "command_end_sim": 1474.4959296658635,
+      "command_span_sim_seconds": 5.1036834716796875,
+      "tool_start_sim": 1469.2071999982,
+      "tool_end_sim": 1996.807771997992,
+      "tool_end_clock_mapping_residual_sim_seconds": -0.0067068240605294704,
+      "source_wall_span_seconds": 0.2551841735839844,
+      "requested_atom_nm": [
+        -6.0045,
+        -11.8242
+      ],
+      "requested_target_nm": [
+        -2.0045,
+        -11.8242
+      ],
+      "waypoints": [
+        {
+          "sim": 1469.3922461941838,
+          "x_nm": -6.304500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.0,
+          "source_marker_id": 13
+        },
+        {
+          "sim": 1469.6620263531804,
+          "x_nm": -6.204500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.013489007949829102,
+          "source_marker_id": 14
+        },
+        {
+          "sim": 1469.7961081936955,
+          "x_nm": -6.104500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.020193099975585938,
+          "source_marker_id": 15
+        },
+        {
+          "sim": 1469.9059857800603,
+          "x_nm": -6.004500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.025686979293823242,
+          "source_marker_id": 16
+        },
+        {
+          "sim": 1470.0080289319158,
+          "x_nm": -5.9045000000000005,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.03078913688659668,
+          "source_marker_id": 17
+        },
+        {
+          "sim": 1470.1174869015813,
+          "x_nm": -5.804500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.03626203536987305,
+          "source_marker_id": 18
+        },
+        {
+          "sim": 1470.2266492322087,
+          "x_nm": -5.7045,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.04172015190124512,
+          "source_marker_id": 19
+        },
+        {
+          "sim": 1470.4398860409856,
+          "x_nm": -5.604500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.05238199234008789,
+          "source_marker_id": 20
+        },
+        {
+          "sim": 1470.6069888547063,
+          "x_nm": -5.504500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.06073713302612305,
+          "source_marker_id": 21
+        },
+        {
+          "sim": 1470.7227458432317,
+          "x_nm": -5.404500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.06652498245239258,
+          "source_marker_id": 22
+        },
+        {
+          "sim": 1470.889386124909,
+          "x_nm": -5.304500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.07485699653625488,
+          "source_marker_id": 23
+        },
+        {
+          "sim": 1471.0356702283025,
+          "x_nm": -5.204500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.08217120170593262,
+          "source_marker_id": 24
+        },
+        {
+          "sim": 1471.1413897946477,
+          "x_nm": -5.104500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.08745718002319336,
+          "source_marker_id": 25
+        },
+        {
+          "sim": 1471.2533463910222,
+          "x_nm": -5.004500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.09305500984191895,
+          "source_marker_id": 26
+        },
+        {
+          "sim": 1471.395348496735,
+          "x_nm": -4.904500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.10015511512756348,
+          "source_marker_id": 27
+        },
+        {
+          "sim": 1471.4943685010076,
+          "x_nm": -4.804500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.10510611534118652,
+          "source_marker_id": 28
+        },
+        {
+          "sim": 1471.6194858029485,
+          "x_nm": -4.704500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.11136198043823242,
+          "source_marker_id": 29
+        },
+        {
+          "sim": 1471.7200889065862,
+          "x_nm": -4.604500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.11639213562011719,
+          "source_marker_id": 30
+        },
+        {
+          "sim": 1471.814769692719,
+          "x_nm": -4.504500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.12112617492675781,
+          "source_marker_id": 31
+        },
+        {
+          "sim": 1471.9546069577336,
+          "x_nm": -4.404500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.12811803817749023,
+          "source_marker_id": 32
+        },
+        {
+          "sim": 1472.063850350678,
+          "x_nm": -4.304500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.13358020782470703,
+          "source_marker_id": 33
+        },
+        {
+          "sim": 1472.159966416657,
+          "x_nm": -4.204500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.13838601112365723,
+          "source_marker_id": 34
+        },
+        {
+          "sim": 1472.2701062634587,
+          "x_nm": -4.104500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.14389300346374512,
+          "source_marker_id": 35
+        },
+        {
+          "sim": 1472.3795499280095,
+          "x_nm": -4.004500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.14936518669128418,
+          "source_marker_id": 36
+        },
+        {
+          "sim": 1472.4785890057683,
+          "x_nm": -3.9045000000000005,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.15431714057922363,
+          "source_marker_id": 37
+        },
+        {
+          "sim": 1472.633108086884,
+          "x_nm": -3.804500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.16204309463500977,
+          "source_marker_id": 38
+        },
+        {
+          "sim": 1472.7437295392156,
+          "x_nm": -3.704500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.16757416725158691,
+          "source_marker_id": 39
+        },
+        {
+          "sim": 1472.8561486676335,
+          "x_nm": -3.604500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.17319512367248535,
+          "source_marker_id": 40
+        },
+        {
+          "sim": 1472.9728879407048,
+          "x_nm": -3.504500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.1790320873260498,
+          "source_marker_id": 41
+        },
+        {
+          "sim": 1473.049367852509,
+          "x_nm": -3.4045000000000005,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.18285608291625977,
+          "source_marker_id": 42
+        },
+        {
+          "sim": 1473.1562699750066,
+          "x_nm": -3.3045000000000013,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.1882011890411377,
+          "source_marker_id": 43
+        },
+        {
+          "sim": 1473.2810677960515,
+          "x_nm": -3.2045000000000012,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.1944410800933838,
+          "source_marker_id": 44
+        },
+        {
+          "sim": 1473.4008683636785,
+          "x_nm": -3.1045000000000007,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.20043110847473145,
+          "source_marker_id": 45
+        },
+        {
+          "sim": 1473.5147084668279,
+          "x_nm": -3.0045000000000006,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.20612311363220215,
+          "source_marker_id": 46
+        },
+        {
+          "sim": 1473.6242474988103,
+          "x_nm": -2.9045000000000005,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.21160006523132324,
+          "source_marker_id": 47
+        },
+        {
+          "sim": 1473.7283458188176,
+          "x_nm": -2.8045000000000013,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.21680498123168945,
+          "source_marker_id": 48
+        },
+        {
+          "sim": 1473.8254060223699,
+          "x_nm": -2.704500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.22165799140930176,
+          "source_marker_id": 49
+        },
+        {
+          "sim": 1473.9155473187566,
+          "x_nm": -2.6045000000000007,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.2261650562286377,
+          "source_marker_id": 50
+        },
+        {
+          "sim": 1474.030927605927,
+          "x_nm": -2.504500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.2319340705871582,
+          "source_marker_id": 51
+        },
+        {
+          "sim": 1474.110969491303,
+          "x_nm": -2.4045,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.23593616485595703,
+          "source_marker_id": 52
+        },
+        {
+          "sim": 1474.202989526093,
+          "x_nm": -2.304500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.24053716659545898,
+          "source_marker_id": 53
+        },
+        {
+          "sim": 1474.302209801972,
+          "x_nm": -2.204500000000001,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.2454981803894043,
+          "source_marker_id": 54
+        },
+        {
+          "sim": 1474.4056691601872,
+          "x_nm": -2.1045000000000007,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.2506711483001709,
+          "source_marker_id": 55
+        },
+        {
+          "sim": 1474.4959296658635,
+          "x_nm": -2.0045000000000006,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.2551841735839844,
+          "source_marker_id": 56
+        }
+      ],
+      "atom_hops": [
+        {
+          "sim": 1470.1865519979037,
+          "atom_id": 1,
+          "from_nm": [
+            -6.014377148166974,
+            -11.818483088772727
+          ],
+          "to_nm": [
+            -5.772026103619806,
+            -11.897798731661734
+          ]
+        },
+        {
+          "sim": 1470.3828559978865,
+          "atom_id": 1,
+          "from_nm": [
+            -5.772026103619806,
+            -11.897798731661734
+          ],
+          "to_nm": [
+            -5.582161219686847,
+            -11.727574391894695
+          ]
+        },
+        {
+          "sim": 1470.6790259992704,
+          "atom_id": 1,
+          "from_nm": [
+            -5.582161219686847,
+            -11.727574391894695
+          ],
+          "to_nm": [
+            -5.339810175139678,
+            -11.806890034783704
+          ]
+        }
+      ],
+      "verification_scan": {
+        "index": 3,
+        "sim_start": 1482.4379659979604,
+        "sim_end": 1994.4379659979604,
+        "duration_sim_seconds": 512.0
+      }
+    },
+    {
+      "attempt": 2,
+      "tool_call_id": "human-8",
+      "command_start_sim": 1997.1971301338635,
+      "command_end_sim": 2002.4835519096814,
+      "command_span_sim_seconds": 5.286421775817871,
+      "tool_start_sim": 1996.8580559990369,
+      "tool_end_sim": 2525.5771159986034,
+      "tool_end_clock_mapping_residual_sim_seconds": -0.006430570501834154,
+      "source_wall_span_seconds": 0.26432108879089355,
+      "requested_atom_nm": [
+        -5.3383,
+        -11.8102
+      ],
+      "requested_target_nm": [
+        -2.0045,
+        -11.8242
+      ],
+      "waypoints": [
+        {
+          "sim": 1997.1971301338635,
+          "x_nm": -5.638297354775712,
+          "y_nm": -11.808940187483694,
+          "wall_offset_from_first_command_s": 0.0,
+          "source_marker_id": 65
+        },
+        {
+          "sim": 1997.4691895744763,
+          "x_nm": -5.540086615457449,
+          "y_nm": -11.809352614849,
+          "wall_offset_from_first_command_s": 0.013602972030639648,
+          "source_marker_id": 66
+        },
+        {
+          "sim": 1997.620070388075,
+          "x_nm": -5.441875876139187,
+          "y_nm": -11.809765042214305,
+          "wall_offset_from_first_command_s": 0.02114701271057129,
+          "source_marker_id": 67
+        },
+        {
+          "sim": 1997.7694920799695,
+          "x_nm": -5.343665136820925,
+          "y_nm": -11.81017746957961,
+          "wall_offset_from_first_command_s": 0.02861809730529785,
+          "source_marker_id": 68
+        },
+        {
+          "sim": 1997.9086283943616,
+          "x_nm": -5.2454543975026615,
+          "y_nm": -11.810589896944917,
+          "wall_offset_from_first_command_s": 0.035574913024902344,
+          "source_marker_id": 69
+        },
+        {
+          "sim": 1998.0120686790906,
+          "x_nm": -5.147243658184399,
+          "y_nm": -11.811002324310223,
+          "wall_offset_from_first_command_s": 0.04074692726135254,
+          "source_marker_id": 70
+        },
+        {
+          "sim": 1998.1713084480725,
+          "x_nm": -5.0490329188661365,
+          "y_nm": -11.811414751675528,
+          "wall_offset_from_first_command_s": 0.04870891571044922,
+          "source_marker_id": 71
+        },
+        {
+          "sim": 1998.2694081566297,
+          "x_nm": -4.950822179547875,
+          "y_nm": -11.811827179040833,
+          "wall_offset_from_first_command_s": 0.053613901138305664,
+          "source_marker_id": 72
+        },
+        {
+          "sim": 1998.420451094862,
+          "x_nm": -4.852611440229612,
+          "y_nm": -11.81223960640614,
+          "wall_offset_from_first_command_s": 0.06116604804992676,
+          "source_marker_id": 73
+        },
+        {
+          "sim": 1998.5286883614026,
+          "x_nm": -4.75440070091135,
+          "y_nm": -11.812652033771444,
+          "wall_offset_from_first_command_s": 0.06657791137695312,
+          "source_marker_id": 74
+        },
+        {
+          "sim": 1998.68902962422,
+          "x_nm": -4.656189961593087,
+          "y_nm": -11.81306446113675,
+          "wall_offset_from_first_command_s": 0.07459497451782227,
+          "source_marker_id": 75
+        },
+        {
+          "sim": 1998.7839917442761,
+          "x_nm": -4.557979222274824,
+          "y_nm": -11.813476888502056,
+          "wall_offset_from_first_command_s": 0.07934308052062988,
+          "source_marker_id": 76
+        },
+        {
+          "sim": 1998.9065913460217,
+          "x_nm": -4.459768482956562,
+          "y_nm": -11.81388931586736,
+          "wall_offset_from_first_command_s": 0.08547306060791016,
+          "source_marker_id": 77
+        },
+        {
+          "sim": 1998.9984301826917,
+          "x_nm": -4.3615577436383,
+          "y_nm": -11.814301743232667,
+          "wall_offset_from_first_command_s": 0.09006500244140625,
+          "source_marker_id": 78
+        },
+        {
+          "sim": 1999.1299704811536,
+          "x_nm": -4.263347004320037,
+          "y_nm": -11.814714170597973,
+          "wall_offset_from_first_command_s": 0.09664201736450195,
+          "source_marker_id": 79
+        },
+        {
+          "sim": 1999.307949950453,
+          "x_nm": -4.165136265001775,
+          "y_nm": -11.815126597963276,
+          "wall_offset_from_first_command_s": 0.10554099082946777,
+          "source_marker_id": 80
+        },
+        {
+          "sim": 1999.513609816786,
+          "x_nm": -4.066925525683511,
+          "y_nm": -11.815539025328583,
+          "wall_offset_from_first_command_s": 0.11582398414611816,
+          "source_marker_id": 81
+        },
+        {
+          "sim": 1999.632051398512,
+          "x_nm": -3.968714786365249,
+          "y_nm": -11.81595145269389,
+          "wall_offset_from_first_command_s": 0.12174606323242188,
+          "source_marker_id": 82
+        },
+        {
+          "sim": 1999.8132685921155,
+          "x_nm": -3.870504047046987,
+          "y_nm": -11.816363880059194,
+          "wall_offset_from_first_command_s": 0.13080692291259766,
+          "source_marker_id": 83
+        },
+        {
+          "sim": 1999.9135903618298,
+          "x_nm": -3.7722933077287246,
+          "y_nm": -11.8167763074245,
+          "wall_offset_from_first_command_s": 0.13582301139831543,
+          "source_marker_id": 84
+        },
+        {
+          "sim": 2000.0499276421033,
+          "x_nm": -3.674082568410462,
+          "y_nm": -11.817188734789806,
+          "wall_offset_from_first_command_s": 0.1426398754119873,
+          "source_marker_id": 85
+        },
+        {
+          "sim": 2000.1452903053723,
+          "x_nm": -3.5758718290922,
+          "y_nm": -11.81760116215511,
+          "wall_offset_from_first_command_s": 0.14740800857543945,
+          "source_marker_id": 86
+        },
+        {
+          "sim": 2000.2377299568616,
+          "x_nm": -3.4776610897739375,
+          "y_nm": -11.818013589520417,
+          "wall_offset_from_first_command_s": 0.15202999114990234,
+          "source_marker_id": 87
+        },
+        {
+          "sim": 2000.4723910591565,
+          "x_nm": -3.379450350455675,
+          "y_nm": -11.818426016885722,
+          "wall_offset_from_first_command_s": 0.16376304626464844,
+          "source_marker_id": 88
+        },
+        {
+          "sim": 2000.6501893303357,
+          "x_nm": -3.2812396111374125,
+          "y_nm": -11.818838444251027,
+          "wall_offset_from_first_command_s": 0.1726529598236084,
+          "source_marker_id": 89
+        },
+        {
+          "sim": 2000.8090285561047,
+          "x_nm": -3.1830288718191495,
+          "y_nm": -11.819250871616333,
+          "wall_offset_from_first_command_s": 0.18059492111206055,
+          "source_marker_id": 90
+        },
+        {
+          "sim": 2000.9770087501965,
+          "x_nm": -3.0848181325008874,
+          "y_nm": -11.81966329898164,
+          "wall_offset_from_first_command_s": 0.1889939308166504,
+          "source_marker_id": 91
+        },
+        {
+          "sim": 2001.1156920692883,
+          "x_nm": -2.986607393182625,
+          "y_nm": -11.820075726346943,
+          "wall_offset_from_first_command_s": 0.19592809677124023,
+          "source_marker_id": 92
+        },
+        {
+          "sim": 2001.2806109688245,
+          "x_nm": -2.888396653864363,
+          "y_nm": -11.82048815371225,
+          "wall_offset_from_first_command_s": 0.20417404174804688,
+          "source_marker_id": 93
+        },
+        {
+          "sim": 2001.4892510673963,
+          "x_nm": -2.7901859145461,
+          "y_nm": -11.820900581077556,
+          "wall_offset_from_first_command_s": 0.21460604667663574,
+          "source_marker_id": 94
+        },
+        {
+          "sim": 2001.5905885002576,
+          "x_nm": -2.6919751752278374,
+          "y_nm": -11.82131300844286,
+          "wall_offset_from_first_command_s": 0.21967291831970215,
+          "source_marker_id": 95
+        },
+        {
+          "sim": 2001.6993693611585,
+          "x_nm": -2.5937644359095753,
+          "y_nm": -11.821725435808165,
+          "wall_offset_from_first_command_s": 0.2251119613647461,
+          "source_marker_id": 96
+        },
+        {
+          "sim": 2001.7759112617932,
+          "x_nm": -2.4955536965913123,
+          "y_nm": -11.822137863173472,
+          "wall_offset_from_first_command_s": 0.22893905639648438,
+          "source_marker_id": 97
+        },
+        {
+          "sim": 2001.8961076042615,
+          "x_nm": -2.3973429572730502,
+          "y_nm": -11.822550290538778,
+          "wall_offset_from_first_command_s": 0.23494887351989746,
+          "source_marker_id": 98
+        },
+        {
+          "sim": 2002.0111493370496,
+          "x_nm": -2.2991322179547873,
+          "y_nm": -11.822962717904083,
+          "wall_offset_from_first_command_s": 0.24070096015930176,
+          "source_marker_id": 99
+        },
+        {
+          "sim": 2002.165649344679,
+          "x_nm": -2.200921478636525,
+          "y_nm": -11.823375145269388,
+          "wall_offset_from_first_command_s": 0.24842596054077148,
+          "source_marker_id": 100
+        },
+        {
+          "sim": 2002.315771987196,
+          "x_nm": -2.1027107393182627,
+          "y_nm": -11.823787572634695,
+          "wall_offset_from_first_command_s": 0.255932092666626,
+          "source_marker_id": 101
+        },
+        {
+          "sim": 2002.4835519096814,
+          "x_nm": -2.0045000000000006,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.26432108879089355,
+          "source_marker_id": 102
+        }
+      ],
+      "atom_hops": [
+        {
+          "sim": 1997.393589997664,
+          "atom_id": 1,
+          "from_nm": [
+            -5.339810175139678,
+            -11.806890034783704
+          ],
+          "to_nm": [
+            -5.582161219686847,
+            -11.727574391894695
+          ]
+        },
+        {
+          "sim": 1997.72667999845,
+          "atom_id": 1,
+          "from_nm": [
+            -5.582161219686847,
+            -11.727574391894695
+          ],
+          "to_nm": [
+            -5.339810175139678,
+            -11.806890034783704
+          ]
+        },
+        {
+          "sim": 1997.9695019987412,
+          "atom_id": 1,
+          "from_nm": [
+            -5.339810175139678,
+            -11.806890034783704
+          ],
+          "to_nm": [
+            -5.097459130592512,
+            -11.886205677672711
+          ]
+        },
+        {
+          "sim": 1998.2258999999613,
+          "atom_id": 1,
+          "from_nm": [
+            -5.097459130592512,
+            -11.886205677672711
+          ],
+          "to_nm": [
+            -4.907594246659552,
+            -11.715981337905674
+          ]
+        },
+        {
+          "sim": 1998.4812159999274,
+          "atom_id": 1,
+          "from_nm": [
+            -4.907594246659552,
+            -11.715981337905674
+          ],
+          "to_nm": [
+            -4.665243202112383,
+            -11.795296980794683
+          ]
+        },
+        {
+          "sim": 1999.0849719988182,
+          "atom_id": 1,
+          "from_nm": [
+            -4.665243202112383,
+            -11.795296980794683
+          ],
+          "to_nm": [
+            -4.422892157565215,
+            -11.874612623683692
+          ]
+        },
+        {
+          "sim": 1999.2619599984027,
+          "atom_id": 1,
+          "from_nm": [
+            -4.422892157565215,
+            -11.874612623683692
+          ],
+          "to_nm": [
+            -4.233027273632255,
+            -11.704388283916655
+          ]
+        },
+        {
+          "sim": 1999.5868159993552,
+          "atom_id": 1,
+          "from_nm": [
+            -4.233027273632255,
+            -11.704388283916655
+          ],
+          "to_nm": [
+            -3.9906762290850883,
+            -11.783703926805664
+          ]
+        },
+        {
+          "sim": 1999.873593999073,
+          "atom_id": 1,
+          "from_nm": [
+            -3.9906762290850883,
+            -11.783703926805664
+          ],
+          "to_nm": [
+            -3.74832518453792,
+            -11.863019569694673
+          ]
+        },
+        {
+          "sim": 2000.437869997695,
+          "atom_id": 1,
+          "from_nm": [
+            -3.74832518453792,
+            -11.863019569694673
+          ],
+          "to_nm": [
+            -3.5059741399907525,
+            -11.942335212583682
+          ]
+        },
+        {
+          "sim": 2000.7656139996834,
+          "atom_id": 1,
+          "from_nm": [
+            -3.5059741399907525,
+            -11.942335212583682
+          ],
+          "to_nm": [
+            -3.316109256057793,
+            -11.772110872816643
+          ]
+        },
+        {
+          "sim": 2001.070551997982,
+          "atom_id": 1,
+          "from_nm": [
+            -3.316109256057793,
+            -11.772110872816643
+          ],
+          "to_nm": [
+            -3.073758211510625,
+            -11.851426515705652
+          ]
+        },
+        {
+          "sim": 2001.2435579998419,
+          "atom_id": 1,
+          "from_nm": [
+            -3.073758211510625,
+            -11.851426515705652
+          ],
+          "to_nm": [
+            -2.8314071669634573,
+            -11.93074215859466
+          ]
+        },
+        {
+          "sim": 2001.546577999834,
+          "atom_id": 1,
+          "from_nm": [
+            -2.8314071669634573,
+            -11.93074215859466
+          ],
+          "to_nm": [
+            -2.6415422830304975,
+            -11.760517818827623
+          ]
+        },
+        {
+          "sim": 2001.7498119990341,
+          "atom_id": 1,
+          "from_nm": [
+            -2.6415422830304975,
+            -11.760517818827623
+          ],
+          "to_nm": [
+            -2.399191238483329,
+            -11.83983346171663
+          ]
+        },
+        {
+          "sim": 2002.0979819982313,
+          "atom_id": 1,
+          "from_nm": [
+            -2.399191238483329,
+            -11.83983346171663
+          ],
+          "to_nm": [
+            -2.156840193936162,
+            -11.919149104605639
+          ]
+        }
+      ],
+      "verification_scan": {
+        "index": 4,
+        "sim_start": 2010.8981579984538,
+        "sim_end": 2522.898157998454,
+        "duration_sim_seconds": 512.0
+      }
+    },
+    {
+      "attempt": 3,
+      "tool_call_id": "human-9",
+      "command_start_sim": 2525.8670738036744,
+      "command_end_sim": 2526.28077295376,
+      "command_span_sim_seconds": 0.4136991500854492,
+      "tool_start_sim": 2525.707175999414,
+      "tool_end_sim": 3048.620759998448,
+      "tool_end_clock_mapping_residual_sim_seconds": -0.006409401539713144,
+      "source_wall_span_seconds": 0.02068495750427246,
+      "requested_atom_nm": [
+        -2.163,
+        -11.9174
+      ],
+      "requested_target_nm": [
+        -1.95,
+        -11.8242
+      ],
+      "waypoints": [
+        {
+          "sim": 2525.8670738036744,
+          "x_nm": -2.254613759096579,
+          "y_nm": -11.95748639599907,
+          "wall_offset_from_first_command_s": 0.0,
+          "source_marker_id": 109
+        },
+        {
+          "sim": 2526.042793064844,
+          "x_nm": -2.178460319322434,
+          "y_nm": -11.924164796999303,
+          "wall_offset_from_first_command_s": 0.00878596305847168,
+          "source_marker_id": 110
+        },
+        {
+          "sim": 2526.1147716338746,
+          "x_nm": -2.1023068795482893,
+          "y_nm": -11.890843197999535,
+          "wall_offset_from_first_command_s": 0.012384891510009766,
+          "source_marker_id": 111
+        },
+        {
+          "sim": 2526.1975505645387,
+          "x_nm": -2.0261534397741445,
+          "y_nm": -11.857521598999767,
+          "wall_offset_from_first_command_s": 0.01652383804321289,
+          "source_marker_id": 112
+        },
+        {
+          "sim": 2526.28077295376,
+          "x_nm": -1.9500000000000002,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.02068495750427246,
+          "source_marker_id": 113
+        }
+      ],
+      "atom_hops": [],
+      "verification_scan": {
+        "index": 5,
+        "sim_start": 2534.2452699993737,
+        "sim_end": 3046.2452699993737,
+        "duration_sim_seconds": 512.0
+      }
+    },
+    {
+      "attempt": 4,
+      "tool_call_id": "human-10",
+      "command_start_sim": 3048.955709077418,
+      "command_end_sim": 3049.563790895045,
+      "command_span_sim_seconds": 0.6080818176269531,
+      "tool_start_sim": 3048.802877999842,
+      "tool_end_sim": 3570.209788000211,
+      "tool_end_clock_mapping_residual_sim_seconds": -0.006416263058781624,
+      "source_wall_span_seconds": 0.030404090881347656,
+      "requested_atom_nm": [
+        -2.1571,
+        -11.9129
+      ],
+      "requested_target_nm": [
+        -2.0045,
+        -11.8242
+      ],
+      "waypoints": [
+        {
+          "sim": 3048.955709077418,
+          "x_nm": -2.4164676123125406,
+          "y_nm": -12.063659549227543,
+          "wall_offset_from_first_command_s": 0.0,
+          "source_marker_id": 120
+        },
+        {
+          "sim": 3049.1288677230477,
+          "x_nm": -2.3340740898500325,
+          "y_nm": -12.015767639382034,
+          "wall_offset_from_first_command_s": 0.00865793228149414,
+          "source_marker_id": 121
+        },
+        {
+          "sim": 3049.2551294341683,
+          "x_nm": -2.2516805673875244,
+          "y_nm": -11.967875729536525,
+          "wall_offset_from_first_command_s": 0.014971017837524414,
+          "source_marker_id": 122
+        },
+        {
+          "sim": 3049.3606105819345,
+          "x_nm": -2.1692870449250163,
+          "y_nm": -11.919983819691018,
+          "wall_offset_from_first_command_s": 0.020245075225830078,
+          "source_marker_id": 123
+        },
+        {
+          "sim": 3049.467350579798,
+          "x_nm": -2.0868935224625083,
+          "y_nm": -11.872091909845508,
+          "wall_offset_from_first_command_s": 0.025582075119018555,
+          "source_marker_id": 124
+        },
+        {
+          "sim": 3049.563790895045,
+          "x_nm": -2.0045,
+          "y_nm": -11.8242,
+          "wall_offset_from_first_command_s": 0.030404090881347656,
+          "source_marker_id": 125
+        }
+      ],
+      "atom_hops": [
+        {
+          "sim": 3049.1050620004535,
+          "atom_id": 1,
+          "from_nm": [
+            -2.156840193936162,
+            -11.919149104605639
+          ],
+          "to_nm": [
+            -2.346705077869121,
+            -12.089373444372676
+          ]
+        },
+        {
+          "sim": 3049.2274879990146,
+          "atom_id": 1,
+          "from_nm": [
+            -2.346705077869121,
+            -12.089373444372676
+          ],
+          "to_nm": [
+            -2.156840193936162,
+            -11.919149104605639
+          ]
+        },
+        {
+          "sim": 3049.538977998309,
+          "atom_id": 1,
+          "from_nm": [
+            -2.156840193936162,
+            -11.919149104605639
+          ],
+          "to_nm": [
+            -1.9669753100032021,
+            -11.7489247648386
+          ]
+        }
+      ],
+      "verification_scan": {
+        "index": 6,
+        "sim_start": 3056.560110000428,
+        "sim_end": 3568.560110000428,
+        "duration_sim_seconds": 512.0
+      }
+    }
+  ]
+}

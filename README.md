@@ -17,7 +17,12 @@ atom arrives, with its neighbours verified unchanged.
 
 **▶ Watch the 24-second looping replay (autoplays)**
 
-![Animated replay: Astra's recorded atom trajectory advances over measured scans, falls short, steps backwards, stalls, and reaches its destination after four attempts.](docs/assets/p4-homepage/astra-replay.gif)
+The white light follows the tip commands; the teal trail follows the atom.
+An overview stays visible throughout. Each attempt cuts from manipulation to
+a **512× rescan**, then pauses for the next adjustment; tiny corrections are
+marked as slow motion.
+
+![Animated replay with a persistent overview: a bright tip-command marker and the recorded atom trajectory show four attempts, accelerated rescans, adjustments, and verified arrival.](docs/assets/p4-homepage/astra-replay.gif)
 
 ![Task 4, easy setting, MAST enabled: Luna 0/2, Terra 0/2, Sol 0/2, Astra 2/2 verified checks. One trial per model, not success rates.](docs/assets/p4-homepage/p4-results.svg)
 

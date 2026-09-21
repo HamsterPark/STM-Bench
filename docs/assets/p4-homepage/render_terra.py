@@ -86,7 +86,11 @@ def frame_image(trial: dict, story: dict, crops: dict, marker: tuple,
     image = Image.new("RGB", (WIDTH, HEIGHT), BG)
     draw = ImageDraw.Draw(image)
     draw.text((32, 20), "Terra · recovery before movement", font=font(36, True), fill=NAVY)
-    draw.text((32, 72), "EASY  /  ONE TRIAL  /  TIME CONDENSED  /  RECORDED SCANS", font=font(18, True), fill=MUTED)
+    draw.text((32, 72), "EASY / ONE TRIAL / RECORDED SCANS", font=font(18, True), fill=MUTED)
+    draw.rounded_rectangle((510, 64, 964, 98), radius=9, fill="#E2F1EA")
+    for x in (526, 539):
+        draw.polygon(((x, 73), (x + 10, 81), (x, 89)), fill=TEAL)
+    draw.text((565, 72), "TIME COMPRESSED / CUTS", font=font(18, True), fill=TEAL)
 
     # Playback animation is deliberately outside the scientific image.
     draw.rounded_rectangle((988, 21, 1248, 84), radius=14, fill=NAVY)
@@ -193,6 +197,7 @@ def render(root: Path) -> dict:
         "annotation_scope": "Recorded scans; explanatory stationary candidate ring and animated playback/status UI. No atom trajectory or image interpolation.",
         "coordinates": {"registration": "Fixed candidate scan footprint for every image", "reference_geom": reference},
         "audit_scope": "False-alarm label is retrospective. Recovery checks are part of one MAST routine. Baseline quality is unknown; later scores are tool-reported, not measured tip health.",
+        "playback_scope": "Persistent fast-forward symbol and TIME COMPRESSED / CUTS label indicate editorial time compression; no constant numerical speedup is asserted.",
     }
     (root / "terra-scenes.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     with Image.open(root / "terra-replay.gif") as result:

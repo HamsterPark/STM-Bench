@@ -84,5 +84,6 @@
       "ny": 256
     }
   },
-  "audit_scope": "False-alarm label is retrospective. Recovery checks are part of one MAST routine. Baseline quality is unknown; later scores are tool-reported, not measured tip health."
+  "audit_scope": "False-alarm label is retrospective. Recovery checks are part of one MAST routine. Baseline quality is unknown; later scores are tool-reported, not measured tip health.",
+  "playback_scope": "Persistent fast-forward symbol and TIME COMPRESSED / CUTS label indicate editorial time compression; no constant numerical speedup is asserted."
 }

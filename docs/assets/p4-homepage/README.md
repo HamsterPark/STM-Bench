@@ -29,10 +29,12 @@ supplied to the models.
 
 [Animation](astra-replay.gif) · [Final frame](astra-replay.png)
 
-The animation begins after Astra has located an atom. Its path is the main
-visual: each pause or backward step is a recorded outcome, and a short caption
-connects the obstacle to the next adjustment. The model chose those adjustments
-after inspecting its scans; it did not see the retrospective hop-by-hop overlay.
+The animation begins after Astra has located an atom. A white/gold light shows
+commanded tip motion; the teal trail shows the atom's recorded movement. A fixed
+overview keeps all four atoms visible and marks the enlarged main view. Four
+attempts alternate **manipulation and rescanning**, with pauses for adjustments
+and final verification. The model chose its adjustments from scans, without seeing these
+retrospective overlays.
 
 | Stage | Saved scan | What the record establishes |
 |---|---:|---|
@@ -156,33 +158,37 @@ acquired scans, without adding noise or painting a different result. The derived
 images are in [scans/](scans/); image provenance and supporting event summaries
 are in [replay-evidence.json](replay-evidence.json).
 
-Astra's main view holds a fixed crop in sample coordinates. Recorded scans 2–6
-replace the background only at completed-scan checkpoints. Between measurements,
-the background remains the last acquired image while the position marker and
-trail advance through the **22 recorded atom hops**, including backwards steps
-and revisits. No intermediate atom positions are invented or interpolated. The
-last scan can still show the atom at its previous measured position while the
-marker advances: that is a held measurement, not a second atom. The final wider
-view supplies context for checking the neighbouring atoms.
+Astra uses a fixed crop in sample coordinates and a permanent overview of all
+four atoms, with a rectangle marking the main view. Recorded scans 2–6 replace
+the backgrounds only at completed-scan checkpoints. Between scans, the image can
+still show the atom at its previous measured position while the overlay advances:
+that is a held measurement, not a second atom or a live camera image.
 
-The trajectory in [replay-data.json](replay-data.json) is a retrospective overlay
-from the simulator's event record, not a live camera view or information available
-to the model. This file also retains the earlier Luna positional data; it does
-not supply a trajectory for Terra. Terra's comparison uses recorded scans and
-recovery events, without inventing atom movement. Highlights, destination
-markers, neighbour circles, captions, and the pulsing play indicator are
-presentation elements. Destination and neighbour markers use post-episode truth
-to explain the record; they were not supplied to the model.
-The pulse does not depict physical vibration or any new instrument event.
+The two moving markers have different sources:
 
-Scene timing is condensed for readability; the loops do not reproduce instrument
-speed or compare model response times. Astra renders at 10 frames per second,
-while the atom changes position only at the recorded hops. The source coordinates
-are preserved by the fixed crop; enlargement and replay pacing are display
-choices. Narration and scene references are recorded in
+- **Teal atom:** the 22 logged hops in [replay-data.json](replay-data.json),
+  including backwards steps and revisits. Atom positions are never interpolated.
+- **White/gold tip light:** interpolation between 93 successful command
+  destinations in [tip-motion.json](tip-motion.json). These are command parameters,
+  not position readbacks or a measured continuous tip path. Their approximate
+  timestamps do not establish exact motion onset or synchronization with every
+  atom hop; the source file records the timing reconstruction and its limits.
+
+Astra's 24-second loop contains 480 frames at 20 frames per second. Each recorded
+512-second verification scan occupies exactly one replay second, labelled
+**512× fast-forward**. The first two manipulations are labelled **sped up / edited**;
+the last two are **slow motion / detail**. Reading pauses and cuts are labelled,
+and model thinking time is omitted. Terra retains 80 frames over 16 seconds with
+a persistent **time compressed / cuts** label. These edited loops do not compare
+model speed or reproduce a continuous experiment clock.
+
+Paths, destination markers and neighbour circles are post-episode annotations
+unavailable to the models. Playback pulses are display cues, not physical
+vibration. Terra uses recorded scans and recovery events without an invented
+atom trajectory. The positional file also retains older Luna data. Narration
+and playback phases are recorded in the schema-3 Astra
 [replay-scenes.json](replay-scenes.json) and [terra-scenes.json](terra-scenes.json).
-Rounded image estimates from the operator record remain separate from the
-simulator's hop coordinates.
+Rounded image estimates remain separate from the simulator's hop coordinates.
 
 The original ledgers remain unchanged. Raw acquisition files, full private
 ledgers, machine paths, and credentials are not published in these assets.
