@@ -1,0 +1,527 @@
+{
+  "schema_version": 1,
+  "description": "Recorded scan renderings and event summaries for a post-episode narrative. Explanatory labels are not agent observations.",
+  "difficulty": "easy",
+  "seed": 0,
+  "trials": [
+    {
+      "model": "Astra",
+      "model_id": "gpt-6-astra",
+      "run_id": "20260921T065308.969Z",
+      "episode_sha256": "1a14f1609f368d6c2184534ab41ac6ea401a61f8dc5a35304d9afa5350687790",
+      "source_replay": "p4-easy-seed0-mode-h-gpt-6-astra.html",
+      "source_replay_sha256": "5049d1fdb255c6b594df5cf23b5c2fee2b1746e24c9214e6cfe9a3f3c838ab4d",
+      "verified_checks": 2,
+      "checks_total": 2,
+      "sim_instrument_seconds": 3228.107024000492,
+      "frames": [
+        {
+          "index": 1,
+          "image": "scans/astra-01.png",
+          "sha256": "8ec47ca4b4c7aef399befc7601ee03c014d2ed77b7776e1f1a29a223de2509c4",
+          "geom": {
+            "cx_nm": 0.0,
+            "cy_nm": 0.0,
+            "w_nm": 59.99999999999999,
+            "h_nm": 59.99999999999999,
+            "angle_deg": 0.0,
+            "nx": 256,
+            "ny": 256
+          },
+          "sim_start": 427.65836199978366,
+          "sim_end": 939.6583619997837,
+          "complete": true,
+          "drift_nm": [
+            0.0,
+            0.0
+          ],
+          "tip_events": [
+            0,
+            0
+          ]
+        },
+        {
+          "index": 2,
+          "image": "scans/astra-02.png",
+          "sha256": "675ebc00568747275ce494f2fe7373ae96f8f49e311d95a388d305b8ac71eb9a",
+          "geom": {
+            "cx_nm": -8.0,
+            "cy_nm": -13.0,
+            "w_nm": 24.0,
+            "h_nm": 24.0,
+            "angle_deg": 0.0,
+            "nx": 256,
+            "ny": 256
+          },
+          "sim_start": 953.8313600001857,
+          "sim_end": 1465.8313600001857,
+          "complete": true,
+          "drift_nm": [
+            0.0,
+            0.0
+          ],
+          "tip_events": [
+            0,
+            0
+          ]
+        },
+        {
+          "index": 3,
+          "image": "scans/astra-03.png",
+          "sha256": "6075313fe6706188c9d1539d2453b425945bc5fbd7659bf57b38343f8bc87c5d",
+          "geom": {
+            "cx_nm": -2.0044999999999997,
+            "cy_nm": -11.8242,
+            "w_nm": 24.0,
+            "h_nm": 24.0,
+            "angle_deg": 0.0,
+            "nx": 256,
+            "ny": 256
+          },
+          "sim_start": 1482.4379659979604,
+          "sim_end": 1994.4379659979604,
+          "complete": true,
+          "drift_nm": [
+            0.0,
+            0.0
+          ],
+          "tip_events": [
+            0,
+            0
+          ]
+        },
+        {
+          "index": 4,
+          "image": "scans/astra-04.png",
+          "sha256": "65b6fab022972e13b4717ea13fbde17cfc4062c4bbf680ea0c0b4eeba6092dd9",
+          "geom": {
+            "cx_nm": -2.0044999999999997,
+            "cy_nm": -11.8242,
+            "w_nm": 24.0,
+            "h_nm": 24.0,
+            "angle_deg": 0.0,
+            "nx": 256,
+            "ny": 256
+          },
+          "sim_start": 2010.8981579984538,
+          "sim_end": 2522.898157998454,
+          "complete": true,
+          "drift_nm": [
+            0.0,
+            0.0
+          ],
+          "tip_events": [
+            0,
+            0
+          ]
+        },
+        {
+          "index": 5,
+          "image": "scans/astra-05.png",
+          "sha256": "db5bf7dc08663fce5b42eeee466235c7bdbb5e51d8972c210410cd793edbb2fa",
+          "geom": {
+            "cx_nm": -1.9500000000000002,
+            "cy_nm": -11.8242,
+            "w_nm": 24.0,
+            "h_nm": 24.0,
+            "angle_deg": 0.0,
+            "nx": 256,
+            "ny": 256
+          },
+          "sim_start": 2534.2452699993737,
+          "sim_end": 3046.2452699993737,
+          "complete": true,
+          "drift_nm": [
+            0.0,
+            0.0
+          ],
+          "tip_events": [
+            0,
+            0
+          ]
+        },
+        {
+          "index": 6,
+          "image": "scans/astra-06.png",
+          "sha256": "c031b5a1f9244cfadeb4fd3c2d252b95a2d60916c7674dffe77d58630066be79",
+          "geom": {
+            "cx_nm": -2.0044999999999997,
+            "cy_nm": -11.8242,
+            "w_nm": 24.0,
+            "h_nm": 24.0,
+            "angle_deg": 0.0,
+            "nx": 256,
+            "ny": 256
+          },
+          "sim_start": 3056.560110000428,
+          "sim_end": 3568.560110000428,
+          "complete": true,
+          "drift_nm": [
+            0.0,
+            0.0
+          ],
+          "tip_events": [
+            0,
+            0
+          ]
+        }
+      ],
+      "attempts": [
+        {
+          "tool_step_index": 6,
+          "arguments": {
+            "atom_x_m": "-6.0045n",
+            "atom_y_m": "-11.8242n",
+            "verify_size_m": "24n",
+            "max_attempts": 1,
+            "target_y_m": "-11.8242n",
+            "target_x_m": "-2.0045n"
+          },
+          "summary_original": "已搬运,未复扫确认",
+          "recorded_hops": 3,
+          "last_recorded_position_nm": [
+            -5.339810175139678,
+            -11.806890034783704
+          ]
+        },
+        {
+          "tool_step_index": 7,
+          "arguments": {
+            "manip_speed_m_s": "100p",
+            "verify_size_m": "24n",
+            "max_attempts": 1,
+            "target_y_m": "-11.8242n",
+            "atom_x_m": "-5.3383n",
+            "atom_y_m": "-11.8102n",
+            "target_x_m": "-2.0045n"
+          },
+          "summary_original": "已搬运,未复扫确认",
+          "recorded_hops": 16,
+          "last_recorded_position_nm": [
+            -2.156840193936162,
+            -11.919149104605639
+          ]
+        },
+        {
+          "tool_step_index": 8,
+          "arguments": {
+            "target_x_m": "-1.95n",
+            "max_attempts": 1,
+            "approach_offset_m": "100p",
+            "verify_size_m": "24n",
+            "target_y_m": "-11.8242n",
+            "atom_x_m": "-2.163n",
+            "manip_speed_m_s": "100p",
+            "atom_y_m": "-11.9174n"
+          },
+          "summary_original": "已搬运,未复扫确认",
+          "recorded_hops": 0,
+          "last_recorded_position_nm": null
+        },
+        {
+          "tool_step_index": 9,
+          "arguments": {
+            "verify_size_m": "24n",
+            "max_attempts": 1,
+            "atom_y_m": "-11.9129n",
+            "target_x_m": "-2.0045n",
+            "manip_setpoint_a": "70n",
+            "target_y_m": "-11.8242n",
+            "atom_x_m": "-2.1571n",
+            "manip_speed_m_s": "100p"
+          },
+          "summary_original": "已搬运,未复扫确认",
+          "recorded_hops": 3,
+          "last_recorded_position_nm": [
+            -1.9669753100032021,
+            -11.7489247648386
+          ]
+        }
+      ],
+      "tip_events": [],
+      "image_estimates": {
+        "selected_start_nm": [
+          -6.0045,
+          -11.8242
+        ],
+        "requested_target_nm": [
+          -2.0045,
+          -11.8242
+        ],
+        "positions_by_frame": {
+          "2": [
+            -6.0045,
+            -11.8242
+          ],
+          "3": [
+            -5.3383,
+            -11.8102
+          ],
+          "4": [
+            -2.163,
+            -11.9174
+          ],
+          "5": [
+            -2.1571,
+            -11.9129
+          ],
+          "6": [
+            -1.9649,
+            -11.7423
+          ]
+        },
+        "displacement_by_attempt_nm": [
+          0.67,
+          3.84,
+          3.84,
+          4.04
+        ],
+        "largest_neighbour_shift_nm": 0.018,
+        "localization_uncertainty_nm": 0.05,
+        "source": "Recorded operator messages and original Astra transcript; rounded image estimates, not hidden coordinates."
+      }
+    },
+    {
+      "model": "Terra",
+      "model_id": "gpt-5.6-terra",
+      "run_id": "20260920T153441.078Z",
+      "episode_sha256": "7d52bf80892c9cbbab049529ade48e8714ea8c6e0e1a510c6cf38b675959fbd4",
+      "source_replay": "p4-easy-seed0-mode-h-gpt-5.6-terra.html",
+      "source_replay_sha256": "bf9dd2046e57a4950e2ab32d721aa61ed707b3e160a3269ccb35fda86655ef03",
+      "verified_checks": 0,
+      "checks_total": 2,
+      "sim_instrument_seconds": 1916.3116160000209,
+      "frames": [
+        {
+          "index": 1,
+          "image": "scans/terra-01.png",
+          "sha256": "d9bc6dd77ff992401127de7cc43d64d45160a514bedfcf0e97672eb81595d4a0",
+          "geom": {
+            "cx_nm": 0.0,
+            "cy_nm": 0.0,
+            "w_nm": 59.99999999999999,
+            "h_nm": 59.99999999999999,
+            "angle_deg": 0.0,
+            "nx": 256,
+            "ny": 256
+          },
+          "sim_start": 842.6631380000617,
+          "sim_end": 1098.6631380000617,
+          "complete": true,
+          "drift_nm": [
+            0.0,
+            0.0
+          ],
+          "tip_events": [
+            0,
+            0
+          ]
+        },
+        {
+          "index": 2,
+          "image": "scans/terra-02.png",
+          "sha256": "8b7dce4ccc4fe861a37fb00e461cef76e4b05718272beda39d9e45f5d8a4a86d",
+          "geom": {
+            "cx_nm": 0.0,
+            "cy_nm": 0.0,
+            "w_nm": 29.999999999999996,
+            "h_nm": 29.999999999999996,
+            "angle_deg": 0.0,
+            "nx": 256,
+            "ny": 256
+          },
+          "sim_start": 1141.129302000627,
+          "sim_end": 1653.129302000627,
+          "complete": true,
+          "drift_nm": [
+            0.0,
+            0.0
+          ],
+          "tip_events": [
+            0,
+            0
+          ]
+        },
+        {
+          "index": 3,
+          "image": "scans/terra-03.png",
+          "sha256": "41c44fa16a9da25885bd0cb74c00981177feb9a8735b38dc5792a9ff4693eabb",
+          "geom": {
+            "cx_nm": -12.4,
+            "cy_nm": 11.1,
+            "w_nm": 6.0,
+            "h_nm": 6.0,
+            "angle_deg": 0.0,
+            "nx": 256,
+            "ny": 256
+          },
+          "sim_start": 1666.4577940001618,
+          "sim_end": 2280.857803095109,
+          "complete": true,
+          "drift_nm": [
+            0.0,
+            0.0
+          ],
+          "tip_events": [
+            0,
+            0
+          ]
+        },
+        {
+          "index": 4,
+          "image": "scans/terra-04.png",
+          "sha256": "5b97f56f6e057c9b084121742b0bb5eca2dd1312f907b8b6eabda46d383d5a10",
+          "geom": {
+            "cx_nm": -12.4,
+            "cy_nm": 11.1,
+            "w_nm": 10.0,
+            "h_nm": 10.0,
+            "angle_deg": 0.0,
+            "nx": 256,
+            "ny": 256
+          },
+          "sim_start": 2303.0881560011767,
+          "sim_end": 2354.288155091682,
+          "complete": true,
+          "drift_nm": [
+            0.0,
+            0.0
+          ],
+          "tip_events": [
+            0,
+            0
+          ]
+        },
+        {
+          "index": 5,
+          "image": "scans/terra-05.png",
+          "sha256": "b32c3627cca58b21bf72ebb7ee1d1e43af61a22f290b3e24722b94dc93427cb9",
+          "geom": {
+            "cx_nm": -12.4,
+            "cy_nm": 11.1,
+            "w_nm": 10.0,
+            "h_nm": 10.0,
+            "angle_deg": 0.0,
+            "nx": 256,
+            "ny": 256
+          },
+          "sim_start": 2375.334006000776,
+          "sim_end": 2426.534005091281,
+          "complete": true,
+          "drift_nm": [
+            0.0,
+            0.0
+          ],
+          "tip_events": [
+            1,
+            1
+          ]
+        },
+        {
+          "index": 6,
+          "image": "scans/terra-06.png",
+          "sha256": "42430688a3d8cdc2ef2a370c470eeed152783546a2e56c97913b02a6873c135d",
+          "geom": {
+            "cx_nm": -12.4,
+            "cy_nm": 11.1,
+            "w_nm": 10.0,
+            "h_nm": 10.0,
+            "angle_deg": 0.0,
+            "nx": 256,
+            "ny": 256
+          },
+          "sim_start": 2444.6535020007286,
+          "sim_end": 2495.8535010912337,
+          "complete": true,
+          "drift_nm": [
+            0.0,
+            0.0
+          ],
+          "tip_events": [
+            2,
+            2
+          ]
+        },
+        {
+          "index": 7,
+          "image": "scans/terra-07.png",
+          "sha256": "9abbe42db446d51473646d0aeecfd7a94145c72d58e9ba87a1c727d938ddea4c",
+          "geom": {
+            "cx_nm": -12.4,
+            "cy_nm": 11.1,
+            "w_nm": 10.0,
+            "h_nm": 10.0,
+            "angle_deg": 0.0,
+            "nx": 256,
+            "ny": 256
+          },
+          "sim_start": 2513.6041620001197,
+          "sim_end": 2564.804161090625,
+          "complete": true,
+          "drift_nm": [
+            0.0,
+            0.0
+          ],
+          "tip_events": [
+            3,
+            3
+          ]
+        }
+      ],
+      "attempts": [],
+      "tip_events": [
+        {
+          "sim": 2364.730446001049,
+          "cause": "pulse",
+          "detail": {
+            "v": 2.019999999552965,
+            "width_s": 0.05000000074505806,
+            "outcome": "no_effect",
+            "dz_m": -8.29478412978071e-12
+          }
+        },
+        {
+          "sim": 2436.585568001028,
+          "cause": "pulse",
+          "detail": {
+            "v": 2.019999999552965,
+            "width_s": 0.05000000074505806,
+            "outcome": "no_effect",
+            "dz_m": -1.0648524793452869e-10
+          }
+        },
+        {
+          "sim": 2505.7735780009534,
+          "cause": "pulse",
+          "detail": {
+            "v": 2.019999999552965,
+            "width_s": 0.05000000074505806,
+            "outcome": "no_effect",
+            "dz_m": 6.204382511988939e-10
+          }
+        }
+      ],
+      "diagnostic_context": {
+        "warning_frame": 3,
+        "audit_reproduced_change_row": 119,
+        "warning_row_source": "The retained analysis reply is truncated before the warning details. Row 119 comes from offline reproduction; the model's final report independently confirms receipt of a tip-change warning.",
+        "tool_reported_quality": [
+          null,
+          0,
+          0,
+          0
+        ],
+        "quality_threshold": 0.3,
+        "quality_source": "The retained ConditionTip driver preview records quality_history [0, 0, 0] after the three pulses. The baseline score was not retained; null is unknown, not zero.",
+        "recovery_scan_indices": [
+          4,
+          5,
+          6,
+          7
+        ],
+        "post_episode_audit": "No corresponding tip event during frame 3. The stability warning was a false positive. The quality metric can return zero for these scans without establishing a bad tip; full original tool replies are not retained.",
+        "audit_source": "Recorded events and the 2026-09-20/21 three-model development audit; diagnostic interpretation is retrospective."
+      }
+    }
+  ]
+}

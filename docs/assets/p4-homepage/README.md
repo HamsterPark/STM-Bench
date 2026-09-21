@@ -1,38 +1,106 @@
-# Task 4: move one atom
+# Task 4: observe, act, check, and adjust
 
-Move one atom to the requested destination without disturbing its neighbours.
-The homepage shows two short, contrasting replays from the same starting scene:
-Astra checks and adjusts until it succeeds; Luna requests a move from an empty
-spot and reports completion, although no atom moves.
+The task is to move one atom to a destination without disturbing its neighbours.
+A command does not guarantee a successful move: the model must locate a candidate
+in measured images, inspect what happened, and decide whether to change its
+settings, try again, or stop. The homepage shows Astra's successful correction
+loop and Terra's unsuccessful recovery from a diagnostic warning.
 
 ![Four models, one trial each: Luna 0/2, Terra 0/2, Sol 0/2, Astra 2/2 verified checks.](p4-results.svg)
 
 The score counts **two verified task checks**: the atom is at its destination,
 and its neighbours are preserved. Verification includes the required measurement
 evidence. An unverified check does not mean a neighbour was moved or damaged.
+These single trials do not estimate success rates or establish a model ranking.
 
-## Watch without animation
+## Read the replays at your own pace
 
-The storyboards retain every narrative stage of the homepage animations.
+The storyboards retain the scans, decisions, and outcomes from the homepage
+animations. The scan panels are replay renderings of acquired simulated scans,
+not pixel-identical copies of the agent's interface. Explanatory annotations
+were added after the episode and were not guidance supplied to the models.
 
-### Astra: verified success
+### Astra: success requires repeated measurement
 
-![Astra: finds an atom; first move falls short; adjusts and tries again; a correction changes nothing; adjusts again; reaches the target with neighbours unchanged.](astra-replay-storyboard.png)
+![Astra searches, inspects a candidate, measures a short first move, adjusts its settings, finds that a correction changed nothing, and verifies the final arrival.](astra-replay-storyboard.png)
 
 [Animation](astra-replay.gif) · [Final frame](astra-replay.png)
 
-### Luna: unsuccessful attempt
+| Stage | Saved scan | What the record establishes |
+|---|---:|---|
+| Search and inspect | 1–2 | An overview is followed by a closer scan of the chosen region. |
+| First move falls short | 3 | The first attempt produces three recorded atom hops, far short of the requested destination. |
+| Adjust and measure again | 4 | A slower move produces 16 hops and brings the atom close to the destination. |
+| A correction changes nothing | 5 | The third attempt records no atom hops. Another scan establishes that outcome. |
+| Adjust again and verify | 6 | The fourth attempt produces three hops. The final report and required evidence pass both task checks. |
 
-![Luna: looks for an atom; chooses an empty spot; requests a move; reports success; the recorded state shows no atom moved.](luna-replay-storyboard.png)
+There were **four move attempts, six saved scans, and about 54 simulated instrument
+minutes**. The 22 recorded hops include backwards steps and revisits; they are not
+22 distinct sites or a count of successful commands. Each manipulation attempt
+was followed by a scan. The final atom position matches the target, and the three
+relevant neighbours remain in place.
 
-[Animation](luna-replay.gif) · [Final frame](luna-replay.png)
+### Terra: recovery from an imperfect diagnostic
 
-## Trial conditions and evidence
+![Terra searches the surface, inspects a real candidate, receives a stability warning, tries three recovery pulses with follow-up scans, and stops without claiming success.](terra-replay-storyboard.png)
+
+[Animation](terra-replay.gif) · [Final frame](terra-replay.png)
+
+**The warning was a false alarm.** This episode exposes a limitation in MAST's
+diagnostic tools; it is not evidence that the physical tip became unstable. The
+reported image-quality scores also cannot be treated as the true tip quality.
+
+| Stage | Saved scan | What the record establishes |
+|---|---:|---|
+| Search the surface | 1–2 | Terra acquires two views, runs feature detection, and exports measured data to locate a candidate. |
+| Inspect a candidate | 3 | A closer view contains a real, isolated atom. Image analysis flags a possible tip change, and Terra reports the tip as unstable. |
+| Assess before recovery | 4 | The conditioning tool acquires an assessment scan before applying a pulse. |
+| Try three recovery steps | 5–7 | Each pulse is followed by a complete scan. The tool reports quality zero and never reaches its requested threshold. |
+| Stop without a result | 7 | Terra ends the episode without moving an atom or submitting a completion report. |
+
+The post-episode audit reproduced the warning near image row 119, but the
+simulator's tip history contains no corresponding change. The first recorded
+tip events are the later recovery pulses themselves. All three pulses have the
+recorded outcome `no_effect`: the tip's single-apex shape remains unchanged,
+although its length changes.
+
+The model's final report confirms receiving a tip-change warning. The original
+analysis reply is truncated before its details, so the exact row marker in the
+animation is labelled as an audit reproduction, not a retained original reading.
+
+The retained recovery summary records three post-pulse scores of zero. Its
+baseline score was not retained, so the replay shows that value as unknown.
+The offline re-evaluation below is separate from those recorded tool results.
+
+Offline evaluation of all seven saved scans also returned zero from the quality
+metric: its sampled angular ring had fewer pixels than the required bins, which
+caused an early zero return. That score does not establish a bad tip. The saved
+tool replies are truncated, so additional evaluation errors during the episode
+cannot be excluded. Terra attempted recovery, but neither it nor the support
+tools resolved the misleading diagnosis.
+
+## All four outcomes
+
+| Model | Verified checks | Recorded atom hops | Saved scans | Recorded outcome |
+|---|---:|---:|---:|---|
+| Luna (`gpt-5.6-luna`) | 0/2 | 0 | 3 | Completed scans and detector retries, then reported an unconfirmed move from a location without an atom. |
+| Terra (`gpt-5.6-terra`) | 0/2 | 0 | 7 | Attempted recovery after a false diagnostic warning; stopped without a result. |
+| Sol (`gpt-5.6-sol`) | 0/2 | 0 | 1 | Located a plausible candidate but did not recover from parameter errors obscured by generic tool messages. |
+| Astra (`gpt-6-astra`) | 2/2 | 22 | 6 | Repeated measurement and adjustment; both checks independently verified. |
+
+Luna's detector eventually returned 218 heuristic candidates, but these did not
+establish a valid atom at its chosen start. Its move tool returned an unconfirmed
+result; the model nevertheless submitted both claims. This is a localization
+and verification failure, with imperfect tool feedback also relevant. Sol's
+rejected calls contained actual parameter errors; its failure is not evidence
+that valid commands were rejected. Neither Terra nor Sol claimed completion.
+
+## Trial conditions and provenance
 
 Recorded **20–21 September 2026 (UTC)**. These are one-seed development trials,
-not success-rate estimates or a published leaderboard. **High difficulty was not
-tested in these episodes.** The experimental trial build is identified by its
-source fingerprint in [results.json](results.json).
+not a published mode-A leaderboard. **High difficulty was not tested in these
+episodes.** The recorded experimental build is identified by its source
+fingerprints in [results.json](results.json).
 
 | Setting | Recorded value |
 |---|---|
@@ -45,46 +113,59 @@ source fingerprint in [results.json](results.json).
 | Instrument budget | 5,400 simulated seconds; 200,000 controller commands |
 | External-agent limits | 80 actions or 20 wall-clock minutes |
 
-| Model | Verified checks | Recorded atom hops | Saved scans | Run ID |
-|---|---:|---:|---:|---|
-| Luna (`gpt-5.6-luna`) | 0/2 | 0 | 3 | `20260920T151024.658Z` |
-| Terra (`gpt-5.6-terra`) | 0/2 | 0 | 7 | `20260920T153441.078Z` |
-| Sol (`gpt-5.6-sol`) | 0/2 | 0 | 1 | `20260920T154740.074Z` |
-| Astra (`gpt-6-astra`) | 2/2 | 22 | 6 | `20260921T065308.969Z` |
-
 The easy profile begins with a sharp tip, disables linear drift and creep, and
-reduces electronic noise. Stochastic manipulation, lattice constraints, finite
-capture range and differences between atoms remain active. Observation limits
-are procedural, not operating-system isolation. The MAST support fingerprint
-covers the source subtrees recorded by the harness, not the entire environment.
+scales electronic noise amplitude to 0.25. Stochastic manipulation, lattice
+constraints, finite capture range and differences between atoms remain active.
+The images still have measurement structure and noise. **Changes of view between
+scans are commanded reframing or zooming, not evidence of drift.** These replays
+do not demonstrate recovery from a poor starting tip or a drifting sample.
 
-The task allows **any isolated atom**. Astra selected an actual atom and made
-four move attempts with 3, 16, 0 and 3 recorded hops, each followed by a scan.
-Its final position matches the target, and the three relevant neighbours stay
-in place. Luna requested a move from `(0, 0)` to `(4, 0)` nm; its chosen starting
-point was empty. It submitted a completion report without any recorded atom
-movement. Its neighbour check is unverified because qualifying manipulation
-evidence is missing; it is not evidence of damage.
+Observation limits were procedural, not operating-system isolation. Model
+thinking paused the instrument clock. The instrument time quoted above is not
+model response latency, animation duration, or a model speed comparison.
 
-## How the animations are made
+| Model | Run ID |
+|---|---|
+| Luna | `20260920T151024.658Z` |
+| Terra | `20260920T153441.078Z` |
+| Sol | `20260920T154740.074Z` |
+| Astra | `20260921T065308.969Z` |
 
-These are **simplified post-episode views of recorded simulator positions**, not
-microscope footage or a display available to the evaluated models. Positions keep
-their spatial scale; dots are enlarged, and each panel shows the area relevant to
-that model's attempt. Only Astra has a selected atom highlighted. Luna's cross
-and circle mark its requested start and destination, not existing atoms.
+Recorded source fingerprints:
 
-Every displayed movement uses a recorded position, including backwards steps and
-revisits. There is no interpolated atom motion. Arrows show requested moves, not
-measured tip paths. Pauses and time compression are chosen for readability and
-must not be used to compare model speed. The animations loop in about 19 seconds
-(Astra) and 15 seconds (Luna).
+- Simulator and benchmark: `164f01def8cb16886d6110cb55d34aa8edaa28789d8131ecc313b4ece02f1ccc`.
+- MAST support: `12e93759433aea0b93a46faa24134dd002ce4ad1848e4f30e70062f9ba01c8bc`.
 
-[results.json](results.json) holds aggregate outcomes and hashes of the original
-episode records. [replay-data.json](replay-data.json) holds the derived positions,
-command intervals and source replay hashes needed to reproduce the animations.
-The original records were not modified. Raw acquisition files, private paths,
-and model credentials are not included in these assets.
+The MAST fingerprint covers the source subtrees recorded by the harness, not
+the entire environment. The aggregate data also includes hashes of the original
+episode records.
+
+## How these replays are made
+
+These are **condensed, annotated replays of recorded simulated measurements**.
+The scan panels use the PNG renderings extracted from the existing replays of
+acquired scans, without adding noise or painting a different result. The derived
+images are in [scans/](scans/); image provenance and supporting event summaries are in
+[replay-evidence.json](replay-evidence.json). Highlights, targets, and
+observation/decision/outcome cards are explanatory overlays. They do not create
+new measurements or environmental events. The models did not receive post-run
+truth overlays during their trials.
+
+Scene timing is compressed for readability. Read the displayed scans and the
+outcomes together: a completed command is not proof of a completed experiment.
+Each animation loops in about one minute. [replay-scenes.json](replay-scenes.json)
+contains the displayed narration and the scan used for each scene. Astra's enlarged
+crop keeps the same sample coordinates across scans; its goal line marks the
+requested x position, not a hidden truth coordinate. Movement totals are rounded
+image estimates from the operator record, separate from the simulator's hop log.
+The original ledgers remain unchanged. Raw acquisition files, full private
+ledgers, machine paths, and credentials are not published in these assets.
+
+[replay-data.json](replay-data.json) retains the derived positional source for
+the earlier simplified Astra/Luna animations as an archived artifact. It does
+not describe the current Terra replay. The four-model scorecard remains based
+on [results.json](results.json); this presentation update does not change scores,
+experimental conditions, or episode records.
 
 Regenerate the assets with Python, Matplotlib and Pillow installed:
 
@@ -93,7 +174,9 @@ python docs/assets/p4-homepage/generate_results.py
 python docs/assets/p4-homepage/generate_replays.py
 ```
 
-The generators check the recorded scores, move counts and final target position
-before rendering. They do not rerun the experiments. The root README uses only
-relative image links to the SVG chart and GIFs; it needs no embedded script,
-external hosting or live instrument connection.
+The generators render existing evidence; they do not rerun the experiments.
+To re-extract the scan PNGs and provenance from the original standalone replay
+files, run `export_evidence.py --replay-dir <replay-directory>` from this folder.
+Regenerating the figures themselves uses the included images and JSON only.
+The root README uses relative image links and requires no live instrument
+connection or embedded script.

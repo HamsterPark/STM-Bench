@@ -1,0 +1,162 @@
+[
+  {
+    "model": "Astra",
+    "file": "astra-replay.gif",
+    "duration_ms": 66000,
+    "frames": 8,
+    "scenes": [
+      {
+        "frame": 1,
+        "title": "Find a target in a measured image",
+        "observation": "The automatic finder returns no candidates, even though bright spots are visible.",
+        "response": "Inspect the scan and zoom into a promising area.",
+        "evidence": "A tool's empty candidate list does not settle what is on the surface.",
+        "attempts": 0,
+        "duration": 8000
+      },
+      {
+        "frame": 2,
+        "title": "Establish a reference before moving",
+        "observation": "The closer scan resolves five spots. Astra identifies an isolated atom.",
+        "response": "Measure its position and record the nearby atoms before requesting a move.",
+        "evidence": "The final check must cover the neighbours as well as the selected atom.",
+        "attempts": 0,
+        "duration": 8000
+      },
+      {
+        "frame": 3,
+        "title": "The first move falls well short",
+        "observation": "A new scan shows only about 0.67 nm of the requested 4 nm move.",
+        "response": "Use the newly measured position to plan another attempt.",
+        "evidence": "Tool summary: moved; rescan not confirmed. The image reveals the shortfall.",
+        "attempts": 1,
+        "duration": 8000
+      },
+      {
+        "frame": 3,
+        "title": "Change how the atom is moved",
+        "observation": "The atom stopped long before the destination. Repeating the command alone is not enough evidence.",
+        "response": "Slow the motion fivefold, keep the same destination, then scan again.",
+        "evidence": "Second attempt: the speed changes from 0.5 to 0.1 nm/s.",
+        "attempts": 1,
+        "duration": 8000
+      },
+      {
+        "frame": 4,
+        "title": "Closer, but still unfinished",
+        "observation": "The next scan shows about 3.84 nm of movement. A small error remains.",
+        "response": "Try a short correction and acquire another image.",
+        "evidence": "Near the destination is not the same as a verified final position.",
+        "attempts": 2,
+        "duration": 8000
+      },
+      {
+        "frame": 5,
+        "title": "A correction makes no progress",
+        "observation": "Another scan puts the atom in the same place. The third attempt has stalled.",
+        "response": "Increase the interaction strength modestly while keeping the slower motion.",
+        "evidence": "Post-run record: this attempt produced zero atom hops, despite the usual tool summary.",
+        "attempts": 3,
+        "duration": 8000
+      },
+      {
+        "frame": 6,
+        "title": "Adjust, then measure again",
+        "observation": "The final scan places the atom at its destination after a stronger fourth attempt.",
+        "response": "Compare this scan with the reference, checking the atom and all three neighbours.",
+        "evidence": "The final adjustment included a backwards hop before reaching the target.",
+        "attempts": 4,
+        "duration": 8000
+      },
+      {
+        "frame": 6,
+        "title": "Verify the whole result",
+        "observation": "The atom has moved about 4.04 nm. Neighbours remain in place within the image uncertainty.",
+        "response": "Submit the measured results for independent verification.",
+        "evidence": "2/2 checks pass: target position and neighbour preservation, with measurement evidence.",
+        "attempts": 4,
+        "duration": 10000
+      }
+    ]
+  },
+  {
+    "model": "Terra",
+    "file": "terra-replay.gif",
+    "duration_ms": 66000,
+    "frames": 8,
+    "scenes": [
+      {
+        "frame": 1,
+        "title": "Search an uneven surface",
+        "observation": "The survey contains small bright spots against a strong background.",
+        "response": "Take a smaller, more detailed scan to narrow the search.",
+        "evidence": "The model must find a usable atom before any manipulation can begin.",
+        "attempts": 0,
+        "duration": 8000
+      },
+      {
+        "frame": 2,
+        "title": "Inspect a candidate more closely",
+        "observation": "The second survey identifies a promising area for a close-up scan.",
+        "response": "Inspect that area at higher resolution before trying to move an atom.",
+        "evidence": "Post-run check: the chosen area really contains an isolated atom.",
+        "attempts": 0,
+        "duration": 8000
+      },
+      {
+        "frame": 3,
+        "title": "A warning interrupts the plan",
+        "observation": "The analysis tool flags a possible tip change partway through this scan.",
+        "response": "Terra reports suspected instability and calls a recovery routine, capped at three attempts.",
+        "evidence": "Post-run audit: no tip change occurred in this scan. The warning was a false alarm.",
+        "attempts": 0,
+        "duration": 8000
+      },
+      {
+        "frame": 4,
+        "title": "Check the recovery baseline",
+        "observation": "The routine acquires a baseline image before applying a pulse.",
+        "response": "The MAST routine begins its bounded sequence of conditioning pulses and checks.",
+        "evidence": "The baseline quality score was not retained. The three later scores are recorded.",
+        "attempts": 0,
+        "duration": 8000
+      },
+      {
+        "frame": 5,
+        "title": "First recovery attempt",
+        "observation": "After one pulse and a fresh scan, the tool reports zero quality.",
+        "response": "The recovery routine proceeds to its second allowed attempt.",
+        "evidence": "This is tool-reported quality, not a direct measurement of tip health.",
+        "attempts": 1,
+        "duration": 8000
+      },
+      {
+        "frame": 6,
+        "title": "Second recovery attempt",
+        "observation": "A second pulse and scan do not improve the reported score.",
+        "response": "The routine uses its final allowed recovery attempt.",
+        "evidence": "The model is now trying to restore confidence in a measurement before acting on it.",
+        "attempts": 2,
+        "duration": 8000
+      },
+      {
+        "frame": 7,
+        "title": "Third recovery attempt",
+        "observation": "The third pulse is followed by another scan. The score remains below the requested threshold.",
+        "response": "The routine returns without establishing successful recovery.",
+        "evidence": "All seven scans were saved. The quality metric could return zero on these images without proving a bad tip.",
+        "attempts": 3,
+        "duration": 8000
+      },
+      {
+        "frame": 7,
+        "title": "Stop without claiming success",
+        "observation": "After three recovery attempts, the measurement remains unverified.",
+        "response": "Terra stops. It reports no completed atom movement and submits no success claim.",
+        "evidence": "0/2 checks. Post-run audit exposes a false alarm and a limitation of the MAST quality metric.",
+        "attempts": 3,
+        "duration": 10000
+      }
+    ]
+  }
+]

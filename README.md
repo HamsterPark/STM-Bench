@@ -6,19 +6,32 @@ A **software scanning tunnelling microscope** and a benchmark that asks one ques
 
 ## Watch task 4: move one atom
 
-Move one atom to a target, leaving nearby atoms in place. The benchmark checks
-what actually happened, alongside the model's report.
+Move one atom to a target, leaving nearby atoms in place. A move command can
+produce a short step—or no movement. The model must inspect noisy scans, adjust
+its approach, and verify the outcome through imperfect tools. All four trials
+used **the same starting scene and MAST support, on easy**: a good starting tip
+and no drift. With one trial per model, these are demonstrations, not success-rate
+estimates.
 
 ![Task 4, easy setting, MAST enabled: Luna 0/2, Terra 0/2, Sol 0/2, Astra 2/2 verified checks. One trial per model, not success rates.](docs/assets/p4-homepage/p4-results.svg)
 
-| Astra · Verified success | Luna · Unsuccessful attempt |
-|:---:|:---:|
-| ![Astra finds an atom, checks each move, and adjusts until the atom reaches the target. Nearby atoms stay in place.](docs/assets/p4-homepage/astra-replay.gif) | ![Luna requests a move from an empty spot and reports success, but no atom moves.](docs/assets/p4-homepage/luna-replay.gif) |
-| Checks the result and adjusts until the atom arrives. | Reports completion, but no atom actually moves. |
+**Astra · Success after four attempts and six scans.** The first move falls short;
+a later correction changes nothing. Astra re-scans and changes settings until
+independent checks confirm that the atom arrived and its neighbours stayed put.
+The episode consumed about **54 simulated instrument minutes**.
 
-Same starting scene and MAST support, **easy setting**, one trial per model.
-The animations condense recorded positions into a simplified view.
-[Still frames and trial details](docs/assets/p4-homepage/README.md).
+![Astra's recorded scans show a short first move, further adjustment, a correction with no movement, and a verified arrival.](docs/assets/p4-homepage/astra-replay.gif)
+
+**Terra · A warning leads to three recovery attempts, then a stop.** Terra finds a
+candidate, receives a stability warning, tries to restore image quality, and
+stops without claiming completion. The post-run audit found a **false alarm and
+a limitation in MAST's quality metric**, which could report zero without
+establishing a bad tip. The episode exposes an unresolved diagnostic problem;
+it does not establish a changing physical environment.
+
+![Terra's recorded scans show the search, candidate inspection, a diagnostic warning, three recovery attempts, and a cautious stop without a result.](docs/assets/p4-homepage/terra-replay.gif)
+
+[Read the scans and decisions at your own pace; view trial details](docs/assets/p4-homepage/README.md).
 
 ## About the benchmark
 
