@@ -1,8 +1,42 @@
 # STM-Bench
 
+**English** · [中文](README.zh-CN.md)
+
 A **software scanning tunnelling microscope** and a benchmark that asks one question of it:
 
 > Give a model a simulated STM. Can it reproduce a classic, simple STM paper?
+
+## Why operating an STM is hard
+
+An STM scans a conducting tip close to a surface and measures a tiny tunnelling
+current. In constant-current imaging, feedback adjusts the tip height as it moves.
+The current depends approximately exponentially on the tip–sample separation:
+atomic-scale sensitivity also makes small disturbances matter. Image contrast and
+spectra depend on both the sample and the tip, so interpreting a feature requires
+knowing whether the measurement conditions are trustworthy. See the
+[Tersoff–Hamann theory](https://doi.org/10.1103/PhysRevB.31.805) for the imaging
+principle and its assumptions.
+
+STM-Bench models several difficulties that turn this into an ongoing control and
+diagnosis problem:
+
+| Operating difficulty | What the agent must handle here |
+|---|---|
+| **The tip state is hidden.** A blunt or multiple-apex tip can blur or duplicate surface features; tip electronic states can alter a spectrum. | Use images, spectra and instrument signals to assess measurement quality, decide whether to condition the tip, and check the result. A diagnosis can remain uncertain. |
+| **Controls interact.** Bias and current setpoint affect the junction; feedback gains and scan speed affect how well the tip follows the surface. | Choose settings for the next measurement and check for noise, saturation or unstable feedback. A setting that worked for imaging may be unsuitable for manipulation. |
+| **Coordinates change with time and history.** Thermal drift, piezoelectric creep and hysteresis shift or distort the correspondence between commanded position and the sample. | Relocate features, track drift and verify compensation across scans and spectra. An old target coordinate can become stale. See [Yothers et al.](https://arxiv.org/abs/1611.00243) for these scanner effects. |
+| **Actions change later measurements.** Tip conditioning can improve or worsen the tip; an atom may follow a move only partway, remain still, or disturb a neighbour. | Inspect again after intervention and adapt to the observed outcome. The simulator makes manipulation depend on junction resistance, speed, tip condition and local environment; [Chen et al.](https://www.nature.com/articles/s41467-022-35149-w) discuss related challenges in real STM manipulation. |
+
+Each task therefore requires a loop of **observe → diagnose → adjust → measure →
+verify**, within an instrument-time budget. Targets vary by seed, and numerical
+claims need both a reported value and the required acquisition evidence. The judge
+checks that those measurements occurred; it does not prove that the reported value
+was calculated from them.
+
+These are simplified models of selected STM difficulties; physical fidelity and
+transfer to a real instrument require separate validation. For a broader account
+of the experimental challenge, see
+[MAST-public's STM introduction](https://github.com/HamsterPark/MAST-public#what-is-stm).
 
 ## Task 4: move one atom
 
@@ -54,9 +88,13 @@ and single trials do not estimate success rates.
 
 **Alpha research prototype.** This release contains the simulator, paper scenarios,
 measurement-aware judge, episode harness and replay tools. The simulator can be used without
-MAST; full benchmark episodes require the separate MAST runtime. There is no published
-mode-A leaderboard yet. The older trials in the historical-evidence section predate the
-current physics and have not been rerun on this release.
+MAST; full benchmark episodes require the separate MAST runtime. The available
+[MAST-public](https://github.com/HamsterPark/MAST-public) repository is a reduced source
+edition, not the complete MAST environment used for benchmark development. The two
+public repositories do not currently provide a way for readers to reproduce full
+benchmark episodes under the authors' conditions. There is no published mode-A
+leaderboard yet. The older trials in the historical-evidence section predate the current
+physics and have not been rerun on this release.
 
 Driving the instrument is the core of the task and analysing the data is the support. There
 are no skill tiers and no human anchor: whether a person could do it is not the question.
@@ -143,11 +181,26 @@ protocol or establish compatibility with every controller command.
 The simulator's core dependencies are numpy, scipy and pyyaml. The installation above also
 includes test and report dependencies. It does **not** install MAST.
 
-**MAST as a dependency path.** The benchmark drives MAST v2 (the multi-agent STM stack;
-a separate repository, not on PyPI) and uses its patched `nanonis_spm` client as the
-oracle for the wire codec. Run inside MAST's virtual environment (it carries `langgraph`,
-`nanonis_spm`, `torch`…) and make its `MASTv2` package directory importable. For a checkout
-that is not already on the import path, use:
+**What MAST supplies.** MAST (Modular Autonomous SPM Toolkit) is the separate STM agent
+and instrument-control system. The episode harness uses its `CoreRuntime`, instrument
+skills and agent loop; replay and the mode-H page use its `.sxm` reader. Its patched
+`nanonis_spm` client is also the wire-codec oracle for integration checks.
+
+**Public availability.** [MAST-public](https://github.com/HamsterPark/MAST-public) publishes
+selected MAST 6.5.0 source, including general agent and instrument-control components,
+but [omits some specialized modules, knowledge assets, model weights, calibration and
+site configuration](https://github.com/HamsterPark/MAST-public/blob/main/docs/OPEN_SOURCE_NOTES.md).
+It is not the complete MAST environment used for this benchmark's development trials.
+With only STM-Bench and MAST-public, readers cannot reproduce the full mode-A, mode-C or
+mode-H benchmark episodes or the showcased trials under the recorded conditions. No
+public end-to-end reproduction setup has been validated. The private calibration corpus
+and historical episode ledgers are also not released. The standalone simulator and the
+MAST-independent physics, scenario and judge checks remain available.
+
+**For a complete MAST environment.** The commands below describe the maintainer's
+dependency path; they are not setup instructions that make MAST-public equivalent to it.
+Use MAST's virtual environment (with its own dependencies) and make its `MASTv2` package
+directory importable. For a checkout that is not already on the import path, use:
 
 ```bash
 export MAST_ROOT=/path/to/MAST
@@ -156,10 +209,9 @@ export PYTHONPATH="$MAST_ROOT/MASTv2${PYTHONPATH:+:$PYTHONPATH}"
 
 Setting `MAST_ROOT` alone adds that directory to the import path only in the tests;
 the CLI and harness require MAST to be importable before they start.
-MAST is not included in this release. Modes A / B0 / B1 / C / H require it; replay and the
-mode-H page also use its `.sxm` reader. Without MAST, the standalone simulator, physics and
-claim-judging tests remain available. MAST-dependent tests carry `requires_mast` and skip
-when that dependency is unavailable.
+Modes A / B0 / B1 / C / H require the complete, compatible MAST environment. The
+`requires_mast` marker checks import availability; passing that check alone does not
+establish episode compatibility or reproduce a benchmark result.
 
 ## Running tests
 
@@ -171,9 +223,9 @@ python -m pytest tests/test_no_machine_paths.py -q     # public-release path gua
 
 Markers include `requires_mast` (MAST importable), `requires_data` (external data available),
 and `isolated` (run separately when using MAST). CI checks Python 3.13 command entry points
-and tests without MAST. A passing CI run does not establish that full benchmark episodes
-are reproducible without the external runtime and data. With MAST available, run ordinary
-and `isolated` tests in separate processes as described in [AGENTS.md](AGENTS.md#run-and-verify).
+and tests without MAST. A passing CI run does not establish full benchmark reproduction.
+With the complete MAST environment available, run ordinary and `isolated` tests in
+separate processes as described in [AGENTS.md](AGENTS.md#run-and-verify).
 
 Release-preparation check (2026-09-20, Windows, fresh Python 3.13 environment): the
 public-checkout test command above completed with **416 passed, 3 skipped and 80
@@ -182,7 +234,7 @@ After replacing the full extracted command catalog with the local registry, the 
 public-checkout suite passed again. A separate check using the existing patched
 control client passed **34 codec and world smoke tests**; it made no model API calls.
 
-## With MAST: mode C, no API key
+## With the complete MAST environment: mode C, no API key
 
 Mode C is the scripted baseline — MAST's own composite skill for the family runs against
 the simulator through the real execution context, no LLM, no key:
@@ -194,16 +246,17 @@ python -m stmbench.cli run --scenario B5_repair_blunt   --mode C --seeds 0
 ```
 
 Each episode prints `success / partial / sim seconds / wall seconds / controller commands`
-and its run directory. Mode C needs MAST importable (the skills are MAST's).
+and its run directory. Mode C needs MAST's runtime and skills, even though it makes no
+model API calls. The command is not a public-reproduction recipe using MAST-public.
 
 ## LLM modes
 
 | mode | what the model sees | needs |
 |---|---|---|
-| `A`  | the full MAST stack: every skill including multi-step composites (`ForgeAuTip`, `AchieveAtomicResolution`, `MoveAtomTo`…), the analysis skills, the composite forge and the knowledge tools | `--model` + provider key |
-| `C`  | scripted baseline (above) | — |
-| `B0` / `B1` | primitive-only ablations. **Shelved**: the code is kept and the modes still run, but they are not part of the paper leaderboard | `--model` + provider key |
-| `H`  | **you**, in a browser (`python -m stmbench.cli gui`): the same loop, tool surface, budgets, result channel and judge as mode A, with a person as the model port — plus the saved frames and spectra rendered as pictures. For feeling a task and checking solvability by hand; never on the leaderboard | MAST importable |
+| `A`  | the full MAST stack: every skill including multi-step composites (`ForgeAuTip`, `AchieveAtomicResolution`, `MoveAtomTo`…), the analysis skills, the composite forge and the knowledge tools | complete MAST environment, `--model` + provider key |
+| `C`  | scripted baseline (above) | complete MAST environment; no API key |
+| `B0` / `B1` | primitive-only ablations. **Shelved**: the code is kept and the modes still run, but they are not part of the paper leaderboard | complete MAST environment, `--model` + provider key |
+| `H`  | **you**, in a browser (`python -m stmbench.cli gui`): the same loop, tool surface, budgets, result channel and judge as mode A, with a person as the model port — plus the saved frames and spectra rendered as pictures. For feeling a task and checking solvability by hand; never on the leaderboard | complete MAST environment |
 
 Mode A is the benchmark. `B0`/`B1` exist to ask "how much did the skill stack contribute",
 which is a different question from the one this benchmark asks.
