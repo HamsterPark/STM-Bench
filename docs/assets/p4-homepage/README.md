@@ -15,16 +15,24 @@ These single trials do not estimate success rates or establish a model ranking.
 
 ## Read the replays at your own pace
 
-The storyboards retain the scans, decisions, and outcomes from the homepage
-animations. The scan panels are replay renderings of acquired simulated scans,
-not pixel-identical copies of the agent's interface. Explanatory annotations
-were added after the episode and were not guidance supplied to the models.
+The homepage loops take about **24 seconds for Astra** and **16 seconds for
+Terra**. A playing indicator and progress bar make their animation visible
+immediately. The static storyboards let readers inspect the same decisions
+without waiting for a loop. The scan panels are replay renderings of acquired
+simulated scans, not pixel-identical copies of the agent's interface.
+Explanatory annotations were added after the episode and were not guidance
+supplied to the models.
 
 ### Astra: success requires repeated measurement
 
-![Astra searches, inspects a candidate, measures a short first move, adjusts its settings, finds that a correction changed nothing, and verifies the final arrival.](astra-replay-storyboard.png)
+![Astra's recorded trajectory shows a short first move, a slower second move, a correction with no movement, and a verified arrival.](astra-replay-storyboard.png)
 
 [Animation](astra-replay.gif) · [Final frame](astra-replay.png)
+
+The animation begins after Astra has located an atom. Its path is the main
+visual: each pause or backward step is a recorded outcome, and a short caption
+connects the obstacle to the next adjustment. The model chose those adjustments
+after inspecting its scans; it did not see the retrospective hop-by-hop overlay.
 
 | Stage | Saved scan | What the record establishes |
 |---|---:|---|
@@ -42,7 +50,7 @@ relevant neighbours remain in place.
 
 ### Terra: recovery from an imperfect diagnostic
 
-![Terra searches the surface, inspects a real candidate, receives a stability warning, tries three recovery pulses with follow-up scans, and stops without claiming success.](terra-replay-storyboard.png)
+![Terra inspects a real candidate, receives a false stability warning, tries three recovery pulses with follow-up scans, and stops without claiming success.](terra-replay-storyboard.png)
 
 [Animation](terra-replay.gif) · [Final frame](terra-replay.png)
 
@@ -65,8 +73,8 @@ recorded outcome `no_effect`: the tip's single-apex shape remains unchanged,
 although its length changes.
 
 The model's final report confirms receiving a tip-change warning. The original
-analysis reply is truncated before its details, so the exact row marker in the
-animation is labelled as an audit reproduction, not a retained original reading.
+analysis reply is truncated before its details; row 119 comes from the later
+diagnostic reproduction, not a retained original reading.
 
 The retained recovery summary records three post-pulse scores of zero. Its
 baseline score was not retained, so the replay shows that value as unknown.
@@ -145,27 +153,42 @@ episode records.
 These are **condensed, annotated replays of recorded simulated measurements**.
 The scan panels use the PNG renderings extracted from the existing replays of
 acquired scans, without adding noise or painting a different result. The derived
-images are in [scans/](scans/); image provenance and supporting event summaries are in
-[replay-evidence.json](replay-evidence.json). Highlights, targets, and
-observation/decision/outcome cards are explanatory overlays. They do not create
-new measurements or environmental events. The models did not receive post-run
-truth overlays during their trials.
+images are in [scans/](scans/); image provenance and supporting event summaries
+are in [replay-evidence.json](replay-evidence.json).
 
-Scene timing is compressed for readability. Read the displayed scans and the
-outcomes together: a completed command is not proof of a completed experiment.
-Each animation loops in about one minute. [replay-scenes.json](replay-scenes.json)
-contains the displayed narration and the scan used for each scene. Astra's enlarged
-crop keeps the same sample coordinates across scans; its goal line marks the
-requested x position, not a hidden truth coordinate. Movement totals are rounded
-image estimates from the operator record, separate from the simulator's hop log.
+Astra's main view holds a fixed crop in sample coordinates. Recorded scans 2–6
+replace the background only at completed-scan checkpoints. Between measurements,
+the background remains the last acquired image while the position marker and
+trail advance through the **22 recorded atom hops**, including backwards steps
+and revisits. No intermediate atom positions are invented or interpolated. The
+last scan can still show the atom at its previous measured position while the
+marker advances: that is a held measurement, not a second atom. The final wider
+view supplies context for checking the neighbouring atoms.
+
+The trajectory in [replay-data.json](replay-data.json) is a retrospective overlay
+from the simulator's event record, not a live camera view or information available
+to the model. This file also retains the earlier Luna positional data; it does
+not supply a trajectory for Terra. Terra's comparison uses recorded scans and
+recovery events, without inventing atom movement. Highlights, destination
+markers, neighbour circles, captions, and the pulsing play indicator are
+presentation elements. Destination and neighbour markers use post-episode truth
+to explain the record; they were not supplied to the model.
+The pulse does not depict physical vibration or any new instrument event.
+
+Scene timing is condensed for readability; the loops do not reproduce instrument
+speed or compare model response times. Astra renders at 10 frames per second,
+while the atom changes position only at the recorded hops. The source coordinates
+are preserved by the fixed crop; enlargement and replay pacing are display
+choices. Narration and scene references are recorded in
+[replay-scenes.json](replay-scenes.json) and [terra-scenes.json](terra-scenes.json).
+Rounded image estimates from the operator record remain separate from the
+simulator's hop coordinates.
+
 The original ledgers remain unchanged. Raw acquisition files, full private
 ledgers, machine paths, and credentials are not published in these assets.
-
-[replay-data.json](replay-data.json) retains the derived positional source for
-the earlier simplified Astra/Luna animations as an archived artifact. It does
-not describe the current Terra replay. The four-model scorecard remains based
-on [results.json](results.json); this presentation update does not change scores,
-experimental conditions, or episode records.
+The four-model scorecard remains based on [results.json](results.json); this
+presentation update does not change scores, experimental conditions, or episode
+records.
 
 Regenerate the assets with Python, Matplotlib and Pillow installed:
 
@@ -175,6 +198,7 @@ python docs/assets/p4-homepage/generate_replays.py
 ```
 
 The generators render existing evidence; they do not rerun the experiments.
+`generate_replays.py` also calls `render_terra.py` for the recovery comparison.
 To re-extract the scan PNGs and provenance from the original standalone replay
 files, run `export_evidence.py --replay-dir <replay-directory>` from this folder.
 Regenerating the figures themselves uses the included images and JSON only.

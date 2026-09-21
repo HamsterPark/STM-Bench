@@ -1,8 +1,8 @@
-"""Render measurement-led replay summaries from immutable exported evidence.
+"""Render a trajectory-first replay over recorded, registered scan images.
 
-Images are replay renderings of acquired scans. No noise, tip faults, drift or
-atom motion is invented. Annotations and scene durations are editorial; command
-feedback, image estimates and retrospective audit findings remain distinct.
+The atom marker uses only logged positions. Scan images change at measurement
+checkpoints; the marker is a retrospective overlay, not a live instrument feed.
+Playback pulses are UI annotations and never change an atom's coordinates.
 """
 
 from __future__ import annotations
@@ -16,213 +16,228 @@ import matplotlib
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parent
-WIDTH, HEIGHT = 1280, 920
+W, H = 1280, 720
+FPS, DURATION = 10, 24.0
 BG, NAVY, MUTED = "#FCFBF7", "#182C3D", "#576777"
-TEAL, AMBER, CYAN = "#14796B", "#956015", "#5EF2DB"
+TEAL, CYAN, AMBER = "#14796B", "#5EF2DB", "#FFD17B"
 FONT_DIR = Path(matplotlib.get_data_path()) / "fonts/ttf"
+VIEW = (-8.0, 1.5, -13.534375, -10.065625)
+PLOT = (32, 112, 1216, 444)
+
+# Editorial replay time; these intervals do not represent instrument speed.
+PHASES = [
+    (0.0, 3.2, 2, 1, "TRY 1", "A move is requested", "The atom moves only partway.", None),
+    (3.2, 6.0, 3, 1, "CHECK", "Stopped short", "Astra scans again, then slows the next move 5x.", "SHORT MOVE"),
+    (6.0, 10.0, 3, 2, "TRY 2", "A slower second attempt", "The route includes a brief backwards step.", None),
+    (10.0, 12.5, 4, 2, "CHECK", "Close, but not there", "Astra measures the gap and tries a fine correction.", "NOT THERE YET"),
+    (12.5, 15.5, 4, 3, "TRY 3", "The correction does nothing", "Astra checks with another scan.", "NO MOVEMENT"),
+    (15.5, 18.0, 5, 3, "CHECK", "Still stuck", "Astra strengthens the pull and keeps moving slowly.", "NO MOVEMENT"),
+    (18.0, 20.5, 5, 4, "TRY 4", "A stronger fourth attempt", "One step back, then onward to the target.", None),
+    (20.5, 24.0, 6, 4, "VERIFY", "At the target", "Astra checks the nearby atoms: both task checks pass.", "VERIFIED"),
+]
 
 
 def font(size, bold=False):
-    filename = "DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf"
-    return ImageFont.truetype(str(FONT_DIR / filename), size)
+    return ImageFont.truetype(str(FONT_DIR / ("DejaVuSans-Bold.ttf" if bold else "DejaVuSans.ttf")), size)
 
 
-def lines(draw, text, face, width):
-    result = []
-    for part in text.split("\n"):
-        line = ""
-        for word in part.split():
-            candidate = (line + " " + word).strip()
-            if draw.textlength(candidate, font=face) > width and line:
-                result.append(line)
-                line = word
-            else:
-                line = candidate
-        result.append(line)
-    return result
+def xy(position):
+    left, right, low, high = VIEW
+    x, y, width, height = PLOT
+    return x + (position[0] - left) / (right - left) * width, y + (high - position[1]) / (high - low) * height
 
 
-def paragraph(draw, text, x, y, width, size=25, colour=NAVY, bold=False, max_lines=None):
-    face = font(size, bold)
-    wrapped = lines(draw, text, face, width)
-    if max_lines is not None and len(wrapped) > max_lines:
-        raise ValueError(f"Text does not fit: {text}")
-    for line in wrapped:
-        draw.text((x, y), line, fill=colour, font=face)
-        y += size + 9
-    return y
+def crop_scan(frame, bounds, size):
+    """Register scan renderings in sample coordinates; these trials have no drift."""
+    raw = Image.open(ROOT / frame["image"]).convert("RGB")
+    g = frame["geom"]
+    assert g["angle_deg"] == 0 and frame["drift_nm"] == [0, 0]
+    left, right, low, high = bounds
+    box = ((left - g["cx_nm"]) / g["w_nm"] * raw.width + raw.width / 2,
+           (g["cy_nm"] - high) / g["h_nm"] * raw.height + raw.height / 2,
+           (right - g["cx_nm"]) / g["w_nm"] * raw.width + raw.width / 2,
+           (g["cy_nm"] - low) / g["h_nm"] * raw.height + raw.height / 2)
+    assert 0 <= box[0] < box[2] <= raw.width and 0 <= box[1] < box[3] <= raw.height
+    return raw.resize(size, Image.Resampling.BILINEAR, box=box)
 
 
-def stories(model):
-    """Narration paraphrases recorded actions, not unobserved internal reasoning."""
-    if model == "Astra":
-        # frame, title, measurement, response, evidence, completed attempts
-        rows = [
-            (1, "Find a target in a measured image", "The automatic finder returns no candidates, even though bright spots are visible.", "Inspect the scan and zoom into a promising area.", "A tool's empty candidate list does not settle what is on the surface.", 0),
-            (2, "Establish a reference before moving", "The closer scan resolves five spots. Astra identifies an isolated atom.", "Measure its position and record the nearby atoms before requesting a move.", "The final check must cover the neighbours as well as the selected atom.", 0),
-            (3, "The first move falls well short", "A new scan shows only about 0.67 nm of the requested 4 nm move.", "Use the newly measured position to plan another attempt.", "Tool summary: moved; rescan not confirmed. The image reveals the shortfall.", 1),
-            (3, "Change how the atom is moved", "The atom stopped long before the destination. Repeating the command alone is not enough evidence.", "Slow the motion fivefold, keep the same destination, then scan again.", "Second attempt: the speed changes from 0.5 to 0.1 nm/s.", 1),
-            (4, "Closer, but still unfinished", "The next scan shows about 3.84 nm of movement. A small error remains.", "Try a short correction and acquire another image.", "Near the destination is not the same as a verified final position.", 2),
-            (5, "A correction makes no progress", "Another scan puts the atom in the same place. The third attempt has stalled.", "Increase the interaction strength modestly while keeping the slower motion.", "Post-run record: this attempt produced zero atom hops, despite the usual tool summary.", 3),
-            (6, "Adjust, then measure again", "The final scan places the atom at its destination after a stronger fourth attempt.", "Compare this scan with the reference, checking the atom and all three neighbours.", "The final adjustment included a backwards hop before reaching the target.", 4),
-            (6, "Verify the whole result", "The atom has moved about 4.04 nm. Neighbours remain in place within the image uncertainty.", "Submit the measured results for independent verification.", "2/2 checks pass: target position and neighbour preservation, with measurement evidence.", 4),
-        ]
-    else:
-        rows = [
-            (1, "Search an uneven surface", "The survey contains small bright spots against a strong background.", "Take a smaller, more detailed scan to narrow the search.", "The model must find a usable atom before any manipulation can begin.", 0),
-            (2, "Inspect a candidate more closely", "The second survey identifies a promising area for a close-up scan.", "Inspect that area at higher resolution before trying to move an atom.", "Post-run check: the chosen area really contains an isolated atom.", 0),
-            (3, "A warning interrupts the plan", "The analysis tool flags a possible tip change partway through this scan.", "Terra reports suspected instability and calls a recovery routine, capped at three attempts.", "Post-run audit: no tip change occurred in this scan. The warning was a false alarm.", 0),
-            (4, "Check the recovery baseline", "The routine acquires a baseline image before applying a pulse.", "The MAST routine begins its bounded sequence of conditioning pulses and checks.", "The baseline quality score was not retained. The three later scores are recorded.", 0),
-            (5, "First recovery attempt", "After one pulse and a fresh scan, the tool reports zero quality.", "The recovery routine proceeds to its second allowed attempt.", "This is tool-reported quality, not a direct measurement of tip health.", 1),
-            (6, "Second recovery attempt", "A second pulse and scan do not improve the reported score.", "The routine uses its final allowed recovery attempt.", "The model is now trying to restore confidence in a measurement before acting on it.", 2),
-            (7, "Third recovery attempt", "The third pulse is followed by another scan. The score remains below the requested threshold.", "The routine returns without establishing successful recovery.", "All seven scans were saved. The quality metric could return zero on these images without proving a bad tip.", 3),
-            (7, "Stop without claiming success", "After three recovery attempts, the measurement remains unverified.", "Terra stops. It reports no completed atom movement and submits no success claim.", "0/2 checks. Post-run audit exposes a false alarm and a limitation of the MAST quality metric.", 3),
-        ]
-    return [dict(frame=r[0], title=r[1], observation=r[2], response=r[3], evidence=r[4],
-                 attempts=r[5], duration=8000 if i < len(rows)-1 else 10000)
-            for i, r in enumerate(rows)]
-
-
-def image_point(geom, position, box):
-    x, y, size = box
-    return (x + (position[0] - geom["cx_nm"]) / geom["w_nm"] * size + size / 2,
-            y - (position[1] - geom["cy_nm"]) / geom["h_nm"] * size + size / 2)
-
-
-def outlined_label(draw, xy, text, size=18, colour=CYAN):
-    draw.text(xy, text, fill=colour, font=font(size, True), stroke_width=2, stroke_fill=NAVY)
-
-
-def render_frame(trial, story, index, count):
-    image = Image.new("RGB", (WIDTH, HEIGHT), BG)
-    draw = ImageDraw.Draw(image)
-    astra = trial["model"] == "Astra"
-    accent = TEAL if astra else AMBER
-    draw.text((32, 23), "STM-BENCH  /  TASK 4  /  EASY, ONE TRIAL  /  TIME CONDENSED", font=font(18, True), fill=MUTED)
-    heading = "Astra: learn from each incomplete move" if astra else "Terra: a diagnostic warning derails the task"
-    draw.text((32, 61), heading, font=font(37, True), fill=NAVY)
-    sub = "6 scans  |  4 move attempts  |  54 instrument minutes" if astra else "7 scans  |  3 recovery pulses  |  stopped without claiming success"
-    draw.text((32, 116), sub, font=font(23), fill=MUTED)
-    draw.rounded_rectangle((32, 161, 1248, 209), radius=10, fill="#E8F4EE" if astra else "#F6F1E6")
-    draw.text((48, 171), f"{index + 1:02d} / {count:02d}   {story['title']}", font=font(25, True), fill=accent)
-
-    recorded = trial["frames"][story["frame"] - 1]
-    raw = Image.open(ROOT / recorded["image"]).convert("RGB")
-    draw.text((32, 231), f"RECORDED SCAN {story['frame']} / {len(trial['frames'])}", font=font(19, True), fill=MUTED)
-    box = (32, 265, 416)
-    image.paste(raw.resize((416, 416), Image.Resampling.NEAREST), box[:2])
-    geom = recorded["geom"]
-    if astra and story["frame"] > 1:
-        pos = trial["image_estimates"]["positions_by_frame"][str(story["frame"])]
-        px, py = image_point(geom, pos, box)
-        draw.ellipse((px - 17, py - 17, px + 17, py + 17), outline=CYAN, width=2)
-        outlined_label(draw, (px + 22, py - 9), "Selected atom", size=15)
-    elif (astra and story["frame"] == 1) or (not astra and story["frame"] < 3):
-        cx, cy, width = (-8, -13, 24) if astra else ((0, 0, 30) if story["frame"] == 1 else (-12.4, 11.1, 6))
-        p1 = image_point(geom, (cx - width / 2, cy + width / 2), box)
-        p2 = image_point(geom, (cx + width / 2, cy - width / 2), box)
-        draw.rectangle((*p1, *p2), outline=CYAN, width=2)
-        outlined_label(draw, (p1[0] + 4, p1[1] + 5), "Next close-up", size=15)
-    if not astra and story["frame"] == 3:
-        row = trial["diagnostic_context"]["audit_reproduced_change_row"]
-        yy = 265 + row / 256 * 416
-        for x in range(32, 448, 16):
-            draw.line((x, yy, min(x + 8, 448), yy), fill="#FFD994", width=2)
-        outlined_label(draw, (42, yy - 26), "Audit-reproduced warning", 16, "#FFD994")
-    draw.text((32, 690), f"{geom['w_nm']:g} nm view | Replay rendering of saved data", fill=MUTED, font=font(17))
-
-    def card(y, label, text, fill, label_colour):
-        draw.rounded_rectangle((480, y, 1248, y + 164), radius=12, fill=fill)
-        draw.text((500, y + 14), label, font=font(18, True), fill=label_colour)
-        paragraph(draw, text, 500, y + 46, 718, size=25, max_lines=3)
-
-    card(230, "OBSERVATION / TOOL FEEDBACK", story["observation"], "#F0F1EE", MUTED)
-    card(406, "RESPONSE", story["response"], "#E8F4EE" if astra else "#F6F1E6", accent)
-    card(582, "EVIDENCE / POST-RUN CONTEXT", story["evidence"], "#EEF0F3", MUTED)
-
-    if astra:
-        draw.text((32, 720), "SAME TARGET AREA, ENLARGED", font=font(16, True), fill=MUTED)
-        if story["frame"] > 1:
-            # Fixed sample coordinates prevent a changed scan centre from being
-            # mistaken for physical movement or drift.
-            left, right, low, high = -7.2, -0.6, -12.6, -10.4
-            p1 = image_point(geom, (left, high), (0, 0, raw.width))
-            p2 = image_point(geom, (right, low), (0, 0, raw.width))
-            crop = raw.resize((416, 139), resample=Image.Resampling.NEAREST, box=(*p1, *p2))
-            image.paste(crop, (32, 748))
-            target = trial["image_estimates"]["requested_target_nm"]
-            tx = 32 + (target[0] - left) / (right - left) * 416
-            draw.line((tx, 748, tx, 887), fill=CYAN, width=2)
-            outlined_label(draw, (tx + 6, 753), "Goal x", 15)
-        else:
-            paragraph(draw, "The reference close-up has not been acquired yet.", 32, 762, 408, 23, MUTED, max_lines=3)
-        progress(draw, trial, story)
-    else:
-        draw.text((32, 726), "REPORTED QUALITY DURING RECOVERY", font=font(16, True), fill=MUTED)
-        for n in range(4):
-            x = 75 + n * 105
-            value = trial["diagnostic_context"]["tool_reported_quality"][n]
-            known = story["frame"] >= 4 + n and value is not None
-            draw.text((x, 765), f"{value:g}" if known else "--", font=font(34, True), fill=accent if known else "#AFB7BE", anchor="mt")
-            label = "Before" if n == 0 else f"Pulse {n}"
-            draw.text((x, 812), label, font=font(16), fill=MUTED, anchor="mt")
-        draw.text((32, 853), "Tool score; not ground truth about the tip.", font=font(17), fill=MUTED)
-        paragraph(draw, "Post-run audit: false alarm. The quality metric could return zero without establishing a bad tip.", 500, 770, 718, 24, AMBER, max_lines=3)
-
-    # Scene order only: this is not an instrument-time or wall-time scale.
-    for n in range(count):
-        x = 480 + n * 96
-        draw.rounded_rectangle((x, 900, x + 86, 906), radius=3,
-                               fill=accent if n <= index else "#DCE0E2")
-    return image
-
-
-def progress(draw, trial, story):
-    draw.text((500, 761), "IMAGE-ESTIMATED MOVEMENT  |  REQUESTED: 4 nm", font=font(17, True), fill=MUTED)
-    values = trial["image_estimates"]["displacement_by_attempt_nm"]
-    for n, value in enumerate(values):
-        x = 502 + 185 * n
-        known = n < story["attempts"]
-        colour = TEAL if n == 3 else AMBER
-        draw.text((x, 788), f"{value:.2f}" if known else "--", font=font(30, True), fill=colour if known else "#AFB7BE")
-        draw.text((x, 830), f"Attempt {n + 1}", font=font(17), fill=MUTED)
-        draw.rounded_rectangle((x, 860, x + 152, 869), radius=4, fill="#DEE3E3")
-        if known:
-            draw.rounded_rectangle((x, 860, x + 152 * min(value / 4.04, 1), 869), radius=4, fill=colour)
-
-
-def render():
+def load_evidence():
     evidence = json.loads((ROOT / "replay-evidence.json").read_text(encoding="utf-8"))
-    assert evidence["difficulty"] == "easy"
-    manifest = []
-    for trial in evidence["trials"]:
-        for f in trial["frames"]:
-            assert hashlib.sha256((ROOT / f["image"]).read_bytes()).hexdigest() == f["sha256"]
-            assert f["drift_nm"] == [0, 0] and f["complete"]
-        story = stories(trial["model"])
-        frames = [render_frame(trial, s, i, len(story)) for i, s in enumerate(story)]
-        palette_source = Image.new("RGB", (WIDTH, HEIGHT * len(frames)))
-        for i, frame in enumerate(frames):
-            palette_source.paste(frame, (0, HEIGHT * i))
-        # Shared palette prevents artificial colour fluctuations between frames.
-        palette = palette_source.quantize(colors=256, method=Image.Quantize.MEDIANCUT)
-        quantized = [f.quantize(palette=palette, dither=Image.Dither.NONE) for f in frames]
-        stem = trial["model"].lower() + "-replay"
-        quantized[0].save(ROOT / (stem + ".gif"), save_all=True,
-                          append_images=quantized[1:], duration=[s["duration"] for s in story],
-                          loop=0, disposal=1, optimize=True)
-        frames[-1].save(ROOT / (stem + ".png"))
-        sheet = Image.new("RGB", (WIDTH, HEIGHT * math.ceil(len(frames) / 2) // 2), BG)
-        for i, frame in enumerate(frames):
-            sheet.paste(frame.resize((WIDTH // 2, HEIGHT // 2), Image.Resampling.LANCZOS),
-                        ((i % 2) * WIDTH // 2, (i // 2) * HEIGHT // 2))
-        sheet.save(ROOT / (stem + "-storyboard.png"))
-        manifest.append({"model": trial["model"], "file": stem + ".gif",
-                         "duration_ms": sum(s["duration"] for s in story),
-                         "frames": len(frames), "scenes": story})
-    (ROOT / "replay-scenes.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
-    print(json.dumps([{k: v for k, v in m.items() if k != "scenes"} for m in manifest], indent=2))
+    positions = json.loads((ROOT / "replay-data.json").read_text(encoding="utf-8"))
+    trial = next(t for t in evidence["trials"] if t["model"] == "Astra")
+    route = next(t for t in positions["trials"] if t["model"] == "Astra")
+    assert evidence["difficulty"] == "easy" and evidence["seed"] == 0
+    assert trial["episode_sha256"] == route["episode_sha256"]
+    assert trial["source_replay_sha256"] == route["source_replay_sha256"]
+    assert len(route["moves"]) == 22
+    assert [len(a["move_indices"]) for a in route["attempts"]] == [3, 16, 0, 3]
+    assert not trial["tip_events"]
+    for f in trial["frames"]:
+        assert f["complete"] and f["drift_nm"] == [0, 0]
+        assert hashlib.sha256((ROOT / f["image"]).read_bytes()).hexdigest() == f["sha256"]
+    schedule = []
+    # Preserve event order and relative timing inside each compressed move.
+    for attempt, window in zip(route["attempts"], [(0.25, 1.45), (6.15, 9.35), None, (18.15, 19.45)]):
+        indices = attempt["move_indices"]
+        if not indices:
+            assert window is None
+            continue
+        first = route["moves"][indices[0]]["sim"]
+        last = route["moves"][indices[-1]]["sim"]
+        for i in indices:
+            move = route["moves"][i]
+            display_time = window[0] + (move["sim"] - first) / (last - first) * (window[1] - window[0])
+            schedule.append({"at_seconds": display_time, "move_index": i})
+    scans = {f["index"]: crop_scan(f, VIEW, PLOT[2:]) for f in trial["frames"] if f["index"] >= 2}
+    neighbour_bounds = (-13.6, -0.4, -20.0, -7.4)
+    neighbour_image = crop_scan(trial["frames"][-1], neighbour_bounds, (211, 202))
+    return dict(trial=trial, route=route, schedule=schedule, scans=scans,
+                neighbour_bounds=neighbour_bounds, neighbour_image=neighbour_image)
+
+
+def pill(draw, box, text, colour=CYAN, fill=NAVY, size=18):
+    draw.rounded_rectangle(box, radius=9, fill=fill)
+    draw.text((box[0] + 12, box[1] + 8), text, font=font(size, True), fill=colour)
+
+
+def dashed_line(draw, start, end, colour="#B0C7D4"):
+    dx, dy = end[0] - start[0], end[1] - start[1]
+    length = math.hypot(dx, dy)
+    for d in range(0, int(length), 22):
+        e = min(d + 10, length)
+        draw.line((start[0] + dx*d/length, start[1] + dy*d/length,
+                   start[0] + dx*e/length, start[1] + dy*e/length), fill=colour, width=2)
+
+
+def state_at(data, t):
+    phase = next(p for p in PHASES if p[0] <= t < p[1])
+    visible = [m for m in data["schedule"] if m["at_seconds"] <= t]
+    count = len(visible)
+    moves = data["route"]["moves"]
+    position = data["route"]["target"]["start"] if not count else [moves[count-1]["x"], moves[count-1]["y"]]
+    return phase, count, position
+
+
+def render_frame(data, t, playing=True):
+    phase, count, position = state_at(data, t)
+    _, _, scan, attempt, badge, obstacle, response, stop_label = phase
+    final = badge == "VERIFY"
+    im = Image.new("RGB", (W, H), BG)
+    draw = ImageDraw.Draw(im)
+    draw.text((32, 19), "ASTRA  /  Move, check, adjust", font=font(34, True), fill=NAVY)
+    draw.text((32, 67), "Recorded atom trajectory  /  Four attempts, six scans", font=font(21), fill=MUTED)
+    # This is a playback status indicator, not a clickable control.
+    status = "PLAYING" if playing else "KEY FRAME"
+    pill(draw, (918, 24, 1248, 76), f"{status}  {int(t):02d}s / 24s", size=20)
+    draw.polygon([(933, 91), (943, 85), (933, 79)], fill=TEAL)
+    draw.text((951, 80), "AUTOPLAY / LOOPS" if playing else "RECORDED REPLAY", font=font(15, True), fill=TEAL)
+
+    im.paste(data["scans"][scan], PLOT[:2])
+    pill(draw, (48, 126, 206, 166), badge, size=18)
+    pill(draw, (859, 126, 1232, 166), f"LAST MEASURED IMAGE: SCAN {scan}", colour="#DCE7EF", size=16)
+
+    start = xy(data["route"]["target"]["start"])
+    target = xy(data["route"]["target"]["site"])
+    dashed_line(draw, start, target)
+    # The target and route are explanatory post-run overlays; the agent never
+    # received these true positions while performing the experiment.
+    draw.ellipse((start[0]-20, start[1]-20, start[0]+20, start[1]+20), outline="#AAB9C8", width=2)
+    draw.text((start[0], start[1]+35), "START", font=font(19, True), fill="#E1E8EF", anchor="mt", stroke_width=2, stroke_fill=NAVY)
+    draw.ellipse((target[0]-25, target[1]-25, target[0]+25, target[1]+25), outline=CYAN if final else "#FFFFFF", width=3)
+    draw.text((target[0], target[1]+42), "TARGET", font=font(19, True), fill=CYAN if final else "#FFFFFF", anchor="mt", stroke_width=2, stroke_fill=NAVY)
+
+    points = [start] + [xy((m["x"], m["y"])) for m in data["route"]["moves"][:count]]
+    if len(points) > 1:
+        draw.line(points, fill=NAVY, width=10, joint="curve")
+        draw.line(points, fill=CYAN, width=5, joint="curve")
+        for point in points[:-1]:
+            draw.ellipse((point[0]-3, point[1]-3, point[0]+3, point[1]+3), fill=CYAN)
+    px, py = xy(position)
+    backstep = False
+    if count:
+        last_event_time = data["schedule"][count-1]["at_seconds"]
+        backstep = count > 1 and points[-1][0] < points[-2][0] and t - last_event_time < 0.55
+    colour = AMBER if backstep else CYAN
+    radius = 21 + 4*math.sin(t * 2*math.pi*1.6)
+    draw.ellipse((px-radius, py-radius, px+radius, py+radius), outline=colour, width=3)
+    draw.ellipse((px-10, py-10, px+10, py+10), fill=colour, outline=NAVY, width=2)
+    if backstep:
+        pill(draw, (px-82, py-73, px+92, py-34), "BACKSTEP", colour=AMBER, size=17)
+    elif stop_label:
+        text_width = draw.textlength(stop_label, font=font(18, True))
+        bx = max(218, min(px-text_width/2-12, 834-text_width))
+        pill(draw, (bx, py-88, bx+text_width+24, py-45), stop_label, colour=CYAN if final else AMBER)
+
+    if final:
+        neighbour_check(im, draw, data)
+    else:
+        # Keep the route visually dominant, with only a compact attempt counter.
+        draw.text((1224, 509), f"ATTEMPT {attempt} / 4", font=font(17, True), fill="#DFE7EF", anchor="rt", stroke_width=2, stroke_fill=NAVY)
+    draw.text((49, 531), "Recorded path over saved scans", font=font(16), fill="#E1E8EF", stroke_width=2, stroke_fill=NAVY)
+
+    draw.rounded_rectangle((32, 578, 1248, 668), radius=12, fill="#E8F4EE" if final else "#F0F1EE")
+    draw.text((50, 590), obstacle, font=font(29, True), fill=TEAL if final else NAVY)
+    if draw.textlength(response, font=font(22)) > 1176:
+        raise ValueError("Response caption too long")
+    draw.text((50, 632), "→ " + response, font=font(22), fill=MUTED)
+    draw.text((32, 679), "Easy setting / single trial / time condensed / highlights are explanatory overlays", font=font(16), fill=MUTED)
+    draw.rounded_rectangle((32, 705, 1248, 711), radius=3, fill="#DDE4E1")
+    bar_end = 32 + 1216 * min((t + 1/FPS) / DURATION, 1)
+    draw.rounded_rectangle((32, 705, bar_end, 711), radius=3, fill=TEAL)
+    return im
+
+
+def neighbour_check(im, draw, data):
+    x, y = 1003, 235
+    draw.rounded_rectangle((x-12, y-39, x+223, y+257), radius=12, fill=NAVY)
+    draw.text((x, y-29), "NEIGHBOUR CHECK", font=font(17, True), fill=CYAN)
+    im.paste(data["neighbour_image"], (x, y))
+    left, right, low, high = data["neighbour_bounds"]
+    for atom in data["route"]["initial_atoms"]:
+        if atom["id"] == data["route"]["selected_atom_id"]:
+            continue
+        ax = x + (atom["x"]-left)/(right-left)*211
+        ay = y + (high-atom["y"])/(high-low)*202
+        draw.ellipse((ax-10, ay-10, ax+10, ay+10), outline=CYAN, width=2)
+    draw.text((x, y+210), "3 neighbours unchanged", font=font(14), fill=CYAN)
+    draw.text((x, y+232), "2 / 2 CHECKS VERIFIED", font=font(14, True), fill=CYAN)
+
+
+def render_astra():
+    data = load_evidence()
+    preview_times = [0.0, 3.5, 7.0, 10.5, 13.5, 16.0, 18.5, 23.0]
+    previews = [render_frame(data, t) for t in preview_times]
+    # A shared palette built from representative scenes avoids artificial colour
+    # changes. Generate one RGB frame at a time to limit memory use.
+    palette_source = Image.new("RGB", (W, H*len(previews)))
+    for i, im in enumerate(previews):
+        palette_source.paste(im, (0, H*i))
+    palette = palette_source.quantize(colors=224, method=Image.Quantize.MEDIANCUT)
+    quantized = [render_frame(data, i/FPS).quantize(palette=palette, dither=Image.Dither.NONE)
+                 for i in range(int(DURATION*FPS))]
+    quantized[0].save(ROOT / "astra-replay.gif", save_all=True, append_images=quantized[1:],
+                      duration=int(1000/FPS), loop=0, disposal=1, optimize=True)
+    render_frame(data, 23.9, playing=False).save(ROOT / "astra-replay.png")
+    # Four full-width checkpoints are readable without playing the animation.
+    sheet = Image.new("RGB", (W, H*4), BG)
+    for i, t in enumerate([3.5, 10.5, 16.0, 23.9]):
+        sheet.paste(render_frame(data, t, playing=False), (0, i*H))
+    sheet.save(ROOT / "astra-replay-storyboard.png")
+    metadata = {
+        "schema_version": 2, "model": "Astra", "duration_seconds": DURATION, "fps": FPS,
+        "view_bounds_nm": VIEW, "source_position_data": "replay-data.json",
+        "source_scan_data": "replay-evidence.json", "movement_schedule": data["schedule"],
+        "phases": [dict(start_s=p[0], end_s=p[1], last_scan=p[2], attempt=p[3],
+                        badge=p[4], obstacle=p[5], response=p[6]) for p in PHASES],
+        "overlay_note": "Positions are post-episode truth. The agent reacted to subsequent scans, not to hidden hops. No position interpolation, added drift or synthetic noise.",
+    }
+    (ROOT / "replay-scenes.json").write_text(json.dumps(metadata, indent=2) + "\n", encoding="utf-8")
+    return {"model": "Astra", "frames": len(quantized), "duration_seconds": DURATION,
+            "size_bytes": (ROOT / "astra-replay.gif").stat().st_size}
 
 
 if __name__ == "__main__":
-    render()
+    print(json.dumps(render_astra(), indent=2))
+    from render_terra import render
+    result = render(ROOT)
+    print(json.dumps({k: result[k] for k in ("model", "duration_ms", "frames")}, indent=2))

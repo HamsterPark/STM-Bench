@@ -6,32 +6,32 @@ A **software scanning tunnelling microscope** and a benchmark that asks one ques
 
 ## Watch task 4: move one atom
 
-Move one atom to a target, leaving nearby atoms in place. A move command can
-produce a short step—or no movement. The model must inspect noisy scans, adjust
-its approach, and verify the outcome through imperfect tools. All four trials
-used **the same starting scene and MAST support, on easy**: a good starting tip
-and no drift. With one trial per model, these are demonstrations, not success-rate
-estimates.
+Move one atom to a target, leaving nearby atoms in place. It can fall short,
+step backwards, or refuse to move: the model must look again and adjust.
+
+**Easy setting · same scene and MAST support · one trial per model**
+
+**Astra · Watch the path, and the corrections.** The atom falls short, sometimes
+steps back, and once stays put. Astra re-scans and changes its approach until the
+atom arrives, with its neighbours verified unchanged.
+
+**▶ Watch the 24-second looping replay (autoplays)**
+
+![Animated replay: Astra's recorded atom trajectory advances over measured scans, falls short, steps backwards, stalls, and reaches its destination after four attempts.](docs/assets/p4-homepage/astra-replay.gif)
 
 ![Task 4, easy setting, MAST enabled: Luna 0/2, Terra 0/2, Sol 0/2, Astra 2/2 verified checks. One trial per model, not success rates.](docs/assets/p4-homepage/p4-results.svg)
 
-**Astra · Success after four attempts and six scans.** The first move falls short;
-a later correction changes nothing. Astra re-scans and changes settings until
-independent checks confirm that the atom arrived and its neighbours stayed put.
-The episode consumed about **54 simulated instrument minutes**.
+**Terra · A misleading warning stops progress.** A false alarm from the diagnostic
+tools prompts three unsuccessful recovery attempts; Terra stops without claiming
+success.
 
-![Astra's recorded scans show a short first move, further adjustment, a correction with no movement, and a verified arrival.](docs/assets/p4-homepage/astra-replay.gif)
+**▶ Watch the 16-second looping comparison (autoplays)**
 
-**Terra · A warning leads to three recovery attempts, then a stop.** Terra finds a
-candidate, receives a stability warning, tries to restore image quality, and
-stops without claiming completion. The post-run audit found a **false alarm and
-a limitation in MAST's quality metric**, which could report zero without
-establishing a bad tip. The episode exposes an unresolved diagnostic problem;
-it does not establish a changing physical environment.
+![Animated comparison: Terra inspects a candidate, receives a false diagnostic warning, tries three recovery steps, and stops without moving an atom.](docs/assets/p4-homepage/terra-replay.gif)
 
-![Terra's recorded scans show the search, candidate inspection, a diagnostic warning, three recovery attempts, and a cautious stop without a result.](docs/assets/p4-homepage/terra-replay.gif)
-
-[Read the scans and decisions at your own pace; view trial details](docs/assets/p4-homepage/README.md).
+Paths and labels are added from the run records; these are condensed replays,
+and single trials do not estimate success rates.
+[View static storyboards and trial details](docs/assets/p4-homepage/README.md).
 
 ## About the benchmark
 
