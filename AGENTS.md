@@ -45,6 +45,7 @@ This is an **alpha research prototype**. Keep these evidence boundaries explicit
    → [verdict integration](stmbench/trackB/truth_criteria.py).
 3. Use the map below to inspect a design decision alongside its regression tests.
    [docs/DESIGN.md](docs/DESIGN.md) records the rationale and historical experiments in Chinese;
+   [docs/FIDELITY.md](docs/FIDELITY.md) lists what the simulator models, its source and its known differences;
    [docs/USAGE.md](docs/USAGE.md) covers operation;
    [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) records external components and protocol provenance.
 

@@ -127,6 +127,8 @@ reported value within tolerance.
   The report is one thing: **reproduction rate, paper × model**.
 
 Design record: [`docs/DESIGN.md`](docs/DESIGN.md) (Chinese). How-to: [`docs/USAGE.md`](docs/USAGE.md).
+What the simulator models, from what source, and where it differs from a real microscope:
+[`docs/FIDELITY.md`](docs/FIDELITY.md).
 Code review and contribution guide: [`AGENTS.md`](AGENTS.md), with a source/test map and validation boundaries.
 
 ## Quick start: simulator, no MAST or API key

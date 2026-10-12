@@ -99,6 +99,7 @@ MAST 条件（开发本基准时使用的智能体与技能运行时）保留，
   报表只回答一件事：**论文 × 模型的复现率**。
 
 设计记录：[`docs/DESIGN.md`](docs/DESIGN.md)（中文）。操作指南：[`docs/USAGE.md`](docs/USAGE.md)。
+模拟器模拟了什么、依据来自哪里、与真实显微镜有何差别：[`docs/FIDELITY.md`](docs/FIDELITY.md)（保真卡，英文）。
 代码审查与贡献指南：[`AGENTS.md`](AGENTS.md)，包含源码/测试对应关系和验证边界。
 
 ## 快速开始：无需 MAST 或 API 密钥的模拟器
