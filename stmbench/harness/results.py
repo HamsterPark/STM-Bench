@@ -18,7 +18,9 @@ RESULT_TOOL_NAMES = frozenset({"reportresult", "reportresults", "reportclaim", "
 
 RESULT_DESCRIPTION = (
     "逐条报告论文结果的数值。这是评分唯一读取的通道：一条结果调用一次，可重复调用更新，"
-    "以最后一次为准；未报告的结果按未复现计。位置类结果必须给 x_nm / y_nm（当前扫描坐标系）。"
+    "以最后一次为准；未报告的结果按未复现计。位置类结果必须给 x_nm / y_nm（扫描坐标系），"
+    "并用 frame 写明这个坐标取自哪一张扫描帧（文件名）；用 evidence 列出得出这个结果所用的"
+    "帧和谱的文件名。判分只在你引用的数据里核对证据要求（见任务说明里的评分规则）。"
     "此工具不碰仪器。"
 )
 
@@ -33,8 +35,13 @@ def result_schema(claim_ids: Iterable[str]) -> dict:
             "value": {"type": "number", "description": "数值，用该结果要求的单位"},
             "unit": {"type": "string", "description": "你使用的单位（用于核对，不参与判分）"},
             "sigma": {"type": "number", "description": "不确定度（可选）"},
-            "x_nm": {"type": "number", "description": "位置类结果：x（当前扫描坐标系，nm）"},
-            "y_nm": {"type": "number", "description": "位置类结果：y（当前扫描坐标系，nm）"},
+            "x_nm": {"type": "number", "description": "位置类结果：x（扫描坐标系，nm）"},
+            "y_nm": {"type": "number", "description": "位置类结果：y（扫描坐标系，nm）"},
+            "frame": {"type": "string",
+                      "description": "位置类结果：x_nm / y_nm 取自哪一张扫描帧（.sxm 文件名）；"
+                                     "判分按这张帧逐行记录的漂移把坐标换算到样品上"},
+            "evidence": {"type": "array", "items": {"type": "string"},
+                         "description": "得出这个结果所用的数据：扫描帧（.sxm）与谱（.dat）的文件名"},
             "note": {"type": "string", "description": "依据，一两句（可选）"},
         },
         "required": ["claim_id", "value"],
@@ -65,9 +72,14 @@ def fold_results(reports: list[dict] | None) -> dict:
         if isinstance(val, bool) or not isinstance(val, (int, float)):
             continue
         entry = {"value": float(val), "turn": rec.get("turn")}
-        for k in ("unit", "note"):
+        for k in ("unit", "note", "frame"):
             if isinstance(args.get(k), str):
                 entry[k] = args[k]
+        cited = args.get("evidence")
+        if isinstance(cited, str):                  # one id given without the list around it
+            cited = [cited]
+        if isinstance(cited, list):
+            entry["evidence"] = [str(x) for x in cited if isinstance(x, (str, int)) and str(x).strip()]
         for k in ("sigma", "x_nm", "y_nm"):
             v = args.get(k)
             if isinstance(v, (int, float)) and not isinstance(v, bool):
@@ -96,7 +108,8 @@ class ResultSink:
         self.records: list[dict] = []
 
     def report(self, claim_id: str, value: float, unit: str = "", *, x_nm: float | None = None,
-               y_nm: float | None = None, sigma: float | None = None, note: str = "") -> None:
+               y_nm: float | None = None, sigma: float | None = None, note: str = "",
+               frame: str | None = None, evidence: Iterable[str] | None = None) -> None:
         args: dict[str, Any] = {"claim_id": str(claim_id), "value": float(value)}
         if unit:
             args["unit"] = unit
@@ -108,6 +121,10 @@ class ResultSink:
             args["sigma"] = float(sigma)
         if note:
             args["note"] = note
+        if frame:
+            args["frame"] = str(frame)
+        if evidence is not None:
+            args["evidence"] = [str(e) for e in evidence]
         self.records.append({"name": RESULT_TOOL, "turn": 0, "args": args})
 
     def folded(self) -> dict:
