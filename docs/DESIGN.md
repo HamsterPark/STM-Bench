@@ -535,6 +535,26 @@ Sader–Jarvis 公式本身在振幅与力的衰减长度相当时偏低：无�
 Sader–Jarvis 的约 7% 偏差留余量；键参数改为对数均匀并放宽，D_e 50–600 meV、a 7–25 /nm。
 整篇机会通过率 14.0% → 4.3%（精确，seed 0–299），过了 5% 门槛。
 
+P3 是第二个。参考解：在离围栏约 150 nm 处修针（4 V 脉冲会把团簇溅到 σ≈40 nm 的范围，钝针、双针、脏针都先修），
+回来后等 5 分钟让长距离移动的蠕变衰减；两帧互相关测横向漂移并补偿，紧接着拍一幅 28 nm、0.1 nm/像素的围栏图，
+用亮像素拟合圆量半径（扣背景用约 2 nm 的滑动中值，台阶不会把整块台面算成"亮"）；谱在 0.1 V / 1 nA 稳定后扫
+−0.55 到 +0.15 V（在 10 mV 成像点直接扫会撞前放钳位，钳位的拐点像一对 ±60 mV 的峰；扫到 +0.55 V 则高偏压一端
+dI/dV 太大，噪声淹没低能共振）；带底在围栏外的裸台面上用误差函数台阶拟合（围栏里共振峰的前沿比带底还陡）；
+共振峰按真值同样的定义找（显著度 ≥ 8%），再用量出的半径、带底和 Cu(111) 的 m* = 0.38 按硬壁能级标上量子数，
+报 n = 2、3。
+
+做的过程中改了真值的一处定义：中心共振原先从带底以上 20 meV 才开始数，而点散射体围栏会漏，能级比硬壁值高
+5–20 meV，小围栏的 n = 1 正好被这条线截掉——实测谱里看得见、真值里没有，阶次整体错一位。现在从带底以上
+5 meV 开始数。
+
+标定：固定答卷原能通过 41%。按阶次判峰行不通——n = 1 是否"可分辨"，带噪声的实测和无噪声的真值在约一成
+seed 上意见不一；按阶次判、半径放宽、容差 8 meV 时最优固定答卷仍有 7%。真正区分 seed 的是围栏本身，于是
+加了一条 claim：从形貌图量出的围栏半径（Crommie 等人报告了它，并用它拟合能级）。峰仍按"最低三个真峰中任一、
+两者不同且升序"判，容差 25 → 10 meV；半径 ±0.15 nm；半径改为对数均匀 4–10 nm（10 nm 以内 n = 2、3 能级至少
+相隔 44 meV）。参考解 30/30 复现，|误差| p90：低峰 2.7 meV、高峰 2.5 meV、半径 0.038 nm；仪器时间中位 485 s。
+整篇机会通过率 41% → 4.3%（精确，seed 0–299；审计对"两条有成对规则 + 一条独立"的三条 claim 现在也精确）。
+P3 修复变体的谱 claim 与 P4 一起处理（它的参考解要搬原子）。
+
 ## 10. 复用清单
 - MAST：`mast.io.nanonis_files`（reader 真源）、`test_frame_corrugation.py:41-65`（writer 样板）、`core/nanonis_patch.py`（协议 + 覆盖表 + 错误段）、`working-memory/NanonisClass_upstream.py` + `06_…reference.md`（spec 源）、`monitoring/pump.py`（Osci2T 序列 + `check_timebase_table`）、`knowledge/fault_diagnosis.py`（故障 schema）、`core/tip_conditioning_policy.py`（包络 + `_sources` 真值分层标签）、`core/noble_tip_workflow.py` + `tip_reference_calibration.txt`（转移数字）、`api/bootstrap.py` / `tools/skill_coverage_campaign.py`（无头范本）、`agentruntime/{ic_assembly,loop,pause,sse}.py`、`vision/*`（尺子 + 基线）、MAST 的测试记录（人工版任务定义）、`docs/v2/talks/repro/scan_corpus.py`（批跑检测器）。
 - VIGIL（历史复用规划；此条不是已移植代码清单）：`src/surfaces/*`、`physical_scanner.py` 的 PI×压电 IIR + Preisach + 蠕变 warp、`noise_injector.py`、`config/tip_universe.yaml`（α₁ 先验）。

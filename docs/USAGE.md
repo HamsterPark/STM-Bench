@@ -358,12 +358,13 @@ and m*) are reported but not held to a gate — knowing them is part of the skil
 constraint claims are judged on the atoms themselves and are not audited. On seeds 0–299
 (2026-10-12) a fixed sheet reproduces P3 in 41 % of seeds, P3's repair spectra in 43 %, P2 in
 16 % (all knowledge claims) and P5 in 13 %; P1's measured claims together pass 4.3 %.
-P5, recalibrated on 2026-10-13 against its reference solution (below), passes 4.3 %.
+P5 and P3, recalibrated on 2026-10-13 against their reference solutions (below), pass 4.3 % each.
 
 ### Reference solutions
 
 ```bash
 python -m stmbench.cli reference --paper P5 --seeds 30 --jobs 4 --json p5.json
+python -m stmbench.cli reference --paper P3 --seeds 30 --jobs 4
 ```
 
 A privileged reference solution (`stmbench.reference`) may use the truth to navigate — where
@@ -372,7 +373,9 @@ tip needs a poke — but every number it reports is measured through the instrum
 computed by `stmbench.analysis` (no MAST). Over many seeds it shows whether a paper is
 solvable, the error spread of a careful measurement (tolerances are set at about twice its
 p90) and the instrument time it takes. P5 (2026-10-13, seeds 0–29): 30/30 reproduced, |error|
-p90 5.9 % (F_min), 3.7 % (decay length), 8.7 % (E_b), 354 s of instrument time.
+p90 5.9 % (F_min), 3.7 % (decay length), 8.7 % (E_b), 354 s of instrument time. P3 (seeds
+0–29): 30/30; |error| p90 2.7 / 2.5 meV (the two resonances), 0.038 nm (the ring's radius),
+485 s.
 
 ### Run directory
 
