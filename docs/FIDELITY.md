@@ -72,6 +72,8 @@ Design notes in Chinese: [DESIGN.md](DESIGN.md) §5 and §9.
 |---|---|---|---|
 | Δf from a Morse + van der Waals force law, finite amplitude (Giessibl, Gauss–Chebyshev N = 64) | lit | `test_forces.py` (closed forms against the Sader–Jarvis inversion) | No electrostatic force; no CO flexibility or tip relaxation |
 | PLL ring-up τ = Q/(π f0), contact damping | lit + model | `test_qplus_zspectr.py` | Constant-Δf imaging is not implemented (feedback is always constant current) |
+| Frequency noise: the seed's σ at 50 pm, 5 ms per point, one sweep; ∝ 1/A and 1/√(integration × sweeps) | lit (Giessibl, Rev. Sci. Instrum. 90, 011101, 2019) + model | `test_physics.py::test_the_frequency_noise_falls_with_amplitude_and_averaging` | Until 2026-10-13 the same at every amplitude and averaging time; white noise only |
+| A tip parked over an atom sits above the drawn bump (the force law's geometry) | model | `test_forces.py::test_the_force_laws_atom_is_as_tall_as_the_imaged_bump` | A scan shows only ~0.6 of that bump (the tip blur), so curves lined up by an image's apparent height are ~40 pm off; the loop's Z (`z_abs`) lines them up exactly |
 | Sensor constants k, f0, Q drawn per seed, readable as registered constants (`Instrument.info`) | model | `test_instrument.py` | The registered k is the true one; a real calibration has its own error |
 
 ## What this means for scores
