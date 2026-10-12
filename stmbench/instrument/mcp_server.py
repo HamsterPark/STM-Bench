@@ -70,7 +70,7 @@ class EpisodeServer:
         self._add("list_data", "The frames and spectra saved so far.", none, lambda a: [_text(inst.list_data())])
         frame_schema = {"type": "object", "properties": {
             "frame": {"type": "string", "description": "frame file name"},
-            "channel": {"type": "string", "enum": ["z", "current"], "default": "z"},
+            "channel": {"type": "string", "enum": ["z", "current", "didv"], "default": "z"},
             "direction": {"type": "string", "enum": ["forward", "backward"], "default": "forward"}},
             "required": ["frame"], "additionalProperties": False}
         self._add("show_frame", "A saved frame as an image (row 0 = top, column 0 = left; line-flattened, "
@@ -129,7 +129,7 @@ class EpisodeServer:
 
     def _frame_values(self, a: dict) -> list[dict]:
         f = self.inst.frame(a["frame"], a.get("channel", "z"), a.get("direction", "forward"))
-        scale, unit = (1e12, "pm") if f["channel"] == "z" else (1e12, "pA")
+        scale, unit = (1e12, "pm") if f["channel"] == "z" else (1e12, "pA")      # didv: lock-in X in pA
         v = _block_means(np.asarray(f["array"], float), int(a.get("max_size", 64))) * scale
         meta = {k2: x for k2, x in f.items() if k2 != "array"}
         meta.update(unit=unit, block_px=int(np.ceil(f["pixels"] / v.shape[0])), shape=list(v.shape),

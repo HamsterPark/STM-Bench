@@ -24,10 +24,12 @@ insufficient. Follow that contract from a scenario through the result channel to
 
 This is an **alpha research prototype**. Keep these evidence boundaries explicit:
 
-- The simulator runs independently. Full benchmark episodes require **MAST**, a separate
-  instrument-control agent runtime that supplies the agent framework and instrument skills.
-  This checkout does not include MAST, the private calibration corpus, or historical run ledgers.
-- Mode **A** is the intended leaderboard mode; no mode-A leaderboard has been published.
+- The simulator runs independently, and full paper episodes run without **MAST** through the
+  benchmark instrument (`stmbench.instrument`, served to any MCP agent). MAST, a separate
+  instrument-control agent runtime with its own agent framework and instrument skills, is the
+  second evaluation condition (mode A), kept for a with/without-MAST comparison. This checkout
+  does not include MAST, the private calibration corpus, or historical run ledgers.
+- No leaderboard has been published, in either condition.
   Historical mode-C scripted gates and mode-H trials predate the current physics and have
   not been rerun on this release. They are development observations, not current reproduction rates.
 - Protocol compatibility is an interface goal, not equivalence to real hardware or support
@@ -45,6 +47,7 @@ This is an **alpha research prototype**. Keep these evidence boundaries explicit
    → [verdict integration](stmbench/trackB/truth_criteria.py).
 3. Use the map below to inspect a design decision alongside its regression tests.
    [docs/DESIGN.md](docs/DESIGN.md) records the rationale and historical experiments in Chinese;
+   [docs/FIDELITY.md](docs/FIDELITY.md) lists what the simulator models, its source and its known differences;
    [docs/USAGE.md](docs/USAGE.md) covers operation;
    [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) records external components and protocol provenance.
 

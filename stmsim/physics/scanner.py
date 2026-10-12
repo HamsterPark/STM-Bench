@@ -38,6 +38,10 @@ from .junction import current_metal
 SIG_CURRENT = 0
 SIG_Z = 14
 SIG_BIAS = 24
+SIG_LI_X = 20                 # lock-in demodulator 1, X: the dI/dV channel of a map
+
+#: the lock-in channel's own noise stream, ``[world seed, LOCKIN_STREAM, frames rendered]``
+LOCKIN_STREAM = 0x11D1D1
 
 
 @dataclass
@@ -145,6 +149,7 @@ class Renderer:
 
     def __init__(self, world):
         self.w = world
+        self.n_rendered = 0
 
     def _sampled_line(self, st: ScanSettings, col_pos: np.ndarray, j: int, ox: float, oy: float,
                       kappa: float, apexes=None, bias_v: float = 0.0) -> np.ndarray:
@@ -179,6 +184,31 @@ class Renderer:
         e = float(min(max(edge_frac, 0.0), 1.0))
         u = (cols + 0.5) / nx
         return float(hyst_px) * (e + (1.0 - e) * 1.5 * 4.0 * u * (1.0 - u))
+
+    def _didv_map(self, rho_f: np.ndarray, rho_b: np.ndarray, st: ScanSettings,
+                  i_set: float) -> tuple[np.ndarray, np.ndarray]:
+        """The lock-in X output of a constant-current dI/dV map (A).
+
+        Model: the demodulated current is the modulation amplitude times the junction's
+        nominal conductance I/V, weighted by the sample LDOS at the bias energy relative to its
+        mean over the frame - the standing-wave pattern of that energy is what the map shows.
+        Simplifications, stated: the setpoint (normalisation) effect of constant-current
+        feedback, the energy broadening by the modulation and the tip's own DOS are left out.
+        Noise: 3 % of the mean signal at 5 ms per pixel, falling as 1/sqrt(dwell) like a bias
+        sweep's (world.STS_NOISE_FRAC), from this channel's own random stream."""
+        from .world import STS_NOISE_FRAC, STS_NOISE_REF_INTEG_S
+
+        w = self.w
+        g0 = abs(i_set) / max(abs(w.bias_v), 1e-3)
+        ref = float(np.mean(rho_f)) or 1.0
+        out = []
+        rng = np.random.default_rng([int(w.seed), LOCKIN_STREAM, int(self.n_rendered)])
+        for rho, line_s in ((rho_f, st.line_time_fwd_s), (rho_b, st.line_time_bwd_s)):
+            sig = float(getattr(w, "lockin_amp_v", 0.01)) * g0 * rho / ref
+            dwell = max(line_s / st.nx, 1e-5)
+            frac = STS_NOISE_FRAC * np.sqrt(STS_NOISE_REF_INTEG_S / dwell)
+            out.append(sig + rng.normal(0.0, frac * float(np.mean(np.abs(sig))) + 1e-18, sig.shape))
+        return out[0], out[1]
 
     def render(self, st: ScanSettings, t_start_sim: float) -> Frame:
         w = self.w
@@ -215,6 +245,10 @@ class Renderer:
         row_offsets = np.zeros((ny, 2))
         fb_on = w.zctrl.on
         z_frozen_tip = w.tip_height_m()
+        # a dI/dV map: the lock-in on and its channel in the scan buffer
+        lockin = bool(getattr(w, "lockin_on", False)) and SIG_LI_X in st.channels
+        rho_f_rows = np.zeros((ny, nx)) if lockin else None
+        rho_b_rows = np.zeros((ny, nx)) if lockin else None
         speed = st.w / max(st.line_time_fwd_s, 1e-9)
         # standing waves cost Bessel/Struve evaluations per sample; computing them once for the
         # whole frame keeps Scan.Action inside the controller client's 5 s reply window (no-op without a
@@ -267,6 +301,13 @@ class Renderer:
             s_b_rows[k], a_b_rows[k] = self._sampled_line(st, bwd_pos, j, ox, oy, kappa,
                                                           apexes=w.tip.pass_apexes(), bias_v=w.bias_v)
             fl_b_rows[k] = w.tip.flicker_series(nx, dt_px_b)   # drawn afresh: the passes disagree
+            if lockin:
+                # the sample LDOS at the bias energy under each pixel centre, through this
+                # row's drift, before the scratch below can change the surface
+                xs, ys = st.pixel_xy(cols.astype(float), j)
+                rho_f_rows[k] = w.surface.ldos_map(xs + ox, ys + oy, w.bias_v)
+                xs, ys = st.pixel_xy(bwd_pos, j)
+                rho_b_rows[k] = w.surface.ldos_map(xs + ox, ys + oy, w.bias_v)
             # scratches: a fragile/blunt tip scanning too fast damages the surface
             w.maybe_scratch(st, j, speed, t_row)
             lam_rows[k] = w.tip.lambda_per_s
@@ -306,6 +347,9 @@ class Renderer:
             i_bwd[k] = w.preamp.clamp(w.noise.current_series(i_b, t_row + st.line_time_fwd_s + dt_px_b * cols))
         data = {SIG_Z: (z_fwd, z_bwd), SIG_CURRENT: (i_fwd, i_bwd),
                 SIG_BIAS: (np.full((ny, nx), w.bias_v), np.full((ny, nx), w.bias_v))}
+        if lockin:
+            data[SIG_LI_X] = self._didv_map(rho_f_rows, rho_b_rows, st, i_set)
+        self.n_rendered += 1
         for sig in st.channels:
             if sig not in data:
                 data[sig] = (np.zeros((ny, nx)), np.zeros((ny, nx)))

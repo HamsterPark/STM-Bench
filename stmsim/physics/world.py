@@ -931,12 +931,20 @@ class World:
             # recorded start) stays for readers of older ledgers
             rows_nm = ([[round(float(o[0]) * 1e9, 4), round(float(o[1]) * 1e9, 4)] for o in fr.row_offsets_m]
                        if fr.row_offsets_m is not None else None)
+            # a dI/dV map (lock-in channel rendered) and the nearest scatterer to the frame's
+            # centre on the sample: what an evidence rule for maps checks
+            from .scanner import SIG_LI_X
+            didv = SIG_LI_X in fr.data
+            near_kind, near_m = (self.surface.nearest_scatterer(st.cx + ox, st.cy + oy)
+                                 if didv else (None, None))
             self._event("scan_saved", path=str(path), rows=fr.rows_done,
                         idx=self.scan_series_counter, complete=bool(fr.rows_done >= st.ny),
                         cx_m=st.cx, cy_m=st.cy, w_m=st.w, h_m=st.h, angle_deg=st.angle_deg,
                         nx=st.nx, ny=st.ny, bias_v=self.bias_v, setpoint_a=self.zctrl.setpoint_a,
                         t_start_sim=fr.t_start_sim, drift_m=[float(ox), float(oy)],
-                        scan_dir=st.scan_dir, row_offsets_nm=rows_nm)
+                        scan_dir=st.scan_dir, row_offsets_nm=rows_nm, didv_map=didv,
+                        **({"near_kind": near_kind, "near_nm": None if near_m is None else near_m * 1e9}
+                           if didv else {}))
             return str(path)
 
     # ── tip shaper (poke) ──

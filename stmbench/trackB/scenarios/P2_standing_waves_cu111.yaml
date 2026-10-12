@@ -60,13 +60,25 @@ claims:
     tol: {abs: 15}
     truth: surface_state.e0_mev
     evidence: &spectra
-      kind: spectra_near_scatterer
-      min_n: 8
-      min_positions: 6
-      near_nm: 8.0
-      min_points: 64
-      v_lo_max: -0.5
-      v_hi_min: 0.1
+      kind: any_of
+      rules:
+        - kind: spectra_near_scatterer
+          min_n: 8
+          min_positions: 6
+          near_nm: 8.0
+          min_points: 64
+          v_lo_max: -0.5
+          v_hi_min: 0.1
+        # the 1993 experiment's own route: dI/dV maps at several energies, each one frame and
+        # free of drift within it (2026-10-13, with the simulator's lock-in map channel)
+        - kind: didv_maps
+          min_n: 4
+          min_energies: 4
+          v_lo_max: -0.3
+          v_hi_min: 0.05
+          near_nm: 10.0
+          min_fov_nm: 15
+          max_nm_per_px: 0.3
   - id: m_eff
     say: "表面态电子的有效质量 m*（以自由电子质量 m_e 为单位）"
     kind: scalar

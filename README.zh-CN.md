@@ -99,6 +99,7 @@ MAST 条件（开发本基准时使用的智能体与技能运行时）保留，
   报表只回答一件事：**论文 × 模型的复现率**。
 
 设计记录：[`docs/DESIGN.md`](docs/DESIGN.md)（中文）。操作指南：[`docs/USAGE.md`](docs/USAGE.md)。
+模拟器模拟了什么、依据来自哪里、与真实显微镜有何差别：[`docs/FIDELITY.md`](docs/FIDELITY.md)（保真卡，英文）。
 代码审查与贡献指南：[`AGENTS.md`](AGENTS.md)，包含源码/测试对应关系和验证边界。
 
 ## 快速开始：无需 MAST 或 API 密钥的模拟器
@@ -316,7 +317,7 @@ $STM_BENCH_DATA/
   MAST 真实技能（`ForgeAuTip` 完成完整的针尖修整循环并报告 `ready`）；基于
   983 个真实时间间隔标定的蠕变与漂移；推导出的 σ*/λ* 阈值；LLM 驱动器、
   HITL 自动应答器、每次实验的计费标签、上述协议和报告表。论文任务部分包括：
-  五种物理后端、六个场景、具有五类 claim 和七条证据规则的 `claims_verified`
+  五种物理后端、六个场景、具有五类 claim 和八类证据规则的 `claims_verified`
   裁判、`ReportResult` 通道、每篇论文一个脚本基线，以及七个新的 MAST 技能
   （已注册，并通过 MAST 自身的验证）。
 - **历史可解性验证（模式 C）。** P1 在真实漂移条件下，于种子 0–9 上复现了

@@ -127,6 +127,8 @@ reported value within tolerance.
   The report is one thing: **reproduction rate, paper × model**.
 
 Design record: [`docs/DESIGN.md`](docs/DESIGN.md) (Chinese). How-to: [`docs/USAGE.md`](docs/USAGE.md).
+What the simulator models, from what source, and where it differs from a real microscope:
+[`docs/FIDELITY.md`](docs/FIDELITY.md).
 Code review and contribution guide: [`AGENTS.md`](AGENTS.md), with a source/test map and validation boundaries.
 
 ## Quick start: simulator, no MAST or API key
@@ -373,7 +375,7 @@ record preserves their context; a current reproduction rate remains to be measur
   `ready`); creep/drift calibrated on 983 real intervals; σ*/λ* thresholds derived; the LLM
   driver, HITL auto-resolver, per-episode billing tags, the protocol above, the report table.
   For the papers: the five physics backends, the six scenarios, the `claims_verified` judge
-  with its five claim kinds and seven evidence rules, the `ReportResult` channel, one scripted
+  with its five claim kinds and eight kinds of evidence rule, the `ReportResult` channel, one scripted
   baseline per paper, and seven new MAST skills (registered, and green on MAST's own gates).
 - **Historical solvability gates (mode C).** P1 reproduced **7/10** on seeds 0–9 under real drift
   (gate2, 2026-09-13, run serially on an idle machine: two periods 0.15–0.25 nm off against
