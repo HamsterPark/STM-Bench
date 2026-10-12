@@ -54,6 +54,8 @@ claims:
   - id: e0_mev
     kind: scalar
     unit: meV
+    # material constants: knowing them is part of the skill (see the chance audit)
+    knowledge: allowed
     tol: {abs: 15}
     truth: surface_state.e0_mev
     evidence: &spectra
@@ -67,6 +69,7 @@ claims:
   - id: m_eff
     kind: scalar
     unit: m_e
+    knowledge: allowed
     tol: {rel: 0.02}
     truth: surface_state.m_star
     evidence: *spectra

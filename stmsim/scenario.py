@@ -200,6 +200,9 @@ class Scenario:
                                      f"(known: {CLAIM_KINDS})")
                 if c["kind"] != "constraint" and "tol" not in c:
                     raise ValueError(f"{self.id}: claim {c['id']!r} needs a tol")
+                if "knowledge" in c and (c["knowledge"] != "allowed" or c["kind"] in ("position", "constraint")):
+                    raise ValueError(f"{self.id}: claim {c['id']!r}: knowledge must be 'allowed', "
+                                     f"and only on a reported value")
                 if c["id"] in seen:
                     raise ValueError(f"{self.id}: duplicate claim id {c['id']!r}")
                 seen.add(c["id"])

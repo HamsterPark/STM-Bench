@@ -39,6 +39,9 @@ claims:
   - id: stripe_period_nm
     kind: scalar
     unit: nm
+    # a material constant: knowing it is part of the skill, so the chance audit records how
+    # often a fixed answer passes but does not hold the claim to the guessing gate
+    knowledge: allowed
     tol: {abs: 0.15}
     truth: herringbone.period_along_arm_nm
     evidence: {kind: frame, min_fov_nm: 100, max_nm_per_px: 0.4}
