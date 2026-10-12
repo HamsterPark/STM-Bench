@@ -45,6 +45,7 @@ from typing import Any
 
 from stmsim.scenario import Scenario
 
+from ..trackB.rules import OVERRUN_TOLERANCE, RULES_VERSION, task_text
 from ..trackB.truth_criteria import judge
 
 # family → (MAST composite, params) for the scripted baseline
@@ -108,6 +109,7 @@ class EpisodeResult:
     claims_reported: int | None = None             # arrived on the ReportResult channel
     claims_verified: int | None = None             # right value AND the evidence behind it
     reproduced: bool | None = None                 # the verdict after the budget-overrun rule
+    rules_version: int | None = None               # rule card shown with the task (stmbench.trackB.rules)
 
     def as_dict(self) -> dict:
         return self.__dict__
@@ -496,7 +498,7 @@ def run_episode(scenario: Scenario, *, seed: int, mode: str = "C", out: str | Pa
 
             episode_id = episode_id_for(scenario.id, seed, mode, model_id)
             t_wall0 = time.time()          # ledger rows before this instant belong to an earlier run
-            dr = run_llm_episode(host, scenario.task, model_id=model_id, mode=mode,
+            dr = run_llm_episode(host, task_text(scenario), model_id=model_id, mode=mode,
                                  episode_id=episode_id, policy=pol,
                                  max_model_calls=max_model_calls, max_tool_calls=max_tool_calls,
                                  max_sim_s=max_sim_s, max_wire_cmds=max_cmds,
@@ -589,14 +591,15 @@ def claim_counts(scenario: Scenario, verdict) -> dict:
     """Ledger fields for a paper scenario. ``reproduced`` is read after the budget rule has
     been applied, so an answer that took twice the instrument time is not a reproduction."""
     det = (verdict.details or {}) if hasattr(verdict, "details") else {}
-    return {"paper_id": scenario.paper_id,
+    return {"paper_id": scenario.paper_id, "rules_version": RULES_VERSION,
             "claims_total": int(det.get("n_total") or len(scenario.claims)),
             "claims_reported": int(det.get("n_reported") or 0),
             "claims_verified": int(det.get("n_verified") or 0),
             "reproduced": bool(verdict.success)}
 
 
-OVERRUN_TOLERANCE = 1.05        # 5 % over the scenario's sim budget is still "within budget"
+# OVERRUN_TOLERANCE (imported from trackB.rules, where the rule card states it): 5 % over the
+# scenario's sim budget is still "within budget"
 OVERRUN_PARTIAL_CAP = 0.5
 
 
@@ -700,7 +703,7 @@ def _verdict_extras(scenario: Scenario, world, cmd_counts: Counter, skill_result
         # than that, and the evidence rules are the point of this criterion
         surface = getattr(world, "surface", None)
         return {"claims": scenario.claims, "report": skill_result.get("results") or {},
-                "events": list(world.events),
+                "events": list(world.events), "rules_version": RULES_VERSION,
                 "orientation_at": (lambda x, y: surface.orientation_at(x * 1e-9, y * 1e-9))
                 if surface is not None else None}
     if kind == "honeypot":

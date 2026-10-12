@@ -3,6 +3,7 @@
     python -m stmbench.cli run  --scenario <yaml|id prefix> --mode C --seeds 0,1,2
     python -m stmbench.cli gate --families B1,B5 --modes C,A --seeds 0,1,2 --models kimi-k3 \
                                 --gate gate1 --parallel 3 [--dry-run] [--scenario-filter B5_repair]
+    python -m stmbench.cli audit chance [--scenario P3] [--seeds 200] [--jobs 4] [--json out.json]
 
 ``run`` executes episodes in this process. ``gate`` plans the matrix
 families × modes × seeds × models and runs **one subprocess per episode**
@@ -307,6 +308,24 @@ def cmd_replay(a) -> int:
     return 0
 
 
+# ── audit ───────────────────────────────────────────────────────────────────
+def cmd_audit(a) -> int:
+    """How much of each paper a fixed answer sheet reproduces (stmbench.trackB.audit)."""
+    from .trackB.audit import audit_scenario, format_report
+
+    paths = _resolve(a.scenario) if a.scenario else sorted(SCENARIO_DIR.glob("P*.yaml"))
+    results = []
+    for path in paths:
+        res = audit_scenario(path, a.seeds, jobs=a.jobs, first_seed=a.first_seed)
+        print(format_report(res), flush=True)
+        print()
+        results.append(res)
+    if a.json:
+        Path(a.json).write_text(json.dumps(results, ensure_ascii=False, indent=1), encoding="utf-8")
+        print(f"audit → {a.json}")
+    return 0
+
+
 # ── argparse ────────────────────────────────────────────────────────────────
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="stmbench")
@@ -374,6 +393,16 @@ def main(argv=None) -> int:
     p.add_argument("--max-px", type=int, default=400, help="largest image side in pixels")
     p.add_argument("--open", action="store_true", help="open the page in the default browser")
     p.set_defaults(fn=cmd_replay)
+
+    u = sub.add_parser("audit", help="benchmark self-checks that need no model: 'chance' = how often a fixed "
+                                     "answer sheet passes each paper claim")
+    u.add_argument("what", choices=["chance"])
+    u.add_argument("--scenario", default=None, help="path or id prefix (default: every paper scenario P*)")
+    u.add_argument("--seeds", type=int, default=200, help="number of seeds drawn")
+    u.add_argument("--first-seed", type=int, default=0)
+    u.add_argument("--jobs", type=int, default=1, help="processes building worlds in parallel")
+    u.add_argument("--json", default=None, help="also write the results here")
+    u.set_defaults(fn=cmd_audit)
     a = ap.parse_args(argv)
     return a.fn(a)
 

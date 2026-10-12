@@ -78,9 +78,9 @@ def run_p3(host, scenario, *, seed: int = 0, extra: dict | None = None) -> dict:
                       optional=True)
     energies = b.data(peaks_res, "energies_mev") or []
     if len(energies) >= 1:
-        b.report("peak_lo_mev", float(energies[0]), "meV")
+        b.report("peak_lo_mev", float(energies[0]), "meV", evidence=[str(paths[-1])])
     if len(energies) >= 2:
-        b.report("peak_hi_mev", float(energies[1]), "meV")
+        b.report("peak_hi_mev", float(energies[1]), "meV", evidence=[str(paths[-1])])
     return b.finish(drift=drift, centre_nm=[cx * 1e9, cy * 1e9], radius_nm=radius * 1e9,
                     n_ring_atoms=len(atoms), atoms_placed=filled,
                     peaks_mev=[round(e, 1) for e in energies[:4]])

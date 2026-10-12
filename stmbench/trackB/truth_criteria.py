@@ -222,13 +222,22 @@ def watch_survived(truth: dict, thr: dict | None = None, *, consumed_fraction: f
 
 
 def claims_verified(truth: dict, thr: dict | None = None, *, claims=(), report=None,
-                    events=(), orientation_at=None) -> Verdict:
+                    events=(), orientation_at=None, rules_version: int | None = None) -> Verdict:
     """P-families: a paper is reproduced when every one of its claims is reported, right
     within tolerance of this seed's hidden truth, **and** backed by the acquisition the
     scenario requires (see :mod:`stmbench.trackB.claims`).
 
-    No report at all is a failure, not an abstention: the paper simply did not come out."""
+    No report at all is a failure, not an abstention: the paper simply did not come out.
+
+    ``rules_version`` is the version of the rule card the agent was shown
+    (:mod:`stmbench.trackB.rules`). From version 1 a report names its data: a position is
+    read in the frame the report names (``frame``), through that frame's per-row drift, and
+    the evidence rule is checked within the frames and spectra the report cites
+    (``evidence``). Episodes run before the rule card (``None`` / 0) are judged as they
+    were: the last covering frame, any data in the episode."""
     from . import claims as C
+
+    strict = int(rules_version or 0) >= 1
 
     t = {**DEFAULT_THRESHOLDS, **(thr or {})}
     claims = list(claims or [])
@@ -251,6 +260,12 @@ def claims_verified(truth: dict, thr: dict | None = None, *, claims=(), report=N
             reported = rep is not None and rep.get("x_nm") is not None and rep.get("y_nm") is not None
         value_ok = False
         truth_val = None
+        placed = None                    # version 1: the frame a reported position is read in
+        if strict and rep is not None and rep.get("x_nm") is not None and rep.get("y_nm") is not None:
+            placed, why = C.placing_frame(events, rep, rule)
+            info["frame"] = rep.get("frame")
+            if why:
+                info["frame_reason"] = why
         if kind == "constraint":
             truth_val = C.truth_at_path(truth, claim["truth"])
             if claim.get("of_claim"):
@@ -270,7 +285,8 @@ def claims_verified(truth: dict, thr: dict | None = None, *, claims=(), report=N
             info["value"] = value
             if claim["truth"] == "orientation_at":
                 sx = sy = None
-                fr = C.frame_covering(events, float(rep["x_nm"]), float(rep["y_nm"]), rule)
+                fr = placed if strict else C.frame_covering(events, float(rep["x_nm"]),
+                                                            float(rep["y_nm"]), rule)
                 if fr is not None:
                     sx, sy = C.to_sample_frame(fr, float(rep["x_nm"]), float(rep["y_nm"]))
                     truth_val = orientation_at(sx, sy) if callable(orientation_at) else None
@@ -307,7 +323,9 @@ def claims_verified(truth: dict, thr: dict | None = None, *, claims=(), report=N
                 # "any isolated atom": the report says which one — the moved atom nearest the
                 # reported place (mapped to the sample through the covering frame's drift)
                 fr = None
-                if rep.get("x_nm") is not None and rep.get("y_nm") is not None:
+                if strict:
+                    fr = placed
+                elif rep.get("x_nm") is not None and rep.get("y_nm") is not None:
                     fr = C.frame_covering(events, float(rep["x_nm"]), float(rep["y_nm"]), rule)
                 cands = [c for c in truth_val.get("candidates") or [] if c.get("now_nm")]
                 if fr is not None and cands:
@@ -322,14 +340,16 @@ def claims_verified(truth: dict, thr: dict | None = None, *, claims=(), report=N
                     else:
                         truth_val = {"reason": "no_moved_atom_there", "nearest_nm": dist}
                 else:
-                    truth_val = {"reason": "no_frame_covers_report" if fr is None else "no_atom_moved"}
+                    truth_val = {"reason": (info.get("frame_reason") or "no_frame_covers_report")
+                                 if fr is None else "no_atom_moved"}
                 info["truth"] = truth_val
             elif kind == "position" and isinstance(truth_val, dict):
                 value_ok = bool(truth_val.get("on_target"))
                 site = truth_val.get("site_nm")
                 now = truth_val.get("atom_now_nm")
                 if value_ok and site and now and rep.get("x_nm") is not None:
-                    fr = C.frame_covering(events, float(rep["x_nm"]), float(rep["y_nm"]), rule)
+                    fr = placed if strict else C.frame_covering(events, float(rep["x_nm"]),
+                                                                float(rep["y_nm"]), rule)
                     if fr is None:
                         value_ok = False
                     else:
@@ -356,7 +376,18 @@ def claims_verified(truth: dict, thr: dict | None = None, *, claims=(), report=N
             if peer_v is None or float(rep["value"]) <= float(peer_v):
                 value_ok = False
                 info["greater_than_failed"] = True
-        ev_ok, ev_info = C.check_evidence(rule, events=events, report=rep or {}, truth=truth)
+        cited = None
+        if strict and rep is not None:
+            # version 1: the evidence rule is checked within the data the report names
+            refs = [str(r) for r in (rep.get("evidence") or [])]
+            if rep.get("frame"):
+                refs.append(str(rep["frame"]))
+            cited = [ev for ev in (C.resolve_citation(events, r) for r in refs) if ev is not None]
+            info["cited"] = refs
+            unresolved = [r for r in refs if C.resolve_citation(events, r) is None]
+            if unresolved:
+                info["unresolved_citations"] = unresolved
+        ev_ok, ev_info = C.check_evidence(rule, events=events, report=rep or {}, truth=truth, cited=cited)
         info["evidence"] = ev_info
         info["value_ok"] = value_ok
         info["evidence_ok"] = ev_ok
@@ -371,7 +402,8 @@ def claims_verified(truth: dict, thr: dict | None = None, *, claims=(), report=N
     return Verdict(bool(n) and n_verified == n, partial,
                    {"checks": checks, "claims": details, "n_total": n,
                     "n_reported": len(folded), "n_verified": n_verified,
-                    "no_report": not folded, "thresholds": t})
+                    "no_report": not folded, "thresholds": t,
+                    "rules_version": int(rules_version or 0)})
 
 
 CRITERIA = {

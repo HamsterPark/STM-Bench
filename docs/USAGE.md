@@ -198,8 +198,9 @@ initial:
   #                     # paper scenario. Use it only to model a different machine.
   # pll: {output_on: false, amplitude_m: 50.0e-12}   # qPlus, needs rig reference-stm-qplus
 faults: []
-task: |                         # goals only; never the tip state, never the fault
-  ... 用 ReportResult 报告 ...   # the task must name the result channel
+task: |                         # goals only; never the tip state, never the fault,
+  ... 用 ReportResult 报告 ...   # never the budget (the rule card states it); it must name
+                                # the result channel
 budget: {sim_hours: 3.0, wire_cmds: 400000}
 hidden:                         # drawn per seed; keys must be in scenario.HIDDEN_SCHEMA
   surface_state:
@@ -209,8 +210,10 @@ hidden:                         # drawn per seed; keys must be in scenario.HIDDE
     # species: {choice: [Fe, Co]}                            # discrete
 claims:
   - id: e0_mev
+    say: "Cu(111) 表面态的带底能量 E0（相对费米能级）"   # what the claim means, for the rule card
     kind: scalar                # scalar | angle | peak_in_list | position | constraint
     unit: meV
+    knowledge: allowed          # only on a material constant: see "The chance audit" below
     tol: {abs: 15}              # abs and/or rel; angle adds mod: 180
     truth: surface_state.e0_mev # a dotted path into World.truth(), or "orientation_at"
     evidence:
@@ -226,7 +229,9 @@ notes: |
   Why these tolerances, measured how, on what date.
 ```
 
-`seed` is never in the file. `Scenario.load()` runs `validate()`: a file with `paper` must use
+`seed` is never in the file. The task the agent sees is `task` followed by the rule card
+generated from the claims and the budget (`stmbench.trackB.rules.task_text`, below).
+`Scenario.load()` runs `validate()`: a file with `paper` must use
 `claims_verified`, must have at least one claim with an id, kind, truth and evidence, and every
 `hidden` key must be in the whitelist — a typo raises rather than silently drawing nothing.
 Adding a key to a `hidden` block reorders every seed's draws (the sampler walks keys in sorted
@@ -254,18 +259,56 @@ order), so the tolerances have to be re-derived; each scenario's `notes` says so
 | `zspec_pair` | one Δf curve on an adatom (close enough, no jump, no contact, enough span past the minimum) and one on clean surface |
 | `events` | at least `min_n` events of a kind, optionally with a `cause` |
 
+Under the version-1 rules (every episode run with the rule card) a reported claim's rule is
+checked **within the data the report cites** (`evidence`), and `frame_covers` /
+`frame_covers_after` use the frame the report names (`frame`), which must satisfy the rule,
+contain the position and, where `after_event` is set, have been saved after the last such event.
+Constraints and `events` rules have nothing to cite and are checked against the whole episode.
+
 ### `ReportResult`
 
 The harness injects one tool in every mode:
 
 ```
-ReportResult(claim_id, value, unit=None, sigma=None, x_nm=None, y_nm=None, note=None)
+ReportResult(claim_id, value, unit=None, sigma=None, x_nm=None, y_nm=None,
+             frame=None, evidence=None, note=None)
 ```
 
 `claim_id` is an enum of that scenario's claim ids. The last report for a claim wins. Positions
-are in the **current scan coordinate system**; the judge maps them onto the sample through the
-drift recorded with each frame. Nothing is parsed out of free text: a claim never reported is
+are in the **scan coordinate system** (x right, y up, the frame of the scan offset); `frame`
+names the saved frame they were read in (its `.sxm` file name, or `frame:N`), and the judge maps
+them onto the sample through the drift of the acquisition row they fall in — each saved frame
+records the offset its renderer added to every row (`row_offsets_nm` in `scan_saved`).
+`evidence` lists the frames and spectra the value came from (`.sxm` / `.dat` file names, or
+`frame:N`, `sts:N`, `zspec:N`). Nothing is parsed out of free text: a claim never reported is
 never reproduced, and every turn's continue message lists the claims still missing.
+
+### The rule card
+
+`stmbench.trackB.rules.rule_card(scenario)` states, from the scenario file, everything the judge
+checks: each claim's meaning (`say`), unit, tolerance, pairwise rules and evidence, the citation
+and coordinate conventions, the budget and the 5 % overrun rule. `task_text(scenario)` appends it
+to the task; the LLM driver, the mode-H page and the replay all show that text. Tolerances are
+public; the values drawn for a seed are not. The ledger records `rules_version`, and the judge
+applies the version-1 rules (citations, the named frame) to episodes with `rules_version ≥ 1`;
+older ledgers re-judge with the rules they ran under. Never state a budget or an evidence rule
+by hand in a task: write it in the claim or the budget, and the card will say it.
+
+### The chance audit
+
+```bash
+python -m stmbench.cli audit chance                    # every paper, 200 seeds
+python -m stmbench.cli audit chance --scenario P3 --seeds 300 --jobs 4 --json out.json
+```
+
+The hidden ranges are public, so a fixed answer near the middle of a range is the attack a
+reported value has to withstand. The audit draws the truth for many seeds and finds, with the
+judge's own tolerance helpers, the constant answer that passes most often: per claim, and for
+the whole paper. Claims marked `knowledge: allowed` (material constants: P1's period, P2's E0
+and m*) are reported but not held to a gate — knowing them is part of the skill. Position and
+constraint claims are judged on the atoms themselves and are not audited. On seeds 0–299
+(2026-10-12) a fixed sheet reproduces P3 in 41 % of seeds, P3's repair spectra in 43 %, P2 in
+16 % (all knowledge claims) and P5 in 13 %; P1's measured claims together pass 4.3 %.
 
 ### Run directory
 

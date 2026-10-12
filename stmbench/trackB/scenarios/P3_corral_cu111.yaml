@@ -26,7 +26,7 @@ faults: []
 task: |
   样品是 Cu(111)，扫描坐标原点附近 60 nm 内有一圈 Fe 原子排成的圆形围栏，仪器已在隧穿态；
   请复现 1993 年量子围栏的观测：测出围栏中心的 dI/dV 谱，报告能量最低的两个可分辨共振峰的
-  能量（meV，相对费米能级），用 ReportResult 报告。预算：1.5 小时仪器时间。
+  能量（meV，相对费米能级），用 ReportResult 报告。
 budget: {sim_hours: 1.5, wire_cmds: 150000}
 hidden:
   adatoms:
@@ -53,6 +53,7 @@ hidden:
     condition_angle_deg: [0.0, 360.0]
 claims:
   - id: peak_lo_mev
+    say: "围栏中心 dI/dV 谱上能量最低的两个可分辨共振峰中较低的那个（相对费米能级）"
     kind: peak_in_list
     unit: meV
     tol: {abs: 25}
@@ -66,6 +67,7 @@ claims:
       v_lo_max: -0.45
       v_hi_min: 0.1
   - id: peak_hi_mev
+    say: "这两个共振峰中较高的那个（相对费米能级）"
     kind: peak_in_list
     unit: meV
     tol: {abs: 25}

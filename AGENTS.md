@@ -56,6 +56,7 @@ This is an **alpha research prototype**. Keep these evidence boundaries explicit
 | Are provider latency and instrument budgets handled separately? | [clock.py](stmsim/physics/clock.py), [ic_driver.py](stmbench/harness/ic_driver.py), [episode.py](stmbench/harness/episode.py) | [test_clock_freeze_and_faults.py](tests/test_clock_freeze_and_faults.py), [test_budget_overrun.py](tests/test_budget_overrun.py), [test_llm_driver_loop.py](tests/test_llm_driver_loop.py) |
 | Can a result be traced to its acquisition, coordinates and tip history? | [episode.py](stmbench/harness/episode.py), [render.py](stmbench/human/render.py), [replay/](stmbench/replay/) | [test_ledger_schema.py](tests/test_ledger_schema.py), [test_human_port.py](tests/test_human_port.py), [test_replay.py](tests/test_replay.py) |
 | Do comparisons respect shared seeds and missing observations? | [stats.py](stmbench/report/stats.py), [summarize.py](stmbench/report/summarize.py) | [test_stats.py](tests/test_stats.py) |
+| Is every judged rule stated in the task, and can a fixed answer pass? | [rules.py](stmbench/trackB/rules.py), [audit.py](stmbench/trackB/audit.py) | [test_rule_card.py](tests/test_rule_card.py), [test_rules_v1.py](tests/test_rules_v1.py), [test_audit.py](tests/test_audit.py) |
 
 Other useful boundaries:
 
@@ -158,15 +159,21 @@ These apply across the simulator, judge, harness and presentation layers.
    not numbers extracted from prose. Reported-value claims need both the report and required
    acquisition evidence; missing reports fail. State constraints are checked directly against
    truth and required evidence. Do not widen tolerances, remove evidence requirements or
-   reduce paper-scenario drift to make a baseline pass.
+   reduce paper-scenario drift to make a baseline pass. Every rule the judge applies is stated
+   to the agent by the rule card (`stmbench.trackB.rules`), generated from the same scenario
+   fields: never state a budget or an evidence rule by hand in a task, and never add a judge
+   rule the card does not state. Under rules version 1 a report names the frame its position
+   was read in (`frame`) and the data its value came from (`evidence`), and the evidence rule
+   is checked within that data; ledgers record `rules_version`, and older ledgers keep their rules.
 5. **Respect clocks and budgets.** Hardware-side processes use the wall clock; scans,
    drift and creep use simulated time, and instrument-time budgets use sim hours.
    `ClockPausedPort` freezes the instrument while the model thinks. Preserve this distinction
    and overrun handling. Run solvability gates serially on an otherwise idle machine:
    host load changes elapsed instrument time and can change the outcome.
 6. **Keep coordinate frames explicit.** The agent reports scan-frame coordinates; the
-   sample lives in the sample frame. Saved frames record their drift, which the judge uses
-   when mapping reported positions. In oriented arrays, row 0 is the high-v edge.
+   sample lives in the sample frame. Saved frames record the drift offset the renderer added
+   to every acquisition row (`row_offsets_nm`), and the judge maps a reported position through
+   the row it falls in, in the frame the report names. In oriented arrays, row 0 is the high-v edge.
    `human.render.pixel_to_scan_nm` must remain the inverse of the judge's footprint mapping
    (`tests/test_human_port.py`). Preserve units at every boundary.
 7. **Respect scan-time history.** A frame is rendered whole at scan start and revealed
@@ -217,8 +224,11 @@ These apply across the simulator, judge, harness and presentation layers.
 
 1. Add a YAML under `stmbench/trackB/scenarios/` with `paper`, `initial`, `hidden`,
    `claims`, `budget` and `task`. Hidden ranges need physical justification; each claim
-   needs its kind, truth reference, acceptance threshold or tolerance, and acquisition-evidence
-   rule. Require a report where the claim kind calls for one.
+   needs its kind, truth reference, acceptance threshold or tolerance, acquisition-evidence
+   rule and a `say` line (its meaning, for the rule card). Require a report where the claim
+   kind calls for one. Mark `knowledge: allowed` only on a material constant.
+   Run `python -m stmbench.cli audit chance --scenario <id>` and record the per-claim and
+   joint chance in the scenario notes.
 2. Implement the required physics and expose the truth through `World.truth()` or an
    existing judge callback such as `orientation_at`. Keep the agent-facing task free of truth.
 3. Reuse `claims_verified` unless it cannot express the criterion; only then extend

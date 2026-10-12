@@ -60,7 +60,11 @@ def run_p4(host, scenario, *, seed: int = 0, extra: dict | None = None) -> dict:
         # the composite could not confirm it; report where we aimed, with the last frame as
         # the evidence — an honest "this is where it should be", which the judge will check
         fx, fy = tx, ty
-    b.report("target_site", float(fx) * 1e9, "nm", x_nm=float(fx) * 1e9, y_nm=float(fy) * 1e9)
+    # the position is read in the last frame saved, the composite's verification scan
+    last = b.latest_frame()
+    b.report("target_site", float(fx) * 1e9, "nm", x_nm=float(fx) * 1e9, y_nm=float(fy) * 1e9,
+             frame=str(last) if last is not None else None,
+             evidence=[str(last)] if last is not None else [])
     return b.finish(drift=drift, atom_start_nm=[ax * 1e9, ay * 1e9], target_nm=[tx * 1e9, ty * 1e9],
                     moved=b.data(move, "moved"), verify=b.data(move, "verify_verdict"),
                     residual_nm=b.data(move, "residual_nm"))

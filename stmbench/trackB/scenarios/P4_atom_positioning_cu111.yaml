@@ -21,7 +21,7 @@ task: |
   样品是 Cu(111)，表面稀疏地散落着 Fe 吸附原子（扫描坐标原点附近 30 nm 内就有孤立的），仪器已在隧穿态；
   请复现 Eigler 与 Schweizer 1990 年的单原子定位实验：任选一个孤立的 Fe 原子（3 nm 内没有别的原子），
   把它沿 +x 方向横向移动 4.0 nm 到最近的晶格位点；它周围 10 nm 内的其余原子不得移动或损毁。
-  用 ReportResult 报告该原子的最终位置（当前扫描坐标，nm）。预算：1.5 小时仪器时间。
+  用 ReportResult 报告该原子的最终位置（当前扫描坐标，nm）。
 budget: {sim_hours: 1.5, wire_cmds: 200000}
 hidden:
   adatoms:
@@ -42,6 +42,7 @@ hidden:
     condition_angle_deg: [0.0, 360.0]
 claims:
   - id: target_site
+    say: "你搬动的那个原子的最终位置：x_nm、y_nm 写位置，value 写同一个 x_nm"
     kind: position
     unit: nm
     tol: {abs_nm: 0.16, report_nm: 0.6}
@@ -50,9 +51,10 @@ claims:
     evidence:
       kind: frame_covers_after
       min_fov_nm: 6
-      max_nm_per_px: 0.1
+      max_nm_per_px: 0.2
       after_event: adatom_hop
   - id: bystander_max_shift_nm
+    say: "被搬原子出生位置或目标位置 10 nm 以内的其他原子的最大位移（丢失或被针尖带走算移动）"
     kind: constraint
     unit: nm
     # the atoms born within bystander_nm of the chosen atom's start or goal — the chosen atom
@@ -79,3 +81,12 @@ notes: |
   the lattice site d away from where it was born** and had no neighbour within isolation_nm.
   ``bystander_max_shift_nm`` is then that atom's neighbourhood: every atom born within
   bystander_nm of its start or goal, a lost one counting as moved.
+
+  **Verification frame, 0.2 nm/px (2026-10-12; was 0.1).** The rule asks for a frame in which
+  the moved atom can be placed, not for a finer one: on rendered 8 nm frames of good-tip seeds
+  an intensity-centroid fit places an adatom to 0.017 nm (median) and 0.051 nm (p90) at
+  0.2 nm/px, against 0.015 / 0.026 nm at 0.1 nm/px (24 atoms each,
+  ``tests/test_p4_verification_frame.py``) - far inside the 0.255 nm Cu site spacing the
+  claim turns on and the 0.6 nm matching radius. The rule is also stated in the task now
+  (rule card); before, a run that verified the atom on a 0.15 nm/px frame failed on a
+  requirement it had never been told.

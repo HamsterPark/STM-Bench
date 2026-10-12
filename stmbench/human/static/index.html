@@ -397,7 +397,7 @@ function renderComposer() {
         frag.append(h('div', { class: 'field' }, h('label', null, h('code', null, name), sp.required ? h('span', { class: 'req' }, ' *') : null, h('span', { class: 'muted small' }, `  ${sp.type}`)), inp, sp.desc ? h('div', { class: 'desc' }, sp.desc) : null));
       }
       if (t.name === 'ReportResult' && S.lastPick) {
-        frag.append(h('div', { class: 'row small' }, h('span', { class: 'muted' }, `图上最近一次点选：x=${fmtNum(S.lastPick.x, 2)} y=${fmtNum(S.lastPick.y, 2)} nm（${S.lastPick.file}）`), h('button', { onclick: () => { if (inputs.x_nm) inputs.x_nm.inp.value = fmtNum(S.lastPick.x, 3); if (inputs.y_nm) inputs.y_nm.inp.value = fmtNum(S.lastPick.y, 3); } }, '填入 x_nm / y_nm')));
+        frag.append(h('div', { class: 'row small' }, h('span', { class: 'muted' }, `图上最近一次点选：x=${fmtNum(S.lastPick.x, 2)} y=${fmtNum(S.lastPick.y, 2)} nm（${S.lastPick.file}）`), h('button', { onclick: () => { if (inputs.x_nm) inputs.x_nm.inp.value = fmtNum(S.lastPick.x, 3); if (inputs.y_nm) inputs.y_nm.inp.value = fmtNum(S.lastPick.y, 3); if (inputs.frame) inputs.frame.inp.value = S.lastPick.file; } }, '填入 x_nm / y_nm / frame')));
       }
     }
     const note = h('input', { type: 'text', placeholder: '备注（随调用记录，可空；不要在这里写 [DONE]）' });
