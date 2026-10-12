@@ -110,6 +110,14 @@ def _evidence(c: dict) -> str:
                 f"{_num(a.get('near_nm_max', 0.15))} nm）测的 Δf(z) 曲线，越过 Δf 极小值后至少再逼近 "
                 f"{_num(a.get('df_span_beyond_min_pm_min', 0))} pm，中途没有跳变、没有接触；以及至少 "
                 f"{int(b.get('min_n', 1))} 条在离吸附原子 {_num(b.get('near_nm_min', 2.0))} nm 以外的干净表面上测的曲线（没有接触）")
+    if kind == "didv_maps":
+        return (f"evidence 中至少引用 {int(rule.get('min_n', 1))} 张开着锁相（lockin）的恒流扫描图（dI/dV 图），"
+                f"偏压至少 {int(rule.get('min_energies', 1))} 个不同的值（按 10 mV 区分），覆盖 {_num(rule.get('v_lo_max'))} V "
+                f"到 {_num(rule.get('v_hi_min'))} V；每张图的中心离最近的散射体（台阶边或吸附原子）不超过 "
+                f"{_num(rule.get('near_nm', 10.0))} nm，图须{_frame_terms(rule)}")
+    if kind == "any_of":
+        alts = [_evidence({"evidence": r}) for r in rule.get("rules") or []]
+        return "以下任一组即可——" + "；或者，".join(f"（{chr(0x61 + i)}）{a}" for i, a in enumerate(alts))
     if kind == "events":
         what = "由针尖拖动引起的原子跳动" if rule.get("event") == "adatom_hop" and rule.get("cause") == "folme" \
             else str(rule.get("event"))

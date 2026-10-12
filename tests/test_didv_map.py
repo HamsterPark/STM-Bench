@@ -1,4 +1,5 @@
-"""The lock-in dI/dV map: what it shows, and that it disturbs nothing else."""
+"""The lock-in dI/dV map: what it shows, that it disturbs nothing else, and that P2 can be
+reproduced the way the 1993 experiment did it - from maps at several energies."""
 from __future__ import annotations
 
 import math
@@ -7,6 +8,7 @@ import numpy as np
 import pytest
 
 from stmbench.instrument import ActionError, Instrument
+from stmbench.trackB import claims as C
 
 P2 = "P2_standing_waves_cu111"
 
@@ -68,3 +70,28 @@ def test_a_map_near_a_step_shows_the_standing_wave_of_its_energy():
         assert periods[bias] == pytest.approx(expect, rel=0.15), (bias, periods[bias], expect)
     assert periods[0.3] < periods[-0.2]                      # higher energy, shorter wave
 
+
+def test_maps_at_four_energies_near_a_step_are_evidence_for_p2():
+    """The paper's route through the judge: four maps at distinct biases near a step, cited,
+    with the truth reported; three maps, or maps far from any scatterer, are not enough."""
+    inst = Instrument(P2, 0)
+    x, y = _near_step(inst, 6.0)
+    inst.act("lockin", on=True, amplitude_mv=10.0)
+    maps = []
+    for bias in (-0.35, -0.2, -0.05, 0.1):
+        inst.act("set_bias", bias_v=bias)
+        maps.append(inst.act("scan", center_x_nm=x, center_y_nm=y, size_nm=16.0, pixels=64,
+                             line_time_s=0.2)["frame"])
+    truth = inst.world.truth()
+    sc = inst.scenario
+    rule = next(c for c in sc.claims if c["id"] == "e0_mev")["evidence"]
+    ok, info = C.check_evidence(rule, events=inst.world.events, report={}, truth=truth,
+                                cited=[C.resolve_citation(inst.world.events, m) for m in maps])
+    assert ok, info
+    ok3, _ = C.check_evidence(rule, events=inst.world.events, report={}, truth=truth,
+                              cited=[C.resolve_citation(inst.world.events, m) for m in maps[:3]])
+    assert not ok3
+    for c in sc.claims:
+        inst.report(c["id"], float(C.truth_at_path(truth, c["truth"])), evidence=maps)
+    out = inst.finish()
+    assert out["success"], inst.verdict.details["claims"]

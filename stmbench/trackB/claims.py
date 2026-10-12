@@ -287,6 +287,18 @@ def check_evidence(rule: dict, *, events, report: dict, truth: dict,
     if kind in ("spectra_near_scatterer", "sts_at_corral_centre", "zspec_pair"):
         ok, info = _check_spectra(kind, rule, events=events, truth=truth, pool=pool)
         return ok, {**info, **tag}
+    if kind == "didv_maps":
+        maps = [f for f in _frames(pool) if f.get("didv_map") and _frame_ok(f, rule)
+                and f.get("near_nm") is not None and float(f["near_nm"]) <= float(rule.get("near_nm", 10.0))]
+        energies = sorted({round(float(f.get("bias_v", 0.0)), 2) for f in maps})
+        lo, hi = rule.get("v_lo_max"), rule.get("v_hi_min")
+        span = bool(energies) and (lo is None or energies[0] <= float(lo)) and (hi is None or energies[-1] >= float(hi))
+        ok = len(maps) >= int(rule.get("min_n", 1)) and len(energies) >= int(rule.get("min_energies", 1)) and span
+        return ok, {"kind": kind, "n_maps": len(maps), "energies_v": energies, **tag}
+    if kind == "any_of":
+        parts = [check_evidence(r, events=events, report=report, truth=truth, cited=cited)
+                 for r in rule.get("rules") or []]
+        return any(ok for ok, _ in parts), {"kind": kind, "parts": [info for _, info in parts], **tag}
     if kind == "events":
         want = str(rule.get("event", "adatom_hop"))
         cause = rule.get("cause")
