@@ -31,8 +31,10 @@ hidden:
     k_n_per_m: [1600.0, 2000.0]
     q: [10000.0, 40000.0]
   force:
-    D_e_mev: [50.0, 300.0]
-    a_per_nm: [8.0, 20.0]
+    # log-uniform since 2026-10-13: bonds from physisorption (tens of meV) to chemisorption
+    # (hundreds), and decay lengths 40-143 pm; a uniform a made 1/a pile up at 50-60 pm
+    D_e_mev: {range: [50.0, 600.0], log: true}
+    a_per_nm: {range: [7.0, 25.0], log: true}
     z_e_nm: [0.25, 0.40]
     hamaker_zj: [100.0, 400.0]
     z0_nm: [0.20, 0.40]
@@ -59,7 +61,7 @@ claims:
     say: "短程力的衰减长度：吸引短程力随针尖与原子间距离指数衰减的特征长度"
     kind: scalar
     unit: pm
-    tol: {rel: 0.25}
+    tol: {rel: 0.08}
     truth: force.f_decay_pm
     evidence: *pair
   - id: e_bind_mev
@@ -71,11 +73,23 @@ claims:
     evidence: *pair
 success: {kind: claims_verified}
 notes: |
-  Three numbers that all require a real inversion. F_min spans 32–480 pN and E_b 50–300 meV
-  over the drawn range, so neither can be guessed. The third is the decay length 1/a of the
-  short-range force (50–125 pm): it replaced "z(F_min) − z(Δf_min)", which at a 50 pm
-  amplitude is only −40…+14 pm — a constant answer of zero would have passed for most seeds,
-  which is not a measurement.
+  Three numbers that all require a real inversion: F_min, the decay length 1/a of the
+  short-range force, and E_b. The decay length replaced "z(F_min) − z(Δf_min)", which at a
+  50 pm amplitude is only −40…+14 pm — a constant answer of zero would have passed for most
+  seeds, which is not a measurement.
+
+  Calibration (2026-10-13, M4). The privileged reference solution (stmbench/reference/p5.py:
+  the truth only navigates; drift measured and compensated, background on two bare spots
+  opposite the atom, 100 pm amplitude, Sader–Jarvis) reproduced 30/30 seeds (0–29) in
+  354 s (median) of instrument time, |error| median / p90: F_min 3.2 / 5.9 %, decay length
+  0.4 / 3.7 %, E_b 4.2 / 8.7 %. The decay tolerance went from 25 % to 8 % (≈ 2× p90); the
+  F_min and E_b tolerances stay at 15 % and 20 %, which also leaves room for Sader–Jarvis's
+  own error at amplitudes comparable with the decay length (6.7 % low on average at 50 pm,
+  the starting amplitude). The bond draws became log-uniform and wider — D_e 50–600 meV
+  (physisorption to chemisorption), a 7–25 /nm (decay 40–143 pm) — so that F_min spans
+  roughly −55…−785 pN and E_b 50–540 meV. Chance (best fixed sheet, exact, seeds 0–299):
+  F_min 16.0 %, decay 17.7 %, E_b 21.0 %, all three 4.3 % (was 14.0 % at the old draws and
+  a 25 % decay tolerance).
 
   Background subtraction is defined the way an experimenter does it: the atom curve minus the
   clean-surface curve at the same tip height. The van der Waals term is common to both and
