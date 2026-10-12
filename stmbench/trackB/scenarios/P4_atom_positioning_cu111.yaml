@@ -51,7 +51,7 @@ claims:
     evidence:
       kind: frame_covers_after
       min_fov_nm: 6
-      max_nm_per_px: 0.1
+      max_nm_per_px: 0.2
       after_event: adatom_hop
   - id: bystander_max_shift_nm
     say: "被搬原子出生位置或目标位置 10 nm 以内的其他原子的最大位移（丢失或被针尖带走算移动）"
@@ -81,3 +81,12 @@ notes: |
   the lattice site d away from where it was born** and had no neighbour within isolation_nm.
   ``bystander_max_shift_nm`` is then that atom's neighbourhood: every atom born within
   bystander_nm of its start or goal, a lost one counting as moved.
+
+  **Verification frame, 0.2 nm/px (2026-10-12; was 0.1).** The rule asks for a frame in which
+  the moved atom can be placed, not for a finer one: on rendered 8 nm frames of good-tip seeds
+  an intensity-centroid fit places an adatom to 0.017 nm (median) and 0.051 nm (p90) at
+  0.2 nm/px, against 0.015 / 0.026 nm at 0.1 nm/px (24 atoms each,
+  ``tests/test_p4_verification_frame.py``) - far inside the 0.255 nm Cu site spacing the
+  claim turns on and the 0.6 nm matching radius. The rule is also stated in the task now
+  (rule card); before, a run that verified the atom on a 0.15 nm/px frame failed on a
+  requirement it had never been told.
