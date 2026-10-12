@@ -5,7 +5,7 @@ Every condition of the benchmark shows a frame the same way, so a difference bet
 not a difference in how their images were prepared:
 
 1. topography (``z``): each line's median is subtracted (removes the slow-axis offsets a
-   drifting, creeping scanner leaves) — current frames are shown as recorded;
+   drifting, creeping scanner leaves) — current and dI/dV frames are shown as recorded;
 2. the 0.5th–99.5th percentile range is mapped onto 0–255 (a few hot pixels do not wash it out);
 3. the image is enlarged by an integer nearest-neighbour factor to at least ``min_px`` per side;
 4. row 0 is the top of the frame (high y), column 0 its left (low x).

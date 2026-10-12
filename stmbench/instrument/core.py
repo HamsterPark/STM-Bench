@@ -34,7 +34,7 @@ from typing import Any
 
 import numpy as np
 
-from stmsim.physics.scanner import SIG_CURRENT, SIG_Z
+from stmsim.physics.scanner import SIG_CURRENT, SIG_LI_X, SIG_Z
 from stmsim.scenario import Scenario
 
 from ..harness.results import ResultSink, fold_results
@@ -144,6 +144,11 @@ ACTIONS: dict[str, ActionSpec] = {s.name: s for s in (
                       "oscillation rings up and the frequency shift is re-zeroed where the tip is.",
                (_P("on", "boolean", "true = oscillating", True),
                 _P("amplitude_pm", "number", "oscillation amplitude setpoint (pm)", lo=1.0, hi=2000.0))),
+    ActionSpec("lockin", "Switch the bias modulation and lock-in on or off. On, every scan also records a "
+                         "dI/dV map at the scan bias (channel 'didv') - the sample's local density of states at "
+                         "that energy; bias sweeps give dI/dV either way.",
+               (_P("on", "boolean", "true = modulating", True),
+                _P("amplitude_mv", "number", "modulation amplitude (mV)", default=10.0, lo=0.1, hi=200.0))),
     ActionSpec("drift_comp", "Program the drift compensation: the piezo follows features moving at this velocity "
                              "in the scan frame (what a two-frame drift measurement reports).",
                (_P("on", "boolean", "true = compensating", True),
@@ -219,6 +224,8 @@ class FrameRecord:
     i_bwd: np.ndarray
     t_start_s: float
     meta: dict = field(default_factory=dict)
+    didv_fwd: np.ndarray | None = None       # lock-in X (A) when the frame was a dI/dV map
+    didv_bwd: np.ndarray | None = None
 
 
 class Instrument:
@@ -347,6 +354,7 @@ class Instrument:
         order = np.arange(st.ny) if direction == "down" else np.arange(st.ny)[::-1]
         z_f, z_b = fr.data[SIG_Z]
         i_f, i_b = fr.data[SIG_CURRENT]
+        d_f, d_b = fr.data.get(SIG_LI_X, (None, None))
         geom = {"center_nm": [_r(center_x_nm), _r(center_y_nm)], "size_nm": _r(size_nm),
                 "pixels": int(pixels), "angle_deg": _r(angle_deg), "direction": direction,
                 "nm_per_px": _r(size_nm / pixels, 6), "line_time_s": _r(line_time_s, 6)}
@@ -355,8 +363,11 @@ class Instrument:
             # backward lines are acquired right to left: flip them into image columns
             z_fwd=np.asarray(z_f)[order], z_bwd=np.asarray(z_b)[order][:, ::-1],
             i_fwd=np.asarray(i_f)[order], i_bwd=np.asarray(i_b)[order][:, ::-1],
-            t_start_s=t_start, meta={"bias_v": w.bias_v, "setpoint_pa": w.zctrl.setpoint_a * 1e12})
-        return {"frame": name, **geom, "duration_s": _r(st.frame_time_s, 3)}
+            t_start_s=t_start, meta={"bias_v": w.bias_v, "setpoint_pa": w.zctrl.setpoint_a * 1e12},
+            didv_fwd=None if d_f is None else np.asarray(d_f)[order],
+            didv_bwd=None if d_b is None else np.asarray(d_b)[order][:, ::-1])
+        channels = ["z", "current"] + (["didv"] if d_f is not None else [])
+        return {"frame": name, **geom, "channels": channels, "duration_s": _r(st.frame_time_s, 3)}
 
     def _do_set_bias(self, bias_v) -> dict:
         self.world.set_bias(float(bias_v))
@@ -488,6 +499,15 @@ class Instrument:
             p.center_freq_hz = float(w.tip.qplus_f0_hz + w.df_physical(gap, amp))
         return {"oscillating": bool(on), "amplitude_setpoint_pm": _r(p.amp_setpoint_m * 1e12)}
 
+    def _do_lockin(self, on, amplitude_mv) -> dict:
+        w = self.world
+        w.lockin_on = bool(on)
+        w.lockin_amp_v = float(amplitude_mv) * 1e-3
+        chans = [c for c in w.scan.channels if c != SIG_LI_X]
+        w.scan.channels = chans + ([SIG_LI_X] if on else [])
+        self._settle(0.05)
+        return {"lockin": bool(on), "amplitude_mv": _r(amplitude_mv, 6)}
+
     def _do_drift_comp(self, on, vx_nm_per_min, vy_nm_per_min, vz_pm_per_min) -> dict:
         self.world.set_drift_comp(bool(on), vx_nm_per_min * 1e-9 / 60.0, vy_nm_per_min * 1e-9 / 60.0,
                                   vz_pm_per_min * 1e-12 / 60.0)
@@ -552,6 +572,7 @@ class Instrument:
                 "tip_nm": [_r(w.tip_x * 1e9), _r(w.tip_y * 1e9)],
                 "current_full_scale_na": _r(w.preamp.full_scale_a * 1e9, 4),
                 "oscillating": bool(p.output_on) if p is not None else None,
+                "lockin": bool(getattr(w, "lockin_on", False)),
                 "actions": self.n_actions}
 
     def info(self) -> dict:
@@ -580,15 +601,19 @@ class Instrument:
                             for s in self.spectra.values()]}
 
     def frame(self, name: str, channel: str = "z", direction: str = "forward") -> dict:
-        """A saved frame's image (row 0 = top) and geometry. ``channel``: z (m) or current (A)."""
+        """A saved frame's image (row 0 = top) and geometry. ``channel``: z (m), current (A), or
+        didv (lock-in X, A) when the frame was taken with the lock-in on."""
         self._observe("frame", name=name, channel=channel, direction=direction)
         f = self.frames.get(Path(str(name)).name)
         if f is None:
             raise ActionError(f"no frame {name!r}")
         arrs = {("z", "forward"): f.z_fwd, ("z", "backward"): f.z_bwd,
                 ("current", "forward"): f.i_fwd, ("current", "backward"): f.i_bwd}
+        if f.didv_fwd is not None:
+            arrs.update({("didv", "forward"): f.didv_fwd, ("didv", "backward"): f.didv_bwd})
         if (channel, direction) not in arrs:
-            raise ActionError("channel is z or current, direction is forward or backward")
+            raise ActionError(f"{f.name} has channels {sorted({c for c, _ in arrs})}; "
+                              "direction is forward or backward")
         unit = "m" if channel == "z" else "A"
         return {"frame": f.name, **f.geometry, "channel": channel, "direction": direction, "unit": unit,
                 "array": np.array(arrs[(channel, direction)], copy=True), **f.meta}
@@ -658,7 +683,9 @@ class Instrument:
 
     def digest(self) -> dict:
         """Hashes of everything measured, for re-checking an episode by replay."""
-        return {"frames": {n: {k: array_digest(getattr(f, k)) for k in ("z_fwd", "z_bwd", "i_fwd", "i_bwd")}
+        return {"frames": {n: {k: array_digest(getattr(f, k)) for k in
+                               ("z_fwd", "z_bwd", "i_fwd", "i_bwd", "didv_fwd", "didv_bwd")
+                               if getattr(f, k) is not None}
                            for n, f in self.frames.items()},
                 "spectra": {n: {k: array_digest(v) for k, v in s.items() if isinstance(v, np.ndarray)}
                             for n, s in self.spectra.items()},
