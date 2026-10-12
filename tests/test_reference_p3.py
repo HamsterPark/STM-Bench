@@ -1,4 +1,4 @@
-"""The P3 privileged reference solution: resonances from spectra."""
+"""The P3 privileged reference solution: radius from an image, resonances from spectra."""
 from __future__ import annotations
 
 import pytest
@@ -13,6 +13,7 @@ def test_the_reference_reproduces_p3_from_measured_data(seed):
     r = p3.run(seed)
     assert r["success"], r
     assert all(r["claims_ok"].values())
+    assert abs(r["abs_err"]["radius_nm"]) < 0.15            # seed 0: 0.12, the worst of seeds 0-29
     assert all(abs(r["abs_err"][c]) < 6.0 for c in ("peak_lo_mev", "peak_hi_mev"))
     assert r["values"]["peak_hi_mev"] > r["values"]["peak_lo_mev"]
     assert r["tip_rounds"] >= 1

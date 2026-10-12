@@ -25,13 +25,15 @@ initial:
 faults: []
 task: |
   样品是 Cu(111)，扫描坐标原点附近 60 nm 内有一圈 Fe 原子排成的圆形围栏，仪器已在隧穿态；
-  请复现 1993 年量子围栏的观测：测出围栏中心的 dI/dV 谱，报告能量最低的两个可分辨共振峰的
-  能量（meV，相对费米能级），用 ReportResult 报告。
+  请复现 1993 年量子围栏的观测：从形貌图量出围栏的半径（nm），测出围栏中心的 dI/dV 谱，报告
+  能量最低的两个可分辨共振峰的能量（meV，相对费米能级），用 ReportResult 报告。
 budget: {sim_hours: 1.5, wire_cmds: 150000}
 hidden:
   adatoms:
     ring_n: [36, 60]
-    ring_radius_nm: [5.5, 9.0]
+    # log-uniform 4-10 nm since 2026-10-13 (was 5.5-9): an experimenter builds the ring at any
+    # size; up to 10 nm the box levels n = 2 and 3 stay >= 44 meV apart
+    ring_radius_nm: {range: [4.0, 10.0], log: true}
     # point-tip height; a good tip shows ~0.6 of it, i.e. 50-90 pm (AdatomParams.height_m)
     height_pm: [80.0, 140.0]
     sigma_nm: [0.25, 0.35]
@@ -57,7 +59,7 @@ claims:
     say: "围栏中心 dI/dV 谱上能量最低的两个可分辨共振峰中较低的那个（相对费米能级）"
     kind: peak_in_list
     unit: meV
-    tol: {abs: 25}
+    tol: {abs: 10}
     rank_max: 3
     truth: corral.peaks_mev
     evidence: &centre
@@ -71,20 +73,44 @@ claims:
     say: "这两个共振峰中较高的那个（相对费米能级）"
     kind: peak_in_list
     unit: meV
-    tol: {abs: 25}
+    tol: {abs: 10}
     rank_max: 3
     truth: corral.peaks_mev
     distinct_from: {claim: peak_lo_mev}
     greater_than: peak_lo_mev
     evidence: *centre
+  - id: radius_nm
+    say: "围栏的半径：围栏原子中心所在圆的半径"
+    kind: scalar
+    unit: nm
+    tol: {abs: 0.15}
+    truth: corral.radius_nm
+    evidence: {kind: frame, min_fov_nm: 22, max_nm_per_px: 0.15}
 success: {kind: claims_verified}
 notes: |
-  The ring radius is drawn over 5.5–9.0 nm, which moves the confined levels by more than
-  40 meV — reciting the 1993 numbers fails. Whether the lowest level is a resolvable peak or a
-  shoulder on the band edge depends on the seed (its width is set by the drawn lifetime), so
-  ``peak_in_list`` accepts any of the three lowest true peaks and only requires the two answers
-  to be different peaks in ascending order. That is what "the two lowest resolvable resonances"
-  means when the resolution itself varies.
+  Whether the lowest level (n = 1, 5-25 meV above the band bottom) is a resolvable peak or a
+  shoulder on the band edge depends on the seed, so ``peak_in_list`` accepts any of the three
+  lowest true peaks and only requires the two answers to be different peaks in ascending
+  order. That is what "the two lowest resolvable resonances" means when the resolution itself
+  varies. The true peaks are counted from 5 meV above the band bottom (2026-10-13; from 20 meV
+  before, which cut the n = 1 resonance of small rings in half).
+
+  Calibration (2026-10-13, M4). A fixed answer sheet passed 41 % of seeds: the lowest
+  resonances sit 20-190 meV above a band bottom that is nearly a constant, and +-25 meV with
+  any of three peaks covered most of that. Judging the peaks by rank does not work - a
+  measured spectrum and the noise-free truth disagree on whether n = 1 is resolvable in about
+  one seed in ten - and with rank-specific peaks, wider rings and an 8 meV tolerance the best
+  sheet still passed 7 %. What separates the seeds is the ring itself, so the radius is now a
+  claim too (Crommie et al. report it and fit the levels with it): a measured radius makes
+  the sheet that matches the peaks match one ring size only.
+  - ring radius log-uniform 4-10 nm (was 5.5-9); peak tolerance 25 -> 10 meV; radius +-0.15 nm;
+  - privileged reference (stmbench/reference/p3.py: drift compensated, one 28 nm frame,
+    spectra stabilised at 0.1 V / 1 nA, band bottom from bare terrace, peaks labelled with the
+    box levels from the measured radius) on seeds 0-29: 30/30 reproduced; |error| median /
+    p90 lower peak 1.5 / 2.7 meV, upper 1.0 / 2.5 meV, radius 0.019 / 0.038 nm (max 0.12);
+    485 s of instrument time (median);
+  - chance (best fixed sheet, exact, seeds 0-299): each peak 40.3 %, radius 11.3 %, all three
+    4.3 %.
 
   Imaging is at 10 mV / 1 nA = 10 MΩ, three to four orders above the drawn pull threshold, so
   the ring survives being scanned. An agent that images at a manipulation resistance will take

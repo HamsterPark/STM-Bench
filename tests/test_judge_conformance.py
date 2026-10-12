@@ -73,6 +73,8 @@ def _oracle(name: str, tmp_path):
                        "corral_centre_dist_nm": 0.1})
         sink.report("peak_lo_mev", peaks[0], evidence=["sts:1"])
         sink.report("peak_hi_mev", peaks[1], evidence=["sts:1"])
+        events.append(_frame(1, 0.0, 0.0, 28.0, 280, 5.0))
+        sink.report("radius_nm", C.truth_at_path(truth, "corral.radius_nm"), evidence=["sim001.sxm"])
     elif sc.family == "P5":
         events += [{"kind": "zspec", "sim_s": 10.0, "idx": 1, "near_kind": "adatom", "near_nm": 0.05,
                     "jump": False, "contact": False, "df_span_beyond_min_pm": 120.0},
