@@ -36,6 +36,12 @@ ZCTRL_OFF, ZCTRL_ON, ZCTRL_HOLD, ZCTRL_SWITCHING_OFF, ZCTRL_SAFETIP, ZCTRL_WITHD
 STS_NOISE_FRAC = 0.03
 STS_NOISE_REF_INTEG_S = 0.005
 
+#: qPlus frequency noise: a scenario's ``sigma_df_hz`` is the noise at this amplitude, the
+#: reference integration time per point and one sweep. Deflection and thermal frequency noise
+#: both scale as 1/A (Giessibl, Rev. Sci. Instrum. 90, 011101, 2019), and averaging longer or
+#: over more sweeps lowers white noise as 1/sqrt(time)
+DF_NOISE_REF_AMP_M = 50e-12
+
 
 @dataclass
 class ZController:
@@ -739,6 +745,9 @@ class World:
             t = np.arange(n) * (settle_s + integ_s)
             i = self.preamp.clamp(self.noise.current_series(i, self.clock.wall() + t))
             sigma = float(self.force.sigma_df_hz) if self.force is not None else 0.1
+            if amp_free > 0:
+                t_avg = (integ_s if integ_s > 0 else STS_NOISE_REF_INTEG_S) * max(int(sweeps), 1)
+                sigma *= (DF_NOISE_REF_AMP_M / amp_free) * math.sqrt(STS_NOISE_REF_INTEG_S / max(t_avg, 1e-5))
             df = np.asarray(df, float) + self.df_rng.normal(0, sigma, n)
             jump = False
             if self.tip.lambda_per_s > 2e-3 and self.df_rng.random() < 0.5:

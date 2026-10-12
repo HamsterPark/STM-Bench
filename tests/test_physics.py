@@ -324,3 +324,27 @@ def test_a_longer_integration_lowers_the_spectrum_noise(tmp_path):
     assert frac[0.0] == pytest.approx(frac[0.005], rel=0.15)
     assert frac[0.02] == pytest.approx(frac[0.005] / 2, rel=0.2)
     assert frac[0.08] == pytest.approx(frac[0.005] / 4, rel=0.2)
+
+
+def test_the_frequency_noise_falls_with_amplitude_and_averaging():
+    """qPlus frequency noise scales as 1/A and falls as 1/sqrt(averaging time). (Until
+    2026-10-13 it was the same at any amplitude, integration time and number of sweeps, so a
+    small amplitude cost nothing and averaging bought nothing.) The random numbers drawn are
+    the same, so with the deterministic part fitted away the noise scales exactly."""
+    from stmbench.instrument import Instrument
+
+    def residual(amp_pm, sweeps, integ_ms=5.0):
+        inst = Instrument("P5_sader_jarvis_qplus", 1)
+        inst.act("pll", on=True, amplitude_pm=amp_pm)
+        r = inst.act("zspec", sweep_nm=0.5, z_offset_nm=2.0, points=256, sweeps=sweeps,
+                     integration_ms=integ_ms, backward=False)
+        s = inst.spectrum(r["spectrum"])
+        z, df = s["z_rel"], s["df"]
+        return float(np.std(df - np.polyval(np.polyfit(z, df, 3), z)))
+
+    base = residual(50.0, 1)
+    assert 0.05 < base < 0.4                                   # the seed's sigma_df at the defaults
+    assert residual(50.0, 4) == pytest.approx(base / 2, rel=0.02)
+    assert residual(50.0, 1, integ_ms=20.0) == pytest.approx(base / 2, rel=0.02)
+    assert residual(100.0, 1) == pytest.approx(base / 2, rel=0.05)
+
