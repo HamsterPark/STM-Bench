@@ -23,7 +23,7 @@ task: |
   见针尖登记信息）；请复现 Huber 等 2019 年的力谱实验：分别在一个 Fe 原子正上方与一处干净的
   Cu(111) 上采集 Δf(z) 曲线，用 Sader–Jarvis 方法反演得到扣除背景后的短程力，报告力的极小值
   F_min（pN）、短程力的衰减长度（pm）与结合能 E_b（meV）。用 ReportResult 报告。
-  预算：1.5 小时仪器时间。
+  
 budget: {sim_hours: 1.5, wire_cmds: 100000}
 hidden:
   qplus:
@@ -46,6 +46,7 @@ hidden:
     condition_angle_deg: [0.0, 360.0]
 claims:
   - id: f_min_pn
+    say: "扣除背景后短程力的极小值 F_min（吸引力为负）"
     kind: scalar
     unit: pN
     tol: {rel: 0.15}
@@ -55,12 +56,14 @@ claims:
       adatom: {near_kind: adatom, near_nm_max: 0.15, min_n: 1, df_span_beyond_min_pm_min: 50}
       background: {near_nm_min: 2.0, min_n: 1}
   - id: f_decay_pm
+    say: "短程力的衰减长度：吸引短程力随针尖与原子间距离指数衰减的特征长度"
     kind: scalar
     unit: pm
     tol: {rel: 0.25}
     truth: force.f_decay_pm
     evidence: *pair
   - id: e_bind_mev
+    say: "结合能 E_b（正值）：短程力对距离积分得到的势阱深度"
     kind: scalar
     unit: meV
     tol: {rel: 0.20}

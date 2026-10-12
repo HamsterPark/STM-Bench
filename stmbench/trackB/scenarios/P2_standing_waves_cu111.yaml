@@ -25,7 +25,7 @@ faults: []
 task: |
   样品是 Cu(111)，已在隧穿态；请复现 1993 年 Cu(111) 表面态电子驻波的观测：在台阶边或孤立吸附原子
   附近，采集一组随距离与能量变化的 dI/dV 谱，由驻波波长随能量的变化拟合出表面态的带底 E0（meV）
-  与有效质量 m*（以电子质量为单位），用 ReportResult 报告。预算：3 小时仪器时间。
+  与有效质量 m*（以电子质量为单位），用 ReportResult 报告。
 budget: {sim_hours: 3.0, wire_cmds: 400000}
 hidden:
   surface:
@@ -52,6 +52,7 @@ hidden:
     condition_angle_deg: [0.0, 360.0]
 claims:
   - id: e0_mev
+    say: "Cu(111) 表面态的带底能量 E0（相对费米能级）"
     kind: scalar
     unit: meV
     # material constants: knowing them is part of the skill (see the chance audit)
@@ -67,6 +68,7 @@ claims:
       v_lo_max: -0.5
       v_hi_min: 0.1
   - id: m_eff
+    say: "表面态电子的有效质量 m*（以自由电子质量 m_e 为单位）"
     kind: scalar
     unit: m_e
     knowledge: allowed

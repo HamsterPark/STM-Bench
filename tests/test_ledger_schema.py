@@ -39,6 +39,8 @@ LEDGER_TYPES: dict[str, tuple] = {
     # paper scenarios; None on every B family, which is what "not a paper" looks like
     "paper_id": (str, NONE), "claims_total": (int, NONE), "claims_reported": (int, NONE),
     "claims_verified": (int, NONE), "reproduced": (bool, NONE),
+    # the rule card shown with a paper's task (stmbench.trackB.rules); None on B families
+    "rules_version": (int, NONE),
 }
 _HEX40 = re.compile(r"^[0-9a-f]{40}$")
 _HEX64 = re.compile(r"^[0-9a-f]{64}$")
@@ -264,7 +266,7 @@ def _ledger(**over) -> dict:
                                            "cost_known": True, "n_calls": 3},
             # a B family is not a paper, so every paper field is present and None
             "paper_id": None, "claims_total": None, "claims_reported": None,
-            "claims_verified": None, "reproduced": None}
+            "claims_verified": None, "reproduced": None, "rules_version": None}
     base.update(over)
     return base
 

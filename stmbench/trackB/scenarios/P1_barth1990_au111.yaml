@@ -18,7 +18,7 @@ faults: []
 task: |
   样品是退火良好的 Au(111)/mica，已在隧穿态；请复现 Barth 等 1990 年对 Au(111) 22×√3 重构的
   STM 观测：测出重构条纹的周期（垂直于条纹方向）与某一处的条纹取向（给出该处坐标），并找到至少
-  两个取向不同的旋转畴、分别报告其位置与取向。每个结果用 ReportResult 报告。预算：2 小时仪器时间。
+  两个取向不同的旋转畴、分别报告其位置与取向。每个结果用 ReportResult 报告。
 budget: {sim_hours: 3.0, wire_cmds: 400000}
 hidden:
   herringbone:
@@ -37,6 +37,7 @@ hidden:
     condition_angle_deg: [0.0, 360.0]
 claims:
   - id: stripe_period_nm
+    say: "重构条纹的周期：相邻两条亮条纹之间、垂直于条纹方向的距离（在锯齿的一条臂上量，即帧的傅里叶谱中条纹峰对应的周期）"
     kind: scalar
     unit: nm
     # a material constant: knowing it is part of the skill, so the chance audit records how
@@ -46,6 +47,7 @@ claims:
     truth: herringbone.period_along_arm_nm
     evidence: {kind: frame, min_fov_nm: 100, max_nm_per_px: 0.4}
   - id: stripe_orientation_deg
+    say: "某一处条纹的方向（亮条纹延伸的方向），并用 x_nm、y_nm 给出该处位置"
     kind: angle
     unit: deg
     tol: {abs: 6, mod: 180}
@@ -53,6 +55,7 @@ claims:
     position: required
     evidence: {kind: frame_covers, min_fov_nm: 40, max_nm_per_px: 0.5}
   - id: domain_a_orientation_deg
+    say: "第一个旋转畴中条纹的方向，并用 x_nm、y_nm 给出该畴内一处位置"
     kind: angle
     unit: deg
     tol: {abs: 6, mod: 180}
@@ -60,6 +63,7 @@ claims:
     position: required
     evidence: {kind: frame_covers, min_fov_nm: 40, max_nm_per_px: 0.5}
   - id: domain_b_orientation_deg
+    say: "第二个旋转畴中条纹的方向，并用 x_nm、y_nm 给出该畴内一处位置"
     kind: angle
     unit: deg
     tol: {abs: 6, mod: 180}

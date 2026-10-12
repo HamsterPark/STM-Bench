@@ -90,12 +90,13 @@ def run_p5(host, scenario, *, seed: int = 0, extra: dict | None = None) -> dict:
     f_min = b.data(inv, "f_min_pn")
     decay = b.data(inv, "decay_length_pm")
     e_bind = b.data(inv, "e_bind_mev")
+    used = [str(p) for p in (atom_path, bg_path) if p]
     if f_min is not None:
-        b.report("f_min_pn", float(f_min), "pN")
+        b.report("f_min_pn", float(f_min), "pN", evidence=used)
     if decay is not None:
-        b.report("f_decay_pm", float(decay), "pm")
+        b.report("f_decay_pm", float(decay), "pm", evidence=used)
     if e_bind is not None:
-        b.report("e_bind_mev", float(e_bind), "meV")
+        b.report("e_bind_mev", float(e_bind), "meV", evidence=used)
     return b.finish(drift=drift, f0_hz=f0, atom_dat=atom_path, background_dat=bg_path,
                     n_candidates=len(cands), atom_nm=[ax * 1e9, ay * 1e9], df_min_hz=df_min,
                     inversion=b.data(inv, "verdict"),

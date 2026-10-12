@@ -22,6 +22,7 @@ from pathlib import Path
 import numpy as np
 
 from ..human import render
+from ..trackB.rules import task_text
 from . import lay
 from .timeline import Ledger, build_timeline
 from .truth_view import SCENARIO_DIR, AtomsAt, TruthView, frame_extent_nm
@@ -169,7 +170,9 @@ def build_replay(run_dir: str | Path, out: str | Path | None = None, *, single_f
                  "paper": {"title": paper.get("title"), "ref": paper.get("ref")},
                  "built": _dt.datetime.now(_dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")},
         "lay": {"intro": lay.INTRO, "paper": lay_paper, "judging": lay.JUDGING},
-        "task": (sc.task.strip() if sc is not None and sc.task else None),
+        # the task as the agent saw it: with its rule card when the ledger says one was shown
+        "task": ((task_text(sc) if ep.get("rules_version") else sc.task.strip())
+                 if sc is not None and sc.task else None),
         "timeline": tl,
         "truth": {"available": view is not None, "reason": why, "overview": overview},
     }

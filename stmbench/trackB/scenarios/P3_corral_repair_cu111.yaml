@@ -27,7 +27,7 @@ task: |
   样品是 Cu(111)，扫描坐标原点附近 60 nm 内有一圈 Fe 原子排成的圆形围栏，环上缺了几个原子，
   缺口外侧散落着几个备用 Fe 原子，仪器已在隧穿态；请复现 1993 年量子围栏的实验：先用横向操纵
   把备用原子补进环上的空位使围栏闭合，再测出围栏中心的 dI/dV 谱，报告能量最低的两个可分辨
-  共振峰的能量（meV，相对费米能级），用 ReportResult 报告。预算：2.5 小时仪器时间。
+  共振峰的能量（meV，相对费米能级），用 ReportResult 报告。
 budget: {sim_hours: 2.5, wire_cmds: 300000}
 hidden:
   adatoms:
@@ -57,6 +57,7 @@ hidden:
     condition_angle_deg: [0.0, 360.0]
 claims:
   - id: ring_occupancy
+    say: "围栏须修好：设计的环上被原子占据的位点比例（原子离设计位置在半个位点间距以内算占据）"
     kind: constraint
     unit: fraction
     truth: corral.ring_occupancy
@@ -68,6 +69,7 @@ claims:
       max_nm_per_px: 0.2
       after_event: adatom_hop
   - id: peak_lo_mev
+    say: "修好之后，围栏中心 dI/dV 谱上能量最低的两个可分辨共振峰中较低的那个（相对费米能级）"
     kind: peak_in_list
     unit: meV
     tol: {abs: 25}
@@ -82,6 +84,7 @@ claims:
       v_hi_min: 0.1
       after_event: adatom_hop
   - id: peak_hi_mev
+    say: "这两个共振峰中较高的那个（相对费米能级）"
     kind: peak_in_list
     unit: meV
     tol: {abs: 25}

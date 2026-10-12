@@ -41,6 +41,7 @@ from typing import Any
 from stmsim.scenario import Scenario
 
 from ..harness.episode import _budget_caps, resolve_policy, run_episode
+from ..trackB.rules import task_text
 from . import render
 from .port import Action, HumanPort, HumanSession, strip_markers
 
@@ -52,14 +53,14 @@ MAX_WAIT_S = 30.0
 
 
 def scenario_summary(sc: Scenario) -> dict:
-    """What the page shows before and during an episode. The task text and the claim ids
-    are what a model gets; tolerances and the scenario's notes stay hidden, as they do
-    from a model."""
+    """What the page shows before and during an episode: the task text with its rule card
+    and the claim ids, exactly what a model gets. The scenario's notes and the hidden draws
+    stay hidden, as they do from a model."""
     claims = [{"id": str(c.get("id")), "kind": c.get("kind"), "unit": c.get("unit"),
                "position": c.get("position") == "required"} for c in (sc.claims or [])]
     return {"id": sc.id, "family": sc.family, "variant": sc.variant, "material": sc.material,
             "rig": sc.rig, "paper": dict(sc.paper) if isinstance(sc.paper, dict) else None,
-            "task": sc.task, "budget": dict(sc.budget or {}), "time_scale": sc.time_scale,
+            "task": task_text(sc), "budget": dict(sc.budget or {}), "time_scale": sc.time_scale,
             "claims": claims, "faults": len(sc.faults or []), "path": sc.path}
 
 

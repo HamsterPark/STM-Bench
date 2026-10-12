@@ -21,7 +21,7 @@ task: |
   样品是 Cu(111)，表面稀疏地散落着 Fe 吸附原子（扫描坐标原点附近 30 nm 内就有孤立的），仪器已在隧穿态；
   请复现 Eigler 与 Schweizer 1990 年的单原子定位实验：任选一个孤立的 Fe 原子（3 nm 内没有别的原子），
   把它沿 +x 方向横向移动 4.0 nm 到最近的晶格位点；它周围 10 nm 内的其余原子不得移动或损毁。
-  用 ReportResult 报告该原子的最终位置（当前扫描坐标，nm）。预算：1.5 小时仪器时间。
+  用 ReportResult 报告该原子的最终位置（当前扫描坐标，nm）。
 budget: {sim_hours: 1.5, wire_cmds: 200000}
 hidden:
   adatoms:
@@ -42,6 +42,7 @@ hidden:
     condition_angle_deg: [0.0, 360.0]
 claims:
   - id: target_site
+    say: "你搬动的那个原子的最终位置：x_nm、y_nm 写位置，value 写同一个 x_nm"
     kind: position
     unit: nm
     tol: {abs_nm: 0.16, report_nm: 0.6}
@@ -53,6 +54,7 @@ claims:
       max_nm_per_px: 0.1
       after_event: adatom_hop
   - id: bystander_max_shift_nm
+    say: "被搬原子出生位置或目标位置 10 nm 以内的其他原子的最大位移（丢失或被针尖带走算移动）"
     kind: constraint
     unit: nm
     # the atoms born within bystander_nm of the chosen atom's start or goal — the chosen atom

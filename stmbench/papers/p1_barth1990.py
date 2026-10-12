@@ -101,20 +101,21 @@ def run_p1(host, scenario, *, seed: int = 0, extra: dict | None = None) -> dict:
     # ── the period: the median over the flat windows, so one bin-snapped or step-contaminated
     # reading cannot carry it ──
     periods = sorted(w["period_nm"] for w in flat)
-    b.report("stripe_period_nm", periods[len(periods) // 2], "nm")
+    b.report("stripe_period_nm", periods[len(periods) // 2], "nm",
+             evidence=[w["path"] for w in flat])
 
     # ── the orientation, reported at the place it was measured ──
     best = max(flat, key=lambda w: w["snr"])
     b.report("stripe_orientation_deg", best["stripe_deg"], "deg",
-             x_nm=best["cx_nm"], y_nm=best["cy_nm"])
+             x_nm=best["cx_nm"], y_nm=best["cy_nm"], frame=best["path"], evidence=[best["path"]])
 
     pair = _two_domains(flat)
     if pair is not None:
         a, c = pair
         b.report("domain_a_orientation_deg", a["stripe_deg"], "deg",
-                 x_nm=a["cx_nm"], y_nm=a["cy_nm"])
+                 x_nm=a["cx_nm"], y_nm=a["cy_nm"], frame=a["path"], evidence=[a["path"]])
         b.report("domain_b_orientation_deg", c["stripe_deg"], "deg",
-                 x_nm=c["cx_nm"], y_nm=c["cy_nm"])
+                 x_nm=c["cx_nm"], y_nm=c["cy_nm"], frame=c["path"], evidence=[c["path"]])
     return b.finish(n_windows=len(windows), n_flat=len(flat), drift=drift,
                     stripe_directions=[round(w["stripe_deg"], 1) for w in flat],
                     periods_nm=[round(x, 3) for x in periods],

@@ -116,9 +116,9 @@ def run_p2(host, scenario, *, seed: int = 0, extra: dict | None = None) -> dict:
     e0 = b.data(fit, "e0_mev")
     m = b.data(fit, "m_eff")
     if e0 is not None:
-        b.report("e0_mev", float(e0), "meV")
+        b.report("e0_mev", float(e0), "meV", evidence=paths)
     if m is not None:
-        b.report("m_eff", float(m), "m_e")
+        b.report("m_eff", float(m), "m_e", evidence=paths)
     return b.finish(n_spectra=len(paths), n_batches=batches, drift=drift,
                     edge_nm=[edge[0] * 1e9, edge[1] * 1e9], edge_angle_deg=edge[2],
                     step_height_pm=edge[3],
