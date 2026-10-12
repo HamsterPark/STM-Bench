@@ -72,3 +72,41 @@ def test_host_registers_tip_opens_experiment_and_runs_skills(tmp_path):
             "old-epoch pulse mark still blocks the fresh site"
     finally:
         host.stop()
+
+
+@pytest.mark.parametrize("timeout_s", [None, 60.0])
+def test_controller_timeout_reaches_the_runtime_config(tmp_path, monkeypatch, timeout_s):
+    """The simulator renders a whole frame inside Scan_Action; a large Au(111) frame took
+    2-15 s on a loaded machine, past MAST's 5 s reply timeout, and MAST dropped the
+    connection. The host can raise that timeout; None keeps MAST's own default."""
+    import mast.core.runtime as mast_runtime
+    from mast.config import NanonisConfig
+
+    from stmbench.harness import runtime_host
+
+    seen = {}
+
+    class CapturingRuntime:
+        def __init__(self, cfg):
+            seen["cfg"] = cfg
+
+        def setup(self):
+            pass
+
+    monkeypatch.setattr(mast_runtime, "CoreRuntime", CapturingRuntime)
+    monkeypatch.setattr(runtime_host, "_export_api_keys_from_repo", lambda: {})
+    monkeypatch.setattr(runtime_host.RuntimeHost, "sync_facts", lambda self: {})
+    # start() points these at its own root and ports; registering them restores them afterwards
+    for var in ("MAST2_PROJECT_ROOT", "MAST2_USER_ROOT", "MAST_NANONIS_PORT_MAIN",
+                "MAST_NANONIS_PORT_MONITOR", "MAST_NANONIS_PORT_DATA", "MAST_NANONIS_PORT_EMERGENCY"):
+        monkeypatch.setenv(var, "")
+
+    w = World(rig=RigProfile.load("reference-stm"), seed=7, session_dir=tmp_path / "s")
+    host = runtime_host.RuntimeHost(w, tmp_path / "out", controller_timeout_s=timeout_s)
+    try:
+        host.start()
+    finally:
+        host.stop()
+    controllers = [v for v in vars(seen["cfg"]).values() if isinstance(v, NanonisConfig)]
+    expected = NanonisConfig().timeout_s if timeout_s is None else timeout_s
+    assert [c.timeout_s for c in controllers] == [expected]
