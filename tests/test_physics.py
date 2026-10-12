@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import math
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -237,3 +238,36 @@ def test_surface_step_height_and_lattice_period():
     period = 1 / peak
     # projection of one of the three row spacings along x: d = a*sqrt(3)/2 / cos(theta) ≥ 0.221 nm
     assert 0.2e-9 < period < 0.6e-9
+
+
+def test_a_blunt_tip_widens_a_feature_in_both_directions():
+    """Regression (2026-10-13): the tip-radius blur acted along the fast axis only, so a
+    blunt tip stretched every adatom along x (aspect 1.5-2.2) while leaving it sharp along y,
+    which neither a person nor a detector reads as a blunt tip. The tip's own size now blurs
+    both directions; the loop/ADC bandwidth still widens the fast axis a little."""
+    from stmbench.instrument import Instrument
+    from stmsim.scenario import Scenario
+
+    sc = Scenario.load(Path(__file__).resolve().parent.parent / "stmbench" / "trackB" / "scenarios"
+                       / "P4_atom_positioning_cu111.yaml")
+    seeds = [s for s in range(60) if sc.draw_hidden(s)["tip"]["condition"] == "blunt"][1:3]
+    for seed in seeds:
+        inst = Instrument(sc, seed)
+        w = inst.world
+        w.drift_v_m_per_s = np.zeros(3)
+        w._creep.clear()
+        reg = w.surface.site.adatoms
+        atom = min(reg.atoms.values(), key=lambda a: math.hypot(*reg.site_xy(a.i, a.j, a.sub)))
+        ax, ay = (v * 1e9 for v in reg.site_xy(atom.i, atom.j, atom.sub))
+        r = inst.act("scan", center_x_nm=ax, center_y_nm=ay, size_nm=8.0, pixels=96, line_time_s=0.3)
+        z = inst.frame(r["frame"])["array"]
+        c = z.shape[0] // 2
+        win = z[c - 12:c + 13, c - 12:c + 13] - np.median(z)
+        win = np.clip(win - 0.5 * win.max(), 0, None)
+        yy, xx = np.mgrid[0:win.shape[0], 0:win.shape[1]]
+        m = win.sum()
+        cy, cx = (win * yy).sum() / m, (win * xx).sum() / m
+        sx = math.sqrt((win * (xx - cx) ** 2).sum() / m)
+        sy = math.sqrt((win * (yy - cy) ** 2).sum() / m)
+        assert w.tip.radius_m > 3e-9 and 0.8 < sx / sy < 1.25, (seed, sx, sy)
+
