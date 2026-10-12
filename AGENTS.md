@@ -57,6 +57,7 @@ This is an **alpha research prototype**. Keep these evidence boundaries explicit
 | Can a result be traced to its acquisition, coordinates and tip history? | [episode.py](stmbench/harness/episode.py), [render.py](stmbench/human/render.py), [replay/](stmbench/replay/) | [test_ledger_schema.py](tests/test_ledger_schema.py), [test_human_port.py](tests/test_human_port.py), [test_replay.py](tests/test_replay.py) |
 | Do comparisons respect shared seeds and missing observations? | [stats.py](stmbench/report/stats.py), [summarize.py](stmbench/report/summarize.py) | [test_stats.py](tests/test_stats.py) |
 | Is every judged rule stated in the task, and can a fixed answer pass? | [rules.py](stmbench/trackB/rules.py), [audit.py](stmbench/trackB/audit.py) | [test_rule_card.py](tests/test_rule_card.py), [test_rules_v1.py](tests/test_rules_v1.py), [test_audit.py](tests/test_audit.py) |
+| Does an episode replay to the same measurements without MAST? | [clock.py](stmsim/physics/clock.py), [instrument/](stmbench/instrument/) | [test_instrument.py](tests/test_instrument.py), [test_mcp_server.py](tests/test_mcp_server.py), [test_determinism_probe.py](tests/test_determinism_probe.py) |
 
 Other useful boundaries:
 
@@ -169,7 +170,11 @@ These apply across the simulator, judge, harness and presentation layers.
    drift and creep use simulated time, and instrument-time budgets use sim hours.
    `ClockPausedPort` freezes the instrument while the model thinks. Preserve this distinction
    and overrun handling. Run solvability gates serially on an otherwise idle machine:
-   host load changes elapsed instrument time and can change the outcome.
+   host load changes elapsed instrument time and can change the outcome. The benchmark
+   instrument (`stmbench.instrument`) runs on the `VirtualClock` instead: every action
+   advances it by its physical duration, observations neither spend time nor draw random
+   numbers, and an episode must replay to the same measurements (`stmbench verify`). Never
+   read the host clock or a shared random stream from an observation.
 6. **Keep coordinate frames explicit.** The agent reports scan-frame coordinates; the
    sample lives in the sample frame. Saved frames record the drift offset the renderer added
    to every acquisition row (`row_offsets_nm`), and the judge maps a reported position through
