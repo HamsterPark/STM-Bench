@@ -26,7 +26,8 @@ budget: {sim_hours: 1.5, wire_cmds: 200000}
 hidden:
   adatoms:
     n_bystanders: [2, 4]
-    height_pm: [50.0, 90.0]
+    # point-tip height; a good tip shows ~0.6 of it, i.e. 50-90 pm (AdatomParams.height_m)
+    height_pm: [80.0, 140.0]
     sigma_nm: [0.25, 0.35]
     r_threshold_kohm: {range: [80.0, 400.0], log: true}
     r_pick_kohm: [15.0, 40.0]

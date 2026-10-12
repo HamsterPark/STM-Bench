@@ -190,9 +190,15 @@ class Renderer:
         gap = w.equilibrium_gap()
         i_set = w.zctrl.setpoint_a
         sigma_m = w.tip.sigma_eff_m(w.phi_junction())
-        # tip radius blur ⊕ loop/ADC bandwidth ⊕ dwell: 100 nm/256 px calibration frames show a
-        # 10-90 % step-edge width of ~1.2 px (72 rig frames), i.e. σ ≈ 0.5-0.6 px minimum
-        sigma_px = math.hypot(sigma_m / (st.w / nx), self.MIN_SIGMA_PX)
+        # The tip's own size blurs the surface in both directions; the loop/ADC bandwidth and
+        # the pixel dwell blur it along the fast axis only. 100 nm/256 px calibration frames
+        # show a 10-90 % step-edge width of ~1.2 px (72 rig frames), i.e. σ ≈ 0.5-0.6 px minimum
+        # along the line. (Until 2026-10-13 the tip part too acted along the fast axis only: a
+        # blunt tip stretched every feature along x and left it sharp along y, which neither a
+        # person nor a detector reads as a blunt tip.)
+        sigma_tip_x_px = sigma_m / (st.w / nx)
+        sigma_tip_y_px = sigma_m / (st.h / ny)
+        sigma_fast_px = math.hypot(sigma_tip_x_px, self.MIN_SIGMA_PX)
         hyst_px = w.hysteresis_px(st)
         cols_b = np.arange(nx)[::-1]                              # backward pass: right → left
         bwd_pos = cols_b + self.hysteresis_profile_px(cols_b, nx, hyst_px, getattr(w, "hyst_shape", "loop"),
@@ -222,12 +228,27 @@ class Renderer:
             prepare(float(np.min(cxs)) + min(ox0, ox1), float(np.max(cxs)) + max(ox0, ox1),
                     float(np.min(cys)) + min(oy0, oy1), float(np.max(cys)) + max(oy0, oy1),
                     w.bias_v)
+        # Pass 1 — the instrument's state row by row: drift, tip events, atoms moved by the
+        # scan, scratches, and the surface each pass samples. Every random stream is drawn in
+        # the same order as when this was one loop (tip: change hazard, apex set and flicker
+        # per pass; world: scratch; adatoms: scan moves); the noise stream is drawn in pass 2,
+        # also in the original order.
+        s_f_rows = np.zeros((ny, nx))
+        s_b_rows = np.zeros((ny, nx))
+        a_f_rows = np.zeros((ny, nx))
+        a_b_rows = np.zeros((ny, nx))
+        fl_f_rows: list[np.ndarray | None] = [None] * ny
+        fl_b_rows: list[np.ndarray | None] = [None] * ny
+        oz_rows = np.zeros(ny)
+        lam_rows = np.zeros(ny)
+        phi_rows = np.zeros(ny)
         for k in range(ny):
             j = st.row_index_for_acq(k)
             t_row = row_times[k]
             # slow drift / creep offset at this row (stage frame)
             ox, oy, oz = w.drift_offset(t_row)
             row_offsets[k] = (ox, oy)
+            oz_rows[k] = oz
             # tip-change hazard for this row (Poisson over one row time)
             if w.tip.maybe_change(per_row, t_row, current_a=i_set, bias_v=w.bias_v):
                 tip_rows.append(k)
@@ -235,47 +256,52 @@ class Renderer:
             # later rows see the new positions, producing the corresponding row jump in the frame
             w.registry_scan_row(st, j, ox, oy, t_row, speed)
             # forward — pixel-dwell averaging: the current is integrated while the tip moves
-            # one pixel, so sub-pixel structure (an aliased lattice at 0.8 nm/px) averages out
-            # the mesoscopic blur applies to the smooth surface only; the atomic lattice is
-            # already apex-transferred (Tip.height_parts) and must not be blurred along one
-            # axis — a fast-axis-only blur leaves the slow-axis lattice components intact and
-            # introduces radial fast-axis anisotropy.
+            # one pixel, so sub-pixel structure (an aliased lattice at 0.8 nm/px) averages out.
+            # The mesoscopic blur (below) applies to the smooth surface only; the atomic lattice
+            # is already apex-transferred (Tip.height_parts) and is not blurred again.
             # a flickering (crashed) tip: each pass images its own apex arrangement
-            s_f, a_f = self._sampled_line(st, cols, j, ox, oy, kappa, apexes=w.tip.pass_apexes(),
-                                          bias_v=w.bias_v)
-            if sigma_px > 0.3:
-                s_f = ndimage.gaussian_filter1d(s_f, sigma_px, mode="nearest")
-            h_f = s_f + a_f + oz
-            fl = w.tip.flicker_series(nx, dt_px_f)          # crashed tip: mid-line apex-length hops
-            if fl is not None:
-                h_f = h_f + fl
+            s_f_rows[k], a_f_rows[k] = self._sampled_line(st, cols, j, ox, oy, kappa,
+                                                          apexes=w.tip.pass_apexes(), bias_v=w.bias_v)
+            fl_f_rows[k] = w.tip.flicker_series(nx, dt_px_f)   # crashed tip: mid-line apex-length hops
+            # backward: acquired right→left, offset along the fast axis by the hysteresis loop
+            s_b_rows[k], a_b_rows[k] = self._sampled_line(st, bwd_pos, j, ox, oy, kappa,
+                                                          apexes=w.tip.pass_apexes(), bias_v=w.bias_v)
+            fl_b_rows[k] = w.tip.flicker_series(nx, dt_px_b)   # drawn afresh: the passes disagree
+            # scratches: a fragile/blunt tip scanning too fast damages the surface
+            w.maybe_scratch(st, j, speed, t_row)
+            lam_rows[k] = w.tip.lambda_per_s
+            phi_rows[k] = w.phi_junction()
+        # the blur: tip size in both directions, bandwidth along the line. Rows are in
+        # acquisition order, which is spatial order along the slow axis either way round.
+        sig = (sigma_tip_y_px if sigma_tip_y_px > 0.3 else 0.0, sigma_fast_px if sigma_fast_px > 0.3 else 0.0)
+        if sig[0] > 0.0 or sig[1] > 0.0:
+            s_f_rows = ndimage.gaussian_filter(s_f_rows, sig, mode="nearest")
+            s_b_rows = ndimage.gaussian_filter(s_b_rows, sig, mode="nearest")
+        # Pass 2 — the feedback loop follows each line in acquisition order; channels and noise
+        for k in range(ny):
+            t_row = row_times[k]
+            h_f = s_f_rows[k] + a_f_rows[k] + oz_rows[k]
+            if fl_f_rows[k] is not None:
+                h_f = h_f + fl_f_rows[k]
             if fb_on:
                 z_line_tip = loop.track(h_f + gap, dt_px_f, z0=z_prev)
             else:
                 z_line_tip = np.full(nx, z_frozen_tip)
-            # backward: acquired right→left, offset along the fast axis by the hysteresis loop
-            s_b, a_b = self._sampled_line(st, bwd_pos, j, ox, oy, kappa, apexes=w.tip.pass_apexes(),
-                                          bias_v=w.bias_v)
-            if sigma_px > 0.3:
-                s_b = ndimage.gaussian_filter1d(s_b, sigma_px, mode="nearest")
-            h_b = s_b + a_b + oz
-            fl = w.tip.flicker_series(nx, dt_px_b)          # drawn afresh: the passes disagree
-            if fl is not None:
-                h_b = h_b + fl
+            h_b = s_b_rows[k] + a_b_rows[k] + oz_rows[k]
+            if fl_b_rows[k] is not None:
+                h_b = h_b + fl_b_rows[k]
             if fb_on:
                 z_line_tip_b = loop.track(h_b + gap, dt_px_b, z0=float(z_line_tip[-1]))
                 z_prev = float(z_line_tip_b[-1])
             else:
                 z_line_tip_b = np.full(nx, z_frozen_tip)
-            # scratches: a fragile/blunt tip scanning too fast damages the surface
-            w.maybe_scratch(st, j, speed, t_row)
             # channels
-            z_fwd[k] = w.z_ctrl_from_tip(z_line_tip) + w.noise.z_series(nx) * (1 + 0.3 * w.tip.lambda_per_s * 1e2)
+            z_fwd[k] = w.z_ctrl_from_tip(z_line_tip) + w.noise.z_series(nx) * (1 + 0.3 * lam_rows[k] * 1e2)
             z_bwd[k] = w.z_ctrl_from_tip(z_line_tip_b) + w.noise.z_series(nx)
             gf = np.clip(z_line_tip - h_f, 0.05e-9, None)
             gb = np.clip(z_line_tip_b - h_b, 0.05e-9, None)
-            i_f = current_metal(gf, w.bias_v, w.phi_junction())
-            i_b = current_metal(gb, w.bias_v, w.phi_junction())
+            i_f = current_metal(gf, w.bias_v, phi_rows[k])
+            i_b = current_metal(gb, w.bias_v, phi_rows[k])
             i_fwd[k] = w.preamp.clamp(w.noise.current_series(i_f, t_row + dt_px_f * cols))
             i_bwd[k] = w.preamp.clamp(w.noise.current_series(i_b, t_row + st.line_time_fwd_s + dt_px_b * cols))
         data = {SIG_Z: (z_fwd, z_bwd), SIG_CURRENT: (i_fwd, i_bwd),

@@ -117,7 +117,11 @@ def grip_of(tip, kappa_m: float) -> Grip:
 @dataclass(frozen=True)
 class AdatomParams:
     species: str = "Fe"
-    height_m: float = 70e-12
+    # the bump a point-like tip would see. The renderer blurs it with the tip's size in both
+    # directions, so a good tip (R = 1 nm) shows about 0.6 of it: 110 pm reads as ~65-70 pm,
+    # the apparent height of single Co (~70 pm) and Cu (~50 pm) atoms on Cu(111) at 10 mV
+    # with a metal tip (arXiv:1912.05292)
+    height_m: float = 110e-12
     sigma_m: float = 0.30e-9
     delta_rad: float = 1.2
     alpha: float = 0.45

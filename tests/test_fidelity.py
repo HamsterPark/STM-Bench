@@ -78,6 +78,28 @@ def _overlap_shift(a: np.ndarray, b: np.ndarray, window: int = 12) -> int:
     return best[0]
 
 
+def _overlap_shift_subpx(a: np.ndarray, b: np.ndarray, window: int = 12) -> float:
+    """:func:`_overlap_shift` refined to a fraction of a pixel by a parabola through the NCC
+    peak and its two neighbours. The thirds of a frame differ by under a pixel (2.7 / 3.5 /
+    2.7 px at 256 px), so whole-pixel readings round them to equal at the ±0.5 px boundary."""
+    a = a - np.median(a, axis=1, keepdims=True)
+    b = b - np.median(b, axis=1, keepdims=True)
+    shifts = np.arange(-window, window + 1)
+    nccs = []
+    for s in shifts:
+        aa, bb = (a[:, s:], b[:, :a.shape[1] - s]) if s >= 0 else (a[:, :s], b[:, -s:])
+        aa = aa - aa.mean()
+        bb = bb - bb.mean()
+        nccs.append(float((aa * bb).sum() / (np.sqrt((aa * aa).sum() * (bb * bb).sum()) + 1e-30)))
+    c = np.asarray(nccs)
+    i = int(np.argmax(c))
+    if 0 < i < len(c) - 1:
+        d = c[i - 1] - 2 * c[i] + c[i + 1]
+        if d < 0:
+            return float(shifts[i] + 0.5 * (c[i - 1] - c[i + 1]) / d)
+    return float(shifts[i])
+
+
 # ── MAST-judged rendering ───────────────────────────────────────────────────────────
 @requires_mast
 def test_good_tip_verify_frames_match_the_real_corpus_on_the_index_recipe(tmp_path: Path):
@@ -228,10 +250,11 @@ def test_retrace_offset_reads_back_at_the_real_median_with_the_measured_shape(tm
         res = peak_shift(fwd, bwd)
         assert res["shift_px"] in (3, 4) and res["ncc_peak"] > 0.995, res
         t = fwd.shape[1] // 3
-        left, centre, right = (_overlap_shift(fwd[:, lo:hi], bwd[:, lo:hi])
+        left, centre, right = (_overlap_shift_subpx(fwd[:, lo:hi], bwd[:, lo:hi])
                                for lo, hi in ((0, t), (t, 2 * t), (2 * t, fwd.shape[1])))
-        assert centre >= max(left, right) >= 2 and min(left, right) >= 0.5 * centre, (left, centre, right)
-        assert centre > min(left, right), (left, centre, right)   # not a constant shift
+        assert min(left, right) >= 2 and min(left, right) >= 0.5 * centre, (left, centre, right)
+        # mid-line bulge: the centre third reads ~0.6-0.8 px more than the edge thirds
+        assert centre >= max(left, right) + 0.3, (left, centre, right)   # not a constant shift
 
 
 def test_hysteresis_profile_keeps_the_mean_and_rejects_the_closed_loop():

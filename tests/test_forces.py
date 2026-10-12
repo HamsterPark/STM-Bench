@@ -131,3 +131,19 @@ def test_van_der_waals_background_is_the_right_size():
         f = abs(force_truth(p, radius_m=2e-9, amplitude_m=50e-12, f0_hz=F0,
                             k_n_per_m=K)["f_vdw_at_0p5nm_pn"])
         assert lo <= f <= hi, (ham_zj, f)
+
+
+def test_the_force_laws_atom_is_as_tall_as_the_imaged_bump(tmp_path):
+    """The gap over an atom is measured from the top of its topographic bump, and the force
+    law puts the surface plane ``bump_m`` below that: the two must be one height, or the
+    van der Waals term no longer cancels between the atom and the background curve."""
+    from pathlib import Path
+
+    from stmsim.physics.adatoms import AdatomParams
+    from stmsim.scenario import Scenario
+
+    assert ForceParams().bump_m == AdatomParams().height_m
+    sc = Scenario.load(Path(__file__).resolve().parent.parent / "stmbench" / "trackB" / "scenarios"
+                       / "P5_sader_jarvis_qplus.yaml")
+    w = sc.build_world(0, session_dir=tmp_path / "s", virtual_clock=True)
+    assert w.force.bump_m == w.surface.site.adatoms.params.height_m
