@@ -104,6 +104,9 @@ class Frame:
     row_times_sim: np.ndarray | None = None
     tip_change_rows: list[int] = field(default_factory=list)
     rec_sim_s: float = 0.0
+    # (ny, 2) drift/creep offset (m) the renderer added to each acquisition row: the frame's
+    # own scan → sample map, which a judge needs when it places a reported position
+    row_offsets_m: np.ndarray | None = None
 
     def progress(self, sim_now: float) -> int:
         if self.finished or self.stopped:
@@ -203,6 +206,7 @@ class Renderer:
         cols = np.arange(nx)
         z_prev = None
         tip_rows: list[int] = []
+        row_offsets = np.zeros((ny, 2))
         fb_on = w.zctrl.on
         z_frozen_tip = w.tip_height_m()
         speed = st.w / max(st.line_time_fwd_s, 1e-9)
@@ -223,6 +227,7 @@ class Renderer:
             t_row = row_times[k]
             # slow drift / creep offset at this row (stage frame)
             ox, oy, oz = w.drift_offset(t_row)
+            row_offsets[k] = (ox, oy)
             # tip-change hazard for this row (Poisson over one row time)
             if w.tip.maybe_change(per_row, t_row, current_a=i_set, bias_v=w.bias_v):
                 tip_rows.append(k)
@@ -280,4 +285,4 @@ class Renderer:
                 data[sig] = (np.zeros((ny, nx)), np.zeros((ny, nx)))
         return Frame(settings=st.copy(), data=data, t_start_wall=w.clock.wall(),
                      t_start_sim=t_start_sim, rows_total=ny, row_times_sim=row_times,
-                     tip_change_rows=tip_rows, rec_sim_s=t_start_sim)
+                     tip_change_rows=tip_rows, rec_sim_s=t_start_sim, row_offsets_m=row_offsets)

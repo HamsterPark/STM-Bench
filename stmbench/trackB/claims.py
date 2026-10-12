@@ -92,10 +92,47 @@ def frame_covering(events, x_nm: float, y_nm: float, rule: dict) -> dict | None:
     return best
 
 
+def _row_offset_nm(frame: dict, x_nm: float, y_nm: float) -> tuple[float, float]:
+    """Drift offset (nm) of the acquisition row in which a scan-frame point was imaged.
+
+    The renderer adds one drift/creep offset per acquisition row (``row_offsets_nm``), so a
+    long frame maps different rows to different places on the sample: across a 150 s frame
+    the drift moves 1-3 nm. Frames saved before per-row records existed carry only the offset
+    at their recorded start (``drift_m``), which is used for them."""
+    rows = frame.get("row_offsets_nm")
+    if not rows:
+        dx, dy = (frame.get("drift_m") or [0.0, 0.0])[:2]
+        return float(dx) * 1e9, float(dy) * 1e9
+    cx, cy = float(frame.get("cx_m", 0.0)) * 1e9, float(frame.get("cy_m", 0.0)) * 1e9
+    h = float(frame.get("h_m", 0.0)) * 1e9
+    th = math.radians(float(frame.get("angle_deg", 0.0) or 0.0))
+    ny = len(rows)
+    v = -math.sin(th) * (x_nm - cx) + math.cos(th) * (y_nm - cy)
+    j = (h / 2 - v) / h * ny - 0.5 if h > 0 else 0.0         # geometric row, 0 = top (high v)
+    k = (ny - 1 - j) if frame.get("scan_dir") == "up" else j   # acquisition row
+    k = min(max(k, 0.0), ny - 1.0)
+    k0 = int(math.floor(k))
+    k1 = min(k0 + 1, ny - 1)
+    f = k - k0
+    return (float(rows[k0][0]) * (1 - f) + float(rows[k1][0]) * f,
+            float(rows[k0][1]) * (1 - f) + float(rows[k1][1]) * f)
+
+
 def to_sample_frame(frame: dict, x_nm: float, y_nm: float) -> tuple[float, float]:
-    """Scan-frame nm → sample-frame nm, using the drift the frame recorded."""
-    dx, dy = (frame.get("drift_m") or [0.0, 0.0])[:2]
-    return x_nm + float(dx) * 1e9, y_nm + float(dy) * 1e9
+    """Scan-frame nm -> sample-frame nm, through the drift of the row the point was imaged in."""
+    ox, oy = _row_offset_nm(frame, x_nm, y_nm)
+    return x_nm + ox, y_nm + oy
+
+
+def to_scan_frame(frame: dict, x_nm: float, y_nm: float) -> tuple[float, float]:
+    """Sample-frame nm -> the scan-frame point of ``frame`` that imaged it (the inverse of
+    :func:`to_sample_frame`; the offset varies slowly with the row, so a few fixed-point
+    steps converge)."""
+    px, py = x_nm, y_nm
+    for _ in range(5):
+        ox, oy = _row_offset_nm(frame, px, py)
+        px, py = x_nm - ox, y_nm - oy
+    return px, py
 
 
 def frame_covering_sample(events, x_nm: float, y_nm: float, rule: dict) -> dict | None:
@@ -109,8 +146,8 @@ def frame_covering_sample(events, x_nm: float, y_nm: float, rule: dict) -> dict 
     for fr in _frames(events):
         if not _frame_ok(fr, rule):
             continue
-        dx, dy = (fr.get("drift_m") or [0.0, 0.0])[:2]
-        if frame_covering([fr], x_nm - float(dx) * 1e9, y_nm - float(dy) * 1e9, rule) is not None:
+        px, py = to_scan_frame(fr, x_nm, y_nm)
+        if frame_covering([fr], px, py, rule) is not None:
             best = fr
     return best
 

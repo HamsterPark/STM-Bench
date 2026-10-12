@@ -919,12 +919,18 @@ class World:
             st = fr.settings
             ox, oy, _ = self.drift_offset(fr.t_start_sim)
             # geometry + the drift the frame was taken under: a judge maps a reported scan-frame
-            # position onto the sample frame with these (see stmbench claims evidence rules)
+            # position onto the sample frame with these (see stmbench claims evidence rules).
+            # ``row_offsets_nm`` is the offset the renderer added to each acquisition row, so a
+            # place is mapped through the row it was imaged in; ``drift_m`` (the offset at the
+            # recorded start) stays for readers of older ledgers
+            rows_nm = ([[round(float(o[0]) * 1e9, 4), round(float(o[1]) * 1e9, 4)] for o in fr.row_offsets_m]
+                       if fr.row_offsets_m is not None else None)
             self._event("scan_saved", path=str(path), rows=fr.rows_done,
                         idx=self.scan_series_counter, complete=bool(fr.rows_done >= st.ny),
                         cx_m=st.cx, cy_m=st.cy, w_m=st.w, h_m=st.h, angle_deg=st.angle_deg,
                         nx=st.nx, ny=st.ny, bias_v=self.bias_v, setpoint_a=self.zctrl.setpoint_a,
-                        t_start_sim=fr.t_start_sim, drift_m=[float(ox), float(oy)])
+                        t_start_sim=fr.t_start_sim, drift_m=[float(ox), float(oy)],
+                        scan_dir=st.scan_dir, row_offsets_nm=rows_nm)
             return str(path)
 
     # ── tip shaper (poke) ──
