@@ -271,3 +271,23 @@ def test_a_blunt_tip_widens_a_feature_in_both_directions():
         sy = math.sqrt((win * (yy - cy) ** 2).sum() / m)
         assert w.tip.radius_m > 3e-9 and 0.8 < sx / sy < 1.25, (seed, sx, sy)
 
+
+def test_a_longer_integration_lowers_the_spectrum_noise(tmp_path):
+    """dI/dV noise falls as 1/sqrt(integration time): 3 % of the peak at the controller's
+    default 5 ms, half that at 20 ms. (Until 2026-10-13 it was 3 % whatever the integration.)
+    An unset integration reads as the default, so callers that never set it see no change."""
+    from stmsim.physics.world import STS_NOISE_FRAC
+    from stmsim.scenario import Scenario
+
+    sc = Scenario.load(Path(__file__).resolve().parent.parent / "stmbench" / "trackB" / "scenarios"
+                       / "P3_corral_cu111.yaml")
+    w = sc.build_world(0, session_dir=tmp_path / "s", virtual_clock=True)
+    frac = {}
+    for integ in (0.0, 0.005, 0.02, 0.08):
+        cur = w.sts_curve(-0.5, 0.3, 400, integ_s=integ)
+        added = cur["didv"] - np.gradient(cur["i"], cur["v"])            # the lock-in noise drawn
+        frac[integ] = float(np.std(added) / np.nanmax(np.abs(np.gradient(cur["i"], cur["v"]))))
+    assert frac[0.005] == pytest.approx(STS_NOISE_FRAC, rel=0.15)
+    assert frac[0.0] == pytest.approx(frac[0.005], rel=0.15)
+    assert frac[0.02] == pytest.approx(frac[0.005] / 2, rel=0.2)
+    assert frac[0.08] == pytest.approx(frac[0.005] / 4, rel=0.2)

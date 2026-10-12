@@ -31,6 +31,11 @@ from .tip import Tip
 
 ZCTRL_OFF, ZCTRL_ON, ZCTRL_HOLD, ZCTRL_SWITCHING_OFF, ZCTRL_SAFETIP, ZCTRL_WITHDRAWING = 1, 2, 3, 4, 5, 6
 
+#: dI/dV noise of a bias sweep: this fraction of the curve's peak at the reference
+#: integration time per point (the controller's default), falling as 1/sqrt(integration)
+STS_NOISE_FRAC = 0.03
+STS_NOISE_REF_INTEG_S = 0.005
+
 
 @dataclass
 class ZController:
@@ -1113,7 +1118,13 @@ class World:
                 jump = True
             if n > 2 and abs(v_end - v_start) > 1e-9:
                 didv = np.gradient(i, vs)
-                didv = didv + self.rng.normal(0, 0.03 * float(np.nanmax(np.abs(didv))) + 1e-14, n)
+                # lock-in noise falls as 1/sqrt(integration time): 3 % of the curve's peak at the
+                # controller's default 5 ms per point, half that at 20 ms (which costs four times
+                # the instrument time). Until 2026-10-13 it was 3 % whatever the integration, so
+                # a careful, slow spectrum bought nothing. An unset integration reads as 5 ms.
+                t_int = integ_s if integ_s > 0 else STS_NOISE_REF_INTEG_S
+                frac = STS_NOISE_FRAC * math.sqrt(STS_NOISE_REF_INTEG_S / max(t_int, 1e-5))
+                didv = didv + self.rng.normal(0, frac * float(np.nanmax(np.abs(didv))) + 1e-14, n)
             else:
                 didv = np.zeros_like(i)
             self.sts_counter += 1
