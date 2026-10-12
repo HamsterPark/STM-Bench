@@ -184,3 +184,18 @@ def test_force_spectroscopy_through_the_instrument_reproduces_p5():
 def test_validate_fills_defaults_and_keeps_types():
     p = validate(ACTIONS["scan"], {"center_x_nm": 1, "center_y_nm": 2, "size_nm": 10})
     assert p["pixels"] == 256 and isinstance(p["center_x_nm"], float) and p["direction"] == "down"
+
+
+def test_z_spectra_carry_the_loops_absolute_z_and_frames_their_start_time():
+    """What lines a curve over an atom up with one over bare surface (the loop's Z, as the .dat
+    file has it), and what turns a shift between two frames into a drift velocity."""
+    inst = Instrument(P5, 0)
+    r = inst.act("scan", center_x_nm=0.0, center_y_nm=0.0, size_nm=5.0, pixels=32, line_time_s=0.05)
+    f = inst.frame(r["frame"])
+    assert f["t_start_s"] == pytest.approx(inst.status()["instrument_time_s"] - r["duration_s"], abs=0.01)
+    inst.act("pll", on=True, amplitude_pm=50.0)
+    z0 = inst.status()["z_nm"] * 1e-9
+    s = inst.spectrum(inst.act("zspec", sweep_nm=0.4, z_offset_nm=0.3, points=64, backward=False)["spectrum"])
+    # the loop's Z at every point: the start offset plus the sweep coordinate, from where it held
+    assert np.allclose(s["z_abs"], z0 + 0.3e-9 + s["z_rel"], rtol=0, atol=2e-14)   # status rounds to 1e-5 nm
+

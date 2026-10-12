@@ -476,7 +476,9 @@ class Instrument:
                               "tip_nm": [_r(w.tip_x * 1e9), _r(w.tip_y * 1e9)],
                               "z_rel": np.asarray(cur["z_rel"], float), "i": np.asarray(cur["i"], float),
                               "df": np.asarray(cur["df"], float), "amp": np.asarray(cur["amp"], float),
-                              "t_s": self.used_s}
+                              # the loop's Z at every point (m), as the .dat file has it: what lines up
+                              # a curve over an atom with one over the bare surface
+                              "z_abs": np.asarray(cur["z_n"], float), "t_s": self.used_s}
         self._settle(duration)
         return {"spectrum": name, "points": int(points), "duration_s": _r(duration, 3)}
 
@@ -616,6 +618,7 @@ class Instrument:
                               "direction is forward or backward")
         unit = "m" if channel == "z" else "A"
         return {"frame": f.name, **f.geometry, "channel": channel, "direction": direction, "unit": unit,
+                "t_start_s": f.t_start_s,          # instrument time the frame began: drift = shift / Δt
                 "array": np.array(arrs[(channel, direction)], copy=True), **f.meta}
 
     def spectrum(self, name: str) -> dict:
