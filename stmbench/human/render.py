@@ -1,8 +1,9 @@
 """Pictures of what the instrument saved, for the person in mode H.
 
-Frames come back through MAST's own reader (``read_sxm`` + ``sxm_oriented_frames``), so
-the orientation convention is the one the judge and the analysis skills use: row 0 of the
-oriented array is the frame's high-v edge (DESIGN.md §8). :func:`pixel_to_scan_nm` is the
+Frames come back through stmsim's own reader (:mod:`stmsim.io.sxm_reader`, identical in
+output to the reader MAST's analysis skills use), so the orientation convention is the one
+the judge and those skills use: row 0 of the oriented array is the frame's high-v edge
+(DESIGN.md §8). :func:`pixel_to_scan_nm` is the
 inverse of the judge's footprint test (``trackB.claims.frame_covering``) and is pinned to it
 by a test, because a reported position is only worth something in the scan frame the judge
 reads.
@@ -74,8 +75,8 @@ def pixel_to_scan_nm(geom: dict, col: float, row: float) -> tuple[float, float]:
 
 # ── files ───────────────────────────────────────────────────────────────────
 def _header(path: Path) -> dict:
-    from mast.io.nanonis_files import read_sxm_header
-    return read_sxm_header(str(path)) or {}
+    from stmsim.io.sxm_reader import read_sxm_header
+    return read_sxm_header(path) or {}
 
 
 def list_files(session_dir: str | Path) -> list[dict]:
@@ -117,8 +118,8 @@ def frame_meta(path: str | Path) -> dict:
 
 
 def dat_meta(path: str | Path) -> dict:
-    from mast.io.nanonis_files import read_dat
-    d = read_dat(str(path))
+    from stmsim.io.sxm_reader import read_dat
+    d = read_dat(path)
     hdr = d.get("header") or {}
     cols = d.get("columns") or {}
     names = list(cols)
@@ -137,9 +138,9 @@ def dat_meta(path: str | Path) -> dict:
 
 # ── frames ──────────────────────────────────────────────────────────────────
 def _oriented(path: Path, channel: str, direction: str) -> tuple[np.ndarray | None, dict]:
-    from mast.io.nanonis_files import read_sxm, sxm_oriented_frames
-    scan = read_sxm(str(path))
-    fr = sxm_oriented_frames(scan, channel)
+    from stmsim.io.sxm_reader import oriented_frames, read_sxm
+    scan = read_sxm(path)
+    fr = oriented_frames(scan, channel)
     img = fr.get("backward" if direction == "backward" else "forward")
     return (None if img is None else np.asarray(img, dtype=float)), fr
 
@@ -255,8 +256,8 @@ def render_frame(path: str | Path, *, channel: str = "Z", direction: str = "forw
 
 # ── spectra ─────────────────────────────────────────────────────────────────
 def dat_columns(path: str | Path) -> dict:
-    from mast.io.nanonis_files import read_dat
-    d = read_dat(str(path))
+    from stmsim.io.sxm_reader import read_dat
+    d = read_dat(path)
     cols = {k: [float(x) for x in np.asarray(v, dtype=float)] for k, v in (d.get("columns") or {}).items()}
     return {"header": {k: str(v) for k, v in (d.get("header") or {}).items()}, "columns": cols}
 
@@ -268,9 +269,9 @@ def render_dat(path: str | Path, *, x: str | None = None, y: str | None = None,
     from matplotlib.backends.backend_agg import FigureCanvasAgg
     from matplotlib.figure import Figure
 
-    from mast.io.nanonis_files import read_dat
+    from stmsim.io.sxm_reader import read_dat
 
-    d = read_dat(str(path))
+    d = read_dat(path)
     cols = d.get("columns") or {}
     names = list(cols)
     if not names:

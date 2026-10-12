@@ -87,6 +87,18 @@ def test_instrument_time_is_the_physical_duration_of_the_actions():
     assert inst.used_s == pytest.approx(94.0, abs=0.01)
 
 
+@pytest.mark.parametrize("pixels,line_time_s", [(40, 0.586), (64, 0.5), (97, 0.333), (128, 0.586)])
+def test_every_saved_frame_is_complete(pixels, line_time_s):
+    """Regression: the frame counts rows as floor(elapsed / row time); advancing exactly the
+    nominal duration could leave the last row unacquired, and the judge only accepts complete
+    frames as evidence."""
+    inst = Instrument(P4, 0)
+    r = inst.act("scan", center_x_nm=0.0, center_y_nm=0.0, size_nm=10.0, pixels=pixels, line_time_s=line_time_s)
+    ev = [e for e in inst.world.events if e["kind"] == "scan_saved"][-1]
+    assert ev["complete"] and ev["rows"] == pixels
+    assert np.isfinite(inst.frame(r["frame"])["array"]).all()
+
+
 def test_a_frame_comes_back_in_image_orientation():
     """Row 0 is the top of the frame whichever way the slow axis ran."""
     inst = Instrument(P4, 7)

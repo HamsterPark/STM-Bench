@@ -117,7 +117,8 @@ This starts a local controller server; connect a compatible TCP client and stop 
 For full episodes, MAST and its dependencies must be importable in the active environment
 (use its environment or put `MASTv2` on `PYTHONPATH`). `MAST_ROOT` identifies the checkout;
 only the test configuration automatically adds its `MASTv2` directory to the import path.
-MAST also supplies the `.sxm` reader used by replay and the mode-H page.
+Replays and the mode-H pictures read files with `stmsim.io.sxm_reader` (MAST not needed);
+the mode-H episode itself runs in MAST's loop.
 
 ```bash
 python -m stmbench.cli run --scenario P1_barth1990_au111 --mode C --seeds 0

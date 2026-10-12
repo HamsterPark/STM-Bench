@@ -10,7 +10,6 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from tests.conftest import requires_mast
 
 SCEN = Path(__file__).resolve().parent.parent / "stmbench" / "trackB" / "scenarios"
 
@@ -272,9 +271,9 @@ def test_the_page_is_one_file_with_its_data_or_a_folder(tmp_path):
     assert (tmp_path / "c" / "replay.js").read_text(encoding="utf-8").startswith("window.REPLAY = ")
 
 
-# ── the whole path, with the real simulator and MAST's frame reader ─────────
-@requires_mast
+# ── the whole path, with the real simulator and stmsim's frame reader ───────
 def test_a_replay_is_built_from_a_ledger_and_checks_its_truth(tmp_path):
+    pytest.importorskip("matplotlib")
     from stmsim.scenario import Scenario
 
     from stmbench.harness.episode import tip_timeline
