@@ -316,8 +316,9 @@ inst.finish()                           # judged with the version-1 rules; ledge
 
 Actions (`stmbench.instrument.ACTIONS`, each with a JSON schema): `scan`, `set_bias`,
 `set_setpoint`, `feedback`, `set_current_range`, `move_tip` (in feedback; at a low junction
-resistance it drags what the tip grips), `pulse`, `poke`, `sts`, `zspec`, `pll`, `drift_comp`,
-`withdraw`, `approach`, `coarse_move`, `wait`. Only hard instrument limits apply; there is no
+resistance it drags what the tip grips), `pulse`, `poke`, `sts`, `zspec`, `pll`, `lockin`
+(bias modulation on: every scan also records a dI/dV map at the scan bias, channel `didv`),
+`drift_comp`, `withdraw`, `approach`, `coarse_move`, `wait`. Only hard instrument limits apply; there is no
 safety gate and there are no composite skills. Observations (`status`, `info`, `list_data`,
 `frame`, `spectrum`) spend no instrument time and draw no random number, so how often an agent
 looks cannot change what it later measures.
