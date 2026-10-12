@@ -128,8 +128,8 @@ def _tunnelling_world(tmp_path, seed: int, time_scale: float):
     return w
 
 
-@requires_mast
 def test_frames_and_spectra_render_for_the_person(tmp_path):
+    pytest.importorskip("matplotlib")
     from stmsim.io.dat_writer import write_dat
 
     from stmbench.human import render

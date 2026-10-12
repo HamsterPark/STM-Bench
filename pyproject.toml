@@ -26,8 +26,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# calibration indices, Track A manifests, report tables
-bench = ["pandas>=2.2", "pyarrow>=15"]
+# calibration indices, Track A manifests, report tables; replay and mode-H pictures (matplotlib)
+bench = ["pandas>=2.2", "pyarrow>=15", "matplotlib>=3.9"]
 dev = ["pytest>=8"]
 
 [project.scripts]
