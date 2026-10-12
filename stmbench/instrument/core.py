@@ -336,8 +336,12 @@ class Instrument:
         w.scan_start(direction_up=(direction == "up"))
         fr = w.frame
         t_start = self.used_s
-        self._advance(st.frame_time_s)
+        # a frame counts its rows as floor(elapsed / row time): one microsecond past the nominal
+        # duration keeps floating-point rounding from leaving the last row unacquired (NaN)
+        self._advance(st.frame_time_s + 1e-6)
         w.scan_running()                                  # reveals the last rows, ends the frame
+        if not fr.finished:
+            raise RuntimeError(f"scan: frame ended with {fr.rows_done}/{fr.rows_total} rows")
         path = w.save_frame()
         name = Path(path).name
         order = np.arange(st.ny) if direction == "down" else np.arange(st.ny)[::-1]
