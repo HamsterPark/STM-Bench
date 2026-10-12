@@ -272,6 +272,39 @@ def test_a_blunt_tip_widens_a_feature_in_both_directions():
         assert w.tip.radius_m > 3e-9 and 0.8 < sx / sy < 1.25, (seed, sx, sy)
 
 
+
+def test_a_good_tip_shows_adatoms_as_tall_as_real_ones():
+    """Single Co and Cu atoms on Cu(111) look ~70 and ~50 pm high to a metal tip at 10 mV
+    (arXiv:1912.05292). The renderer blurs the drawn (point-tip) bump with the tip's size in
+    both directions, so the drawn heights sit above that; this pins what a good tip shows."""
+    from stmbench.instrument import Instrument
+    from stmsim.scenario import Scenario
+
+    sc = Scenario.load(Path(__file__).resolve().parent.parent / "stmbench" / "trackB" / "scenarios"
+                       / "P4_atom_positioning_cu111.yaml")
+    sc.hidden = {k: v for k, v in sc.hidden.items() if k != "tip"}      # the scenario's good tip
+    shown = []
+    for seed in range(4):
+        inst = Instrument(sc, seed)
+        w = inst.world
+        w.drift_v_m_per_s = np.zeros(3)
+        w._creep.clear()
+        reg = w.surface.site.adatoms
+        xy = reg.positions()
+        lone = [a for a in reg.atoms.values()
+                if sorted(np.hypot(*(xy - np.array(reg.site_xy(a.i, a.j, a.sub))).T))[1] > 3e-9
+                and w.surface.step_free_window(*reg.site_xy(a.i, a.j, a.sub), 3e-9)]
+        atom = min(lone, key=lambda a: math.hypot(*reg.site_xy(a.i, a.j, a.sub)))
+        ax, ay = (v * 1e9 for v in reg.site_xy(atom.i, atom.j, atom.sub))
+        r = inst.act("scan", center_x_nm=ax, center_y_nm=ay, size_nm=8.0, pixels=96, line_time_s=0.3)
+        z = inst.frame(r["frame"])["array"]
+        yy, xx = np.mgrid[0:96, 0:96]
+        d = np.hypot(yy - 47.5, xx - 47.5) * r["nm_per_px"]
+        h = float(z[d <= 0.4].max() - np.median(z[(d > 1.5) & (d <= 2.5)])) * 1e12
+        shown.append(h)
+        assert 40.0 < h < 110.0, (seed, h, reg.params.height_m * 1e12)
+    assert 55.0 < float(np.mean(shown)) < 90.0, shown
+
 def test_a_longer_integration_lowers_the_spectrum_noise(tmp_path):
     """dI/dV noise falls as 1/sqrt(integration time): 3 % of the peak at the controller's
     default 5 ms, half that at 20 ms. (Until 2026-10-13 it was 3 % whatever the integration.)

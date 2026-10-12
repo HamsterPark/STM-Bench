@@ -34,7 +34,8 @@ hidden:
     ring_n: [36, 60]
     ring_radius_nm: [5.5, 9.0]
     gap_atoms: [3, 6]
-    height_pm: [50.0, 90.0]
+    # point-tip height; a good tip shows ~0.6 of it, i.e. 50-90 pm (AdatomParams.height_m)
+    height_pm: [80.0, 140.0]
     sigma_nm: [0.25, 0.35]
     delta_rad: [0.9, 1.5]
     alpha: [0.30, 0.60]

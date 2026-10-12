@@ -41,7 +41,7 @@ from __future__ import annotations
 
 import math
 import zlib
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
@@ -375,7 +375,12 @@ class Scenario:
         if not cfg:
             return
         from .physics.forces import ForceParams
-        world.force = ForceParams.from_yaml(cfg)
+        force = ForceParams.from_yaml(cfg)
+        reg = world.surface.site.adatoms
+        if "bump_pm" not in cfg and reg is not None:
+            # one geometry: the force law's atom is as tall as the bump the gap is measured from
+            force = replace(force, bump_m=reg.params.height_m)
+        world.force = force
 
     def scheduler(self, world: World, server=None) -> FaultScheduler:
         return FaultScheduler(world, [Fault.from_dict(f) for f in self.faults], server=server)

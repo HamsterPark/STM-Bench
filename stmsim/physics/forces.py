@@ -52,7 +52,10 @@ class ForceParams:
     bg_frac: float = 0.0                # short-range strength on the clean surface
     sigma_lat_m: float = 0.15e-9
     sigma_df_hz: float = 0.2
-    bump_m: float = 70e-12              # apparent height of the adatom under the tip
+    # the adatom's height above the surface plane. The tip's gap over the atom is measured
+    # from the top of the topographic bump, so this must equal that bump
+    # (AdatomParams.height_m): Scenario sets it from the adatoms unless a scenario gives bump_pm
+    bump_m: float = 110e-12
 
     @classmethod
     def from_yaml(cls, cfg: dict[str, Any]) -> "ForceParams":
