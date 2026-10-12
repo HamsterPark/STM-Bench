@@ -6,6 +6,7 @@
     python -m stmbench.cli audit chance [--scenario P3] [--seeds 200] [--jobs 4] [--json out.json]
     python -m stmbench.cli episode --scenario P5_sader_jarvis_qplus --seed 0 --out <run dir>   # MCP stdio
     python -m stmbench.cli verify <run dir>                                                     # replay + compare
+    python -m stmbench.cli reference --paper P5 [--seeds 30] [--jobs 4] [--json out.json]      # privileged reference runs
 
 ``run`` executes episodes in this process. ``gate`` plans the matrix
 families × modes × seeds × models and runs **one subprocess per episode**
@@ -347,6 +348,20 @@ def cmd_verify(a) -> int:
     return 0 if res["ok"] else 1
 
 
+def cmd_reference(a) -> int:
+    """Privileged reference solutions over many seeds (stmbench.reference)."""
+    from .reference import format_summary, run_many, summarize
+
+    rows = run_many(a.paper, list(range(a.first_seed, a.first_seed + a.seeds)), jobs=a.jobs)
+    s = summarize(rows)
+    print(format_summary(a.paper, s))
+    if a.json:
+        Path(a.json).write_text(json.dumps({"summary": s, "runs": rows}, ensure_ascii=False, indent=1),
+                                encoding="utf-8")
+        print(f"reference → {a.json}")
+    return 0
+
+
 # ── argparse ────────────────────────────────────────────────────────────────
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="stmbench")
@@ -436,6 +451,15 @@ def main(argv=None) -> int:
                                       "every measurement and the verdict")
     v.add_argument("run_dir")
     v.set_defaults(fn=cmd_verify)
+
+    f = sub.add_parser("reference", help="privileged reference solutions: the truth navigates, every reported "
+                                         "number is measured; reports success, error spread and instrument time")
+    f.add_argument("--paper", required=True, help="P5")
+    f.add_argument("--seeds", type=int, default=30, help="number of seeds")
+    f.add_argument("--first-seed", type=int, default=0)
+    f.add_argument("--jobs", type=int, default=1, help="processes in parallel")
+    f.add_argument("--json", default=None, help="also write every run and the summary here")
+    f.set_defaults(fn=cmd_reference)
     a = ap.parse_args(argv)
     return a.fn(a)
 
