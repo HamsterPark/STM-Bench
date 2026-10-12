@@ -729,7 +729,10 @@ class Surface:
             return dict(cached)
         centre = (reg.ring["centre_nm"][0] * 1e-9, reg.ring["centre_nm"][1] * 1e-9)
         ss = self.surface_state
-        lo = ss.p.e0_ev + 0.02
+        # from just above the band bottom: the confined levels sit 5-20 meV above the textbook
+        # hard-wall ones, so a start at E0 + 20 meV cut the lowest resonance of small corrals in
+        # half — dropped here, visible in a measured spectrum, and every rank shifted by one
+        lo = ss.p.e0_ev + 0.005
         grid = np.arange(lo, 0.6, 0.002)
         rho = self.ldos_at(*centre)
         y = np.asarray(rho.rho(grid), float)

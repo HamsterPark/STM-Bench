@@ -130,7 +130,7 @@ def test_a_peak_just_outside_its_window_matches_nothing(tmp_path):
     sc, truth, report, events, orient = _oracle("P3_corral_cu111.yaml", tmp_path)
     peaks = C.truth_at_path(truth, "corral.peaks_mev")
     lim = next(c for c in sc.claims if c["id"] == "peak_lo_mev")["tol"]["abs"]
-    assert peaks[1] - peaks[0] > 2.5 * lim            # the next peak is out of reach of the probe
+    assert peaks[0] == min(peaks)                     # probed from below: no other peak in reach
     for value, ok in ((peaks[0] - 0.999 * lim, True), (peaks[0] - 1.001 * lim, False)):
         rep = {"claims": {**report["claims"], "peak_lo_mev": {**report["claims"]["peak_lo_mev"], "value": value}}}
         v = judge("claims_verified", truth, claims=sc.claims, report=rep, events=events,

@@ -220,3 +220,23 @@ bottom to a reader of the resulting `.dat` file."""
     m = ss.point_modulation_integrated(np.array([1.5e-9, 4e-9]), np.array([0.4e-9, 0.0]),
                                        CU.e0_ev - 0.1, pts)
     assert np.isfinite(m).all()
+
+
+def test_a_small_corrals_lowest_resonance_is_counted():
+    """The truth's resonances at a corral's centre are counted from 5 meV above the band
+    bottom. From 20 meV (until 2026-10-13) the n = 1 resonance of small rings, which leaks
+    5-20 meV above its hard-wall level, was cut: a measured spectrum showed it, the truth did
+    not, and every rank was off by one."""
+    import tempfile
+    from pathlib import Path
+
+    from stmsim.scenario import Scenario
+
+    sc = Scenario.load(Path(__file__).resolve().parent.parent / "stmbench" / "trackB" / "scenarios"
+                       / "P3_corral_cu111.yaml")
+    sc.hidden["adatoms"] = {**sc.hidden["adatoms"], "ring_radius_nm": [4.5, 5.0]}     # small rings
+    for seed in range(3):
+        w = sc.build_world(seed, session_dir=Path(tempfile.mkdtemp()) / "s", virtual_clock=True)
+        c = w.surface.corral_snapshot()
+        hw1 = c["hard_wall_ev"][0] * 1e3
+        assert c["peaks_mev"][0] - hw1 < 25.0, (seed, c["radius_nm"], c["peaks_mev"][:2], hw1)
