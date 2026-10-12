@@ -257,12 +257,44 @@ def _best_step(grids: Sequence[ClaimGrid], choice: Sequence[int], c: int) -> tup
     return i, float(frac[i])
 
 
+def _linked(grids: Sequence[ClaimGrid]) -> bool:
+    """Whether any two of the claims are tied by a pairwise rule of the judge."""
+    for a in range(len(grids)):
+        for b in range(a + 1, len(grids)):
+            r = _rules_between(grids[a], grids[b])
+            if r["ranks_distinct"] or r["apart"] is not None or r["order"]:
+                return True
+    return False
+
+
+def _best_triple(grids: Sequence[ClaimGrid]) -> tuple[list[int], float]:
+    """Exact best sheet for three claims with no pairwise rule between them: for every answer
+    to the first claim, the seed counts of all (second, third) pairs in one matrix product.
+    Answers whose own pass count cannot beat the best so far are skipped."""
+    g0, g1, g2 = grids
+    n = g0.passes.shape[1]
+    p1 = g1.passes.astype(np.float32)
+    p2t = g2.passes.astype(np.float32).T
+    marg = g0.passes.sum(axis=1)
+    best_val, best = -1.0, [0, 0, 0]
+    for i in np.argsort(-marg):
+        if marg[i] <= best_val:
+            break
+        m = (p1 * g0.passes[i][None, :]) @ p2t
+        j, k = np.unravel_index(int(np.argmax(m)), m.shape)
+        if m[j, k] > best_val:
+            best_val, best = float(m[j, k]), [int(i), int(j), int(k)]
+    return best, best_val / n
+
+
 def best_joint(grids: Sequence[ClaimGrid], *, sweeps: int = 8, restarts: int = 5) -> tuple[list[int], float]:
     """The fixed answer sheet that passes the most seeds on every claim at once.
 
-    One or two claims: exact (two claims through a seed-count matrix). Three or more:
-    coordinate ascent, each step exact, from the per-claim optima and from the next-best
-    candidates of each claim; the result is then a lower bound on the best sheet."""
+    One or two claims: exact (two claims through a seed-count matrix). Three claims with no
+    pairwise rule between them: exact (:func:`_best_triple`). Otherwise coordinate ascent, each
+    step exact, from the per-claim optima and from the next-best candidates of each claim; the
+    result is then a lower bound on the best sheet (on P5, before the exact search, ascent
+    reported 4.0 % at a looser tolerance and 4.3 % at a tighter one)."""
     if not grids:
         return [], 0.0
     n = grids[0].passes.shape[1]
@@ -274,6 +306,8 @@ def best_joint(grids: Sequence[ClaimGrid], *, sweeps: int = 8, restarts: int = 5
         counts = _pair_counts(grids[0], grids[1])
         i, j = np.unravel_index(int(np.argmax(counts)), counts.shape)
         return [int(i), int(j)], float(counts[i, j]) / n
+    if len(grids) == 3 and not _linked(grids):
+        return _best_triple(grids)
     marg = [g.passes.mean(axis=1) for g in grids]
     base = [int(np.argmax(m)) for m in marg]
     starts = [base]
