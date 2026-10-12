@@ -330,6 +330,11 @@ python -m stmbench.cli episode --scenario P4_atom_positioning_cu111 --seed 0 --o
 python -m stmbench.cli verify runs/p4_s0          # replay the actions, compare every measurement and the verdict
 ```
 
+A frame observation carries `t_start_s` (the instrument time it began: a shift between two frames
+over their time difference is the drift `drift_comp` takes), and a Z spectrum carries `z_abs`, the
+loop's Z at every point as the `.dat` file has it (what lines a curve over an atom up with one
+over bare surface).
+
 The MCP tools are the actions, the observations (`show_frame` returns a PNG rendered one fixed
 way — line-flattened, 0.5–99.5 % contrast, integer enlargement to ≥ 512 px — and
 `frame_values` the numbers), `get_task` (task, rule card, manual), `report_result`,
@@ -347,11 +352,27 @@ python -m stmbench.cli audit chance --scenario P3 --seeds 300 --jobs 4 --json ou
 The hidden ranges are public, so a fixed answer near the middle of a range is the attack a
 reported value has to withstand. The audit draws the truth for many seeds and finds, with the
 judge's own tolerance helpers, the constant answer that passes most often: per claim, and for
-the whole paper. Claims marked `knowledge: allowed` (material constants: P1's period, P2's E0
+the whole paper (exactly for up to three claims without a pairwise rule between them; otherwise
+by coordinate ascent, a lower bound). Claims marked `knowledge: allowed` (material constants: P1's period, P2's E0
 and m*) are reported but not held to a gate — knowing them is part of the skill. Position and
 constraint claims are judged on the atoms themselves and are not audited. On seeds 0–299
 (2026-10-12) a fixed sheet reproduces P3 in 41 % of seeds, P3's repair spectra in 43 %, P2 in
 16 % (all knowledge claims) and P5 in 13 %; P1's measured claims together pass 4.3 %.
+P5, recalibrated on 2026-10-13 against its reference solution (below), passes 4.3 %.
+
+### Reference solutions
+
+```bash
+python -m stmbench.cli reference --paper P5 --seeds 30 --jobs 4 --json p5.json
+```
+
+A privileged reference solution (`stmbench.reference`) may use the truth to navigate — where
+the atom is, which nearby spot is bare surface, how far the sample has drifted, whether the
+tip needs a poke — but every number it reports is measured through the instrument and
+computed by `stmbench.analysis` (no MAST). Over many seeds it shows whether a paper is
+solvable, the error spread of a careful measurement (tolerances are set at about twice its
+p90) and the instrument time it takes. P5 (2026-10-13, seeds 0–29): 30/30 reproduced, |error|
+p90 5.9 % (F_min), 3.7 % (decay length), 8.7 % (E_b), 354 s of instrument time.
 
 ### Run directory
 

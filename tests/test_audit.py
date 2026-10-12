@@ -77,12 +77,25 @@ def test_the_pair_search_keeps_the_judges_peak_rules():
     assert choice[1] > choice[0]
 
 
-def test_three_claims_give_a_lower_bound_on_the_best_sheet():
+def test_three_unlinked_claims_are_searched_exactly():
+    """P5's three numbers: coordinate ascent had reported 13.7 % where the best sheet passes
+    14.0 % (seeds 0-299), and ranked two tolerances the wrong way round."""
     rng = np.random.default_rng(11)
     for _ in range(10):
         ps = [rng.random((6, 50)) < 0.5 for _ in range(3)]
         grids = [_grid(f"c{k}", p) for k, p in enumerate(ps)]
         brute = max(A.joint_pass(grids, list(ch)).mean() for ch in itertools.product(range(6), repeat=3))
+        choice, val = A.best_joint(grids)
+        assert val == pytest.approx(brute)
+        assert A.joint_pass(grids, choice).mean() == pytest.approx(val)
+
+
+def test_four_claims_give_a_lower_bound_on_the_best_sheet():
+    rng = np.random.default_rng(12)
+    for _ in range(5):
+        ps = [rng.random((4, 50)) < 0.5 for _ in range(4)]
+        grids = [_grid(f"c{k}", p) for k, p in enumerate(ps)]
+        brute = max(A.joint_pass(grids, list(ch)).mean() for ch in itertools.product(range(4), repeat=4))
         start = [int(np.argmax(p.mean(axis=1))) for p in ps]
         choice, val = A.best_joint(grids)
         assert A.joint_pass(grids, start).mean() <= val + 1e-12 <= brute + 1e-9

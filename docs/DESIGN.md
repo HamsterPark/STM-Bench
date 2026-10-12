@@ -512,6 +512,29 @@ max 0.253 nm，形状是「吸附到相邻 FFT 分箱」的长尾：120 nm 窗�
 这些回合的账本保存在本地 `<data-root>/runs_h_agents`（未随仓库提供），模型列为 `claude-opus-agent`，`report.summarize` 照常读取。
 它们回答的是「题目做得出来吗、环境哪里坏了」，不是榜单；榜单要等模式 A。
 
+### 9.5 特权参考解与标定（M4，2026-10-13 起）
+
+参考解（`stmbench/reference/`）可以用真值导航：原子在哪、附近哪里是裸表面、样品漂了多远、针尖要不要戳；
+报告的每个数都来自仪器实测，经 `stmbench/analysis/`（不依赖 MAST）算出。它回答三件事：题能不能做、
+认真测量的误差有多大（容差取其 p90 的约 2 倍）、要多少仪器时间。
+
+P5 是第一个。做参考解的过程中发现并修了四处：
+- **`zspec` 观测没有绝对 Z**（.dat 文件里有）：原子曲线和背景曲线没法在同一针尖高度上对齐。现在观测带 `z_abs`；
+  帧观测也补上了起始时刻 `t_start_s`，否则两帧算不出漂移速度。
+- **Δf 噪声与振幅、积分时间、平均次数都无关**：小振幅不付代价，多次平均没有回报。现在按 1/A 和
+  1/√(积分时间 × 次数) 缩放（Giessibl 2019），默认设置（50 pm、5 ms、1 次）下不变，随机抽取次数不变。
+- **机会审计对三条 claim 用坐标上升，只是下界**：P5 报 13.7%，精确值 14.0%，而且把两档容差排反了。现在三条
+  claim 之间没有成对规则时精确搜索（逐个枚举第一条的候选，用矩阵乘法求另两条），并按边际通过数剪枝。
+- **对齐方法本身**：背景点若落在台阶另一侧（seed 5）或样品有倾斜（seed 0，7 pm），钝针的范德华力就抵消不掉，
+  F_min 偏 6–20%。参考解在原子两侧对称的两个裸表面点上测背景，先用两幅图的互相关测横向漂移、再测并补偿
+  Z 漂移（冷台约 60 pm/min，不补偿时长平均会让曲线的公共高度区间切掉力的极小值）。
+
+Sader–Jarvis 公式本身在振幅与力的衰减长度相当时偏低：无噪声曲线上，50 pm 时 F_min 平均低 6.7%，100 pm 时
+1.6%。参考解用 100 pm。30 个 seed 全部复现，|误差| p90：F_min 5.9%、衰减长度 3.7%、E_b 8.7%，仪器时间约
+354 s。据此 P5 重标定：衰减长度容差 25% → 8%；F_min、E_b 容差不动（15%、20%），给 50 pm 起始振幅下
+Sader–Jarvis 的约 7% 偏差留余量；键参数改为对数均匀并放宽，D_e 50–600 meV、a 7–25 /nm。
+整篇机会通过率 14.0% → 4.3%（精确，seed 0–299），过了 5% 门槛。
+
 ## 10. 复用清单
 - MAST：`mast.io.nanonis_files`（reader 真源）、`test_frame_corrugation.py:41-65`（writer 样板）、`core/nanonis_patch.py`（协议 + 覆盖表 + 错误段）、`working-memory/NanonisClass_upstream.py` + `06_…reference.md`（spec 源）、`monitoring/pump.py`（Osci2T 序列 + `check_timebase_table`）、`knowledge/fault_diagnosis.py`（故障 schema）、`core/tip_conditioning_policy.py`（包络 + `_sources` 真值分层标签）、`core/noble_tip_workflow.py` + `tip_reference_calibration.txt`（转移数字）、`api/bootstrap.py` / `tools/skill_coverage_campaign.py`（无头范本）、`agentruntime/{ic_assembly,loop,pause,sse}.py`、`vision/*`（尺子 + 基线）、MAST 的测试记录（人工版任务定义）、`docs/v2/talks/repro/scan_corpus.py`（批跑检测器）。
 - VIGIL（历史复用规划；此条不是已移植代码清单）：`src/surfaces/*`、`physical_scanner.py` 的 PI×压电 IIR + Preisach + 蠕变 warp、`noise_injector.py`、`config/tip_universe.yaml`（α₁ 先验）。
