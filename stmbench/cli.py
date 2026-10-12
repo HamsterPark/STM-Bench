@@ -4,6 +4,8 @@
     python -m stmbench.cli gate --families B1,B5 --modes C,A --seeds 0,1,2 --models kimi-k3 \
                                 --gate gate1 --parallel 3 [--dry-run] [--scenario-filter B5_repair]
     python -m stmbench.cli audit chance [--scenario P3] [--seeds 200] [--jobs 4] [--json out.json]
+    python -m stmbench.cli episode --scenario P5_sader_jarvis_qplus --seed 0 --out <run dir>   # MCP stdio
+    python -m stmbench.cli verify <run dir>                                                     # replay + compare
 
 ``run`` executes episodes in this process. ``gate`` plans the matrix
 families × modes × seeds × models and runs **one subprocess per episode**
@@ -326,6 +328,25 @@ def cmd_audit(a) -> int:
     return 0
 
 
+# ── the MAST-free benchmark instrument ─────────────────────────────────────
+def cmd_episode(a) -> int:
+    """Serve one episode over MCP stdio (stmbench.instrument.mcp_server)."""
+    from .instrument import Instrument
+    from .instrument.mcp_server import EpisodeServer
+
+    EpisodeServer(Instrument(a.scenario, a.seed, out_dir=a.out)).serve_stdio()
+    return 0
+
+
+def cmd_verify(a) -> int:
+    """Replay an instrument episode from its ledger and compare measurements and verdict."""
+    from .instrument import verify
+
+    res = verify(a.run_dir)
+    print(json.dumps(res, ensure_ascii=False, indent=1))
+    return 0 if res["ok"] else 1
+
+
 # ── argparse ────────────────────────────────────────────────────────────────
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="stmbench")
@@ -403,6 +424,18 @@ def main(argv=None) -> int:
     u.add_argument("--jobs", type=int, default=1, help="processes building worlds in parallel")
     u.add_argument("--json", default=None, help="also write the results here")
     u.set_defaults(fn=cmd_audit)
+
+    e = sub.add_parser("episode", help="serve one episode of the MAST-free instrument over MCP stdio "
+                                       "(any MCP agent can take the instrument's seat)")
+    e.add_argument("--scenario", required=True, help="scenario id or YAML path")
+    e.add_argument("--seed", type=int, required=True)
+    e.add_argument("--out", required=True, help="run directory: ledger and saved files")
+    e.set_defaults(fn=cmd_episode)
+
+    v = sub.add_parser("verify", help="re-check an instrument episode: replay its actions and compare "
+                                      "every measurement and the verdict")
+    v.add_argument("run_dir")
+    v.set_defaults(fn=cmd_verify)
     a = ap.parse_args(argv)
     return a.fn(a)
 

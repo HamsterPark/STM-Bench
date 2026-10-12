@@ -294,6 +294,48 @@ applies the version-1 rules (citations, the named frame) to episodes with `rules
 older ledgers re-judge with the rules they ran under. Never state a budget or an evidence rule
 by hand in a task: write it in the claim or the budget, and the card will say it.
 
+### The benchmark instrument (no MAST)
+
+`stmbench.instrument` runs a paper scenario on the simulator without MAST and without the wire
+protocol, on a **virtual clock**: instrument time moves only when an action advances it, by the
+action's physical duration (a frame takes pixels × 2 × line time; a spectrum its points × (settle
++ integration) plus overheads). The same seed and the same actions therefore give the same
+measurements and the same verdict on any host, and any episode can be re-checked from its ledger.
+
+```python
+from stmbench.instrument import Instrument
+inst = Instrument("P5_sader_jarvis_qplus", seed=0, out_dir="runs/p5_s0")
+print(inst.task())                      # the task with its rule card
+inst.act("pll", on=True, amplitude_pm=50)
+inst.act("move_tip", x_nm=1.2, y_nm=-0.4)
+r = inst.act("zspec", sweep_nm=0.5, z_offset_nm=0.3, points=256)
+inst.spectrum(r["spectrum"])            # read-only: no instrument time, no random draw
+inst.report("f_min_pn", -150.0, evidence=[r["spectrum"], "..."])
+inst.finish()                           # judged with the version-1 rules; ledger written
+```
+
+Actions (`stmbench.instrument.ACTIONS`, each with a JSON schema): `scan`, `set_bias`,
+`set_setpoint`, `feedback`, `set_current_range`, `move_tip` (in feedback; at a low junction
+resistance it drags what the tip grips), `pulse`, `poke`, `sts`, `zspec`, `pll`, `drift_comp`,
+`withdraw`, `approach`, `coarse_move`, `wait`. Only hard instrument limits apply; there is no
+safety gate and there are no composite skills. Observations (`status`, `info`, `list_data`,
+`frame`, `spectrum`) spend no instrument time and draw no random number, so how often an agent
+looks cannot change what it later measures.
+
+Any MCP agent can take the instrument's seat:
+
+```bash
+python -m stmbench.cli episode --scenario P4_atom_positioning_cu111 --seed 0 --out runs/p4_s0   # MCP stdio
+python -m stmbench.cli verify runs/p4_s0          # replay the actions, compare every measurement and the verdict
+```
+
+The MCP tools are the actions, the observations (`show_frame` returns a PNG rendered one fixed
+way — line-flattened, 0.5–99.5 % contrast, integer enlargement to ≥ 512 px — and
+`frame_values` the numbers), `get_task` (task, rule card, manual), `report_result`,
+`report_tip_state` and `finish`. The ledger is `episode.json` (verdict, hashes of every
+measurement), `actions.jsonl` (every call, refused ones included), `events.json`,
+`report.json` and `session/` (the saved `.sxm` / `.dat` files).
+
 ### The chance audit
 
 ```bash

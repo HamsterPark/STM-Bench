@@ -46,6 +46,11 @@ class Clock:
         self._pause_started: float | None = None
         self._paused_total = 0.0
 
+    @property
+    def is_virtual(self) -> bool:
+        """False: this clock reads the host clock (see :class:`VirtualClock`)."""
+        return False
+
     # ── pause / resume ──
     @property
     def is_paused(self) -> bool:
@@ -112,3 +117,49 @@ class Clock:
     def sim_datetime(self, sim_s: float | None = None) -> _dt.datetime:
         s = self.sim() if sim_s is None else sim_s
         return self.sim_epoch + _dt.timedelta(seconds=float(s))
+
+
+class VirtualClock(Clock):
+    """A clock that moves only when told to: the instrument's time in a benchmark episode.
+
+    ``wall()`` is a counter, not a reading of the host clock, so everything stmsim derives
+    from it — sim and slow time, transients, approach cycles, PLL ring-up, the noise series —
+    becomes a function of the actions taken, not of how fast the host runs them or how long
+    the agent thinks. ``advance(dt)`` moves it forward; whoever drives the world states how
+    long each action takes. ``pause``/``resume`` keep their nesting contract and nothing else:
+    a virtual clock never runs on its own.
+
+    The default scales are 1: with no host time to compress, hardware-side processes (wall)
+    and scan lines (sim) share one physical time base, and an instrument-time budget is
+    simply seconds of this clock.
+    """
+
+    def __init__(self, time_scale: float = 1.0, sim_epoch: _dt.datetime | None = None,
+                 slow_scale: float = 1.0, start_s: float = 0.0):
+        super().__init__(time_scale=time_scale, sim_epoch=sim_epoch, slow_scale=slow_scale)
+        self._now = float(start_s)
+
+    @property
+    def is_virtual(self) -> bool:
+        return True
+
+    @property
+    def paused_total_s(self) -> float:
+        return 0.0
+
+    def pause(self) -> None:
+        self._pause_depth += 1
+
+    def resume(self) -> None:
+        if self._pause_depth:
+            self._pause_depth -= 1
+
+    def wall(self) -> float:
+        return self._now
+
+    def advance(self, seconds: float) -> None:
+        """Let ``seconds`` of instrument time pass (never backwards)."""
+        s = float(seconds)
+        if not s >= 0.0:
+            raise ValueError(f"a clock cannot go back ({seconds!r} s)")
+        self._now += s
