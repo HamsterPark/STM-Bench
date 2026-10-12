@@ -73,14 +73,15 @@ class World:
                  material: str = "Au(111)", time_scale: float = 1.0,
                  session_dir: str | Path | None = None, tip: Tip | None = None,
                  contamination: float = 0.0, adsorbate_density_per_um2: float = 3.0,
-                 herringbone=None, surface_state=None, terrace_median_m: float | None = None):
+                 herringbone=None, surface_state=None, terrace_median_m: float | None = None,
+                 clock: Clock | None = None):
         self.lock = threading.RLock()
         self.rig = rig or RigProfile.load("reference-stm")
         self.seed = seed
         self.rng = np.random.default_rng(seed)
         # drift and creep accrue per SIM second: they are functions of how long the experiment
         # runs, and the scenario budgets are written in sim hours (see Clock.__init__)
-        self.clock = Clock(time_scale=time_scale, slow_scale=time_scale)
+        self.clock = clock if clock is not None else Clock(time_scale=time_scale, slow_scale=time_scale)
         self.surface = Surface(material, seed=seed, contamination=contamination,
                                adsorbate_density_per_um2=adsorbate_density_per_um2,
                                herringbone=herringbone, surface_state=surface_state,

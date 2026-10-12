@@ -51,6 +51,7 @@ import yaml
 from .faults import Fault, FaultScheduler
 from .physics.rig import RigProfile
 from .physics.tip import Apex, Tip
+from .physics.clock import VirtualClock
 from .physics.world import World
 
 # ── hidden parameters ───────────────────────────────────────────────────────
@@ -221,7 +222,13 @@ class Scenario:
     def draw_hidden(self, seed: int) -> dict:
         return resolve_hidden(self.hidden, seed, self.id)
 
-    def build_world(self, seed: int, session_dir: str | Path) -> World:
+    def build_world(self, seed: int, session_dir: str | Path, *, virtual_clock: bool = False) -> World:
+        """The world this scenario describes, for ``seed``.
+
+        ``virtual_clock``: instrument time moves only when the driver advances it
+        (:class:`~stmsim.physics.clock.VirtualClock`, scales 1), so the same actions give the
+        same world on any host. The default reads the host clock, accelerated by ``time_scale``,
+        which is what the wire-protocol clients (MAST) expect."""
         rig = RigProfile.load(self.rig)
         ini = self.initial or {}
         drawn = self.draw_hidden(seed)
@@ -264,7 +271,9 @@ class Scenario:
                     **drawn.get("initial", {})}
         herringbone = self._herringbone_params(drawn, ini)
         surface_state = self._surface_state_params(drawn, ini)
-        w = World(rig=rig, seed=seed, material=self.material, time_scale=self.time_scale,
+        w = World(rig=rig, seed=seed, material=self.material,
+                  time_scale=1.0 if virtual_clock else self.time_scale,
+                  clock=VirtualClock() if virtual_clock else None,
                   session_dir=session_dir, tip=tip,
                   contamination=float(surf.get("contamination", 0.0)),
                   adsorbate_density_per_um2=float(surf.get("adsorbate_density_per_um2", 3.0)),
