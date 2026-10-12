@@ -90,6 +90,25 @@ def test_three_unlinked_claims_are_searched_exactly():
         assert A.joint_pass(grids, choice).mean() == pytest.approx(val)
 
 
+def test_a_linked_pair_and_a_free_claim_are_searched_exactly():
+    """P3's shape: two peak answers tied by the judge's rules (different peaks, ascending) and
+    a third claim (the radius) free of them."""
+    rng = np.random.default_rng(7)
+    for _ in range(5):
+        ranks_lo = rng.integers(-1, 3, size=(6, 40))
+        ranks_hi = rng.integers(-1, 3, size=(6, 40))
+        lo = A.ClaimGrid({"id": "lo", "kind": "peak_in_list"}, np.arange(6.0), ranks_lo >= 0, ranks=ranks_lo)
+        hi = A.ClaimGrid({"id": "hi", "kind": "peak_in_list", "distinct_from": {"claim": "lo"},
+                          "greater_than": "lo"}, np.arange(6.0), ranks_hi >= 0, ranks=ranks_hi)
+        rad = _grid("radius", rng.random((7, 40)) < 0.4)
+        grids = [lo, hi, rad]
+        brute = max(A.joint_pass(grids, [i, j, k]).mean()
+                    for i in range(6) for j in range(6) for k in range(7))
+        choice, val = A.best_joint(grids)
+        assert val == pytest.approx(brute)
+        assert A.joint_pass(grids, choice).mean() == pytest.approx(val)
+
+
 def test_four_claims_give_a_lower_bound_on_the_best_sheet():
     rng = np.random.default_rng(12)
     for _ in range(5):

@@ -267,6 +267,33 @@ def _linked(grids: Sequence[ClaimGrid]) -> bool:
     return False
 
 
+def _masked(g: ClaimGrid, mask: np.ndarray) -> ClaimGrid:
+    """The grid restricted to the seeds in ``mask`` (others pass nothing, match no rank)."""
+    ranks = None if g.ranks is None else np.where(mask[None, :], g.ranks, -1)
+    return ClaimGrid(g.claim, g.candidates, g.passes & mask[None, :], ranks=ranks, truths=g.truths)
+
+
+def _best_pair_plus_one(grids: Sequence[ClaimGrid], free: int) -> tuple[list[int], float]:
+    """Exact best sheet for three claims where only the two others than ``free`` are tied by a
+    pairwise rule: for every answer to the free claim, the linked pair's seed-count matrix on
+    the seeds that answer passes. Answers whose own pass count cannot beat the best are skipped."""
+    g = grids[free]
+    a, b = [k for k in range(3) if k != free]
+    n = g.passes.shape[1]
+    marg = g.passes.sum(axis=1)
+    best_val, best = -1.0, [0, 0, 0]
+    for i in np.argsort(-marg):
+        if marg[i] <= best_val:
+            break
+        counts = _pair_counts(_masked(grids[a], g.passes[i]), _masked(grids[b], g.passes[i]))
+        j, k = np.unravel_index(int(np.argmax(counts)), counts.shape)
+        if counts[j, k] > best_val:
+            best_val = float(counts[j, k])
+            best = [0, 0, 0]
+            best[free], best[a], best[b] = int(i), int(j), int(k)
+    return best, best_val / n
+
+
 def _best_triple(grids: Sequence[ClaimGrid]) -> tuple[list[int], float]:
     """Exact best sheet for three claims with no pairwise rule between them: for every answer
     to the first claim, the seed counts of all (second, third) pairs in one matrix product.
@@ -290,8 +317,9 @@ def _best_triple(grids: Sequence[ClaimGrid]) -> tuple[list[int], float]:
 def best_joint(grids: Sequence[ClaimGrid], *, sweeps: int = 8, restarts: int = 5) -> tuple[list[int], float]:
     """The fixed answer sheet that passes the most seeds on every claim at once.
 
-    One or two claims: exact (two claims through a seed-count matrix). Three claims with no
-    pairwise rule between them: exact (:func:`_best_triple`). Otherwise coordinate ascent, each
+    One or two claims: exact (two claims through a seed-count matrix). Three claims: exact when
+    no pairwise rule ties them (:func:`_best_triple`) or when one rule ties two of them
+    (:func:`_best_pair_plus_one`). Otherwise coordinate ascent, each
     step exact, from the per-claim optima and from the next-best candidates of each claim; the
     result is then a lower bound on the best sheet (on P5, before the exact search, ascent
     reported 4.0 % at a looser tolerance and 4.3 % at a tighter one)."""
@@ -308,6 +336,11 @@ def best_joint(grids: Sequence[ClaimGrid], *, sweeps: int = 8, restarts: int = 5
         return [int(i), int(j)], float(counts[i, j]) / n
     if len(grids) == 3 and not _linked(grids):
         return _best_triple(grids)
+    if len(grids) == 3:
+        free = [k for k in range(3) if not _linked([grids[k], grids[(k + 1) % 3]])
+                and not _linked([grids[k], grids[(k + 2) % 3]])]
+        if free:
+            return _best_pair_plus_one(grids, free[0])
     marg = [g.passes.mean(axis=1) for g in grids]
     base = [int(np.argmax(m)) for m in marg]
     starts = [base]
