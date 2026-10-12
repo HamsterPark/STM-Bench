@@ -69,10 +69,11 @@ Astra 重新扫描并调整操作，直到原子到达目标，且邻近原子�
 ## 关于这个基准
 
 **Alpha 阶段的研究原型。** 本次发布包含模拟器、论文场景、核查测量证据的裁判、回合运行框架和回放工具。
-模拟器可独立于 MAST 使用；完整基准回合需要单独的 MAST 运行时。
-公开的 [MAST-public](https://github.com/HamsterPark/MAST-public) 仓库是精简源码版，
-不是开发本基准时使用的完整 MAST 环境。目前，两个公开仓库尚不能让读者按作者的条件复现完整基准回合。
-模式 A 尚未发布榜单。历史证据一节中的较早试跑发生在当前物理实现之前，尚未在本次发布版本上重跑。
+完整的论文回合不需要 MAST 也能跑：基准仪器（`stmbench.instrument`）在虚拟时钟上提供原语动作，
+通过 MCP 交给任何智能体，按每道题规则卡上写明的规则判分，并可按记录的动作重放复核。
+MAST 条件（开发本基准时使用的智能体与技能运行时）保留，用于有/无 MAST 的对照；它需要完整的 MAST 环境，
+而公开的 [MAST-public](https://github.com/HamsterPark/MAST-public) 仓库是精简源码版，不是那个环境。
+目前还没有发布榜单。历史证据一节中的较早试跑发生在当前物理实现之前，尚未在本次发布版本上重跑。
 
 任务以仪器操作为核心，以数据分析为辅助。不划分技能等级，也不设人类锚点：本基准不回答人类能否完成任务。
 为使记住文献答案不足以过关，目标量会在有物理依据的范围内按 seed 抽取；
@@ -116,6 +117,15 @@ python -m stmsim serve --profile reference-stm --seed 0 --material "Au(111)"
 python -m pytest tests -q -m "not requires_mast and not requires_data"
 ```
 
+不需要 MAST 的完整论文回合，任何支持 MCP（stdio）的智能体都能接入：
+
+```bash
+python -m stmbench.cli episode --scenario P4_atom_positioning_cu111 --seed 0 --out runs/p4_s0
+python -m stmbench.cli verify runs/p4_s0      # 重放动作，逐项比对测量与判分
+```
+
+智能体的第一个调用是 `get_task`（题面、规则卡、仪器说明书）；详见 [docs/USAGE.md](docs/USAGE.md#the-benchmark-instrument-no-mast)。
+
 ## 五点架构概览
 
 1. `stmsim.physics.World` 整合表面、针尖、隧穿结、反馈和扫描器，使用两种时钟：硬件侧过程用墙钟时间，
@@ -142,7 +152,8 @@ python -m pytest tests -q -m "not requires_mast and not requires_data"
 模拟器的核心依赖是 numpy、scipy 和 pyyaml。前面的安装命令也包含测试和报表依赖，但**不会**安装 MAST。
 
 **MAST 提供什么。** MAST（Modular Autonomous SPM Toolkit）是独立的 STM 智能体与仪器控制系统。
-回合运行框架使用它的 `CoreRuntime`、仪器技能和智能体循环；回放与模式 H 页面使用它的 `.sxm` 读取器。
+回合运行框架使用它的 `CoreRuntime`、仪器技能和智能体循环，模式 H 页面的回合也在这个循环里运行。
+（回放与模式 H 页面上的图像用 stmsim 自带的读取器读文件。）
 它修补过的 `nanonis_spm` 客户端也是集成检查中验证线协议编解码的参照。
 
 **公开可用范围。** [MAST-public](https://github.com/HamsterPark/MAST-public) 发布了部分 MAST 6.5.0 源码，

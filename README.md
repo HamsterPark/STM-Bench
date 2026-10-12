@@ -87,13 +87,14 @@ and single trials do not estimate success rates.
 ## About the benchmark
 
 **Alpha research prototype.** This release contains the simulator, paper scenarios,
-measurement-aware judge, episode harness and replay tools. The simulator can be used without
-MAST; full benchmark episodes require the separate MAST runtime. The available
+measurement-aware judge, episode harness and replay tools. Full paper episodes run without
+MAST through the benchmark instrument (`stmbench.instrument`): primitive actions on a virtual
+clock, served to any MCP agent, judged by the rules stated on each task's rule card, and
+re-checkable by replaying the recorded actions. The MAST condition — the agent-and-skills
+runtime the benchmark was developed with — stays for a with/without-MAST comparison; it needs
+the complete MAST environment, and the available
 [MAST-public](https://github.com/HamsterPark/MAST-public) repository is a reduced source
-edition, not the complete MAST environment used for benchmark development. The two
-public repositories do not currently provide a way for readers to reproduce full
-benchmark episodes under the authors' conditions. There is no published mode-A
-leaderboard yet. The older trials in the historical-evidence section predate the current
+edition, not that environment. There is no published leaderboard yet. The older trials in the historical-evidence section predate the current
 physics and have not been rerun on this release.
 
 Driving the instrument is the core of the task and analysing the data is the support. There
@@ -146,6 +147,16 @@ calibration data:
 python -m pytest tests -q -m "not requires_mast and not requires_data"
 ```
 
+A full paper episode, without MAST, for any agent that speaks MCP (stdio):
+
+```bash
+python -m stmbench.cli episode --scenario P4_atom_positioning_cu111 --seed 0 --out runs/p4_s0
+python -m stmbench.cli verify runs/p4_s0      # replay the actions; compare every measurement and the verdict
+```
+
+The agent's first call is `get_task` (task, rule card, instrument manual); see
+[docs/USAGE.md](docs/USAGE.md#the-benchmark-instrument-no-mast).
+
 ## Architecture in five lines
 
 1. `stmsim.physics.World` integrates surface + tip + junction + feedback + scanner on two
@@ -183,7 +194,8 @@ includes test and report dependencies. It does **not** install MAST.
 
 **What MAST supplies.** MAST (Modular Autonomous SPM Toolkit) is the separate STM agent
 and instrument-control system. The episode harness uses its `CoreRuntime`, instrument
-skills and agent loop; replay and the mode-H page use its `.sxm` reader. Its patched
+skills and agent loop, and the mode-H page runs its episode inside that loop. (Replays and
+the mode-H pictures read files with stmsim's own reader.) Its patched
 `nanonis_spm` client is also the wire-codec oracle for integration checks.
 
 **Public availability.** [MAST-public](https://github.com/HamsterPark/MAST-public) publishes
