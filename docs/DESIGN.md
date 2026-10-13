@@ -596,6 +596,24 @@ p90 0.16 nm、最大 0.41 nm（判分容许 0.6 nm；大部分是针尖尖端自
 1.5 h。100 个 seed 先修了针，32 个在阶梯中途又修了一次。这 150 个 seed 里没有原子被拾走，拾起后的恢复用
 人为设定的原子测试。判分容差不需要为防猜改动，预算留到统一定预算时再调。
 
+P3 修复变体（进行中，2026-10-13 暂停）。搬原子的步骤已抽成 `stmbench/reference/_manip.py`（P4 改用它后
+seed 0–29 逐值不变），P3 的测量抽成 `p3.measure()`（seed 0–5 逐值不变），修复变体的谱部分直接复用。修复部分
+的参考解还没跑通（试跑 12 个 seed 成功 1 个；跑完的几个，谱峰误差都在 2.5 meV 以内），已确认的事实：
+- 环上原子相距 0.6–0.9 nm，形貌里连成一片，数不出单个原子；环的截面又因表面态的态密度比原子之和高约 13%，
+  按"单原子体积 ÷ 环截面"估缺失数会多算一个。场景在缺口外放了与缺失数相同的备用原子，数备用原子就够了
+  （离线 60 帧定对 59 帧，剩下一帧是勘测帧太小、备用原子贴边被漏掉）。**这一点题面还没写，补上才公平。**
+  缺口取环截面降到一半的那段，空位等分其中（`analysis.corral.find_ring` / `ring_profile` / `ring_gap`）；
+  找环要用亮像素投票，最小二乘圆会被备用原子拉偏 1–2 nm。
+- 快扫帧里原子沿快轴偏 v·τ（360 nm/s 时约 0.35 nm），针尖尖端的侧向偏移随自发变化游走，个别 seed 超过
+  0.8 nm。拖动起点若落在原子背后，原子先朝尖端跳、再跳回来，原地不动；起点放在原子背后 0.5 nm、让针尖越过
+  原子再带走，拖动才可靠。
+- 靠近环时按位置认原子，容易认成缺口边上的环原子；P4 那样用静止原子重测去跟踪漂移，会因此把补偿带歪
+  （几 nm/min）。
+下一步的设计：只在开头拍一张勘测帧，量出环心、半径、各空位的角度，用帧里与已知原子对得上的孤立原子标定
+这张帧的整体偏移，把空位换算成样品坐标保存；之后每次拖动，起点用导航给的原子位置，终点用保存的空位；往里
+拖之后再拍帧看该处截面是否回到环的水平。重标定也待做：P3 改了真值定义之后，修复变体的固定答卷是 53%
+（seed 0–299），要像 P3 一样加半径 claim、峰容差收到 10 meV。
+
 ## 10. 复用清单
 - MAST：`mast.io.nanonis_files`（reader 真源）、`test_frame_corrugation.py:41-65`（writer 样板）、`core/nanonis_patch.py`（协议 + 覆盖表 + 错误段）、`working-memory/NanonisClass_upstream.py` + `06_…reference.md`（spec 源）、`monitoring/pump.py`（Osci2T 序列 + `check_timebase_table`）、`knowledge/fault_diagnosis.py`（故障 schema）、`core/tip_conditioning_policy.py`（包络 + `_sources` 真值分层标签）、`core/noble_tip_workflow.py` + `tip_reference_calibration.txt`（转移数字）、`api/bootstrap.py` / `tools/skill_coverage_campaign.py`（无头范本）、`agentruntime/{ic_assembly,loop,pause,sse}.py`、`vision/*`（尺子 + 基线）、MAST 的测试记录（人工版任务定义）、`docs/v2/talks/repro/scan_corpus.py`（批跑检测器）。
 - VIGIL（历史复用规划；此条不是已移植代码清单）：`src/surfaces/*`、`physical_scanner.py` 的 PI×压电 IIR + Preisach + 蠕变 warp、`noise_injector.py`、`config/tip_universe.yaml`（α₁ 先验）。
