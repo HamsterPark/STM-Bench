@@ -390,8 +390,24 @@ p90 5.9 % (F_min), 3.7 % (decay length), 8.7 % (E_b), 354 s of instrument time. 
 0–29): 30/30; |error| p90 2.7 / 2.5 meV (the two resonances), 0.038 nm (the ring's radius),
 485 s. P4 (seeds 0–149): 150/150 — no atom's threshold read (a resistance ladder from
 400 kΩ down), the goal site computed from the lattice the other atoms in a survey give
-(`stmbench.analysis.adatoms`); the reported place |error| p90 0.16 nm against the judge's
-0.6 nm; 879 s median, 1428 s p90.
+(`stmbench.analysis.adatoms`); the reported place |error| p90 0.016 nm against the judge's
+0.6 nm (0.16 nm before the judge mapped positions through the imaging apex, 2026-10-14);
+879 s median, 1428 s p90. Per-seed results: `docs/results/`.
+
+### Scripted baselines
+
+```bash
+python -m stmbench.cli baseline --paper P4 --seeds 30 --jobs 4 --json p4-baseline.json
+```
+
+A scripted baseline (`stmbench.baselines`) drives the instrument an agent gets over MCP and
+nothing else — no truth, no MAST — and decides everything from what it observes: the tip's
+state from how its atoms look (`stmbench.analysis.tip`), which atom to move from a survey, the
+drift from atoms found again, whether the atom moved from current spikes and fiducials. It is
+the bar an agent should clear. P4 (2026-10-14): 150/150 on seeds 450–599, held out
+until the code was final, with 984 s median instrument time (the privileged
+reference: 879 s); 300/300 on seeds 0–299, where it was developed. Per-seed results and
+the earlier held-out rounds: `docs/results/p4_baseline_seeds_*.json`, DESIGN §9.6.
 
 ### Run directory
 

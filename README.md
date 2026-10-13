@@ -83,17 +83,19 @@ Reference protocols establish **task solvability, achievable measurement precisi
 
 These protocols have privileged access for navigation and operational decisions—for example, locating an atom, selecting bare surface, tracking drift, and deciding when to condition the tip. Their reported physical values come from instrument acquisitions and numerical analysis. The results below characterize this measurement reference. Autonomous-agent performance is evaluated separately.
 
-**Documented calibration results, 13 October 2026:**
+**Documented calibration results, 13 October 2026 (P4 rerun 14 October):**
 
 | Reference protocol | Seeds | Complete task success | Median instrument time | 90th-percentile measurement error |
 |---|---:|---:|---:|---|
 | **P3 · Corral geometry and resonances** | 0–29 | **30/30** | **485 s** | Peak energies: **2.7 / 2.5 meV** absolute error; radius: **0.038 nm** absolute error |
-| **P4 · Single-atom positioning** | 0–149 | **150/150** | **879 s** | Reported position: **0.16 nm** error |
+| **P4 · Single-atom positioning** | 0–149 | **150/150** | **879 s** | Reported position: **0.016 nm** error |
 | **P5 · Force spectroscopy** | 0–29 | **30/30** | **354 s** | Absolute relative errors: **5.9%** in force minimum, **3.7%** in decay length, **8.7%** in binding energy |
 
-The calibration records are retained with the [P3](stmbench/trackB/scenarios/P3_corral_cu111.yaml), [P4](stmbench/trackB/scenarios/P4_atom_positioning_cu111.yaml), and [P5](stmbench/trackB/scenarios/P5_sader_jarvis_qplus.yaml) scenarios and in the [design record](docs/DESIGN.md). The repository includes protocols and summarized records; the original per-seed result JSON files for this table are not included. The commands below generate new summaries for a specified checkout.
+The calibration records are retained with the [P3](stmbench/trackB/scenarios/P3_corral_cu111.yaml), [P4](stmbench/trackB/scenarios/P4_atom_positioning_cu111.yaml), and [P5](stmbench/trackB/scenarios/P5_sader_jarvis_qplus.yaml) scenarios and in the [design record](docs/DESIGN.md). Per-seed results for every row are in [`docs/results/`](docs/results/); the commands below regenerate them for a specified checkout. Since 14 October the judge maps a reported position through the tip apex that imaged it as well as through drift. Before that, P4's 90th-percentile position error was 0.16 nm, almost all of it the apex offset.
 
 P4 illustrates why the control problem is substantial. Its reference searches a resistance ladder without reading each atom's manipulation threshold, estimates lattice geometry from measured adatom positions, and re-images to follow the result. The 150 documented runs include 100 initial conditioning episodes and 32 runs requiring further conditioning during manipulation. Of the final sites, 147 were the nearest site and three satisfied the stated 0.02 nm near-tie rule. The position error in the table measures the reported location; actual site occupation and neighbour preservation are checked separately. P4's 90th-percentile instrument time was 1,428 s, within its 5,400 s budget.
+
+**Without privileged access.** A scripted P4 baseline in [`stmbench.baselines`](stmbench/baselines/) drives only the interface an MCP agent receives and reads nothing from the simulator. It judges the tip from how its atoms look, chooses the atom from a survey, measures drift on atoms it finds again, and follows the move against fiducial atoms. On seeds 450–599, held out until the code was final, it succeeded on **150/150**, with a median of **984 s** of instrument time against 879 s for the reference. On seeds 0–299, where it was developed, it succeeded on **300/300**. Two earlier held-out rounds, run before the fixes their failures led to, are recorded in the [design record](docs/DESIGN.md). In nearly every run the moved atom had neighbours within the 10 nm that the bystander check covers. This shows that P4 can be solved from observations alone within its budget. It is a script, not an agent result.
 
 ### Calibrating what a good measurement must accomplish
 
@@ -101,7 +103,7 @@ The reference protocols connect tolerance design to measured error distributions
 
 For the recalibrated P3 and P5 tasks, the best fixed answer passed the joint numerical checks on **4.3% of seeds 0–299** in each case. This is a finite-seed audit with acquisition evidence assumed satisfied, not a full-episode success rate or a universal guessing probability. It helps check that seeded task variation makes measurement informative. See the [audit implementation](stmbench/trackB/audit.py) and [calibration history](docs/DESIGN.md).
 
-The current reference command covers P3, P4, and P5. P1/P2 reference coverage and the P3-repair protocol remain development priorities. Autonomous-agent evaluation can now build on these instrument and scoring foundations; a current-version model leaderboard has not yet been published.
+The current reference command covers P3, P4, and P5, and the scripted baseline covers P4. P1/P2 reference coverage and the P3-repair protocol remain development priorities. Autonomous-agent evaluation can now build on these instrument and scoring foundations; a current-version model leaderboard has not yet been published.
 
 ## A recorded experiment in motion
 

@@ -61,7 +61,7 @@ This is an **alpha research prototype**. Keep these evidence boundaries explicit
 | Do comparisons respect shared seeds and missing observations? | [stats.py](stmbench/report/stats.py), [summarize.py](stmbench/report/summarize.py) | [test_stats.py](tests/test_stats.py) |
 | Is every judged rule stated in the task, and can a fixed answer pass? | [rules.py](stmbench/trackB/rules.py), [audit.py](stmbench/trackB/audit.py) | [test_rule_card.py](tests/test_rule_card.py), [test_rules_v1.py](tests/test_rules_v1.py), [test_audit.py](tests/test_audit.py) |
 | Does an episode replay to the same measurements without MAST? | [clock.py](stmsim/physics/clock.py), [instrument/](stmbench/instrument/) | [test_instrument.py](tests/test_instrument.py), [test_mcp_server.py](tests/test_mcp_server.py), [test_determinism_probe.py](tests/test_determinism_probe.py) |
-| Can a paper be reproduced by measurement, how precisely, in how much time? | [reference/](stmbench/reference/), [analysis/](stmbench/analysis/) | [test_reference_p5.py](tests/test_reference_p5.py), [test_reference_p3.py](tests/test_reference_p3.py), [test_reference_p4.py](tests/test_reference_p4.py), [test_analysis_force.py](tests/test_analysis_force.py), [test_analysis_drift.py](tests/test_analysis_drift.py), [test_analysis_spectra.py](tests/test_analysis_spectra.py), [test_analysis_adatoms.py](tests/test_analysis_adatoms.py), [test_analysis_corral_gap.py](tests/test_analysis_corral_gap.py) |
+| Can a paper be reproduced by measurement, how precisely, in how much time? And without the truth? | [reference/](stmbench/reference/), [baselines/](stmbench/baselines/), [analysis/](stmbench/analysis/) | [test_reference_p5.py](tests/test_reference_p5.py), [test_reference_p3.py](tests/test_reference_p3.py), [test_reference_p4.py](tests/test_reference_p4.py), [test_baselines_p4.py](tests/test_baselines_p4.py), [test_analysis_tip.py](tests/test_analysis_tip.py), [test_analysis_force.py](tests/test_analysis_force.py), [test_analysis_drift.py](tests/test_analysis_drift.py), [test_analysis_spectra.py](tests/test_analysis_spectra.py), [test_analysis_adatoms.py](tests/test_analysis_adatoms.py), [test_analysis_corral_gap.py](tests/test_analysis_corral_gap.py) |
 
 Other useful boundaries:
 
@@ -71,7 +71,9 @@ Other useful boundaries:
 - [stmsim/calibrate/](stmsim/calibrate/) fits lab data;
   [stmsim/validate/](stmsim/validate/) compares simulated and real measurements.
   Their external data requirements differ from the standalone physics tests.
-- [stmbench/papers/](stmbench/papers/) holds scripted baselines;
+- [stmbench/papers/](stmbench/papers/) holds the mode-C scripted baselines, which drive MAST;
+  [stmbench/baselines/](stmbench/baselines/) holds scripted baselines on the MAST-free instrument,
+  which see only what an MCP agent sees;
   [runtime_host.py](stmbench/harness/runtime_host.py) connects the simulator to MAST;
   [human/](stmbench/human/) provides the mode-H interface.
 - `P1`–`P5` are the paper families; `B1`–`B9` are regression families.

@@ -7,6 +7,7 @@
     python -m stmbench.cli episode --scenario P5_sader_jarvis_qplus --seed 0 --out <run dir>   # MCP stdio
     python -m stmbench.cli verify <run dir>                                                     # replay + compare
     python -m stmbench.cli reference --paper P4 [--seeds 30] [--jobs 4] [--json out.json]      # privileged reference runs
+    python -m stmbench.cli baseline --paper P4 [--seeds 30] [--jobs 4] [--json out.json]       # scripted, no truth
 
 ``run`` executes episodes in this process. ``gate`` plans the matrix
 families × modes × seeds × models and runs **one subprocess per episode**
@@ -362,6 +363,20 @@ def cmd_reference(a) -> int:
     return 0
 
 
+def cmd_baseline(a) -> int:
+    """Scripted baselines over many seeds: no truth, no MAST (stmbench.baselines)."""
+    from .baselines import format_summary, run_many, summarize
+
+    rows = run_many(a.paper, list(range(a.first_seed, a.first_seed + a.seeds)), jobs=a.jobs)
+    s = summarize(rows)
+    print(format_summary(a.paper, s))
+    if a.json:
+        Path(a.json).write_text(json.dumps({"summary": s, "runs": rows}, ensure_ascii=False, indent=1, default=str),
+                                encoding="utf-8")
+        print(f"baseline → {a.json}")
+    return 0
+
+
 # ── argparse ────────────────────────────────────────────────────────────────
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="stmbench")
@@ -460,6 +475,14 @@ def main(argv=None) -> int:
     f.add_argument("--jobs", type=int, default=1, help="processes in parallel")
     f.add_argument("--json", default=None, help="also write every run and the summary here")
     f.set_defaults(fn=cmd_reference)
+    b = sub.add_parser("baseline", help="scripted baselines: the instrument an agent gets and nothing else "
+                                        "(no truth, no MAST); reports success by the tip's state and instrument time")
+    b.add_argument("--paper", required=True, help="P4")
+    b.add_argument("--seeds", type=int, default=30, help="number of seeds")
+    b.add_argument("--first-seed", type=int, default=0)
+    b.add_argument("--jobs", type=int, default=1, help="processes in parallel")
+    b.add_argument("--json", default=None, help="also write every run and the summary here")
+    b.set_defaults(fn=cmd_baseline)
     a = ap.parse_args(argv)
     return a.fn(a)
 
