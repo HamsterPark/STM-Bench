@@ -104,13 +104,29 @@ def frame_covering(events, x_nm: float, y_nm: float, rule: dict) -> dict | None:
     return best
 
 
+def _apex_nm(frame: dict, k: float) -> tuple[float, float]:
+    """The lead apex's lateral offset (nm) at acquisition row ``k`` (``apex_runs_nm``)."""
+    dx = dy = 0.0
+    for row, ax, ay in frame.get("apex_runs_nm") or ():
+        if row > k + 0.5:
+            break
+        dx, dy = float(ax), float(ay)
+    return dx, dy
+
+
 def _row_offset_nm(frame: dict, x_nm: float, y_nm: float) -> tuple[float, float]:
-    """Drift offset (nm) of the acquisition row in which a scan-frame point was imaged.
+    """Offset (nm) from a scan-frame point of a frame to the place on the sample it imaged: the
+    drift of the acquisition row it was imaged in, plus the offset of the apex that imaged it.
 
     The renderer adds one drift/creep offset per acquisition row (``row_offsets_nm``), so a
     long frame maps different rows to different places on the sample: across a 150 s frame
-    the drift moves 1-3 nm. Frames saved before per-row records existed carry only the offset
-    at their recorded start (``drift_m``), which is used for them."""
+    the drift moves 1-3 nm. The tip images through the apex nearest the surface, so every
+    feature shows displaced by that apex's lateral offset — and the drags are, too, so an
+    operator who moves an atom by what the images show moves it right. A tip change can hand
+    the imaging to another apex nanometres off (P4 seed 15 of the baseline: 2.5 nm, after a
+    new apex took over from a receded one), which no measurement on the sample can see;
+    ``apex_runs_nm`` records it. Frames saved before per-row records existed carry only the
+    drift at their recorded start (``drift_m``), which is used for them."""
     rows = frame.get("row_offsets_nm")
     if not rows:
         dx, dy = (frame.get("drift_m") or [0.0, 0.0])[:2]
@@ -126,12 +142,14 @@ def _row_offset_nm(frame: dict, x_nm: float, y_nm: float) -> tuple[float, float]
     k0 = int(math.floor(k))
     k1 = min(k0 + 1, ny - 1)
     f = k - k0
-    return (float(rows[k0][0]) * (1 - f) + float(rows[k1][0]) * f,
-            float(rows[k0][1]) * (1 - f) + float(rows[k1][1]) * f)
+    ax, ay = _apex_nm(frame, k)
+    return (float(rows[k0][0]) * (1 - f) + float(rows[k1][0]) * f + ax,
+            float(rows[k0][1]) * (1 - f) + float(rows[k1][1]) * f + ay)
 
 
 def to_sample_frame(frame: dict, x_nm: float, y_nm: float) -> tuple[float, float]:
-    """Scan-frame nm -> sample-frame nm, through the drift of the row the point was imaged in."""
+    """Scan-frame nm -> sample-frame nm, through the drift of the row the point was imaged in
+    and the apex that imaged it."""
     ox, oy = _row_offset_nm(frame, x_nm, y_nm)
     return x_nm + ox, y_nm + oy
 

@@ -119,3 +119,12 @@ notes: |
   had dropped the hops from its events, so the current showed no spikes (seed 92: 11 hops at
   40 kΩ, then the pickup); they are kept now. The reference rerun under these rules matched
   the 2026-10-13 run on all 150 seeds, value for value (``docs/results/p4_reference_seeds_0-149.json``).
+
+  **A reported place is mapped through the apex that imaged it (2026-10-14).** The tip images
+  and drags through its leading apex, so a feature shows displaced by that apex's offset: an
+  atom moved by what the images show lands right, and only the report carries the offset. A
+  tip change can hand the imaging to an apex nanometres off (the scripted baseline, seed 15:
+  2.5 nm, the atom on its site, the report outside ``report_nm``). Frames record the leading
+  apex's offset where it changes (``apex_runs_nm``) and the judge maps through it as through
+  drift. The reference, rerun: 150/150 as before, the reported place |error| from median
+  0.040 / p90 0.160 / max 0.407 nm down to 0.006 / 0.016 / 0.043 nm.

@@ -115,6 +115,9 @@ class Frame:
     # or the tip withdrawn it is a flat sheet of noise, not a topograph
     feedback: bool = True
     withdrawn: bool = False
+    # (acquisition row, dx, dy) of the lead apex from that row on (m): the tip images through
+    # it, so a feature shows displaced by -(dx, dy) — in images and drags alike
+    apex_runs_m: list | None = None
 
     def progress(self, sim_now: float) -> int:
         if self.finished or self.stopped:
@@ -247,6 +250,7 @@ class Renderer:
         z_prev = None
         tip_rows: list[int] = []
         row_offsets = np.zeros((ny, 2))
+        apex_runs: list[list[float]] = []
         fb_on = w.zctrl.on
         z_frozen_tip = w.tip_height_m()
         # a dI/dV map: the lock-in on and its channel in the scan buffer
@@ -290,6 +294,10 @@ class Renderer:
             # tip-change hazard for this row (Poisson over one row time)
             if w.tip.maybe_change(per_row, t_row, current_a=i_set, bias_v=w.bias_v):
                 tip_rows.append(k)
+            # the apex nearest the surface images; a change can hand that to another one
+            lead = max(w.tip.apexes, key=lambda a: a.dz)
+            if not apex_runs or (apex_runs[-1][1], apex_runs[-1][2]) != (lead.dx, lead.dy):
+                apex_runs.append([k, float(lead.dx), float(lead.dy)])
             # imaging at a manipulation resistance drags (or picks up) adatoms mid-frame:
             # later rows see the new positions, producing the corresponding row jump in the frame
             w.registry_scan_row(st, j, ox, oy, t_row, speed)
@@ -360,4 +368,4 @@ class Renderer:
         return Frame(settings=st.copy(), data=data, t_start_wall=w.clock.wall(),
                      t_start_sim=t_start_sim, rows_total=ny, row_times_sim=row_times,
                      tip_change_rows=tip_rows, rec_sim_s=t_start_sim, row_offsets_m=row_offsets,
-                     feedback=bool(fb_on), withdrawn=bool(w.withdrawn))
+                     feedback=bool(fb_on), withdrawn=bool(w.withdrawn), apex_runs_m=apex_runs)

@@ -193,8 +193,9 @@ These apply across the simulator, judge, harness and presentation layers.
    read the host clock or a shared random stream from an observation.
 6. **Keep coordinate frames explicit.** The agent reports scan-frame coordinates; the
    sample lives in the sample frame. Saved frames record the drift offset the renderer added
-   to every acquisition row (`row_offsets_nm`), and the judge maps a reported position through
-   the row it falls in, in the frame the report names. In oriented arrays, row 0 is the high-v edge.
+   to every acquisition row (`row_offsets_nm`) and the lateral offset of the apex that imaged
+   it (`apex_runs_nm`, where it changes), and the judge maps a reported position through both,
+   for the row it falls in, in the frame the report names. In oriented arrays, row 0 is the high-v edge.
    `human.render.pixel_to_scan_nm` must remain the inverse of the judge's footprint mapping
    (`tests/test_human_port.py`). Preserve units at every boundary.
 7. **Respect scan-time history.** A frame is rendered whole at scan start and revealed

@@ -328,3 +328,18 @@ def test_frame_covers_after_times_a_frame_by_its_scan_not_its_save():
     blind = _drifted(4, 0.0, sim_s=40.0, t_start_sim=31.0, feedback=False, withdrawn=True)
     none_ok, _ = check_evidence(rule, events=[hop, blind], report={}, truth=truth)
     assert not none_ok
+
+
+def test_a_place_is_mapped_through_the_apex_that_imaged_its_row():
+    """The tip images through the apex nearest the surface, and a change can hand that to an
+    apex nanometres off: every feature imaged after it shows displaced by that apex's offset."""
+    from stmbench.trackB.claims import to_scan_frame
+    fr = {**FRAME, "w_m": 10e-9, "h_m": 10e-9, "nx": 100, "ny": 100, "scan_dir": "down",
+          "row_offsets_nm": [[0.0, 0.0]] * 100, "apex_runs_nm": [[0, 0.0, 0.0], [50, 0.0, 2.5]]}
+    # scanned down: acquisition row 0 is the top (y = +5 nm), row 99 the bottom
+    assert to_sample_frame(fr, 0.0, 4.0) == pytest.approx((0.0, 4.0))      # before the change
+    assert to_sample_frame(fr, 0.0, -4.0) == pytest.approx((0.0, -1.5))    # after it
+    assert to_scan_frame(fr, 0.0, -1.5) == pytest.approx((0.0, -4.0))
+    # a frame from before the apex was recorded maps through the drift alone
+    old = {k: v for k, v in fr.items() if k != "apex_runs_nm"}
+    assert to_sample_frame(old, 0.0, -4.0) == pytest.approx((0.0, -4.0))
