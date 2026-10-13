@@ -286,6 +286,22 @@ def test_debris_on_a_site_stops_the_drag(tmp_path):
     assert ev and x1 - x0 < 1.2e-9                            # it stopped short of the cluster
 
 
+def test_a_scratch_blocks_its_groove_not_a_disk_around_it(tmp_path):
+    """A scratch is a groove 1.5 nm wide along a scan line. The sites on it are blocked; a site
+    3 nm off the line is not, though it is far inside half the scratch's length of its centre."""
+    import math as _m
+
+    w = _world(tmp_path)
+    reg, atom = _example(w)
+    x0, y0 = reg.site_xy(atom.i, atom.j)
+    w.surface.add_feature(Feature(x0, y0 + 3e-9, -0.15e-9, 24e-9, 1.5e-9, _m.radians(0.0), kind="scratch"))
+    assert w.site_blocked(x0 + 5e-9, y0 + 3e-9)            # on the groove, 5 nm from its centre
+    assert not w.site_blocked(x0, y0)                       # 3 nm beside it
+    ev = reg.drag((x0, y0), (x0 + 4e-9, y0), r_ohm=0.4 * PARAMS.r_threshold_ohm * atom.r_scale, v_m_s=0.3e-9,
+                  sim_s=0.0, terrace=w.surface.terrace_level, grip=Grip(), blocked=w.site_blocked)
+    assert ev and reg.site_xy(atom.i, atom.j)[0] - x0 > 3e-9    # dragged along beside it
+
+
 # ── P4: any isolated atom ───────────────────────────────────────────────────
 def _p4_verdict(w, rep_xy_nm, sc):
     from stmbench.trackB.truth_criteria import claims_verified

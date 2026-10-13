@@ -20,10 +20,16 @@ class Session:
         self.inst = Instrument(scenario, seed, out_dir)
         self.w = self.inst.world
 
-    def go(self, sx: float, sy: float) -> None:
-        """Put the tip over a sample-frame point (privileged: the drift is read from the world)."""
+    def scan_xy(self, sx: float, sy: float) -> tuple[float, float]:
+        """Where a sample-frame point (m) is in scan coordinates now, in nm (privileged: the
+        drift is read from the world)."""
         ox, oy, _ = self.w.drift_offset(self.w.clock.sim())
-        self.inst.act("move_tip", x_nm=(sx - ox) * 1e9, y_nm=(sy - oy) * 1e9)
+        return (sx - ox) * 1e9, (sy - oy) * 1e9
+
+    def go(self, sx: float, sy: float) -> None:
+        """Put the tip over a sample-frame point."""
+        x, y = self.scan_xy(sx, sy)
+        self.inst.act("move_tip", x_nm=x, y_nm=y)
 
 
 def is_bare(w, x: float, y: float, level, clear: float) -> bool:

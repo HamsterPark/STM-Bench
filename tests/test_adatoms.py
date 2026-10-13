@@ -146,6 +146,37 @@ def test_pick_up_changes_the_tip_and_dropping_restores_it(tmp_path):
         assert restored[key] == before[key], key
 
 
+def test_a_shallow_poke_buries_a_picked_up_atom_and_the_tip_drags_again(tmp_path):
+    """Poking the apex into clean surface is how an operator gets an atom off the tip: it is
+    lost in the deposit, the tip loses what the atom did to it, and it can move atoms again.
+    (A tip carrying an atom drags nothing, so without this a pick-up ended the experiment.)"""
+    w = _dragging_world(tmp_path, setpoint=2e-6)          # below R_pick: the atom goes onto the tip
+    reg = w.surface.site.adatoms
+    atom = _target(w)
+    other = reg.add(atom.i + 40, atom.j, role="field")    # ~10 nm away
+    start = reg.site_xy(atom.i, atom.j)
+    before = w.tip.snapshot()
+    w.move_xy(start[0] - 1e-9, start[1])
+    w.move_xy_path(start[0] + 1e-9, start[1], speed_m_s=0.5e-9)
+    assert reg.carried is atom
+    w.move_xy(start[0], start[1] - 20e-9)                 # clean surface, away from both atoms
+    props = {"tip_lift_m": -0.5e-9, "bias_settling_s": 0.1, "lift_height_m": 0.5e-9}
+    for _ in range(10):
+        w.tip_shaper_start(props)
+        if reg.carried is None:
+            break
+    assert reg.carried is None and atom.status == "lost"
+    snap = w.tip.snapshot()
+    assert snap["carried"] is None and snap["ldos"] == "flat"
+    assert snap["apex_sigma_nm"] == pytest.approx(before["apex_sigma_nm"])
+    assert [e for e in w.events if e["kind"] == "adatom_lost" and e.get("buried")]
+    ox, oy = reg.site_xy(other.i, other.j)
+    w.zctrl.setpoint_a = 100e-9                           # 100 kΩ, under the pull threshold
+    w.move_xy(ox, oy)
+    w.move_xy_path(ox + 2e-9, oy, speed_m_s=0.5e-9)
+    assert reg.site_xy(other.i, other.j)[0] - ox > 1.5e-9
+
+
 def test_scanning_at_an_imaging_resistance_leaves_the_atoms_alone(tmp_path):
     w = _dragging_world(tmp_path, setpoint=1e-9)
     reg = w.surface.site.adatoms

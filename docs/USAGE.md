@@ -365,6 +365,7 @@ P5 and P3, recalibrated on 2026-10-13 against their reference solutions (below),
 ```bash
 python -m stmbench.cli reference --paper P5 --seeds 30 --jobs 4 --json p5.json
 python -m stmbench.cli reference --paper P3 --seeds 30 --jobs 4
+python -m stmbench.cli reference --paper P4 --seeds 30 --jobs 4
 ```
 
 A privileged reference solution (`stmbench.reference`) may use the truth to navigate — where
@@ -375,7 +376,10 @@ solvable, the error spread of a careful measurement (tolerances are set at about
 p90) and the instrument time it takes. P5 (2026-10-13, seeds 0–29): 30/30 reproduced, |error|
 p90 5.9 % (F_min), 3.7 % (decay length), 8.7 % (E_b), 354 s of instrument time. P3 (seeds
 0–29): 30/30; |error| p90 2.7 / 2.5 meV (the two resonances), 0.038 nm (the ring's radius),
-485 s.
+485 s. P4 (seeds 0–149): 150/150 — no atom's threshold read (a resistance ladder from
+400 kΩ down), the goal site computed from the lattice the other atoms in a survey give
+(`stmbench.analysis.adatoms`); the reported place |error| p90 0.16 nm against the judge's
+0.6 nm; 879 s median, 1428 s p90.
 
 ### Run directory
 

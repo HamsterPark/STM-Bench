@@ -457,9 +457,16 @@ class Tip:
                 self.metastable = False
                 self.flicker_dz_m = 0.0
                 self.flicker_rate_hz = 0.0
-                if self.carried is None and self.ldos.name == "featured":
+                if self.ldos.name == "featured":
                     # the apex comes back coated with fresh substrate metal: whatever was
-                    # adsorbed on it is buried (no draw, so the tip's random history is kept)
+                    # adsorbed on it is buried, an atom it picked up included, and the
+                    # sharpening that atom gave goes with it (no draw, so the tip's random
+                    # history is kept). The world marks a buried atom lost.
+                    if self.carried is not None:
+                        backup = self._carry_backup or {}
+                        self.apex_sigma_m = float(backup.get("apex_sigma_m", self.apex_sigma_m))
+                        self._carry_backup = None
+                        self.carried = None
                     self.ldos = LDOSTemplate("flat")
                     self.phi_ev = max(self.phi_ev, 4.0)
                 self.lambda_per_s = float(max(1e-5, self.lambda_per_s * r.uniform(0.2, 0.6)))

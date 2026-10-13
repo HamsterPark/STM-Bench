@@ -151,6 +151,8 @@ def _tol_text(tol: dict | None, unit: str | None) -> str:
     u = _unit(unit)
     if "rel" in tol:
         return f"±{num(float(tol['rel']) * 100, 3)}%"
+    if "site_tie_nm" in tol:
+        return f"最近格点（并列 {num(float(tol['site_tie_nm']))} nm）"
     if "abs_nm" in tol:
         return f"±{num(float(tol['abs_nm']))} nm"
     if "abs" in tol:

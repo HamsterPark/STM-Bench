@@ -54,9 +54,13 @@ def _tolerance(c: dict, sc) -> str:
     if kind == "position":
         ini = (sc.initial or {}).get("adatoms") or {}
         d = (float(ini.get("target_dx_nm", 0.0)), float(ini.get("target_dy_nm", 0.0)))
-        return (f"所报位置须在某个被你搬动过的原子 {_num(tol.get('report_nm', 0.5))} nm 以内（按 frame 指定的帧换算到样品上）；"
-                f"这个原子出生时 {_num(ini.get('isolation_nm', 3.0))} nm 内没有别的原子，"
-                f"并且现在正好占据'出生位置平移 ({_num(d[0])}, {_num(d[1])}) nm 后最近的那个晶格位点'")
+        out = (f"所报位置须在某个被你搬动过的原子 {_num(tol.get('report_nm', 0.5))} nm 以内（按 frame 指定的帧换算到样品上）；"
+               f"这个原子出生时 {_num(ini.get('isolation_nm', 3.0))} nm 内没有别的原子，"
+               f"并且现在正好占据'出生位置平移 ({_num(d[0])}, {_num(d[1])}) nm 后最近的那个晶格位点'")
+        tie = float(tol.get("site_tie_nm", 0.0) or 0.0)
+        if tie > 0:
+            out += f"（若另有格点离那一点只比最近的远不到 {_num(tie)} nm，占据它也算）"
+        return out
     if kind == "constraint":
         lo, hi = c.get("min"), c.get("max")
         bound = (f"不小于 {_num(lo)}" if lo is not None else "") + \

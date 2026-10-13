@@ -61,6 +61,9 @@ def test_the_p4_verification_frame_is_on_the_card():
     card = R.rule_card(sc)
     assert f"像素尺寸（宽度 ÷ 列数）不大于 {_num(rule['max_nm_per_px'])} nm" in card
     assert "最后一次原子跳动" in card and "frame" in card
+    # and the near-tied sites the judge also accepts
+    tie = next(c for c in sc.claims if c["id"] == "target_site")["tol"]["site_tie_nm"]
+    assert f"只比最近的远不到 {_num(tie)} nm" in card
 
 
 def test_the_card_explains_citations_and_coordinates():

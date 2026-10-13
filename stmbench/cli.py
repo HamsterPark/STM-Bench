@@ -6,7 +6,7 @@
     python -m stmbench.cli audit chance [--scenario P3] [--seeds 200] [--jobs 4] [--json out.json]
     python -m stmbench.cli episode --scenario P5_sader_jarvis_qplus --seed 0 --out <run dir>   # MCP stdio
     python -m stmbench.cli verify <run dir>                                                     # replay + compare
-    python -m stmbench.cli reference --paper P5 [--seeds 30] [--jobs 4] [--json out.json]      # privileged reference runs
+    python -m stmbench.cli reference --paper P4 [--seeds 30] [--jobs 4] [--json out.json]      # privileged reference runs
 
 ``run`` executes episodes in this process. ``gate`` plans the matrix
 families × modes × seeds × models and runs **one subprocess per episode**
@@ -454,7 +454,7 @@ def main(argv=None) -> int:
 
     f = sub.add_parser("reference", help="privileged reference solutions: the truth navigates, every reported "
                                          "number is measured; reports success, error spread and instrument time")
-    f.add_argument("--paper", required=True, help="P5")
+    f.add_argument("--paper", required=True, help="P3, P4 or P5")
     f.add_argument("--seeds", type=int, default=30, help="number of seeds")
     f.add_argument("--first-seed", type=int, default=0)
     f.add_argument("--jobs", type=int, default=1, help="processes in parallel")
