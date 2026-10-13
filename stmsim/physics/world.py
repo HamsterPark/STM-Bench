@@ -573,11 +573,21 @@ class World:
         return grip_of(self.tip, self.kappa_m())
 
     def site_blocked(self, x: float, y: float) -> bool:
-        """A lattice site under a deposit — debris from a poke, a pulse, a crash, or a native
-        adsorbate: an adatom cannot be dragged onto it."""
-        for f in self.surface.features_near(x, y, 6e-9):
-            r = 0.5 * max(f.sigma_x, f.sigma_y or f.sigma_x)
-            if (f.x - x) ** 2 + (f.y - y) ** 2 <= r * r:
+        """A lattice site under a deposit — debris from a poke, a pulse, a crash, a scratch, or a
+        native adsorbate: an adatom cannot be dragged onto it. The footprint is the deposit's
+        ellipse at half its sigmas, turned as the deposit is. (Until 2026-10-13 it was a disk of
+        half the larger sigma around the deposit's centre: a scratch, a groove 1.5 nm wide along
+        a whole scan line, then held every atom within a quarter of the frame's width of the
+        frame's centre, where the image shows one thin line.)"""
+        for f in self.surface.site.features:
+            a, b = 0.5 * f.sigma_x, 0.5 * (f.sigma_y or f.sigma_x)
+            dx, dy = x - f.x, y - f.y
+            if dx * dx + dy * dy > max(a, b) ** 2:
+                continue
+            if f.angle:
+                c, s = math.cos(f.angle), math.sin(f.angle)
+                dx, dy = c * dx + s * dy, -s * dx + c * dy
+            if (dx / a) ** 2 + (dy / b) ** 2 <= 1.0:
                 return True
         return False
 
