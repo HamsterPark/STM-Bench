@@ -1,0 +1,10205 @@
+{
+ "summary": {
+  "n": 150,
+  "success_rate": 0.9666666666666667,
+  "by_tip": {
+   "blunt": {
+    "success": 34,
+    "n": 36
+   },
+   "dirty": {
+    "success": 21,
+    "n": 21
+   },
+   "double": {
+    "success": 41,
+    "n": 42
+   },
+   "good": {
+    "success": 35,
+    "n": 36
+   },
+   "unstable": {
+    "success": 14,
+    "n": 15
+   }
+  },
+  "instrument_s": {
+   "median": 963.0601905612165,
+   "p90": 1429.5943014544523,
+   "max": 2212.8732266927004
+  },
+  "failures": {
+   "RuntimeError: no candidate has fiducials around it": 5
+  }
+ },
+ "runs": [
+  {
+   "paper": "P4",
+   "seed": 300,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.0027126324826270845
+   },
+   "instrument_s": 835.4880118302477,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 2,
+     "goal": 1,
+     "neighbour": 1
+    }
+   ],
+   "lattice_deg": 6.932,
+   "lattice_rms_nm": 0.0077198670956733495,
+   "lattice_vectors": 36,
+   "ruler_atoms": 9,
+   "survey_atoms": 9,
+   "candidates": 5,
+   "start_nm": [
+    0.5974206670281426,
+    3.1069859443266807
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 16,
+     "off_goal_nm": 0.245
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 1,
+     "off_goal_nm": 0.005
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 301,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 1,
+   "abs_err": {
+    "target_site": 0.017972778466847916
+   },
+   "instrument_s": 1173.3309953541448,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "blunt",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 3,
+     "step": 1,
+     "neighbour": 2,
+     "path": 2
+    }
+   ],
+   "lattice_deg": 10.232,
+   "lattice_rms_nm": 0.05124675904317008,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 2,
+   "start_nm": [
+    4.958216425773777,
+    -0.8381057347453975
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 3.762
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 2,
+     "off_goal_nm": 3.239
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 14,
+     "off_goal_nm": 0.036
+    }
+   ],
+   "r_success_kohm": 131.072
+  },
+  {
+   "paper": "P4",
+   "seed": 302,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.000999675352926847
+   },
+   "instrument_s": 1316.6268498129684,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 5
+    }
+   ],
+   "lattice_deg": 6.558000000000001,
+   "lattice_rms_nm": 0.018487371366538812,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 2,
+   "start_nm": [
+    9.013718538837065,
+    -14.732994106199484
+   ],
+   "skipped": [
+    "too few fiducials around the atom"
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 2,
+     "off_goal_nm": 3.602
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 1,
+     "off_goal_nm": 3.344
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 14,
+     "off_goal_nm": 0.013
+    }
+   ],
+   "r_success_kohm": 83.88608000000002
+  },
+  {
+   "paper": "P4",
+   "seed": 303,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.009058137991441088
+   },
+   "instrument_s": 580.0725957677599,
+   "tip_condition": "unstable",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 5
+    }
+   ],
+   "lattice_deg": 59.482,
+   "lattice_rms_nm": 0.017188586923676766,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 3,
+   "start_nm": [
+    -0.3978463747108698,
+    -3.524367357459056
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 16,
+     "off_goal_nm": 0.018
+    }
+   ],
+   "r_success_kohm": 400.0
+  },
+  {
+   "paper": "P4",
+   "seed": 304,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.011666042891086447
+   },
+   "instrument_s": 1195.6369680731332,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "edge": 6,
+     "neighbour": 3,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 0.7020000000000001,
+   "lattice_rms_nm": 0.009350857633974046,
+   "lattice_vectors": 91,
+   "ruler_atoms": 14,
+   "survey_atoms": 14,
+   "candidates": 4,
+   "start_nm": [
+    5.914079471564293,
+    1.9761131857680354
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 16,
+     "off_goal_nm": 0.002
+    }
+   ],
+   "r_success_kohm": 67.10886400000001
+  },
+  {
+   "paper": "P4",
+   "seed": 305,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 6,
+   "abs_err": {
+    "target_site": 0.009341438016582932
+   },
+   "instrument_s": 1067.769702015403,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 5,
+     "path": 1
+    }
+   ],
+   "lattice_deg": 16.458,
+   "lattice_rms_nm": 0.015645570164166293,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 2,
+   "start_nm": [
+    1.8273235325853108,
+    10.913411908619414
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 18,
+     "off_goal_nm": 0.016
+    }
+   ],
+   "r_success_kohm": 131.072
+  },
+  {
+   "paper": "P4",
+   "seed": 306,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 1,
+   "abs_err": {
+    "target_site": 0.0017382732545285894
+   },
+   "instrument_s": 1332.471999145931,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 3,
+     "neighbour": 5
+    }
+   ],
+   "lattice_deg": 29.186,
+   "lattice_rms_nm": 0.015266822253989395,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 2,
+   "start_nm": [
+    -0.5971729403809007,
+    -8.124797605633564
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 1,
+     "off_goal_nm": 3.742
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 7,
+     "off_goal_nm": 2.201
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 10,
+     "off_goal_nm": 0.015
+    }
+   ],
+   "r_success_kohm": 83.88608000000002
+  },
+  {
+   "paper": "P4",
+   "seed": 307,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.01380091174975754
+   },
+   "instrument_s": 754.8844666497876,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 7
+    }
+   ],
+   "lattice_deg": 15.99,
+   "lattice_rms_nm": 0.012355914368117305,
+   "lattice_vectors": 66,
+   "ruler_atoms": 12,
+   "survey_atoms": 12,
+   "candidates": 5,
+   "start_nm": [
+    -1.728432910989504,
+    1.1101800005533633
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 11,
+     "off_goal_nm": 1.589
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 7,
+     "off_goal_nm": 0.007
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 308,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.0011044770629128845
+   },
+   "instrument_s": 1138.665884150595,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "neighbour": 3,
+     "step": 1,
+     "edge": 5
+    }
+   ],
+   "lattice_deg": 9.214000000000002,
+   "lattice_rms_nm": 0.01259980737586602,
+   "lattice_vectors": 78,
+   "ruler_atoms": 13,
+   "survey_atoms": 13,
+   "candidates": 4,
+   "start_nm": [
+    -2.8542051414175447,
+    -3.4913064410794306
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "off_goal_nm": 3.732
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 15,
+     "off_goal_nm": 0.229
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 0.039
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 309,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.00965917064476363
+   },
+   "instrument_s": 917.4063322203965,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 4,
+     "path": 2
+    }
+   ],
+   "lattice_deg": 47.967999999999996,
+   "lattice_rms_nm": 0.012099518334416878,
+   "lattice_vectors": 55,
+   "ruler_atoms": 11,
+   "survey_atoms": 11,
+   "candidates": 5,
+   "start_nm": [
+    2.0003845509840055,
+    2.457212625252211
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 17,
+     "off_goal_nm": 0.011
+    }
+   ],
+   "r_success_kohm": 67.10886400000001
+  },
+  {
+   "paper": "P4",
+   "seed": 310,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 6,
+   "abs_err": {
+    "target_site": 0.003644728653570812
+   },
+   "instrument_s": 949.7890418446856,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "path": 2,
+     "neighbour": 2,
+     "edge": 1
+    }
+   ],
+   "lattice_deg": 4.0,
+   "lattice_rms_nm": 0.005743224126693453,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 2,
+   "start_nm": [
+    10.569504719209107,
+    -0.47333270105332304
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "off_goal_nm": 3.716
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 15,
+     "off_goal_nm": 0.018
+    }
+   ],
+   "r_success_kohm": 320.0
+  },
+  {
+   "paper": "P4",
+   "seed": 311,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.001088537116962156
+   },
+   "instrument_s": 2212.8732266927004,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 6,
+   "tip_rounds": 1,
+   "surface_jumps": 10,
+   "drift_atoms": [
+    4,
+    4
+   ],
+   "passed_over": [
+    {
+     "neighbour": 1,
+     "edge": 4,
+     "step": 1
+    }
+   ],
+   "lattice_deg": 35.760000000000005,
+   "lattice_rms_nm": 0.016759966037087515,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 4,
+   "start_nm": [
+    -0.15458934547887537,
+    -1.6346998715401497
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 7,
+     "off_goal_nm": 2.461
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 11,
+     "off_goal_nm": 0.003
+    }
+   ],
+   "recoveries": [
+    "poked"
+   ],
+   "r_success_kohm": 256.0
+  },
+  {
+   "paper": "P4",
+   "seed": 312,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.008608653548028632
+   },
+   "instrument_s": 1429.5943014544523,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 5,
+     "neighbour": 3
+    }
+   ],
+   "lattice_deg": 26.348000000000003,
+   "lattice_rms_nm": 0.0322882233179363,
+   "lattice_vectors": 66,
+   "ruler_atoms": 12,
+   "survey_atoms": 12,
+   "candidates": 4,
+   "start_nm": [
+    10.497857696597958,
+    9.43231877570776
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 5,
+     "off_goal_nm": 2.868
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 13,
+     "off_goal_nm": 0.012
+    }
+   ],
+   "r_success_kohm": 67.10886400000001
+  },
+  {
+   "paper": "P4",
+   "seed": 313,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.0042605673902390345
+   },
+   "instrument_s": 1255.9395875606738,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "blunt",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "edge": 5
+    }
+   ],
+   "lattice_deg": 55.596,
+   "lattice_rms_nm": 0.027199887298702003,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 2,
+   "start_nm": [
+    9.24849249284144,
+    7.752552201772174
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 5,
+     "off_goal_nm": 2.693
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 11,
+     "off_goal_nm": 0.004
+    }
+   ],
+   "r_success_kohm": 83.88608000000002
+  },
+  {
+   "paper": "P4",
+   "seed": 314,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.0018172602287468466
+   },
+   "instrument_s": 888.6535479859414,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "neighbour": 2,
+     "edge": 2
+    }
+   ],
+   "lattice_deg": 31.906,
+   "lattice_rms_nm": 0.015770185046330112,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 4,
+   "start_nm": [
+    1.7282179558974349,
+    -1.4466735219209959
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 2,
+     "off_goal_nm": 3.535
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 16,
+     "off_goal_nm": 0.007
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 315,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.002779452383006957
+   },
+   "instrument_s": 760.4612630292146,
+   "tip_condition": "unstable",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 1,
+     "path": 1
+    }
+   ],
+   "lattice_deg": 51.292,
+   "lattice_rms_nm": 0.013472324836073695,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 6,
+   "start_nm": [
+    0.643057795605003,
+    0.905102010135721
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 3,
+     "off_goal_nm": 3.26
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 14,
+     "off_goal_nm": 0.007
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 316,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.016580342776033704
+   },
+   "instrument_s": 1270.8262034338477,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 3,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "neighbour": 2,
+     "path": 1,
+     "edge": 2
+    }
+   ],
+   "lattice_deg": 55.40200000000001,
+   "lattice_rms_nm": 0.013258330565470745,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 3,
+   "start_nm": [
+    -10.868325721613703,
+    -0.26958943678586067
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 5,
+     "off_goal_nm": 2.662
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 10,
+     "off_goal_nm": 0.236
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "off_goal_nm": 0.009
+    }
+   ],
+   "r_success_kohm": 320.0
+  },
+  {
+   "paper": "P4",
+   "seed": 317,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 6,
+   "abs_err": {
+    "target_site": 0.005014650995918372
+   },
+   "instrument_s": 749.5298042390361,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    7
+   ],
+   "passed_over": [
+    {
+     "goal": 1,
+     "edge": 6,
+     "neighbour": 2
+    }
+   ],
+   "lattice_deg": 26.218,
+   "lattice_rms_nm": 0.017763728238675735,
+   "lattice_vectors": 120,
+   "ruler_atoms": 16,
+   "survey_atoms": 16,
+   "candidates": 7,
+   "start_nm": [
+    3.6146023694998384,
+    -0.32032375530212676
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 18,
+     "off_goal_nm": 0.015
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 318,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.01066880358633041
+   },
+   "instrument_s": 1203.4309697476865,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 1
+    }
+   ],
+   "lattice_deg": 41.114000000000004,
+   "lattice_rms_nm": 0.02022312130948507,
+   "lattice_vectors": 10,
+   "ruler_atoms": 5,
+   "survey_atoms": 5,
+   "candidates": 4,
+   "start_nm": [
+    -8.708323402907872,
+    1.2330667483101507
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 5,
+     "off_goal_nm": 2.927
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 13,
+     "off_goal_nm": 0.005
+    }
+   ],
+   "r_success_kohm": 83.88608000000002
+  },
+  {
+   "paper": "P4",
+   "seed": 319,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.002319151750231067
+   },
+   "instrument_s": 860.6551703237276,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 2,
+     "neighbour": 2
+    }
+   ],
+   "lattice_deg": 40.45,
+   "lattice_rms_nm": 0.013459263037806897,
+   "lattice_vectors": 15,
+   "ruler_atoms": 6,
+   "survey_atoms": 6,
+   "candidates": 2,
+   "start_nm": [
+    0.2584146763059003,
+    -4.848379625971255
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 16,
+     "off_goal_nm": 0.43
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "off_goal_nm": 0.243
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 0.008
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 320,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.003400655032076203
+   },
+   "instrument_s": 1046.8830307508215,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 3
+    }
+   ],
+   "lattice_deg": 23.956000000000003,
+   "lattice_rms_nm": 0.007961735442903649,
+   "lattice_vectors": 15,
+   "ruler_atoms": 6,
+   "survey_atoms": 6,
+   "candidates": 3,
+   "start_nm": [
+    -0.8373440012129834,
+    5.013464433753295
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "off_goal_nm": 3.767
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "off_goal_nm": 3.53
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 16,
+     "off_goal_nm": 0.006
+    }
+   ],
+   "r_success_kohm": 256.0
+  },
+  {
+   "paper": "P4",
+   "seed": 321,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 5,
+   "abs_err": {
+    "target_site": 0.008201753626327347
+   },
+   "instrument_s": 985.2234460772485,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "path": 1,
+     "edge": 4
+    }
+   ],
+   "lattice_deg": 37.046,
+   "lattice_rms_nm": 0.00911005374664016,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 5,
+   "start_nm": [
+    3.1980011524031795,
+    2.3793480833903224
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 2,
+     "off_goal_nm": 3.567
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 1,
+     "off_goal_nm": 3.33
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 15,
+     "off_goal_nm": 0.005
+    }
+   ],
+   "r_success_kohm": 83.88608000000002
+  },
+  {
+   "paper": "P4",
+   "seed": 322,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.022450442340169224
+   },
+   "instrument_s": 887.8372183048745,
+   "tip_condition": "unstable",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "goal": 1,
+     "edge": 3
+    }
+   ],
+   "lattice_deg": 53.512,
+   "lattice_rms_nm": 0.014108243351229548,
+   "lattice_vectors": 36,
+   "ruler_atoms": 9,
+   "survey_atoms": 9,
+   "candidates": 5,
+   "start_nm": [
+    1.8083011261408615,
+    -2.203338672191304
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 4,
+     "off_goal_nm": 3.201
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 12,
+     "off_goal_nm": 0.253
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 1,
+     "off_goal_nm": 0.004
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 323,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.0013007765867747618
+   },
+   "instrument_s": 746.0029717256206,
+   "tip_condition": "unstable",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 4,
+     "path": 1,
+     "neighbour": 1
+    }
+   ],
+   "lattice_deg": 45.21000000000001,
+   "lattice_rms_nm": 0.01460897765672663,
+   "lattice_vectors": 91,
+   "ruler_atoms": 14,
+   "survey_atoms": 14,
+   "candidates": 8,
+   "start_nm": [
+    -0.3906093512262707,
+    0.8136545368818595
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 18,
+     "off_goal_nm": 0.003
+    }
+   ],
+   "r_success_kohm": 256.0
+  },
+  {
+   "paper": "P4",
+   "seed": 324,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.005809930229734702
+   },
+   "instrument_s": 941.7718406129085,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "edge": 7,
+     "path": 1,
+     "neighbour": 2
+    }
+   ],
+   "lattice_deg": 40.15800000000001,
+   "lattice_rms_nm": 0.016648017907879745,
+   "lattice_vectors": 91,
+   "ruler_atoms": 14,
+   "survey_atoms": 14,
+   "candidates": 4,
+   "start_nm": [
+    2.9488234732549827,
+    0.5699489452630182
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 2,
+     "off_goal_nm": 3.575
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 3,
+     "off_goal_nm": 2.9
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 13,
+     "off_goal_nm": 0.011
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 325,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 1,
+   "abs_err": {
+    "target_site": 0.007167618819824942
+   },
+   "instrument_s": 719.4194119130356,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    2
+   ],
+   "passed_over": [
+    {
+     "edge": 4
+    }
+   ],
+   "lattice_deg": 42.690000000000005,
+   "lattice_rms_nm": 0.014976632935323352,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 3,
+   "start_nm": [
+    -4.251537082213039,
+    3.4285738669892893
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 2,
+     "off_goal_nm": 3.572
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 16,
+     "off_goal_nm": 0.015
+    }
+   ],
+   "r_success_kohm": 256.0
+  },
+  {
+   "paper": "P4",
+   "seed": 326,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.009383177340492514
+   },
+   "instrument_s": 579.432893290139,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "path": 2,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 45.648,
+   "lattice_rms_nm": 0.014899732511115473,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 4,
+   "start_nm": [
+    6.604411404157091,
+    2.6996957637014134
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 17,
+     "off_goal_nm": 0.004
+    }
+   ],
+   "r_success_kohm": 400.0
+  },
+  {
+   "paper": "P4",
+   "seed": 327,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 5,
+   "abs_err": {
+    "target_site": 0.0017215522669974232
+   },
+   "instrument_s": 759.522426389056,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "goal": 2,
+     "neighbour": 2,
+     "path": 1
+    }
+   ],
+   "lattice_deg": 10.608000000000002,
+   "lattice_rms_nm": 0.01603254571037082,
+   "lattice_vectors": 36,
+   "ruler_atoms": 9,
+   "survey_atoms": 9,
+   "candidates": 4,
+   "start_nm": [
+    0.14262343686394985,
+    3.04949761117188
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 4,
+     "off_goal_nm": 3.008
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 13,
+     "off_goal_nm": 0.009
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 328,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 5,
+   "abs_err": {
+    "target_site": 0.0059370107213261355
+   },
+   "instrument_s": 936.8609659190106,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "neighbour": 2,
+     "edge": 6
+    }
+   ],
+   "lattice_deg": 12.682,
+   "lattice_rms_nm": 0.01776447838680891,
+   "lattice_vectors": 55,
+   "ruler_atoms": 11,
+   "survey_atoms": 11,
+   "candidates": 3,
+   "start_nm": [
+    -9.468027881991997,
+    3.115114732879782
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 17,
+     "off_goal_nm": 0.008
+    }
+   ],
+   "r_success_kohm": 256.0
+  },
+  {
+   "paper": "P4",
+   "seed": 329,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.006662360994885187
+   },
+   "instrument_s": 761.5319274077729,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 3,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 36.762,
+   "lattice_rms_nm": 0.01159151595618743,
+   "lattice_vectors": 36,
+   "ruler_atoms": 9,
+   "survey_atoms": 9,
+   "candidates": 5,
+   "start_nm": [
+    0.7070312280420765,
+    -4.50166375139327
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "off_goal_nm": 3.764
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 17,
+     "off_goal_nm": 0.016
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 330,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 1,
+   "abs_err": {
+    "target_site": 0.0042912807351865425
+   },
+   "instrument_s": 1250.6109907137375,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 5
+    }
+   ],
+   "lattice_deg": 7.282,
+   "lattice_rms_nm": 0.05467516026333137,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 5,
+   "start_nm": [
+    1.323190048389801,
+    4.35281521022471
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 2,
+     "off_goal_nm": 3.609
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 15,
+     "off_goal_nm": 0.017
+    }
+   ],
+   "r_success_kohm": 67.10886400000001
+  },
+  {
+   "paper": "P4",
+   "seed": 331,
+   "success": false,
+   "partial": 0.0,
+   "error": "RuntimeError: no candidate has fiducials around it",
+   "claims_ok": {
+    "target_site": false,
+    "bystander_max_shift_nm": false
+   },
+   "on_goal": null,
+   "n_bystanders": null,
+   "abs_err": {
+    "target_site": NaN
+   },
+   "instrument_s": 713.2616600696418,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 7,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 59.334,
+   "lattice_rms_nm": 0.04928793222323737,
+   "lattice_vectors": 36,
+   "ruler_atoms": 9,
+   "survey_atoms": 9,
+   "candidates": 1,
+   "start_nm": [
+    9.632954413728669,
+    3.798546304311831
+   ],
+   "skipped": [
+    "too few fiducials around the atom"
+   ]
+  },
+  {
+   "paper": "P4",
+   "seed": 332,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.00886564448033519
+   },
+   "instrument_s": 1086.3364251458486,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "neighbour": 2,
+     "edge": 1,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 0.254,
+   "lattice_rms_nm": 0.008649727608546893,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 3,
+   "start_nm": [
+    -4.166769716403726,
+    9.852596945986612
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "off_goal_nm": 3.823
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 5,
+     "off_goal_nm": 2.539
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 10,
+     "off_goal_nm": 0.019
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 333,
+   "success": false,
+   "partial": 0.0,
+   "error": "RuntimeError: no candidate has fiducials around it",
+   "claims_ok": {
+    "target_site": false,
+    "bystander_max_shift_nm": false
+   },
+   "on_goal": null,
+   "n_bystanders": null,
+   "abs_err": {
+    "target_site": NaN
+   },
+   "instrument_s": 1961.061523840886,
+   "tip_condition": "blunt",
+   "atoms_tried": 2,
+   "tip_first": "unknown",
+   "pokes": 6,
+   "tip_rounds": 4,
+   "drift_atoms": [
+    2,
+    2
+   ],
+   "passed_over": [
+    {
+     "path": 1,
+     "edge": 3
+    },
+    {
+     "edge": 2,
+     "path": 1,
+     "avoid": 1
+    }
+   ],
+   "lattice_deg": 24.852000000000004,
+   "lattice_rms_nm": 0.017546992293247035,
+   "lattice_vectors": 15,
+   "ruler_atoms": 6,
+   "survey_atoms": 6,
+   "candidates": 2,
+   "start_nm": [
+    6.489835617133934,
+    3.9008796224651405
+   ],
+   "skipped": [
+    "too few fiducials around the atom",
+    "too few fiducials around the atom",
+    "too few fiducials around the atom"
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0,
+     "off_goal_nm": 3.985
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 1,
+     "off_goal_nm": 3.739
+    }
+   ],
+   "lost": [
+    "the atom is not where the survey put it"
+   ]
+  },
+  {
+   "paper": "P4",
+   "seed": 334,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 5,
+   "abs_err": {
+    "target_site": 0.013482249403723797
+   },
+   "instrument_s": 1308.2512828302365,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 5,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 8
+    }
+   ],
+   "lattice_deg": 24.584000000000003,
+   "lattice_rms_nm": 0.026750544869099824,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 2,
+   "start_nm": [
+    9.822653975547215,
+    -5.340792963153376
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 16,
+     "off_goal_nm": 0.42
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 2,
+     "off_goal_nm": 0.009
+    }
+   ],
+   "r_success_kohm": 400.0
+  },
+  {
+   "paper": "P4",
+   "seed": 335,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.003531898567669521
+   },
+   "instrument_s": 579.6759063198402,
+   "tip_condition": "unstable",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "goal": 2,
+     "edge": 3
+    }
+   ],
+   "lattice_deg": 26.92,
+   "lattice_rms_nm": 0.019801841783921997,
+   "lattice_vectors": 55,
+   "ruler_atoms": 11,
+   "survey_atoms": 11,
+   "candidates": 6,
+   "start_nm": [
+    2.820057123066789,
+    2.4720879152302686
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 18,
+     "off_goal_nm": 0.008
+    }
+   ],
+   "r_success_kohm": 400.0
+  },
+  {
+   "paper": "P4",
+   "seed": 336,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.008495041786354162
+   },
+   "instrument_s": 856.2912919080728,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "edge": 2,
+     "neighbour": 3
+    }
+   ],
+   "lattice_deg": 45.658,
+   "lattice_rms_nm": 0.038477792557367274,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 5,
+   "start_nm": [
+    3.003853491388444,
+    -2.9522111959834447
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "off_goal_nm": 3.667
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 2,
+     "off_goal_nm": 3.175
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 14,
+     "off_goal_nm": 0.027
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 337,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 1,
+   "abs_err": {
+    "target_site": 0.00292230584825973
+   },
+   "instrument_s": 1274.998211929099,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "goal": 1,
+     "edge": 4
+    }
+   ],
+   "lattice_deg": 37.168,
+   "lattice_rms_nm": 0.012573577191056225,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 5,
+   "start_nm": [
+    0.3569060675316216,
+    3.6209264783548605
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 1,
+     "off_goal_nm": 3.769
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 12,
+     "off_goal_nm": 1.101
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 5,
+     "off_goal_nm": 0.018
+    }
+   ],
+   "r_success_kohm": 83.88608000000002
+  },
+  {
+   "paper": "P4",
+   "seed": 338,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.001712960131868782
+   },
+   "instrument_s": 1296.5872703674145,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 5,
+     "path": 1
+    }
+   ],
+   "lattice_deg": 28.152000000000005,
+   "lattice_rms_nm": 0.018489760437222346,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 4,
+   "start_nm": [
+    7.757560305938821,
+    5.073807834784285
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 3.755
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 4,
+     "off_goal_nm": 2.861
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 12,
+     "off_goal_nm": 0.259
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 1,
+     "off_goal_nm": 0.005
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 339,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 1,
+   "abs_err": {
+    "target_site": 0.0012483211177621032
+   },
+   "instrument_s": 1159.703970071822,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "blunt",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "neighbour": 1,
+     "edge": 6,
+     "path": 2
+    }
+   ],
+   "lattice_deg": 41.698,
+   "lattice_rms_nm": 0.020199592276195215,
+   "lattice_vectors": 78,
+   "ruler_atoms": 13,
+   "survey_atoms": 13,
+   "candidates": 4,
+   "start_nm": [
+    -2.9350245109032542,
+    3.2651309412626865
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 6,
+     "off_goal_nm": 2.698
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 12,
+     "off_goal_nm": 0.014
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 340,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.00445901578424667
+   },
+   "instrument_s": 1438.9964866347564,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "neighbour": 2,
+     "edge": 2
+    }
+   ],
+   "lattice_deg": 22.747999999999998,
+   "lattice_rms_nm": 0.008352354791024823,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 3,
+   "start_nm": [
+    2.7186421914171,
+    3.5366972377014676
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 1,
+     "off_goal_nm": 3.76
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 1,
+     "off_goal_nm": 3.527
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 1,
+     "off_goal_nm": 3.306
+    },
+    {
+     "r_kohm": 53.7,
+     "spikes": 15,
+     "off_goal_nm": 0.015
+    }
+   ],
+   "r_success_kohm": 53.68709120000002
+  },
+  {
+   "paper": "P4",
+   "seed": 341,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.007148375971572927
+   },
+   "instrument_s": 1425.8329364236988,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 2,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 2
+    }
+   ],
+   "lattice_deg": 26.542000000000005,
+   "lattice_rms_nm": 0.01407271202529813,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 6,
+   "start_nm": [
+    4.444822802288712,
+    6.065433619830118
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 2,
+     "off_goal_nm": 3.533
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 10,
+     "off_goal_nm": 1.311
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 6,
+     "off_goal_nm": 0.01
+    }
+   ],
+   "r_success_kohm": 67.10886400000001
+  },
+  {
+   "paper": "P4",
+   "seed": 342,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.006987906844597438
+   },
+   "instrument_s": 928.3035190376038,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    2
+   ],
+   "passed_over": [
+    {
+     "edge": 6,
+     "path": 1
+    }
+   ],
+   "lattice_deg": 22.388,
+   "lattice_rms_nm": 0.043518193442547044,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 3,
+   "start_nm": [
+    5.491508557896594,
+    2.3172253552187208
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 6,
+     "off_goal_nm": 2.657
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 12,
+     "off_goal_nm": 0.006
+    }
+   ],
+   "r_success_kohm": 83.88608000000002
+  },
+  {
+   "paper": "P4",
+   "seed": 343,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.0061742273554978985
+   },
+   "instrument_s": 894.5426227520259,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 2
+    }
+   ],
+   "lattice_deg": 11.93,
+   "lattice_rms_nm": 0.017138012726909978,
+   "lattice_vectors": 10,
+   "ruler_atoms": 5,
+   "survey_atoms": 5,
+   "candidates": 3,
+   "start_nm": [
+    -2.381049515569682,
+    7.243644153546624
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 17,
+     "off_goal_nm": 0.014
+    }
+   ],
+   "r_success_kohm": 320.0
+  },
+  {
+   "paper": "P4",
+   "seed": 344,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.005122701520823451
+   },
+   "instrument_s": 859.5925569335395,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "goal": 1,
+     "edge": 2,
+     "neighbour": 2
+    }
+   ],
+   "lattice_deg": 12.202000000000002,
+   "lattice_rms_nm": 0.019278368962688634,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 3,
+   "start_nm": [
+    -2.180627512966911,
+    -0.91509563141787
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 16,
+     "off_goal_nm": 0.256
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 1,
+     "off_goal_nm": 0.016
+    }
+   ],
+   "r_success_kohm": 131.072
+  },
+  {
+   "paper": "P4",
+   "seed": 345,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 5,
+   "abs_err": {
+    "target_site": 0.0023948981741191066
+   },
+   "instrument_s": 745.397909625556,
+   "tip_condition": "unstable",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "goal": 1,
+     "edge": 3
+    }
+   ],
+   "lattice_deg": 40.948,
+   "lattice_rms_nm": 0.011325637209525294,
+   "lattice_vectors": 55,
+   "ruler_atoms": 11,
+   "survey_atoms": 11,
+   "candidates": 7,
+   "start_nm": [
+    -2.115772678490849,
+    0.7174547336881361
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 18,
+     "off_goal_nm": 0.011
+    }
+   ],
+   "r_success_kohm": 256.0
+  },
+  {
+   "paper": "P4",
+   "seed": 346,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.009919064881657084
+   },
+   "instrument_s": 1849.9210083060407,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 8,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 4,
+     "neighbour": 1
+    }
+   ],
+   "lattice_deg": 5.614000000000001,
+   "lattice_rms_nm": 0.02077075923008249,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 3,
+   "start_nm": [
+    -1.8686952526332554,
+    -2.6065619956227515
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 2,
+     "off_goal_nm": 3.584
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 14,
+     "off_goal_nm": 0.258
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 0.014
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 347,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.006422626270614606
+   },
+   "instrument_s": 622.3624117356943,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 3
+    }
+   ],
+   "lattice_deg": 8.411999999999999,
+   "lattice_rms_nm": 0.011770722878435886,
+   "lattice_vectors": 55,
+   "ruler_atoms": 11,
+   "survey_atoms": 11,
+   "candidates": 8,
+   "start_nm": [
+    1.3899146679825591,
+    -4.131295742627984
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 17,
+     "off_goal_nm": 0.009
+    }
+   ],
+   "r_success_kohm": 320.0
+  },
+  {
+   "paper": "P4",
+   "seed": 348,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.013400690206904911
+   },
+   "instrument_s": 1074.97579071409,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "goal": 1,
+     "edge": 2,
+     "path": 1
+    }
+   ],
+   "lattice_deg": 55.217999999999996,
+   "lattice_rms_nm": 0.008198774788068009,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 4,
+   "start_nm": [
+    0.6110385239700804,
+    -1.5955743290925142
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 3,
+     "off_goal_nm": 3.188
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 13,
+     "off_goal_nm": 0.017
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 349,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.009067689862921374
+   },
+   "instrument_s": 893.1284688310741,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "neighbour": 1,
+     "edge": 2,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 0.9780000000000001,
+   "lattice_rms_nm": 0.011429743698075551,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 4,
+   "start_nm": [
+    -4.987289337326235,
+    -0.8147837419895083
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 5,
+     "off_goal_nm": 2.821
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 3,
+     "off_goal_nm": 2.043
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 8,
+     "off_goal_nm": 0.005
+    }
+   ],
+   "r_success_kohm": 131.072
+  },
+  {
+   "paper": "P4",
+   "seed": 350,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.0033762093294966533
+   },
+   "instrument_s": 932.4128575972168,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 4,
+     "path": 1,
+     "neighbour": 2
+    }
+   ],
+   "lattice_deg": 5.1000000000000005,
+   "lattice_rms_nm": 0.018933813864828283,
+   "lattice_vectors": 55,
+   "ruler_atoms": 11,
+   "survey_atoms": 11,
+   "candidates": 4,
+   "start_nm": [
+    -3.9837637977400604,
+    3.4911908795844226
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 2,
+     "off_goal_nm": 3.595
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 14,
+     "off_goal_nm": 0.254
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 1,
+     "off_goal_nm": 0.009
+    }
+   ],
+   "r_success_kohm": 131.072
+  },
+  {
+   "paper": "P4",
+   "seed": 351,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 5,
+   "abs_err": {
+    "target_site": 0.004274788296942812
+   },
+   "instrument_s": 987.28982728395,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "blunt",
+   "pokes": 3,
+   "tip_rounds": 2,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 6,
+     "neighbour": 2,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 12.720000000000002,
+   "lattice_rms_nm": 0.014488793906019643,
+   "lattice_vectors": 66,
+   "ruler_atoms": 12,
+   "survey_atoms": 12,
+   "candidates": 3,
+   "start_nm": [
+    10.35910231773585,
+    12.776454303696283
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 17,
+     "off_goal_nm": 0.018
+    }
+   ],
+   "r_success_kohm": 320.0
+  },
+  {
+   "paper": "P4",
+   "seed": 352,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 7,
+   "abs_err": {
+    "target_site": 0.0063150135265917446
+   },
+   "instrument_s": 847.3986227957494,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    8
+   ],
+   "passed_over": [
+    {
+     "neighbour": 4,
+     "edge": 4,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 33.45,
+   "lattice_rms_nm": 0.015168641013906657,
+   "lattice_vectors": 78,
+   "ruler_atoms": 13,
+   "survey_atoms": 13,
+   "candidates": 4,
+   "start_nm": [
+    0.3907977724541958,
+    -3.7128620784110637
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 2,
+     "off_goal_nm": 3.544
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 12,
+     "off_goal_nm": 0.889
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 4,
+     "off_goal_nm": 0.008
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 353,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.007203075428639062
+   },
+   "instrument_s": 1121.7865176011546,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "neighbour": 2,
+     "edge": 5
+    }
+   ],
+   "lattice_deg": 43.618,
+   "lattice_rms_nm": 0.01290404709388792,
+   "lattice_vectors": 55,
+   "ruler_atoms": 11,
+   "survey_atoms": 11,
+   "candidates": 4,
+   "start_nm": [
+    6.242151018565416,
+    9.069592806062518
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 2,
+     "off_goal_nm": 3.611
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 16,
+     "off_goal_nm": 0.006
+    }
+   ],
+   "r_success_kohm": 131.072
+  },
+  {
+   "paper": "P4",
+   "seed": 354,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.002857434697912674
+   },
+   "instrument_s": 1334.121718194243,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 2,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 4,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 1.364,
+   "lattice_rms_nm": 0.005867125321427209,
+   "lattice_vectors": 36,
+   "ruler_atoms": 9,
+   "survey_atoms": 9,
+   "candidates": 4,
+   "start_nm": [
+    4.752014838092592,
+    2.1808875420247844
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 2,
+     "off_goal_nm": 3.554
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 2,
+     "off_goal_nm": 3.045
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 11,
+     "off_goal_nm": 0.239
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 1,
+     "off_goal_nm": 0.01
+    }
+   ],
+   "r_success_kohm": 131.072
+  },
+  {
+   "paper": "P4",
+   "seed": 355,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.006956656154826697
+   },
+   "instrument_s": 1035.9094911303728,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    2
+   ],
+   "passed_over": [
+    {
+     "edge": 5,
+     "step": 1
+    }
+   ],
+   "lattice_deg": 17.706,
+   "lattice_rms_nm": 0.019220178038944,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 4,
+   "start_nm": [
+    -4.660392394506296,
+    9.022010269324888
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "off_goal_nm": 3.807
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 17,
+     "off_goal_nm": 0.011
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 356,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 1,
+   "abs_err": {
+    "target_site": 0.001787969143882765
+   },
+   "instrument_s": 2048.716557730587,
+   "tip_condition": "double",
+   "atoms_tried": 2,
+   "tip_first": "double",
+   "pokes": 6,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    4,
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 3
+    },
+    {
+     "avoid": 3,
+     "edge": 3
+    }
+   ],
+   "lattice_deg": 47.900000000000006,
+   "lattice_rms_nm": 0.0128658853714474,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 1,
+   "start_nm": [
+    -10.696537919171265,
+    11.289564468376138
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 5
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 1,
+     "off_goal_nm": 3.703
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 6,
+     "off_goal_nm": 2.283
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 10,
+     "off_goal_nm": 0.031
+    }
+   ],
+   "lost": [
+    "the atom is not along its path"
+   ],
+   "r_success_kohm": 83.88608000000002
+  },
+  {
+   "paper": "P4",
+   "seed": 357,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 5,
+   "abs_err": {
+    "target_site": 0.004479828842135096
+   },
+   "instrument_s": 675.359743586302,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "path": 2,
+     "neighbour": 2,
+     "edge": 2,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 32.122,
+   "lattice_rms_nm": 0.021113694535997183,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 1,
+   "start_nm": [
+    -0.5932818578180914,
+    -4.823510175858445
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 3,
+     "off_goal_nm": 3.318
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 15,
+     "off_goal_nm": 0.017
+    }
+   ],
+   "r_success_kohm": 320.0
+  },
+  {
+   "paper": "P4",
+   "seed": 358,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.0054184505922176525
+   },
+   "instrument_s": 719.5993050630688,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 3
+    }
+   ],
+   "lattice_deg": 17.896000000000004,
+   "lattice_rms_nm": 0.010522083747166512,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 5,
+   "start_nm": [
+    0.8417883825223491,
+    -2.5728122975259318
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 2,
+     "off_goal_nm": 3.607
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 16,
+     "off_goal_nm": 0.009
+    }
+   ],
+   "r_success_kohm": 256.0
+  },
+  {
+   "paper": "P4",
+   "seed": 359,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.017559597446623026
+   },
+   "instrument_s": 1346.3584577724096,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 3,
+   "drift_atoms": [
+    2
+   ],
+   "passed_over": [
+    {
+     "edge": 3,
+     "path": 2
+    }
+   ],
+   "lattice_deg": 30.462000000000003,
+   "lattice_rms_nm": 0.01761167677144832,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 3,
+   "start_nm": [
+    5.514622712898198,
+    1.364335888858843
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 3,
+     "off_goal_nm": 3.324
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 15,
+     "off_goal_nm": 0.032
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 360,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 1,
+   "abs_err": {
+    "target_site": 0.002474854097347157
+   },
+   "instrument_s": 899.3670523953551,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    2
+   ],
+   "passed_over": [
+    {
+     "edge": 5,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 33.772,
+   "lattice_rms_nm": 0.025403426869371738,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 4,
+   "start_nm": [
+    6.754200902623104,
+    -0.016483520341292746
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 3.742
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 3,
+     "off_goal_nm": 3.076
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 14,
+     "off_goal_nm": 0.008
+    }
+   ],
+   "r_success_kohm": 131.072
+  },
+  {
+   "paper": "P4",
+   "seed": 361,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.009600711591692965
+   },
+   "instrument_s": 791.0207786556376,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 3
+    }
+   ],
+   "lattice_deg": 48.74400000000001,
+   "lattice_rms_nm": 0.03670645689790837,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 4,
+   "start_nm": [
+    0.33904369993992844,
+    -5.727836574261509
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 16,
+     "off_goal_nm": 0.258
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 0.02
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 362,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.008676900661867272
+   },
+   "instrument_s": 1261.482764815014,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 3,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 2,
+     "neighbour": 2
+    }
+   ],
+   "lattice_deg": 25.85,
+   "lattice_rms_nm": 0.011086307229880554,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 6,
+   "start_nm": [
+    4.423200468966215,
+    -5.385177137058584
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 3,
+     "off_goal_nm": 3.319
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 15,
+     "off_goal_nm": 0.008
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 363,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.00400966860959693
+   },
+   "instrument_s": 716.9647970981562,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 2
+    }
+   ],
+   "lattice_deg": 49.992000000000004,
+   "lattice_rms_nm": 0.0100951937460808,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 5,
+   "start_nm": [
+    -4.153809800955949,
+    1.2562860497157011
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 4,
+     "off_goal_nm": 3.0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 13,
+     "off_goal_nm": 0.011
+    }
+   ],
+   "r_success_kohm": 256.0
+  },
+  {
+   "paper": "P4",
+   "seed": 364,
+   "success": false,
+   "partial": 0.0,
+   "error": "RuntimeError: no candidate has fiducials around it",
+   "claims_ok": {
+    "target_site": false,
+    "bystander_max_shift_nm": false
+   },
+   "on_goal": null,
+   "n_bystanders": null,
+   "abs_err": {
+    "target_site": NaN
+   },
+   "instrument_s": 496.27225421198716,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    2
+   ],
+   "passed_over": [
+    {
+     "edge": 3
+    }
+   ],
+   "lattice_deg": 19.618,
+   "lattice_rms_nm": 0.014213167429200705,
+   "lattice_vectors": 10,
+   "ruler_atoms": 5,
+   "survey_atoms": 5,
+   "candidates": 2,
+   "start_nm": [
+    -2.9334403006250938,
+    -1.1261864277567604
+   ],
+   "skipped": [
+    "too few fiducials around the atom",
+    "too few fiducials around the atom"
+   ]
+  },
+  {
+   "paper": "P4",
+   "seed": 365,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.009952930607967259
+   },
+   "instrument_s": 951.0674832789897,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 5
+    }
+   ],
+   "lattice_deg": 7.0,
+   "lattice_rms_nm": 0.05445225737725741,
+   "lattice_vectors": 36,
+   "ruler_atoms": 9,
+   "survey_atoms": 9,
+   "candidates": 4,
+   "start_nm": [
+    2.431951163498276,
+    10.211988471558568
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "off_goal_nm": 3.856
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 16,
+     "off_goal_nm": 0.006
+    }
+   ],
+   "r_success_kohm": 320.0
+  },
+  {
+   "paper": "P4",
+   "seed": 366,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.005520987611882404
+   },
+   "instrument_s": 1210.0338807372364,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 2,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 1,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 4.562,
+   "lattice_rms_nm": 0.010579103556314745,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 5,
+   "start_nm": [
+    -2.296045192969121,
+    -2.965132194005168
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 3,
+     "off_goal_nm": 3.187
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 13,
+     "off_goal_nm": 0.014
+    }
+   ],
+   "r_success_kohm": 131.072
+  },
+  {
+   "paper": "P4",
+   "seed": 367,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.0014981780778515349
+   },
+   "instrument_s": 937.9527532947629,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "path": 1,
+     "edge": 5,
+     "neighbour": 2
+    }
+   ],
+   "lattice_deg": 51.238,
+   "lattice_rms_nm": 0.012025373781812154,
+   "lattice_vectors": 55,
+   "ruler_atoms": 11,
+   "survey_atoms": 11,
+   "candidates": 3,
+   "start_nm": [
+    -2.3794478431533435,
+    -6.78709660623025
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 17,
+     "off_goal_nm": 0.007
+    }
+   ],
+   "r_success_kohm": 256.0
+  },
+  {
+   "paper": "P4",
+   "seed": 368,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.009630256431877158
+   },
+   "instrument_s": 1517.40435468767,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    4,
+    4
+   ],
+   "passed_over": [
+    {
+     "path": 2,
+     "edge": 2
+    }
+   ],
+   "lattice_deg": 34.407999999999994,
+   "lattice_rms_nm": 0.010988483550759364,
+   "lattice_vectors": 15,
+   "ruler_atoms": 6,
+   "survey_atoms": 6,
+   "candidates": 2,
+   "start_nm": [
+    1.3981142216495073,
+    -3.987311805690169
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 2,
+     "off_goal_nm": 3.529
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 15,
+     "off_goal_nm": 0.252
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 1,
+     "off_goal_nm": 0.005
+    }
+   ],
+   "tip_mid": 1,
+   "tip_rounds": 2,
+   "recoveries": [
+    "conditioned"
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 369,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.0027192586682517777
+   },
+   "instrument_s": 579.8648049973698,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 1,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 39.46,
+   "lattice_rms_nm": 0.010101967346863977,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 6,
+   "start_nm": [
+    -0.5551880926462438,
+    -1.779845939306984
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 18,
+     "off_goal_nm": 0.014
+    }
+   ],
+   "r_success_kohm": 400.0
+  },
+  {
+   "paper": "P4",
+   "seed": 370,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 1,
+   "abs_err": {
+    "target_site": 0.003337330297617381
+   },
+   "instrument_s": 817.0639653499829,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    2
+   ],
+   "passed_over": [
+    {
+     "goal": 1,
+     "path": 1
+    }
+   ],
+   "lattice_deg": 5.118000000000001,
+   "lattice_rms_nm": 0.007815099909170694,
+   "lattice_vectors": 6,
+   "ruler_atoms": 4,
+   "survey_atoms": 4,
+   "candidates": 2,
+   "start_nm": [
+    -6.193636160222367,
+    1.7314138167057465
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "off_goal_nm": 3.876
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 2,
+     "off_goal_nm": 3.369
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 14,
+     "off_goal_nm": 0.038
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 371,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.003390929129955143
+   },
+   "instrument_s": 920.285091316989,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 7,
+     "goal": 1,
+     "neighbour": 1
+    }
+   ],
+   "lattice_deg": 38.636,
+   "lattice_rms_nm": 0.05323989718663677,
+   "lattice_vectors": 91,
+   "ruler_atoms": 14,
+   "survey_atoms": 14,
+   "candidates": 5,
+   "start_nm": [
+    3.734578926748938,
+    -3.4513556697841175
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 18,
+     "off_goal_nm": 0.013
+    }
+   ],
+   "r_success_kohm": 67.10886400000001
+  },
+  {
+   "paper": "P4",
+   "seed": 372,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.0132011514733922
+   },
+   "instrument_s": 1080.675367612423,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 4
+    }
+   ],
+   "lattice_deg": 22.658,
+   "lattice_rms_nm": 0.010224640944493124,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 6,
+   "start_nm": [
+    -3.2996577414602193,
+    0.04080114311017269
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "off_goal_nm": 3.78
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 5,
+     "off_goal_nm": 2.66
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 12,
+     "off_goal_nm": 0.01
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 373,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 1,
+   "abs_err": {
+    "target_site": 0.005496288186230459
+   },
+   "instrument_s": 774.9803949306656,
+   "tip_condition": "unstable",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 6,
+     "path": 1
+    }
+   ],
+   "lattice_deg": 37.67,
+   "lattice_rms_nm": 0.012029447026062415,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 1,
+   "start_nm": [
+    -5.748858209390296,
+    8.969968000872178
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 16,
+     "off_goal_nm": 0.424
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "off_goal_nm": 0.24
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "off_goal_nm": 0.019
+    }
+   ],
+   "r_success_kohm": 320.0
+  },
+  {
+   "paper": "P4",
+   "seed": 374,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.004525297612324725
+   },
+   "instrument_s": 963.0601905612165,
+   "tip_condition": "unstable",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 4
+    }
+   ],
+   "lattice_deg": 1.108,
+   "lattice_rms_nm": 0.014156867014297365,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 4,
+   "start_nm": [
+    -3.7298811486752363,
+    -1.1795972236915873
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 5,
+     "off_goal_nm": 2.813
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 11,
+     "off_goal_nm": 0.006
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 375,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.008973775932200157
+   },
+   "instrument_s": 623.0933548083361,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "goal": 1,
+     "edge": 1
+    }
+   ],
+   "lattice_deg": 45.11,
+   "lattice_rms_nm": 0.0060487063217447125,
+   "lattice_vectors": 10,
+   "ruler_atoms": 5,
+   "survey_atoms": 5,
+   "candidates": 3,
+   "start_nm": [
+    -3.3454568384625247,
+    -2.5469501049420273
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 18,
+     "off_goal_nm": 0.023
+    }
+   ],
+   "r_success_kohm": 320.0
+  },
+  {
+   "paper": "P4",
+   "seed": 376,
+   "success": false,
+   "partial": 0.0,
+   "error": "RuntimeError: no candidate has fiducials around it",
+   "claims_ok": {
+    "target_site": false,
+    "bystander_max_shift_nm": false
+   },
+   "on_goal": null,
+   "n_bystanders": null,
+   "abs_err": {
+    "target_site": NaN
+   },
+   "instrument_s": 440.3072532119872,
+   "tip_condition": "unstable",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "neighbour": 2,
+     "edge": 3,
+     "step": 1
+    }
+   ],
+   "lattice_deg": 54.084,
+   "lattice_rms_nm": 0.011828230894448242,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 1,
+   "start_nm": [
+    -0.9086798702331507,
+    -13.056785533918855
+   ],
+   "skipped": [
+    "too few fiducials around the atom"
+   ]
+  },
+  {
+   "paper": "P4",
+   "seed": 377,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.0064417750394091455
+   },
+   "instrument_s": 895.2499337881427,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 4,
+     "neighbour": 2,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 23.862000000000002,
+   "lattice_rms_nm": 0.01746244461198463,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 1,
+   "start_nm": [
+    10.112700283724564,
+    -10.298268785039362
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 18,
+     "off_goal_nm": 0.005
+    }
+   ],
+   "r_success_kohm": 320.0
+  },
+  {
+   "paper": "P4",
+   "seed": 378,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.00837298510567165
+   },
+   "instrument_s": 1335.5352486730549,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 3,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 4,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 27.208000000000002,
+   "lattice_rms_nm": 0.013373978054377216,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 2,
+   "start_nm": [
+    3.7788694158922276,
+    2.425557680927163
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 18,
+     "off_goal_nm": 0.015
+    }
+   ],
+   "r_success_kohm": 83.88608000000002
+  },
+  {
+   "paper": "P4",
+   "seed": 379,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.008877625285279871
+   },
+   "instrument_s": 1342.609937284341,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 4
+    }
+   ],
+   "lattice_deg": 38.168,
+   "lattice_rms_nm": 0.012334166792072271,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 6,
+   "start_nm": [
+    0.7951516314362017,
+    1.9391209216628944
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 1,
+     "off_goal_nm": 3.786
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 2,
+     "off_goal_nm": 3.348
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 14,
+     "off_goal_nm": 0.266
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 1,
+     "off_goal_nm": 0.029
+    }
+   ],
+   "r_success_kohm": 83.88608000000002
+  },
+  {
+   "paper": "P4",
+   "seed": 380,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 7,
+   "abs_err": {
+    "target_site": 0.011865049374065163
+   },
+   "instrument_s": 774.9459273042072,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    8
+   ],
+   "passed_over": [
+    {
+     "edge": 4,
+     "neighbour": 3,
+     "goal": 2,
+     "path": 1
+    }
+   ],
+   "lattice_deg": 6.798,
+   "lattice_rms_nm": 0.02256863270442806,
+   "lattice_vectors": 78,
+   "ruler_atoms": 13,
+   "survey_atoms": 13,
+   "candidates": 3,
+   "start_nm": [
+    -3.087406071726523,
+    4.533245734393585
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "off_goal_nm": 3.842
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "off_goal_nm": 3.592
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 15,
+     "off_goal_nm": 0.009
+    }
+   ],
+   "r_success_kohm": 256.0
+  },
+  {
+   "paper": "P4",
+   "seed": 381,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.004972638899208897
+   },
+   "instrument_s": 2024.7827113793237,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 6,
+   "drift_atoms": [
+    5,
+    5
+   ],
+   "passed_over": [
+    {
+     "path": 1,
+     "edge": 4
+    }
+   ],
+   "lattice_deg": 25.612000000000002,
+   "lattice_rms_nm": 0.014547433652157223,
+   "lattice_vectors": 66,
+   "ruler_atoms": 12,
+   "survey_atoms": 12,
+   "candidates": 7,
+   "start_nm": [
+    -6.702643580306653,
+    5.7104458521034545
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 16,
+     "off_goal_nm": 0.432
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "off_goal_nm": 0.241
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "off_goal_nm": 0.013
+    }
+   ],
+   "r_success_kohm": 256.0
+  },
+  {
+   "paper": "P4",
+   "seed": 382,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 5,
+   "abs_err": {
+    "target_site": 0.006988649936674981
+   },
+   "instrument_s": 841.3561720898587,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "neighbour": 2,
+     "goal": 1,
+     "edge": 2
+    }
+   ],
+   "lattice_deg": 8.562,
+   "lattice_rms_nm": 0.016589917258005623,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 3,
+   "start_nm": [
+    0.8243120569926887,
+    -6.449733979305215
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 6,
+     "off_goal_nm": 2.606
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 10,
+     "off_goal_nm": 0.273
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 0.017
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 383,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.009588271998744888
+   },
+   "instrument_s": 806.8690298365384,
+   "tip_condition": "unstable",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 6,
+     "goal": 1,
+     "neighbour": 1,
+     "step": 2
+    }
+   ],
+   "lattice_deg": 45.400000000000006,
+   "lattice_rms_nm": 0.033582666951915946,
+   "lattice_vectors": 91,
+   "ruler_atoms": 14,
+   "survey_atoms": 14,
+   "candidates": 4,
+   "start_nm": [
+    -8.166486506908882,
+    -1.3279121150962823
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 3.848
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 17,
+     "off_goal_nm": 0.007
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 384,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 6,
+   "abs_err": {
+    "target_site": 0.003030435170603285
+   },
+   "instrument_s": 916.3198542559494,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    1
+   ],
+   "passed_over": [
+    {
+     "edge": 2,
+     "goal": 1,
+     "step": 1
+    }
+   ],
+   "lattice_deg": 46.55400000000001,
+   "lattice_rms_nm": 0.011413161108512442,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 6,
+   "start_nm": [
+    -4.305899069219256,
+    -5.450342093563407
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 16,
+     "off_goal_nm": 0.251
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 1,
+     "off_goal_nm": 0.013
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 385,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.009898243101161674
+   },
+   "instrument_s": 853.8958687754599,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "neighbour": 3,
+     "edge": 3,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 23.25,
+   "lattice_rms_nm": 0.019294049376420735,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 3,
+   "start_nm": [
+    1.5468836927788665,
+    -4.473031874616957
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "off_goal_nm": 3.77
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 6,
+     "off_goal_nm": 2.428
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 11,
+     "off_goal_nm": 0.011
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 386,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 1,
+   "abs_err": {
+    "target_site": 0.005562155172050955
+   },
+   "instrument_s": 1428.2947646076077,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 4,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "edge": 3,
+     "path": 1
+    }
+   ],
+   "lattice_deg": 15.644,
+   "lattice_rms_nm": 0.010451413826844723,
+   "lattice_vectors": 36,
+   "ruler_atoms": 9,
+   "survey_atoms": 9,
+   "candidates": 5,
+   "start_nm": [
+    5.999674894088788,
+    1.0487353939599267
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 16,
+     "off_goal_nm": 0.426
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 0.221
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 0.054
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 387,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 5,
+   "abs_err": {
+    "target_site": 0.0031532527348257277
+   },
+   "instrument_s": 1423.2583790366702,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 2,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "neighbour": 2,
+     "edge": 6
+    }
+   ],
+   "lattice_deg": 57.278,
+   "lattice_rms_nm": 0.014251703500565661,
+   "lattice_vectors": 66,
+   "ruler_atoms": 12,
+   "survey_atoms": 12,
+   "candidates": 4,
+   "start_nm": [
+    8.21924483000727,
+    -10.234825112779554
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 1,
+     "off_goal_nm": 3.704
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 9,
+     "off_goal_nm": 1.527
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 6,
+     "off_goal_nm": 0.002
+    }
+   ],
+   "r_success_kohm": 83.88608000000002
+  },
+  {
+   "paper": "P4",
+   "seed": 388,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.005534426480138138
+   },
+   "instrument_s": 930.9810838392402,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "goal": 1,
+     "edge": 2
+    }
+   ],
+   "lattice_deg": 22.54,
+   "lattice_rms_nm": 0.014881037438491345,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 4,
+   "start_nm": [
+    3.759073935955456,
+    -2.854240558354139
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 3,
+     "off_goal_nm": 3.32
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 15,
+     "off_goal_nm": 0.013
+    }
+   ],
+   "r_success_kohm": 83.88608000000002
+  },
+  {
+   "paper": "P4",
+   "seed": 389,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.009601679695348532
+   },
+   "instrument_s": 1037.0621530395085,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "neighbour": 2,
+     "edge": 2
+    }
+   ],
+   "lattice_deg": 34.174,
+   "lattice_rms_nm": 0.012012081240832105,
+   "lattice_vectors": 66,
+   "ruler_atoms": 12,
+   "survey_atoms": 12,
+   "candidates": 8,
+   "start_nm": [
+    2.5411030245578736,
+    4.01299665897316
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 4,
+     "off_goal_nm": 3.086
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 6,
+     "off_goal_nm": 1.783
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 8,
+     "off_goal_nm": 0.011
+    }
+   ],
+   "r_success_kohm": 256.0
+  },
+  {
+   "paper": "P4",
+   "seed": 390,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.0031706569785507604
+   },
+   "instrument_s": 940.8063541120404,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    7
+   ],
+   "passed_over": [
+    {
+     "edge": 6,
+     "step": 1,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 18.552000000000003,
+   "lattice_rms_nm": 0.04720738204964077,
+   "lattice_vectors": 55,
+   "ruler_atoms": 11,
+   "survey_atoms": 11,
+   "candidates": 3,
+   "start_nm": [
+    -3.8977268423354197,
+    9.681775145090452
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 1,
+     "off_goal_nm": 3.794
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 6,
+     "off_goal_nm": 2.447
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 11,
+     "off_goal_nm": 0.019
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 391,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.018822229055361243
+   },
+   "instrument_s": 1108.1757159929948,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 2
+    }
+   ],
+   "lattice_deg": 23.108,
+   "lattice_rms_nm": 0.015512369828006233,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 5,
+   "start_nm": [
+    -2.1992932635417333,
+    -6.684638474833395
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 18,
+     "off_goal_nm": 0.002
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 392,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 5,
+   "abs_err": {
+    "target_site": 0.012633719431318776
+   },
+   "instrument_s": 1758.5094127773964,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 8,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 4
+    }
+   ],
+   "lattice_deg": 22.52,
+   "lattice_rms_nm": 0.027420523382237806,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 4,
+   "start_nm": [
+    3.009217094232767,
+    -13.358924537881116
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 18,
+     "off_goal_nm": 0.01
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 393,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.007518877300877198
+   },
+   "instrument_s": 887.2008778417007,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 2,
+     "goal": 2
+    }
+   ],
+   "lattice_deg": 31.682000000000002,
+   "lattice_rms_nm": 0.007712111788370586,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 3,
+   "start_nm": [
+    -4.3340921560169825,
+    -2.0089539359196387
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "off_goal_nm": 3.757
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 16,
+     "off_goal_nm": 0.264
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 1,
+     "off_goal_nm": 0.005
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 394,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.007013371602180263
+   },
+   "instrument_s": 1133.5885076929899,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 3,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 25.912000000000003,
+   "lattice_rms_nm": 0.061846263467410116,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 4,
+   "start_nm": [
+    2.748899688666068,
+    6.334113777718144
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 17,
+     "off_goal_nm": 0.261
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 1,
+     "off_goal_nm": 0.009
+    }
+   ],
+   "r_success_kohm": 131.072
+  },
+  {
+   "paper": "P4",
+   "seed": 395,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.007919949259686027
+   },
+   "instrument_s": 1198.0063463368092,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 2,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "path": 1,
+     "neighbour": 4,
+     "edge": 4
+    }
+   ],
+   "lattice_deg": 54.0,
+   "lattice_rms_nm": 0.03378960056802782,
+   "lattice_vectors": 66,
+   "ruler_atoms": 12,
+   "survey_atoms": 12,
+   "candidates": 3,
+   "start_nm": [
+    -2.48744832893032,
+    -1.4682553163467595
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "off_goal_nm": 3.845
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 15,
+     "off_goal_nm": 0.262
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 0.004
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 396,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.00755540366241757
+   },
+   "instrument_s": 881.5720169867054,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "path": 1,
+     "edge": 2
+    }
+   ],
+   "lattice_deg": 11.552,
+   "lattice_rms_nm": 0.010027056698619218,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 7,
+   "start_nm": [
+    3.655013451624246,
+    -4.8587836359390515
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 8,
+     "off_goal_nm": 2.095
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 9,
+     "off_goal_nm": 0.014
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 397,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 1,
+   "abs_err": {
+    "target_site": 0.01088915249017371
+   },
+   "instrument_s": 1813.4423710892293,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 8,
+   "drift_atoms": [
+    2
+   ],
+   "passed_over": [
+    {
+     "edge": 3
+    }
+   ],
+   "lattice_deg": 24.088,
+   "lattice_rms_nm": 0.016019775312139963,
+   "lattice_vectors": 10,
+   "ruler_atoms": 5,
+   "survey_atoms": 5,
+   "candidates": 2,
+   "start_nm": [
+    -11.095070007276234,
+    -6.381548605627259
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 1,
+     "off_goal_nm": 3.756
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 17,
+     "off_goal_nm": 0.018
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 398,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 5,
+   "abs_err": {
+    "target_site": 0.00818066423377857
+   },
+   "instrument_s": 803.4583402757269,
+   "tip_condition": "unstable",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 6,
+     "path": 1,
+     "neighbour": 2
+    }
+   ],
+   "lattice_deg": 45.722,
+   "lattice_rms_nm": 0.015221958989599984,
+   "lattice_vectors": 91,
+   "ruler_atoms": 14,
+   "survey_atoms": 14,
+   "candidates": 5,
+   "start_nm": [
+    -0.5329557121532034,
+    2.68729815475632
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 3.687
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 16,
+     "off_goal_nm": 0.002
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 399,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 5,
+   "abs_err": {
+    "target_site": 0.0020873673637517545
+   },
+   "instrument_s": 1037.1198225248281,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "neighbour": 4,
+     "goal": 1,
+     "edge": 1
+    }
+   ],
+   "lattice_deg": 54.660000000000004,
+   "lattice_rms_nm": 0.015583813696050457,
+   "lattice_vectors": 36,
+   "ruler_atoms": 9,
+   "survey_atoms": 9,
+   "candidates": 3,
+   "start_nm": [
+    3.237296122488985,
+    6.720412339931222
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 2,
+     "off_goal_nm": 3.583
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 10,
+     "off_goal_nm": 1.174
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 5,
+     "off_goal_nm": 0.02
+    }
+   ],
+   "r_success_kohm": 256.0
+  },
+  {
+   "paper": "P4",
+   "seed": 400,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.0075294109639751925
+   },
+   "instrument_s": 764.0331073249224,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {}
+   ],
+   "lattice_deg": 53.284000000000006,
+   "lattice_rms_nm": 0.019715687859766177,
+   "lattice_vectors": 15,
+   "ruler_atoms": 6,
+   "survey_atoms": 6,
+   "candidates": 6,
+   "start_nm": [
+    -0.3468331804724336,
+    1.4026502293551673
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "off_goal_nm": 3.862
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 16,
+     "off_goal_nm": 0.007
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 401,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.007333372646529688
+   },
+   "instrument_s": 1372.5554006246107,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 2,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "neighbour": 2,
+     "edge": 1
+    }
+   ],
+   "lattice_deg": 38.014,
+   "lattice_rms_nm": 0.013238412508807945,
+   "lattice_vectors": 55,
+   "ruler_atoms": 11,
+   "survey_atoms": 11,
+   "candidates": 8,
+   "start_nm": [
+    -4.30171036345412,
+    1.96944697491357
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 2,
+     "off_goal_nm": 3.551
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 3,
+     "off_goal_nm": 2.867
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 12,
+     "off_goal_nm": 0.228
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 1,
+     "off_goal_nm": 0.023
+    }
+   ],
+   "r_success_kohm": 131.072
+  },
+  {
+   "paper": "P4",
+   "seed": 402,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 5,
+   "abs_err": {
+    "target_site": 0.0059573049604792466
+   },
+   "instrument_s": 1047.4487487210206,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "edge": 2,
+     "neighbour": 4
+    }
+   ],
+   "lattice_deg": 14.258000000000001,
+   "lattice_rms_nm": 0.019598279872400447,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 4,
+   "start_nm": [
+    -0.47531801999491563,
+    -3.336081961495154
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 53.7,
+     "spikes": 11,
+     "off_goal_nm": 1.336
+    },
+    {
+     "r_kohm": 42.9,
+     "spikes": 6,
+     "off_goal_nm": 0.002
+    }
+   ],
+   "r_success_kohm": 42.949672960000015
+  },
+  {
+   "paper": "P4",
+   "seed": 403,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.00272805774961422
+   },
+   "instrument_s": 1338.5779749156,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "blunt",
+   "pokes": 3,
+   "tip_rounds": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 2
+    }
+   ],
+   "lattice_deg": 11.28,
+   "lattice_rms_nm": 0.011500394423034667,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 5,
+   "start_nm": [
+    -0.6840266944589644,
+    1.3700115891294686
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 12,
+     "off_goal_nm": 1.174
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 5,
+     "off_goal_nm": 0.0
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 404,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.006005214083534649
+   },
+   "instrument_s": 774.9097972328066,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "edge": 5,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 12.214000000000002,
+   "lattice_rms_nm": 0.016195850918695513,
+   "lattice_vectors": 66,
+   "ruler_atoms": 12,
+   "survey_atoms": 12,
+   "candidates": 6,
+   "start_nm": [
+    -0.5964886519073929,
+    -3.4880301531192686
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 16,
+     "off_goal_nm": 0.253
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 0.004
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 405,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.0059334338142991785
+   },
+   "instrument_s": 1557.3968178670784,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 4,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "neighbour": 2,
+     "step": 1,
+     "goal": 2,
+     "edge": 3
+    }
+   ],
+   "lattice_deg": 55.858000000000004,
+   "lattice_rms_nm": 0.022221754161113345,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 2,
+   "start_nm": [
+    -0.6074219145043784,
+    -0.45982238347718507
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 5,
+     "off_goal_nm": 2.676
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 10,
+     "off_goal_nm": 0.257
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 1,
+     "off_goal_nm": 0.002
+    }
+   ],
+   "r_success_kohm": 131.072
+  },
+  {
+   "paper": "P4",
+   "seed": 406,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 5,
+   "abs_err": {
+    "target_site": 0.008026562003950497
+   },
+   "instrument_s": 947.4657481596661,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "edge": 2,
+     "path": 1,
+     "neighbour": 2
+    }
+   ],
+   "lattice_deg": 19.464000000000002,
+   "lattice_rms_nm": 0.00937045988773109,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 3,
+   "start_nm": [
+    -3.267464453114467,
+    -3.079152925725314
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 17,
+     "off_goal_nm": 0.246
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 1,
+     "off_goal_nm": 0.019
+    }
+   ],
+   "r_success_kohm": 83.88608000000002
+  },
+  {
+   "paper": "P4",
+   "seed": 407,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 5,
+   "abs_err": {
+    "target_site": 0.0036333744745793853
+   },
+   "instrument_s": 1048.8274420746336,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    7
+   ],
+   "passed_over": [
+    {
+     "edge": 2,
+     "step": 1,
+     "path": 1,
+     "goal": 1,
+     "neighbour": 2
+    }
+   ],
+   "lattice_deg": 21.008,
+   "lattice_rms_nm": 0.033663518716950065,
+   "lattice_vectors": 55,
+   "ruler_atoms": 11,
+   "survey_atoms": 11,
+   "candidates": 4,
+   "start_nm": [
+    -2.284042295278603,
+    -0.7301194707054428
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "off_goal_nm": 3.768
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 17,
+     "off_goal_nm": 0.019
+    }
+   ],
+   "r_success_kohm": 256.0
+  },
+  {
+   "paper": "P4",
+   "seed": 408,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.009188255825774075
+   },
+   "instrument_s": 949.6349101002041,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "blunt",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 5,
+     "path": 1
+    }
+   ],
+   "lattice_deg": 36.588,
+   "lattice_rms_nm": 0.015338309543480788,
+   "lattice_vectors": 36,
+   "ruler_atoms": 9,
+   "survey_atoms": 9,
+   "candidates": 3,
+   "start_nm": [
+    2.4626003494258484,
+    -3.4943468026203206
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 2,
+     "off_goal_nm": 3.578
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 16,
+     "off_goal_nm": 0.001
+    }
+   ],
+   "r_success_kohm": 320.0
+  },
+  {
+   "paper": "P4",
+   "seed": 409,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.007300085956622021
+   },
+   "instrument_s": 891.1003242503499,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 5,
+     "goal": 1,
+     "height": 1
+    }
+   ],
+   "lattice_deg": 44.342000000000006,
+   "lattice_rms_nm": 0.0323346580501845,
+   "lattice_vectors": 91,
+   "ruler_atoms": 14,
+   "survey_atoms": 14,
+   "candidates": 7,
+   "start_nm": [
+    -0.5208993029291733,
+    0.6641619192229555
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 3,
+     "off_goal_nm": 3.429
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 15,
+     "off_goal_nm": 0.003
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 410,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.0038678709253839433
+   },
+   "instrument_s": 843.2177959268034,
+   "tip_condition": "unstable",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 5
+    }
+   ],
+   "lattice_deg": 42.828,
+   "lattice_rms_nm": 0.021922818552626008,
+   "lattice_vectors": 66,
+   "ruler_atoms": 12,
+   "survey_atoms": 12,
+   "candidates": 7,
+   "start_nm": [
+    0.4135455562922985,
+    1.15454152509162
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "off_goal_nm": 3.814
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 17,
+     "off_goal_nm": 0.008
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 411,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 5,
+   "abs_err": {
+    "target_site": 0.0035620543003622297
+   },
+   "instrument_s": 938.4497238014883,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "path": 2,
+     "goal": 1,
+     "edge": 3
+    }
+   ],
+   "lattice_deg": 4.084,
+   "lattice_rms_nm": 0.015288223278469067,
+   "lattice_vectors": 55,
+   "ruler_atoms": 11,
+   "survey_atoms": 11,
+   "candidates": 5,
+   "start_nm": [
+    -3.1232230983131473,
+    -3.452928284571964
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "off_goal_nm": 3.695
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 4,
+     "off_goal_nm": 2.681
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 10,
+     "off_goal_nm": 0.254
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 1,
+     "off_goal_nm": 0.006
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 412,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.005530186456565817
+   },
+   "instrument_s": 1027.9694573605623,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "blunt",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "path": 1,
+     "edge": 5
+    }
+   ],
+   "lattice_deg": 34.730000000000004,
+   "lattice_rms_nm": 0.014830300528935398,
+   "lattice_vectors": 66,
+   "ruler_atoms": 12,
+   "survey_atoms": 12,
+   "candidates": 6,
+   "start_nm": [
+    -1.250842334359671,
+    4.188744006964134
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 9,
+     "off_goal_nm": 1.979
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 9,
+     "off_goal_nm": 0.009
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 413,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.003701913263178415
+   },
+   "instrument_s": 1659.1346350664357,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 2,
+   "drift_atoms": [
+    4,
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 4,
+     "path": 1,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 25.07,
+   "lattice_rms_nm": 0.05624640506327615,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 4,
+   "start_nm": [
+    -5.792898301596798,
+    0.09947466411340855
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 1,
+     "off_goal_nm": 3.76
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 17,
+     "off_goal_nm": 0.008
+    }
+   ],
+   "tip_mid": 1,
+   "recoveries": [
+    "conditioned"
+   ],
+   "r_success_kohm": 131.072
+  },
+  {
+   "paper": "P4",
+   "seed": 414,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 6,
+   "abs_err": {
+    "target_site": 0.002928613896228245
+   },
+   "instrument_s": 1214.7155047981641,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "blunt",
+   "pokes": 3,
+   "tip_rounds": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 6,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 56.967999999999996,
+   "lattice_rms_nm": 0.013324571870359953,
+   "lattice_vectors": 66,
+   "ruler_atoms": 12,
+   "survey_atoms": 12,
+   "candidates": 5,
+   "start_nm": [
+    9.10140056483801,
+    -4.597467509843661
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 7,
+     "off_goal_nm": 2.308
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 9,
+     "off_goal_nm": 0.008
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 415,
+   "success": false,
+   "partial": 0.0,
+   "error": "RuntimeError: no candidate has fiducials around it",
+   "claims_ok": {
+    "target_site": false,
+    "bystander_max_shift_nm": false
+   },
+   "on_goal": null,
+   "n_bystanders": null,
+   "abs_err": {
+    "target_site": NaN
+   },
+   "instrument_s": 1461.9754473388498,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 4,
+   "drift_atoms": [
+    4,
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 5
+    }
+   ],
+   "lattice_deg": 35.647999999999996,
+   "lattice_rms_nm": 0.014767594165679276,
+   "lattice_vectors": 15,
+   "ruler_atoms": 6,
+   "survey_atoms": 6,
+   "candidates": 1,
+   "start_nm": [
+    -10.73193852230679,
+    -6.411447474618509
+   ],
+   "skipped": [
+    "too few fiducials around the atom"
+   ]
+  },
+  {
+   "paper": "P4",
+   "seed": 416,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": false,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.01820586782535068
+   },
+   "instrument_s": 1199.4871705901032,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "neighbour": 1,
+     "edge": 7,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 24.517999999999997,
+   "lattice_rms_nm": 0.01794575348014762,
+   "lattice_vectors": 55,
+   "ruler_atoms": 11,
+   "survey_atoms": 11,
+   "candidates": 2,
+   "start_nm": [
+    -0.9198066482107627,
+    6.890282573791097
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 7,
+     "off_goal_nm": 2.424
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 11,
+     "off_goal_nm": 0.005
+    }
+   ],
+   "r_success_kohm": 83.88608000000002
+  },
+  {
+   "paper": "P4",
+   "seed": 417,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.00039042901253771314
+   },
+   "instrument_s": 959.5718516598025,
+   "tip_condition": "unstable",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 1,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 23.596000000000004,
+   "lattice_rms_nm": 0.004222645040534102,
+   "lattice_vectors": 15,
+   "ruler_atoms": 6,
+   "survey_atoms": 6,
+   "candidates": 4,
+   "start_nm": [
+    -2.610582882131691,
+    1.7112876090324889
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "off_goal_nm": 3.775
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 2,
+     "off_goal_nm": 3.329
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 8,
+     "off_goal_nm": 1.547
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 7,
+     "off_goal_nm": 0.008
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 418,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 5,
+   "abs_err": {
+    "target_site": 0.001752816237783149
+   },
+   "instrument_s": 579.9706689225205,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 3,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 20.592000000000002,
+   "lattice_rms_nm": 0.011770693215627084,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 6,
+   "start_nm": [
+    -2.4728252728582554,
+    1.9228805854150437
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 18,
+     "off_goal_nm": 0.015
+    }
+   ],
+   "r_success_kohm": 400.0
+  },
+  {
+   "paper": "P4",
+   "seed": 419,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 1,
+   "abs_err": {
+    "target_site": 0.004072596514288548
+   },
+   "instrument_s": 1824.5503595048817,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 11,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "goal": 2,
+     "edge": 3
+    }
+   ],
+   "lattice_deg": 26.994,
+   "lattice_rms_nm": 0.015602859961771217,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 3,
+   "start_nm": [
+    7.3633885806057044,
+    -8.673605012221756
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 18,
+     "off_goal_nm": 0.053
+    }
+   ],
+   "r_success_kohm": 320.0
+  },
+  {
+   "paper": "P4",
+   "seed": 420,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.004259202929972689
+   },
+   "instrument_s": 1795.1984439719208,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "blunt",
+   "pokes": 3,
+   "tip_rounds": 2,
+   "drift_atoms": [
+    2,
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 5
+    }
+   ],
+   "lattice_deg": 46.970000000000006,
+   "lattice_rms_nm": 0.009267403373186153,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 5,
+   "start_nm": [
+    5.11630200897266,
+    5.944682414036356
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 4,
+     "off_goal_nm": 3.006
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 13,
+     "off_goal_nm": 0.003
+    }
+   ],
+   "tip_mid": 1,
+   "recoveries": [
+    "conditioned"
+   ],
+   "r_success_kohm": 83.88608000000002
+  },
+  {
+   "paper": "P4",
+   "seed": 421,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.004069225848364053
+   },
+   "instrument_s": 1420.9990281808514,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 2,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "goal": 1,
+     "edge": 7
+    }
+   ],
+   "lattice_deg": 27.082000000000004,
+   "lattice_rms_nm": 0.01350854319863065,
+   "lattice_vectors": 78,
+   "ruler_atoms": 13,
+   "survey_atoms": 13,
+   "candidates": 5,
+   "start_nm": [
+    7.2901808759681614,
+    5.670800653092138
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 2,
+     "off_goal_nm": 3.52
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 15,
+     "off_goal_nm": 0.246
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 1,
+     "off_goal_nm": 0.017
+    }
+   ],
+   "r_success_kohm": 67.10886400000001
+  },
+  {
+   "paper": "P4",
+   "seed": 422,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.004622620568701205
+   },
+   "instrument_s": 1981.4005556896595,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 2,
+   "drift_atoms": [
+    4,
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 1
+    }
+   ],
+   "lattice_deg": 50.806000000000004,
+   "lattice_rms_nm": 0.01590724745185636,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 6,
+   "start_nm": [
+    4.220398937184491,
+    9.513681186520952
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0,
+     "off_goal_nm": 3.994
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 53.7,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 42.9,
+     "spikes": 16,
+     "off_goal_nm": 0.236
+    },
+    {
+     "r_kohm": 42.9,
+     "spikes": 1,
+     "off_goal_nm": 0.01
+    }
+   ],
+   "tip_mid": 1,
+   "recoveries": [
+    "conditioned"
+   ],
+   "r_success_kohm": 42.949672960000015
+  },
+  {
+   "paper": "P4",
+   "seed": 423,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.004967004952836666
+   },
+   "instrument_s": 1218.6900857896203,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 3
+    }
+   ],
+   "lattice_deg": 6.662000000000001,
+   "lattice_rms_nm": 0.015589362669714371,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 4,
+   "start_nm": [
+    -1.2643437031128215,
+    -1.90890782895476
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 1,
+     "off_goal_nm": 3.842
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 2,
+     "off_goal_nm": 3.336
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 14,
+     "off_goal_nm": 0.003
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 424,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.00667107983805424
+   },
+   "instrument_s": 802.0628595816682,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 2
+    }
+   ],
+   "lattice_deg": 3.8400000000000003,
+   "lattice_rms_nm": 0.009843038599851235,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 6,
+   "start_nm": [
+    4.371460753011142,
+    0.9958872979064779
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 3,
+     "off_goal_nm": 3.194
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 13,
+     "off_goal_nm": 0.01
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 425,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.009772602125005912
+   },
+   "instrument_s": 792.6178584654682,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "edge": 5,
+     "goal": 2,
+     "path": 1
+    }
+   ],
+   "lattice_deg": 43.05800000000001,
+   "lattice_rms_nm": 0.014404690993841047,
+   "lattice_vectors": 66,
+   "ruler_atoms": 12,
+   "survey_atoms": 12,
+   "candidates": 4,
+   "start_nm": [
+    -0.38603143091381753,
+    3.2475853644017043
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 17,
+     "off_goal_nm": 0.253
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 0.01
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 426,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.0064466337925319795
+   },
+   "instrument_s": 797.5310130675662,
+   "tip_condition": "unstable",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 3,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 36.938,
+   "lattice_rms_nm": 0.007301356081601587,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 4,
+   "start_nm": [
+    5.097484602067169,
+    1.902080722657292
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 2,
+     "off_goal_nm": 3.564
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 16,
+     "off_goal_nm": 0.007
+    }
+   ],
+   "r_success_kohm": 320.0
+  },
+  {
+   "paper": "P4",
+   "seed": 427,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.008098414285004525
+   },
+   "instrument_s": 832.6243951798972,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 3,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 56.06,
+   "lattice_rms_nm": 0.020733803575937383,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 4,
+   "start_nm": [
+    2.16504143788676,
+    1.68784111008312
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 15,
+     "off_goal_nm": 0.256
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 1,
+     "off_goal_nm": 0.005
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 428,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 1,
+   "abs_err": {
+    "target_site": 0.00586109254848157
+   },
+   "instrument_s": 1349.299715775835,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 4,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 8,
+     "neighbour": 2,
+     "step": 1
+    },
+    {
+     "edge": 5,
+     "path": 1,
+     "goal": 1
+    }
+   ],
+   "lattice_deg": 32.578,
+   "lattice_rms_nm": 0.030933370503854418,
+   "lattice_vectors": 55,
+   "ruler_atoms": 11,
+   "survey_atoms": 11,
+   "candidates": 4,
+   "start_nm": [
+    19.984452204165095,
+    -5.241905632783762
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 3,
+     "off_goal_nm": 3.309
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 15,
+     "off_goal_nm": 0.025
+    }
+   ],
+   "r_success_kohm": 256.0
+  },
+  {
+   "paper": "P4",
+   "seed": 429,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.0037170498119424894
+   },
+   "instrument_s": 940.9020331273795,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "edge": 5,
+     "goal": 1,
+     "neighbour": 2
+    }
+   ],
+   "lattice_deg": 48.242000000000004,
+   "lattice_rms_nm": 0.021753099435898655,
+   "lattice_vectors": 78,
+   "ruler_atoms": 13,
+   "survey_atoms": 13,
+   "candidates": 5,
+   "start_nm": [
+    -6.50888672807595,
+    -5.554587074862241
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "off_goal_nm": 3.669
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 3.434
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 14,
+     "off_goal_nm": 0.253
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 1,
+     "off_goal_nm": 0.009
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 430,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.0029949044266477896
+   },
+   "instrument_s": 761.1551096350181,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 2,
+     "goal": 2
+    }
+   ],
+   "lattice_deg": 26.692000000000004,
+   "lattice_rms_nm": 0.014965408429168955,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 4,
+   "start_nm": [
+    -1.215088528060516,
+    3.041667984767898
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 2,
+     "off_goal_nm": 3.535
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 16,
+     "off_goal_nm": 0.019
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 431,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.005956128259513948
+   },
+   "instrument_s": 1057.9259544960948,
+   "tip_condition": "unstable",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "edge": 2,
+     "neighbour": 4
+    }
+   ],
+   "lattice_deg": 46.620000000000005,
+   "lattice_rms_nm": 0.036891700695120135,
+   "lattice_vectors": 36,
+   "ruler_atoms": 9,
+   "survey_atoms": 9,
+   "candidates": 3,
+   "start_nm": [
+    -7.6095999820459355,
+    -4.814964181443848
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 5,
+     "off_goal_nm": 2.77
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 12,
+     "off_goal_nm": 0.028
+    }
+   ],
+   "r_success_kohm": 131.072
+  },
+  {
+   "paper": "P4",
+   "seed": 432,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.005214018137472445
+   },
+   "instrument_s": 1385.9765402927878,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 2,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "goal": 1,
+     "edge": 2,
+     "neighbour": 2
+    }
+   ],
+   "lattice_deg": 49.248000000000005,
+   "lattice_rms_nm": 0.011671476863889725,
+   "lattice_vectors": 66,
+   "ruler_atoms": 12,
+   "survey_atoms": 12,
+   "candidates": 7,
+   "start_nm": [
+    -2.3654038848024435,
+    1.7362913601130536
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 3.748
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 8,
+     "off_goal_nm": 1.921
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 7,
+     "off_goal_nm": 0.245
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 1,
+     "off_goal_nm": 0.011
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 433,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.005151378300843408
+   },
+   "instrument_s": 984.1461520903214,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "neighbour": 2
+    }
+   ],
+   "lattice_deg": 13.888000000000002,
+   "lattice_rms_nm": 0.04217311322444589,
+   "lattice_vectors": 36,
+   "ruler_atoms": 9,
+   "survey_atoms": 9,
+   "candidates": 7,
+   "start_nm": [
+    0.8258024492334002,
+    1.4516615304589031
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 1,
+     "off_goal_nm": 3.682
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 1,
+     "off_goal_nm": 3.439
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 15,
+     "off_goal_nm": 0.015
+    }
+   ],
+   "r_success_kohm": 83.88608000000002
+  },
+  {
+   "paper": "P4",
+   "seed": 434,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 8,
+   "abs_err": {
+    "target_site": 0.008461967410699319
+   },
+   "instrument_s": 943.9252605589145,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    8
+   ],
+   "passed_over": [
+    {
+     "edge": 3,
+     "path": 1,
+     "neighbour": 5
+    }
+   ],
+   "lattice_deg": 0.054000000000000006,
+   "lattice_rms_nm": 0.03989523040162896,
+   "lattice_vectors": 66,
+   "ruler_atoms": 12,
+   "survey_atoms": 12,
+   "candidates": 3,
+   "start_nm": [
+    1.025914859843283,
+    -2.640077423975093
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 1,
+     "off_goal_nm": 3.818
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 3,
+     "off_goal_nm": 3.053
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 12,
+     "off_goal_nm": 0.002
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 435,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.0019785704612129713
+   },
+   "instrument_s": 763.9619780288065,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    6
+   ],
+   "passed_over": [
+    {
+     "neighbour": 3,
+     "edge": 4
+    }
+   ],
+   "lattice_deg": 6.208,
+   "lattice_rms_nm": 0.012590004965550263,
+   "lattice_vectors": 78,
+   "ruler_atoms": 13,
+   "survey_atoms": 13,
+   "candidates": 6,
+   "start_nm": [
+    0.19947412537620224,
+    2.996971586815196
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "off_goal_nm": 3.846
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 16,
+     "off_goal_nm": 0.007
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 436,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.009554465698248141
+   },
+   "instrument_s": 750.8087018550325,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "goal": 1,
+     "path": 1,
+     "edge": 2
+    }
+   ],
+   "lattice_deg": 17.692,
+   "lattice_rms_nm": 0.006561619145049139,
+   "lattice_vectors": 15,
+   "ruler_atoms": 6,
+   "survey_atoms": 6,
+   "candidates": 2,
+   "start_nm": [
+    1.1899304359910374,
+    -5.018626097244891
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 18,
+     "off_goal_nm": 0.003
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 437,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.0023509218672447076
+   },
+   "instrument_s": 1128.4199942696737,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "blunt",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    1
+   ],
+   "passed_over": [
+    {
+     "goal": 2,
+     "edge": 3
+    }
+   ],
+   "lattice_deg": 31.57,
+   "lattice_rms_nm": 0.010169128336571479,
+   "lattice_vectors": 36,
+   "ruler_atoms": 9,
+   "survey_atoms": 9,
+   "candidates": 4,
+   "start_nm": [
+    -2.170021648353867,
+    3.935550291111774
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 2,
+     "off_goal_nm": 3.533
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "off_goal_nm": 3.321
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 14,
+     "off_goal_nm": 0.245
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "off_goal_nm": 0.009
+    }
+   ],
+   "r_success_kohm": 256.0
+  },
+  {
+   "paper": "P4",
+   "seed": 438,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 5,
+   "abs_err": {
+    "target_site": 0.0009977794557926298
+   },
+   "instrument_s": 930.7699271478247,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    7
+   ],
+   "passed_over": [
+    {
+     "goal": 2,
+     "edge": 2,
+     "path": 1
+    }
+   ],
+   "lattice_deg": 9.238000000000001,
+   "lattice_rms_nm": 0.02645325359374942,
+   "lattice_vectors": 66,
+   "ruler_atoms": 12,
+   "survey_atoms": 12,
+   "candidates": 7,
+   "start_nm": [
+    3.545497826002734,
+    -0.1051688364408534
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 3,
+     "off_goal_nm": 3.251
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 14,
+     "off_goal_nm": 0.004
+    }
+   ],
+   "r_success_kohm": 83.88608000000002
+  },
+  {
+   "paper": "P4",
+   "seed": 439,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 1,
+   "abs_err": {
+    "target_site": 0.0049006293914352975
+   },
+   "instrument_s": 1179.7244452628997,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "blunt",
+   "pokes": 3,
+   "tip_rounds": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "edge": 2
+    }
+   ],
+   "lattice_deg": 43.264,
+   "lattice_rms_nm": 0.010877053781537426,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 8,
+   "start_nm": [
+    1.1997212072787562,
+    3.1955411868232773
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "off_goal_nm": 3.853
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 17,
+     "off_goal_nm": 0.012
+    }
+   ],
+   "r_success_kohm": 256.0
+  },
+  {
+   "paper": "P4",
+   "seed": 440,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.0034422530526169244
+   },
+   "instrument_s": 890.1635922109683,
+   "tip_condition": "good",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "goal": 1,
+     "neighbour": 2,
+     "edge": 1
+    }
+   ],
+   "lattice_deg": 23.364,
+   "lattice_rms_nm": 0.012820154017451882,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 3,
+   "start_nm": [
+    -0.7165785272698031,
+    5.800452241756426
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 1,
+     "off_goal_nm": 3.772
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 17,
+     "off_goal_nm": 0.005
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 441,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.008439549244375564
+   },
+   "instrument_s": 1073.4591001323306,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 5,
+     "path": 2
+    }
+   ],
+   "lattice_deg": 38.158,
+   "lattice_rms_nm": 0.012095612766494979,
+   "lattice_vectors": 91,
+   "ruler_atoms": 14,
+   "survey_atoms": 14,
+   "candidates": 7,
+   "start_nm": [
+    0.033372796281248895,
+    4.403015162023554
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 6,
+     "off_goal_nm": 2.656
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 12,
+     "off_goal_nm": 0.002
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 442,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.012217238111208326
+   },
+   "instrument_s": 1252.9013552914507,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 6,
+     "neighbour": 1
+    }
+   ],
+   "lattice_deg": 19.834000000000003,
+   "lattice_rms_nm": 0.018128664689513824,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 3,
+   "start_nm": [
+    2.5474359032167655,
+    0.4683518625487757
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 4,
+     "off_goal_nm": 3.135
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 4,
+     "off_goal_nm": 2.208
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 10,
+     "off_goal_nm": 0.006
+    }
+   ],
+   "r_success_kohm": 83.88608000000002
+  },
+  {
+   "paper": "P4",
+   "seed": 443,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.007118184776549254
+   },
+   "instrument_s": 1315.5766023840933,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 4,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 3,
+     "step": 2,
+     "path": 1
+    }
+   ],
+   "lattice_deg": 6.220000000000001,
+   "lattice_rms_nm": 0.020625490442961622,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 4,
+   "start_nm": [
+    9.296416232881455,
+    8.87691994075232
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "off_goal_nm": 3.851
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 16,
+     "off_goal_nm": 0.009
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 444,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 6,
+   "abs_err": {
+    "target_site": 0.0070059740677692085
+   },
+   "instrument_s": 1122.5806565416083,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 2,
+   "drift_atoms": [
+    7
+   ],
+   "passed_over": [
+    {
+     "edge": 3,
+     "goal": 1,
+     "neighbour": 1,
+     "path": 1
+    }
+   ],
+   "lattice_deg": 30.06,
+   "lattice_rms_nm": 0.021632799978714087,
+   "lattice_vectors": 36,
+   "ruler_atoms": 9,
+   "survey_atoms": 9,
+   "candidates": 3,
+   "start_nm": [
+    -1.501218297049725,
+    7.789651897020233
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 7,
+     "off_goal_nm": 2.429
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 11,
+     "off_goal_nm": 0.011
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 445,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.0030062997861278478
+   },
+   "instrument_s": 1171.1449567336635,
+   "tip_condition": "double",
+   "atoms_tried": 1,
+   "tip_first": "double",
+   "pokes": 3,
+   "tip_rounds": 1,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "edge": 5
+    }
+   ],
+   "lattice_deg": 38.612,
+   "lattice_rms_nm": 0.01441996671198726,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 5,
+   "start_nm": [
+    -1.648160145627191,
+    4.565433134811878
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "off_goal_nm": 3.756
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 3,
+     "off_goal_nm": 3.084
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 13,
+     "off_goal_nm": 0.243
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 0.017
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 446,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 2,
+   "abs_err": {
+    "target_site": 0.010505117908345577
+   },
+   "instrument_s": 1342.6737758307622,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 3,
+   "drift_atoms": [
+    3
+   ],
+   "passed_over": [
+    {
+     "edge": 6
+    }
+   ],
+   "lattice_deg": 56.660000000000004,
+   "lattice_rms_nm": 0.018415075906592186,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 4,
+   "start_nm": [
+    6.25380080911534,
+    11.593807472854072
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "off_goal_nm": 3.699
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 15,
+     "off_goal_nm": 0.014
+    }
+   ],
+   "r_success_kohm": 163.84
+  },
+  {
+   "paper": "P4",
+   "seed": 447,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 3,
+   "abs_err": {
+    "target_site": 0.0057827454942677575
+   },
+   "instrument_s": 814.8525974163628,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    4
+   ],
+   "passed_over": [
+    {
+     "goal": 2,
+     "edge": 4,
+     "neighbour": 1
+    }
+   ],
+   "lattice_deg": 54.85,
+   "lattice_rms_nm": 0.014438017161777561,
+   "lattice_vectors": 66,
+   "ruler_atoms": 12,
+   "survey_atoms": 12,
+   "candidates": 5,
+   "start_nm": [
+    2.941289000633329,
+    3.4397993995364153
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 2,
+     "off_goal_nm": 3.592
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 2,
+     "off_goal_nm": 3.083
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 13,
+     "off_goal_nm": 0.01
+    }
+   ],
+   "r_success_kohm": 204.8
+  },
+  {
+   "paper": "P4",
+   "seed": 448,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 4,
+   "abs_err": {
+    "target_site": 0.0036155768638037994
+   },
+   "instrument_s": 833.7512618715132,
+   "tip_condition": "dirty",
+   "atoms_tried": 1,
+   "tip_first": "ok",
+   "pokes": 3,
+   "drift_atoms": [
+    5
+   ],
+   "passed_over": [
+    {
+     "path": 1,
+     "edge": 5
+    }
+   ],
+   "lattice_deg": 58.53,
+   "lattice_rms_nm": 0.03896852561906585,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
+   "candidates": 4,
+   "start_nm": [
+    -4.642331870964709,
+    -0.8940239965415131
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 16,
+     "off_goal_nm": 0.002
+    }
+   ],
+   "r_success_kohm": 104.8576
+  },
+  {
+   "paper": "P4",
+   "seed": 449,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "target_site": true,
+    "bystander_max_shift_nm": true
+   },
+   "on_goal": true,
+   "n_bystanders": 1,
+   "abs_err": {
+    "target_site": 0.009013810754448365
+   },
+   "instrument_s": 1941.8172756506992,
+   "tip_condition": "blunt",
+   "atoms_tried": 1,
+   "tip_first": "unknown",
+   "pokes": 3,
+   "tip_rounds": 5,
+   "drift_atoms": [
+    4,
+    1
+   ],
+   "passed_over": [
+    {
+     "edge": 3
+    }
+   ],
+   "lattice_deg": 54.984,
+   "lattice_rms_nm": 0.01684016833781701,
+   "lattice_vectors": 36,
+   "ruler_atoms": 9,
+   "survey_atoms": 9,
+   "candidates": 6,
+   "start_nm": [
+    -0.4538193302592646,
+    -4.181247185612179
+   ],
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 2,
+     "off_goal_nm": 3.586
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 9,
+     "off_goal_nm": 1.407
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 6,
+     "off_goal_nm": 0.005
+    }
+   ],
+   "tip_mid": 1,
+   "recoveries": [
+    "conditioned"
+   ],
+   "r_success_kohm": 163.84
+  }
+ ]
+}

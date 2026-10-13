@@ -135,3 +135,13 @@ notes: |
   (both succeed with the fix).
   Every move's creep is kept now. The reference, rerun: 150/150, every rung unchanged,
   instrument time within 0.009 s, the reported place within 0.8 pm.
+
+  **Scripted baseline without the truth (2026-10-14, ``stmbench/baselines/p4.py``).** The
+  instrument an agent gets and nothing else: the tip judged from how its atoms look, the atom
+  chosen from a survey, the drift from atoms found again, the move followed against fiducials.
+  Held out until the code was final, seeds 450–599: 150/150 (blunt 30/30, dirty 25/25,
+  double 43/43, good 30/30, unstable 22/22), instrument time median 984 s, p90 1410 s, max
+  2331 s. Seeds 0–299, where it was developed: 300/300. Two earlier held-out rounds, before
+  the fixes their failures led to: 149/150 (150–299) and 145/150 (300–449). In 296 of the
+  300 development successes the moved atom had other atoms within ``bystander_nm``, so the
+  bystander claim was tested.
