@@ -336,7 +336,15 @@ def claims_verified(truth: dict, thr: dict | None = None, *, claims=(), report=N
                     if dist <= float(tol.get("report_nm", 0.5)):
                         info["atom_id"] = near["id"]
                         truth_val = near
-                        value_ok = bool(near.get("on_goal")) and bool(near.get("isolated"))
+                        on_goal = bool(near.get("on_goal"))
+                        d, best = near.get("goal_dist_nm"), near.get("goal_nearest_nm")
+                        if d is not None and best is not None:
+                            # where another site is all but as near the point as the nearest
+                            # one, which of them is "nearest" turns on the lattice constant's
+                            # last digit: either counts
+                            info["goal_margin_nm"] = float(d) - float(best)
+                            on_goal = on_goal or float(d) - float(best) <= float(tol.get("site_tie_nm", 0.0))
+                        value_ok = on_goal and bool(near.get("isolated"))
                     else:
                         truth_val = {"reason": "no_moved_atom_there", "nearest_nm": dist}
                 else:

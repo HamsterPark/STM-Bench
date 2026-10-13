@@ -573,7 +573,8 @@ class AdatomRegistry:
         for a in atoms:
             if not a.history:
                 continue
-            gi, gj = self.site_of(a.x0 + dx, a.y0 + dy, a.sub)
+            px, py = a.x0 + dx, a.y0 + dy                       # the point d from its birth
+            gi, gj = self.site_of(px, py, a.sub)
             gx, gy = self.site_xy(gi, gj, a.sub)
             d_birth = np.hypot(births[:, 0] - a.x0, births[:, 1] - a.y0)
             d_goal = np.hypot(births[:, 0] - gx, births[:, 1] - gy)
@@ -584,6 +585,10 @@ class AdatomRegistry:
                           "now_nm": [now[0] * 1e9, now[1] * 1e9] if now else None,
                           "goal_site": [gi, gj], "goal_nm": [gx * 1e9, gy * 1e9],
                           "on_goal": bool(now is not None and (a.i, a.j) == (gi, gj)),
+                          # how far its site and the nearest site are from that point: a site
+                          # all but as near as the nearest is the same answer (judge's site_tie_nm)
+                          "goal_dist_nm": math.hypot(now[0] - px, now[1] - py) * 1e9 if now else None,
+                          "goal_nearest_nm": math.hypot(gx - px, gy - py) * 1e9,
                           "isolated": bool(np.count_nonzero(d_birth <= iso) <= 1),
                           "n_bystanders": len(others),
                           "bystander_max_shift_nm": max((shift_nm(o) for o in others), default=0.0)})

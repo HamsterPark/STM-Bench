@@ -115,6 +115,28 @@ def test_v1_the_verification_frame_must_follow_the_last_hop():
         assert v.success is ok, (frame, v.details["claims"]["target_site"])
 
 
+def test_v1_a_site_all_but_as_near_as_the_nearest_counts():
+    """Which site is nearest to birth + d can turn on the lattice constant's last digit (P4
+    notes, 2026-10-13): a site at most ``site_tie_nm`` farther from the point than the
+    nearest one counts too; a site a spacing off still does not."""
+    hop = {"kind": "adatom_hop", "cause": "folme", "sim_s": 50.0}
+    after = {**FRAME, "idx": 2, "sim_s": 60.0, "path": "s/a002.sxm", "cx_m": 10e-9,
+             "w_m": 10e-9, "h_m": 10e-9, "nx": 64, "ny": 64}
+    claim = {**_target_claim(), "tol": {"site_tie_nm": 0.02, "report_nm": 0.6}}
+    for d_now, ok in ((0.130, True), (0.145, True), (0.160, False), (0.300, False)):
+        truth = _any_target_truth()
+        truth["adatoms"]["target"]["candidates"][0].update(on_goal=False, goal_dist_nm=d_now,
+                                                           goal_nearest_nm=0.130)
+        v = judge("claims_verified", truth, claims=[claim], events=[hop, after],
+                  report=_report("target_site", 10.0, x_nm=10.0, y_nm=0.0, frame="a002.sxm"), rules_version=1)
+        assert v.success is ok, (d_now, v.details["claims"]["target_site"])
+    # without the field the rule is the nearest site only
+    truth["adatoms"]["target"]["candidates"][0].update(goal_dist_nm=0.131)
+    v = judge("claims_verified", truth, claims=[_target_claim()], events=[hop, after],
+              report=_report("target_site", 10.0, x_nm=10.0, y_nm=0.0, frame="a002.sxm"), rules_version=1)
+    assert not v.success
+
+
 def _period_claim():
     return {"id": "period_nm", "kind": "scalar", "tol": {"abs": 0.4}, "truth": "herringbone.period_nm",
             "evidence": {"kind": "frame", "min_fov_nm": 40, "max_nm_per_px": 0.5}}

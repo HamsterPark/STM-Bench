@@ -46,7 +46,7 @@ claims:
     say: "你搬动的那个原子的最终位置：x_nm、y_nm 写位置，value 写同一个 x_nm"
     kind: position
     unit: nm
-    tol: {abs_nm: 0.16, report_nm: 0.6}
+    tol: {site_tie_nm: 0.02, report_nm: 0.6}
     truth: adatoms.target
     position: required
     evidence:
@@ -91,3 +91,13 @@ notes: |
   claim turns on and the 0.6 nm matching radius. The rule is also stated in the task now
   (rule card); before, a run that verified the atom on a 0.15 nm/px frame failed on a
   requirement it had never been told.
+
+  **Near-tied sites, 0.02 nm (2026-10-13; was the nearest site only).** Which site is nearest
+  to "birth + d" can turn on the lattice constant's last digit: this Cu(111) has 0.255 nm
+  between hollows, the literature gives 0.2556 nm at room temperature and ~0.2548 nm at 4 K,
+  and 0.24 % of 4 nm is 0.01 nm. On 32 of 300 seeds a second site is within 0.02 nm as near
+  as the nearest (seed 9: 0.0002 nm), so the rule was a coin flip there, also for the
+  reference solution, which measures the lattice from the other atoms. A site at most
+  ``site_tie_nm`` farther from the point than the nearest one now counts as well; elsewhere
+  the rule is unchanged, and an atom one site off is still wrong. (The ``abs_nm: 0.16`` this
+  replaces was never applied, only shown in the replay.)
