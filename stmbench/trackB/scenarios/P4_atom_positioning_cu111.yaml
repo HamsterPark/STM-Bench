@@ -101,3 +101,10 @@ notes: |
   ``site_tie_nm`` farther from the point than the nearest one now counts as well; elsewhere
   the rule is unchanged, and an atom one site off is still wrong. (The ``abs_nm: 0.16`` this
   replaces was never applied, only shown in the replay.)
+
+  **Reference solution (2026-10-13, ``stmbench/reference/p4.py``).** No threshold read (a
+  resistance ladder from 400 kΩ down by 0.8 per step), the goal site computed from the lattice
+  the other atoms in a 28 nm survey give. Seeds 0–149: 150/150, 147 on the nearest site and 3
+  on a tied one; the reported place |error| median 0.04 nm, p90 0.16 nm, max 0.41 nm against
+  ``report_nm`` 0.6; instrument time median 879 s, p90 1428 s, max 2003 s against the 1.5 h
+  budget. No tolerance changed: a fixed answer cannot pass P4.
