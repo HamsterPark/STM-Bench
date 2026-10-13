@@ -156,7 +156,9 @@ class World:
         self.drift_comp_t0 = 0.0                          # slow-clock instant it came on
         self._comp_frozen = np.zeros(3)                   # what it had already taken up
         self.drift_comp_sat = float(dv.get("comp_saturation", 0.9))
-        self._creep: list[tuple[float, np.ndarray]] = []   # (t_sim, delta vector) after moves
+        self._creep: list[tuple[float, np.ndarray]] = []   # (slow-clock instant, delta) of every move
+        self._creep_n = 0                                  # moves noted, for the arrays below
+        self._creep_cache: tuple | None = None
         self.creep_gamma = float(dv.get("creep_gamma", 0.05))
         self.creep_tau_s = float(dv.get("creep_tau_s", 500.0))
         # fast-axis hysteresis, as the fraction of the axis by which the retrace is offset from
@@ -280,15 +282,31 @@ class World:
         """Drift/creep offset (m) at sim instant ``t_sim``; evaluated on the slow clock."""
         t = self.clock.slow_from_sim(t_sim)
         d = self.drift_v_m_per_s * t + self._comp_accum(t)
-        for t0, delta in self._creep:
-            if t > t0:
-                # creep continues in the direction of the move: x(t) = D·γ·ln(1 + t/τ)
-                d = d + delta * self.creep_gamma * math.log1p((t - t0) / self.creep_tau_s)
+        if self._creep:
+            t0, deltas = self._creep_arrays()
+            live = t > t0
+            if live.any():
+                # creep continues in the direction of every move: x(t) = D·γ·ln(1 + t/τ)
+                w = self.creep_gamma * np.log1p((t - t0[live]) / self.creep_tau_s)
+                d = d + (deltas[live] * w[:, None]).sum(axis=0)
         return float(d[0]), float(d[1]), float(d[2])
 
+    def _creep_arrays(self) -> tuple[np.ndarray, np.ndarray]:
+        key = (id(self._creep), len(self._creep), self._creep_n)
+        if self._creep_cache is None or self._creep_cache[0] != key:
+            t0 = np.array([c[0] for c in self._creep], float)
+            deltas = np.array([c[1] for c in self._creep], float).reshape(-1, 3)
+            self._creep_cache = (key, t0, deltas)
+        return self._creep_cache[1], self._creep_cache[2]
+
     def note_move(self, delta: np.ndarray) -> None:
+        # Every move keeps creeping (the log never levels off, and the creep of several moves
+        # adds up). Only the last 20 used to be kept, and a move dropped from that window took
+        # its creep with it at once: after a tip conditioned 150 nm away and back, the sample
+        # jumped by ±10 nm between frames as the out-and-back pair slid across the window's
+        # edge (P4 seeds 77 and 138 of the scripted baseline, 2026-10-14).
         self._creep.append((self.clock.slow(), np.asarray(delta, float)))
-        self._creep = self._creep[-20:]
+        self._creep_n += 1
 
     # Z conversions
     def z_tip_from_ctrl(self, z_n) -> float | np.ndarray:
