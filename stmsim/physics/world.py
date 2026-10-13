@@ -502,6 +502,18 @@ class World:
         self._lose_adatoms(sx, sy, 3e-9 * severity, cause="crash")
         self._event("crash", reason=reason, **out)
 
+    def _bury_carried(self, x: float, y: float) -> None:
+        """A poke whose apex came back clean (:meth:`Tip.poke`) left the atom the tip had picked
+        up in the deposit: lost, and the tip can move atoms again."""
+        reg = self.surface.site.adatoms
+        if reg is None or reg.carried is None or self.tip.carried is not None:
+            return
+        atom, reg.carried = reg.carried, None
+        atom.status = "lost"
+        reg.epoch += 1
+        self._event("adatom_lost", atom_ids=[atom.id], cause="poke", buried=True,
+                    xy_nm=[x * 1e9, y * 1e9], radius_nm=0.0)
+
     def _lose_adatoms(self, x: float, y: float, radius: float, *, cause: str) -> None:
         """A crash / poke / pulse takes the adatoms it lands on with it."""
         reg = self.surface.site.adatoms
@@ -772,6 +784,7 @@ class World:
                 depth = float(-np.min(z_close))
                 outcome = self.tip.poke(self.clock.sim(), max(depth, 0.0), self.bias_v)
                 sx0, sy0 = self.sample_xy()
+                self._bury_carried(sx0, sy0)
                 self._apply_poke_outcome(outcome, sx0, sy0)
                 df = np.where(contact, np.maximum(50.0, np.abs(df) + 50.0), df)
                 if self.zctrl.on:
@@ -977,6 +990,7 @@ class World:
             outcome = self.tip.poke(self.clock.sim(), depth, bias)
             # surface memory
             sx, sy = self.sample_xy()
+            self._bury_carried(sx, sy)
             if outcome["outcome"] in ("cluster", "pit"):
                 sig = outcome.get("cluster_sigma_m", 1e-9)
                 hgt = outcome.get("cluster_height_m", 0.4e-9)
