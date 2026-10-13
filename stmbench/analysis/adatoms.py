@@ -55,7 +55,7 @@ def bumps(z: np.ndarray, nm_per_px: float, *, background_nm: float = 2.0, min_he
           compact_r_nm: float = 0.7, border_nm: float = 0.5) -> tuple[list[tuple[float, float, float]], np.ndarray]:
     """Compact bumps in a topograph: ``([(col, row, height_m), …] highest first, background-
     subtracted array)``. A bump is a local maximum standing ``min_height_m`` and ``min_sigma``
-    noise sigmas above a running median over ``background_nm``, and falling below
+    pixel-noise sigmas above a running median over ``background_nm``, and falling below
     ``compact_frac`` of its height ``compact_r_nm`` out in all eight directions (a step's
     ridge does not, nor the corner where a step meets a row jump)."""
     from scipy.ndimage import gaussian_filter, maximum_filter, median_filter
@@ -68,7 +68,12 @@ def bumps(z: np.ndarray, nm_per_px: float, *, background_nm: float = 2.0, min_he
     size = max(5, int(round(background_nm / nm_per_px)) | 1)
     hp = gaussian_filter(z - median_filter(z, size=size, mode="nearest"), max(0.5, 0.06 / nm_per_px))
     med = float(np.median(hp))
-    noise = 1.4826 * float(np.median(np.abs(hp - med)))
+    # the noise from neighbouring pixels along the line: smooth things (atoms, a ring of them
+    # filling a third of a small frame) hardly change from one pixel to the next, while they
+    # inflate a spread taken over the frame's values (a 5 nm frame beside a corral put
+    # 4 sigma above a 56 pm atom)
+    dz = np.diff(z, axis=1)
+    noise = 1.4826 * float(np.median(np.abs(dz - np.median(dz)))) / math.sqrt(2.0)
     hp = hp - med
     sep = max(3, int(round(min_sep_nm / nm_per_px)) | 1)
     peaks = (hp == maximum_filter(hp, size=sep)) & (hp > max(min_height_m, min_sigma * noise))

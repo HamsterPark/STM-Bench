@@ -99,6 +99,22 @@ def test_a_bump_beside_a_step_and_below_a_row_jump():
     assert abs(col * npx - 3.0) < 0.15 and abs(row * npx - 4.0) < 0.15 and h > 40e-12
 
 
+def test_an_atom_beside_a_ring_of_atoms_is_found():
+    """A 5 nm frame over an atom 1.5 nm from a corral, the ring's arc across the top of it: the
+    atom is found. The noise level comes from neighbouring pixels, so the arc does not count as
+    noise (on a rendered frame beside a P3-repair corral, a spread taken over the frame's values
+    had put the threshold above a 56 pm atom)."""
+    npx, n = 0.1, 50
+    yy, xx = np.mgrid[0:n, 0:n] * npx
+    x, y = xx - 2.5, 2.5 - yy                                  # frame centre at 0, row 0 at the top
+    z = np.random.default_rng(1).normal(0.0, 2.7e-12, x.shape)
+    for k in range(-4, 5):                                     # ring atoms 0.85 nm apart, 1.5 nm up
+        z += 45e-12 * np.exp(-((x - 0.85 * k) ** 2 + (y - 1.5) ** 2) / (2 * 0.36 ** 2))
+    z += 56e-12 * np.exp(-((x + 0.2) ** 2 + y ** 2) / (2 * 0.36 ** 2))
+    found, _ = bumps(z, npx, compact_frac=0.9)
+    assert any(abs(c * npx - 2.5 + 0.2) < 0.25 and abs(2.5 - r * npx) < 0.25 for c, r, h in found)
+
+
 def test_a_slow_frame_places_the_atom_and_a_fast_one_shifts_it_along_the_scan():
     """On a rendered frame (seed 28 arrives with a good tip): at 20 nm/s the atom is where the
     sample has it; at 280 nm/s the Z loop's lag puts it ~0.15 nm further along the fast axis."""

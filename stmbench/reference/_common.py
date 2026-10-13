@@ -26,6 +26,18 @@ class Session:
         ox, oy, _ = self.w.drift_offset(self.w.clock.sim())
         return (sx - ox) * 1e9, (sy - oy) * 1e9
 
+    def image_xy(self, sx: float, sy: float) -> tuple[float, float]:
+        """Where an atom at a sample-frame point (m) shows in a frame now, in scan nm: the tip
+        images through its apex, so a feature appears shifted by the apex's lateral offset
+        (privileged: read from the tip). Spontaneous changes walk the offset, past 0.8 nm on
+        some seeds, while images and drags stay consistent with each other."""
+        apexes = getattr(self.w.tip, "apexes", None) or []
+        dx = dy = 0.0
+        if apexes:
+            lead = max(apexes, key=lambda a: a.dz)
+            dx, dy = float(lead.dx), float(lead.dy)
+        return self.scan_xy(sx - dx, sy - dy)
+
     def go(self, sx: float, sy: float) -> None:
         """Put the tip over a sample-frame point."""
         x, y = self.scan_xy(sx, sy)
