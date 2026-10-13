@@ -117,7 +117,7 @@ STM-Bench 提供共同的实验环境，用于研究不同控制运行时与视�
 |---|---|---|
 | **[STM-Bench](https://github.com/HamsterPark/STM-Bench)** | 模拟显微镜、论文启发任务、种子控制的环境变化、采集证据评估与回放。 | 定义实验环境，检验科学结果。 |
 | **[MAST-public](https://github.com/HamsterPark/MAST-public)** | Python 仪器控制运行时、实验技能、状态反馈与工作流的公开子集。 | 展示独立 MAST 评估条件所采用的控制方法；完整集成使用完整 MAST 环境。 |
-| **VISTA-SPM** *（当前未公开）* | 可复用的视觉推理、带尺度标定的图像检查、定量测量与视觉证据档案。 | 提供解释、重访和测量 SPM 观测的方法，可作为对照评估中的视觉组件。 |
+| **[VISTA-SPM](https://github.com/HamsterPark/VISTA-SPM)** | 可复用的视觉推理、带尺度标定的图像检查、定量测量与视觉证据档案。 | 提供解释、重访和测量 SPM 观测的方法，可作为对照评估中的视觉组件。 |
 | **[dsh-spm](https://github.com/HamsterPark/dsh-spm)** | 面向 DeepSeek Harness 的 TypeScript SPM 领域工具与视觉框架集成。 | 提供另一种智能体与运行时集成环境，支持发展 SPM 推理与控制方法。 |
 
 VISTA-SPM 对持续保留视觉证据的重视，在这里具有直接的实验意义：STM 实验会在尺度、漂移与针尖状态不断变化时，反复回到同一个结构。STM-Bench 为研究这类方法提供演化中的物理场景、测量记录和结果判据。独立仪器接口也使基准可以脱离这些配套项目单独使用。
