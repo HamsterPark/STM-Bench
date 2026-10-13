@@ -77,20 +77,18 @@ def _peak_values(claims: list[dict], labels: dict[int, float], peaks_v: list[flo
     return out
 
 
-def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARIO, repeats: int = 3,
-        integration_ms: float = 20.0) -> dict:
-    """One P3 episode by the reference protocol; returns what it reported and how it scored."""
-    s = Session(scenario, seed, out_dir)
+def measure(s: Session, centre, radius_m: float, *, integration_ms: float = 20.0, repeats: int = 3,
+            compensated: bool = False) -> dict:
+    """Steps 2-6 of the protocol, from a tip fit for spectroscopy back at the ring: the radius
+    from a frame, the band bottom on bare terrace, the resonances at the centre; reports every
+    peak and radius claim of the scenario. ``centre`` (m, sample frame) and ``radius_m`` are
+    navigation. ``compensated``: a drift compensation is already running, and is switched off
+    before the drift is measured again (with it on, two frames give only what it leaves)."""
     inst, w = s.inst, s.w
-    ring = w.surface.corral_snapshot()
-    cx, cy = (v * 1e-9 for v in ring["centre_nm"])
-    radius_true = float(ring["radius_nm"]) * 1e-9
-    outside = radius_true + 8e-9
-    rounds = condition_tip(s, cx, cy, clean_ldos=True, imaging=True, r_min=radius_true + 150e-9,
-                           r_max=radius_true + 200e-9, clear=5e-9)
-    if rounds:
-        s.go(cx, cy)
-        inst.act("wait", seconds=300.0)
+    cx, cy = centre
+    outside = radius_m + 8e-9
+    if compensated:
+        inst.act("drift_comp", on=False)
     vx, vy = lateral_drift(s, cx, cy)
     inst.act("drift_comp", on=True, vx_nm_per_min=vx, vy_nm_per_min=vy)
     s.go(cx, cy)
@@ -119,23 +117,47 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
     for cid in radius_claims:
         got[cid] = radius_nm
         inst.report(cid, radius_nm, unit="nm", evidence=[fr["frame"]])
-    out = inst.finish()
-    snap = w.truth()["corral"]
+    return {"values": got, "e0_mev": e0 * 1e3, "radius_measured_nm": float(radius_nm),
+            "peaks_found": len(peaks), "spectra": len(names) + 1,
+            "drift_comp_nm_per_min": [float(vx), float(vy)], "radius_claims": radius_claims}
+
+
+def truth_errors(inst, got: dict, radius_claims: list[str]) -> tuple[dict, dict]:
+    """The truths the reported values are judged against (as the judge matches peaks: the
+    nearest of the lowest ``rank_max``), and the signed errors."""
+    snap = inst.world.truth()["corral"]
     truth = snap["peaks_mev"]
     want = {}
-    for c in inst.scenario.claims:            # as the judge matches: the nearest of the lowest rank_max
+    for c in inst.scenario.claims:
         cid = str(c["id"])
         if c.get("kind") == "peak_in_list" and cid in got:
             cands = truth[: int(c.get("rank_max", len(truth)))]
             if cands:
                 want[cid] = float(min(cands, key=lambda t: abs(t - got[cid])))
     want.update({cid: float(snap["radius_nm"]) for cid in radius_claims})
+    return want, {k: float(got[k] - want[k]) for k in want if k in got}
+
+
+def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARIO, repeats: int = 3,
+        integration_ms: float = 20.0) -> dict:
+    """One P3 episode by the reference protocol; returns what it reported and how it scored."""
+    s = Session(scenario, seed, out_dir)
+    inst, w = s.inst, s.w
+    ring = w.surface.corral_snapshot()
+    cx, cy = (v * 1e-9 for v in ring["centre_nm"])
+    radius_true = float(ring["radius_nm"]) * 1e-9
+    rounds = condition_tip(s, cx, cy, clean_ldos=True, imaging=True, r_min=radius_true + 150e-9,
+                           r_max=radius_true + 200e-9, clear=5e-9)
+    if rounds:
+        s.go(cx, cy)
+        inst.act("wait", seconds=300.0)
+    m = measure(s, (cx, cy), radius_true, integration_ms=integration_ms, repeats=repeats)
+    got = m.pop("values")
+    out = inst.finish()
+    want, err = truth_errors(inst, got, m.pop("radius_claims"))
     return {"paper": "P3", "seed": int(seed), "success": bool(out["success"]),
             "partial": float(out.get("partial", 0.0)),
-            "values": got, "truth": want,
-            "abs_err": {k: float(got[k] - want[k]) for k in want if k in got},
-            "claims_ok": claims_ok(inst), "e0_mev": e0 * 1e3,
-            "radius_nm": float(ring["radius_nm"]), "radius_measured_nm": float(radius_nm),
-            "peaks_found": len(peaks), "instrument_s": float(inst.used_s), "tip_rounds": rounds,
-            "spectra": len(names) + 1, "drift_comp_nm_per_min": [float(vx), float(vy)],
+            "values": got, "truth": want, "abs_err": err,
+            "claims_ok": claims_ok(inst), "radius_nm": float(ring["radius_nm"]),
+            "instrument_s": float(inst.used_s), "tip_rounds": rounds, **m,
             "tip_condition": inst.scenario.draw_hidden(seed).get("tip", {}).get("condition")}
