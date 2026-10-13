@@ -128,3 +128,10 @@ notes: |
   apex's offset where it changes (``apex_runs_nm``) and the judge maps through it as through
   drift. The reference, rerun: 150/150 as before, the reported place |error| from median
   0.040 / p90 0.160 / max 0.407 nm down to 0.006 / 0.016 / 0.043 nm.
+
+  **Creep no longer forgets old moves (2026-10-14).** Only the last 20 moves crept, so after a
+  tip was conditioned 150 nm away and back the sample jumped by ±10 nm between frames as that
+  pair slid out of the window; the scripted baseline lost atoms to it on seeds 77 and 138
+  (both succeed with the fix).
+  Every move's creep is kept now. The reference, rerun: 150/150, every rung unchanged,
+  instrument time within 0.009 s, the reported place within 0.8 pm.

@@ -278,3 +278,28 @@ def test_a_compensation_that_did_not_help_is_switched_back_off(monkeypatch):
     assert "switched off" in out["note"]
     last = [c for c in b.calls if c[0] == "SetDriftCompensation"][-1]
     assert last[1]["enable"] is False
+
+
+def test_old_moves_keep_their_creep():
+    """Every move creeps on, x(t) = D·γ·ln(1 + t/τ), and the creep of all of them adds up.
+    Only the last 20 moves used to be kept, and an old one dropped out of the sum with all its
+    creep at once: after a tip was conditioned 150 nm away and back, the sample jumped by
+    ±10 nm between frames as the out-and-back pair slid across the window's edge (the scripted
+    P4 baseline, seeds 77 and 138). Here 30 short moves follow such a pair; none may move the sample."""
+    from stmbench.instrument import Instrument
+
+    inst = Instrument("P4_atom_positioning_cu111", 0)
+    w = inst.world
+    w.drift_v_m_per_s = np.zeros(3)
+    w._creep.clear()
+    inst.act("move_tip", x_nm=0.0, y_nm=150.0)
+    inst.act("wait", seconds=60.0)
+    inst.act("move_tip", x_nm=0.0, y_nm=0.0)
+    worst = 0.0
+    for k in range(30):
+        inst.act("wait", seconds=30.0)
+        before = np.array(w.drift_offset(w.clock.sim()))
+        inst.act("move_tip", x_nm=6.0 if k % 2 == 0 else 0.0, y_nm=0.0)
+        after = np.array(w.drift_offset(w.clock.sim()))
+        worst = max(worst, float(np.hypot(*(after - before)[:2])) * 1e9)
+    assert worst < 0.05, worst
