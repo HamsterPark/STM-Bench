@@ -1,0 +1,1179 @@
+{
+ "summary": {
+  "n": 30,
+  "errors": [],
+  "success_rate": 1.0,
+  "claims": {
+   "peak_hi_mev": {
+    "relative": false,
+    "pass_rate": 1.0,
+    "err_median": 1.018492243179793,
+    "err_p90": 2.5309993109778395,
+    "err_max": 2.877304403938183,
+    "signed_median": 0.3211839856537879
+   },
+   "peak_lo_mev": {
+    "relative": false,
+    "pass_rate": 1.0,
+    "err_median": 1.5265459076688899,
+    "err_p90": 2.7413251947365493,
+    "err_max": 3.6969980416918133,
+    "signed_median": -0.33138556939414343
+   },
+   "radius_nm": {
+    "relative": false,
+    "pass_rate": 1.0,
+    "err_median": 0.019236572557355114,
+    "err_p90": 0.03845688686811384,
+    "err_max": 0.12012805763561385,
+    "signed_median": 0.0010372266927731744
+   }
+  },
+  "instrument_s": {
+   "median": 485.0058520074871,
+   "p90": 528.325297615777
+  }
+ },
+ "runs": [
+  {
+   "paper": "P3",
+   "seed": 0,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -392.0,
+    "peak_hi_mev": -292.00000000000006,
+    "radius_nm": 6.730116004619621
+   },
+   "truth": {
+    "peak_lo_mev": -392.3087496510669,
+    "peak_hi_mev": -292.3087496510668,
+    "radius_nm": 6.850244062255235
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.3087496510668757,
+    "peak_hi_mev": 0.308749651066762,
+    "radius_nm": -0.12012805763561385
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 6.850244062255235,
+   "instrument_s": 526.8422706822972,
+   "tip_rounds": 7,
+   "e0_mev": -465.4759391054703,
+   "radius_measured_nm": 6.730116004619621,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.14803309490366862,
+    -0.21927238264749596
+   ],
+   "tip_condition": "blunt"
+  },
+  {
+   "paper": "P3",
+   "seed": 1,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -368.00000000000006,
+    "peak_hi_mev": -294.00000000000006,
+    "radius_nm": 8.26031280128868
+   },
+   "truth": {
+    "peak_lo_mev": -366.4232882053945,
+    "peak_hi_mev": -294.42328820539444,
+    "radius_nm": 8.253441106191982
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.5767117946055578,
+    "peak_hi_mev": 0.4232882053943854,
+    "radius_nm": 0.006871695096698716
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 8.253441106191982,
+   "instrument_s": 482.7783075880222,
+   "tip_rounds": 1,
+   "e0_mev": -419.58914951476174,
+   "radius_measured_nm": 8.26031280128868,
+   "peaks_found": 6,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    1.0457086328834018,
+    0.07629939201180085
+   ],
+   "tip_condition": "double"
+  },
+  {
+   "paper": "P3",
+   "seed": 2,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -370.00000000000006,
+    "peak_hi_mev": -260.00000000000006,
+    "radius_nm": 6.667719501745132
+   },
+   "truth": {
+    "peak_lo_mev": -368.87730440393835,
+    "peak_hi_mev": -262.87730440393824,
+    "radius_nm": 6.6658769120540216
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.1226955960617033,
+    "peak_hi_mev": 2.877304403938183,
+    "radius_nm": 0.0018425896911100637
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 6.6658769120540216,
+   "instrument_s": 482.78194348615034,
+   "tip_rounds": 1,
+   "e0_mev": -444.6805728549622,
+   "radius_measured_nm": 6.667719501745132,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.08875704281314983,
+    -0.8130901250149516
+   ],
+   "tip_condition": "double"
+  },
+  {
+   "paper": "P3",
+   "seed": 3,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -370.00000000000006,
+    "peak_hi_mev": -272.0,
+    "radius_nm": 6.82839865532736
+   },
+   "truth": {
+    "peak_lo_mev": -369.0104193926886,
+    "peak_hi_mev": -273.01041939268856,
+    "radius_nm": 6.851477267507258
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.9895806073114386,
+    "peak_hi_mev": 1.0104193926885614,
+    "radius_nm": -0.023078612179897817
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 6.851477267507258,
+   "instrument_s": 614.5897910048928,
+   "tip_rounds": 19,
+   "e0_mev": -438.18249893831796,
+   "radius_measured_nm": 6.82839865532736,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.24936896245489665,
+    -0.4890459665092264
+   ],
+   "tip_condition": "blunt"
+  },
+  {
+   "paper": "P3",
+   "seed": 4,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -338.00000000000006,
+    "peak_hi_mev": -166.00000000000003,
+    "radius_nm": 5.20854785101993
+   },
+   "truth": {
+    "peak_lo_mev": -336.16266024865024,
+    "peak_hi_mev": -166.16266024865007,
+    "radius_nm": 5.202266250947304
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.8373397513498162,
+    "peak_hi_mev": 0.1626602486500417,
+    "radius_nm": 0.006281600072626681
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 5.202266250947304,
+   "instrument_s": 490.35762047573974,
+   "tip_rounds": 2,
+   "e0_mev": -456.2131213753219,
+   "radius_measured_nm": 5.20854785101993,
+   "peaks_found": 4,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.7121233316244974,
+    0.38843619688024955
+   ],
+   "tip_condition": "double"
+  },
+  {
+   "paper": "P3",
+   "seed": 5,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -344.0,
+    "peak_hi_mev": -190.00000000000006,
+    "radius_nm": 5.559968268251467
+   },
+   "truth": {
+    "peak_lo_mev": -342.10279462130757,
+    "peak_hi_mev": -190.10279462130742,
+    "radius_nm": 5.555269919201278
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.8972053786924334,
+    "peak_hi_mev": 0.1027946213073676,
+    "radius_nm": 0.004698349050189066
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 5.555269919201278,
+   "instrument_s": 548.9462896145491,
+   "tip_rounds": 10,
+   "e0_mev": -453.00708845506983,
+   "radius_measured_nm": 5.559968268251467,
+   "peaks_found": 4,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.11779588186261522,
+    0.6526594458582649
+   ],
+   "tip_condition": "blunt"
+  },
+  {
+   "paper": "P3",
+   "seed": 6,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -374.00000000000006,
+    "peak_hi_mev": -272.0,
+    "radius_nm": 6.72522185806007
+   },
+   "truth": {
+    "peak_lo_mev": -376.17690138468157,
+    "peak_hi_mev": -270.17690138468146,
+    "radius_nm": 6.704529527328966
+   },
+   "abs_err": {
+    "peak_lo_mev": 2.176901384681514,
+    "peak_hi_mev": -1.8230986153185427,
+    "radius_nm": 0.020692330731103326
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 6.704529527328966,
+   "instrument_s": 541.6725400170948,
+   "tip_rounds": 9,
+   "e0_mev": -450.12682848247516,
+   "radius_measured_nm": 6.72522185806007,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.5079054644458232,
+    0.1636256844716314
+   ],
+   "tip_condition": "blunt"
+  },
+  {
+   "paper": "P3",
+   "seed": 7,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -300.00000000000006,
+    "peak_hi_mev": -108.00000000000004,
+    "radius_nm": 4.796879540932069
+   },
+   "truth": {
+    "peak_lo_mev": -301.20791333644064,
+    "peak_hi_mev": -109.20791333644047,
+    "radius_nm": 4.777287084306023
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.2079133364405834,
+    "peak_hi_mev": 1.207913336440427,
+    "radius_nm": 0.019592456626045696
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 4.777287084306023,
+   "instrument_s": 497.553295926205,
+   "tip_rounds": 3,
+   "e0_mev": -438.34912251106266,
+   "radius_measured_nm": 4.796879540932069,
+   "peaks_found": 3,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.6349893332741925,
+    0.5521367775323227
+   ],
+   "tip_condition": "blunt"
+  },
+  {
+   "paper": "P3",
+   "seed": 8,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -344.0,
+    "peak_hi_mev": -242.00000000000006,
+    "radius_nm": 7.0595407989609935
+   },
+   "truth": {
+    "peak_lo_mev": -342.834022281787,
+    "peak_hi_mev": -244.8340222817869,
+    "radius_nm": 7.080219874221799
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.1659777182130142,
+    "peak_hi_mev": 2.8340222817868437,
+    "radius_nm": -0.020679075260805924
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 7.080219874221799,
+   "instrument_s": 482.6955443455741,
+   "tip_rounds": 1,
+   "e0_mev": -415.5420793922273,
+   "radius_measured_nm": 7.0595407989609935,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.23626101911716052,
+    -0.5708569215840711
+   ],
+   "tip_condition": "double"
+  },
+  {
+   "paper": "P3",
+   "seed": 9,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -372.00000000000006,
+    "peak_hi_mev": -290.00000000000006,
+    "radius_nm": 7.529490434374902
+   },
+   "truth": {
+    "peak_lo_mev": -369.55229877471163,
+    "peak_hi_mev": -289.5522987747116,
+    "radius_nm": 7.565413980275956
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.4477012252884265,
+    "peak_hi_mev": -0.44770122528848333,
+    "radius_nm": -0.03592354590105362
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 7.565413980275956,
+   "instrument_s": 485.0930487607609,
+   "tip_rounds": 2,
+   "e0_mev": -425.16902525314805,
+   "radius_measured_nm": 7.529490434374902,
+   "peaks_found": 4,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.44437380967776446,
+    0.22096395553819928
+   ],
+   "tip_condition": "unstable"
+  },
+  {
+   "paper": "P3",
+   "seed": 10,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -382.0,
+    "peak_hi_mev": -306.00000000000006,
+    "radius_nm": 7.476256485112471
+   },
+   "truth": {
+    "peak_lo_mev": -382.5926373267348,
+    "peak_hi_mev": -304.59263732673475,
+    "radius_nm": 7.496842706978296
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.5926373267348026,
+    "peak_hi_mev": -1.407362673265311,
+    "radius_nm": -0.02058622186582504
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 7.496842706978296,
+   "instrument_s": 482.79062442832907,
+   "tip_rounds": 1,
+   "e0_mev": -437.51097710747814,
+   "radius_measured_nm": 7.476256485112471,
+   "peaks_found": 6,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.19811809495772223,
+    0.028669562769718857
+   ],
+   "tip_condition": "double"
+  },
+  {
+   "paper": "P3",
+   "seed": 11,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -392.0,
+    "peak_hi_mev": -318.00000000000006,
+    "radius_nm": 8.282550318059004
+   },
+   "truth": {
+    "peak_lo_mev": -388.3030019583082,
+    "peak_hi_mev": -316.30300195830813,
+    "radius_nm": 8.268404977582035
+   },
+   "abs_err": {
+    "peak_lo_mev": -3.6969980416918133,
+    "peak_hi_mev": -1.696998041691927,
+    "radius_nm": 0.014145340476968471
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 8.268404977582035,
+   "instrument_s": 490.18813441234016,
+   "tip_rounds": 2,
+   "e0_mev": -440.2806399052766,
+   "radius_measured_nm": 8.282550318059004,
+   "peaks_found": 6,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.7946520919020155,
+    -0.8016462328793171
+   ],
+   "tip_condition": "blunt"
+  },
+  {
+   "paper": "P3",
+   "seed": 12,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -404.0,
+    "peak_hi_mev": -356.00000000000006,
+    "radius_nm": 9.92223688904866
+   },
+   "truth": {
+    "peak_lo_mev": -403.5326288357868,
+    "peak_hi_mev": -355.53262883578674,
+    "radius_nm": 9.869221238496841
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.4673711642132048,
+    "peak_hi_mev": -0.4673711642133185,
+    "radius_nm": 0.053015650551818894
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 9.869221238496841,
+   "instrument_s": 490.34552439858817,
+   "tip_rounds": 2,
+   "e0_mev": -437.89952806606226,
+   "radius_measured_nm": 9.92223688904866,
+   "peaks_found": 6,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.07409753451311357,
+    -0.8087053795448554
+   ],
+   "tip_condition": "double"
+  },
+  {
+   "paper": "P3",
+   "seed": 13,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -268.0,
+    "peak_hi_mev": 6.000000000000005,
+    "radius_nm": 4.188401610630692
+   },
+   "truth": {
+    "peak_lo_mev": -269.04429693060507,
+    "peak_hi_mev": 4.95570306939519,
+    "radius_nm": 4.195506927348986
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.0442969306050713,
+    "peak_hi_mev": 1.0442969306048155,
+    "radius_nm": -0.007105316718294397
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 4.195506927348986,
+   "instrument_s": 480.08256015346626,
+   "tip_rounds": 1,
+   "e0_mev": -463.06803956889985,
+   "radius_measured_nm": 4.188401610630692,
+   "peaks_found": 3,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.12119745374640127,
+    0.7795300683394794
+   ],
+   "tip_condition": "dirty"
+  },
+  {
+   "paper": "P3",
+   "seed": 14,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -384.0,
+    "peak_hi_mev": -298.00000000000006,
+    "radius_nm": 7.171191348781263
+   },
+   "truth": {
+    "peak_lo_mev": -381.2590763702644,
+    "peak_hi_mev": -299.2590763702643,
+    "radius_nm": 7.202538654637432
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.7409236297356188,
+    "peak_hi_mev": 1.2590763702642676,
+    "radius_nm": -0.03134730585616907
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 7.202538654637432,
+   "instrument_s": 504.78544286564374,
+   "tip_rounds": 4,
+   "e0_mev": -440.62957984634875,
+   "radius_measured_nm": 7.171191348781263,
+   "peaks_found": 4,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.20701146009718208,
+    0.2356700850735153
+   ],
+   "tip_condition": "blunt"
+  },
+  {
+   "paper": "P3",
+   "seed": 15,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -426.00000000000006,
+    "peak_hi_mev": -372.00000000000006,
+    "radius_nm": 8.88584014029647
+   },
+   "truth": {
+    "peak_lo_mev": -427.7721328100613,
+    "peak_hi_mev": -369.77213281006124,
+    "radius_nm": 8.898264700769646
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.7721328100612368,
+    "peak_hi_mev": -2.22786718993882,
+    "radius_nm": -0.012424560473176527
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 8.898264700769646,
+   "instrument_s": 174.5165174188731,
+   "tip_rounds": 0,
+   "e0_mev": -468.44882573050154,
+   "radius_measured_nm": 8.88584014029647,
+   "peaks_found": 6,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.2964478857934591,
+    0.488627295112504
+   ],
+   "tip_condition": "good"
+  },
+  {
+   "paper": "P3",
+   "seed": 16,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -362.00000000000006,
+    "peak_hi_mev": -252.00000000000006,
+    "radius_nm": 6.248158842509462
+   },
+   "truth": {
+    "peak_lo_mev": -363.4763800207323,
+    "peak_hi_mev": -253.4763800207322,
+    "radius_nm": 6.247926978815026
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.476380020732222,
+    "peak_hi_mev": 1.4763800207321367,
+    "radius_nm": 0.00023186369443628507
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 6.247926978815026,
+   "instrument_s": 480.1752733678312,
+   "tip_rounds": 1,
+   "e0_mev": -442.69425225248875,
+   "radius_measured_nm": 6.248158842509462,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.8007775738554975,
+    0.4038907180033759
+   ],
+   "tip_condition": "dirty"
+  },
+  {
+   "paper": "P3",
+   "seed": 17,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -366.00000000000006,
+    "peak_hi_mev": -228.00000000000003,
+    "radius_nm": 5.636299983999183
+   },
+   "truth": {
+    "peak_lo_mev": -367.7187409598037,
+    "peak_hi_mev": -227.7187409598036,
+    "radius_nm": 5.628632478981461
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.7187409598036538,
+    "peak_hi_mev": -0.28125904019643144,
+    "radius_nm": 0.00766750501772151
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 5.628632478981461,
+   "instrument_s": 519.4085397593567,
+   "tip_rounds": 6,
+   "e0_mev": -468.870116636596,
+   "radius_measured_nm": 5.636299983999183,
+   "peaks_found": 4,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.42141836675959404,
+    0.5248900222516221
+   ],
+   "tip_condition": "blunt"
+  },
+  {
+   "paper": "P3",
+   "seed": 18,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -242.00000000000006,
+    "peak_hi_mev": -4.0000000000000036,
+    "radius_nm": 4.339150756973791
+   },
+   "truth": {
+    "peak_lo_mev": -242.33361832024102,
+    "peak_hi_mev": -4.333618320240817,
+    "radius_nm": 4.324953605901969
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.3336183202409586,
+    "peak_hi_mev": 0.33361832024081384,
+    "radius_nm": 0.014197151071821956
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 4.324953605901969,
+   "instrument_s": 526.828596895505,
+   "tip_rounds": 7,
+   "e0_mev": -411.936728406361,
+   "radius_measured_nm": 4.339150756973791,
+   "peaks_found": 3,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.5042485975383824,
+    -0.5704359294268067
+   ],
+   "tip_condition": "blunt"
+  },
+  {
+   "paper": "P3",
+   "seed": 19,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -392.0,
+    "peak_hi_mev": -330.00000000000006,
+    "radius_nm": 8.401163825935818
+   },
+   "truth": {
+    "peak_lo_mev": -391.8046000254249,
+    "peak_hi_mev": -329.80460002542486,
+    "radius_nm": 8.403921987310817
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.19539997457508207,
+    "peak_hi_mev": -0.19539997457519576,
+    "radius_nm": -0.0027581613749987355
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 8.403921987310817,
+   "instrument_s": 174.50156415166694,
+   "tip_rounds": 0,
+   "e0_mev": -438.7378285064751,
+   "radius_measured_nm": 8.401163825935818,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    1.0037057839572514,
+    -0.49105447534378105
+   ],
+   "tip_condition": "good"
+  },
+  {
+   "paper": "P3",
+   "seed": 20,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -198.00000000000006,
+    "peak_hi_mev": 105.99999999999999,
+    "radius_nm": 4.02133132421121
+   },
+   "truth": {
+    "peak_lo_mev": -196.98133592245466,
+    "peak_hi_mev": 105.01866407754562,
+    "radius_nm": 4.002450635722545
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.0186640775453952,
+    "peak_hi_mev": 0.9813359224543632,
+    "radius_nm": 0.018880688488664532
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 4.002450635722545,
+   "instrument_s": 480.11648317517285,
+   "tip_rounds": 1,
+   "e0_mev": -411.0751213826898,
+   "radius_measured_nm": 4.02133132421121,
+   "peaks_found": 3,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.22471844476897773,
+    -1.1846760105600906
+   ],
+   "tip_condition": "dirty"
+  },
+  {
+   "paper": "P3",
+   "seed": 21,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -358.00000000000006,
+    "peak_hi_mev": -274.0,
+    "radius_nm": 7.637950015818023
+   },
+   "truth": {
+    "peak_lo_mev": -356.3697759744257,
+    "peak_hi_mev": -274.36977597442564,
+    "radius_nm": 7.639800587925168
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.630224025574364,
+    "peak_hi_mev": 0.3697759744256359,
+    "radius_nm": -0.0018505721071448988
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 7.639800587925168,
+   "instrument_s": 174.4592872914764,
+   "tip_rounds": 0,
+   "e0_mev": -413.0489423806776,
+   "radius_measured_nm": 7.637950015818023,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.21033046919857729,
+    0.4596717318329655
+   ],
+   "tip_condition": "good"
+  },
+  {
+   "paper": "P3",
+   "seed": 22,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -348.00000000000006,
+    "peak_hi_mev": -232.00000000000003,
+    "radius_nm": 6.088043341206245
+   },
+   "truth": {
+    "peak_lo_mev": -350.53285032810265,
+    "peak_hi_mev": -232.53285032810257,
+    "radius_nm": 6.049746959833557
+   },
+   "abs_err": {
+    "peak_lo_mev": 2.5328503281025974,
+    "peak_hi_mev": 0.5328503281025405,
+    "radius_nm": 0.03829638137268798
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 6.049746959833557,
+   "instrument_s": 519.3239920786631,
+   "tip_rounds": 6,
+   "e0_mev": -432.58361758054025,
+   "radius_measured_nm": 6.088043341206245,
+   "peaks_found": 4,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.39465843112676946,
+    -0.3800136092211932
+   ],
+   "tip_condition": "blunt"
+  },
+  {
+   "paper": "P3",
+   "seed": 23,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -414.00000000000006,
+    "peak_hi_mev": -344.0,
+    "radius_nm": 8.421792371847785
+   },
+   "truth": {
+    "peak_lo_mev": -411.25506072025513,
+    "peak_hi_mev": -345.2550607202551,
+    "radius_nm": 8.443658855659589
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.7449392797449264,
+    "peak_hi_mev": 1.2550607202550736,
+    "radius_nm": -0.021866483811804116
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 8.443658855659589,
+   "instrument_s": 489.7681646414471,
+   "tip_rounds": 3,
+   "e0_mev": -462.29926631386434,
+   "radius_measured_nm": 8.421792371847785,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.09552644850714967,
+    0.49694594717972745
+   ],
+   "tip_condition": "unstable"
+  },
+  {
+   "paper": "P3",
+   "seed": 24,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -404.0,
+    "peak_hi_mev": -318.00000000000006,
+    "radius_nm": 7.465383742507968
+   },
+   "truth": {
+    "peak_lo_mev": -405.02656509367114,
+    "peak_hi_mev": -319.0265650936711,
+    "radius_nm": 7.425482306181022
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.0265650936711381,
+    "peak_hi_mev": 1.0265650936710244,
+    "radius_nm": 0.03990143632694654
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 7.425482306181022,
+   "instrument_s": 482.795238087368,
+   "tip_rounds": 1,
+   "e0_mev": -468.2963578679078,
+   "radius_measured_nm": 7.465383742507968,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.20609879421997312,
+    -0.32186248915637367
+   ],
+   "tip_condition": "blunt"
+  },
+  {
+   "paper": "P3",
+   "seed": 25,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -366.00000000000006,
+    "peak_hi_mev": -276.0,
+    "radius_nm": 6.8218384076212395
+   },
+   "truth": {
+    "peak_lo_mev": -367.7448933331099,
+    "peak_hi_mev": -275.74489333310987,
+    "radius_nm": 6.797917686718635
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.7448933331098715,
+    "peak_hi_mev": -0.2551066668901285,
+    "radius_nm": 0.023920720902604664
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 6.797917686718635,
+   "instrument_s": 174.45456181467338,
+   "tip_rounds": 0,
+   "e0_mev": -432.41898542015406,
+   "radius_measured_nm": 6.8218384076212395,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.40337681874325987,
+    -0.4923253652079721
+   ],
+   "tip_condition": "good"
+  },
+  {
+   "paper": "P3",
+   "seed": 26,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -290.00000000000006,
+    "peak_hi_mev": -60.00000000000006,
+    "radius_nm": 4.444100171245441
+   },
+   "truth": {
+    "peak_lo_mev": -289.1455733154077,
+    "peak_hi_mev": -57.14557331540748,
+    "radius_nm": 4.4409752052095035
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.8544266845923403,
+    "peak_hi_mev": -2.8544266845925748,
+    "radius_nm": 0.003124966035937149
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 4.4409752052095035,
+   "instrument_s": 480.153456062372,
+   "tip_rounds": 1,
+   "e0_mev": -454.32649708975964,
+   "radius_measured_nm": 4.444100171245441,
+   "peaks_found": 3,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.2081585854561494,
+    -0.057729290645669985
+   ],
+   "tip_condition": "dirty"
+  },
+  {
+   "paper": "P3",
+   "seed": 27,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -412.00000000000006,
+    "peak_hi_mev": -360.00000000000006,
+    "radius_nm": 9.528320778037052
+   },
+   "truth": {
+    "peak_lo_mev": -414.4973300919992,
+    "peak_hi_mev": -362.4973300919991,
+    "radius_nm": 9.549844500104133
+   },
+   "abs_err": {
+    "peak_lo_mev": 2.4973300919991175,
+    "peak_hi_mev": 2.4973300919990606,
+    "radius_nm": -0.021523722067080087
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 9.549844500104133,
+   "instrument_s": 484.91865525421326,
+   "tip_rounds": 2,
+   "e0_mev": -454.34530150157735,
+   "radius_measured_nm": 9.528320778037052,
+   "peaks_found": 6,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.32708173231376664,
+    0.9928678150279473
+   ],
+   "tip_condition": "unstable"
+  },
+  {
+   "paper": "P3",
+   "seed": 28,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -346.00000000000006,
+    "peak_hi_mev": -214.00000000000003,
+    "radius_nm": 5.693236933946625
+   },
+   "truth": {
+    "peak_lo_mev": -344.86822395887305,
+    "peak_hi_mev": -212.86822395887296,
+    "radius_nm": 5.716908900058817
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.1317760411270115,
+    "peak_hi_mev": -1.1317760411270683,
+    "radius_nm": -0.023671966112192244
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 5.716908900058817,
+   "instrument_s": 482.7031340448517,
+   "tip_rounds": 1,
+   "e0_mev": -438.44529341180436,
+   "radius_measured_nm": 5.693236933946625,
+   "peaks_found": 4,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.4617524431183247,
+    0.5230983027486618
+   ],
+   "tip_condition": "double"
+  },
+  {
+   "paper": "P3",
+   "seed": 29,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -366.00000000000006,
+    "peak_hi_mev": -294.00000000000006,
+    "radius_nm": 7.743913464858666
+   },
+   "truth": {
+    "peak_lo_mev": -369.23118112986907,
+    "peak_hi_mev": -293.231181129869,
+    "radius_nm": 7.746805994628235
+   },
+   "abs_err": {
+    "peak_lo_mev": 3.2311811298690145,
+    "peak_hi_mev": -0.7688188701310423,
+    "radius_nm": -0.0028925297695687746
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "radius_nm": 7.746805994628235,
+   "instrument_s": 489.5949731019147,
+   "tip_rounds": 3,
+   "e0_mev": -423.96332614950273,
+   "radius_measured_nm": 7.743913464858666,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.7993053747970426,
+    -0.27877636864209193
+   ],
+   "tip_condition": "unstable"
+  }
+ ]
+}
