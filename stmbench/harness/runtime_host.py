@@ -36,13 +36,16 @@ DEFAULT_SETTINGS = {
 
 class RuntimeHost:
     def __init__(self, world: World, out_dir: str | Path, *, settings: dict | None = None,
-                 vision_backend: str | None = None):
+                 vision_backend: str | None = None, controller_timeout_s: float | None = None):
         self.world = world
         self.out_dir = Path(out_dir)
         self.mast_root = self.out_dir / "mast_root"
         self.mast_root.mkdir(parents=True, exist_ok=True)
         self.settings = {**DEFAULT_SETTINGS, **(settings or {})}
         self.vision_backend = vision_backend
+        # The simulator renders a whole frame inside Scan_Action (a real controller answers at once):
+        # large Au(111) frames take 2-15 s, past MAST's 5 s reply timeout. None keeps MAST's default.
+        self.controller_timeout_s = controller_timeout_s
         self.dispatcher = build_dispatcher(world)
         self.dispatcher.log_calls = True
         self.server: WireServer | None = None
@@ -59,7 +62,7 @@ class RuntimeHost:
         if self.vision_backend:
             os.environ["MAST_VISION_BACKEND"] = self.vision_backend
         self._write_settings()
-        from mast.config import MASTConfig
+        from mast.config import MASTConfig, NanonisConfig
         from mast.core.runtime import CoreRuntime
 
         # The isolated MAST2_PROJECT_ROOT has no provider key files — export configured keys as
@@ -67,7 +70,12 @@ class RuntimeHost:
         self.facts_keys = _export_api_keys_from_repo()
 
         t0 = time.perf_counter()
-        self.app = CoreRuntime(MASTConfig())
+        cfg = MASTConfig()
+        if self.controller_timeout_s:
+            for settings in vars(cfg).values():      # the controller connection settings
+                if isinstance(settings, NanonisConfig):
+                    settings.timeout_s = float(self.controller_timeout_s)
+        self.app = CoreRuntime(cfg)
         self.app.setup()
         self.t_setup_s = time.perf_counter() - t0
         self.sync_facts()
