@@ -48,8 +48,9 @@ Protocol:
 
 On seeds 0–149 (the draws of 2026-10-13): 150/150 reproduced, 147 on the nearest site and 3 on
 a site tied with it (``site_tie_nm``); reported place |error| median 0.04 nm, p90 0.16 nm,
-max 0.41 nm (the judge allows 0.6; most of it is the apex's own offset, which images and drags
-share); the atom followed at 54–400 kΩ (median 164 kΩ) after a median of five drags;
+max 0.41 nm (the judge allows 0.6; most of it was the apex's own offset, which images and drags
+share: mapped through the imaging apex as well since 2026-10-14, median 0.006 nm, p90 0.016 nm,
+max 0.043 nm); the atom followed at 54–400 kΩ (median 164 kΩ) after a median of five drags;
 instrument time median 879 s, p90 1428 s, max 2003 s. The tip was conditioned first on 100
 seeds and again mid-ladder on 32. No atom went onto the tip on these seeds; the recovery is
 tested on one made to (``tests/test_reference_p4.py``).

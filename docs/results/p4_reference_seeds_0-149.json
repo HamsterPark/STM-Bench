@@ -7,10 +7,10 @@
    "target_site": {
     "relative": false,
     "pass_rate": 1.0,
-    "err_median": 0.039653601730910676,
-    "err_p90": 0.16032355294205752,
-    "err_max": 0.4069437183678629,
-    "signed_median": 0.039653601730910676
+    "err_median": 0.006215319285886262,
+    "err_p90": 0.016341983940726838,
+    "err_max": 0.04337264282078081,
+    "signed_median": 0.006215319285886262
    }
   },
   "instrument_s": {
@@ -32,7 +32,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.13606215085841117
+    "target_site": 0.0072710827931891635
    },
    "instrument_s": 880.3103255845999,
    "atoms_tried": 1,
@@ -83,7 +83,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.045428411861012916
+    "target_site": 0.00625155168582878
    },
    "instrument_s": 1000.0873846283048,
    "atoms_tried": 1,
@@ -144,7 +144,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.20131944452140085
+    "target_site": 0.00763458929880298
    },
    "instrument_s": 996.7864316303267,
    "atoms_tried": 1,
@@ -208,7 +208,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.03217082562261348
+    "target_site": 0.01045022321294987
    },
    "instrument_s": 891.7786242339482,
    "atoms_tried": 1,
@@ -248,7 +248,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.05219386968388088
+    "target_site": 0.010257692152852138
    },
    "instrument_s": 655.4866204103082,
    "atoms_tried": 1,
@@ -355,7 +355,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.16105014052850875
+    "target_site": 0.00519072437757844
    },
    "instrument_s": 972.4488712856889,
    "atoms_tried": 1,
@@ -459,7 +459,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.09693653013410165
+    "target_site": 0.002404741046935662
    },
    "instrument_s": 981.555402509966,
    "atoms_tried": 1,
@@ -516,7 +516,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.059178427864366924
+    "target_site": 0.04337264282078081
    },
    "instrument_s": 863.1421769383082,
    "atoms_tried": 1,
@@ -564,7 +564,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.03808248868762467
+    "target_site": 0.006542278330062439
    },
    "instrument_s": 877.9476363025034,
    "atoms_tried": 1,
@@ -619,7 +619,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.08599716487165693
+    "target_site": 0.0037556190880718926
    },
    "instrument_s": 1069.3059605087115,
    "atoms_tried": 1,
@@ -714,7 +714,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.11348508812650306
+    "target_site": 0.00789655601509719
    },
    "instrument_s": 1557.011390535668,
    "atoms_tried": 1,
@@ -958,7 +958,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.149527935035962
+    "target_site": 0.007283021894823859
    },
    "instrument_s": 1106.3142965684676,
    "atoms_tried": 1,
@@ -1378,7 +1378,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.04370252516684146
+    "target_site": 0.0005957532557161437
    },
    "instrument_s": 1580.43418034355,
    "atoms_tried": 1,
@@ -1494,7 +1494,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.0612347046828817
+    "target_site": 0.0054112099384428305
    },
    "instrument_s": 1013.3528790774279,
    "atoms_tried": 1,
@@ -1651,7 +1651,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.03460170682464136
+    "target_site": 0.010772122851742562
    },
    "instrument_s": 772.9542908988112,
    "atoms_tried": 1,
@@ -1731,7 +1731,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.03529386227225518
+    "target_site": 0.006322500153647913
    },
    "instrument_s": 1445.5526043297255,
    "atoms_tried": 1,
@@ -1882,7 +1882,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.09319146453149166
+    "target_site": 0.006006645293807205
    },
    "instrument_s": 758.665215410513,
    "atoms_tried": 1,
@@ -1925,7 +1925,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.05891121561593049
+    "target_site": 0.009703969947281723
    },
    "instrument_s": 890.5253703723678,
    "atoms_tried": 1,
@@ -1980,7 +1980,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.22921834472921485
+    "target_site": 0.009037384078317083
    },
    "instrument_s": 947.2740654802128,
    "atoms_tried": 1,
@@ -2032,7 +2032,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.05817005352906053
+    "target_site": 0.004336194779982978
    },
    "instrument_s": 828.827758000268,
    "atoms_tried": 1,
@@ -2072,7 +2072,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.014463816276524278
+    "target_site": 0.01683334977415707
    },
    "instrument_s": 1765.3640394912668,
    "atoms_tried": 1,
@@ -2128,7 +2128,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.07024204246412726
+    "target_site": 0.024565864056248696
    },
    "instrument_s": 1501.9041648669868,
    "atoms_tried": 1,
@@ -2256,7 +2256,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.11180206066050659
+    "target_site": 0.006473776614152946
    },
    "instrument_s": 789.3180182468178,
    "atoms_tried": 1,
@@ -2358,7 +2358,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.01481477127120776
+    "target_site": 0.0039209619171817695
    },
    "instrument_s": 842.1942526940064,
    "atoms_tried": 1,
@@ -2490,7 +2490,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.05628110289802964
+    "target_site": 0.018540453641641336
    },
    "instrument_s": 821.472750101989,
    "atoms_tried": 1,
@@ -2539,7 +2539,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.09079712293786328
+    "target_site": 0.0028095533786531308
    },
    "instrument_s": 923.6359851709908,
    "atoms_tried": 1,
@@ -2589,7 +2589,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.0493911813142578
+    "target_site": 0.0038508015173564693
    },
    "instrument_s": 973.5669404469667,
    "atoms_tried": 1,
@@ -2695,7 +2695,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.10368748066696892
+    "target_site": 0.005869054587254438
    },
    "instrument_s": 992.5631185947907,
    "atoms_tried": 1,
@@ -2739,7 +2739,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.06232164701638651
+    "target_site": 0.007657198158472135
    },
    "instrument_s": 773.087382903988,
    "atoms_tried": 1,
@@ -2829,7 +2829,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.13974603298949695
+    "target_site": 0.0026189539009320705
    },
    "instrument_s": 705.6944992721385,
    "atoms_tried": 1,
@@ -2910,7 +2910,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.05620541718052027
+    "target_site": 0.015645537597023813
    },
    "instrument_s": 730.8174914427738,
    "atoms_tried": 1,
@@ -3014,7 +3014,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.12700576278123482
+    "target_site": 0.0037876809057255977
    },
    "instrument_s": 1490.159574513511,
    "atoms_tried": 1,
@@ -3163,7 +3163,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.13969528046786137
+    "target_site": 0.003079890482561995
    },
    "instrument_s": 1412.3427793959995,
    "atoms_tried": 1,
@@ -3222,7 +3222,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.15542055262535331
+    "target_site": 0.0023547984703702726
    },
    "instrument_s": 469.9649986916579,
    "atoms_tried": 1,
@@ -3332,7 +3332,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.12040896920383953
+    "target_site": 0.008157151279450799
    },
    "instrument_s": 636.1422545119513,
    "atoms_tried": 1,
@@ -3448,7 +3448,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.03504829929751329
+    "target_site": 0.002550654813654363
    },
    "instrument_s": 669.0500765666656,
    "atoms_tried": 1,
@@ -3516,7 +3516,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.08614081447143516
+    "target_site": 0.004007102725256852
    },
    "instrument_s": 985.9077402238761,
    "atoms_tried": 1,
@@ -3625,7 +3625,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.1968268309778692
+    "target_site": 0.018583138133183883
    },
    "instrument_s": 1138.8832901209917,
    "atoms_tried": 1,
@@ -3692,7 +3692,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.04208563244296883
+    "target_site": 0.008212485779826159
    },
    "instrument_s": 658.8345366280943,
    "atoms_tried": 1,
@@ -3744,7 +3744,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.06427485835019818
+    "target_site": 0.005873079671978814
    },
    "instrument_s": 695.6080764980027,
    "atoms_tried": 1,
@@ -3811,7 +3811,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.08698062058348945
+    "target_site": 0.006250381726254752
    },
    "instrument_s": 1426.0207106497464,
    "atoms_tried": 1,
@@ -3868,7 +3868,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.07135266733952791
+    "target_site": 0.003616532225966662
    },
    "instrument_s": 801.6569879695727,
    "atoms_tried": 1,
@@ -4249,7 +4249,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.2734156619114119
+    "target_site": 0.007007581536912218
    },
    "instrument_s": 794.4000146877456,
    "atoms_tried": 1,
@@ -4390,7 +4390,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.08119404029634096
+    "target_site": 0.013691489748119415
    },
    "instrument_s": 1059.0150985426512,
    "atoms_tried": 1,
@@ -4500,7 +4500,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.03818989434266358
+    "target_site": 0.008750215216343647
    },
    "instrument_s": 817.3615059738661,
    "atoms_tried": 1,
@@ -4601,7 +4601,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.08698421048299194
+    "target_site": 0.005136825514576956
    },
    "instrument_s": 1013.755906970366,
    "atoms_tried": 1,
@@ -4646,7 +4646,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.0647159153596018
+    "target_site": 0.008754377558201553
    },
    "instrument_s": 1137.4639649473802,
    "atoms_tried": 1,
@@ -4718,7 +4718,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.0627434318893948
+    "target_site": 0.001221002463044989
    },
    "instrument_s": 891.4791727840294,
    "atoms_tried": 1,
@@ -4763,7 +4763,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.11952284678947496
+    "target_site": 0.006975000888050716
    },
    "instrument_s": 971.3687396211808,
    "atoms_tried": 1,
@@ -4823,7 +4823,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.0627611494808697
+    "target_site": 0.010471184043454151
    },
    "instrument_s": 664.8734246905921,
    "atoms_tried": 1,
@@ -4974,7 +4974,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.16024282098800738
+    "target_site": 0.005302322017022506
    },
    "instrument_s": 995.8011693546861,
    "atoms_tried": 1,
@@ -5019,7 +5019,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.013102836628067702
+    "target_site": 0.012300239822354194
    },
    "instrument_s": 708.2019044099753,
    "atoms_tried": 1,
@@ -5136,7 +5136,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.0337761025677078
+    "target_site": 0.004644372228893752
    },
    "instrument_s": 705.790418467519,
    "atoms_tried": 1,
@@ -5224,7 +5224,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.3405545390949183
+    "target_site": 0.002644541154691682
    },
    "instrument_s": 1013.5542189842705,
    "atoms_tried": 1,
@@ -5287,7 +5287,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.2621926428371604
+    "target_site": 0.002246171028650612
    },
    "instrument_s": 1548.1113995026653,
    "atoms_tried": 1,
@@ -5352,7 +5352,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.18084154523707652
+    "target_site": 0.0028366760329830913
    },
    "instrument_s": 1499.2053665015142,
    "atoms_tried": 1,
@@ -5424,7 +5424,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.23477030190569273
+    "target_site": 0.017751172331472803
    },
    "instrument_s": 1012.8835752537159,
    "atoms_tried": 1,
@@ -5488,7 +5488,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.09534751802408506
+    "target_site": 0.008240821037530575
    },
    "instrument_s": 890.9312066323424,
    "atoms_tried": 1,
@@ -5540,7 +5540,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.06243253261587277
+    "target_site": 0.014781990626670724
    },
    "instrument_s": 851.2648938656529,
    "atoms_tried": 1,
@@ -5656,7 +5656,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.28396565883750297
+    "target_site": 0.016768339873184067
    },
    "instrument_s": 1096.090032372853,
    "atoms_tried": 1,
@@ -5720,7 +5720,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.2428363069628469
+    "target_site": 0.006144390921374626
    },
    "instrument_s": 1121.8587241312634,
    "atoms_tried": 1,
@@ -5790,7 +5790,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.15600280015211432
+    "target_site": 0.0044526818138871434
    },
    "instrument_s": 885.3297379306935,
    "atoms_tried": 1,
@@ -5837,7 +5837,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.12556267773045995
+    "target_site": 0.008738275433453428
    },
    "instrument_s": 984.5058870232743,
    "atoms_tried": 1,
@@ -5894,7 +5894,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.032903001358661615
+    "target_site": 0.003413792667078489
    },
    "instrument_s": 876.4351462307919,
    "atoms_tried": 1,
@@ -5991,7 +5991,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.032926793253932864
+    "target_site": 0.014025462792047144
    },
    "instrument_s": 664.9256112125285,
    "atoms_tried": 1,
@@ -6051,7 +6051,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.1701481124853138
+    "target_site": 0.0013563282907561687
    },
    "instrument_s": 979.4401048576524,
    "atoms_tried": 1,
@@ -6102,7 +6102,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.10649025594063755
+    "target_site": 0.01015313407745812
    },
    "instrument_s": 888.6412348552271,
    "atoms_tried": 1,
@@ -6154,7 +6154,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.10534768674659437
+    "target_site": 0.006285416667506316
    },
    "instrument_s": 1043.7227176315305,
    "atoms_tried": 1,
@@ -6276,7 +6276,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.07264517452181238
+    "target_site": 0.006258105181796907
    },
    "instrument_s": 1363.6570405584143,
    "atoms_tried": 1,
@@ -6372,7 +6372,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.09924892637000851
+    "target_site": 0.012695489527225864
    },
    "instrument_s": 1252.8920102359834,
    "atoms_tried": 1,
@@ -6463,7 +6463,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.12206323687778435
+    "target_site": 0.0023585746924266004
    },
    "instrument_s": 626.0308847198845,
    "atoms_tried": 1,
@@ -6554,7 +6554,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.05289894374810312
+    "target_site": 0.013367794825908967
    },
    "instrument_s": 994.8237982307289,
    "atoms_tried": 1,
@@ -6610,7 +6610,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.17386792732012127
+    "target_site": 0.021500643387662433
    },
    "instrument_s": 1149.1180985787892,
    "atoms_tried": 1,
@@ -6723,7 +6723,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.07337653680845367
+    "target_site": 0.004545165005572546
    },
    "instrument_s": 880.9947469043854,
    "atoms_tried": 1,
@@ -6877,7 +6877,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.08730566029657624
+    "target_site": 0.008299184189795559
    },
    "instrument_s": 1514.0341078786482,
    "atoms_tried": 1,
@@ -6942,7 +6942,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.08434668658740467
+    "target_site": 0.02337597846310361
    },
    "instrument_s": 990.3290055707926,
    "atoms_tried": 1,
@@ -7002,7 +7002,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.008066053354258742
+    "target_site": 0.009553797517279038
    },
    "instrument_s": 905.1193204989004,
    "atoms_tried": 1,
@@ -7062,7 +7062,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.08115087202802065
+    "target_site": 0.012400296149336312
    },
    "instrument_s": 746.6995971400562,
    "atoms_tried": 1,
@@ -7130,7 +7130,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.07503350213535395
+    "target_site": 0.028781200946871095
    },
    "instrument_s": 875.9947703984392,
    "atoms_tried": 1,
@@ -7185,7 +7185,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.10160241760486437
+    "target_site": 0.007871581742150982
    },
    "instrument_s": 799.0291330933596,
    "atoms_tried": 1,
@@ -7237,7 +7237,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.035814545434791685
+    "target_site": 0.013470921285655794
    },
    "instrument_s": 630.3742759132698,
    "atoms_tried": 1,
@@ -7290,7 +7290,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.4069437183678629
+    "target_site": 0.003963653205787249
    },
    "instrument_s": 1115.1805165127835,
    "atoms_tried": 1,
@@ -7402,7 +7402,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.3411085889733364
+    "target_site": 0.006960496111502721
    },
    "instrument_s": 1247.670599523713,
    "atoms_tried": 1,
@@ -7480,7 +7480,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.13917937765594565
+    "target_site": 0.003500183095703432
    },
    "instrument_s": 777.2553149601222,
    "atoms_tried": 1,
@@ -7528,7 +7528,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.07848874546228217
+    "target_site": 0.016461551437080446
    },
    "instrument_s": 2003.4892239206843,
    "atoms_tried": 1,
@@ -7586,7 +7586,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.04111730911915777
+    "target_site": 0.005804933605334315
    },
    "instrument_s": 749.1868333446263,
    "atoms_tried": 1,
@@ -7856,7 +7856,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.05684862814195594
+    "target_site": 0.005570913111445616
    },
    "instrument_s": 932.9031626515094,
    "atoms_tried": 1,
@@ -7912,7 +7912,7 @@
    "on_goal": false,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.04383093735597038
+    "target_site": 0.01404247322102628
    },
    "instrument_s": 959.1672543753575,
    "atoms_tried": 1,
@@ -8029,7 +8029,7 @@
    "on_goal": true,
    "bystander_max_shift_nm": 0.0,
    "abs_err": {
-    "target_site": 0.15210822803922594
+    "target_site": 0.008157806257316476
    },
    "instrument_s": 995.8605658747194,
    "atoms_tried": 1,

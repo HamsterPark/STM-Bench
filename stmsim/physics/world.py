@@ -963,6 +963,10 @@ class World:
             # recorded start) stays for readers of older ledgers
             rows_nm = ([[round(float(o[0]) * 1e9, 4), round(float(o[1]) * 1e9, 4)] for o in fr.row_offsets_m]
                        if fr.row_offsets_m is not None else None)
+            # ``apex_runs_nm``: the lead apex's lateral offset from each row on where it changed —
+            # the tip images through it, so the judge maps a place through it as through drift
+            apex_nm = ([[int(r), round(float(ax) * 1e9, 4), round(float(ay) * 1e9, 4)] for r, ax, ay in fr.apex_runs_m]
+                       if getattr(fr, "apex_runs_m", None) else None)
             # a dI/dV map (lock-in channel rendered) and the nearest scatterer to the frame's
             # centre on the sample: what an evidence rule for maps checks
             from .scanner import SIG_LI_X
@@ -975,7 +979,7 @@ class World:
                         nx=st.nx, ny=st.ny, bias_v=self.bias_v, setpoint_a=self.zctrl.setpoint_a,
                         t_start_sim=fr.t_start_sim, drift_m=[float(ox), float(oy)],
                         feedback=bool(fr.feedback), withdrawn=bool(fr.withdrawn),
-                        scan_dir=st.scan_dir, row_offsets_nm=rows_nm, didv_map=didv,
+                        scan_dir=st.scan_dir, row_offsets_nm=rows_nm, apex_runs_nm=apex_nm, didv_map=didv,
                         **({"near_kind": near_kind, "near_nm": None if near_m is None else near_m * 1e9}
                            if didv else {}))
             return str(path)

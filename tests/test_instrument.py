@@ -216,3 +216,31 @@ def test_a_frame_records_the_state_it_was_scanned_in_and_keeps_its_start_when_sa
     z = np.asarray(inst.frame(Path(saved[1]["path"]).name)["array"], float)
     assert np.nanstd(z) < 10e-12                              # what such a frame shows
     assert saved[2]["t_start_sim"] == saved[1]["t_start_sim"] < saved[2]["sim_s"]
+
+
+def test_the_judge_maps_an_atom_through_the_apex_that_imaged_it():
+    """An operator moves an atom by what the images show and reports where a frame shows it;
+    the tip images (and drags) through its leading apex, wherever that sits. On P4 seed 15
+    of the scripted baseline a new apex 2.5 nm off took over from a receded one: the atom was
+    on its site and the report 2.5 nm from it through the drift alone."""
+    from stmbench.analysis.adatoms import locate
+    from stmbench.trackB.claims import to_sample_frame
+    from stmsim.physics.tip import Apex
+
+    inst = Instrument(P4, 7)                                   # a good tip
+    w = inst.world
+    reg = w.surface.site.adatoms
+    atom = reg.atoms[reg.target["atom_id"]]
+    ax, ay = (v * 1e9 for v in reg.site_xy(atom.i, atom.j, atom.sub))
+    w.tip.apexes = [Apex(0.0, 0.0, -0.3e-9, 1.0), Apex(0.0, 2.0e-9, 0.0, 0.8)]   # the second one leads
+    ox, oy, _ = w.drift_offset(w.clock.sim())
+    sx, sy = ax - ox * 1e9, ay - oy * 1e9 - 2.0                # where it shows: drift and apex
+    r = inst.act("scan", center_x_nm=sx, center_y_nm=sy, size_nm=8.0, pixels=80, line_time_s=0.2)
+    hit = min(locate(inst.frame(r["frame"])), key=lambda a: math.hypot(a[0] - sx, a[1] - sy))
+    ev = [e for e in w.events if e["kind"] == "scan_saved"][-1]
+    assert ev["apex_runs_nm"] == [[0, 0.0, 2.0]]
+    px, py = to_sample_frame(ev, hit[0], hit[1])
+    assert math.hypot(px - ax, py - ay) < 0.15
+    bare = {k: v for k, v in ev.items() if k != "apex_runs_nm"}
+    qx, qy = to_sample_frame(bare, hit[0], hit[1])
+    assert abs(math.hypot(qx - ax, qy - ay) - 2.0) < 0.2
