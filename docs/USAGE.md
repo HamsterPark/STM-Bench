@@ -142,14 +142,20 @@ These are the benchmark. One file per paper, plus a second variant for P3.
 
 | id | family | what has to be reproduced | budget |
 |---|---|---|---|
-| `P1_barth1990_au111` | P1 | herringbone stripe period, one orientation with its position, two rotational domains | 2.0 h / 300 k cmds |
+| `P1_barth1990_au111` | P1 | herringbone stripe period, one orientation with its position, two rotational domains | 3.0 h / 400 k cmds |
 | `P2_standing_waves_cu111` | P2 | Cu(111) surface-state band bottom E₀ and effective mass m* | 3.0 h / 400 k |
-| `P3_corral_cu111` | P3 | the two lowest resolvable resonances at a quantum corral's centre | 1.5 h / 150 k |
-| `P3_corral_repair_cu111` | P3 | the same, after finishing a ring that arrives with 3–6 atoms missing | 2.5 h / 300 k |
+| `P3_corral_cu111` | P3 | the corral radius and the two lowest resolvable resonances at its centre | 1.5 h / 150 k |
+| `P3_corral_repair_cu111` | P3 | finish a ring that arrives with 3–6 atoms missing, then measure its two lowest resolvable centre-spectrum resonances | 2.5 h / 300 k |
 | `P4_atom_positioning_cu111` | P4 | any isolated Fe atom moved 4 nm along +x onto its lattice site, the atoms within 10 nm unmoved | 1.5 h / 200 k |
 | `P5_sader_jarvis_qplus` | P5 | force minimum, decay length and binding energy from Δf(z) | 1.5 h / 100 k |
 
 All six use `success: {kind: claims_verified}`.
+
+For both P3 variants, the judge accepts two distinct peaks among the three lowest true
+centre-LDOS peaks, reported in ascending energy order: the lowest level may appear as a
+band-edge shoulder at the available resolution. The measurement variant uses ±10 meV
+peak tolerances and a ±0.15 nm radius tolerance. The repair variant currently uses ±25 meV
+peak tolerances and ring occupancy ≥0.97, with no radius claim.
 
 Every paper's tip arrives in a drawn condition (`hidden.tip.condition`: good, blunt, double,
 unstable or dirty) that the task never mentions, and in P3–P5 the Fe deposit covers the whole
@@ -299,8 +305,9 @@ by hand in a task: write it in the claim or the budget, and the card will say it
 `stmbench.instrument` runs a paper scenario on the simulator without MAST and without the wire
 protocol, on a **virtual clock**: instrument time moves only when an action advances it, by the
 action's physical duration (a frame takes pixels × 2 × line time; a spectrum its points × (settle
-+ integration) plus overheads). The same seed and the same actions therefore give the same
-measurements and the same verdict on any host, and any episode can be re-checked from its ledger.
++ integration) plus overheads). With the same implementation and numerical environment,
+the same seed and actions reproduce the measurements and verdict independently of host
+waiting time. An episode can be re-checked from its ledger.
 
 ```python
 from stmbench.instrument import Instrument
@@ -352,13 +359,18 @@ python -m stmbench.cli audit chance --scenario P3 --seeds 300 --jobs 4 --json ou
 The hidden ranges are public, so a fixed answer near the middle of a range is the attack a
 reported value has to withstand. The audit draws the truth for many seeds and finds, with the
 judge's own tolerance helpers, the constant answer that passes most often: per claim, and for
-the whole paper (exactly for up to three claims without a pairwise rule between them; otherwise
-by coordinate ascent, a lower bound). Claims marked `knowledge: allowed` (material constants: P1's period, P2's E0
+the whole paper. Search is exact for one or two claims, and for three claims when they are
+independent or only two are linked by pairwise rules (as in the current P3 task). Other cases
+use coordinate ascent, yielding a lower bound. Acquisition evidence is assumed satisfied: these are
+value-check acceptance rates, not complete episode reproduction rates. Claims marked
+`knowledge: allowed` (material constants: P1's period, P2's E0
 and m*) are reported but not held to a gate — knowing them is part of the skill. Position and
 constraint claims are judged on the atoms themselves and are not audited. On seeds 0–299
-(2026-10-12) a fixed sheet reproduces P3 in 41 % of seeds, P3's repair spectra in 43 %, P2 in
-16 % (all knowledge claims) and P5 in 13 %; P1's measured claims together pass 4.3 %.
-P5 and P3, recalibrated on 2026-10-13 against their reference solutions (below), pass 4.3 % each.
+(2026-10-12), a fixed answer sheet passed the joint value checks for P3 in 41 % of seeds,
+P3's repair spectra in 43 %, P2 in 16 % (all knowledge claims) and P5 in 13 %;
+P1's measurement claims together passed 4.3 %. After recalibration on 2026-10-13 against
+their reference solutions (below), the joint value-check acceptance rates for P5 and P3
+were 4.3 % each.
 
 ### Reference solutions
 

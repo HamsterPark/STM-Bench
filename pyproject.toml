@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "stm-bench"
 version = "0.1.0.dev0"
-description = "STM-Bench: a software scanning tunnelling microscope that speaks the controller wire protocol (stmsim) plus an LLM benchmark for operating an STM through MAST (stmbench)"
+description = "STM-Bench: a simulated scanning tunnelling microscope (stmsim) and an evidence-based benchmark for experimental agents, with standalone MCP and MAST interfaces (stmbench)"
 readme = "README.md"
 requires-python = ">=3.13"
 license = "MIT"

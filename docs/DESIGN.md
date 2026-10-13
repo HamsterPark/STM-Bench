@@ -187,9 +187,13 @@ MCP 服务器（`stmbench episode`）把它交给任何支持 MCP 的智能体�
 |---|---|---|---|---|
 | P1 | Barth 等 1990，Au(111) 22×√3 重构 | 条纹周期、某处取向、两个旋转畴的取向与位置 | `stripe_period_nm`(±0.15 nm)、三条 `angle`(±6°) | `physics/herringbone.py`：Voronoi 旋转畴、畴界振幅包络、沿臂周期 |
 | P2 | Crommie/Hasegawa 1993，Cu(111) 表面态驻波 | 带底 E₀、有效质量 m* | `e0_mev`(±15 meV)、`m_eff`(±2 %) | `physics/surface_state.py`：二维表面态 LDOS、直线/点散射、闭式偏压积分 |
-| P3 | Crommie 等 1993，量子围栏（测量 + 修复两个变体） | 中心谱最低两个可分辨共振；修复变体另加环闭合 | 两条 `peak_in_list`(±25 meV)、`ring_occupancy` ≥ 0.97 | T 矩阵多重散射 + 吸附原子登记表 |
+| P3（测量） | Crommie 等 1993，量子围栏 | 围栏半径、中心谱最低两个可分辨共振 | 两条 `peak_in_list`(±10 meV)、`radius_nm`(±0.15 nm) | T 矩阵多重散射 + 吸附原子登记表 |
+| P3（修复） | 同上，先修复缺口再测谱 | 环闭合、修复后中心谱最低两个可分辨共振 | 两条 `peak_in_list`(±25 meV)、`ring_occupancy` ≥ 0.97；当前不含半径 claim | 同上 + 横向操纵动力学 |
 | P4 | Eigler–Schweizer 1990（Fe/Cu(111) 变体） | 任选一个孤立原子（3 nm 内无邻居）沿 +x 搬 4 nm 到其晶格位点，周围 10 nm 内原子未动 | `target_site`(`position`，按报告位置匹配到被搬的原子)、`bystander_max_shift_nm` ≤ 0.2（`of_claim` 同一原子） | `physics/adatoms.py`：横向操纵动力学、针尖决定抓取、原子个体差异、铺满样品的沉积、拾取/落回、扫描致跳 |
-| P5 | Sader–Jarvis 2004 / Huber 2019，qPlus 力谱 | 扣背景后的短程力极小、衰减长度、结合能 | `f_min_pn`(±15 %)、`f_decay_pm`(±25 %)、`e_bind_mev`(±20 %) | `physics/forces.py` + `physics/qplus.py`：Δf 正演、PLL 模块、ZSpectr 升级 |
+| P5 | Sader–Jarvis 2004 / Huber 2019，qPlus 力谱 | 扣背景后的短程力极小、衰减长度、结合能 | `f_min_pn`(±15 %)、`f_decay_pm`(±8 %)、`e_bind_mev`(±20 %) | `physics/forces.py` + `physics/qplus.py`：Δf 正演、PLL 模块、ZSpectr 升级 |
+
+表中为当前场景 YAML 的判据。P3 两个变体均允许从中心 LDOS 最低三个真峰中匹配两个不同、能量递增的峰，
+以容纳最低能级在部分 seed 中呈带边肩峰的情况；测量变体与修复变体的容差、claim 组成分别列出。
 
 每个场景的 `notes` 记录该篇容差的**实测标定日期与数字**（做法、seed 数、误差中位数与 p90），
 以及为什么某个量没有成为 claim。改动 `hidden` 块的键会重排同 seed 的抽样，必须重新标定——各 notes 都写了这句。

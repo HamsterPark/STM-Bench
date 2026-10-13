@@ -107,8 +107,8 @@ python -m pytest tests -q -m "not requires_mast and not requires_data"
 
 [CI](.github/workflows/tests.yml) runs Python 3.13 entry-point checks and tests with
 `-m "not requires_mast"`, leaving its scratch data root absent so data-dependent tests
-skip. A passing public suite does not validate MAST integration, full benchmark episodes,
-or reproduction rates. Read skip/deselection counts with the passing count; do not turn
+skip. A passing public suite does not validate MAST integration or autonomous-agent
+reproduction rates. Read skip/deselection counts with the passing count; do not turn
 an unavailable check into a successful one.
 
 To operate the standalone simulator:
@@ -118,8 +118,19 @@ python -m stmsim serve --profile reference-stm --seed 0 --material "Au(111)"
 ```
 
 This starts a local controller server; connect a compatible TCP client and stop with Ctrl+C.
-For full episodes, MAST and its dependencies must be importable in the active environment
-(use its environment or put `MASTv2` on `PYTHONPATH`). `MAST_ROOT` identifies the checkout;
+Full paper episodes also run through the standalone benchmark instrument. An MCP-capable
+agent launches the episode server below, calls `get_task` first, and operates the instrument
+through its tools. After the episode ends, `verify` replays the recorded actions and checks
+the measurements and verdict. Use a new output directory for each episode.
+
+```bash
+python -m stmbench.cli episode --scenario P4_atom_positioning_cu111 --seed 0 --out runs/p4_s0
+python -m stmbench.cli verify runs/p4_s0
+```
+
+For MAST-backed episodes (modes A, B0, B1, C and H), MAST and its dependencies must be
+importable in the active environment (use its environment or put `MASTv2` on `PYTHONPATH`).
+`MAST_ROOT` identifies the checkout;
 only the test configuration automatically adds its `MASTv2` directory to the import path.
 Replays and the mode-H pictures read files with `stmsim.io.sxm_reader` (MAST not needed);
 the mode-H episode itself runs in MAST's loop.

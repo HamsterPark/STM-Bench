@@ -2,424 +2,205 @@
 
 **English** · [中文](README.zh-CN.md)
 
-A **software scanning tunnelling microscope** and a benchmark that asks one question of it:
+**A simulated scanning tunnelling microscope and a benchmark for experimental intelligence.**
 
-> Give a model a simulated STM. Can it reproduce a classic, simple STM paper?
+STM-Bench turns landmark scanning-probe experiments into reproducible tests of scientific agency. An agent operates a microscope, establishes useful measurement conditions, locates nanoscale structures, acquires images and spectra, manipulates atoms, and supports its conclusions with recorded experimental evidence.
 
-## Why operating an STM is hard
+> Can an AI carry an experiment from an unfamiliar instrument state to a verified scientific result?
 
-An STM scans a conducting tip close to a surface and measures a tiny tunnelling
-current. In constant-current imaging, feedback adjusts the tip height as it moves.
-The current depends approximately exponentially on the tip–sample separation:
-atomic-scale sensitivity also makes small disturbances matter. Image contrast and
-spectra depend on both the sample and the tip, so interpreting a feature requires
-knowing whether the measurement conditions are trustworthy. See the
-[Tersoff–Hamann theory](https://doi.org/10.1103/PhysRevB.31.805) for the imaging
-principle and its assumptions.
+The project brings together a stateful physical simulator, six paper-inspired scenarios in five families, an independent instrument interface, and an evidence-aware judge. Full experiments are available to MCP-capable agents through `stmbench.instrument`; a separate MAST integration supports experiments with a richer instrument-control runtime. Measurement references, seeded variation, and action replay make both the task and its evaluation open to inspection.
 
-STM-Bench models several difficulties that turn this into an ongoing control and
-diagnosis problem:
+**Current research release:** standalone MCP episodes; reproducible virtual instrument time; versioned scoring rules with explicit evidence and coordinate frames; dI/dV imaging; and documented multi-seed reference results for quantum-corral spectroscopy, single-atom positioning, and qPlus force spectroscopy. See [reference results](#measurement-reference-results) and [getting started](#getting-started).
 
-| Operating difficulty | What the agent must handle here |
+## Why STM is a powerful test of experimental intelligence
+
+Scanning tunnelling microscopy connects perception, physical intervention, and scientific inference at the atomic scale. Tunnelling current is approximately exponential in tip–sample separation; in constant-current imaging, feedback converts the junction's response into a height signal. The electronic structure of the sample and the state of the tip both contribute to the observation. The [Tersoff–Hamann theory](https://doi.org/10.1103/PhysRevB.31.805) provides a foundational account of this relationship.
+
+An STM image is an observation produced by an experiment. Its interpretation depends on bias, current, scan geometry, feedback, and acquisition history. A sharp feature can move because an atom moved, because the sample drifted, or because the tip changed. A spectrum becomes scientifically useful when its location, stabilization conditions, and reference measurement are understood. Successful operation requires the experimenter to choose the next observation that resolves the uncertainty.
+
+| Experimental challenge | What an agent must achieve |
 |---|---|
-| **The tip state is hidden.** A blunt or multiple-apex tip can blur or duplicate surface features; tip electronic states can alter a spectrum. | Use images, spectra and instrument signals to assess measurement quality, decide whether to condition the tip, and check the result. A diagnosis can remain uncertain. |
-| **Controls interact.** Bias and current setpoint affect the junction; feedback gains and scan speed affect how well the tip follows the surface. | Choose settings for the next measurement and check for noise, saturation or unstable feedback. A setting that worked for imaging may be unsuitable for manipulation. |
-| **Coordinates change with time and history.** Thermal drift, piezoelectric creep and hysteresis shift or distort the correspondence between commanded position and the sample. | Relocate features, track drift and verify compensation across scans and spectra. An old target coordinate can become stale. See [Yothers et al.](https://arxiv.org/abs/1611.00243) for these scanner effects. |
-| **Actions change later measurements.** Tip conditioning can improve or worsen the tip; an atom may follow a move only partway, remain still, or disturb a neighbour. | Inspect again after intervention and adapt to the observed outcome. The simulator makes manipulation depend on junction resistance, speed, tip condition and local environment; [Chen et al.](https://www.nature.com/articles/s41467-022-35149-w) discuss related challenges in real STM manipulation. |
+| **Partially observed tip–sample junction** | Infer tip condition from measurements, condition the tip when needed, and confirm recovery. |
+| **A moving coordinate system** | Estimate drift and creep, revisit a feature, and connect measurements acquired at different times and scales. |
+| **Coupled measurement settings** | Balance field of view, spatial resolution, scan speed, signal quality, and instrument time. |
+| **Actions that change the sample** | Find a manipulation regime, follow the atom's response, preserve neighbouring structures, and verify the final state. |
+| **Quantitative scientific claims** | Connect geometry, spectra, and physical models to values with units, tolerances, and acquisition evidence. |
 
-Each task therefore requires a loop of **observe → diagnose → adjust → measure →
-verify**, within an instrument-time budget. Targets vary by seed, and numerical
-claims need both a reported value and the required acquisition evidence. The judge
-checks that those measurements occurred; it does not prove that the reported value
-was calculated from them.
+These demands make STM a compact, scientifically rich setting for studying active perception, planning under uncertainty, and experimental control. Classical demonstrations of surface reconstruction, electron standing waves, quantum confinement, and atom manipulation provide concrete objectives with physically meaningful success criteria. STM-Bench builds on this experimental tradition to evaluate the complete measurement process.
 
-These are simplified models of selected STM difficulties; physical fidelity and
-transfer to a real instrument require separate validation. For a broader account
-of the experimental challenge, see
-[MAST-public's STM introduction](https://github.com/HamsterPark/MAST-public#what-is-stm).
+## Six experiments, five scientific families
 
-## Task 4: move one atom
+Each scenario supplies a task, an instrument-time budget, and a rule card generated from the scoring configuration. Seeded worlds vary relevant geometry, material parameters, tip conditions, and manipulation behaviour. The agent observes the instrument; the evaluator retains the hidden state needed to check the outcome.
 
-Move one atom to a target, leaving nearby atoms in place. The chart brings
-together four earlier replayed episodes, five selected Cursor-session episodes
-and Jev Choice's five development runs. All used P4 easy, seed 0, mode H and
-the maintainer's full MAST environment. Each score counts two verified checks:
-the atom reached its target and its neighbours stayed in place.
+| Scenario | Scientific objective | Required result |
+|---|---|---|
+| **P1 · Au(111) reconstruction** | Image the herringbone reconstruction and locate rotational domains, following [Barth et al.](https://doi.org/10.1103/PhysRevB.42.9307). | Stripe period, a local orientation, and positions/orientations in two distinct domains. |
+| **P2 · Cu(111) standing waves** | Recover surface-state dispersion from spatially and energetically resolved measurements, following [Crommie et al.](https://doi.org/10.1038/363524a0). | Band-bottom energy and effective mass, supported by spectra near a scatterer or dI/dV maps at multiple energies. |
+| **P3 · Quantum-corral spectroscopy** | Relate the geometry of an Fe corral to its confined electronic states, following [Crommie et al.](https://doi.org/10.1126/science.262.5131.218). | Corral radius and two distinct, ascending low-energy resonances from a spectrum at its centre. |
+| **P3-repair · Build, then measure** | Restore a damaged corral before measuring its electronic states. | At least 97% ring occupancy, post-manipulation imaging, and two centre resonances measured after manipulation. |
+| **P4 · Single-atom positioning** | Move an isolated Fe atom on Cu(111) by 4 nm along +x to the nearest lattice site while preserving neighbours; an adaptation of [Eigler and Schweizer](https://doi.org/10.1038/344524a0). | Verified target-site occupation, a final position tied to a follow-up image, and neighbour preservation. |
+| **P5 · qPlus force spectroscopy** | Acquire atom and background Δf(z) curves and apply [Sader–Jarvis force inversion](https://doi.org/10.1063/1.1667267), inspired by [Huber et al.](https://doi.org/10.1126/science.aay3444). | Short-range force minimum, decay length, and binding energy. |
 
-![P4 easy verified checks: earlier Luna 0/2, Terra 0/2, Sol 0/2, Astra 2/2; later Opus 2/2, inherit 2/2, Sol medium 1/2, Grok 1/2, Composer 0/2; Jev Choice 0/2 in each of five development runs.](docs/assets/p4-homepage/p4-results.svg)
+The scenarios adapt the scientific objectives of these papers to explicit simulator models. P4 uses Fe/Cu(111); the original Eigler–Schweizer experiment used Xe/Ni(110). P3's peak rule accepts two different peaks among the three lowest true resonances, accommodating a lowest level that may appear as a shoulder in the measured spectrum. Its current tolerances are ±10 meV for peaks and ±0.15 nm for radius. P5 uses relative tolerances of 15%, 8%, and 20% for force minimum, decay length, and binding energy. The [scenario files](stmbench/trackB/scenarios/) define the complete, versioned contract; P3-repair retains its own rules and is undergoing reference-protocol calibration.
 
-These are single-seed development results, not success rates or a mode-A
-leaderboard. `inherit` is the recorded model label; its underlying model is
-unknown. Jev uses a separate choice driver whose settings changed between runs.
-[See run IDs and scoring context](docs/assets/p4-homepage/README.md#later-five-model-comparison-and-jev-choice).
+## From measurement to a verified result
 
-## Watch two earlier attempts
+The benchmark's central contract is simple: **a scientific result must be accompanied by the required acquisition evidence.** A completed episode combines instrument operation, structured claims, and a check against the simulated sample.
 
-A move can fall short, step backwards, or refuse to happen: the model must look
-again and adjust. The four earlier trials shared a starting scene and MAST
-support, with one episode per model.
+1. **Read the experiment.** `get_task` provides the objective, scoring rules, and instrument manual. Tolerances and evidence requirements are visible to the agent.
+2. **Acquire and act.** The agent controls bias, current, feedback, scan geometry, spectroscopy, drift compensation, tip conditioning, and tip motion. It receives images, numerical observations, and saved data identifiers.
+3. **Report with provenance.** `report_result` names the claim, its value and units, and its supporting frames or spectra. Positional reports identify the frame in which the coordinates were measured.
+4. **Verify the experiment.** The judge checks values, acquisition conditions, spatial coverage, event ordering, and required sample-state constraints. Complete success requires all claims in the scenario to pass within the episode budget.
 
-**Astra · Watch the path, and the corrections.** The atom falls short, sometimes
-steps back, and once stays put. Astra re-scans and changes its approach until the
-atom arrives, with its neighbours verified unchanged.
+Frame provenance matters at STM length scales. The evaluator maps reported coordinates using the drift recorded for the relevant acquisition row. A post-manipulation image must follow the atom's motion; a spectrum must cover the required energy range at the required location. The [version-1 rules](stmbench/trackB/rules.py) expose these conditions directly to the agent.
 
-**▶ Watch the 24-second looping replay (autoplays)**
+Acquisition checks establish that the required measurements occurred and that the reported evidence satisfies the task. They do not inspect the agent's internal derivation. Material knowledge is explicitly allowed for selected claims, including P1's period and P2's material parameters; their acquisition requirements still apply. This makes the role of prior knowledge and the role of experimental evidence explicit.
 
-The white light follows the tip commands; the teal trail follows the atom.
-An overview stays visible throughout. Each attempt cuts from manipulation to
-a **512× rescan**, then pauses for the next adjustment; tiny corrections are
-marked as slow motion.
+### Reproducible instrument time and action replay
 
-![Animated replay with a persistent overview: a bright tip-command marker and the recorded atom trajectory show four attempts, accelerated rescans, adjustments, and verified arrival.](docs/assets/p4-homepage/astra-replay.gif)
+The standalone instrument uses a **virtual clock**. Scans, spectra, motion, and waiting advance time by their physical duration. Reading a saved image or checking status consumes neither instrument time nor random draws. Host speed and model response latency therefore do not change the instrument's evolution between actions.
 
-**Terra · A misleading warning stops progress.** A false alarm from the diagnostic
-tools prompts three unsuccessful recovery attempts; Terra stops without claiming
-success.
+Each episode records actions, events, reports, measurement hashes, and acquired `.sxm` / `.dat` files. `stmbench verify` reconstructs the episode from its seed and actions, then compares measurements and the verdict. Reproducibility can be checked at the level of the acquired data. Record the checkout revision and software environment alongside each run so that replay uses the same physical model and numerical environment.
 
-**▶ Watch the 16-second looping comparison (autoplays)**
+## A microscope with consequential physics
 
-![Animated comparison: Terra inspects a candidate, receives a false diagnostic warning, tries three recovery steps, and stops without moving an atom.](docs/assets/p4-homepage/terra-replay.gif)
+`stmsim` models a coupled experimental system: a surface, a changing tip, a scanner, a tunnel junction, feedback, and measurement channels. Instrument settings affect what can be seen and what a subsequent action will do.
 
-Paths and labels are added from the run records; these are condensed replays,
-and single trials do not estimate success rates.
-[View static storyboards and trial details](docs/assets/p4-homepage/README.md).
+| Subsystem | Modelled experimental behaviour |
+|---|---|
+| **Imaging and tip state** | Constant-current topography; two-dimensional tip-radius blur; sharp, blunt, double, unstable, and dirty tips; electronic noise; stochastic tip changes and conditioning. |
+| **Scanner and feedback** | Drift and creep during acquisition, active drift compensation, feedback lag, and scan-speed-dependent displacement of apparent features. |
+| **Electronic spectroscopy** | Cu(111) surface-state dispersion, scattering at steps and adatoms, T-matrix corral resonances, and integration-time-dependent spectral noise. |
+| **dI/dV imaging** | Bias-dependent lock-in contrast acquired with a scan, enabling spatial and energy-resolved standing-wave measurements. The map stores lock-in X current; spectroscopy reports dI/dV in A/V. |
+| **Atom manipulation** | Lattice-constrained motion controlled by junction resistance, speed, tip condition, and atom-specific thresholds; slips, pickup, recovery, and local debris obstacles. |
+| **qPlus spectroscopy** | Finite-amplitude frequency shifts from short-range Morse and long-range van der Waals forces; noise dependent on amplitude, integration time, and averaging; force reconstruction from measured curves. |
 
-## About the benchmark
+The [fidelity card](docs/FIDELITY.md) connects each behaviour to its literature basis, laboratory fit, or modelling assumption, together with its checks and remaining scope. For example, current dI/dV maps model energy-dependent LDOS contrast without setpoint effects, modulation broadening, or a structured tip DOS. The qPlus extension supports force spectroscopy with constant-current positioning; constant-Δf imaging is outside the implemented scope. This traceable physical specification is part of the benchmark's scientific foundation.
 
-**Alpha research prototype.** This release contains the simulator, paper scenarios,
-measurement-aware judge, episode harness and replay tools. Full paper episodes run without
-MAST through the benchmark instrument (`stmbench.instrument`): primitive actions on a virtual
-clock, served to any MCP agent, judged by the rules stated on each task's rule card, and
-re-checkable by replaying the recorded actions. The MAST condition — the agent-and-skills
-runtime the benchmark was developed with — stays for a with/without-MAST comparison; it needs
-the complete MAST environment, and the available
-[MAST-public](https://github.com/HamsterPark/MAST-public) repository is a reduced source
-edition, not that environment. There is no published leaderboard yet. The older trials in the historical-evidence section predate the current
-physics and have not been rerun on this release.
+## Measurement reference results
 
-Driving the instrument is the core of the task and analysing the data is the support. There
-are no skill tiers and no human anchor: whether a person could do it is not the question.
-To make literature recall insufficient, target quantities are drawn per seed inside
-physically motivated ranges, and the judge requires acquisition evidence as well as a
-reported value within tolerance.
+Reference protocols establish **task solvability, achievable measurement precision, and instrument-time cost**. They are executable protocols in [`stmbench.reference`](stmbench/reference/) with analysis routines in [`stmbench.analysis`](stmbench/analysis/).
 
-- **`stmsim`** — a simulated STM that implements an SPM-controller TCP wire protocol on
-  `127.0.0.1`, allowing compatible control clients to exercise the simulated instrument.
-  Protocol compatibility does not imply equivalence to a real microscope. Tip damage
-  (blunt / multi-apex / unstable / contaminated junction) is the main character: approach,
-  tunnelling junction, feedback dynamics, scanning with drift/creep/hysteresis, spectroscopy,
-  tip conditioning by pulse and poke, coarse motion and communication faults are all
-  modelled, with a **hidden ground truth** the benchmark scores against. On top of that the
-  paper scenarios add the Au(111) herringbone with rotational domains, the Cu(111) surface
-  state and its standing waves, an adatom registry with lateral manipulation, quantum-corral
-  multiple scattering, and a qPlus frequency-shift channel with a PLL. Usable stand-alone
-  (`python -m stmsim serve`) or in-process.
-- **`stmbench`** — five paper scenario families:
+These protocols have privileged access for navigation and operational decisions—for example, locating an atom, selecting bare surface, tracking drift, and deciding when to condition the tip. Their reported physical values come from instrument acquisitions and numerical analysis. The results below characterize this measurement reference. Autonomous-agent performance is evaluated separately.
 
-  | | paper | what has to be reproduced |
-  |---|---|---|
-  | P1 | Barth et al. 1990 | the herringbone stripe period, its orientation, and two rotational domains |
-  | P2 | Crommie / Hasegawa 1993 | the Cu(111) surface-state band bottom and effective mass |
-  | P3 | Crommie et al. 1993 | the confined resonances in a quantum corral (and, in the second variant, repairing the ring first) |
-  | P4 | Eigler & Schweizer 1990 | any isolated Fe atom moved 4 nm onto its lattice site, its neighbours left alone |
-  | P5 | Sader–Jarvis 2004 / Huber 2019 | the short-range force minimum, its decay length and the binding energy, from Δf(z) |
+**Documented calibration results, 13 October 2026:**
 
-  The report is one thing: **reproduction rate, paper × model**.
+| Reference protocol | Seeds | Complete task success | Median instrument time | 90th-percentile measurement error |
+|---|---:|---:|---:|---|
+| **P3 · Corral geometry and resonances** | 0–29 | **30/30** | **485 s** | Peak energies: **2.7 / 2.5 meV** absolute error; radius: **0.038 nm** absolute error |
+| **P4 · Single-atom positioning** | 0–149 | **150/150** | **879 s** | Reported position: **0.16 nm** error |
+| **P5 · Force spectroscopy** | 0–29 | **30/30** | **354 s** | Absolute relative errors: **5.9%** in force minimum, **3.7%** in decay length, **8.7%** in binding energy |
 
-Design record: [`docs/DESIGN.md`](docs/DESIGN.md) (Chinese). How-to: [`docs/USAGE.md`](docs/USAGE.md).
-What the simulator models, from what source, and where it differs from a real microscope:
-[`docs/FIDELITY.md`](docs/FIDELITY.md).
-Code review and contribution guide: [`AGENTS.md`](AGENTS.md), with a source/test map and validation boundaries.
+The calibration records are retained with the [P3](stmbench/trackB/scenarios/P3_corral_cu111.yaml), [P4](stmbench/trackB/scenarios/P4_atom_positioning_cu111.yaml), and [P5](stmbench/trackB/scenarios/P5_sader_jarvis_qplus.yaml) scenarios and in the [design record](docs/DESIGN.md). The repository includes protocols and summarized records; the original per-seed result JSON files for this table are not included. The commands below generate new summaries for a specified checkout.
 
-## Quick start: simulator, no MAST or API key
+P4 illustrates why the control problem is substantial. Its reference searches a resistance ladder without reading each atom's manipulation threshold, estimates lattice geometry from measured adatom positions, and re-images to follow the result. The 150 documented runs include 100 initial conditioning episodes and 32 runs requiring further conditioning during manipulation. Of the final sites, 147 were the nearest site and three satisfied the stated 0.02 nm near-tie rule. The position error in the table measures the reported location; actual site occupation and neighbour preservation are checked separately. P4's 90th-percentile instrument time was 1,428 s, within its 5,400 s budget.
 
-From a checkout of this repository, with Python **3.13**:
+### Calibrating what a good measurement must accomplish
+
+The reference protocols connect tolerance design to measured error distributions. A complementary **fixed-answer audit** asks how often one constant set of numerical answers can satisfy the value checks across seeded worlds.
+
+For the recalibrated P3 and P5 tasks, the best fixed answer passed the joint numerical checks on **4.3% of seeds 0–299** in each case. This is a finite-seed audit with acquisition evidence assumed satisfied, not a full-episode success rate or a universal guessing probability. It helps check that seeded task variation makes measurement informative. See the [audit implementation](stmbench/trackB/audit.py) and [calibration history](docs/DESIGN.md).
+
+The current reference command covers P3, P4, and P5. P1/P2 reference coverage and the P3-repair protocol remain development priorities. Autonomous-agent evaluation can now build on these instrument and scoring foundations; a current-version model leaderboard has not yet been published.
+
+## A recorded experiment in motion
+
+![Annotated replay of an Astra agent repeatedly imaging and manipulating an Fe atom, with a target and neighbouring atoms visible.](docs/assets/p4-homepage/astra-replay.gif)
+
+This historical P4 example shows the experimental loop: inspect, move, image again, adjust, and verify. In the recorded September 2026 mode-H trial, an external Astra agent operated through MAST and satisfied both P4 checks. The trial used the **easy profile, seed 0**, before the current simulator calibration. The animation combines saved scans with post-episode trajectory annotations and compressed timing. It is a process demonstration, separate from the multi-seed reference results above. The [replay record](docs/assets/p4-homepage/README.md) preserves conditions, provenance, comparison cases, and the original development scorecards.
+
+## Place in the SPM research ecosystem
+
+STM-Bench provides a common experimental environment in which different control runtimes and visual reasoning strategies can be studied. The companion projects address complementary parts of scientific instrument autonomy:
+
+| Project | Primary responsibility | Relationship to STM-Bench |
+|---|---|---|
+| **[STM-Bench](https://github.com/HamsterPark/STM-Bench)** | Simulated microscope, paper-inspired tasks, seeded variation, evidence-aware evaluation, and replay. | Defines the experimental environment and checks the scientific outcome. |
+| **[MAST-public](https://github.com/HamsterPark/MAST-public)** | Public subset of the Python instrument-control runtime, experimental skills, state feedback, and workflows. | Exposes the control approach behind the separate MAST evaluation condition; full integration uses the full MAST environment. |
+| **VISTA-SPM** *(currently private)* | Reusable visual reasoning, calibrated inspection, metrology, and visual evidence archives. | Supplies a complementary approach to interpreting, revisiting, and measuring SPM observations; a natural component for comparative evaluation. |
+| **[dsh-spm](https://github.com/HamsterPark/dsh-spm)** | TypeScript SPM domain tools and visual-framework integration for DeepSeek Harness. | Provides another agent/runtime integration layer in which SPM reasoning and control methods can develop. |
+
+VISTA-SPM's emphasis on persistent visual evidence is especially relevant here: an STM experiment repeatedly returns to the same structure under changing scale, drift, and tip conditions. STM-Bench supplies the changing physical scene, recorded measurements, and outcome criteria with which such methods can be investigated. Its standalone instrument interface also makes the benchmark useful independently of these companion projects.
+
+Related scientific tools include [AFS3D](https://github.com/HamsterPark/AFS3D) and [dft-spm-toolkit](https://github.com/HamsterPark/dft-spm-toolkit), which extend the wider research workflow into force-spectroscopy analysis and first-principles/SPM calculations.
+
+## Getting started
+
+Use **Python 3.13 or newer**; CI runs on Python 3.13. From a repository checkout in a virtual environment:
 
 ```bash
 python -m pip install -e ".[dev,bench]"
+python -m stmbench.cli --help
+```
+
+Core dependencies are NumPy, SciPy, and PyYAML. The `dev` extra adds pytest; `bench` adds reporting and plotting dependencies. Standalone instrument episodes and reference protocols run without MAST or a model API key. An agent client supplies its own model connection when evaluating a model.
+
+### Run a measurement reference
+
+This executes one P5 reference experiment and writes its results:
+
+```bash
+python -m stmbench.cli reference --paper P5 --seeds 1 --jobs 1 --json p5-reference.json
+```
+
+For multi-seed reference measurements and a fixed-answer audit:
+
+```bash
+python -m stmbench.cli reference --paper P3 --seeds 30 --jobs 4 --json p3-reference.json
+python -m stmbench.cli reference --paper P4 --seeds 150 --jobs 4 --json p4-reference.json
+python -m stmbench.cli reference --paper P5 --seeds 30 --jobs 4 --json p5-reference-30.json
+python -m stmbench.cli audit chance --scenario P3 --seeds 300 --jobs 4 --json p3-audit.json
+```
+
+For `reference` and `audit`, `--seeds` is a **count**, starting at seed 0 by default; use `--first-seed` to change the starting seed. Record the Git revision and environment with new results, since physics and scoring evolve with the research release.
+
+### Give an MCP agent the instrument
+
+Configure an MCP-capable client to launch this **stdio server**, using the installed environment's Python executable and the repository as its working directory:
+
+```bash
+python -m stmbench.cli episode --scenario P4_atom_positioning_cu111 --seed 0 --out runs/p4_s0
+```
+
+The command opens one experiment for the connected agent; the agent performs the experiment through the exposed tools. Begin with `get_task`, acquire images and spectra, submit `report_result` calls with evidence, and end with `finish`. Use a fresh output directory for each episode. Task/rule text currently follows the Chinese scenario definitions, while the tool interface includes English descriptions.
+
+After completion, replay the recorded actions and verify the measurements and verdict:
+
+```bash
+python -m stmbench.cli verify runs/p4_s0
+```
+
+The [instrument guide](docs/USAGE.md#the-benchmark-instrument-no-mast) also documents direct Python use through `Instrument`, the available actions, observation formats, and episode files.
+
+### Optional controller and MAST integration
+
+The simulator also exposes a local controller TCP interface:
+
+```bash
 python -m stmsim serve --profile reference-stm --seed 0 --material "Au(111)"
 ```
 
-The second command starts a local controller server, not a graphical interface. Connect a
-compatible TCP client to operate it; stop the server with Ctrl+C. This path exercises the
-simulator and does not run a paper episode. For the tests that do not need MAST or private
-calibration data:
+This path supports integration with instrument-control software. With the full MAST environment available, the repository retains mode A for an agent in MAST's loop, mode C for scripted baselines, and mode H for an external or human operator through the browser interface. These conditions exercise a different tool/runtime stack from the standalone primitive instrument. Keep their results labelled by interface, scenario version, seed, and configuration. See the [usage guide](docs/USAGE.md) for setup, drivers, and the HTML replay tools for MAST episodes.
+
+## Development and documentation
+
+STM-Bench is an **alpha research release**. Its public source contains the simulator, standalone instrument, scenarios, judge, reference protocols, analysis modules, MAST adapters, and historical replay assets. The immediate research programme is to extend calibrated reference coverage, complete the corral-repair protocol, and evaluate autonomous agents under clearly recorded interface conditions.
+
+Run the public-checkout checks without MAST or private calibration data:
 
 ```bash
 python -m pytest tests -q -m "not requires_mast and not requires_data"
 ```
 
-A full paper episode, without MAST, for any agent that speaks MCP (stdio):
-
-```bash
-python -m stmbench.cli episode --scenario P4_atom_positioning_cu111 --seed 0 --out runs/p4_s0
-python -m stmbench.cli verify runs/p4_s0      # replay the actions; compare every measurement and the verdict
-```
-
-The agent's first call is `get_task` (task, rule card, instrument manual); see
-[docs/USAGE.md](docs/USAGE.md#the-benchmark-instrument-no-mast).
-
-## Architecture in five lines
-
-1. `stmsim.physics.World` integrates surface + tip + junction + feedback + scanner on two
-   clocks (wall time for hardware-side processes, an optionally accelerated sim clock for
-   scan lines and slow physics); `World.truth()` is the hidden state.
-2. `stmsim.modules.*` present that world as controller modules (Bias, ZCtrl, Scan, FolMe,
-   Motor, AutoApproach, TipShaper, BiasSpectr, LockIn, Signals, Osci1T/2T, Util…);
-   `stmsim.wire` serves them on four loopback ports with the exact request/response
-   framing and command field types listed in
-   [`stmsim/spec/command_registry.json`](stmsim/spec/command_registry.json).
-3. `stmsim.scenario` + `stmsim.faults` build an initial world from a YAML scenario, draw
-   the scenario's hidden values for that seed, and schedule faults (mid-scan tip change, Z
-   drifting to its limit, gain oscillation, >5 s comms latency, NeedModule…);
-   `stmbench.trackB.truth_criteria` turns the hidden truth into a verdict. A paper scenario
-   is judged by `claims_verified`: reported-value claims need both a value inside tolerance
-   and acquisition evidence from the episode's event log. State constraints check hidden
-   truth and required evidence directly.
-4. `stmbench.harness` hosts MAST's `CoreRuntime` on the simulator (ports, isolated project
-   root, tip/experiment/vacuum registration), runs the scripted baseline (mode C) or drives
-   MAST's instrument-control agent with the model under test (modes A / B0 / B1) under a
-   fixed protocol, and writes one ledger per episode.
-5. `stmbench.report` folds ledgers into the paper × mode × model table (the B families
-   follow it as regression rows).
-
-The controller command names and byte formats are compatibility contracts. They describe
-how a client requests an operation; the simulated result is computed by this project's
-handlers and physics. Renaming those commands would require changing the client too.
-Maintaining the simulator's command definitions locally does not make it a new wire
-protocol or establish compatibility with every controller command.
-
-## Full benchmark dependency: MAST
-
-The simulator's core dependencies are numpy, scipy and pyyaml. The installation above also
-includes test and report dependencies. It does **not** install MAST.
-
-**What MAST supplies.** MAST (Modular Autonomous SPM Toolkit) is the separate STM agent
-and instrument-control system. The episode harness uses its `CoreRuntime`, instrument
-skills and agent loop, and the mode-H page runs its episode inside that loop. (Replays and
-the mode-H pictures read files with stmsim's own reader.) Its patched
-`nanonis_spm` client is also the wire-codec oracle for integration checks.
-
-**Public availability.** [MAST-public](https://github.com/HamsterPark/MAST-public) publishes
-selected MAST 6.5.0 source, including general agent and instrument-control components,
-but [omits some specialized modules, knowledge assets, model weights, calibration and
-site configuration](https://github.com/HamsterPark/MAST-public/blob/main/docs/OPEN_SOURCE_NOTES.md).
-It is not the complete MAST environment used for this benchmark's development trials.
-With only STM-Bench and MAST-public, readers cannot reproduce the full mode-A, mode-C or
-mode-H benchmark episodes or the showcased trials under the recorded conditions. No
-public end-to-end reproduction setup has been validated. The private calibration corpus
-and historical episode ledgers are also not released. The standalone simulator and the
-MAST-independent physics, scenario and judge checks remain available.
-
-**For a complete MAST environment.** The commands below describe the maintainer's
-dependency path; they are not setup instructions that make MAST-public equivalent to it.
-Use MAST's virtual environment (with its own dependencies) and make its `MASTv2` package
-directory importable. For a checkout that is not already on the import path, use:
-
-```bash
-export MAST_ROOT=/path/to/MAST
-export PYTHONPATH="$MAST_ROOT/MASTv2${PYTHONPATH:+:$PYTHONPATH}"
-```
-
-Setting `MAST_ROOT` alone adds that directory to the import path only in the tests;
-the CLI and harness require MAST to be importable before they start.
-Modes A / B0 / B1 / C / H require the complete, compatible MAST environment. The
-`requires_mast` marker checks import availability; passing that check alone does not
-establish episode compatibility or reproduce a benchmark result.
-
-## Running tests
-
-```bash
-python -m pytest tests -q -m "not requires_mast and not requires_data"  # public checkout
-python -m pytest tests -q -m "not requires_mast"       # what CI runs (no MAST installed)
-python -m pytest tests/test_no_machine_paths.py -q     # public-release path guard
-```
-
-Markers include `requires_mast` (MAST importable), `requires_data` (external data available),
-and `isolated` (run separately when using MAST). CI checks Python 3.13 command entry points
-and tests without MAST. A passing CI run does not establish full benchmark reproduction.
-With the complete MAST environment available, run ordinary and `isolated` tests in
-separate processes as described in [AGENTS.md](AGENTS.md#run-and-verify).
-
-Release-preparation check (2026-09-20, Windows, fresh Python 3.13 environment): the
-public-checkout test command above completed with **416 passed, 3 skipped and 80
-deselected**. No MAST runtime, private corpus or model API was used for that check.
-After replacing the full extracted command catalog with the local registry, the same
-public-checkout suite passed again. A separate check using the existing patched
-control client passed **34 codec and world smoke tests**; it made no model API calls.
-
-## With the complete MAST environment: mode C, no API key
-
-Mode C is the scripted baseline — MAST's own composite skill for the family runs against
-the simulator through the real execution context, no LLM, no key:
-
-```bash
-export STM_BENCH_DATA=/somewhere/with/space
-python -m stmbench.cli run --scenario P1_barth1990_au111 --mode C --seeds 0,1,2 --time-scale 20
-python -m stmbench.cli run --scenario B5_repair_blunt   --mode C --seeds 0
-```
-
-Each episode prints `success / partial / sim seconds / wall seconds / controller commands`
-and its run directory. Mode C needs MAST's runtime and skills, even though it makes no
-model API calls. The command is not a public-reproduction recipe using MAST-public.
-
-## LLM modes
-
-| mode | what the model sees | needs |
-|---|---|---|
-| `A`  | the full MAST stack: every skill including multi-step composites (`ForgeAuTip`, `AchieveAtomicResolution`, `MoveAtomTo`…), the analysis skills, the composite forge and the knowledge tools | complete MAST environment, `--model` + provider key |
-| `C`  | scripted baseline (above) | complete MAST environment; no API key |
-| `B0` / `B1` | primitive-only ablations. **Shelved**: the code is kept and the modes still run, but they are not part of the paper leaderboard | complete MAST environment, `--model` + provider key |
-| `H`  | **you**, in a browser (`python -m stmbench.cli gui`): the same loop, tool surface, budgets, result channel and judge as mode A, with a person as the model port — plus the saved frames and spectra rendered as pictures. For feeling a task and checking solvability by hand; never on the leaderboard | complete MAST environment |
-
-Mode A is the benchmark. `B0`/`B1` exist to ask "how much did the skill stack contribute",
-which is a different question from the one this benchmark asks.
-
-```bash
-python -m stmbench.cli run --scenario B5_repair_blunt --mode B0 --model kimi-k3 --seeds 0 \
-       --time-scale 20 --max-model-calls 80
-```
-
-Provider keys are read the way MAST reads them (`<MAST repo>/api key/*.env`, or the
-provider's environment variable, or `MAST2_API_KEY_DIR`); this repository never stores a
-key. A human stands in for nothing: an auto-resolver answers every HITL question under a
-fixed policy (`default` approves and reminds of the budget; `honeypot`, the default for
-B8, rejects without a reason). Model IDs are MAST's (`kimi-k3`, `qwen3.7-max`,
-`deepseek-…`, Claude, MiniMax, GLM…).
-
-## Protocol rules (identical for every model and mode)
-
-- **Sim clock pauses while the model thinks.** Sim time advances only while tools run —
-  the time a real instrument would spend — so a slow provider is not charged drift or
-  budget for its latency (`ClockPausedPort`; the ledger records whether the pause was live).
-- **Every tool name is always bound.** Tools in packs the model has not loaded are present
-  as stubs (name, one-line description, empty schema). Calling a stub loads its pack and
-  asks for a retry — it does not execute with defaults. Some providers constrain call names
-  to the bound list and would otherwise substitute a neighbouring tool
-  (`GetScanBuffer` → `HomeZController`), which is an environment hazard, not a model error.
-- **Budgets.** Each scenario fixes sim hours and a controller command count. The driver polls
-  after every tool call and aborts when either is spent; commands issued while the clock is
-  paused do not count. A composite that runs past the budget inside a single tool call
-  still counts: more than 5 % over ⇒ `success = False`, partial ≤ 0.5. Model/tool call caps
-  (`--max-model-calls`, `--max-tool-calls`) are set so they do not bind.
-- **Results arrive on one structured tool, and the judge checks they were measured.** The
-  harness injects `ReportResult(claim_id, value, unit, x_nm, y_nm, note)` with the scenario's
-  own claim ids as an enum; nothing is parsed out of free text, and a required report that is
-  missing fails its claim. Each claim also carries an evidence rule that the judge checks against the
-  episode's event log: the frame that covers the reported position, wide enough and fine
-  enough; enough spectra near a scatterer over the right bias window; a Δf curve on the atom
-  and one on clean surface; a close frame taken *after* an atom actually moved. A right number
-  reported without the measurement behind it scores zero. `ReportTipState(junction,
-  atomic_resolution, tip_state, reason)` remains the statement channel for the regression
-  families and feeds `diag_correct`.
-- **Multi-turn, unattended.** A reply without a tool call gets the same fixed "continue"
-  message until the model ends its reply with `[DONE]` or `[ABORT]` (end of reply only;
-  markers in the body are logged, not honoured).
-- Run directories are `<out>/<scenario>/seed<N>/<mode>_<model>_<policy>/<run_id>` and are
-  never overwritten.
-
-## Data layout under `STM_BENCH_DATA`
-
-Nothing large lives in the repo. One environment variable names the root; package code
-reaches it only through `stmsim.paths` (re-exported as `stmbench.paths`: `data_root()`,
-`runs_dir()`, `calib_dir()`, `index_dir()`, `trackA_dir()`, `fidelity_dir()`,
-`sessions_dir(name)`…). It defaults to `~/stm_bench` on all platforms; set `STM_BENCH_DATA`
-explicitly to choose another location. Blank means unset; `~` is expanded.
-
-```
-$STM_BENCH_DATA/
-├── calib/         thresholds.json (σ*, λ* derived by trackB/derive_thresholds.py),
-│                  creep.json, working_points.json
-├── index/         indices this repo builds (dat_index.parquet)
-├── trackA/        Track A manifests (T1..T4.parquet, meta.json) and rendered prompts
-├── fidelity/      stmsim.validate.fidelity report + its sim sessions
-├── runs/          episode run directories (default --out)
-├── sessions/      .sxm written by `stmsim serve` / in-process worlds
-├── gate1/         P5 gate runs + summary.md
-└── logs/
-```
-
-Two more private locations, neither part of the release: the real-instrument corpus index
-(`STM_BENCH_CORPUS_INDEX`, `corpus_index_dir()`; the old name `STM_BENCH_INDEX` still
-works with a deprecation warning) used by the calibration scripts and the Track A
-manifest builder, and the raw `.dat` mirror (`STM_BENCH_RAW`, `raw_mirror_root()`) used by
-`stmsim.calibrate.index_dat`. Their portable defaults are directories under
-`$STM_BENCH_DATA` (`corpus_index/`, `raw/`). The fitted numbers they produced are checked
-in (`stmsim/profiles/reference-stm.yaml`, `stmbench/trackB/truth_criteria.py`). `MAST_ROOT`
-(`mast_root()`) names the MAST checkout; unset, it is derived from the importable `mast`
-package. `tests/test_no_machine_paths.py` checks package source for known lab-path
-literals and direct `STM_BENCH_*` / `MAST_ROOT` reads outside `stmsim/paths.py`.
-
-## Status and historical development evidence (2026-09-20)
-
-The results in this section are historical development observations from earlier physics
-versions, not measurements of this release. They have not been rerun on the current physics.
-Mode-H agent trials and mode-C scripted gates are not mode-A leaderboard results. The design
-record preserves their context; a current reproduction rate remains to be measured.
-
-- **First end-to-end runs by an agent (mode H, Claude Opus driving the page's API; not the
-  leaderboard).** Seed 0 of every paper: P5 **3/3**, P4 **2/2**, P1 3/4 (the stripe period
-  measured on drift-sheared frames, a correction it had computed and discarded), P3-repair
-  2/3 (both resonances right; the six atoms it put back closed the ring physically but only
-  one landed on the judge's ring site), P2 1/2 (E₀ to 0.1 meV, m* 4 % off against a 2 %
-  tolerance), P3 1/2 (the band-edge rise taken for the lowest resonance). The trials found
-  four environment faults, all fixed and pinned by tests: spectra were NaN below the band
-  bottom (the NaN edge sat at E₀ and leaked it), FolMe moves never reached the manipulation
-  physics (no atom had ever moved through the wire, in any mode), the preamp fact clamped
-  every manipulation setpoint to 10 nA, and loading a second tool pack unloaded the first.
-  `docs/DESIGN.md` §9.2–9.3 has the list; `stmbench/human/` is the mode-H page.
-
-- **Implemented; historical integration checks.** Command spec table; physics core; wire
-  codec + loopback server round-tripped against MAST's client; MAST's real skills run on the
-  simulator unmodified (`ForgeAuTip` completes a full conditioning loop and declares
-  `ready`); creep/drift calibrated on 983 real intervals; σ*/λ* thresholds derived; the LLM
-  driver, HITL auto-resolver, per-episode billing tags, the protocol above, the report table.
-  For the papers: the five physics backends, the six scenarios, the `claims_verified` judge
-  with its five claim kinds and eight kinds of evidence rule, the `ReportResult` channel, one scripted
-  baseline per paper, and seven new MAST skills (registered, and green on MAST's own gates).
-- **Historical solvability gates (mode C).** P1 reproduced **7/10** on seeds 0–9 under real drift
-  (gate2, 2026-09-13, run serially on an idle machine: two periods 0.15–0.25 nm off against
-  ±0.15, one seed found a single rotational domain). The P1 baseline used 97–102 % of its
-  budget, making results sensitive to host load — gates are run alone. At that point the
-  other four did not pass, with the failures attributed to acquisition rather than
-  the analysis (`docs/DESIGN.md` §9.1). The dispersion fit recovers the band bottom to 6 meV and the
-  mass to 0.8 % on the generator, but a forty-point spectroscopy line takes over an hour of
-  instrument time and the sample drifts several wavelengths while it runs. Cluster extraction
-  finds every adatom to 0.1 nm in a small levelled frame and none of them in a wide survey.
-  The force chain runs end to end and gets two of its three numbers. Each scenario's `notes`
-  and `docs/DESIGN.md` §9 carry the specifics. Tolerances are not being widened to close the
-  gap.
-- **Drift is part of the task, not a nuisance to be dialled down.** The rig walks about a
-  nanometre a minute, so a paper's two- or three-hour budget moves the sample 90–180 nm under
-  the tip — past a quantum corral's whole diameter, and within a single frame far enough to
-  shear the image and stretch the lattice period being measured. The scenarios keep that:
-  `drift_scale` was removed from all of them, and drift now accrues per *simulated* second, so
-  compressing instrument time with `--time-scale` no longer compresses the difficulty with it.
-  What the instrument offers in return is real: `Piezo.DriftCompSet` drives the physics rather
-  than storing a panel value, and MAST's `MeasureFrameDrift` → `SetDriftCompensation` →
-  measure-again loop closes on it. The P2 baseline takes 0.97 nm/min down to 0.10 that way.
-  A sign error there doubles the drift instead of doing nothing, which is what makes the
-  verification step worth taking.
-- **Bugs this shook out.** Getting one paper to run end to end turned up eleven wiring faults
-  between the simulator, the skills and the judge — piezo limits reported in metres instead of
-  volts (which made every `ConfigureScan` look out of range), an image-frame angle read as a
-  stage-frame one, replies parsed only at their outermost level, a manipulation composite that
-  never widened the preamp range because it read the gain off the wrong readback. They are
-  listed in `docs/DESIGN.md` §9.2, and each one is now pinned by a test.
-- **Pending.** The leaderboard itself: no mode-A run (a provider model inside MAST's loop)
-  has been made on a paper scenario yet; the mode-H trials above are a solvability check by
-  hand, never pooled with it. Before that: re-gate P1, re-run the P2/P3 gates on the fixed
-  simulator, and the MAST-side items the trials raised (`MoveAtomTo` does not switch the
-  preamp range itself and its default 175 kΩ does not pull an Fe atom; `MeasureFrameDrift`'s
-  x sign; a readable spring constant for P5). The remaining calibration items (hysteresis
-  distribution, STS templates) and the fidelity appendix are also open.
-- **Shelved on purpose** (code kept, not on the leaderboard, marked in `docs/DESIGN.md` §4):
-  Track A offline decisions, the B0/B1 primitive ablations, the human anchor, and the nine
-  B operation families, which are now regression tests rather than tasks.
-- **Portability guard.** `tests/test_no_machine_paths.py` checks package code for lab paths
-  and direct `STM_BENCH_*` / `MAST_ROOT` reads outside `stmsim/paths.py`. Set `MAST_ROOT`
-  explicitly when using a separate runtime checkout.
+| Resource | What it explains |
+|---|---|
+| [Usage guide](docs/USAGE.md) | Instrument and MCP operation, references, audits, MAST integration, and run records. |
+| [Physical fidelity card](docs/FIDELITY.md) | Model sources, checks, assumptions, and physical scope. |
+| [Design and experimental record](docs/DESIGN.md) | Scientific rationale, calibration decisions, and dated development results; primarily Chinese. |
+| [Scenario definitions](stmbench/trackB/scenarios/) | Tasks, hidden distributions, claims, tolerances, and acquisition requirements. |
+| [Repository guide](AGENTS.md) | Source map, invariants, and contribution/validation guidance. |
+| [Historical replay evidence](docs/assets/p4-homepage/README.md) | Recorded P4 agent demonstrations and their provenance. |
 
 ## License
 
-See [`LICENSE`](LICENSE) and [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
+See [LICENSE](LICENSE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
