@@ -38,11 +38,13 @@ def _image(png: bytes) -> dict:
     return {"type": "image", "data": base64.b64encode(png).decode("ascii"), "mimeType": "image/png"}
 
 
-def _block_means(a: np.ndarray, max_size: int) -> np.ndarray:
-    """Down-sample by whole-block means to at most ``max_size`` per side."""
+def _block_means(a: np.ndarray, max_size: int) -> tuple[np.ndarray, int]:
+    """Down-sample by whole-block means to at most ``max_size`` per side: the means and the
+    block's side in pixels. Pixels past the last whole block (bottom rows, right columns) are
+    left out."""
     k = max(1, int(np.ceil(max(a.shape) / max(1, max_size))))
     h, w = (a.shape[0] // k) * k, (a.shape[1] // k) * k
-    return a[:h, :w].reshape(h // k, k, w // k, k).mean(axis=(1, 3))
+    return a[:h, :w].reshape(h // k, k, w // k, k).mean(axis=(1, 3)), k
 
 
 class EpisodeServer:
@@ -82,7 +84,8 @@ class EpisodeServer:
                          "description": "at most this many values per side (block means)"}},
             "required": ["frame"], "additionalProperties": False}
         self._add("frame_values", "A saved frame's values as numbers (z in pm, current in pA), "
-                                  "down-sampled by block means; row 0 = top.", values_schema, self._frame_values)
+                                  "down-sampled by means over blocks of block_px × block_px pixels (pixels past "
+                                  "the last whole block are left out); row 0 = top.", values_schema, self._frame_values)
         self._add("get_spectrum", "A saved spectrum's data (V, A, dI/dV in A/V; or z in m, A, Δf in Hz, m).",
                   {"type": "object", "properties": {"spectrum": {"type": "string"}}, "required": ["spectrum"],
                    "additionalProperties": False}, self._spectrum)
@@ -130,10 +133,11 @@ class EpisodeServer:
     def _frame_values(self, a: dict) -> list[dict]:
         f = self.inst.frame(a["frame"], a.get("channel", "z"), a.get("direction", "forward"))
         scale, unit = (1e12, "pm") if f["channel"] == "z" else (1e12, "pA")      # didv: lock-in X in pA
-        v = _block_means(np.asarray(f["array"], float), int(a.get("max_size", 64))) * scale
+        v, k = _block_means(np.asarray(f["array"], float), int(a.get("max_size", 64)))
+        v = v * scale
         meta = {k2: x for k2, x in f.items() if k2 != "array"}
-        meta.update(unit=unit, block_px=int(np.ceil(f["pixels"] / v.shape[0])), shape=list(v.shape),
-                    values=np.round(v, 2).tolist())
+        # block (r, c) is the mean of pixels r·k … r·k+k-1 (rows) by c·k … c·k+k-1 (columns)
+        meta.update(unit=unit, block_px=int(k), shape=list(v.shape), values=np.round(v, 2).tolist())
         return [_text(meta)]
 
     def _spectrum(self, a: dict) -> list[dict]:

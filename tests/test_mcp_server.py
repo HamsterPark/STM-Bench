@@ -115,3 +115,16 @@ def test_the_cli_serves_an_episode_on_stdio(tmp_path):
                        capture_output=True, text=True, timeout=120, env={**__import__("os").environ, "PYTHONUTF8": "1"})
     assert v.returncode == 0 and json.loads(v.stdout)["ok"], v.stdout + v.stderr
     assert Path(tmp_path / "run" / "actions.jsonl").exists()
+
+
+def test_frame_values_reports_the_block_it_averaged():
+    """97 px asked for at most 64 per side: 2×2 blocks, 48×48 of them, and the reply says 2
+    (it said 3, the size that would have given 97 / 48)."""
+    import numpy as np
+    srv = EpisodeServer(Instrument(P4, 0))
+    facts = _json(_call(srv, "scan", {"center_x_nm": 0, "center_y_nm": 0, "size_nm": 9.7, "pixels": 97,
+                                      "line_time_s": 0.05}))
+    vals = _json(_call(srv, "frame_values", {"frame": facts["frame"], "max_size": 64}))
+    assert vals["block_px"] == 2 and vals["shape"] == [48, 48]
+    z = np.asarray(srv.inst.frame(facts["frame"])["array"], float) * 1e12
+    assert abs(vals["values"][5][7] - z[10:12, 14:16].mean()) < 0.01

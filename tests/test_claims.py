@@ -309,3 +309,22 @@ def test_frame_covers_after_resolves_a_truth_path_point():
     # and a truth without the point at all fails loudly rather than passing on a default
     none_ok, info = check_evidence(rule, events=[hop, after], report={}, truth={})
     assert not none_ok and "no_truth_at" in info["reason"]
+
+
+def test_frame_covers_after_times_a_frame_by_its_scan_not_its_save():
+    """The repaired ring has to be seen after the last hop: a frame scanned before it and saved
+    after it shows the ring as it was."""
+    truth = {"corral": {"centre_nm": [8.0, -6.0]}}
+    rule = {"kind": "frame_covers_after", "point": "corral.centre_nm",
+            "min_fov_nm": 15, "max_nm_per_px": 0.5, "after_event": "adatom_hop"}
+    hop = {"kind": "adatom_hop", "cause": "folme", "sim_s": 15.0}
+    resaved = _drifted(2, 0.0, sim_s=20.0, t_start_sim=12.0)
+    bad, _ = check_evidence(rule, events=[hop, resaved], report={}, truth=truth)
+    assert not bad
+    fresh = _drifted(3, 0.0, sim_s=30.0, t_start_sim=16.0)
+    ok, info = check_evidence(rule, events=[hop, resaved, fresh], report={}, truth=truth)
+    assert ok and info["frame_idx"] == 3
+    # nor is a frame scanned with the tip withdrawn
+    blind = _drifted(4, 0.0, sim_s=40.0, t_start_sim=31.0, feedback=False, withdrawn=True)
+    none_ok, _ = check_evidence(rule, events=[hop, blind], report={}, truth=truth)
+    assert not none_ok

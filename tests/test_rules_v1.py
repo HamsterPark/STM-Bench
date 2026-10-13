@@ -168,3 +168,40 @@ def test_v1_spectra_must_be_among_the_cited_ones():
         v = judge("claims_verified", truth, claims=[claim], events=sts,
                   report=_report("e0_mev", -438.0, evidence=cited), rules_version=1)
         assert v.success is ok, cited
+
+
+def _verification(**kw) -> dict:
+    return {**FRAME, "idx": 2, "sim_s": 60.0, "t_start_sim": 55.0, "path": "s/a002.sxm", "cx_m": 10e-9,
+            "w_m": 10e-9, "h_m": 10e-9, "nx": 64, "ny": 64, **kw}
+
+
+def _verdict(events) -> bool:
+    return judge("claims_verified", _any_target_truth(), claims=[_target_claim()], events=events,
+                 report=_report("target_site", 10.0, x_nm=10.0, y_nm=0.0, frame="a002.sxm"),
+                 rules_version=1).success
+
+
+def test_v1_a_frame_scanned_without_tunnelling_verifies_nothing():
+    """Withdrawn, or with the Z loop off, a scan is a flat sheet of noise (~2 pm) that covers
+    the right place at the right size: a run that withdrew before its verification frame and
+    reported the right place from earlier passed (Codex review, 2026-10-14)."""
+    hop = {"kind": "adatom_hop", "cause": "folme", "sim_s": 50.0}
+    for state, ok in (({"feedback": True, "withdrawn": False}, True),
+                      ({"feedback": False, "withdrawn": True}, False),
+                      ({"feedback": False, "withdrawn": False}, False),
+                      ({}, True)):                      # a ledger from before the state was recorded
+        assert _verdict([hop, _verification(**state)]) is ok, state
+
+
+def test_v1_the_verification_frame_is_timed_by_when_it_was_scanned():
+    """A frame shows the surface as it was when it was scanned. One taken before the atom
+    moved and saved (again) after it shows the old place (Codex review, 2026-10-14), and one
+    during which imaging moved the atom is not after that hop either."""
+    hop = {"kind": "adatom_hop", "cause": "folme", "sim_s": 50.0}
+    assert _verdict([hop, _verification(t_start_sim=52.0)])
+    assert not _verdict([hop, _verification(t_start_sim=40.0)])          # scanned before, saved after
+    # imaging at a low resistance moved the atom in a row of the frame itself: the event carries
+    # the frame's start as its time and the row's as ``row_sim_s``
+    in_frame = {"kind": "adatom_hop", "cause": "scan", "sim_s": 55.0, "row_sim_s": 57.5}
+    assert not _verdict([hop, in_frame, _verification(t_start_sim=55.0)])
+    assert _verdict([hop, in_frame, _verification(idx=3, path="s/a002.sxm", t_start_sim=58.0, sim_s=70.0)])

@@ -974,6 +974,7 @@ class World:
                         cx_m=st.cx, cy_m=st.cy, w_m=st.w, h_m=st.h, angle_deg=st.angle_deg,
                         nx=st.nx, ny=st.ny, bias_v=self.bias_v, setpoint_a=self.zctrl.setpoint_a,
                         t_start_sim=fr.t_start_sim, drift_m=[float(ox), float(oy)],
+                        feedback=bool(fr.feedback), withdrawn=bool(fr.withdrawn),
                         scan_dir=st.scan_dir, row_offsets_nm=rows_nm, didv_map=didv,
                         **({"near_kind": near_kind, "near_nm": None if near_m is None else near_m * 1e9}
                            if didv else {}))

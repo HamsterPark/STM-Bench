@@ -111,6 +111,10 @@ class Frame:
     # (ny, 2) drift/creep offset (m) the renderer added to each acquisition row: the frame's
     # own scan → sample map, which a judge needs when it places a reported position
     row_offsets_m: np.ndarray | None = None
+    # the state the frame was acquired in (it is rendered at its start): with the Z loop off
+    # or the tip withdrawn it is a flat sheet of noise, not a topograph
+    feedback: bool = True
+    withdrawn: bool = False
 
     def progress(self, sim_now: float) -> int:
         if self.finished or self.stopped:
@@ -355,4 +359,5 @@ class Renderer:
                 data[sig] = (np.zeros((ny, nx)), np.zeros((ny, nx)))
         return Frame(settings=st.copy(), data=data, t_start_wall=w.clock.wall(),
                      t_start_sim=t_start_sim, rows_total=ny, row_times_sim=row_times,
-                     tip_change_rows=tip_rows, rec_sim_s=t_start_sim, row_offsets_m=row_offsets)
+                     tip_change_rows=tip_rows, rec_sim_s=t_start_sim, row_offsets_m=row_offsets,
+                     feedback=bool(fb_on), withdrawn=bool(w.withdrawn))

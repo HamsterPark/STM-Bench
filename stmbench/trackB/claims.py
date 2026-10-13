@@ -72,6 +72,11 @@ def _frames(events) -> list[dict]:
 def _frame_ok(frame: dict, rule: dict) -> bool:
     if not frame.get("complete", True):
         return False
+    # a constant-current topograph: the tip tunnelling, the Z loop on. Withdrawn, or with the
+    # loop off, the frame is a flat sheet of noise that passes every test of its geometry
+    # (ledgers from before the state was recorded carry neither key)
+    if frame.get("withdrawn") or frame.get("feedback") is False:
+        return False
     w, h = float(frame.get("w_m", 0.0)), float(frame.get("h_m", 0.0))
     nx = int(frame.get("nx", 0) or 0)
     if min(w, h) * 1e9 < float(rule.get("min_fov_nm", 0.0)):
@@ -196,10 +201,32 @@ def resolve_citation(events, ref) -> dict | None:
     return None
 
 
+def _acquired_s(frame: dict) -> float:
+    """When a frame's acquisition began. A frame shows the surface as it was then (it is
+    rendered at its start), and it can be saved, or saved again, any time later; ledgers from
+    before the start was recorded fall back to the save time."""
+    t = frame.get("t_start_sim")
+    return float(frame.get("sim_s", 0.0) if t is None else t)
+
+
+def _event_s(e: dict) -> float:
+    """When an event happened. An atom moved by imaging carries the time of the row the tip
+    was on (``row_sim_s``): the frame's events are stamped with its start."""
+    t = e.get("row_sim_s")
+    return float(e.get("sim_s", 0.0) if t is None else t)
+
+
+def _last_event_s(events, event_kind: str) -> float | None:
+    times = [_event_s(e) for e in events or [] if e.get("kind") == event_kind]
+    return max(times) if times else None
+
+
 def _after_last(events, frame: dict, event_kind: str) -> bool:
-    """Was ``frame`` saved at or after the last ``event_kind`` event? (no such event: no)"""
-    times = [float(e.get("sim_s", 0.0)) for e in events or [] if e.get("kind") == event_kind]
-    return bool(times) and float(frame.get("sim_s", 0.0)) >= max(times)
+    """Was ``frame`` acquired after the last ``event_kind`` event: did its scan start later?
+    (No such event: no.) A frame taken before an atom moved and saved after it shows where the
+    atom was, as does one during which it moved."""
+    t = _last_event_s(events, event_kind)
+    return t is not None and _acquired_s(frame) > t
 
 
 def placing_frame(events, report: dict, rule: dict) -> tuple[dict | None, str | None]:
@@ -273,13 +300,14 @@ def check_evidence(rule: dict, *, events, report: dict, truth: dict,
             return fr is not None, {"kind": kind, "frame_idx": (fr or {}).get("idx"),
                                     **({"reason": why} if why else {}), **tag}
         after = rule.get("after_event")
+        later = _frames(pool)
         t_after = 0.0
         if after:
-            times = [float(e.get("sim_s", 0.0)) for e in events or [] if e.get("kind") == after]
-            if not times:
+            t_last = _last_event_s(events, str(after))
+            if t_last is None:
                 return False, {"kind": kind, "reason": f"no_{after}"}
-            t_after = max(times)
-        later = [e for e in pool if float(e.get("sim_s", 0.0)) >= t_after]
+            t_after = t_last
+            later = [e for e in later if _acquired_s(e) > t_after]
         cover = frame_covering_sample if in_sample else frame_covering
         fr = cover(later, float(x), float(y), rule)
         return fr is not None, {"kind": kind, "frame_idx": (fr or {}).get("idx"),
@@ -349,10 +377,10 @@ def _check_spectra(kind: str, rule: dict, *, events, truth: dict,
                and float(e["corral_centre_dist_nm"]) <= cmax]
     after = rule.get("after_event")
     if after:
-        times = [float(e.get("sim_s", 0.0)) for e in events or [] if e.get("kind") == after]
-        if not times:
+        t_last = _last_event_s(events, str(after))
+        if t_last is None:
             return False, {"kind": kind, "reason": f"no_{after}"}
-        got = [e for e in got if float(e.get("sim_s", 0.0)) >= max(times)]
+        got = [e for e in got if float(e.get("sim_s", 0.0)) >= t_last]
     positions = {(round(float(e.get("sx_m", 0.0)) * 1e9 / 0.5),
                   round(float(e.get("sy_m", 0.0)) * 1e9 / 0.5)) for e in got}
     ok = (len(got) >= int(rule.get("min_n", 1))

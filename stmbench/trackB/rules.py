@@ -76,7 +76,7 @@ def _tolerance(c: dict, sc) -> str:
 
 
 def _frame_terms(rule: dict) -> str:
-    terms = ["完整（扫完全部行）"]
+    terms = ["在隧穿状态下开着 Z 反馈扫描（恒流形貌；退针或关着反馈扫的不算）", "完整（扫完全部行）"]
     if rule.get("min_fov_nm") is not None:
         terms.append(f"视场（宽、高中较小者）不小于 {_num(rule['min_fov_nm'])} nm")
     if rule.get("max_nm_per_px") is not None:
@@ -88,14 +88,15 @@ def _evidence(c: dict) -> str:
     rule = c.get("evidence") or {}
     kind = rule.get("kind", "frame")
     after = rule.get("after_event")
-    after_txt = f"，并且在{_AFTER.get(after, after)}之后保存" if after else ""
+    after_txt = (f"，并且在{_AFTER.get(after, after)}之后才开始扫描（看开始扫描的时间，不看保存的时间）"
+                 if after else "")
     if kind == "frame":
         return f"evidence 中至少引用一张扫描帧，须{_frame_terms(rule)}"
     if kind == "frame_covers":
         return f"所报位置须落在 frame 指定的那张帧里，该帧须{_frame_terms(rule)}"
     if kind == "frame_covers_after":
         if isinstance(rule.get("point"), str):
-            return (f"（不需要引用）{_AFTER.get(after, after) if after else '本局开始'}之后，本局至少保存过一张覆盖围栏中心的帧，"
+            return (f"（不需要引用）{_AFTER.get(after, after) if after else '本局开始'}之后，本局至少新扫并保存过一张覆盖围栏中心的帧，"
                     f"须{_frame_terms(rule)}")
         return f"所报位置须落在 frame 指定的那张帧里，该帧须{_frame_terms(rule)}{after_txt}"
     if kind == "spectra_near_scatterer":

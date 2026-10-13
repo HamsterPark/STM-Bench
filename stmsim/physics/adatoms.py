@@ -454,6 +454,9 @@ class AdatomRegistry:
                 if p_p > 1e-6 and self.rng_dyn.random() < p_p:
                     ax, ay = self.site_xy(cand.i, cand.j, cand.sub)
                     self.pick_up(cand, sim_s=sim_s)
+                    # what hopped on this path before the pickup did so, the picked atom too
+                    # (dropped behind, then caught again): those hops spiked the current
+                    events.extend(self._hop_records(moved))
                     events.append({"kind": "adatom_picked", "atom_id": cand.id,
                                    "r_kohm": r_eff / 1e3, "xy_nm": [ax * 1e9, ay * 1e9]})
                     return events
@@ -479,14 +482,20 @@ class AdatomRegistry:
             moved[attached.id]["n_hops"] += 1
             if self.rng_dyn.random() < p.p_slip:
                 attached = None
+        events.extend(self._hop_records(moved))
+        return events
+
+    def _hop_records(self, moved: dict[int, dict]) -> list[dict]:
+        """The hop events of one drag path: every atom that hopped, where it ended up."""
+        out = []
         for atom_id, rec in moved.items():
             atom = self.atoms[atom_id]
             ax, ay = self.site_xy(atom.i, atom.j, atom.sub)
             rec["to_site"] = [atom.i, atom.j]
             rec["to_xy_nm"] = [ax * 1e9, ay * 1e9]
             if rec["n_hops"]:
-                events.append(rec)
-        return events
+                out.append(rec)
+        return out
 
     def scan_row(self, p0: tuple[float, float], p1: tuple[float, float], *, r_ohm: float,
                  v_m_s: float, sim_s: float, grip: Grip | None = None,

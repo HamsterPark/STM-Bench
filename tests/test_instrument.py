@@ -199,3 +199,20 @@ def test_z_spectra_carry_the_loops_absolute_z_and_frames_their_start_time():
     # the loop's Z at every point: the start offset plus the sweep coordinate, from where it held
     assert np.allclose(s["z_abs"], z0 + 0.3e-9 + s["z_rel"], rtol=0, atol=2e-14)   # status rounds to 1e-5 nm
 
+
+
+def test_a_frame_records_the_state_it_was_scanned_in_and_keeps_its_start_when_saved_again():
+    """What the judge needs to tell a topograph from a sheet of noise, and a fresh frame from an
+    old one saved again (Codex review, 2026-10-14)."""
+    inst = Instrument(P4, 0)
+    inst.act("scan", center_x_nm=0.0, center_y_nm=0.0, size_nm=8.0, pixels=32, line_time_s=0.05)
+    inst.act("withdraw")
+    inst.act("scan", center_x_nm=0.0, center_y_nm=0.0, size_nm=8.0, pixels=32, line_time_s=0.05)
+    w = inst.world
+    w.save_frame()                                            # the controller can save a frame again
+    saved = [e for e in w.events if e["kind"] == "scan_saved"]
+    assert saved[0]["feedback"] is True and saved[0]["withdrawn"] is False
+    assert saved[1]["feedback"] is False and saved[1]["withdrawn"] is True
+    z = np.asarray(inst.frame(Path(saved[1]["path"]).name)["array"], float)
+    assert np.nanstd(z) < 10e-12                              # what such a frame shows
+    assert saved[2]["t_start_sim"] == saved[1]["t_start_sim"] < saved[2]["sim_s"]
