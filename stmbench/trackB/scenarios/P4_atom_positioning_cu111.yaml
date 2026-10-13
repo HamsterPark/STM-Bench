@@ -108,3 +108,14 @@ notes: |
   on a tied one; the reported place |error| median 0.04 nm, p90 0.16 nm, max 0.41 nm against
   ``report_nm`` 0.6; instrument time median 879 s, p90 1428 s, max 2003 s against the 1.5 h
   budget. No tolerance changed: a fixed answer cannot pass P4.
+
+  **Evidence frames are topographs scanned after the last hop (2026-10-14, Codex review).** A
+  frame scanned with the tip withdrawn or the Z loop off (~2 pm of noise) covered the right
+  place at the right size and verified the move (seed 28, the reference with a withdrawal
+  before its verification frame: 2/2); a frame scanned before the last hop and saved again
+  after it counted as after it. Frames now record ``feedback`` and ``withdrawn``, and the
+  evidence takes neither such a frame nor one whose scan started before the last hop (a hop
+  that imaging caused is timed by its row). A drag that moved atoms and then picked one up
+  had dropped the hops from its events, so the current showed no spikes (seed 92: 11 hops at
+  40 kΩ, then the pickup); they are kept now. The reference rerun under these rules matched
+  the 2026-10-13 run on all 150 seeds, value for value (``docs/results/p4_reference_seeds_0-149.json``).

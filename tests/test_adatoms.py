@@ -1,6 +1,7 @@
 """Adatoms on lattice sites, and moving them with the tip."""
 from __future__ import annotations
 
+import dataclasses
 import math
 
 import numpy as np
@@ -315,3 +316,26 @@ def test_ring_occupancy_is_geometric_so_a_gap_closed_on_the_next_hollow_counts(t
     far = reg2.site_of(sx + ux * 1.2 * spacing, sy + uy * 1.2 * spacing)   # radially outward
     assert reg2.add(*far, role="spare") is not None
     assert reg2.ring_occupancy() == pytest.approx((n - 3) / n)
+
+
+def test_hops_before_a_pickup_on_the_same_path_are_reported(tmp_path):
+    """An atom that hops, slips off and is caught again by the apex, which then takes it: its
+    hops happened and spiked the current before the pickup. They were dropped from the events,
+    so the instrument reported no spikes (Codex review, 2026-10-14: P4 seed 92, 11 hops at
+    40 kΩ, then the pickup)."""
+    w = _dragging_world(tmp_path, setpoint=200e-9)            # 50 kΩ: the atom follows
+    reg = w.surface.site.adatoms
+    reg.params = dataclasses.replace(reg.params, p_slip=1.0)  # it slips after every hop
+    # the apex holds the atom until it has hopped, and takes it the next time it catches it
+    reg.p_pick = lambda r_ohm, atom=None, grip=None: 1.0 if atom is not None and atom.history else 0.0
+    atom = _target(w)
+    start = reg.site_xy(atom.i, atom.j)
+    w.move_xy(*start)
+    n0 = len(w.events)
+    events = w.move_xy_path(start[0] + 4e-9, start[1], speed_m_s=0.5e-9)
+    kinds = [e["kind"] for e in events]
+    assert kinds[-1] == "adatom_picked" and "adatom_hop" in kinds
+    hop = next(e for e in events if e["kind"] == "adatom_hop")
+    assert hop["atom_id"] == atom.id and hop["n_hops"] >= 1 and atom.status == "on_tip"
+    logged = [e["kind"] for e in w.events[n0:]]
+    assert logged.index("adatom_hop") < logged.index("adatom_picked")
