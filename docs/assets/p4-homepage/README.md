@@ -310,6 +310,11 @@ the models did not see during their runs.
   0.001–0.032 nm from the moved atom's actual position, and none gave the goal
   coordinates in place of a measurement. The 1/2 results failed on where the
   atom was, not on locating it.
+- **The three 0/2 runs reported only after their episodes had ended.** Each
+  sent its report after the instrument-time budget or the wall-clock limit had
+  closed the episode, so none was recorded. cat-jam's late report gave the
+  target coordinates of its last move for an atom with no recorded hop; its
+  note said that no verification scan had been made.
 
 ### Conditions and limitations
 
@@ -358,9 +363,9 @@ ledger, the generated profile, the scenario file or simulator source during any
 episode. The cat-jam run read part of the console script and then called it
 with the same interpreter instead of through its wrapper. After its episode had
 ended, the nemotron run listed its ledger directories, displayed the benchmark
-CLI's help text and attempted further instrument commands, which the server
-refused. The audit covers the tool calls the harness recorded; it does not prove
-that no other information reached a model.
+CLI's help text and tried to send another report, which was not accepted. The
+audit covers the tool calls the harness recorded; it does not prove that no
+other information reached a model.
 
 Two scripted console checks preceded the batch and used only console
 observations: `20261015T104435.522Z` scored 0/2 with the default manipulation
