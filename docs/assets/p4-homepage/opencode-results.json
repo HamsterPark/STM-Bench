@@ -1,0 +1,462 @@
+{
+  "schema_version": 1,
+  "title": "P4 easy: eight free-tier models through an agent harness and operator console",
+  "scenario": "P4_atom_positioning_cu111",
+  "difficulty": "easy",
+  "seed": 0,
+  "mode": "H",
+  "date_utc": "2026-10-15",
+  "driver": "One opencode subagent per model, through the opencode provider's free tier.",
+  "interface": "Local operator console over the mode-H HTTP API: the standard mode-H tools, a heuristic blob detector, a bounded numeric sandbox and PNG rendering.",
+  "mast_support": "maintainer's full environment enabled; not held fixed during the batch",
+  "time_scale": 20,
+  "sim_budget_seconds": 5400,
+  "wire_command_budget": 200000,
+  "external_action_limit": 80,
+  "external_wall_limit_minutes": 20,
+  "condition_notes": [
+    "Sharp single tip; no linear drift or creep; electronic noise amplitude scaled to 0.25. The generated profile was identical in all eight runs apart from its absolute rig path.",
+    "Judged by the September 2026 rules of the recorded checkout: the report is matched to the moved atom within 0.6 nm of it, which must sit on the goal lattice site itself, and the follow-up frame needs a field of view of at least 6 nm at no more than 0.1 nm/px. The scenario file's abs_nm of 0.16 nm was not applied by that judge. The rules merged into main on 12-14 October 2026 were not applied, and the verdicts were not recomputed under them.",
+    "The MAST checkout received eleven commits while the batch ran; the ledgers record five different MAST Git HEAD values. Their effect on these episodes was not assessed.",
+    "Every executed MoveAtomTo call replied only that the move ran without rescan confirmation, whatever the atom did; outcomes were visible only in later scans.",
+    "Fresh subagent contexts; serial trials, one per model. The prompt gave the scenario task, the console commands, the limits and procedural rules; it suggested no manipulation settings.",
+    "Procedure-based information restriction, not OS-level isolation. A post-run audit of the agent transcripts found no reads of episode ledgers, the scenario profile or simulator source during any episode; one model read the console script and called it directly."
+  ],
+  "score_definition": "Number of claims independently verified from reported results, simulator state and required acquisition evidence; denominator 2.",
+  "scope": "Single-seed mode-H development trials, not a success-rate estimate, a model ranking or a mode-A leaderboard.",
+  "recorded_git_heads": {
+    "stmbench_sha": "1abed1d9d4a3fa7f018c792dba30140d5643c1c2",
+    "mast_sha_at_batch_start": "f028b70d40ea8f0d0f57a680b0d2c87be0dc8129"
+  },
+  "stmbench_source_note": "The recorded STM-Bench HEAD is a private development checkout. Its stmsim/, stmbench/ and tests/ trees match public commit 0923f40 except the unpublished easy-profile and Jev driver modules and the electronic-noise scale in stmsim/physics/world.py. Git HEAD does not capture uncommitted changes.",
+  "models": [
+    {
+      "model_id": "opencode/cat-jam-free",
+      "run_id": "20261015T105434.966Z",
+      "episodes": 1,
+      "claims_verified": 0,
+      "claims_total": 2,
+      "target_position_verified": false,
+      "neighbour_preservation_verified": false,
+      "task_completed": false,
+      "position_reported": false,
+      "episode_end": "instrument-time budget exhausted",
+      "final_distance_to_goal_nm": null,
+      "report_to_atom_nm": null,
+      "moved_atoms_net_dx_nm": [],
+      "move_calls": [
+        {
+          "status": "executed",
+          "setpoint_nA": 57.0,
+          "setpoint_is_default": true,
+          "speed_nm_s": 0.5,
+          "verify_scan": false,
+          "recorded_hops": 0,
+          "recorded_junction_kohm": null,
+          "net_dx_nm": 0.0
+        },
+        {
+          "status": "executed",
+          "setpoint_nA": 57.0,
+          "setpoint_is_default": true,
+          "speed_nm_s": 0.5,
+          "verify_scan": false,
+          "recorded_hops": 0,
+          "recorded_junction_kohm": null,
+          "net_dx_nm": 0.0
+        }
+      ],
+      "recorded_atom_hops": 0,
+      "scans_acquired": 7,
+      "tool_calls": 16,
+      "sim_instrument_seconds": 5594.5,
+      "mast_sha": "608e4c8ddcd691cd7861cffe2ff7da758ebdd954",
+      "episode_sha256": "2ea539e0a70dabfa0ab7bfce8ed94496de49af291bdef94a93e105d38aedb567"
+    },
+    {
+      "model_id": "opencode/longcat-2.5-preview-free",
+      "run_id": "20261015T110308.026Z",
+      "episodes": 1,
+      "claims_verified": 0,
+      "claims_total": 2,
+      "target_position_verified": false,
+      "neighbour_preservation_verified": false,
+      "task_completed": false,
+      "position_reported": false,
+      "episode_end": "external 20-minute wall-clock limit",
+      "final_distance_to_goal_nm": null,
+      "report_to_atom_nm": null,
+      "moved_atoms_net_dx_nm": [
+        1.591
+      ],
+      "move_calls": [
+        {
+          "status": "executed",
+          "setpoint_nA": 57.0,
+          "setpoint_is_default": true,
+          "speed_nm_s": 0.5,
+          "verify_scan": false,
+          "recorded_hops": 6,
+          "recorded_junction_kohm": 175,
+          "net_dx_nm": 1.591
+        }
+      ],
+      "recorded_atom_hops": 6,
+      "scans_acquired": 3,
+      "tool_calls": 9,
+      "sim_instrument_seconds": 2468.3,
+      "mast_sha": "00ab8e8bd3e9f810cfa95632c3b58fea86980780",
+      "episode_sha256": "ae0e36ad2936e59e34324b9c61aa9362500db1a1d8e5a4b932daebbe5aa31d8c"
+    },
+    {
+      "model_id": "opencode/space-bunny-free",
+      "run_id": "20261015T113124.669Z",
+      "episodes": 1,
+      "claims_verified": 1,
+      "claims_total": 2,
+      "target_position_verified": false,
+      "neighbour_preservation_verified": true,
+      "task_completed": false,
+      "position_reported": true,
+      "episode_end": "ended by the model",
+      "final_distance_to_goal_nm": 3.373,
+      "report_to_atom_nm": 0.03,
+      "moved_atoms_net_dx_nm": [
+        0.675,
+        0.432
+      ],
+      "move_calls": [
+        {
+          "status": "executed",
+          "setpoint_nA": 57.0,
+          "setpoint_is_default": true,
+          "speed_nm_s": 0.5,
+          "verify_scan": false,
+          "recorded_hops": 3,
+          "recorded_junction_kohm": 175,
+          "net_dx_nm": 0.675
+        },
+        {
+          "status": "executed",
+          "setpoint_nA": 57.0,
+          "setpoint_is_default": true,
+          "speed_nm_s": 1.0,
+          "verify_scan": false,
+          "recorded_hops": 2,
+          "recorded_junction_kohm": 175,
+          "net_dx_nm": 0.432
+        },
+        {
+          "status": "rejected by parameter check",
+          "rejection": "max_attempts = 5 is outside the listed range 1-3",
+          "setpoint_nA": 20.0,
+          "setpoint_is_default": false,
+          "speed_nm_s": 2.0,
+          "verify_scan": true,
+          "recorded_hops": 0,
+          "recorded_junction_kohm": null,
+          "net_dx_nm": 0.0
+        },
+        {
+          "status": "executed",
+          "setpoint_nA": 20.0,
+          "setpoint_is_default": false,
+          "speed_nm_s": 2.0,
+          "verify_scan": true,
+          "recorded_hops": 0,
+          "recorded_junction_kohm": null,
+          "net_dx_nm": 0.0
+        },
+        {
+          "status": "executed",
+          "setpoint_nA": 1.0,
+          "setpoint_is_default": false,
+          "speed_nm_s": 1.0,
+          "verify_scan": false,
+          "recorded_hops": 0,
+          "recorded_junction_kohm": null,
+          "net_dx_nm": 0.0
+        }
+      ],
+      "recorded_atom_hops": 5,
+      "scans_acquired": 8,
+      "tool_calls": 24,
+      "sim_instrument_seconds": 5335.0,
+      "mast_sha": "4df51b961b00017e23016fb9373d3561396af4b9",
+      "episode_sha256": "f7254d5ba54dbf661063cacd82f1896b6ac4ab0b03c3116654333bf3a26dbe33"
+    },
+    {
+      "model_id": "opencode/mimo-v2.6-flash-free",
+      "run_id": "20261015T114620.142Z",
+      "episodes": 1,
+      "claims_verified": 2,
+      "claims_total": 2,
+      "target_position_verified": true,
+      "neighbour_preservation_verified": true,
+      "task_completed": true,
+      "position_reported": true,
+      "episode_end": "ended by the model",
+      "final_distance_to_goal_nm": 0.0,
+      "report_to_atom_nm": 0.001,
+      "moved_atoms_net_dx_nm": [
+        4.047
+      ],
+      "move_calls": [
+        {
+          "status": "executed",
+          "setpoint_nA": 57.0,
+          "setpoint_is_default": true,
+          "speed_nm_s": 0.5,
+          "verify_scan": false,
+          "recorded_hops": 1,
+          "recorded_junction_kohm": 175,
+          "net_dx_nm": 0.432
+        },
+        {
+          "status": "rejected by parameter check",
+          "rejection": "manip_setpoint_a = 1.0000000000000001e-07 is above maximum 1e-07",
+          "setpoint_nA": 100.0,
+          "setpoint_is_default": false,
+          "speed_nm_s": 0.5,
+          "verify_scan": true,
+          "recorded_hops": 0,
+          "recorded_junction_kohm": null,
+          "net_dx_nm": 0.0
+        },
+        {
+          "status": "executed",
+          "setpoint_nA": 99.0,
+          "setpoint_is_default": false,
+          "speed_nm_s": 0.2,
+          "verify_scan": true,
+          "recorded_hops": 19,
+          "recorded_junction_kohm": 101,
+          "net_dx_nm": 3.615
+        }
+      ],
+      "recorded_atom_hops": 20,
+      "scans_acquired": 4,
+      "tool_calls": 13,
+      "sim_instrument_seconds": 2728.5,
+      "mast_sha": "4df51b961b00017e23016fb9373d3561396af4b9",
+      "episode_sha256": "4187a469078b7cd16524a561451a77f8c46eb74bff9972191b9c4f37b95cb93b"
+    },
+    {
+      "model_id": "opencode/step-5-preview-free",
+      "run_id": "20261015T120907.524Z",
+      "episodes": 1,
+      "claims_verified": 1,
+      "claims_total": 2,
+      "target_position_verified": false,
+      "neighbour_preservation_verified": true,
+      "task_completed": false,
+      "position_reported": true,
+      "episode_end": "external 20-minute wall-clock limit",
+      "final_distance_to_goal_nm": 1.349,
+      "report_to_atom_nm": 0.016,
+      "moved_atoms_net_dx_nm": [
+        2.698
+      ],
+      "move_calls": [
+        {
+          "status": "executed",
+          "setpoint_nA": 57.0,
+          "setpoint_is_default": true,
+          "speed_nm_s": 0.5,
+          "verify_scan": true,
+          "recorded_hops": 3,
+          "recorded_junction_kohm": 175,
+          "net_dx_nm": 0.675
+        },
+        {
+          "status": "executed",
+          "setpoint_nA": 85.0,
+          "setpoint_is_default": false,
+          "speed_nm_s": 0.5,
+          "verify_scan": true,
+          "recorded_hops": 9,
+          "recorded_junction_kohm": 118,
+          "net_dx_nm": 2.024
+        }
+      ],
+      "recorded_atom_hops": 12,
+      "scans_acquired": 5,
+      "tool_calls": 11,
+      "sim_instrument_seconds": 3954.9,
+      "mast_sha": "4df51b961b00017e23016fb9373d3561396af4b9",
+      "episode_sha256": "b2bdab6d122494c3da557bc296a697d010b8b925395ae8a1169723cb9c6ea10a"
+    },
+    {
+      "model_id": "opencode/deepseek-v4.1-flash-free",
+      "run_id": "20261015T123244.466Z",
+      "episodes": 1,
+      "claims_verified": 0,
+      "claims_total": 2,
+      "target_position_verified": false,
+      "neighbour_preservation_verified": false,
+      "task_completed": false,
+      "position_reported": false,
+      "episode_end": "instrument-time budget exhausted",
+      "final_distance_to_goal_nm": null,
+      "report_to_atom_nm": null,
+      "moved_atoms_net_dx_nm": [
+        1.591
+      ],
+      "move_calls": [
+        {
+          "status": "executed",
+          "setpoint_nA": 57.0,
+          "setpoint_is_default": true,
+          "speed_nm_s": 0.5,
+          "verify_scan": true,
+          "recorded_hops": 1,
+          "recorded_junction_kohm": 175,
+          "net_dx_nm": 0.242
+        },
+        {
+          "status": "executed",
+          "setpoint_nA": 1.0,
+          "setpoint_is_default": false,
+          "speed_nm_s": 0.5,
+          "verify_scan": true,
+          "recorded_hops": 0,
+          "recorded_junction_kohm": null,
+          "net_dx_nm": 0.0
+        },
+        {
+          "status": "rejected by parameter check",
+          "rejection": "manip_setpoint_a = 1.0000000000000001e-07 is above maximum 1e-07",
+          "setpoint_nA": 100.0,
+          "setpoint_is_default": false,
+          "speed_nm_s": 0.5,
+          "verify_scan": true,
+          "recorded_hops": 0,
+          "recorded_junction_kohm": null,
+          "net_dx_nm": 0.0
+        },
+        {
+          "status": "executed",
+          "setpoint_nA": 95.0,
+          "setpoint_is_default": false,
+          "speed_nm_s": 0.5,
+          "verify_scan": true,
+          "recorded_hops": 6,
+          "recorded_junction_kohm": 105,
+          "net_dx_nm": 1.349
+        }
+      ],
+      "recorded_atom_hops": 7,
+      "scans_acquired": 7,
+      "tool_calls": 17,
+      "sim_instrument_seconds": 5404.5,
+      "mast_sha": "019e00675e091a11ab731eb70893c89a8324085e",
+      "episode_sha256": "7adace156e97591bf940a0bf6979251b2e2fd2ed5d15f695092eeb5351a57640"
+    },
+    {
+      "model_id": "opencode/muse-spark-1.3-contributor-free",
+      "run_id": "20261015T124920.767Z",
+      "episodes": 1,
+      "claims_verified": 1,
+      "claims_total": 2,
+      "target_position_verified": false,
+      "neighbour_preservation_verified": true,
+      "task_completed": false,
+      "position_reported": true,
+      "episode_end": "ended by the model",
+      "final_distance_to_goal_nm": 0.255,
+      "report_to_atom_nm": 0.013,
+      "moved_atoms_net_dx_nm": [
+        3.858
+      ],
+      "move_calls": [
+        {
+          "status": "executed",
+          "setpoint_nA": 57.0,
+          "setpoint_is_default": true,
+          "speed_nm_s": 0.5,
+          "verify_scan": true,
+          "recorded_hops": 0,
+          "recorded_junction_kohm": null,
+          "net_dx_nm": 0.0
+        },
+        {
+          "status": "executed",
+          "setpoint_nA": 30.0,
+          "setpoint_is_default": false,
+          "speed_nm_s": 1.0,
+          "verify_scan": false,
+          "recorded_hops": 0,
+          "recorded_junction_kohm": null,
+          "net_dx_nm": 0.0
+        },
+        {
+          "status": "executed",
+          "setpoint_nA": 80.0,
+          "setpoint_is_default": false,
+          "speed_nm_s": 0.3,
+          "verify_scan": false,
+          "recorded_hops": 15,
+          "recorded_junction_kohm": 125,
+          "net_dx_nm": 3.858
+        }
+      ],
+      "recorded_atom_hops": 15,
+      "scans_acquired": 8,
+      "tool_calls": 21,
+      "sim_instrument_seconds": 5081.3,
+      "mast_sha": "363fa68bcbb3c1cc3bf690ab2e75a0c93463e8c7",
+      "episode_sha256": "a4b17a1d9fd65033ba826f906ca235d6f3cf238493e62adf81f0bdeb372c37d3"
+    },
+    {
+      "model_id": "opencode/nemotron-3.5-lightning-free",
+      "run_id": "20261015T130115.517Z",
+      "episodes": 1,
+      "claims_verified": 1,
+      "claims_total": 2,
+      "target_position_verified": false,
+      "neighbour_preservation_verified": true,
+      "task_completed": false,
+      "position_reported": true,
+      "episode_end": "ended by the model",
+      "final_distance_to_goal_nm": 1.349,
+      "report_to_atom_nm": 0.032,
+      "moved_atoms_net_dx_nm": [
+        2.698
+      ],
+      "move_calls": [
+        {
+          "status": "executed",
+          "setpoint_nA": 57.0,
+          "setpoint_is_default": true,
+          "speed_nm_s": 0.5,
+          "verify_scan": false,
+          "recorded_hops": 10,
+          "recorded_junction_kohm": 175,
+          "net_dx_nm": 2.698
+        }
+      ],
+      "recorded_atom_hops": 10,
+      "scans_acquired": 3,
+      "tool_calls": 11,
+      "sim_instrument_seconds": 2461.0,
+      "mast_sha": "363fa68bcbb3c1cc3bf690ab2e75a0c93463e8c7",
+      "episode_sha256": "1f5f95f568ff602a6cd9fbe599bd4e97bc09ee6ed2e5a3733cfa98e102581c87"
+    }
+  ],
+  "scripted_console_checks": [
+    {
+      "run_id": "20261015T104435.522Z",
+      "settings": "default manipulation settings",
+      "claims_verified": 0,
+      "claims_total": 2,
+      "episode_sha256": "463717812e723b95b6bb12804fc64b5ea675081f04b6e5baa88be3acdc9a3c77"
+    },
+    {
+      "run_id": "20261015T105101.080Z",
+      "settings": "90 nA and 0.5 nm/s, set after the first check",
+      "claims_verified": 1,
+      "claims_total": 2,
+      "episode_sha256": "2eef4bfc29f1b644b1d0c963088bc4c4a94fe6241e476e90bb3379d2f1ec1921"
+    }
+  ]
+}

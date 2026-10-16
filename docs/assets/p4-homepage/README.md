@@ -6,13 +6,15 @@ in measured images, inspect what happened, and decide whether to change its
 settings, try again, or stop. The homepage shows Astra's successful correction
 loop and Terra's unsuccessful recovery from a diagnostic warning.
 
-![One P4 easy chart with the earlier four results, five Cursor-session results, and Jev Choice at 0/2 in each of five development runs.](p4-results.svg)
+![One P4 easy chart with the earlier four results, five Cursor-session results, Jev Choice at 0/2 in each of five development runs, and eight free-tier models from 15 October 2026 in run order.](p4-results.svg)
 
 The score counts **two verified task checks**: the atom is at its destination,
 and its neighbours are preserved. Verification includes the required measurement
 evidence. An unverified check does not mean a neighbour was moved or damaged.
 These single-seed development results do not estimate success rates or establish
 a model ranking. Jev's row summarizes five runs with driver changes between them.
+The [15 October 2026 group](#eight-free-tier-models-through-an-agent-harness-15-october-2026)
+used a different interface, and MAST changed while it ran.
 
 ## Read the replays at your own pace
 
@@ -194,8 +196,9 @@ Rounded image estimates remain separate from the simulator's hop coordinates.
 The original ledgers remain unchanged. Raw acquisition files, full private
 ledgers, machine paths, and credentials are not published in these assets.
 The merged scorecard draws its earlier four rows from [results.json](results.json),
-the next five from [cursor-results.json](cursor-results.json), and Jev's summary
-from [jev-results.json](jev-results.json). The figure combines published
+the next five from [cursor-results.json](cursor-results.json), Jev's summary
+from [jev-results.json](jev-results.json), and the last eight from
+[opencode-results.json](opencode-results.json). The figure combines published
 aggregates; it does not change experimental conditions or episode records.
 
 Regenerate the merged scorecard and replays with Python, Matplotlib and Pillow installed:
@@ -251,3 +254,122 @@ are `20260921T080649.097Z`, `20260921T082137.633Z`,
 `20260921T083739.917Z`. The driver offers finite choices derived from scans;
 its tracking and retry limits changed between runs. The chart's Jev row
 summarizes these development iterations, not five independent samples.
+
+## Eight free-tier models through an agent harness (15 October 2026)
+
+The chart's third group adds eight **15 October 2026 (UTC)** P4 easy, seed-0,
+mode-H development runs, one per model, run serially with a fresh server and
+episode each. Each model ran as a fresh subagent of the opencode agent harness,
+through the opencode provider's free tier, and operated the instrument only
+through a local command-line console over the mode-H HTTP interface. The
+[aggregate results](opencode-results.json) retain the run IDs, verified-claim
+flags, every manipulation request with its recorded hops, hashes of the private
+`episode.json` files and the recorded Git HEAD values. The private ledgers,
+agent transcripts and raw acquisition files are not part of this repository.
+
+| Model ID | Run ID | Verified checks | Recorded outcome |
+|---|---|---:|---|
+| `opencode/cat-jam-free` | `20261015T105434.966Z` | 0/2 | Seven scans and two default-setting moves without a recorded hop; the instrument-time budget ran out before a report. |
+| `opencode/longcat-2.5-preview-free` | `20261015T110308.026Z` | 0/2 | One default-setting move carried an atom 1.59 nm in six hops; the 20-minute wall-clock limit ended the episode before a report. |
+| `opencode/space-bunny-free` | `20261015T113124.669Z` | 1/2 | Two moves at the default current carried two different atoms 0.68 and 0.43 nm; later moves at 20 and 1 nA recorded no hop. The reported atom was 3.37 nm from its goal. |
+| `opencode/mimo-v2.6-flash-free` | `20261015T114620.142Z` | 2/2 | The default setting gave one 0.43 nm hop; after a rejected 100 nA request, 99 nA at 0.2 nm/s carried the atom 19 hops onto its goal site. |
+| `opencode/step-5-preview-free` | `20261015T120907.524Z` | 1/2 | The default setting and then 85 nA carried the atom 2.70 nm in twelve hops; it was reported 1.35 nm short, shortly before the wall-clock limit. |
+| `opencode/deepseek-v4.1-flash-free` | `20261015T123244.466Z` | 0/2 | Moves at the default setting, 1 nA and 95 nA, and a rejected 100 nA request, carried the atom 1.59 nm in seven hops; the instrument-time budget ran out before a report. |
+| `opencode/muse-spark-1.3-contributor-free` | `20261015T124920.767Z` | 1/2 | No hop at the default setting or at 30 nA; 80 nA at 0.3 nm/s carried the atom 3.86 nm in 15 hops, one lattice site (0.255 nm) short of its goal. |
+| `opencode/nemotron-3.5-lightning-free` | `20261015T130115.517Z` | 1/2 | One default-setting move carried the atom 2.70 nm in ten hops; it was reported 1.35 nm short of its goal. |
+
+Rows are in run order. A 1/2 means the neighbour-preservation check passed
+while the target-site check failed. The three 0/2 runs reported no position,
+so the judge had no moved atom to which it could bind the neighbour check;
+this does not show that a neighbour moved. Hop counts, displacements and
+distances to the goal come from the simulator's post-episode records, which
+the models did not see during their runs.
+
+### What the records show
+
+- **The manipulation setting decided how far an atom went.** Every run's first
+  move used the tool's default setting, which the hop records give as 175 kΩ at
+  0.5 nm/s (57 nA at 10 mV). These first moves carried an atom between zero and
+  2.70 nm, never the full 4 nm. Requests at 30, 20 and 1 nA, which raise the
+  junction resistance, recorded no hop. The two runs that moved an atom more
+  than 3.8 nm used 80–99 nA (125–101 kΩ) at 0.2–0.3 nm/s; only one of them
+  ended on the goal site.
+- **Every executed move returned the same reply.** `MoveAtomTo` answered each
+  executed call with the same text, that the move ran without rescan
+  confirmation, including calls that recorded no hop and the call that reached
+  the goal. Only a later scan could show the outcome.
+- **A 100 nA request was rejected as above its own maximum.** The parameter
+  check converted 100 nA to `1.0000000000000001e-07` A and refused it as above
+  the 100 nA limit. Both models that tried it continued at 99 or 95 nA. The
+  remaining rejection was a retry count above the allowed three.
+- **Budgets ended four runs.** Two runs exhausted the 5,400 s instrument-time
+  budget (5,594 s and 5,404 s used), and two reached the 20-minute wall-clock
+  limit. A 384-pixel frame took roughly 800 s of instrument time; a move with
+  its verification scan took about 650 s.
+- **The reported positions were measured.** The five reports were
+  0.001–0.032 nm from the moved atom's actual position, and none gave the goal
+  coordinates in place of a measurement. The 1/2 results failed on where the
+  atom was, not on locating it.
+
+### Conditions and limitations
+
+| Setting | Recorded value |
+|---|---|
+| Scenario / difficulty / seed | `P4_atom_positioning_cu111` / easy / 0 |
+| Driver | One fresh opencode subagent per model; serial; one episode each |
+| Interface | Console over the mode-H HTTP API: the standard mode-H tools, a heuristic blob detector, a bounded numeric sandbox and PNG rendering |
+| Limits | 80 instrument actions, 20 wall-clock minutes, 5,400 simulated seconds, 200,000 controller commands |
+| Simulator and judge | September 2026 versions from private checkout `1abed1d` (see below) |
+| MAST | Maintainer's full environment, not held fixed (see below) |
+
+The easy profile was generated outside the scenario directory and was identical
+in all eight runs apart from its absolute rig path: a sharp starting tip, no
+linear drift or creep, and electronic noise scaled to 0.25, as in the September
+runs above. The prompt gave each model the scenario task verbatim, the console
+commands, the limits and procedural rules: use only the console; do not read
+the episode ledger, repository source, scenario files, other trials or the
+internet; report only what was measured. It suggested no manipulation settings.
+It did state that a move reply would describe the result and residual, which
+the instrument's reply did not do.
+
+**The batch ran on the September 2026 simulator and judge.** The recorded
+STM-Bench HEAD `1abed1d` is a private development checkout. Its `stmsim/`,
+`stmbench/` and `tests/` trees match public commit `0923f40` apart from the
+unpublished easy-profile and Jev driver modules and the electronic-noise scale
+in `stmsim/physics/world.py`. That judge matches a report to the moved atom
+within 0.6 nm of it and passes the target check only when that atom sits on the
+goal lattice site; the follow-up frame needs a field of view of at least 6 nm
+at no more than 0.1 nm/px. The scenario file's `abs_nm: 0.16` was not applied.
+P4's physics, rules and evidence checks on `main` changed on 12–14 October
+2026. These runs predate those changes, their verdicts were not recomputed
+under the new rules, and they do not describe the current release.
+
+**MAST was not held fixed.** The maintainer's MAST checkout received eleven
+commits while the batch ran, including changes to its connection, runtime,
+diagnostics and monitoring modules. The ledgers record five different MAST Git
+HEAD values, and the batch's condition record captured only the HEAD at its
+start. Each recorded value is the HEAD when that ledger was written, not
+necessarily the code that the run's server had imported. The effect of these
+changes on the episodes was not assessed.
+
+**Observation limits were procedural, not operating-system isolation.** A
+post-run audit of the eight agent transcripts found no read of an episode
+ledger, the generated profile, the scenario file or simulator source during any
+episode. The cat-jam run read part of the console script and then called it
+with the same interpreter instead of through its wrapper. After its episode had
+ended, the nemotron run listed its ledger directories, displayed the benchmark
+CLI's help text and attempted further instrument commands, which the server
+refused. The audit covers the tool calls the harness recorded; it does not prove
+that no other information reached a model.
+
+Two scripted console checks preceded the batch and used only console
+observations: `20261015T104435.522Z` scored 0/2 with the default manipulation
+setting and `20261015T105101.080Z` scored 1/2 at 90 nA and 0.5 nm/s. They tested
+the console and server, not a model, and are not chart rows.
+
+These are single-seed development observations through one harness and
+interface, not success rates, a model ranking or a mode-A leaderboard. The
+model identifiers are those recorded by the harness and provider; they do not
+establish an underlying model version. The limits match those of the September
+runs, but the interface and harness differ, so these rows are not comparable
+cell for cell with the groups above.
