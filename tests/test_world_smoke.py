@@ -56,7 +56,7 @@ def test_truth_and_events(tmp_path):
 def test_piezo_limits_are_volts_so_the_scanner_has_travel(tmp_path):
     """``Piezo.XYZLimitsGet`` returns DAC volts, not metres.
 
-    MAST works out a reachable half range as ``calibration × min(10 V, |limit|)``. Reporting
+    Control software works out a reachable half range as ``calibration × min(10 V, |limit|)``. Reporting
     the limits in metres makes that product ~1e-13 m, so the scanner looks like it has no
     travel at all and every ``ConfigureScan`` is refused as out of range — which is how this
     was found. With volts the half range comes out at exactly ``Piezo.RangeGet / 2``.
@@ -81,7 +81,7 @@ def test_piezo_limits_are_volts_so_the_scanner_has_travel(tmp_path):
 def test_preamp_gain_table_round_trips_and_the_widest_range_is_10_uA():
     """Gain index i is a full scale of 10 V / 10^(6+i); index 0 (1E6 V/A) is the widest
     range the preamp switches to, which is what the harness registers as the preamp's
-    full scale (MAST clamps the setpoint ceiling to that fact)."""
+    full scale (control software clamps the setpoint ceiling to that fact)."""
     from stmsim.physics.junction import Preamp
 
     p = Preamp()

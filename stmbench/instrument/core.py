@@ -1,4 +1,4 @@
-"""The benchmark instrument: primitive actions on stmsim, on a virtual clock, without MAST.
+"""The benchmark instrument: primitive actions on stmsim, on a virtual clock.
 
 Why it exists. A benchmark's agent-facing interface must not belong to one agent framework,
 and an episode must be re-checkable: the same seed and the same actions have to give the same
@@ -18,7 +18,7 @@ Three kinds of call:
 * **reports** (``report``, ``report_tip_state``, ``finish``) - the result channel of
   :mod:`stmbench.trackB.results`, judged by the version-1 rules shown on the rule card.
 
-What is deliberately absent: MAST's composite skills and its safety gate. An action does what
+What is deliberately absent: composite skills and a safety gate. An action does what
 the instrument would do, hard limits only (bias, piezo range, preamplifier range); a poke too
 deep, a pulse too high, a coarse step in tunnelling have their physical consequences.
 """

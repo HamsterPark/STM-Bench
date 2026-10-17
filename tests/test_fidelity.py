@@ -21,12 +21,7 @@ import numpy as np
 import pytest
 
 
-# MAST's own detectors on 40 real complete 80–120 nm Au frames (the ones the hysteresis
-# calibration measured, fb_corr_flip ≥ 0.9), re-run 2026-08-28: the real reference the
-# sim is held against below.
-
-
-# ── synthetic index used by the no-MAST tests ───────────────────────────────────────
+# ── synthetic index used by the tests below ─────────────────────────────────────────
 def _write_index(path: Path, *, n_au: int = 40, seed: int = 0) -> Path:
     pd = pytest.importorskip("pandas")
     pytest.importorskip("pyarrow")
@@ -109,7 +104,7 @@ def test_retrace_offset_reads_back_at_the_real_median_with_the_measured_shape(tm
     real frames read 3–4 px in the same recipe's ±1 px quantisation), and the offset must
     bulge mid-line the way 39 real frames do (thirds 0.98 / 1.37 / 1.17 % of the axis:
     centre ≥ edges, edges ≥ half the centre) — neither a constant shift nor a closed loop
-    with zero offset at the turnarounds. Sim frames only; no MAST needed."""
+    with zero offset at the turnarounds. Sim frames only."""
     from stmsim.calibrate.hysteresis import peak_shift
     from stmsim.physics.scanner import SIG_Z
     from stmsim.validate.fidelity import VERIFY, make_world, scan_frame

@@ -1,5 +1,5 @@
 """P4 scripted baseline: move one atom by d onto its lattice site with nothing but what the
-instrument shows — no truth, no MAST.
+instrument shows — no truth.
 
 What the reference (:mod:`stmbench.reference.p4`) reads from the truth, this reads from frames:
 

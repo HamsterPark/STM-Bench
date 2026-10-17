@@ -2,7 +2,7 @@
 
 On the host clock they do not: there sim time is wall time × time_scale, so a slower or
 busier host lets more instrument time pass between two actions — more drift, other tip
-events, other noise. That is the clock the wire-protocol clients (MAST) run on, and the
+events, other noise. That is the clock wire-protocol clients run on, and the
 strict xfail below keeps the limitation on record. A world built on the virtual instrument
 clock (``build_world(..., virtual_clock=True)``, which the benchmark instrument uses) moves
 only when an action advances it, and gives the same frame whatever the host does.

@@ -166,7 +166,7 @@ class Tip:
         N(0, ``flicker_dz_m``) — the mid-line Z segments (telegraph steps of tens to hundreds
         of pm) a real unstable tip writes into both passes independently. With
         ``flicker_rate_hz == 0`` the pass gets one constant offset (the row-DC part, which
-        MAST's row-median detrend removes; the per-pass apex re-draw in :meth:`pass_apexes`
+        a row-median detrend removes; the per-pass apex re-draw in :meth:`pass_apexes`
         then carries the disagreement)."""
         if self.flicker_dz_m <= 0 or n <= 0:
             return None
@@ -499,7 +499,7 @@ class Tip:
         """Tip into the sample: blunt radius, 1–3 extra apexes 2–6 nm off (the picked-up
         cluster), a lowered barrier — and an *unstable* apex: metastable, λ ≥ 0.05/s and
         a per-pass dz flicker of the cluster apexes (:meth:`pass_apexes`), which is what
-        separates a crashed tip's verify frame from a merely blunt one under MAST's
+        separates a crashed tip's verify frame from a merely blunt one under a
         trace/retrace detector. The extra apexes' dz is quantised to whole steps."""
         r = self.rng
         self.radius_m = float(self.radius_m * r.uniform(2.0, 6.0) * severity)

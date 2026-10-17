@@ -2,11 +2,11 @@
 
 DESIGN.md §4.5 row "扎针 ①–③ 段时序/Δz": the simulator's ``world.tip_shaper_start`` plays a
 four-segment Z/I trajectory whose lags today are literals (``hw_lag = 0.22 + U(0, 0.11)``).
-This module measures them from 168 ``mast.readback_trace/1`` JSON traces recorded during a
+This module measures them from 168 read-back JSON traces (:data:`SCHEMA`) recorded during a
 calibration acquisition (under the configured trace directory) and writes
 ``$STM_BENCH_DATA/calib/poke_timing.json`` with medians / quantiles and ``n`` per quantity.
 
-The four segments (the current channel pins them; see MAST ``io/z_trace.feedback_restored_t``)::
+The four segments (the current channel pins them)::
 
     ①  baseline        Z = z1,   I = setpoint          feedback ON
     ②  pressed −d      Z = z1−d, I saturated           feedback OFF, tip in the surface
@@ -54,6 +54,7 @@ import numpy as np
 
 from stmsim.paths import calib_dir, data_path
 
+#: the schema name the recorded read-back trace files carry
 SCHEMA = "mast.readback_trace/1"
 CURRENT_RISE_FACTOR = 3.0        # |I| ≥ 3 × baseline ⇒ the tip is pressing
 CURRENT_RETURN_FACTOR = 2.0      # |I| ≤ 2 × baseline after the rise ⇒ feedback back (④)

@@ -11,8 +11,8 @@ Outputs (both under ``stmsim.paths.calib_dir()``):
 ``iz_phi.json``
     per material (and for the unlabelled majority) the quantiles of κ (1/nm) and φ (eV) over
     the fits that pass the contract — points above ``1e-4 × max|I|`` only, R² > 0.9,
-    0.5 ≤ φ ≤ 8 eV, no log-current jumps — exactly what
-    ``mast.vision.spectroscopy.assess_iz`` calls *clean*; the failures are counted, not
+    0.5 ≤ φ ≤ 8 eV, no log-current jumps — what an I(z)
+    quality check calls *clean*; the failures are counted, not
     dropped silently.
 ``sts_templates.json``
     per material the median normalised dI/dV on ``v_grid`` (−1…+1 V, 10 mV), the number of
@@ -32,12 +32,12 @@ Provenance caveats the JSON carries explicitly
       derivative of I(V) (corr > 0.5); otherwise the numeric derivative is used and the
       choice is counted per material.
 
-Run (STM-Bench root, MAST venv)::
+Run (from the STM-Bench root)::
 
     python -m stmsim.calibrate.iz_templates [--index PATH] [--out-dir DIR] [--max-per-class 600]
 
-No MAST import is needed: the ``.dat`` parser below is self-contained (same header/columns
-contract as ``mast.io.nanonis_files.read_dat``: ``key<TAB>value`` header lines, a ``[DATA]``
+The ``.dat`` parser below is self-contained (the header/columns contract of
+:func:`stmsim.io.sxm_reader.read_dat`: ``key<TAB>value`` header lines, a ``[DATA]``
 marker, one column-name line, tab-separated numeric rows, ragged rows NaN-padded).
 """
 from __future__ import annotations

@@ -37,7 +37,7 @@ def _tilted_world(tmp_path: Path, seed: int, window_m: float, **kw) -> World:
     w.surface.site.tilt = SAMPLE_TILT
     w.tip.lambda_per_s = 0.0          # a stable tip: no spontaneous apex changes mid-frame
     # no thermal drift: over a 64-row frame the rig's ~1 pm/s Z drift is 20 % of a 0.2°
-    # tilt span — exactly the frame-method flaw MAST's circle probe exists to avoid
+    # tilt span — exactly the frame-method flaw a circle probe exists to avoid
     w.drift_v_m_per_s = np.zeros(3)
     x, y = _flat_spot(w.surface, window_m)
     w.tip_x, w.tip_y = x, y
@@ -145,7 +145,7 @@ def test_tilt_step_under_closed_loop_is_a_z_transient(tmp_path):
     w = _tilted_world(tmp_path, seed=21, window_m=48e-9)
     assert abs(w.tilt_plane_z(w.tip_x, w.tip_y)) < 1e-15
     # away from the x axis the correction plane has a value at the tip → the surface the
-    # loop follows steps by that much → a real Z transient (why MAST applies tilt in
+    # loop follows steps by that much → a real Z transient (why tilt is applied in
     # ≤1° sub-steps with feedback on), then the loop settles at the same gap as before
     w.move_xy(w.tip_x + 50e-9, w.tip_y)
     w.transients.clear()

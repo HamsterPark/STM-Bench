@@ -228,7 +228,7 @@ class Scenario:
         ``virtual_clock``: instrument time moves only when the driver advances it
         (:class:`~stmsim.physics.clock.VirtualClock`, scales 1), so the same actions give the
         same world on any host. The default reads the host clock, accelerated by ``time_scale``,
-        which is what the wire-protocol clients (MAST) expect."""
+        which is what wire-protocol clients expect."""
         rig = RigProfile.load(self.rig)
         ini = self.initial or {}
         drawn = self.draw_hidden(seed)

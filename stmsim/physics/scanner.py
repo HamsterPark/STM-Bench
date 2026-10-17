@@ -152,7 +152,7 @@ class Renderer:
     """Renders a whole frame from the world state at scan start."""
 
     OVERSAMPLE = 4
-    MIN_SIGMA_PX = 1.0     # calibrated so a good tip gives MAST trace/retrace ≈0.95-0.98 at 100 nm (reference: 0.93-0.98)
+    MIN_SIGMA_PX = 1.0     # calibrated so a good tip gives trace/retrace ≈0.95-0.98 at 100 nm (reference: 0.93-0.98)
 
     def __init__(self, world):
         self.w = world

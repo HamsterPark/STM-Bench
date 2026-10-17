@@ -1,5 +1,5 @@
-"""stmsim's own reader for the files it writes: round trips through the instrument, and parity
-with the reader MAST's analysis skills use (when MAST is available)."""
+"""stmsim's own reader for the files it writes: round trips through the instrument, and
+files that are not frames are refused."""
 from __future__ import annotations
 
 import numpy as np

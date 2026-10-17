@@ -1,8 +1,7 @@
 """Pictures of what the instrument saved, for the person in mode H.
 
-Frames come back through stmsim's own reader (:mod:`stmsim.io.sxm_reader`, identical in
-output to the reader MAST's analysis skills use), so the orientation convention is the one
-the judge and those skills use: row 0 of the oriented array is the frame's high-v edge
+Frames come back through stmsim's own reader (:mod:`stmsim.io.sxm_reader`), so the orientation
+convention is the one the judge uses: row 0 of the oriented array is the frame's high-v edge
 (DESIGN.md §8). :func:`pixel_to_scan_nm` is the
 inverse of the judge's footprint test (``trackB.claims.frame_covering``) and is pinned to it
 by a test, because a reported position is only worth something in the scan frame the judge
@@ -230,7 +229,7 @@ def array_png(z: np.ndarray, *, cmap: str = DEFAULT_CMAP, max_px: int | None = N
 
 def frame_array(path: str | Path, *, channel: str = "Z", direction: str = "forward",
                 flatten_mode: str = "plane") -> tuple[np.ndarray, dict]:
-    """One frame as the flattened oriented array (row 0 = the high-v edge) and MAST's
+    """One frame as the flattened oriented array (row 0 = the high-v edge) and the reader's
     frame dict."""
     img, fr = _oriented(Path(path), channel, direction)
     if img is None:

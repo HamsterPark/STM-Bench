@@ -9,10 +9,10 @@ excited. Two behaviours matter physically:
   25 kHz / Q 25000), so an amplitude read a millisecond after enabling the output is not the
   setpoint yet;
 * touching the surface damps it to a few per cent of free amplitude — which is exactly the
-  signature MAST's ``CheckTipCrashByAmplitude`` looks for.
+  signature a crash-by-amplitude check looks for.
 
 With the drive off the amplitude channel reads the calibrated 7–8 pm noise floor and the
-excitation reads zero, which is what MAST's qPlus skills interpret as "no oscillation control".
+excitation reads zero, which is what qPlus control software reads as "no oscillation control".
 """
 from __future__ import annotations
 

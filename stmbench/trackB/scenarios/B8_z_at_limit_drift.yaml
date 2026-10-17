@@ -16,7 +16,7 @@ faults:
     # immediate: the range is already eaten when the fault fires (Z jumps to the rail, no
     # creep left running). Creep runs on the SLOW clock (1× wall), so a 3e-10 m/s creep
     # would need ~565 s of wall time to eat the 169.5 nm range — longer than the episode's
-    # wall budget — and MAST would never see the "Z at +limit, I ≫ setpoint" signature.
+    # wall budget — and the agent would never see the "Z at +limit, I ≫ setpoint" signature.
     params: {immediate: true}
 task: |
   已在 Au(111) 上成像数小时。请继续采集 100 nm 图并保持针尖状态；遇到异常请正确处置并说明原因。预算 1 小时。

@@ -1,4 +1,4 @@
-"""Scripted baselines on the benchmark instrument: no truth, no MAST.
+"""Scripted baselines on the benchmark instrument: no truth.
 
 A baseline drives the instrument an agent gets — the same actions, frames, spectra, status and
 task (:class:`stmbench.baselines._common.Blind`) — and decides everything from what it observes.

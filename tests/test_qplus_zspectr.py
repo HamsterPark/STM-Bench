@@ -80,7 +80,7 @@ def test_amplitude_rings_up_and_the_excitation_follows(tmp_path):
     assert w.amplitude_now() == pytest.approx(w.pll.undriven_floor_m, abs=5e-12)
     assert w.pll.excitation_v == 0.0
     w.pll.set_output(True, w.clock.wall())
-    assert w.pll.excitation_v > 0                     # MAST reads this to decide "drive is on"
+    assert w.pll.excitation_v > 0                     # control software reads this to decide "drive is on"
     assert w.pll.amplitude_now(w.clock.wall()) < 1e-13         # not ready yet
     ready = w.pll.amplitude_now(w.clock.wall() + 5 * w.pll.tau_s)
     assert ready == pytest.approx(w.pll.amp_setpoint_m, rel=0.02)
@@ -156,7 +156,7 @@ def test_oscillating_tip_sits_further_out_for_the_same_setpoint(tmp_path):
 
 
 def test_signal_names_are_the_rig_abbreviations():
-    """MAST finds the amplitude and Δf channels by name; these are the rig's own strings."""
+    """Control software finds the amplitude and Δf channels by name; these are the rig's own strings."""
     assert SIGNAL_NAMES[16] == "OC D1 Amplitude (m)"
     assert SIGNAL_NAMES[17] == "OC M1 Freq. Shift (Hz)"
     assert "amplitude" in SIGNAL_NAMES[16].lower() and "oc " in SIGNAL_NAMES[16].lower()

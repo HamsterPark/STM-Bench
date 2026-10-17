@@ -6,8 +6,8 @@ has the sample slide out from under the tip while it runs. Turning that down in 
 would delete the capability worth testing; what the benchmark asks instead is that the agent
 notice it and track it.
 
-The instrument offers the means (``Piezo.DriftCompSet``) and MAST drives it
-(``SetDriftCompensation`` after ``MeasureFrameDrift``). These tests pin that the loop closes:
+The instrument offers the means (``Piezo.DriftCompSet``) and the operator drives it (a
+measured drift, programmed). These tests pin that the loop closes:
 compensation programmed from a measurement stops the motion, the wrong sign makes it worse
 rather than doing nothing, and the ramp runs out of piezo eventually.
 """

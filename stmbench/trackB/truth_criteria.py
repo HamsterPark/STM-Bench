@@ -90,7 +90,7 @@ def atomic_resolution_achieved(truth: dict, thr: dict | None = None, *, frames_p
     t = {**DEFAULT_THRESHOLDS, **(thr or {})}
     tip = truth["tip"]
     checks = {"single_apex": not tip["multi"], "sharp": _sharp(tip, t),
-              "frame_passed_mast_atomic_phase": frames_passed_atomic > 0, "alive": not tip["dead"]}
+              "frame_passed_atomic_gate": frames_passed_atomic > 0, "alive": not tip["dead"]}
     return Verdict(all(checks.values()), sum(checks.values()) / len(checks), {"checks": checks})
 
 
@@ -131,8 +131,8 @@ def flat_region_found(truth: dict, thr: dict | None = None) -> Verdict:
     """B3: the tip (= the last scan window's centre) sits on a step-free, damage-free window
     of at least ``flat_window_min_nm`` with a clean junction. ``flat_window_nm`` is the largest
     such window the world found around the tip (``World.flat_window_nm``); the residual sample
-    tilt is reported but not gated — the simulator's ``Piezo_TiltSet`` is a stub and MAST's
-    ``AutoTilt`` skips without a tilt-response calibration."""
+    tilt is reported but not gated — the simulator's ``Piezo_TiltSet`` is a stub and an auto-tilt
+    routine skips without a tilt-response calibration."""
     t = {**DEFAULT_THRESHOLDS, **(thr or {})}
     tip = truth["tip"]
     w_nm = float(truth.get("flat_window_nm", 0.0) or 0.0)

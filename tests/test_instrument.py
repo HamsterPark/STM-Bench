@@ -1,4 +1,4 @@
-"""The MAST-free benchmark instrument: primitive actions on a virtual clock, read-only
+"""The benchmark instrument: primitive actions on a virtual clock, read-only
 observations, the version-1 result channel, a ledger, and re-checking by replay."""
 from __future__ import annotations
 

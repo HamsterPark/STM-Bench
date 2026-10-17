@@ -1,4 +1,4 @@
-"""Write controller ``.sxm`` files the way ``mast.io.nanonis_files.read_sxm`` expects them.
+"""Write controller ``.sxm`` files the way controller-file readers expect them.
 
 Layout: text header of ``:KEY:`` lines, ``:SCANIT_END:``, then ``\\x1a\\x04``, then
 big-endian float32 frames channel by channel (forward then backward for ``both``).

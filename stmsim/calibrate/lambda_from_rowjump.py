@@ -50,7 +50,7 @@ def _frames(index_path: str | Path, material_filter: str):
             hay = hay + " " + d["comment"].astype(str)
         d = d[hay.str.contains(material_filter, case=False, na=False)]
     d = d[d["acq_frac"] >= FILTERS["acq_frac"]]              # complete frames only
-    d = d[d["fb_corr_flip"] >= FILTERS["fb_corr_flip"]]      # MAST's good-tip trace/retrace band
+    d = d[d["fb_corr_flip"] >= FILTERS["fb_corr_flip"]]      # the good-tip trace/retrace band
     rows_n = d["ny"].astype(float)
     t_frame = rows_n * (d["t_fwd_s"].astype(float) + d["t_bwd_s"].astype(float))
     keep = (t_frame > 0) & np.isfinite(t_frame)
@@ -122,7 +122,7 @@ def lambda_star_from_task(*, verify_rows: int = 256, verify_line_s: float = 0.58
     t_frame = verify_rows * 2.0 * verify_line_s
     lam = -math.log(1.0 - max_interrupt_p) / t_frame
     return {"lambda_star_per_s": lam, "t_verify_frame_s": t_frame, "max_interrupt_p": max_interrupt_p,
-            "note": "task-derived: a Poisson tip-change rate at which MAST's own verify frame "
+            "note": "task-derived: a Poisson tip-change rate at which a verify frame "
                     "is interrupted in at most max_interrupt_p of attempts"}
 
 
