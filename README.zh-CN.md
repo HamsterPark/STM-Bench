@@ -175,6 +175,12 @@ python -m stmbench.cli verify runs/p4_s0
 python -m stmbench.cli agent --scenario P4_atom_positioning_cu111 --seed 0 --out runs/p4_s0 --model claude-opus-5-5
 ```
 
+供人或通过屏幕操作的智能体使用时，`stmbench console` 把同一台仪器做成网页，写下同样的记录；网页从不显示真值和得分：
+
+```bash
+python -m stmbench.cli console --scenario P4_atom_positioning_cu111 --seed 0 --out runs/console_p4
+```
+
 [仪器使用指南](docs/USAGE.md#the-benchmark-instrument)还介绍了如何通过 `Instrument` 直接调用 Python 接口，以及可用动作、观测格式与回合文件。
 
 ### 可选的控制器接口

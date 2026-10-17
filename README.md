@@ -177,6 +177,12 @@ To seat a model at the instrument with these tools and nothing else, `stmbench a
 python -m stmbench.cli agent --scenario P4_atom_positioning_cu111 --seed 0 --out runs/p4_s0 --model claude-opus-5-5
 ```
 
+For a person, or an agent that works through a screen, `stmbench console` serves the same instrument as a web page and writes the same ledger; the page never shows the truth or the score:
+
+```bash
+python -m stmbench.cli console --scenario P4_atom_positioning_cu111 --seed 0 --out runs/console_p4
+```
+
 The [instrument guide](docs/USAGE.md#the-benchmark-instrument) also documents direct Python use through `Instrument`, the available actions, observation formats, and episode files.
 
 ### Optional controller interface

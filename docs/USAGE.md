@@ -156,6 +156,36 @@ ends when the model calls `finish`, at a limit (`--max-turns`, `--max-tool-calls
 Next to the instrument's ledger the run directory gets `driver.json` and `transcript.jsonl`
 (below); `verify` and `replay` read the run as usual.
 
+### The console
+
+```bash
+python -m stmbench.cli console --scenario P4_atom_positioning_cu111 --seed 0 --out runs/console_p4
+python -m stmbench.cli console --out runs/console          # pick a paper scenario and a seed on the page
+```
+
+`stmbench.console` serves the instrument as a web page (standard library only, one episode per
+process) for a person at the instrument and for an agent that works through a screen —
+screenshots, mouse and keyboard. The page drives the same `Instrument` an MCP agent gets: the
+same actions (a form per action, generated from the action table), readings, frames (the PNG
+an MCP agent sees), spectra, reports and refusals, on the same virtual clock; the same ledger
+lands in the run directory, and `verify` and `replay` read it. The same calls through the page
+and through the MCP server give the same measurements and verdict (`tests/test_console.py`).
+
+The page shows the task with its rule card and the manual, never the truth; finishing does not
+show the score, which stays in `episode.json`. Every read is an observation in the ledger, so
+the page reads only when asked — after an action or a click — never on a timer. Over a frame
+the cursor reads out scan coordinates (the mapping the frame's MCP reply states,
+`stmbench.render.pixel_to_scan_nm`); a click picks a point, which can be copied into an
+action's or a report's coordinate fields, as a controller's own image window allows.
+
+The server binds `127.0.0.1` unless `--host` says otherwise, and whoever reaches the page can
+operate the instrument. The hidden state lives in the server's process: run the server outside
+the machine a screen agent controls (for a virtual machine, on the host, with `--host` set to
+an interface the guest can reach), since an agent with a shell next to the server could read
+it. An episode not finished on the page is finished, and judged as it stands, by
+`POST /api/finish` or when the server stops (Ctrl-C). `stmbench/console/server.py` lists the
+endpoints.
+
 ### The paper scenarios
 
 These are the benchmark. One file per paper, plus a second variant for P3.
@@ -483,6 +513,7 @@ tip-shaping traces under `<data-root>/calibration_inputs/poke_traces/` or pass a
 |---|---|
 | `stmbench/instrument/` | the benchmark instrument: `core.py` (actions, observations, reports, ledger, replay check), `mcp_server.py` (MCP stdio), `render.py` (the PNG a frame observation returns) |
 | `stmbench/trackB/` | the scenarios, `rules.py` (rule card, overrun rule), `claims.py` (claim and evidence checks), `results.py` (the result channel's fold), `truth_criteria.py` (verdicts), `audit.py` (chance audit) |
+| `stmbench/console/` | the instrument in a web page (`stmbench.cli console`): `server.py` (the endpoints over `Instrument`), `static/index.html` (the page) |
 | `stmbench/agent/` | the model-alone loop (`stmbench.cli agent`): `loop.py` (prompt, limits, the record), `models.py` (Claude through the anthropic SDK, OpenAI-compatible endpoints, a scripted port) |
 | `stmbench/reference/`, `stmbench/baselines/` | privileged reference solutions; scripted baselines that see only what an agent sees |
 | `stmbench/analysis/` | measurement analysis the references and baselines use (adatoms, drift, tip, spectra, force, corral) |

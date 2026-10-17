@@ -7,6 +7,7 @@
     python -m stmbench.cli audit chance [--scenario P3] [--seeds 200] [--jobs 4] [--json out.json]
     python -m stmbench.cli agent --scenario P4_atom_positioning_cu111 --seed 0 --out <run dir> \
                                  [--provider anthropic|openai] [--model ID]                    # a model alone
+    python -m stmbench.cli console --scenario P4_atom_positioning_cu111 --seed 0 --out <run dir> [--port 8765]
 
 Data roots default to ``$STM_BENCH_DATA`` (see ``stmbench.paths``)."""
 from __future__ import annotations
@@ -128,6 +129,16 @@ def cmd_agent(a) -> int:
     return 1 if res.stop.startswith("error") else 0
 
 
+def cmd_console(a) -> int:
+    """The instrument in a web page (stmbench.console)."""
+    from .console import serve
+
+    if a.seed is not None and a.scenario is None:
+        raise SystemExit("--seed needs --scenario (without one, the page offers the scenarios)")
+    serve(a.out, scenario=a.scenario, seed=a.seed, host=a.host, port=a.port, open_browser=not a.no_browser)
+    return 0
+
+
 # ── argparse ────────────────────────────────────────────────────────────────
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="stmbench")
@@ -206,6 +217,18 @@ def main(argv=None) -> int:
     g.add_argument("--max-wall-min", type=float, default=None, help="wall-clock limit in minutes")
     g.add_argument("-v", "--verbose", action="store_true", help="print one line per turn")
     g.set_defaults(fn=cmd_agent)
+
+    w = sub.add_parser("console", help="the instrument in a web page, for a person or an agent working through a "
+                                       "screen; the same ledger as an MCP episode")
+    w.add_argument("--out", required=True, help="the run directory (with --scenario) or a directory for the "
+                                                "episode the page starts")
+    w.add_argument("--scenario", default=None, help="scenario id; without it the page offers the paper scenarios")
+    w.add_argument("--seed", type=int, default=None, help="with --scenario (default 0)")
+    w.add_argument("--host", default="127.0.0.1",
+                   help="interface to bind (default 127.0.0.1; whoever reaches the page can operate the instrument)")
+    w.add_argument("--port", type=int, default=8765)
+    w.add_argument("--no-browser", action="store_true", help="do not open a browser")
+    w.set_defaults(fn=cmd_console)
     a = ap.parse_args(argv)
     return a.fn(a)
 

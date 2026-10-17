@@ -71,6 +71,8 @@ Other useful boundaries:
 - [stmsim/calibrate/](stmsim/calibrate/) fits lab data;
   [stmsim/validate/](stmsim/validate/) compares simulated and real measurements.
   Their external data requirements differ from the standalone physics tests.
+- [stmbench/console/](stmbench/console/) serves the instrument as a web page for a person or a
+  screen-driven agent (`stmbench.cli console`; tests in [test_console.py](tests/test_console.py)).
 - [stmbench/agent/](stmbench/agent/) seats a language model at the instrument with its MCP tools
   and nothing else (`stmbench.cli agent`; tests in [test_agent.py](tests/test_agent.py)).
 - [stmbench/reference/](stmbench/reference/) holds the privileged reference solutions and
@@ -228,7 +230,7 @@ These apply across the simulator, the instrument, the judge and the presentation
 - Keep the simulator's name vendor-neutral. Preserve required compatibility API and file-format
   tokens allowed by that same guard; do not erase protocol provenance from documentation.
 - Write code, comments and docstrings in English. Chinese belongs in scenario task text,
-  the replay page, and `docs/DESIGN.md`.
+  the replay page, the console page's labels (beside their English), and `docs/DESIGN.md`.
 - Update `docs/DESIGN.md` when a design decision changes. Keep operational instructions in
   `docs/USAGE.md` and release claims in `README.md` consistent with the implementation.
   When committing, use one logical change per commit, a present-tense subject, and a body
