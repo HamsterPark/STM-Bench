@@ -19,7 +19,6 @@ from stmbench.trackA.render import (
     PNG_SIGNATURE, data_root, flatten_three_step, header_summary, png_bytes_gray, png_shape, render_array, resolve_path,
 )
 
-from tests.conftest import requires_mast
 
 
 # ── AUROC ───────────────────────────────────────────────────────────────────
@@ -499,7 +498,7 @@ def test_relative_frame_references_resolve_under_the_raw_mirror_root(monkeypatch
     assert [str(resolve_path(p)) for p in n["input_paths"]] == [str(Path("Q:/mirror root") / f"d/{i}.sxm") for i in (1, 2, 3)]
 
 
-# ── simulator frames (needs MAST's reader) ──────────────────────────────────
+# ── simulator frames (stmsim's reader) ──────────────────────────────────────
 
 def _world(tmp_path: Path, seed: int = 1):
     from stmsim.physics.rig import RigProfile
@@ -529,7 +528,6 @@ def _frame(w, *, rows: int | None = None, cx: float = 0.0, gap_s: float = 15.0) 
     return path
 
 
-@requires_mast
 def test_render_simulated_sxm_frame(tmp_path):
     from stmbench.trackA.render import render_frame
     w = _world(tmp_path)
@@ -548,7 +546,6 @@ def test_render_simulated_sxm_frame(tmp_path):
     assert png_shape(render_frame(part, crop_to_acquired=True).png) == (rp.acq_rows, 48)
 
 
-@requires_mast
 def test_drift_features_and_drift_rule_on_simulated_glances(tmp_path):
     from stmbench.trackA.baselines import glance_step_features
     w = _world(tmp_path)
@@ -586,7 +583,6 @@ def test_drift_features_and_drift_rule_on_simulated_glances(tmp_path):
     assert same["dx_px"] <= 1 and same["side"] == "top"
 
 
-@requires_mast
 def test_pixel_head_negative_control_on_simulated_frames(tmp_path):
     w = _world(tmp_path)
     parts = [_frame(w, rows=12) for _ in range(3)]
@@ -605,7 +601,6 @@ def test_pixel_head_negative_control_on_simulated_frames(tmp_path):
     assert res["n_scored"] == 2 and res["auroc_pooled"] in (0.0, 0.5, 1.0)
 
 
-@requires_mast
 def test_cli_score_and_render_roundtrip(tmp_path, monkeypatch, capsys):
     pd = pytest.importorskip("pandas")
     pytest.importorskip("pyarrow")
@@ -688,7 +683,6 @@ def test_t4_scoring_and_median_baseline_with_nan_setpoint():
     assert res["mean_log_likelihood"] is not None
 
 
-@requires_mast
 def test_head_rows_render_hides_the_tail(tmp_path):
     from stmbench.trackA.render import render_frame
     w = _world(tmp_path)
