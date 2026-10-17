@@ -255,23 +255,20 @@ def test_argparse_defaults_follow_the_env(monkeypatch, tmp_path):
 
 
 # ── the vendor's name stays out of this repository ─────────────────────────
-#: names that are MAST's (its client package, its patch module, its env vars, its tool) or
-#: the .sxm file format's own header token; everything else that says "nanonis" is a leak
+#: a controller client's own identifiers as the design record cites them (its package, its
+#: patch module and manual, its port variables, its class and send call), the .sxm file
+#: format's header token, and the rig profile's provenance (which real controller the numbers
+#: were measured on); everything else that says "nanonis" is a leak
 _VENDOR_ALLOWED = ("nanonis_spm", "nanonis_files", "nanonis_patch", "nanonis_manual",
-                   "nanonis_script", "NanonisClass_upstream", "NanonisConfig", "MAST_NANONIS_PORT_",
-                   "NANONIS_VERSION", "nanonis_spm_format_strings_reference", "Nanonis(",
-                   "Nanonis.send", "Nanonis.quickSend", "import Nanonis",
-                   # the ledger / budget key's former name, read for compatibility only
-                   "nanonis_cmds",
-                   # the rig profile's provenance: which real controller the numbers were measured on
-                   "spm_controller_v5e")
+                   "NanonisClass_upstream", "MAST_NANONIS_PORT_", "NANONIS_VERSION", "Nanonis(",
+                   "Nanonis.send", "spm_controller_v5e")
 _VENDOR_EXCLUDE: set[str] = set()
 _VENDOR = re.compile(r"nanonis", re.IGNORECASE)
 
 
-def test_the_vendor_name_appears_only_as_mast_api_or_file_format_tokens():
+def test_the_vendor_name_appears_only_as_client_or_file_format_tokens():
     """The simulator speaks a controller's wire protocol; it does not carry that
-    controller's brand (2026-09-11 decision). MAST's own identifiers and the .sxm header
+    controller's brand (2026-09-11 decision). A client's own identifiers and the .sxm header
     token are the only places the word may appear in package source and docs."""
     offenders = []
     for d in SCAN_DIRS + ("docs",):
