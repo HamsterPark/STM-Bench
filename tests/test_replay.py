@@ -63,8 +63,8 @@ def test_scan_start_names_the_tip_events_its_render_drew(tmp_path):
         assert t0 - 1e-6 <= e.sim_s <= t0 + 32 * 1.0          # a row of this frame, not "now"
 
 
-def test_the_harness_stamps_the_clock_and_dumps_the_tip(tmp_path):
-    from stmbench.harness.episode import sim_stamped, tip_timeline
+def test_the_recorder_stamps_the_clock_and_dumps_the_tip(tmp_path):
+    from stmbench.replay.record import sim_stamped, tip_timeline
 
     w = _tunnelling_world(tmp_path)
     seen = []
@@ -276,7 +276,7 @@ def test_a_replay_is_built_from_a_ledger_and_checks_its_truth(tmp_path):
     pytest.importorskip("matplotlib")
     from stmsim.scenario import Scenario
 
-    from stmbench.harness.episode import tip_timeline
+    from stmbench.replay.record import tip_timeline
     from stmbench.replay.build import build_replay
 
     sc = Scenario.load(SCEN / "P4_atom_positioning_cu111.yaml")

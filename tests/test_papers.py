@@ -1,13 +1,10 @@
 """The paper scenarios themselves: well-formed, per-seed, and not answerable from memory."""
 from __future__ import annotations
 
-import ast
 from pathlib import Path
 
-import numpy as np
 import pytest
 
-from stmbench.papers import PAPER_BASELINES
 from stmbench.trackB.truth_criteria import CRITERIA, judge
 from stmsim.scenario import Scenario
 
@@ -15,10 +12,13 @@ SCEN = Path(__file__).resolve().parent.parent / "stmbench" / "trackB" / "scenari
 PAPERS = sorted(p for p in SCEN.glob("P*.yaml"))
 PAPER_NAMES = [p.name for p in PAPERS]
 
+#: the paper ladder: one scenario family per paper the benchmark reproduces
+LADDER = {"P1", "P2", "P3", "P4", "P5"}
+
 
 def test_there_is_a_scenario_for_every_paper_in_the_ladder():
     families = {Scenario.load(p).family for p in PAPERS}
-    assert families == set(PAPER_BASELINES), (families, set(PAPER_BASELINES))
+    assert families == LADDER, (families, LADDER)
 
 
 @pytest.mark.parametrize("name", PAPER_NAMES)
@@ -28,7 +28,7 @@ def test_paper_scenario_is_well_formed(name):
     assert sc.success["kind"] == "claims_verified" and sc.success["kind"] in CRITERIA
     assert sc.claims and sc.hidden
     assert sc.budget["sim_hours"] > 0 and sc.budget["wire_cmds"] > 0
-    assert sc.family in PAPER_BASELINES, "a paper family needs a mode-C baseline"
+    assert sc.family in LADDER, "a paper scenario belongs to a family on the ladder"
     for c in sc.claims:
         assert c["id"] and c["kind"] and c["truth"] and c["evidence"]
         if c["kind"] == "position":
@@ -138,26 +138,6 @@ def _frozen_answers(sc: Scenario, seed: int, session) -> tuple[dict, object]:
     return out, orient
 
 
-def _scalar_claims(sc: Scenario) -> list[dict]:
-    return [c for c in sc.claims if c["kind"] == "scalar"]
-
-
-def _truth_of(sc: Scenario, seed: int, session) -> dict:
-    return sc.build_world(seed, session_dir=session).truth()
-
-
-def _truth_values(sc: Scenario, seed: int, session) -> dict:
-    from stmbench.trackB.claims import truth_at_path
-
-    truth = _truth_of(sc, seed, session)
-    out = {}
-    for c in _scalar_claims(sc):
-        val = truth_at_path(truth, c["truth"])
-        if isinstance(val, (int, float)):
-            out[c["id"]] = float(val)
-    return out
-
-
 def _all_evidence() -> list[dict]:
     """Evidence generous enough that only the VALUE can fail the claim."""
     frame = {"kind": "scan_saved", "sim_s": 1.0, "idx": 1, "complete": True, "cx_m": 0.0,
@@ -172,26 +152,6 @@ def _all_evidence() -> list[dict]:
               "jump": False, "contact": False, "df_span_beyond_min_pm": 120.0}]
     hop = {"kind": "adatom_hop", "cause": "folme", "sim_s": 5.0}
     return [frame, hop, *sts, *zspec]
-
-
-# ── the baselines are solvability proofs, so they must not cheat ──
-BASELINE_FILES = sorted((Path(__file__).resolve().parent.parent / "stmbench" / "papers")
-                        .glob("p[0-9]*.py"))
-
-
-@pytest.mark.parametrize("path", BASELINE_FILES, ids=lambda p: p.name)
-def test_a_baseline_never_reads_the_hidden_truth(path):
-    """A scripted baseline exists to show the task is doable with what the instrument shows.
-    One peek at ``world.truth()`` and it proves nothing."""
-    tree = ast.parse(path.read_text(encoding="utf-8"))
-    banned = {"truth", "hidden", "adatoms", "surface", "site", "force", "pll"}
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Attribute) and node.attr in banned:
-            src = ast.unparse(node)
-            assert not src.startswith(("world.", "host.world", "b.host.world", "w.")), \
-                f"{path.name} reaches into the world: {src}"
-        if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
-            assert node.func.attr != "truth", f"{path.name} calls truth()"
 
 
 @pytest.mark.parametrize("name", PAPER_NAMES)

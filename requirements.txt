@@ -14,8 +14,3 @@ pyarrow>=15           # [24.0.0]
 
 # tests
 pytest>=8             # [9.0.3]
-
-# NOT on PyPI and NOT installed by this file:
-#   MAST v2 (the agent stack the benchmark drives) and its patched `nanonis_spm` client.
-#   Put <MAST checkout>/MASTv2 on PYTHONPATH or set MAST_ROOT — see README "Install".
-#   Everything that needs it is marked `requires_mast` and skips when it is absent.

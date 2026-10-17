@@ -111,12 +111,12 @@ class Tip:
 
     # ── two sharpness scales ──────────────────────────────────────────────────
     # ``radius_m`` is the mesoscopic radius: it broadens steps and features through
-    # ``sigma_eff_m`` and drives MAST's trace/retrace similarity. ``apex_sigma_m`` is the
+    # ``sigma_eff_m`` and drives the trace/retrace similarity. ``apex_sigma_m`` is the
     # lateral smearing of the terminating apex atom's orbital: it alone decides whether
     # the atomic lattice is transferred into the image. They are correlated (a blunt
     # tip rarely ends in one clean atom) but not identical — the correlation is the
-    # ASSUMED map below, and ``derive_thresholds`` reports the sharpness threshold in
-    # apex_sigma, not in radius.
+    # ASSUMED map below, and the derived sharpness threshold (``sigma_star_nm`` in
+    # stmbench.trackB.truth_criteria) is in apex_sigma, not in radius.
     APEX_SIGMA_FLOOR_M = 0.05e-9
     APEX_SIGMA_CEIL_M = 0.60e-9
 

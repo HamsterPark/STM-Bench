@@ -1,13 +1,12 @@
 """λ* — the tip-change-rate UPPER BOUND read off real complete frames (docs/DESIGN.md §4.5,
 row "换针率 λ 上界"; §5.2 "λ* 由完整 Au 帧 rowjump_frac p85 反推").
 
-This is the calibrate-side owner of the computation that ``stmbench.trackB.derive_thresholds
-.lambda_star_from_index`` also carries; the two are kept identical on purpose (same filters,
-same quantile) — change both or neither. What is added here:
+This module owns the computation behind ``lambda_star`` in
+:mod:`stmbench.trackB.truth_criteria`. What is added here:
 
 * a per-session view ("逐会话"): session = the frame's directory + recording date; the
   per-session p85 rates say how much the bound moves from one night to the next;
-* the task-derived λ* (MAST's verify frame must survive in ≥ 90 % of attempts) next to it,
+* the task-derived λ* (a verify frame must survive in ≥ 90 % of attempts) next to it,
   so ``lambda.json`` carries both numbers with their provenance — ``truth_criteria`` pins
   the task-derived one (3.5e-4 /s).
 
@@ -64,8 +63,7 @@ def _frames(index_path: str | Path, material_filter: str):
 
 def lambda_star_from_index(index_path: str | Path, *, quantile: float = 0.85,
                            material_filter: str = "Au") -> dict:
-    """Upper bound on the acceptable tip-change rate from real complete frames — identical
-    to ``derive_thresholds.lambda_star_from_index`` (kept in step by hand)."""
+    """Upper bound on the acceptable tip-change rate from real complete frames."""
     try:
         d = _frames(index_path, material_filter)
     except KeyError as exc:
@@ -118,8 +116,8 @@ def lambda_star_per_session(index_path: str | Path, *, quantile: float = 0.85,
 
 def lambda_star_from_task(*, verify_rows: int = 256, verify_line_s: float = 0.586,
                           max_interrupt_p: float = 0.10) -> dict:
-    """λ* defined by what the task needs (same as ``derive_thresholds.lambda_star_from_task``):
-    MAST's verify frame (256 rows × 2 × 0.586 s ≈ 300 s) survives without a tip change in
+    """λ* defined by what the task needs: a verify frame (256 rows × 2 × 0.586 s ≈ 300 s)
+    survives without a tip change in
     ≥ 90 % of attempts ⇒ λ* = −ln(1 − p) / T."""
     t_frame = verify_rows * 2.0 * verify_line_s
     lam = -math.log(1.0 - max_interrupt_p) / t_frame

@@ -5,7 +5,7 @@ The rule (README "Data layout"): everything outside the repo is reached through
 ``D:/Users/researcher/…`` in a default argument, a ``Path(...)`` fallback or a usage docstring
 means a fresh checkout on another machine silently writes into a relative directory
 called ``E:`` (POSIX) or fails (Windows without that drive). A second helper that reads
-``STM_BENCH_*`` / ``MAST_ROOT`` itself is the same defect one step removed: two readers
+``STM_BENCH_*`` itself is the same defect one step removed: two readers
 of one variable drift apart (blank-means-unset, ``~`` expansion, the POSIX default).
 
 Scope: every ``.py`` / ``.yaml`` / ``.json`` / ``.toml`` under ``stmsim/`` and
@@ -17,14 +17,12 @@ This test is STRICT: an offender fails the suite with the file:line list.
 """
 from __future__ import annotations
 
-import os
 import re
 import warnings
 from pathlib import Path, PurePosixPath, PureWindowsPath
 
 import pytest
 
-from tests.conftest import requires_mast
 
 ROOT = Path(__file__).resolve().parents[1]
 SCAN_DIRS = ("stmsim", "stmbench")
@@ -34,8 +32,8 @@ EXCLUDE_PATHS = {"stmsim/paths.py"}
 # any drive-letter path (for example D:/Users/researcher, C:/Users/researcher, or F:/data)
 # not preceded by an identifier character
 PATTERN = re.compile(r"(?<![A-Za-z0-9_])[A-Za-z]:[/\\]")
-# a direct read of one of the helper's variables: os.environ.get("STM_BENCH_…") / os.environ["MAST_ROOT"]
-ENV_READ = re.compile(r"""(?:environ(?:\.get\(|\[)|getenv\()\s*["'](?:STM_BENCH_\w+|MAST_ROOT)["']""")
+# a direct read of one of the helper's variables: os.environ.get("STM_BENCH_…")
+ENV_READ = re.compile(r"""(?:environ(?:\.get\(|\[)|getenv\()\s*["']STM_BENCH_\w+["']""")
 
 
 def _excluded(path: Path, root: Path) -> bool:
@@ -85,10 +83,10 @@ def test_no_machine_paths_in_package_source():
 
 
 def test_no_parallel_env_readers_in_package_source():
-    """Only ``stmsim/paths.py`` may read ``STM_BENCH_*`` / ``MAST_ROOT`` from the environment."""
+    """Only ``stmsim/paths.py`` may read ``STM_BENCH_*`` from the environment."""
     offenders = scan(pattern=ENV_READ)
     if offenders:
-        pytest.fail(_report(offenders, "direct STM_BENCH_*/MAST_ROOT environment read(s)"))
+        pytest.fail(_report(offenders, "direct STM_BENCH_* environment read(s)"))
 
 
 def test_scanner_finds_a_planted_literal(tmp_path):
@@ -117,8 +115,8 @@ def test_scanner_finds_a_planted_env_read(tmp_path):
     pkg.mkdir()
     (pkg / "own.py").write_text(
         'r = os.environ.get("STM_BENCH_DATA", "x")\n'
-        "m = os.environ['MAST_ROOT']\n"
-        'p = os.environ.get("MAST_NANONIS_PORT_MAIN")\n'      # not ours: fine
+        "m = os.environ['STM_BENCH_RAW']\n"
+        'p = os.environ.get("HOME")\n'                        # not ours: fine
         'q = "STM_BENCH_DATA"\n',                             # a mention, not a read: fine
         encoding="utf-8")
     hits = scan(tmp_path, pattern=ENV_READ)
@@ -154,8 +152,6 @@ def test_paths_helper_honours_env(monkeypatch, tmp_path):
     assert sp.corpus_index_dir() == tmp_path / "idx"
     monkeypatch.setenv(sp.RAW_ENV_VAR, str(tmp_path / "raw"))
     assert sp.raw_mirror_root() == tmp_path / "raw"
-    monkeypatch.setenv(sp.MAST_ENV_VAR, str(tmp_path / "MAST"))
-    assert sp.mast_root() == tmp_path / "MAST"
 
 
 def test_paths_helper_expands_home(monkeypatch, tmp_path):
@@ -207,33 +203,6 @@ def test_legacy_corpus_index_name_warns(monkeypatch, tmp_path):
         assert sp.corpus_index_dir() == tmp_path / "new"
 
 
-def test_mast_root_unset_and_unimportable(monkeypatch):
-    import builtins
-    from stmsim import paths as sp
-
-    monkeypatch.delenv(sp.MAST_ENV_VAR, raising=False)
-    real_import = builtins.__import__
-
-    def fake_import(name, *a, **k):
-        if name == "mast" or name.startswith("mast."):
-            raise ImportError("no mast here")
-        return real_import(name, *a, **k)
-
-    monkeypatch.setattr(builtins, "__import__", fake_import)
-    assert sp.mast_root() is None
-
-
-@requires_mast
-def test_mast_root_from_importable_package(monkeypatch):
-    import mast
-    from stmsim import paths as sp
-
-    monkeypatch.delenv(sp.MAST_ENV_VAR, raising=False)
-    root = sp.mast_root()
-    assert root is not None
-    assert (root / "MASTv2" / "mast" / "__init__.py").resolve() == Path(mast.__file__).resolve()
-
-
 def test_trackA_and_physics_shims_delegate(monkeypatch, tmp_path):
     """The names other modules still import resolve to the one helper."""
     from stmsim import paths as sp
@@ -254,8 +223,6 @@ def test_argparse_defaults_follow_the_env(monkeypatch, tmp_path):
     """Script defaults are computed from the helper at parse time, not frozen literals."""
     from stmsim import paths as sp
     from stmsim.calibrate import fit_creep, index_dat, working_points
-    from stmbench.trackB import derive_thresholds
-    from stmbench.harness import forge_trial, host_trial, skill_probe
 
     monkeypatch.setenv(sp.ENV_VAR, str(tmp_path))
     monkeypatch.setenv(sp.CORPUS_ENV_VAR, str(tmp_path / "idx"))
@@ -285,11 +252,6 @@ def test_argparse_defaults_follow_the_env(monkeypatch, tmp_path):
     assert Path(defaults(index_dat)["--root"]) == tmp_path / "raw"
     assert Path(defaults(index_dat)["--out"]) == tmp_path / "index" / "dat_index.parquet"
     assert Path(defaults(working_points)["--index"]) == tmp_path / "idx" / "sxm_index_full.parquet"
-    assert Path(defaults(derive_thresholds)["--out"]) == tmp_path / "calib" / "thresholds.json"
-    assert Path(defaults(derive_thresholds)["--index"]) == tmp_path / "idx" / "sxm_index_full.parquet"
-    assert Path(defaults(forge_trial)["--root"]) == tmp_path / "forge_root"
-    assert Path(defaults(host_trial)["--root"]) == tmp_path / "host_root"
-    assert Path(defaults(skill_probe)["--root"]) == tmp_path / "probe_root"
 
 
 # ── the vendor's name stays out of this repository ─────────────────────────

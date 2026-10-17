@@ -1,12 +1,13 @@
 """Success criteria evaluated on the simulator's hidden truth (docs/DESIGN.md §5.2).
 
 Every criterion returns ``{"success": bool, "partial": float in [0,1], "details": {...}}``.
-Thresholds are *derived* (see ``derive_thresholds``), not hand-picked:
+Thresholds were *derived*, not hand-picked (2026-08-28; the derivation script is in the
+repository's history):
 
-* ``r_star_nm`` — the largest tip radius at which ≥90 % of seeds pass MAST's
-  ``assess_atomic_phase`` on a 5 nm Au(111) frame (docs §5.2); default from the last run.
-* ``lambda_star`` — from the p85 ``rowjump_frac`` of complete reference Au frames.
-* ``phi_min_ev = 3.0`` — MAST's own ``barrier_height`` "clean" threshold.
+* ``sigma_star_nm`` — the largest apex smearing at which ≥90 % of seeds pass an
+  atomic-resolution image gate on a 5 nm Au(111) frame (docs §5.2);
+* ``lambda_star`` — from the p85 ``rowjump_frac`` of complete reference Au frames;
+* ``phi_min_ev = 3.0`` — the usual "clean junction" barrier-height threshold.
 """
 from __future__ import annotations
 
@@ -15,16 +16,15 @@ from dataclasses import dataclass
 
 DEFAULT_THRESHOLDS = {
     # Sharpness is judged on the APEX smearing (what decides atomic contrast), not on the
-    # mesoscopic radius (what broadens steps). ``sigma_star_nm`` is derived by
-    # ``derive_thresholds``: the largest apex_sigma at which ≥90 % of seeds pass MAST's
-    # ``assess_atomic_phase`` on a 5 nm Au(111) frame at 20 mV / 500 pA.
-    # derive_thresholds 2026-08-28 (10 seeds, flat terrace, Au(111) 20 mV/500 pA, 5 nm/256 px):
+    # mesoscopic radius (what broadens steps). ``sigma_star_nm`` is the largest apex_sigma at
+    # which ≥90 % of seeds pass an atomic-resolution image gate on a 5 nm Au(111) frame at
+    # 20 mV / 500 pA. Derived 2026-08-28 (10 seeds, flat terrace, Au(111) 20 mV/500 pA, 5 nm/256 px):
     # σ_a ≤ 0.09 nm passed 10/10, σ_a ≥ 0.10 nm passed 0/10 — the cliff sits where the imaged
     # corrugation (30 pm × transfer 0.077 ≈ 2.3 pm) meets the 2 pm Z noise floor.
     "sigma_star_nm": 0.09,
     "r_star_nm": 0.75,         # informational only: radius implied by the assumed σ_a(R) map
-    # task-derived: MAST's own verify frame (≈300 s) must survive without a tip change in
-    # ≥90 % of attempts ⇒ λ* = −ln(0.9)/300 s (derive_thresholds.lambda_star_from_task)
+    # task-derived: a verify frame (≈300 s) must survive without a tip change in
+    # ≥90 % of attempts ⇒ λ* = −ln(0.9)/300 s (stmsim.calibrate.lambda_from_rowjump)
     "lambda_star": 3.5e-4,
     "phi_min_ev": 3.0,
     "ghost_max": 0.05,         # secondary-apex contrast relative to primary

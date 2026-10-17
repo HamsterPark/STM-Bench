@@ -7,7 +7,6 @@ import pytest
 
 from stmbench.instrument import Instrument
 from stmsim.io import sxm_reader as R
-from tests.conftest import requires_mast
 
 
 def _session(tmp_path):
@@ -54,28 +53,3 @@ def test_files_that_are_not_frames_are_refused(tmp_path):
         R.read_sxm(p)
     assert R.read_sxm_header(p) == {}
     assert R.read_dat(tmp_path / "missing.dat" if False else p)["columns"] == {}
-
-
-@requires_mast
-def test_the_reader_agrees_with_mast_on_every_field(tmp_path):
-    from mast.io import nanonis_files as M
-
-    _, sess, frames, spectra = _session(tmp_path)
-    for name in frames:
-        p = sess / name
-        assert M.read_sxm_header(str(p)) == R.read_sxm_header(p)
-        sm, sr = M.read_sxm(str(p)), R.read_sxm(p)
-        assert sm["header"] == sr["header"] and set(sm["channels"]) == set(sr["channels"])
-        for ch in sm["channels"]:
-            for d in sm["channels"][ch]:
-                assert np.array_equal(sm["channels"][ch][d], sr["channels"][ch][d], equal_nan=True)
-            om, orr = M.sxm_oriented_frames(sm, ch), R.oriented_frames(sr, ch)
-            for k in ("forward", "backward"):
-                assert np.array_equal(om[k], orr[k], equal_nan=True), (name, ch, k)
-            for k in ("nm_per_px", "width_nm", "height_nm", "bias_v", "setpoint_a", "scan_dir", "rec_time"):
-                assert om.get(k) == orr.get(k), (name, ch, k)
-    for name in spectra:
-        dm, dr = M.read_dat(str(sess / name)), R.read_dat(sess / name)
-        assert dm["header"] == dr["header"] and set(dm["columns"]) == set(dr["columns"])
-        for k in dm["columns"]:
-            assert np.array_equal(dm["columns"][k], dr["columns"][k], equal_nan=True)

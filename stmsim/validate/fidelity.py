@@ -1,22 +1,12 @@
 """Detector-distribution fidelity (docs/DESIGN.md §4.6 item 1).
 
-Render simulator frames across seeds / materials / tip states at the two imaging points
-MAST itself uses, run **MAST's own detectors** on the files (through ``read_sxm`` — the
-same path a real frame takes), and compare against the real corpus:
+Render simulator frames across seeds / materials / tip states at two imaging points, read
+them back through stmsim's reader (the path a real frame takes), and compare them with the
+real corpus on the indexer's statistics:
 
 * ``verify``  — the tip-forging verify frame: 100 nm / 256 px / 0.586 s per line at
-  1.0 V / 100 pA (``config/forge_tip_reference.txt`` §4: ``verify_scan_nm=100``,
-  ``verify_pixels=256``, ``verify_line_time_s=0.586``, ``verify_bias_v=1.0``,
-  ``verify_setpoint_a=100 pA``);
-* ``atomic``  — the atomic-resolution point: 5 nm / 256 px at 20 mV / 500 pA on Au(111)
-  (the point ``derive_thresholds`` sweeps r* at; 0.0195 nm/px is inside MAST's scale gate).
-
-Detectors (all MAST, none re-implemented here):
-
-* ``mast.vision.tip_metrics.trace_retrace_correlation`` / ``assess_tip_classical``
-* ``mast.vision.double_tip.step_splitting`` (the large-frame multi-tip verdict)
-* ``mast.vision.tip_change.detect_tip_change`` (v2, null-calibrated row-jump)
-* ``mast.vision.atomic_phase.assess_atomic_phase`` (atomic point only)
+  1.0 V / 100 pA;
+* ``atomic``  — the atomic-resolution point: 5 nm / 256 px at 20 mV / 500 pA on Au(111).
 
 Real side — **without re-reading a single .sxm** — comes from the corpus index
 (``sxm_index_full.parquet``): ``fb_corr_flip`` / ``fb_corr_raw`` / ``rowjump_frac`` /
@@ -24,49 +14,34 @@ Real side — **without re-reading a single .sxm** — comes from the corpus ind
 split by genre (verify-like 80–120 nm; atomic-like ≤ 10 nm). Those columns were computed by
 the indexer with a fixed recipe (row-median removal, ≤128 rows, best NCC over ±6 px); the
 **same recipe** is applied to the simulator frames (:func:`index_stats`) so the KS distance
-compares like with like. MAST's ``trace_retrace_correlation`` is a different statistic
-(plane-detrended 2-D NCC, ±12 % shift window) and is compared against the *bands* the plan
-names, not against the index.
-
-Target bands (docs/DESIGN.md §4.6; the real numbers they come from are cited inline):
-
-* good tip, verify frame, ``trace_retrace_correlation`` ∈ [0.96, 0.99]
-  (0.994 / 0.990 / 0.959 on the real rig, ``forge_tip_reference.txt:247-249``);
-  bad tip ≈ 0.43 (one real failed verify at the correct speed);
-* ``step_splitting`` score: multi-tip 0.171–0.185 vs single ≤ 0.147, 40 labelled real
-  frames (``double_tip.py`` ``DOUBLE_TIP_SCORE_ON_STEPS``);
-* ``edge_resolution_px`` median 1.21 on 72 real rig frames — **reported, not a ruler**
-  (seven tenths of that width is the pixel grid).
+compares like with like.
 
 Nothing here changes the simulator; a miss is a finding for the tip / renderer / surface
 owner.
 
-Findings 2026-08-28 (G4, MAST's detectors re-run on 40 real complete 80–120 nm Au frames
-from ``calib/hysteresis.json`` as the reference — ``trace_retrace_correlation`` p05/p25/
-p50/p75/p95 = 0.856/0.940/0.972/0.981/0.991; ``step_splitting`` 30/40 undecidable, the
-decided ten 0.07–0.125 plus one 0.199 on a 128 px frame):
+Findings 2026-08-28, from a tip-quality detector suite (not part of this repository) run on
+40 real complete 80–120 nm Au frames — trace/retrace correlation p05/p25/p50/p75/p95 =
+0.856/0.940/0.972/0.981/0.991; step splitting 30/40 undecidable, the decided ten 0.07–0.125
+plus one 0.199 on a 128 px frame:
 
-* good-tip ``trace_retrace_correlation``: the loss is NOT the hysteresis. MAST's statistic
-  is a circular 2-D NCC after row-median + plane detrending; the retrace's fast-axis offset
-  makes the frame's two edge columns wrap onto each other, and on the sim's frames those
-  edges carry ~5 % of the detrended variance (a monotonic staircase, 10–17 mrad, with
-  perfectly flat terraces: detrended rms ~120 pm vs 200 pm real median). Adding the
-  *same* 50–100 pm smooth roughness to trace and retrace lifts the sim to 0.97–0.985; the
-  smoothest real frames (rms ≤ 120 pm) sit at 0.85–0.98, median ≈ 0.955, where the sim is.
-  ⇒ terrace texture / adsorbate density is the surface owner's lever; ``hyst_frac`` 0.012
-  (real median 1.17 %) and the measured loop shape are kept as the physics says.
+* good-tip trace/retrace correlation: the loss is NOT the hysteresis. The statistic is a
+  circular 2-D NCC after row-median + plane detrending; the retrace's fast-axis offset makes
+  the frame's two edge columns wrap onto each other, and on the sim's frames those edges
+  carry ~5 % of the detrended variance (a monotonic staircase, 10–17 mrad, with perfectly
+  flat terraces: detrended rms ~120 pm vs 200 pm real median). Adding the *same* 50–100 pm
+  smooth roughness to trace and retrace lifts the sim to 0.97–0.985; the smoothest real
+  frames (rms ≤ 120 pm) sit at 0.85–0.98, median ≈ 0.955, where the sim is. ⇒ terrace
+  texture / adsorbate density is the surface owner's lever; ``hyst_frac`` 0.012 (real median
+  1.17 %) and the measured loop shape are kept as the physics says.
 * crashed tip: a *static* blunt multi-apex tip reads 0.96 — indistinguishable from good.
   ``Tip.crash`` now leaves a flickering apex (``flicker_dz_m`` / ``flicker_rate_hz``, per
   pass and mid-line), which puts the verify frame at ~0.5 (real failed verify: 0.43).
-* ``step_splitting``: the single-tip scores of 0.13–0.30 are reproduced by the *surface
-  alone* (``terrace_height`` rendered without tip or scanner, same seeds, same numbers):
-  the autocorrelation replica the detector scores is the ridge of the sim's straight,
-  parallel step edges (separation vectors line up with ``Site.step_angle``), which real
-  Au/mica edges (meandering, islands) do not produce. The two-apex soft-max ghost adds
-  nothing the detector can see on these frames (also tried: equal-height apexes, curved
-  edges, adsorbates up to 1000/µm²) — ``double_tip.py`` header point 3 says why. Both
-  halves of that band are therefore a surface finding, pinned as strict xfails.
-* atomic-phase gate: σ* = 0.09 nm before and after (``derive_thresholds --seeds 4``).
+* step splitting: the single-tip scores of 0.13–0.30 are reproduced by the *surface alone*
+  (``terrace_height`` rendered without tip or scanner, same seeds, same numbers): the
+  autocorrelation replica the detector scores is the ridge of the sim's straight, parallel
+  step edges (separation vectors line up with ``Site.step_angle``), which real Au/mica edges
+  (meandering, islands) do not produce — a surface finding.
+* atomic-phase gate: σ* = 0.09 nm before and after.
 
 Run::
 
@@ -74,8 +49,7 @@ Run::
 
 ``--real`` names the corpus index directory or parquet (default
 ``stmsim.paths.corpus_index_dir()``); when it is absent the report still carries the
-simulator side and says the real side was unavailable.
-"""
+simulator side and says the real side was unavailable."""
 from __future__ import annotations
 
 import argparse
@@ -130,21 +104,13 @@ MATERIAL_PATTERNS = {
 
 TIP_KINDS = ("good", "crashed", "multi")
 
-BANDS = {
-    "verify_corr_good": (0.96, 0.99),
-    "verify_corr_bad_target": 0.43,
-    "step_splitting_multi": (0.171, 0.185),
-    "step_splitting_single_max": 0.147,
-    "edge_px_real_median": 1.21,
-}
-
 
 # ── simulator side ──────────────────────────────────────────────────────────────────
 
 def make_world(seed: int, material: str, tip_kind: str, session_dir: Path, point: ImagingPoint):
     """A World in tunnelling at ``point`` with a tip of ``tip_kind``.
 
-    ``good``: R = 1 nm, σ_a = 0.06 nm (inside σ* from ``derive_thresholds``), no spontaneous
+    ``good``: R = 1 nm, σ_a = 0.06 nm (inside the derived σ* = 0.09 nm), no spontaneous
     changes. ``crashed``: the good tip after :meth:`Tip.crash` (R ×2–6, extra apexes 2–6 nm
     off, λ ≥ 0.05/s, φ lowered, and a flickering apex — ``flicker_dz_m`` / ``flicker_rate_hz``
     — so trace and retrace disagree) — the simulator's own notion of a damaged tip.
@@ -194,9 +160,7 @@ def make_world(seed: int, material: str, tip_kind: str, session_dir: Path, point
 
 def flat_centre(world, w_nm: float, *, max_step_pm: float = 20.0, reach_nm: float = 400.0):
     """A scan centre whose window holds no step (what ``FindFlatRegion`` gives an operator
-    before an atomic frame), from the simulator's terrace truth. Mirrors
-    ``stmbench.trackB.derive_thresholds._flat_centre`` — duplicated because ``stmsim`` must
-    not import ``stmbench``."""
+    before an atomic frame), from the simulator's terrace truth."""
     half = 0.5 * w_nm * 1e-9
     g = np.linspace(-half, half, 9)
     gx, gy = np.meshgrid(g, g)
@@ -294,66 +258,15 @@ def index_stats(fwd: np.ndarray, bwd: np.ndarray | None, *, shift_px: int = 6,
     return out
 
 
-# ── MAST detectors on one saved frame ───────────────────────────────────────────────
+# ── one saved frame, on the indexer's recipe ────────────────────────────────────────
 
-def evaluate_frame(path: str, point: ImagingPoint, material: str) -> dict:
-    """Run MAST's detectors on a saved .sxm and return plain JSON-able numbers."""
-    from mast.io.nanonis_files import read_sxm, sxm_oriented_frames
-    from mast.vision.atomic_phase import assess_atomic_phase
-    from mast.vision.double_tip import step_splitting
-    from mast.vision.lattice_calibration import first_order_period_nm
-    from mast.vision.tip_change import detect_tip_change
-    from mast.vision.tip_metrics import assess_tip_classical, trace_retrace_correlation
+def evaluate_frame(path: str, point: ImagingPoint) -> dict:
+    """Read a saved .sxm through stmsim's reader and measure it with the indexer's recipe."""
+    from stmsim.io.sxm_reader import oriented_frames, read_sxm
 
-    fr = sxm_oriented_frames(read_sxm(path), "Z")
-    fwd, bwd = fr["forward"], fr["backward"]
+    fr = oriented_frames(read_sxm(path), "Z")
     nmpp = float(fr.get("nm_per_px") or point.nm_per_px)
-    out: dict = {"nm_per_px": nmpp}
-    out["trace_retrace_corr"] = float(trace_retrace_correlation(fwd, bwd))
-    # assess_tip_classical opens with ``if std < 1e-9: return <flat>`` on the detrended
-    # frame — an absolute gate in the frame's own unit, so a metre-unit frame with < 1 nm
-    # of rms relief (every 100 nm Au frame) comes back as "flat" (sharpness 0, no edge, no
-    # instability). MAST's callers hand it whatever unit the frame arrived in; here it gets
-    # nanometres so the metrics are computed at all. Recorded so the reader knows.
-    tm = assess_tip_classical(fwd * 1e9, bwd * 1e9, nm_per_px=nmpp)
-    out["tip_metrics_unit"] = "nm (metre-unit frames trip the std<1e-9 flat gate)"
-    out["fwd_bwd_instability"] = _f(getattr(tm, "fwd_bwd_instability", None))
-    out["edge_resolution_px"] = _f(getattr(tm, "edge_resolution_px", None))
-    out["fft_sharpness"] = _f(getattr(tm, "fft_sharpness", None))
-    out["n_terrace_levels"] = getattr(tm, "n_terrace_levels", None)
-    tc = detect_tip_change(np.stack([fwd, bwd]), nm_per_px=nmpp)
-    out["tip_change"] = {"changed": bool(tc.changed), "score": _f(tc.score), "change_row": tc.change_row,
-                         "threshold": _f(tc.threshold), "lod_m": _f(tc.lod), "calib": tc.calib}
-    if point.name == "verify":
-        ss = step_splitting(fwd, frame_m=point.w_nm * 1e-9)
-        out["step_splitting"] = {"verdict": ss.get("verdict"), "score": _f(ss.get("score")),
-                                 "reason": str(ss.get("reason", ""))[:120],
-                                 "replica_reason": str(ss.get("replica_reason", ""))[:80],
-                                 "separation_px": ss.get("separation_px")}
-    if point.name == "atomic":
-        expect = first_order_period_nm(material)
-        res = {}
-        for name, img in (("fwd", fwd), ("bwd", bwd)):
-            r = assess_atomic_phase(img, nm_per_px=nmpp, expected_a_nm=expect)
-            res[name] = {"passed": bool(r.passed), "reasons": list(getattr(r, "reasons", ()) or ()),
-                         "concentration": _f(getattr(r, "angular_concentration", None)),
-                         "sharpness": _f(getattr(r, "fft_sharpness", None)),
-                         "period_nm": _f(getattr(r, "period_nm", None))}
-        res["both_passed"] = bool(res["fwd"]["passed"] and res["bwd"]["passed"])
-        res["expected_a_nm"] = expect
-        out["atomic"] = res
-    out["index"] = index_stats(fwd, bwd)
-    return out
-
-
-def _f(x):
-    if x is None:
-        return None
-    try:
-        v = float(x)
-    except (TypeError, ValueError):
-        return None
-    return v if math.isfinite(v) else None
+    return {"nm_per_px": nmpp, "index": index_stats(fr["forward"], fr["backward"])}
 
 
 # ── render + evaluate a whole set ───────────────────────────────────────────────────
@@ -380,17 +293,14 @@ class FidelitySet:
                 w = make_world(seed, material, tip_kind, sd, point)
                 path = scan_frame(w, point)
                 rec = {"material": material, "tip": tip_kind, "point": pname, "seed": seed,
-                       "path": path, "truth": _truth(w), "mast": evaluate_frame(path, point, material),
+                       "path": path, "truth": _truth(w), "frame": evaluate_frame(path, point),
                        "wall_s": round(time.time() - t0, 2)}
                 self.records.append(rec)
                 if self.verbose:
-                    m = rec["mast"]
-                    print(f"{material} {tip_kind:8s} {pname:6s} seed={seed:3d} corr={m['trace_retrace_corr']:.3f} "
-                          f"idx_corr={_fmt(m['index']['fb_corr_flip'])} rowjump={_fmt(m['index']['rowjump_frac'])} "
-                          f"tc={m['tip_change']['score']:.2f}/{len(rec['truth']['tip_change_rows'])} "
-                          f"{'ss=' + _fmt(m['step_splitting']['score']) if 'step_splitting' in m else ''}"
-                          f"{'atomic=' + str(m['atomic']['both_passed']) if 'atomic' in m else ''}  {rec['wall_s']}s",
-                          flush=True)
+                    ix = rec["frame"]["index"]
+                    print(f"{material} {tip_kind:8s} {pname:6s} seed={seed:3d} idx_corr={_fmt(ix['fb_corr_flip'])} "
+                          f"rowjump={_fmt(ix['rowjump_frac'])} tip_changes={len(rec['truth']['tip_change_rows'])}  "
+                          f"{rec['wall_s']}s", flush=True)
         return self.records
 
 
@@ -484,7 +394,7 @@ def _pick(records, **where) -> list[dict]:
 def _vals(recs, *keys):
     out = []
     for r in recs:
-        v = r["mast"]
+        v = r["frame"]
         for k in keys:
             v = v.get(k) if isinstance(v, dict) else None
             if v is None:
@@ -493,25 +403,15 @@ def _vals(recs, *keys):
     return out
 
 
-def _frac_in(vals, lo, hi) -> float | None:
-    v = [x for x in vals if x is not None]
-    return (sum(lo <= x <= hi for x in v) / len(v)) if v else None
-
-
-def _median(vals) -> float | None:
-    v = [x for x in vals if x is not None]
-    return float(np.median(v)) if v else None
-
-
 def compare(records: list[dict], real_by_material: dict[str, dict]) -> dict:
-    """KS distances (index recipe, per genre) + the plan's bands (MAST recipe).
+    """KS distances on the indexer's recipe, per genre.
 
     ``real_by_material`` maps material → :func:`real_distributions` output (may be
-    ``{"available": False}``: the bands are still computed, the KS entries carry ``None``)."""
+    ``{"available": False}``: the KS entries then carry ``None``)."""
     materials = sorted({r["material"] for r in records})
-    out: dict = {"bands": BANDS, "by_material": {}}
+    out: dict = {"by_material": {}}
     for material in materials:
-        m: dict = {"ks": {}, "bands": {}}
+        m: dict = {"ks": {}}
         real = real_by_material.get(material) or {}
         # ── KS on the indexer's statistics, sim vs real, per genre ──
         for genre in ("verify", "atomic"):
@@ -528,64 +428,8 @@ def compare(records: list[dict], real_by_material: dict[str, dict]) -> dict:
                     else:
                         entry[tip_set] = ks_distance(sim_vals, g_real["arrays"][col])
                 m["ks"][genre][col] = entry
-        # ── bands on MAST's own detectors ──
-        vg = _pick(records, material=material, point="verify", tip="good")
-        vc = _pick(records, material=material, point="verify", tip="crashed")
-        vm = _pick(records, material=material, point="verify", tip="multi")
-        corr_g = _vals(vg, "trace_retrace_corr")
-        corr_c = _vals(vc, "trace_retrace_corr")
-        lo, hi = BANDS["verify_corr_good"]
-        m["bands"]["verify_corr"] = {
-            "good": {"values": corr_g, "median": _median(corr_g), "frac_in_band": _frac_in(corr_g, lo, hi),
-                     "band": [lo, hi]},
-            "crashed": {"values": corr_c, "median": _median(corr_c), "target": BANDS["verify_corr_bad_target"],
-                        "frac_below_0p8": _frac_in(corr_c, -1.0, 0.8)},
-            "separation": ((_median(corr_g) or 0) - (_median(corr_c) or 0)) if corr_g and corr_c else None,
-        }
-        ss_single = _vals(vg, "step_splitting", "score")
-        ss_multi = _vals(vm, "step_splitting", "score")
-        slo, shi = BANDS["step_splitting_multi"]
-        m["bands"]["step_splitting"] = {
-            "single": {"values": ss_single, "median": _median(ss_single),
-                       "frac_le_single_max": _frac_in(ss_single, -1.0, BANDS["step_splitting_single_max"]),
-                       "verdicts": _count(_vals(vg, "step_splitting", "verdict"))},
-            "multi": {"values": ss_multi, "median": _median(ss_multi), "frac_in_band": _frac_in(ss_multi, slo, shi),
-                      "frac_split": _frac_in(ss_multi, 0.16, 10.0), "verdicts": _count(_vals(vm, "step_splitting", "verdict"))},
-        }
-        # tip_change: detection on frames with a true change vs false alarms on frames without
-        all_v = _pick(records, material=material, point="verify")
-        with_ev = [r for r in all_v if r["truth"]["tip_change_rows"]]
-        without = [r for r in all_v if not r["truth"]["tip_change_rows"]]
-        m["bands"]["tip_change"] = {
-            "n_frames_with_true_change": len(with_ev),
-            "detected_frac": _frac_in([1.0 if r["mast"]["tip_change"]["changed"] else 0.0 for r in with_ev], 0.5, 1.5),
-            "false_alarm_frac": _frac_in([1.0 if r["mast"]["tip_change"]["changed"] else 0.0 for r in without], 0.5, 1.5),
-            "score_median_with": _median([r["mast"]["tip_change"]["score"] for r in with_ev]),
-            "score_median_without": _median([r["mast"]["tip_change"]["score"] for r in without]),
-            "threshold": _median([r["mast"]["tip_change"]["threshold"] for r in all_v]),
-            "true_changes_per_frame_median": _median([len(r["truth"]["tip_change_rows"]) for r in with_ev]),
-        }
-        ag = _pick(records, material=material, point="atomic", tip="good")
-        ac = _pick(records, material=material, point="atomic", tip="crashed")
-        m["bands"]["atomic_phase"] = {
-            "good_pass_frac": _frac_in([1.0 if r["mast"]["atomic"]["both_passed"] else 0.0 for r in ag], 0.5, 1.5),
-            "crashed_pass_frac": _frac_in([1.0 if r["mast"]["atomic"]["both_passed"] else 0.0 for r in ac], 0.5, 1.5),
-            "good_fail_reasons": _count(sum((r["mast"]["atomic"]["fwd"]["reasons"] for r in ag), [])),
-            "crashed_fail_reasons": _count(sum((r["mast"]["atomic"]["fwd"]["reasons"] for r in ac), [])),
-        }
-        edge = _vals(vg, "edge_resolution_px")
-        m["bands"]["edge_resolution_px"] = {"good_median": _median(edge), "real_median_reported": BANDS["edge_px_real_median"],
-                                            "note": "reported only — not a ruler (DESIGN §4.6)"}
         out["by_material"][material] = m
     return out
-
-
-def _count(vals) -> dict:
-    c: dict = {}
-    for v in vals:
-        k = str(v)
-        c[k] = c.get(k, 0) + 1
-    return c
 
 
 # ── report ──────────────────────────────────────────────────────────────────────────
@@ -612,22 +456,6 @@ def build_report(fs: FidelitySet, real_by_material: dict[str, dict]) -> dict:
 def summary_lines(report: dict) -> list[str]:
     lines = []
     for material, m in report["comparison"]["by_material"].items():
-        b = m["bands"]
-        vc = b["verify_corr"]
-        lines.append(f"[{material}] verify trace_retrace_corr good: median {_fmt(vc['good']['median'])}, "
-                     f"in band {vc['good']['band']}: {_fmt(vc['good']['frac_in_band'])}; "
-                     f"crashed median {_fmt(vc['crashed']['median'])} (target ~{vc['crashed']['target']})")
-        ss = b["step_splitting"]
-        lines.append(f"[{material}] step_splitting single median {_fmt(ss['single']['median'])} "
-                     f"(≤0.147: {_fmt(ss['single']['frac_le_single_max'])}) {ss['single']['verdicts']}; "
-                     f"multi median {_fmt(ss['multi']['median'])} (in 0.171–0.185: {_fmt(ss['multi']['frac_in_band'])}) "
-                     f"{ss['multi']['verdicts']}")
-        tc = b["tip_change"]
-        lines.append(f"[{material}] tip_change detected {_fmt(tc['detected_frac'])} of {tc['n_frames_with_true_change']} "
-                     f"frames with a true change, false alarms {_fmt(tc['false_alarm_frac'])}; "
-                     f"score {_fmt(tc['score_median_with'])} vs {_fmt(tc['score_median_without'])} (tau {_fmt(tc['threshold'])})")
-        ap = b["atomic_phase"]
-        lines.append(f"[{material}] atomic_phase pass: good {_fmt(ap['good_pass_frac'])}, crashed {_fmt(ap['crashed_pass_frac'])}")
         for genre, cols in m["ks"].items():
             parts = []
             for col, entry in cols.items():

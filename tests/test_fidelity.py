@@ -1,23 +1,17 @@
 """Fidelity validation (docs/DESIGN.md §4.6 item 1) + the §4.5 calibration leftovers.
 
-* the sim's good tip at MAST's verify point must land where the real corpus puts a good
-  tip — judged by MAST's own detectors through ``read_sxm`` (needs MAST);
-* the sim's crashed tip must NOT look like a good one to MAST's trace/retrace detector
-  (the plan's ~0.43 band; a static blunt multi-apex tip read 0.96 on 2026-08-28);
+* the sim's good tip at the verify imaging point must land where the real corpus puts
+  frames on the indexer's statistic (``index_stats``), and the crashed tip must be what
+  the truth says it is;
 * the retrace offset must read back at the real rig's median (1.17 % of the axis) with the
   measured along-line shape (a bulge mid-line, not a closed loop, not a constant);
 * the indexer's recipe re-implemented in ``index_stats`` must agree with a hand-built pair;
-* the real-side loader / KS / bands must work on a tiny synthetic index (no MAST, no E:);
+* the real-side loader and KS must work on a tiny synthetic index (no lab drive);
 * ``lambda_from_rowjump`` must reproduce the hand-computed bound and the per-session split;
 * ``hysteresis`` must state the storage convention and the nx-trend bound, and refuse to
   invent a per-frame shift.
 
-Bands the simulator does not reach are pinned as STRICT xfails with the finding, so a fix
-on the owning side (the surface) flips them to failures that remove the marker. No test
-here skips silently: everything that needs MAST carries ``requires_mast``.
-
-Rendering: each verify frame ≈ 0.5–1 s including MAST's detectors.
-"""
+Rendering: each verify frame takes ≈ 0.5–1 s."""
 from __future__ import annotations
 
 import json
@@ -26,17 +20,10 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from tests.conftest import requires_mast
-
-VERIFY_BAND = (0.96, 0.99)
-CRASHED_TARGET = 0.43              # one real failed verify at the correct speed (forge_tip_reference.txt)
-MAST_TIP_READY = 0.80              # MAST's verify gate on trace_retrace_correlation
 
 # MAST's own detectors on 40 real complete 80–120 nm Au frames (the ones the hysteresis
 # calibration measured, fb_corr_flip ≥ 0.9), re-run 2026-08-28: the real reference the
 # sim is held against below.
-REAL_TRC_QUANTILES = (0.856, 0.940, 0.972, 0.981, 0.991)      # p05 p25 p50 p75 p95
-REAL_STEP_SPLIT_DECIDED_MAX = 0.125                           # 9 of 10 decided single-tip frames (one 128 px frame: 0.199)
 
 
 # ── synthetic index used by the no-MAST tests ───────────────────────────────────────
@@ -62,22 +49,6 @@ def _write_index(path: Path, *, n_au: int = 40, seed: int = 0) -> Path:
     return path
 
 
-def _overlap_shift(a: np.ndarray, b: np.ndarray, window: int = 12) -> int:
-    """Lateral shift maximising the overlap NCC of row-median-removed frames (b's features
-    sit ``s`` px to the left of a's when the result is +s) — the calibration's measurement."""
-    a = a - np.median(a, axis=1, keepdims=True)
-    b = b - np.median(b, axis=1, keepdims=True)
-    best = (0, -2.0)
-    for s in range(-window, window + 1):
-        aa, bb = (a[:, s:], b[:, :a.shape[1] - s]) if s >= 0 else (a[:, :s], b[:, -s:])
-        aa = aa - aa.mean()
-        bb = bb - bb.mean()
-        c = float((aa * bb).sum() / (np.sqrt((aa * aa).sum() * (bb * bb).sum()) + 1e-30))
-        if c > best[1]:
-            best = (s, c)
-    return best[0]
-
-
 def _overlap_shift_subpx(a: np.ndarray, b: np.ndarray, window: int = 12) -> float:
     """:func:`_overlap_shift` refined to a fraction of a pixel by a parabola through the NCC
     peak and its two neighbours. The thirds of a frame differ by under a pixel (2.7 / 3.5 /
@@ -100,8 +71,7 @@ def _overlap_shift_subpx(a: np.ndarray, b: np.ndarray, window: int = 12) -> floa
     return float(shifts[i])
 
 
-# ── MAST-judged rendering ───────────────────────────────────────────────────────────
-@requires_mast
+# ── rendered verify frames on the indexer's recipe ─────────────────────────────────
 def test_good_tip_verify_frames_match_the_real_corpus_on_the_index_recipe(tmp_path: Path):
     """The apples-to-apples statistic: the indexer's fb_corr (row-median removed, ±6 px)
     on the sim's good tip must sit where the real verify genre sits (real complete Au
@@ -115,118 +85,21 @@ def test_good_tip_verify_frames_match_the_real_corpus_on_the_index_recipe(tmp_pa
     recs = fs.run()
     assert len(recs) == 4 and all(Path(r["path"]).is_file() for r in recs)
     good = [r for r in recs if r["tip"] == "good"]
-    idx = [r["mast"]["index"]["fb_corr_flip"] for r in good]
+    idx = [r["frame"]["index"]["fb_corr_flip"] for r in good]
     assert all(0.875 <= v < 0.9999 for v in idx), idx
     assert 0.961 <= float(np.median(idx)) <= 0.989, idx
-    raw = [r["mast"]["index"]["fb_corr_raw"] for r in good]
+    raw = [r["frame"]["index"]["fb_corr_raw"] for r in good]
     assert all(raw[i] < idx[i] - 0.3 for i in range(len(good))), (raw, idx)   # mirrored storage seen
     for r in good:
         assert not r["truth"]["multi"] and r["truth"]["lambda_per_s"] == 0.0 and r["truth"]["tip_change_rows"] == []
         assert r["truth"]["flicker_dz_pm"] == 0.0 and r["truth"]["hysteresis_shape"] == "loop"
-        assert r["mast"]["trace_retrace_corr"] > MAST_TIP_READY          # MAST's verify gate (tip_ready at 0.80)
     for r in [r for r in recs if r["tip"] == "crashed"]:
         assert r["truth"]["radius_nm"] > 1.0 and r["truth"]["lambda_per_s"] >= 0.05
         assert r["truth"]["metastable"] and r["truth"]["flicker_dz_pm"] > 0 and r["truth"]["flicker_rate_hz"] > 0
         assert r["truth"]["n_apex"] >= 2 and r["truth"]["tip_change_rows"]
-    # the comparison machinery runs with no real side and still reports the bands
+    # the comparison machinery runs with no real side: the KS entries carry None
     cmp_ = compare(recs, {"Au(111)": {"available": False}})
-    b = cmp_["by_material"]["Au(111)"]["bands"]
-    assert b["verify_corr"]["good"]["frac_in_band"] is not None
     assert cmp_["by_material"]["Au(111)"]["ks"]["verify"]["fb_corr_flip"]["good"]["ks"] is None
-
-
-@requires_mast
-def test_crashed_tip_verify_frames_fail_masts_gate_and_sit_near_the_real_failed_verify(tmp_path: Path):
-    """Band (b): a crashed tip's verify frame must read like the real failed verify
-    (~0.43), not like a good tip. Eight seeds: every frame below MAST's tip_ready gate
-    (0.80), the median inside 0.35–0.65 (measured 0.48 over 12 seeds with
-    ``Tip.CRASH_FLICKER_DZ_M`` = 0.12–0.20 nm), and the mechanism visible in the truth —
-    a flickering, metastable apex with a high change hazard that fired during the frame."""
-    from stmsim.validate.fidelity import FidelitySet
-
-    fs = FidelitySet(n=8, tips=("crashed",), points=("verify",), session_dir=tmp_path / "s")
-    recs = fs.run()
-    corr = [r["mast"]["trace_retrace_corr"] for r in recs]
-    assert len(corr) == 8
-    assert all(c < MAST_TIP_READY for c in corr), corr
-    assert 0.35 <= float(np.median(corr)) <= 0.65, corr
-    assert sum(0.3 <= c <= 0.7 for c in corr) >= 4, corr
-    for r in recs:
-        t = r["truth"]
-        assert t["metastable"] and t["flicker_dz_pm"] >= 120 and t["flicker_rate_hz"] >= 1.0
-        assert t["lambda_per_s"] >= 0.05 and t["n_apex"] >= 2 and len(t["tip_change_rows"]) >= 5
-    # and the index recipe (what the corpus carries) also separates them from the good band
-    idx = [r["mast"]["index"]["fb_corr_flip"] for r in recs]
-    assert float(np.median(idx)) < 0.961, idx                       # below the real good-tip IQR
-
-
-@requires_mast
-@pytest.mark.xfail(strict=True, reason=(
-    "Band (a): MAST's trace_retrace_correlation on the sim's good tip reads median 0.93–0.95 "
-    "(8 seeds, hyst_frac 0.012 with the measured loop shape / constant shift), band 0.96–0.99; "
-    "real reference on 40 frames: median 0.972. NOT the hysteresis: the loss is MAST's circular "
-    "2-D NCC wrapping the frame's edge columns onto each other, and on the sim's monotonic "
-    "staircase with perfectly flat terraces (detrended rms ~120 pm vs real 200 pm) those edges "
-    "carry ~5 % of the variance. Adding the same 50–100 pm smooth roughness to both passes "
-    "lifts the sim to 0.97–0.985; the smoothest real frames (rms ≤ 120 pm) read 0.85–0.98 too. "
-    "Surface owner's lever (terrace texture / adsorbates); strict so a surface fix flips this."))
-def test_good_tip_verify_frames_land_in_masts_band(tmp_path: Path):
-    from stmsim.validate.fidelity import FidelitySet
-
-    fs = FidelitySet(n=6, tips=("good",), points=("verify",), session_dir=tmp_path / "s")
-    corr = [r["mast"]["trace_retrace_corr"] for r in fs.run()]
-    assert VERIFY_BAND[0] <= float(np.median(corr)) <= VERIFY_BAND[1], corr
-    assert sum(VERIFY_BAND[0] <= c <= VERIFY_BAND[1] for c in corr) >= 4, corr
-
-
-@requires_mast
-@pytest.mark.xfail(strict=True, reason=(
-    "Band (c), single half: step_splitting on the sim's single tip reads 0.13–0.30 where decided "
-    "(real single tips ≤ 0.147; the ten decided real frames 0.07–0.125). The score is reproduced by "
-    "the SURFACE ALONE — Surface.terrace_height rendered with no tip and no scanner gives the same "
-    "numbers on the same seeds — it is the autocorrelation ridge of the sim's straight, parallel "
-    "step edges (the separation vectors line up with Site.step_angle); real Au/mica edges meander. "
-    "Surface owner's finding; strict so a surface fix flips this."))
-def test_single_tip_step_splitting_stays_at_or_below_the_real_single_band(tmp_path: Path):
-    from stmsim.validate.fidelity import BANDS, FidelitySet
-
-    fs = FidelitySet(n=6, tips=("good",), points=("verify",), session_dir=tmp_path / "s")
-    scores = [r["mast"]["step_splitting"]["score"] for r in fs.run()]
-    assert all(s is not None and s <= BANDS["step_splitting_single_max"] for s in scores), scores
-
-
-@requires_mast
-@pytest.mark.xfail(strict=True, reason=(
-    "Band (c), multi half: MAST's autocorrelation replica score cannot see the two-apex soft-max "
-    "ghost on the sim's frames — equal-height apexes 3/2 nm off at 0.7 weight, one-step-lower "
-    "apexes, curved edges and adsorbates up to 1000/µm² all leave the score at the single-tip "
-    "value (double_tip.py header point 3: the echo is a soft-max, not a linear echo; the real "
-    "0.171–0.185 band came from six labelled frames). Whatever separates multi from single on "
-    "real frames is not in the sim's surface; the sim's single-tip ridge (0.13–0.30) already "
-    "overlaps the multi band. Surface owner's finding; strict so a fix flips this."))
-def test_multi_tip_probe_reads_in_the_real_multi_band(tmp_path: Path):
-    from stmsim.validate.fidelity import FidelitySet
-
-    fs = FidelitySet(n=6, tips=("good", "multi"), points=("verify",), session_dir=tmp_path / "s")
-    recs = fs.run()
-    multi = [r["mast"]["step_splitting"]["score"] for r in recs if r["tip"] == "multi"]
-    single = [r["mast"]["step_splitting"]["score"] for r in recs if r["tip"] == "good"]
-    assert all(m is not None and m >= 0.17 for m in multi), multi
-    assert all(s is not None and s < m for s, m in zip(single, multi)), (single, multi)
-
-
-@requires_mast
-def test_atomic_point_is_judged_by_masts_gate(tmp_path: Path):
-    """Band (d): one sharp tip passes ``assess_atomic_phase`` fwd+bwd at 5 nm / 256 px; the
-    crashed tip (R ×2–6, flickering) does not — the gate is MAST's, the tip is the
-    simulator's. σ* = 0.09 nm is derived by ``stmbench.trackB.derive_thresholds``."""
-    from stmsim.validate.fidelity import FidelitySet
-
-    fs = FidelitySet(n=1, tips=("good", "crashed"), points=("atomic",), session_dir=tmp_path / "s")
-    recs = {r["tip"]: r for r in fs.run()}
-    assert recs["good"]["mast"]["atomic"]["both_passed"], recs["good"]["mast"]["atomic"]
-    assert not recs["crashed"]["mast"]["atomic"]["both_passed"]
-    assert abs(recs["good"]["mast"]["nm_per_px"] - 5.0 / 256) < 1e-6
 
 
 # ── hysteresis: the sim's retrace offset reads back like the rig's ──────────────────
@@ -305,7 +178,7 @@ def test_index_stats_reproduces_the_indexer_recipe():
     assert index_stats(fwd[:4], bwd[:4])["fb_corr_flip"] is None
 
 
-# ── the real side without MAST or the lab drive ─────────────────────────────────────
+# ── the real side without the lab drive ─────────────────────────────────────────────
 def test_real_distributions_filters_and_ks(tmp_path: Path):
     from stmsim.validate.fidelity import compare, ks_distance, real_distributions, resolve_index
 
@@ -326,19 +199,13 @@ def test_real_distributions_filters_and_ks(tmp_path: Path):
     # compare() consumes records shaped like FidelitySet.run() output
     recs = [{"material": "Au(111)", "tip": t, "point": "verify", "seed": i,
              "truth": {"tip_change_rows": [3] if t == "crashed" else []},
-             "mast": {"trace_retrace_corr": 0.97 if t == "good" else 0.5,
-                      "tip_change": {"changed": t == "crashed", "score": 5.0, "threshold": 10.0},
-                      "step_splitting": {"verdict": "single", "score": 0.1},
-                      "index": {"fb_corr_flip": 0.97, "rowjump_frac": 0.05, "rowjump_sigma_m": 2e-12}}}
+             "frame": {"index": {"fb_corr_flip": 0.97, "rowjump_frac": 0.05, "rowjump_sigma_m": 2e-12}}}
             for t in ("good", "crashed") for i in range(3)]
     c = compare(recs, {"Au(111)": real})["by_material"]["Au(111)"]
     assert c["ks"]["verify"]["fb_corr_flip"]["good"]["n_real"] == 20
     assert c["ks"]["verify"]["fb_corr_flip"]["good"]["ks"] is not None
     assert c["ks"]["atomic"]["rowjump_frac"]["good"]["ks"] is None      # no atomic records rendered
-    assert c["bands"]["verify_corr"]["good"]["frac_in_band"] == 1.0
-    assert c["bands"]["verify_corr"]["crashed"]["median"] == 0.5
-    assert c["bands"]["tip_change"]["detected_frac"] == 1.0 and c["bands"]["tip_change"]["false_alarm_frac"] == 0.0
-    assert c["bands"]["step_splitting"]["single"]["frac_le_single_max"] == 1.0
+    assert "bands" not in c
 
 
 # ── λ* upper bound (calibrate-side owner) ───────────────────────────────────────────
