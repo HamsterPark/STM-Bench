@@ -255,6 +255,9 @@ class Instrument:
             session = Path(self._tmp.name) / "session"
         self.world = scenario.build_world(self.seed, session_dir=session, virtual_clock=True)
         self.t0 = self.world.clock.sim()
+        # the world as the episode found it, for the ledger only (a replay rebuilds and checks
+        # the sample against it, and starts the tip's story from it); reading it draws nothing
+        self.truth_before = self.world.truth()
         b = scenario.budget or {}
         self.max_sim_s = float(b["sim_hours"]) * 3600.0 if b.get("sim_hours") else None
         self.max_actions = int(max_actions)
@@ -713,9 +716,15 @@ class Instrument:
               "claims_total": det.get("n_total"), "claims_reported": det.get("n_reported"),
               "claims_verified": det.get("n_verified"), "instrument_time_s": self.used_s,
               "max_sim_s": self.max_sim_s, "actions": self.n_actions, "verdict": v.as_dict(),
-              "digest": self.digest(), "diagnosis": self.diagnosis, "truth_after": self.truth_after}
+              "digest": self.digest(), "diagnosis": self.diagnosis, "sim_t0_s": self.t0,
+              "truth_before": self.truth_before, "truth_after": self.truth_after}
         (out / "episode.json").write_text(json.dumps(ep, default=_json_default, ensure_ascii=False, indent=1),
                                           encoding="utf-8")
+        from ..replay.record import tip_timeline
+
+        (out / "tip_timeline.json").write_text(
+            json.dumps(tip_timeline(self.world, initial=(self.truth_before or {}).get("tip")),
+                       default=_json_default, ensure_ascii=False, indent=1), encoding="utf-8")
         with (out / "actions.jsonl").open("w", encoding="utf-8") as fh:
             for rec in self.log:
                 fh.write(json.dumps(rec, default=_json_default, ensure_ascii=False) + "\n")

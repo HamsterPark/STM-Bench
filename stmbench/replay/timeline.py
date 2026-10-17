@@ -38,6 +38,7 @@ class Ledger:
     driver: dict | None
     events: list[dict]
     tip_timeline: dict | None
+    actions: list[dict] | None = None
 
     @classmethod
     def load(cls, run_dir: str | Path) -> "Ledger":
@@ -49,12 +50,71 @@ class Ledger:
             p = d / name
             return json.loads(p.read_text(encoding="utf-8")) if p.is_file() else None
 
-        return cls(run_dir=d, episode=_read("episode.json"), driver=_read("driver.json"),
-                   events=list(_read("events.json") or []), tip_timeline=_read("tip_timeline.json"))
+        p = d / "actions.jsonl"
+        actions = ([json.loads(line) for line in p.read_text(encoding="utf-8").splitlines() if line.strip()]
+                   if p.is_file() else None)
+        ep = _read("episode.json")
+        driver = _read("driver.json")
+        if driver is None and actions is not None:
+            driver = driver_from_actions(actions, ep)
+        return cls(run_dir=d, episode=ep, driver=driver, events=list(_read("events.json") or []),
+                   tip_timeline=_read("tip_timeline.json"), actions=actions)
 
     @property
     def session_dir(self) -> Path:
         return self.run_dir / "session"
+
+
+# ── an instrument run's own record ──────────────────────────────────────────
+#: the instrument's names for the result and diagnosis channels (the earlier ledgers' tools
+#: were ReportResult / ReportTipState / SetDriftCompensation)
+REPORT_TOOLS = ("ReportResult", "report_result")
+DIAGNOSIS_TOOLS = ("ReportTipState", "report_tip_state")
+
+
+def driver_from_actions(actions: list[dict], episode: dict | None) -> dict:
+    """The steps of an instrument run (``actions.jsonl``) in the shape the timeline reads:
+    a stamped ``tool_start`` / ``tool_end`` pair per action, report and diagnosis. Instrument
+    time in the log counts from the episode's start (``sim_t0_s``). Observations take no
+    instrument time and are left out. Moves carry the junction resistance they ran at, from
+    the bias and setpoint set before them."""
+    ep = episode or {}
+    tb = ep.get("truth_before") or {}
+    t0 = float(ep.get("sim_t0_s", tb.get("sim_s", 0.0)) or 0.0)
+    bias = tb.get("bias_v")
+    current_a = tb.get("setpoint_a")
+    evs: list[dict] = []
+    for rec in actions:
+        kind = rec.get("kind")
+        if kind == "act":
+            name = str(rec.get("name") or "")
+            params = dict(rec.get("params") or {})
+            if name == "set_bias":
+                bias = params.get("bias_v", bias)
+            elif name == "set_setpoint" and params.get("current_pa") is not None:
+                current_a = float(params["current_pa"]) * 1e-12
+            if name == "move_tip" and bias is not None and current_a:
+                params["junction_kohm"] = abs(float(bias)) / float(current_a) / 1e3
+            res = rec.get("result") if isinstance(rec.get("result"), dict) else {}
+            preview = ("存为 " + str(res.get("frame") or res.get("spectrum"))
+                       if res.get("frame") or res.get("spectrum") else "")
+            sim0 = t0 + float(rec.get("t0_s") or 0.0)
+            sim1 = t0 + float(rec.get("t1_s") or rec.get("t0_s") or 0.0)
+            ok = True
+        elif kind in ("report", "diagnosis", "refused", "finish"):
+            name = {"report": "report_result", "diagnosis": "report_tip_state",
+                    "finish": "finish"}.get(kind, str(rec.get("name") or ""))
+            params = dict(rec.get("args") or {})
+            sim0 = sim1 = t0 + float(rec.get("t_s") or 0.0)
+            preview = str(rec.get("error") or "")
+            ok = kind != "refused"
+        else:
+            continue
+        cid = f"a{rec.get('i')}"
+        evs.append({"kind": "tool_start", "tool_call_id": cid, "name": name, "args": params, "sim_s": sim0})
+        evs.append({"kind": "tool_end", "tool_call_id": cid, "name": name, "ok": ok, "preview": preview,
+                    "sim_s": sim1})
+    return {"events": evs, "final_text": "", "source": "actions"}
 
 
 # ── the model's clock ───────────────────────────────────────────────────────
@@ -469,17 +529,17 @@ def build_moments(ledger: Ledger, steps: list[dict], tip: list[dict], atoms: dic
     for s in steps:
         if s.get("stub"):
             continue
-        if s["name"] == "ReportResult":
+        if s["name"] in REPORT_TOOLS:
             add(s["sim1"], "info", "report", s["caption"].replace("提交答案：", "AI 提交答案："))
-        elif s["name"] == "ReportTipState":
+        elif s["name"] in DIAGNOSIS_TOOLS:
             add(s["sim1"], "info", "diagnosis", "AI " + s["caption"])
-        elif s["name"] == "SetDriftCompensation" and "开启" in s["caption"]:
+        elif s["name"] in ("SetDriftCompensation", "drift_comp") and "开启" in s["caption"]:
             if drift_on:
                 add(s["sim1"], "info", "drift", "AI 重新调了漂移补偿", "又量了一次漂移，把补偿调得更准。")
             else:
                 add(s["sim1"], "info", "drift", "AI 开启了漂移补偿", "样品在慢慢漂移，AI 让扫描跟着它走。")
             drift_on = True
-        elif s["name"] == "SetDriftCompensation":
+        elif s["name"] in ("SetDriftCompensation", "drift_comp"):
             drift_on = False
     ep = ledger.episode
     ok = bool(ep.get("success"))
@@ -494,7 +554,7 @@ def build_moments(ledger: Ledger, steps: list[dict], tip: list[dict], atoms: dic
 def build_timeline(ledger: Ledger, *, claim_specs: dict[str, dict] | None = None) -> dict:
     ep = ledger.episode
     tb, ta = ep.get("truth_before") or {}, ep.get("truth_after") or {}
-    sim_start = float(tb.get("sim_s", 0.0))
+    sim_start = float(tb.get("sim_s", ep.get("sim_t0_s", 0.0)) or 0.0)
     sim_end = max(float(ta.get("sim_s", sim_start)), sim_start)
     ts = float(ep.get("time_scale") or 1.0)
     steps, messages, clock = build_steps(ledger.driver, ledger.events, sim_start, sim_end, ts)
@@ -504,12 +564,12 @@ def build_timeline(ledger: Ledger, *, claim_specs: dict[str, dict] | None = None
     moments = build_moments(ledger, steps, tip, atoms, frames, sim_end)
     reports: dict[str, dict] = {}
     for s in steps:
-        if s["name"] == "ReportResult" and s["args"].get("claim_id"):
+        if s["name"] in REPORT_TOOLS and s["args"].get("claim_id"):
             reports[str(s["args"]["claim_id"])] = s["args"]
     claims = [lay.claim_verdict(cid, rec, (claim_specs or {}).get(cid), reports.get(cid))
               for cid, rec in ((ep.get("verdict") or {}).get("details", {}).get("claims") or {}).items()]
     caps = ep.get("caps") or {}
-    return {"sim_start": sim_start, "sim_end": sim_end, "budget_s": caps.get("max_sim_s"),
+    return {"sim_start": sim_start, "sim_end": sim_end, "budget_s": caps.get("max_sim_s", ep.get("max_sim_s")),
             "time_scale": ts, "clock": clock, "steps": steps, "messages": messages, "frames": frames,
             "tip": tip, "tip_source": tip_source, "atoms": atoms, "moments": moments, "claims": claims,
             "final_text": _clean_text(str(((ledger.driver or {}).get("final_text")) or ""))}

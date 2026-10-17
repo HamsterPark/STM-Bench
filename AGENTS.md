@@ -135,8 +135,8 @@ python -m stmbench.cli reference --paper P4 --seeds 30
 python -m stmbench.cli baseline --paper P4 --seeds 30 --first-seed 450
 ```
 
-Replays read files with `stmsim.io.sxm_reader`; they take run directories in the earlier
-ledger format (see [docs/USAGE.md](docs/USAGE.md)):
+Replays read files with `stmsim.io.sxm_reader`; they take an instrument run directory (see
+[docs/USAGE.md](docs/USAGE.md)):
 
 ```bash
 python -m stmbench.cli replay "<run-directory>" --single-file --open

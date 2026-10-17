@@ -361,10 +361,12 @@ the earlier held-out rounds: `docs/results/p4_baseline_seeds_*.json`, DESIGN §9
 ```
 <out>/                the directory given as --out (or Instrument(..., out_dir=...))
 ├── episode.json      ledger: verdict, claims reported / verified, instrument time and budget,
-│                     action count, hashes of every measurement, tip diagnoses, truth after
+│                     action count, hashes of every measurement, tip diagnoses, the truth
+│                     before and after (for the judge and the replay only)
 ├── actions.jsonl     every call in order, refused ones included, with its instrument time
 ├── events.json       the world's events (frames, pulses, crashes, atoms moving), in sim time
 ├── report.json       the reports, folded: the last report for each claim
+├── tip_timeline.json the tip at the start and after every change, with the state it left
 └── session/          the .sxm frames and .dat spectra the episode saved
 ```
 
@@ -377,9 +379,9 @@ and seed and compares every measurement and the verdict.
 python -m stmbench.cli replay <run dir> [--out DIR] [--single-file] [--bare] [--no-truth] [--open]
 ```
 
-builds a page that plays one episode back for people who have never used an STM. It reads
-run directories in the earlier ledger format (`driver.json` with the model's steps,
-`tip_timeline.json`); reading the instrument's `actions.jsonl` is still to be added. The left
+builds a page that plays one episode back for people who have never used an STM. It reads an
+instrument run directory — the steps come from the agent's `driver.json` when the run has
+one, else from `actions.jsonl` — and run directories in the earlier ledger format. The left
 side is what the model saw and did: its frames drawn row by row on the instrument clock, each
 tool call retold in plain words, what it said. The right side is what only the audience sees:
 the tip as a drawing with a traffic light (sharp, blunt, double, crashed and flickering,
