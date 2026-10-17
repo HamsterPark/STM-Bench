@@ -3,7 +3,7 @@
 Three streams meet here:
 
 * the model's steps (``driver.json``): each tool call with the instrument time it started
-  and ended — stamped by the harness since ``sim_stamped``; for older ledgers rebuilt from
+  and ended — stamped by :func:`stmbench.replay.record.sim_stamped`; otherwise rebuilt from
   wall times (:func:`calibrate_clock`), because the instrument clock stands still while the
   model thinks and only runs inside tool calls;
 * the world (``events.json``): frames, atoms moving, crashes, pulses — already in sim time;

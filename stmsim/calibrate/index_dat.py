@@ -9,10 +9,9 @@ assigned to ``other``. Indexes retain source metadata and are private calibratio
 
 Per file we keep: path, group, size, header fields of interest, column names, row count,
 sweep column range, and — when the columns allow it — a first-pass κ fit for I(z) sweeps
-(same recipe as ``mast.vision.spectroscopy.assess_iz``: log|I| vs z, points above the noise
-floor only).
+(log|I| vs z, points above the noise floor only).
 
-Run (from STM-Bench root, MAST venv, PYTHONPATH must include MASTv2)::
+Run (from the STM-Bench root)::
 
     python -m stmsim.calibrate.index_dat --root "$STM_BENCH_RAW" --out "$STM_BENCH_DATA/index/dat_index.parquet"
 
@@ -80,7 +79,7 @@ def _fit_kappa(z_m: np.ndarray, i_a: np.ndarray) -> dict:
 
 
 def _one(path: str, root: str | os.PathLike) -> dict:
-    from mast.io.nanonis_files import read_dat  # PYTHONPATH must include MASTv2
+    from stmsim.io.sxm_reader import read_dat
 
     rec: dict = {"path": path, "group": _group(path, root), "size": os.path.getsize(path),
                  "mtime": os.path.getmtime(path), "err": ""}

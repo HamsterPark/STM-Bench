@@ -3,7 +3,7 @@
 Conventions (SI unless noted):
 
 * ``kappa`` — inverse decay length, 1/m; ``kappa = 5.123 * sqrt(phi_eV)`` per nm
-  (``mast.vision.spectroscopy.assess_iz`` uses the same constant);
+  (the usual I(z) barrier fit uses the same constant);
 * ``gap`` — tip-apex to surface distance, m;
 * metallic junction: ``I = G_contact * V_eff * exp(-2 kappa gap)``, with ``G_contact``
   chosen so that 100 pA at 1 V sits near a 0.57 nm gap for phi = 4 eV;
@@ -230,7 +230,7 @@ def didv_curve(vs: np.ndarray, gap_m: float, phi_ev: float, rho_s: LDOSTemplate 
 
 
 def apparent_barrier_from_iz(z_m: np.ndarray, i_a: np.ndarray, floor_a: float) -> tuple[float, float, int]:
-    """(phi_eV, r², n_ok) — the fit MAST's ``assess_iz`` / ``MeasureBarrierHeight`` do."""
+    """(phi_eV, r², n_ok) — the fit a barrier-height measurement does."""
     z = np.asarray(z_m, float) * 1e9
     i = np.abs(np.asarray(i_a, float))
     ok = np.isfinite(i) & (i > floor_a)

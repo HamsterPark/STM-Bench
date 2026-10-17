@@ -1,7 +1,7 @@
 """World: the whole instrument in one object (surface + tip + junction + loop + scanner +
 coarse stage + clocks + noise), with the controller-facing verbs as methods.
 
-All controller modules call into this class under ``self.lock``. Every method that MAST
+All controller modules call into this class under ``self.lock``. Every method a client
 polls at kHz rate (``current_now``, ``z_now``) is O(1): equilibrium values are cached and
 only re-derived when something changed; transients (poke, pulse, setpoint change) are
 pre-computed time series looked up by wall time.
@@ -147,8 +147,8 @@ class World:
         v_z = float(dv.get("v_z_m_per_s", 1.0e-12 if cold else 8e-12))
         ang = float(self.rng.uniform(0, 2 * math.pi))
         self.drift_v_m_per_s = np.array([v_xy * math.cos(ang), v_xy * math.sin(ang), v_z]) * self.rng.normal(1.0, 0.25, 3)
-        # Piezo drift compensation. The instrument offers it, MAST drives it
-        # (SetDriftCompensation), and the papers need it: a spectroscopy line or a corral
+        # Piezo drift compensation. The instrument offers it, the operator drives it
+        # (a measured drift, programmed), and the papers need it: a spectroscopy line or a corral
         # repair runs for an hour, and at ~1 nm/min the sample walks several nanometres under
         # the tip while it does. See set_drift_comp for the sign convention.
         self.drift_comp_on = False
@@ -247,9 +247,8 @@ class World:
         """``Piezo.DriftCompSet``: ramp the piezo to follow the drifting sample.
 
         **Sign.** ``v`` is the velocity at which features are seen to move in the scan frame —
-        which is exactly what a drift measurement from two frames reports (MAST's
-        ``ComputeDriftVector`` returns the cross-correlation shift of the current frame against
-        a reference). The controller applies the measured vector and the motion stops. A reversed
+        which is exactly what a drift measurement from two frames reports (the
+        cross-correlation shift of the current frame against a reference). The controller applies the measured vector and the motion stops. A reversed
         sign doubles the drift instead of cancelling it, which is why the
         documented workflow ends in "measure again": the mistake is visible and recoverable.
 
@@ -464,8 +463,8 @@ class World:
                 if self.withdrawn:
                     # controller: closing the loop from the withdraw rail extends Z at the I-gain
                     # speed until the setpoint is found (or the far rail if the sample is out
-                    # of fine range) — this is how MAST's settle routine re-engages after a
-                    # Withdraw (skills/composite/_z_settle.py: Withdraw → OnOffSet(1) → poll)
+                    # of fine range) — this is how a settle routine re-engages after a
+                    # Withdraw (Withdraw → OnOffSet(1) → poll)
                     self.withdrawn = False
                     z0 = self.tip_height_m()
                     z_eq = self._equilibrium_z_tip()
@@ -868,8 +867,8 @@ class World:
     # ── piezo tilt correction ──
     #: Response of the *reported* Z slope (per axis, deg per deg) to a Piezo.TiltSet step is
     #: −1 on both axes under the convention in :meth:`set_piezo_tilt`, so the compensating
-    #: matrix MAST's TiltCalibrate solves (G = −M⁻¹) is the identity: Δtilt = +measured slope.
-    #: Declared by the harness as this rig's one-off calibration (RuntimeHost.sync_facts).
+    #: matrix a tilt calibration solves (G = −M⁻¹) is the identity: Δtilt = +measured slope.
+    #: This rig's one-off tilt-response calibration.
     TILT_RESPONSE_G: tuple[tuple[float, float], tuple[float, float]] = ((1.0, 0.0), (0.0, 1.0))
 
     def tilt_plane_z(self, x, y):
@@ -892,8 +891,8 @@ class World:
         residual the instrument sees goes to zero at ``tilt = atan(−extend_sign·slope)``.
 
         A tilt step under closed loop is a step in the surface the loop follows (Z jumps
-        by the plane's change at the tip position): a real Z transient, the reason MAST
-        applies tilt in ≤1° sub-steps with the feedback on.
+        by the plane's change at the tip position): a real Z transient, the reason tilt
+        is applied in ≤1° sub-steps with the feedback on.
         """
         with self.lock:
             tx, ty = float(tilt_x_deg), float(tilt_y_deg)

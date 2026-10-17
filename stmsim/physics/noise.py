@@ -4,7 +4,7 @@ Everything is generated from one seeded ``numpy`` generator so a scenario replay
 Two access patterns:
 
 * :meth:`NoiseModel.current_sample` — one O(1) sample at a given wall time (for
-  ``Current.Get`` polled at kHz rates by MAST's read-back skills);
+  ``Current.Get`` polled at kHz rates by read-back routines);
 * :meth:`NoiseModel.current_series` — a vector for a scope screen / a scan line.
 
 Components: white (preamp floor + shot), 1/f, mains pickup (50 Hz + harmonics, plus

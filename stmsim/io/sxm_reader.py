@@ -1,4 +1,4 @@
-"""Read the controller files stmsim writes (``.sxm`` frames, ``.dat`` spectra) without MAST.
+"""Read the controller files stmsim writes (``.sxm`` frames, ``.dat`` spectra).
 
 Written from the file layout that :mod:`stmsim.io.sxm_writer` and :mod:`stmsim.io.dat_writer`
 document, and held to them by round-trip tests; files of the same controller format from a real

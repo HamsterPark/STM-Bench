@@ -1,4 +1,4 @@
-"""Clock pause/resume and the immediate thermal-drift fault (no MAST needed)."""
+"""Clock pause/resume and the immediate thermal-drift fault."""
 from __future__ import annotations
 
 import time

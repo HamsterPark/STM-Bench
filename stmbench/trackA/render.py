@@ -11,9 +11,9 @@ Rows controller never acquired are NaN in the file (``frame_validity.acquired_ro
 convention) and render **black**; ``acq_rows`` / ``n_rows`` in the summary say how
 much of the frame is real. Nothing here needs PIL: the PNG is written with ``zlib``.
 
-Reading goes through ``mast.io.nanonis_files`` (``read_sxm`` + ``sxm_oriented_frames``)
-so backward frames are un-mirrored and ``:SCAN_DIR: up`` files are put top-first
-exactly as MAST does — the only orientation rule in the tree.
+Reading goes through :mod:`stmsim.io.sxm_reader` (``read_sxm`` + ``oriented_frames``)
+so backward frames are un-mirrored and ``:SCAN_DIR: up`` files are put top-first — the
+only orientation rule in the tree.
 
 Header summary (``header_summary``): size (nm), pixels, bias (V), setpoint (A), scan
 speed (nm/s and s/line), angle, direction, optional ``rec_time``, optional ``comment``.
@@ -61,18 +61,18 @@ def resolve_path(p: str | os.PathLike) -> Path:
 # ── reading ─────────────────────────────────────────────────────────────────
 
 def load_scan(path: str | os.PathLike) -> dict:
-    from mast.io.nanonis_files import read_sxm
+    from stmsim.io.sxm_reader import read_sxm
     return read_sxm(str(resolve_path(path)))
 
 
 def load_header(path: str | os.PathLike) -> dict:
-    from mast.io.nanonis_files import read_sxm_header
+    from stmsim.io.sxm_reader import read_sxm_header
     return read_sxm_header(str(resolve_path(path)))
 
 
 def oriented(scan: dict, channel: str = "Z") -> dict:
-    from mast.io.nanonis_files import sxm_oriented_frames
-    return sxm_oriented_frames(scan, channel)
+    from stmsim.io.sxm_reader import oriented_frames
+    return oriented_frames(scan, channel)
 
 
 def _first_float(value: Any, default: float | None = None) -> float | None:

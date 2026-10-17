@@ -13,7 +13,6 @@ from stmsim.paths import (  # noqa: F401 — re-exported on purpose
     CORPUS_ENV_VAR,
     ENV_VAR,
     LEGACY_CORPUS_ENV_VAR,
-    MAST_ENV_VAR,
     RAW_ENV_VAR,
     calib_dir,
     corpus_index_dir,
@@ -23,7 +22,6 @@ from stmsim.paths import (  # noqa: F401 — re-exported on purpose
     describe,
     fidelity_dir,
     index_dir,
-    mast_root,
     raw_mirror_root,
     runs_dir,
     sessions_dir,
@@ -31,8 +29,8 @@ from stmsim.paths import (  # noqa: F401 — re-exported on purpose
 )
 
 __all__ = [
-    "ENV_VAR", "CORPUS_ENV_VAR", "RAW_ENV_VAR", "MAST_ENV_VAR", "LEGACY_CORPUS_ENV_VAR",
+    "ENV_VAR", "CORPUS_ENV_VAR", "RAW_ENV_VAR", "LEGACY_CORPUS_ENV_VAR",
     "data_root", "data_path", "runs_dir", "calib_dir", "index_dir", "trackA_dir", "fidelity_dir",
-    "sessions_dir", "corpus_index_dir", "raw_mirror_root", "mast_root",
+    "sessions_dir", "corpus_index_dir", "raw_mirror_root",
     "data_available", "describe",
 ]

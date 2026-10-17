@@ -6,7 +6,7 @@ because on a real rig that is what the controller autosave leaves behind. The si
 produce the same thing or the whole analysis half of a paper task is unreachable.
 
 Layout (matched against controller files, ``stmsim/calibrate/iz_templates.parse_dat_text``
-and MAST's ``mast.io.nanonis_files.read_dat``)::
+and :func:`stmsim.io.sxm_reader.read_dat`)::
 
     <key>\\t<value>\\t
     <key>\\t<value>\\t

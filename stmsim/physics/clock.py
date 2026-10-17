@@ -2,8 +2,8 @@
 
 * ``wall`` — real elapsed seconds. Every *hardware-side* process (tip shaper, bias pulse,
   oscilloscope screens, auto-approach cycles, spectroscopy sweeps) runs on it, because
-  MAST's read-back skills sample with ``perf_counter`` and judge segment lengths in wall
-  seconds.
+  read-back routines in control software sample with ``perf_counter`` and judge segment
+  lengths in wall seconds.
 * ``sim`` — virtual seconds = wall × ``time_scale`` (+ offset). Only scan-line progress and
   slow physics (creep, drift, tip-change hazard) use it, and the ``.sxm`` header stamps it.
 
@@ -27,9 +27,9 @@ class Clock:
         # Slow physics — thermal drift, piezo creep, the sample creeping toward the tip —
         # runs on its own scale, which the World ties to ``time_scale``.
         #
-        # It used to default to 1× wall on the reasoning that MAST judges "Z has settled" in
+        # It used to default to 1× wall on the reasoning that a client judges "Z has settled" in
         # wall seconds, so a 20× clock would make a 1 nm/min drift look like 20. That reasoning
-        # does not hold: everything MAST times in wall seconds (transients, ring-up, tip-shaper
+        # does not hold: everything a client times in wall seconds (transients, ring-up, tip-shaper
         # segments) reads ``wall()`` directly and never touches this clock. What this clock
         # does drive is how far the sample walks during an experiment — and the budget an
         # experiment is given is denominated in *sim* hours. Leaving drift on the wall clock

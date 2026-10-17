@@ -138,7 +138,7 @@ class _StepSurface:
 
 
 def test_two_apex_softmax_splits_a_step_into_the_analytic_pair():
-    """The physics MAST's ``detect_step_splitting`` assumes (double_tip.py): apexes at
+    """The physics a step-splitting detector assumes: apexes at
     separation d and weights a₁, a₂ turn a step of height H into an intermediate plateau
     of width |d| whose height above the lower level is (1/2κ)·ln[(a_hi·e^{2κH} + a_lo)/
     (a₁ + a₂)] with ``a_hi`` the apex over the high terrace — every step in the frame

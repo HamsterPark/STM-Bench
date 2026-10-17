@@ -1,7 +1,7 @@
 """Instrument time beyond the scenario budget is not success, whatever the truth says."""
 from __future__ import annotations
 
-from stmbench.harness.episode import OVERRUN_PARTIAL_CAP, apply_budget_overrun
+from stmbench.trackB.rules import OVERRUN_PARTIAL_CAP, apply_budget_overrun
 from stmbench.trackB.truth_criteria import Verdict
 
 

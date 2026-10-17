@@ -94,7 +94,7 @@ notes: |
   broadening and a finite phase-coherence length all sit on top of E0 and m*.
 
   **Tolerances, measured 2026-09-07** on the generator: twelve energies x 96 distances with
-  2 % noise, fitted through ``mast.vision.standing_wave.fit_dispersion``, over twelve draws of
+  2 % noise, fitted with a standing-wave dispersion fit, over twelve draws of
   the hidden block. |E0 error| had a median of 4.7 meV and a p90 of 6.0 meV; the relative m*
   error a median of 0.5 % and a p90 of 0.8 %. The claims ask for 15 meV and 2 %, about twice
   those p90s.

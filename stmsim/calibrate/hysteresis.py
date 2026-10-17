@@ -31,8 +31,8 @@ What it CANNOT tell us
   known 4 px shift: circular NCC 0.989 at 0 vs 0.943 at 4; overlap NCC 0.9999 at 4). The
   ±6 px window is a zero-shift NCC in practice, and the trend with ``nx`` is flat for that
   reason. The per-``nx`` table is kept as description only.
-* Whether 6–7 px (MAST's ``_fwd_bwd_instability`` docstring, "real Createc hardware")
-  applies to *this* rig; that number is from a different machine.
+* Whether the 6–7 px quoted for a different instrument (Createc hardware) applies to
+  *this* rig; that number is from another machine.
 
 The measurement the index cannot give is ``--sample N``: it re-reads N real complete frames
 of the verify genre (needs the raw mirror the index paths point at) and locates the NCC peak
@@ -154,7 +154,7 @@ def fit_from_index(index_path: str | Path, material: str = "Au(111)", *,
         "bound_from_nx_trend": bound,
         "genres": genres,
         "cannot_infer": ["per-frame hysteresis in px (argmax shift not stored)",
-                         "whether MAST's Createc '6-7 px' applies to this rig"],
+                         "whether the 6-7 px quoted for Createc hardware applies to this rig"],
         "reference_other_rig_px": [6, 7],
     }
 
@@ -167,7 +167,7 @@ def peak_shift(fwd: np.ndarray, bwd: np.ndarray, *, max_shift_px: int = 24, max_
     sit to the LEFT of the forward ones by that many px, i.e. the backward line samples
     ahead) and the NCC at zero / at the peak.
 
-    Why not ``np.roll`` like the indexer (and like MAST's FFT cross-correlation): a
+    Why not ``np.roll`` like the indexer (or an FFT cross-correlation): a
     circular shift wraps ``s`` columns from the far edge, and on a 100 nm frame whose
     range is ~1 nm of tilt + steps those wrapped columns mismatch by the whole range —
     enough to pull the peak back to ``s = 0`` even when every row is a clean 4 px shift
@@ -204,7 +204,7 @@ def peak_shift(fwd: np.ndarray, bwd: np.ndarray, *, max_shift_px: int = 24, max_
 def measure_sample(d, n: int, *, seed: int = 0, genre_nm: tuple[float, float] = (80.0, 120.0),
                    min_corr: float = 0.9, max_shift_px: int = 24) -> dict:
     """Re-read ``n`` real complete frames of the verify genre and measure the peak shift."""
-    from mast.io.nanonis_files import read_sxm, sxm_oriented_frames
+    from stmsim.io.sxm_reader import oriented_frames as sxm_oriented_frames, read_sxm
 
     rng_nm = d["range_x_m"].to_numpy(float) * 1e9
     s = d[(rng_nm >= genre_nm[0]) & (rng_nm <= genre_nm[1]) & (d["fb_corr_flip"] >= min_corr)]

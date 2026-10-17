@@ -18,7 +18,7 @@ _SI_RE = re.compile(r"^\s*([-+]?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?)\s*([fpnuµ
 
 def si(value: Any) -> float | None:
     """A tool argument as a number: ``40e-9``, ``"40n"``, ``"8.355p"``, ``"0.4"`` (the
-    SI-prefixed strings MAST accepts). ``None`` when it is not a number."""
+    SI-prefixed strings tool arguments use). ``None`` when it is not a number."""
     if isinstance(value, bool) or value is None:
         return None
     if isinstance(value, (int, float)):
@@ -386,7 +386,7 @@ _PATH_RE = re.compile(r"[A-Za-z]:[\\/]|\\\\")
 
 
 def result_text(preview: Any, limit: int = 90) -> str:
-    """A tool's reply when it reads as a sentence (MAST writes many in Chinese); dicts,
+    """A tool's reply when it reads as a sentence (many tools write theirs in Chinese); dicts,
     reprs and file dumps are left out — they mean nothing to the audience."""
     s = str(preview or "").strip()
     if not s or s[0] in "{[(/" or s.startswith(("Command(", "ToolMessage")) or _PATH_RE.search(s):

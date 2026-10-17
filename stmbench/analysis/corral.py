@@ -1,8 +1,8 @@
 """A quantum corral's geometry from a topograph: the circle through its ring of atoms.
 
 The ring's atoms sit ~1 nm apart, so along the ring they read as a ridge, and a detector of
-isolated adatoms (``stmbench.papers._clusters``, which rejects anything that stays high 0.7 nm
-away in some direction) finds none of them. The fit here takes the bright pixels instead.
+isolated adatoms (one that rejects anything that stays high 0.7 nm away in some direction)
+finds none of them. The fit here takes the bright pixels instead.
 """
 from __future__ import annotations
 

@@ -12,8 +12,6 @@ jobs:
       matrix:
         python-version: ["3.13"]
     env:
-      # MAST v2 is not on PyPI; everything that needs it is marked `requires_mast`
-      # (skipped automatically, and deselected here so the count is clean).
       PYTHONUNBUFFERED: "1"
     steps:
       - uses: actions/checkout@v4
@@ -35,5 +33,5 @@ jobs:
           python -m stmbench.cli --help
           stmsim serve --help
           stmbench --help
-      - name: Tests (without MAST)
-        run: python -m pytest tests -q -m "not requires_mast" -p no:cacheprovider --durations=10
+      - name: Tests
+        run: python -m pytest tests -q -p no:cacheprovider --durations=10

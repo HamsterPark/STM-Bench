@@ -1,4 +1,4 @@
-"""Scenario loading, fault scheduling and truth criteria (no MAST needed)."""
+"""Scenario loading, fault scheduling and truth criteria."""
 from __future__ import annotations
 
 import re

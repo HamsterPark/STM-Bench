@@ -1,4 +1,4 @@
-"""The benchmark instrument: primitive actions on stmsim, on a virtual clock, without MAST.
+"""The benchmark instrument: primitive actions on stmsim, on a virtual clock.
 
 Why it exists. A benchmark's agent-facing interface must not belong to one agent framework,
 and an episode must be re-checkable: the same seed and the same actions have to give the same
@@ -16,9 +16,9 @@ Three kinds of call:
   no instrument time and no random draw, so how often an agent looks cannot change what it
   later measures;
 * **reports** (``report``, ``report_tip_state``, ``finish``) - the result channel of
-  :mod:`stmbench.harness.results`, judged by the version-1 rules shown on the rule card.
+  :mod:`stmbench.trackB.results`, judged by the version-1 rules shown on the rule card.
 
-What is deliberately absent: MAST's composite skills and its safety gate. An action does what
+What is deliberately absent: composite skills and a safety gate. An action does what
 the instrument would do, hard limits only (bias, piezo range, preamplifier range); a poke too
 deep, a pulse too high, a coarse step in tunnelling have their physical consequences.
 """
@@ -37,13 +37,17 @@ import numpy as np
 from stmsim.physics.scanner import SIG_CURRENT, SIG_LI_X, SIG_Z
 from stmsim.scenario import Scenario
 
-from ..harness.results import ResultSink, fold_results
+from ..trackB.results import ResultSink, fold_results
 from ..trackB.rules import OVERRUN_TOLERANCE, RULES_VERSION, task_text
 
 #: version of the action set, the observations and the log format
 API_VERSION = 1
 SCENARIO_DIR = Path(__file__).resolve().parents[1] / "trackB" / "scenarios"
 MAX_ACTIONS = 3000
+#: success kinds the instrument can judge from what it records: the paper scenarios'. The
+#: skill scenarios (B*) judge on evidence this instrument does not collect, so they are
+#: refused at the start rather than failing at the end of an episode.
+JUDGED_KINDS = ("claims_verified",)
 _GAIN_FULL_SCALE_NA = {10000.0: 0, 1000.0: 1, 100.0: 2, 10.0: 3, 1.0: 4, 0.1: 5}
 
 
@@ -236,6 +240,10 @@ class Instrument:
         if not isinstance(scenario, Scenario):
             p = Path(scenario)
             scenario = Scenario.load(p if p.exists() else SCENARIO_DIR / f"{scenario}.yaml")
+        kind = (scenario.success or {}).get("kind", "claims_verified")
+        if kind not in JUDGED_KINDS:
+            raise ValueError(f"{scenario.id}: the instrument judges {', '.join(JUDGED_KINDS)} scenarios; "
+                             f"this one's success kind is {kind!r}")
         self.scenario = scenario
         self.seed = int(seed)
         self.out_dir = Path(out_dir) if out_dir is not None else None
@@ -658,7 +666,7 @@ class Instrument:
         """Judge the episode (version-1 rules, budget overrun rule) and write the ledger."""
         if self.finished:
             return self._summary()
-        from ..harness.episode import apply_budget_overrun
+        from ..trackB.rules import apply_budget_overrun
         from ..trackB.truth_criteria import judge
 
         w = self.world

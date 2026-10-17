@@ -111,12 +111,12 @@ class Tip:
 
     # ── two sharpness scales ──────────────────────────────────────────────────
     # ``radius_m`` is the mesoscopic radius: it broadens steps and features through
-    # ``sigma_eff_m`` and drives MAST's trace/retrace similarity. ``apex_sigma_m`` is the
+    # ``sigma_eff_m`` and drives the trace/retrace similarity. ``apex_sigma_m`` is the
     # lateral smearing of the terminating apex atom's orbital: it alone decides whether
     # the atomic lattice is transferred into the image. They are correlated (a blunt
     # tip rarely ends in one clean atom) but not identical — the correlation is the
-    # ASSUMED map below, and ``derive_thresholds`` reports the sharpness threshold in
-    # apex_sigma, not in radius.
+    # ASSUMED map below, and the derived sharpness threshold (``sigma_star_nm`` in
+    # stmbench.trackB.truth_criteria) is in apex_sigma, not in radius.
     APEX_SIGMA_FLOOR_M = 0.05e-9
     APEX_SIGMA_CEIL_M = 0.60e-9
 
@@ -166,7 +166,7 @@ class Tip:
         N(0, ``flicker_dz_m``) — the mid-line Z segments (telegraph steps of tens to hundreds
         of pm) a real unstable tip writes into both passes independently. With
         ``flicker_rate_hz == 0`` the pass gets one constant offset (the row-DC part, which
-        MAST's row-median detrend removes; the per-pass apex re-draw in :meth:`pass_apexes`
+        a row-median detrend removes; the per-pass apex re-draw in :meth:`pass_apexes`
         then carries the disagreement)."""
         if self.flicker_dz_m <= 0 or n <= 0:
             return None
@@ -499,7 +499,7 @@ class Tip:
         """Tip into the sample: blunt radius, 1–3 extra apexes 2–6 nm off (the picked-up
         cluster), a lowered barrier — and an *unstable* apex: metastable, λ ≥ 0.05/s and
         a per-pass dz flicker of the cluster apexes (:meth:`pass_apexes`), which is what
-        separates a crashed tip's verify frame from a merely blunt one under MAST's
+        separates a crashed tip's verify frame from a merely blunt one under a
         trace/retrace detector. The extra apexes' dz is quantised to whole steps."""
         r = self.rng
         self.radius_m = float(self.radius_m * r.uniform(2.0, 6.0) * severity)

@@ -14,8 +14,8 @@ inventory. `stmsim/spec/extract.py` exports this local registry and does not rea
 external client checkout.
 
 The wire contracts have a history: earlier versions of this project used a larger
-catalog extracted from a controller client identified as `nanonis_spm` version 1.0.9 and MAST's
-protocol patches. This version removes that full catalog and its extraction code;
+catalog extracted from a controller client identified as `nanonis_spm` version 1.0.9 and a set
+of protocol patches to it. This version removes that full catalog and its extraction code;
 it preserves the applicable interface formats for compatibility. This is a change
 in scope and maintenance, not a claim that those protocol conventions were invented
 here or that the implementation was developed in a clean room.
@@ -25,12 +25,11 @@ copyright and distribution terms; the project's MIT license does not relicense
 that external software. A compatible name or data layout is an interface contract,
 not an implementation of the corresponding instrument operation.
 
-## MAST and calibration data
+## Calibration data
 
-MAST is a separate runtime and is not bundled here. Its availability and terms must
-be checked independently. The repository includes references to MAST interfaces and
-calibration provenance; it does not include the private raw instrument corpus or
-the historical episode ledgers cited in the design record.
+The repository records calibration provenance (what was measured, when, and on how many
+samples); it does not include the private raw instrument corpus or the historical episode
+ledgers cited in the design record.
 
 ## Python dependencies
 

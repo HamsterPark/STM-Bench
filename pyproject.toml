@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "stm-bench"
 version = "0.1.0.dev0"
-description = "STM-Bench: a simulated scanning tunnelling microscope (stmsim) and an evidence-based benchmark for experimental agents, with standalone MCP and MAST interfaces (stmbench)"
+description = "STM-Bench: a simulated scanning tunnelling microscope (stmsim) and an evidence-based benchmark for experimental agents, with a standalone MCP instrument interface (stmbench)"
 readme = "README.md"
 requires-python = ">=3.13"
 license = "MIT"
@@ -39,12 +39,10 @@ include = ["stmsim*", "stmbench*"]
 
 [tool.setuptools.package-data]
 stmsim = ["profiles/*.yaml", "spec/*.json"]
-stmbench = ["trackB/scenarios/*.yaml", "human/static/*.html", "replay/static/*.html"]
+stmbench = ["trackB/scenarios/*.yaml", "replay/static/*.html"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = [
-    "requires_mast: needs MAST v2 (MASTv2 on PYTHONPATH / MAST_ROOT) and its patched nanonis_spm; skipped when absent",
     "requires_data: needs the STM_BENCH_DATA directory (calibration tables, corpus indices); skipped when absent",
-    "isolated: must be the only RuntimeHost in its process (MAST process-level singletons); run separately with -m isolated",
 ]

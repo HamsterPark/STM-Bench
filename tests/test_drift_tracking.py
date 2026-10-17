@@ -6,8 +6,8 @@ has the sample slide out from under the tip while it runs. Turning that down in 
 would delete the capability worth testing; what the benchmark asks instead is that the agent
 notice it and track it.
 
-The instrument offers the means (``Piezo.DriftCompSet``) and MAST drives it
-(``SetDriftCompensation`` after ``MeasureFrameDrift``). These tests pin that the loop closes:
+The instrument offers the means (``Piezo.DriftCompSet``) and the operator drives it (a
+measured drift, programmed). These tests pin that the loop closes:
 compensation programmed from a measurement stops the motion, the wrong sign makes it worse
 rather than doing nothing, and the ramp runs out of piezo eventually.
 """
@@ -146,138 +146,6 @@ def test_no_scenario_turns_the_drift_down_to_make_itself_passable(tmp_path):
         if scale is not None and float(scale) < 1.0:
             offenders.append(f"{f.name}: drift_scale={scale}")
     assert not offenders, offenders
-
-
-# ── the baselines' side: a reading has to be credible before it is acted on ──────
-class _FakeBaseline:
-    """Enough of ``papers._runner.Baseline`` to drive ``null_the_drift`` without a microscope."""
-
-    def __init__(self, replies: dict, frames: int = 9):
-        self.replies = replies
-        self.calls: list[tuple[str, dict]] = []
-        self._frames = frames
-
-    def run(self, skill, params=None, *, optional=False):
-        self.calls.append((skill, dict(params or {})))
-        got = self.replies.get(skill)
-        if isinstance(got, list):                 # a sequence: one reply per call, last repeats
-            n = sum(1 for c in self.calls if c[0] == skill) - 1
-            return got[min(n, len(got) - 1)]
-        return got
-
-    @staticmethod
-    def data(res, key, default=None):
-        if res is None:
-            return default
-        return res.get(key, default)
-
-    def latest_frame(self):
-        self._frames -= 1
-        return Path(f"frame_{self._frames}.sxm")
-
-
-def _reply(**kw) -> dict:
-    return kw
-
-
-def _null(replies, **kw):
-    from stmbench.papers._drift import null_the_drift
-
-    b = _FakeBaseline(replies)
-    out = null_the_drift(b, (0.0, 0.0), frame_nm=40.0, pixels=128, **kw)
-    return b, out
-
-
-def test_a_measurement_whose_pairs_disagree_is_not_acted_on(monkeypatch):
-    """``MeasureFrameDrift`` says so itself when the pairs contradict each other. Programming a
-    compensation from that median points the piezo somewhere nobody measured."""
-    import stmbench.papers._drift as drift_mod
-
-    monkeypatch.setattr(drift_mod, "acq_seconds", lambda p: 80.0)
-    b, out = _null({"MeasureFrameDrift": _reply(
-        verdict="measured", frame_seconds=80.0, dx_median_nm=1.0, dy_median_nm=-3.0,
-        n_measured=2, consistency_warning="各对帧给出的 Δy 彼此对不上")})
-    assert out["applied"] is False and out["trusted"] is False
-    assert not any(c[0] == "SetDriftCompensation" for c in b.calls)
-    assert "disagree" in out["note"]
-
-
-def test_a_window_with_nothing_in_it_reports_why_rather_than_zero(monkeypatch):
-    """Two frames of a bare patch correlate to about nothing, which reads exactly like a stable
-    machine. The difference has to survive into the ledger."""
-    import stmbench.papers._drift as drift_mod
-
-    monkeypatch.setattr(drift_mod, "acq_seconds", lambda p: 80.0)
-    b, out = _null({"MeasureFrameDrift": _reply(verdict="undetermined")})
-    assert out["applied"] is False
-    assert "no feature to track" in out["note"]
-    assert not any(c[0] == "SetDriftCompensation" for c in b.calls)
-
-
-def test_a_good_measurement_is_set_and_then_checked(monkeypatch):
-    """What a working compensation looks like: the second reading is a fraction of the first."""
-    import stmbench.papers._drift as drift_mod
-
-    monkeypatch.setattr(drift_mod, "acq_seconds", lambda p: 80.0)
-    b, out = _null({"MeasureFrameDrift": [
-        _reply(verdict="measured", frame_seconds=80.0, dx_median_nm=-1.3, dy_median_nm=0.2,
-               feature_dx_median_nm=1.3, feature_dy_median_nm=0.2, n_measured=2),
-        _reply(verdict="measured", frame_seconds=80.0, dx_median_nm=-0.08, dy_median_nm=0.01,
-               feature_dx_median_nm=0.08, feature_dy_median_nm=0.01, n_measured=2)]})
-    sets = [c for c in b.calls if c[0] == "SetDriftCompensation"]
-    assert out["applied"] is True and len(sets) == 1
-    assert sets[0][1]["enable"] is True
-    # what was measured is what was typed in: the features moved 1.3 nm (+x) over 80 s, and
-    # Piezo.DriftCompSet takes the velocity at which features are seen to move
-    assert sets[0][1]["vx"] == pytest.approx(1.3e-9 / 80.0, rel=1e-9)
-    assert sets[0][1]["vy"] == pytest.approx(0.2e-9 / 80.0, rel=1e-9)
-    # and it measured again afterwards rather than assuming
-    assert sum(1 for c in b.calls if c[0] == "MeasureFrameDrift") >= 2
-
-
-def test_an_older_skill_without_feature_fields_gets_its_x_sign_turned_round(monkeypatch):
-    """``dx_median_nm`` is the register-shift in array axes (x reversed); without the
-    feature_* fields the baseline turns x round itself rather than typing the wrong sign in."""
-    import stmbench.papers._drift as drift_mod
-
-    monkeypatch.setattr(drift_mod, "acq_seconds", lambda p: 80.0)
-    b, out = _null({"MeasureFrameDrift": [
-        _reply(verdict="measured", frame_seconds=80.0, dx_median_nm=-1.3, dy_median_nm=0.2,
-               n_measured=2),
-        _reply(verdict="measured", frame_seconds=80.0, dx_median_nm=-0.08, dy_median_nm=0.01,
-               n_measured=2)]})
-    sets = [c for c in b.calls if c[0] == "SetDriftCompensation"]
-    assert out["applied"] is True and sets[0][1]["vx"] == pytest.approx(1.3e-9 / 80.0, rel=1e-9)
-
-
-def test_the_registration_frames_are_the_cheap_ones(monkeypatch):
-    """A drift measurement that spends measurement-grade frames eats the scenario's budget —
-    which is how four P1 seeds verified every claim and still failed, over budget."""
-    import stmbench.papers._drift as drift_mod
-
-    monkeypatch.setattr(drift_mod, "acq_seconds", lambda p: 80.0)
-    b, _ = _null({"MeasureFrameDrift": _reply(
-        verdict="measured", frame_seconds=80.0, dx_median_nm=1.3, dy_median_nm=0.2,
-        n_measured=2)})
-    scans = [c[1] for c in b.calls if c[0] == "ScanAt"]
-    assert scans and all(s["size_m"] == pytest.approx(40e-9) and s["pixels"] == 128
-                         for s in scans)
-
-
-def test_a_compensation_that_did_not_help_is_switched_back_off(monkeypatch):
-    """The residual staying where it was means the reading was not something the window could
-    support — a herringbone grating pins only the across-stripe component, a straight edge only
-    its normal. Leaving that compensation on points the piezo somewhere nobody measured."""
-    import stmbench.papers._drift as drift_mod
-
-    monkeypatch.setattr(drift_mod, "acq_seconds", lambda p: 80.0)
-    steady = _reply(verdict="measured", frame_seconds=80.0, dx_median_nm=1.3,
-                    dy_median_nm=0.2, n_measured=2)
-    b, out = _null({"MeasureFrameDrift": steady})
-    assert out["applied"] is False
-    assert "switched off" in out["note"]
-    last = [c for c in b.calls if c[0] == "SetDriftCompensation"][-1]
-    assert last[1]["enable"] is False
 
 
 def test_old_moves_keep_their_creep():

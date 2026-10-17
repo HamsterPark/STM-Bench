@@ -6,7 +6,7 @@ works on any machine by setting environment variables (``tests/test_no_machine_p
 excludes this file by name and fails on a literal anywhere else under ``stmsim/`` /
 ``stmbench/``).
 
-Four roots, four variables (blank or whitespace = unset; ``~`` is expanded; surrounding
+Three roots, three variables (blank or whitespace = unset; ``~`` is expanded; surrounding
 quotes are stripped so a pasted PowerShell value works):
 
 =========================  =======================  ====================================
@@ -15,8 +15,6 @@ function                   variable                 default
 :func:`data_root`          ``STM_BENCH_DATA``       ``~/stm_bench`` on every platform
 :func:`corpus_index_dir`   ``STM_BENCH_CORPUS_INDEX``  ``<data_root>/corpus_index``
 :func:`raw_mirror_root`    ``STM_BENCH_RAW``        ``<data_root>/raw``
-:func:`mast_root`          ``MAST_ROOT``            the checkout that owns the importable
-                                                    ``mast`` package (``None`` if neither)
 =========================  =======================  ====================================
 
 Named sub-directories of the data root (no creation here — writers call
@@ -39,7 +37,6 @@ from pathlib import Path
 ENV_VAR = "STM_BENCH_DATA"
 CORPUS_ENV_VAR = "STM_BENCH_CORPUS_INDEX"
 RAW_ENV_VAR = "STM_BENCH_RAW"
-MAST_ENV_VAR = "MAST_ROOT"
 LEGACY_CORPUS_ENV_VAR = "STM_BENCH_INDEX"        # deprecated alias of CORPUS_ENV_VAR
 
 
@@ -126,26 +123,6 @@ def raw_mirror_root() -> Path:
     return data_path("raw")
 
 
-def mast_root() -> Path | None:
-    """The MAST checkout (the directory that contains ``MASTv2/``).
-
-    ``MAST_ROOT`` if set; else derived from the importable ``mast`` package
-    (``<root>/MASTv2/mast/__init__.py``); else ``None`` — callers that need it say so.
-    """
-    p = _from_env(MAST_ENV_VAR)
-    if p is not None:
-        return p
-    try:
-        import mast  # noqa: F401  (MAST is optional; only MAST-backed features need it)
-    except Exception:  # noqa: BLE001
-        return None
-    init = getattr(mast, "__file__", None)
-    if not init:
-        return None
-    root = Path(init).resolve().parents[2]            # mast/__init__.py → MASTv2 → root
-    return root if (root / "MASTv2" / "mast").is_dir() else None
-
-
 # ── introspection ────────────────────────────────────────────────────────────
 
 def data_available() -> bool:
@@ -163,8 +140,8 @@ def describe() -> str:
 
 
 __all__ = [
-    "ENV_VAR", "CORPUS_ENV_VAR", "RAW_ENV_VAR", "MAST_ENV_VAR", "LEGACY_CORPUS_ENV_VAR",
+    "ENV_VAR", "CORPUS_ENV_VAR", "RAW_ENV_VAR", "LEGACY_CORPUS_ENV_VAR",
     "data_root", "data_path", "runs_dir", "calib_dir", "index_dir", "trackA_dir", "fidelity_dir",
-    "sessions_dir", "corpus_index_dir", "raw_mirror_root", "mast_root",
+    "sessions_dir", "corpus_index_dir", "raw_mirror_root",
     "data_available", "describe",
 ]

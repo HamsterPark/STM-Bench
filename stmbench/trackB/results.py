@@ -5,7 +5,6 @@ parses numbers out of free text is grading prose. One call per claim, the last c
 claim wins, and a claim that is never reported counts as *not reproduced* — an unmeasured
 result is not an abstention, it is a paper that did not come out.
 
-This module deliberately imports nothing from MAST so the judge and the tests can use it.
 """
 from __future__ import annotations
 

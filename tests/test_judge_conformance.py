@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from stmbench.harness.results import ResultSink
+from stmbench.trackB.results import ResultSink
 from stmbench.trackB import claims as C
 from stmbench.trackB.rules import RULES_VERSION
 from stmbench.trackB.truth_criteria import judge
