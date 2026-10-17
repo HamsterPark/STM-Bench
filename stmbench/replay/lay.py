@@ -108,7 +108,7 @@ PAPERS: dict[str, dict] = {
            "goal": "在一个铁原子正上方和一块干净的铜面上各测一条“频率随高度变化”的曲线，换算成力，"
                    "报告最大吸引力、力的衰减长度和结合能。"},
 }
-JUDGING = "判定方式：AI 用 ReportResult 报出的数值须与本轮随机抽取、对模型隐藏的真值比较。数值落在容差内且具备所需采集证据时，对应测量才算通过。"
+JUDGING = "判定方式：AI 通过结果通道报出的数值须与本轮随机抽取、对模型隐藏的真值比较。数值落在容差内且具备所需采集证据时，对应测量才算通过。"
 
 
 def paper_for(scenario_id: str, family: str | None) -> dict | None:
@@ -338,14 +338,14 @@ def tool_caption(name: str, args: dict | None) -> str:
     if n == "VerifyAdatomAt":
         where = _xy(a, "target_x_m", "target_y_m")
         return f"核对 {where} 那里是不是有原子" if where else "核对原子在不在指定位置"
-    if n == "ReportResult":
+    if n in ("ReportResult", "report_result"):
         cid = a.get("claim_id")
         v = a.get("value")
         u = _unit(a.get("unit"))
         if cid == "target_site" and a.get("x_nm") is not None:
             return f"提交答案：{claim_label(cid)}，位置 ({num(si(a.get('x_nm')))}, {num(si(a.get('y_nm')))}) nm"
         return f"提交答案：{claim_label(cid)} = {num(si(v), 4)}{'' if u == '°' else ' '}{u}".rstrip()
-    if n == "ReportTipState":
+    if n in ("ReportTipState", "report_tip_state"):
         st = a.get("tip_state") or a.get("state") or ""
         return f"说出它对针尖的判断：{st}" if st else "说出它对针尖的判断"
     if n == "SetDriftCompensation":
@@ -366,6 +366,9 @@ def tool_caption(name: str, args: dict | None) -> str:
     if n == "load_tool_pack":
         p = str(a.get("pack", ""))
         return f"从工具箱里取出“{PACKS.get(p, p)}”这一套工具"
+    caption = _instrument_caption(n, a)
+    if caption is not None:
+        return caption
     if n in _FIXED:
         return _FIXED[n]
     low = n.lower()
@@ -380,6 +383,86 @@ def tool_caption(name: str, args: dict | None) -> str:
     if n.startswith("Acquire"):
         return f"测量（{n}）"
     return f"调用工具 {n}"
+
+
+#: a junction resistance below this (kΩ) puts the tip close enough to drag what it grips;
+#: imaging runs at hundreds of MΩ
+DRAG_REGIME_KOHM = 1000.0
+
+
+def _instrument_caption(n: str, a: dict) -> str | None:
+    """The benchmark instrument's actions (units are in the parameter names: nm, V, pA, s)."""
+    if n == "scan":
+        size, px = a.get("size_nm"), a.get("pixels")
+        x, y = a.get("center_x_nm"), a.get("center_y_nm")
+        s = f"扫一幅 {num(size)} nm 见方的图" if size is not None else "扫一幅图"
+        if x is not None and y is not None:
+            s += f"，中心在 ({num(x)}, {num(y)}) nm"
+        return s + (f"（{px}×{px} 像素）" if px else "")
+    if n == "move_tip":
+        x, y, v, r = a.get("x_nm"), a.get("y_nm"), a.get("speed_nm_s"), a.get("junction_kohm")
+        s = f"把针尖移到 ({num(x)}, {num(y)}) nm" if x is not None and y is not None else "移动针尖"
+        if v is not None:
+            s += f"，速度 {num(v)} nm/s"
+        if r is not None and float(r) < DRAG_REGIME_KOHM:
+            s += f"；结电阻只有 {num(r)} kΩ（成像时是几百 MΩ），针尖贴得很近，会拖着它抓住的原子走"
+        return s
+    if n == "set_bias":
+        v = a.get("bias_v")
+        return f"把针尖电压设为 {with_prefix(float(v), 'V')}" if v is not None else "改变针尖电压"
+    if n == "set_setpoint":
+        i = a.get("current_pa")
+        return f"把隧穿电流设为 {with_prefix(float(i) * 1e-12, 'A')}" if i is not None else "改变隧穿电流"
+    if n == "set_current_range":
+        return "切换电流放大器的量程"
+    if n == "feedback":
+        return "打开高度反馈" if a.get("on") else "关掉高度反馈（针尖停在原来的高度）"
+    if n == "pulse":
+        v = a.get("bias_v")
+        return (f"给针尖打一个 {with_prefix(float(v), 'V')} 的电压脉冲（修针尖）" if v is not None
+                else "给针尖打一个电压脉冲（修针尖）")
+    if n == "poke":
+        d = a.get("depth_nm")
+        return (f"让针尖轻扎进表面 {num(d)} nm 再抽回（修针尖）" if d is not None
+                else "让针尖轻扎一下表面（修针尖）")
+    if n == "sts":
+        v0, v1 = a.get("v_start"), a.get("v_end")
+        if v0 is not None and v1 is not None:
+            return f"在一个点上测一条谱：电压从 {with_prefix(float(v0), 'V')} 扫到 {with_prefix(float(v1), 'V')}"
+        return "在一个点上测一条谱"
+    if n == "zspec":
+        return "测一条力谱：针尖一点点靠近，记下振动频率怎么变"
+    if n == "pll":
+        return "让 qPlus 传感器振起来" if a.get("on") else "停掉 qPlus 传感器的振动"
+    if n == "lockin":
+        return "打开锁相：扫描时同时记下 dI/dV 图" if a.get("on") else "关掉锁相"
+    if n == "drift_comp":
+        if not a.get("on"):
+            return "关掉漂移补偿"
+        vx, vy = a.get("vx_nm_per_min"), a.get("vy_nm_per_min")
+        if vx is not None and vy is not None:
+            return f"开启漂移补偿：样品每分钟漂 {num(math.hypot(float(vx), float(vy)))} nm，让扫描跟着它走"
+        return "开启漂移补偿，让扫描跟着漂移的样品走"
+    if n == "withdraw":
+        return "把针尖完全撤回，关掉反馈"
+    if n == "approach":
+        return "让针尖慢慢靠近表面（进针）"
+    if n == "coarse_move":
+        steps, d = a.get("steps"), a.get("direction")
+        return f"粗调台走 {steps} 步（{d}）" if steps is not None else "移动粗调台"
+    if n == "wait":
+        sec = a.get("seconds")
+        return f"等 {duration(float(sec))}，漂移和蠕变照常进行" if sec is not None else "等一会儿"
+    if n == "finish":
+        return "结束实验"
+    return _OBSERVE.get(n)
+
+
+#: the instrument's observations: they take no instrument time
+_OBSERVE = {"get_task": "读任务、评分规则和仪器说明", "status": "看一眼仪器此刻的读数",
+            "info": "查看仪器的固定参数", "list_data": "列出已经保存的图和谱",
+            "show_frame": "看一幅已经扫好的图", "frame_values": "读一幅图上的数值",
+            "get_spectrum": "读一条谱的数据"}
 
 
 _PATH_RE = re.compile(r"[A-Za-z]:[\\/]|\\\\")

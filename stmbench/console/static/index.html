@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>STM 控制台 · STM console</title>
+<style>
+  :root {
+    --bg: #f4f5f7; --panel: #ffffff; --ink: #1c1e22; --muted: #5f6672; --line: #dfe2e7;
+    --accent: #1f5fbf; --accent-ink: #ffffff; --ok: #1a7f37; --bad: #b42318; --warn: #8a5300;
+    --sel: #eef4ff; --sel-line: #c9d8f5; --code: #f6f8fa;
+    --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
+  [hidden] { display: none !important; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 system-ui, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+         display: flex; flex-direction: column; }
+  button { font: inherit; cursor: pointer; border: 1px solid var(--line); background: #fff; color: var(--ink); border-radius: 6px; padding: 5px 10px; }
+  button:hover:not(:disabled) { border-color: #aab4c3; }
+  button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+  button.danger { background: #fff5f5; color: var(--bad); border-color: #f0c2c2; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  button.primary .en, button.danger .en { color: inherit; opacity: .85; }
+  input, select { font: inherit; border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; background: #fff; color: var(--ink); width: 100%; }
+  input[type=checkbox] { width: auto; margin: 0 6px 0 0; }
+  pre, code { font-family: var(--mono); font-size: 12.5px; }
+  pre { white-space: pre-wrap; word-break: break-word; margin: 0; }
+  h3 { font-size: 14px; margin: 16px 0 6px; padding-top: 10px; border-top: 1px solid var(--line); }
+  h3:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+  .en { color: var(--muted); font-weight: normal; }
+  .muted { color: var(--muted); } .small { font-size: 12px; }
+  .ok { color: var(--ok); } .bad { color: var(--bad); } .warn { color: var(--warn); }
+  .mono { font-family: var(--mono); }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .grow { flex: 1 1 auto; }
+
+  header { display: flex; gap: 16px; align-items: center; padding: 8px 14px; background: var(--panel); border-bottom: 1px solid var(--line); flex-wrap: wrap; min-height: 52px; }
+  header .brand { font-weight: 600; font-size: 15px; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; background: #eceef1; }
+  .badge.on { background: #e6f4ea; color: var(--ok); }
+  .badge.end { background: #e8f0fe; color: var(--accent); }
+  .meter { display: flex; flex-direction: column; gap: 2px; min-width: 280px; }
+  .meter progress { width: 100%; height: 8px; }
+  .meter .lbl { font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 12px; }
+  .spin { display: inline-block; width: 12px; height: 12px; border: 2px solid #ccc; border-top-color: var(--accent); border-radius: 50%; animation: sp 1s linear infinite; vertical-align: -2px; }
+  @keyframes sp { to { transform: rotate(360deg); } }
+  #err { background: #fdecea; color: var(--bad); padding: 6px 14px; border-bottom: 1px solid #f3c7c3; white-space: pre-wrap; }
+  #banner { background: #e8f0fe; color: var(--accent); padding: 6px 14px; border-bottom: 1px solid var(--sel-line); font-weight: 600; }
+
+  main { display: grid; grid-template-columns: 340px minmax(520px, 1fr) 400px; gap: 12px; padding: 12px 14px; flex: 1 1 auto; min-height: 0; }
+  .col { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; min-height: 0; overflow: auto; }
+  .col.split { display: flex; flex-direction: column; overflow: hidden; }
+  .pane { overflow: auto; min-height: 0; }
+  #pane-readings { flex: 0 0 auto; max-height: 48%; border-bottom: 1px solid var(--line); }
+  #pane-actions { flex: 1 1 auto; }
+  @media (max-width: 1280px) {
+    body { display: block; height: auto; }
+    main { grid-template-columns: minmax(0, 1fr); }
+    .col, .col.split { overflow: visible; }
+    #pane-readings { max-height: none; }
+  }
+  .hd { padding: 8px 12px; border-bottom: 1px solid var(--line); font-weight: 600; display: flex; align-items: center; gap: 8px; background: #fafbfc; position: sticky; top: 0; z-index: 2; white-space: nowrap; }
+  .hd button { padding: 3px 8px; font-size: 13px; font-weight: normal; }
+  .bd { padding: 10px 12px; }
+  .help { background: #f7f9fc; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; margin-bottom: 10px; }
+  .task { background: #fffbe6; border: 1px solid #f3e4a8; border-radius: 8px; padding: 10px 12px; font-family: inherit; font-size: 13px; }
+  details summary { cursor: pointer; color: var(--accent); margin: 8px 0 4px; }
+  details pre { background: var(--code); border: 1px solid var(--line); border-radius: 6px; padding: 8px; }
+
+  .field { margin: 6px 0; }
+  .field label, .field .lbl { display: block; font-size: 12.5px; margin-bottom: 2px; }
+  .req { color: var(--bad); }
+  .desc { color: var(--muted); font-size: 12px; margin-top: 2px; white-space: pre-wrap; }
+  .doc { background: var(--code); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font-size: 12.5px; margin: 8px 0; white-space: pre-wrap; }
+  .evlist { display: flex; flex-direction: column; gap: 2px; max-height: 140px; overflow: auto; border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; }
+  .evlist label { display: flex; align-items: center; }
+  .reply { background: var(--code); border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; margin-top: 8px; max-height: 260px; overflow: auto; }
+
+  .actgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .act { display: flex; flex-direction: column; align-items: flex-start; text-align: left; padding: 5px 8px; line-height: 1.25; }
+  .act.on { background: var(--sel); border-color: var(--accent); }
+  .act .mono { font-size: 11.5px; }
+
+  table.kv { border-collapse: collapse; width: 100%; font-size: 13px; }
+  table.kv th, table.kv td { border-bottom: 1px solid var(--line); padding: 2px 6px; text-align: left; vertical-align: top; }
+  table.kv th { font-weight: normal; white-space: nowrap; }
+  table.kv td { font-family: var(--mono); font-size: 12.5px; }
+
+  .lists { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .list { border: 1px solid var(--line); border-radius: 8px; max-height: 210px; overflow: auto; }
+  .list .lh { font-size: 12.5px; font-weight: 600; padding: 4px 8px; border-bottom: 1px solid var(--line); background: #fafbfc; position: sticky; top: 0; }
+  .item { display: block; width: 100%; text-align: left; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; padding: 4px 8px; background: #fff; }
+  .item.on { background: var(--sel); }
+  .item .nm { display: block; font-size: 12.5px; }
+  .vhd { margin-bottom: 4px; }
+  .vhd select { width: auto; }
+  .imgbox { position: relative; width: min(100%, 620px); aspect-ratio: 1 / 1; background: #111; border-radius: 6px; overflow: hidden; }
+  .imgbox img { display: block; width: 100%; height: 100%; image-rendering: pixelated; cursor: crosshair; }
+  .pin-mark { position: absolute; width: 16px; height: 16px; margin: -8px 0 0 -8px; border: 2px solid #ff3b30; border-radius: 50%; box-shadow: 0 0 0 1px #fff; pointer-events: none; }
+  .readout { font-family: var(--mono); font-size: 12.5px; margin-top: 6px; min-height: 1.5em; }
+  .pinbox { margin-top: 4px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 12.5px; }
+  .plot { width: 100%; max-width: 760px; background: #fff; border: 1px solid var(--line); border-radius: 6px; }
+  .empty { padding: 40px 0; text-align: center; }
+  .logrow { border-bottom: 1px solid var(--line); padding: 4px 0; font-size: 12.5px; }
+  .logrow .clip { max-height: 3.9em; overflow: hidden; color: var(--muted); }
+  .logrow.bad .clip { color: var(--bad); }
+
+  #start { display: flex; justify-content: center; padding: 40px 14px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; width: min(100%, 460px); }
+  .card h2 { margin: 0 0 10px; font-size: 17px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">STM 控制台 <span class="en">STM console</span></div>
+  <div id="hdr-scn" class="muted">未开始 not started</div>
+  <span id="hdr-state" class="badge">…</span>
+  <div class="meter" id="meter" hidden>
+    <div class="lbl"><span>仪器时间 / 预算 <span class="en">instrument time / budget</span></span><span id="meter-txt" class="mono">–</span></div>
+    <progress id="meter-bar" max="1" value="0"></progress>
+  </div>
+  <div class="grow"></div>
+  <span id="busy" class="muted" hidden><span class="spin"></span> 仪器运行中… <span class="en">the instrument is working…</span></span>
+</header>
+<div id="banner" hidden>实验已结束，记录已写入。<span class="en">The episode is over; the record is written.</span></div>
+<div id="err" hidden></div>
+<div id="start" hidden></div>
+<main id="main" hidden>
+  <section class="col" id="col-left" aria-label="任务与报告 task and reports">
+    <div class="hd">任务 <span class="en">Task</span></div>
+    <div class="bd">
+      <div class="help">先读任务和评分规则。右侧“操作”执行动作，会花仪器时间；看读数和看数据不花。结果用左下方“报告结果”提交，最后点“结束实验”（结束时不显示得分）。<br><span class="en">Read the task and its scoring rules first. Actions (right) spend instrument time; readings and data do not. Submit results under “Report a result”, then finish the episode (finishing does not show the score).</span></div>
+      <pre id="task-text" class="task"></pre>
+      <details><summary>仪器说明 <span class="en">Instrument manual</span></summary><pre id="manual-text"></pre></details>
+      <h3>报告结果 <span class="en">Report a result</span></h3>
+      <div id="report"></div>
+      <h3>针尖诊断 <span class="en">Tip diagnosis</span></h3>
+      <div id="tipdiag"></div>
+      <h3>结束实验 <span class="en">Finish</span></h3>
+      <div id="finish-box"></div>
+    </div>
+  </section>
+  <section class="col" id="col-center" aria-label="数据 data">
+    <div class="hd">数据 <span class="en">Data</span><div class="grow"></div><button id="btn-data" type="button">刷新数据 <span class="en">Refresh</span></button></div>
+    <div class="bd">
+      <div id="viewer"></div>
+      <div class="lists">
+        <div class="list"><div class="lh">帧 <span class="en">Frames</span> (<span id="n-frames">0</span>)</div><div id="frames"></div></div>
+        <div class="list"><div class="lh">谱 <span class="en">Spectra</span> (<span id="n-spectra">0</span>)</div><div id="spectra"></div></div>
+      </div>
+      <h3>记录 <span class="en">Log</span></h3>
+      <div id="log"></div>
+    </div>
+  </section>
+  <section class="col split" id="col-right" aria-label="仪器 instrument">
+    <div class="pane" id="pane-readings">
+      <div class="hd">仪器读数 <span class="en">Readings</span><div class="grow"></div><button id="btn-info" type="button">固定参数 <span class="en">Info</span></button><button id="btn-status" type="button">刷新 <span class="en">Refresh</span></button></div>
+      <div class="bd" id="readings"></div>
+    </div>
+    <div class="pane" id="pane-actions">
+      <div class="hd">操作 <span class="en">Actions</span></div>
+      <div class="bd" id="actions"></div>
+    </div>
+  </section>
+</main>
+
+<script>
+'use strict';
+// The page shows what an MCP agent gets, nothing more: every read goes to the instrument and is
+// recorded there as an observation, so the page reads only when asked (after an action or a click).
+const S = {
+  session: null, actions: [], data: { frames: [], spectra: [] }, status: null, info: null,
+  sel: null, view: { ch: 'z', dir: 'forward' }, values: null, imgUrl: null,
+  spec: null, specX: null, specY: null, pin: null, action: null, busy: 0, confirmFinish: false, log: [],
+};
+const $ = (id) => document.getElementById(id);
+function h(tag, attrs, ...kids) {
+  const el = document.createElement(tag);
+  if (attrs) for (const [k, v] of Object.entries(attrs)) {
+    if (k === 'class') el.className = v;
+    else if (k.startsWith('on') && typeof v === 'function') el.addEventListener(k.slice(2), v);
+    else if (v !== null && v !== undefined && v !== false) el.setAttribute(k, v === true ? '' : v);
+  }
+  for (const k of kids.flat()) if (k !== null && k !== undefined && k !== false) el.append(k.nodeType ? k : document.createTextNode(String(k)));
+  return el;
+}
+const bi = (zh, en) => [zh, ' ', h('span', { class: 'en' }, en)];
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+async function api(path, body) {
+  const opt = body === undefined ? {} : { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
+  const r = await fetch(path, opt);
+  const j = await r.json().catch(() => ({ error: `HTTP ${r.status}` }));
+  if (!r.ok || (j && j.error)) throw new Error((j && j.error) || `HTTP ${r.status}`);
+  return j;
+}
+function showErr(msg) { $('err').textContent = '仪器拒绝或出错 refused or failed: ' + msg; $('err').hidden = false; }
+function clearErr() { $('err').hidden = true; $('err').textContent = ''; }
+function setBusy(d) { S.busy += d; $('busy').hidden = S.busy === 0; renderState(); }
+// a call the operator made (actions, reports, finish): logged on the page
+async function call(name, args, fn) {
+  clearErr(); setBusy(1);
+  try { const v = await fn(); addLog(name, args, true, v); return { ok: true, v }; }
+  catch (e) {
+    showErr(e.message.startsWith(name + ':') ? e.message : `${name}: ${e.message}`);
+    addLog(name, args, false, e.message); return { ok: false, error: e.message };
+  }
+  finally { setBusy(-1); }
+}
+// a read (status, data, images, spectra)
+async function observe(fn) {
+  try { return await fn(); } catch (e) { showErr(e.message); return undefined; }
+}
+
+// ── formatting ──
+function fmtNum(v) {
+  if (typeof v !== 'number' || !Number.isFinite(v)) return String(v);
+  const a = Math.abs(v);
+  if (a !== 0 && (a >= 1e5 || a < 1e-3)) return v.toExponential(3);
+  return String(Math.round(v * 1e4) / 1e4);
+}
+function fmtVal(v) {
+  if (v === null || v === undefined) return '–';
+  if (typeof v === 'boolean') return v ? '是 yes' : '否 no';
+  if (Array.isArray(v)) return '(' + v.map(fmtVal).join(', ') + ')';
+  if (typeof v === 'object') return JSON.stringify(v);
+  return fmtNum(v);
+}
+function fmtDur(s) {
+  s = Math.round(Number(s) || 0);
+  const H = Math.floor(s / 3600), M = Math.floor((s % 3600) / 60), X = s % 60;
+  return H ? `${H} h ${M} min` : (M ? `${M} min ${X} s` : `${X} s`);
+}
+
+const ACT = {
+  scan: '扫描成像', set_bias: '设偏压', set_setpoint: '设电流设定点', feedback: 'Z 反馈开关',
+  set_current_range: '前放量程', move_tip: '移动针尖', pulse: '电压脉冲', poke: '针尖压入表面',
+  sts: '隧道谱 STS', zspec: 'Z 谱', pll: 'qPlus 振荡 PLL', lockin: '锁相放大器',
+  drift_comp: '漂移补偿', withdraw: '撤针', approach: '自动进针', coarse_move: '粗动台步进', wait: '等待',
+};
+const STATUS = {
+  instrument_time_s: ['已用仪器时间', 'instrument time', 's'], budget_s: ['时间预算', 'budget', 's'],
+  bias_v: ['偏压', 'bias', 'V'], setpoint_pa: ['电流设定点', 'setpoint', 'pA'], feedback: ['Z 反馈', 'feedback', ''],
+  withdrawn: ['已撤针', 'withdrawn', ''], z_nm: ['Z', 'z', 'nm'], current_pa: ['隧道电流', 'current', 'pA'],
+  tip_nm: ['针尖位置 (x, y)', 'tip', 'nm'], current_full_scale_na: ['前放量程', 'current range', 'nA'],
+  oscillating: ['qPlus 振荡', 'oscillating', ''], lockin: ['锁相放大器', 'lock-in', ''],
+  actions: ['已执行动作', 'actions', ''],
+};
+const CH = { z: 'Z 形貌 topography', current: '电流 current', didv: 'dI/dV 锁相 lock-in' };
+const CHV = { z: 'z', current: 'I', didv: 'dI/dV' };
+const DIR = { forward: '正向 forward', backward: '反向 backward' };
+const UNITS = { v: 'V', i: 'A', didv: 'A/V', z_rel: 'm', z_abs: 'm', df: 'Hz', amp: 'm' };
+
+// ── start ──
+function renderStart() {
+  $('main').hidden = true; $('start').hidden = false;
+  const sc = S.session.scenarios || [];
+  $('start').replaceChildren(h('div', { class: 'card' },
+    h('h2', null, bi('开始一个实验', 'Start an episode')),
+    h('div', { class: 'field' }, h('label', { for: 'start-scn' }, bi('场景', 'scenario')),
+      h('select', { id: 'start-scn' }, ...sc.map((s) => h('option', { value: s }, s)))),
+    h('div', { class: 'field' }, h('label', { for: 'start-seed' }, bi('种子', 'seed')),
+      h('input', { id: 'start-seed', type: 'text', inputmode: 'numeric', value: '0', autocomplete: 'off' })),
+    h('div', { class: 'row' }, h('button', { class: 'primary', id: 'btn-start', type: 'button', onclick: startEpisode }, bi('开始', 'Start')))));
+}
+async function startEpisode() {
+  const scenario = $('start-scn').value, seed = Number($('start-seed').value || 0);
+  const r = await call('start', { scenario, seed }, () => api('/api/start', { scenario, seed }));
+  if (r.ok) { S.session = r.v; await enter(); }
+}
+
+// ── the episode ──
+async function enter() {
+  $('start').hidden = true; $('main').hidden = false;
+  $('hdr-scn').textContent = `${S.session.scenario_id} · 种子 seed ${S.session.seed}`;
+  const task = await observe(() => api('/api/task'));
+  if (task) { $('task-text').textContent = task.task; $('manual-text').textContent = task.manual; }
+  S.actions = (await observe(() => api('/api/actions'))) || [];
+  renderActions(); renderReport(); renderTip(); renderFinish(); renderLog();
+  await refreshStatus();
+  await refreshData();
+  const last = S.data.frames[S.data.frames.length - 1];
+  if (last && !S.sel) await select('frame', last.frame); else renderViewer();
+  renderState();
+}
+function renderState() {
+  const fin = !!(S.session && S.session.finished);
+  const st = $('hdr-state');
+  st.textContent = !S.session || !S.session.started ? '未开始 not started' : (fin ? '已结束 finished' : '进行中 in progress');
+  st.className = 'badge ' + (fin ? 'end' : (S.session && S.session.started ? 'on' : ''));
+  $('banner').hidden = !fin;
+  for (const el of document.querySelectorAll('button.run')) el.disabled = fin || S.busy > 0;
+}
+async function refreshStatus() {
+  const st = await observe(() => api('/api/status'));
+  if (st) { S.status = st; renderReadings(); renderMeter(); }
+}
+async function refreshData() {
+  const d = await observe(() => api('/api/data'));
+  if (d) { S.data = d; renderLists(); renderEvidence(); }
+}
+function renderMeter() {
+  const st = S.status; if (!st) return;
+  const used = Number(st.instrument_time_s) || 0, b = st.budget_s;
+  $('meter').hidden = false;
+  $('meter-txt').textContent = b ? `${fmtDur(used)} / ${fmtDur(b)}` : fmtDur(used);
+  $('meter-bar').max = b || 1; $('meter-bar').value = b ? Math.min(used, b) : 0;
+}
+function renderReadings() {
+  const st = S.status || {};
+  const rows = Object.entries(st).map(([k, v]) => {
+    const L = STATUS[k];
+    return h('tr', null, h('th', null, L ? bi(L[0], L[1]) : k), h('td', null, fmtVal(v), L && L[2] && v !== null ? ' ' + L[2] : ''));
+  });
+  const parts = [h('table', { class: 'kv', id: 'status-table' }, ...rows)];
+  if (S.info) parts.push(h('details', { open: true }, h('summary', null, bi('固定参数', 'instrument facts')), h('pre', { id: 'info-text' }, JSON.stringify(S.info, null, 1))));
+  $('readings').replaceChildren(...parts);
+}
+
+// ── actions ──
+function renderActions() {
+  const grid = h('div', { class: 'actgrid' }, ...S.actions.map((a) =>
+    h('button', { class: 'act' + (S.action === a.name ? ' on' : ''), id: 'act-' + a.name, type: 'button', title: a.doc,
+                  onclick: () => { S.action = a.name; renderActions(); } },
+      h('span', null, ACT[a.name] || a.name), h('span', { class: 'mono muted' }, a.name))));
+  const spec = S.actions.find((a) => a.name === S.action);
+  $('actions').replaceChildren(grid, spec ? actionForm(spec) : h('div', { class: 'muted small', style: 'margin-top:8px' }, bi('选一个操作。', 'Choose an action.')));
+  renderState();
+}
+function field(pfx, k, sch, required) {
+  const id = `${pfx}-${k}`;
+  const dflt = sch.default !== undefined ? `默认 default ${sch.default}` : '';
+  const choose = '— 请选择 choose —';
+  let input;
+  if (sch.type === 'boolean') {
+    input = h('select', { id, name: k }, h('option', { value: '' }, required ? choose : dflt),
+      h('option', { value: 'true' }, '开 on (true)'), h('option', { value: 'false' }, '关 off (false)'));
+  } else if (sch.enum) {
+    input = h('select', { id, name: k }, h('option', { value: '' }, required ? choose : dflt),
+      ...sch.enum.map((v) => h('option', { value: String(v) }, String(v))));
+  } else {
+    input = h('input', { id, name: k, type: 'text', autocomplete: 'off', spellcheck: 'false',
+                         inputmode: sch.type === 'number' || sch.type === 'integer' ? 'decimal' : null,
+                         placeholder: required ? '必填 required' : dflt });
+  }
+  const lo = sch.minimum, hi = sch.maximum;
+  const range = lo !== undefined || hi !== undefined ? `  [${lo ?? '−∞'}, ${hi ?? '∞'}]` : '';
+  return h('div', { class: 'field' },
+    h('label', { for: id }, h('span', { class: 'mono' }, k), required ? h('span', { class: 'req' }, ' *') : null, h('span', { class: 'muted small' }, range)),
+    input, sch.description ? h('div', { class: 'desc' }, sch.description) : null);
+}
+function actionForm(spec) {
+  const props = (spec.schema && spec.schema.properties) || {}, req = new Set((spec.schema && spec.schema.required) || []);
+  return h('form', { id: 'act-form', novalidate: true, onsubmit: runAction },
+    h('div', { class: 'doc', id: 'act-doc' }, spec.doc),
+    ...Object.entries(props).map(([k, sch]) => field('act', k, sch, req.has(k))),
+    h('div', { class: 'row' }, h('button', { class: 'primary run', type: 'submit', id: 'btn-run' }, `执行 Run: ${spec.name}`)),
+    h('div', { id: 'act-reply' }));
+}
+function collect(form, schema) {
+  const args = {};
+  for (const [k, sch] of Object.entries((schema && schema.properties) || {})) {
+    const el = form.elements.namedItem(k); if (!el) continue;
+    const raw = String(el.value).trim(); if (raw === '') continue;
+    if (sch.type === 'boolean') args[k] = raw === 'true';
+    else if (sch.type === 'number' || sch.type === 'integer') { const n = Number(raw); args[k] = Number.isFinite(n) ? n : raw; }
+    else args[k] = raw;
+  }
+  return args;
+}
+async function runAction(ev) {
+  ev.preventDefault();
+  const spec = S.actions.find((a) => a.name === S.action); if (!spec) return;
+  const args = collect($('act-form'), spec.schema);
+  const r = await call(spec.name, args, () => api('/api/act', { name: spec.name, args }));
+  const box = $('act-reply');
+  if (!r.ok) { if (box) box.replaceChildren(h('pre', { class: 'reply bad' }, r.error)); return; }
+  if (box) box.replaceChildren(h('div', { class: 'small muted', style: 'margin-top:8px' }, bi('仪器回复', 'instrument reply')),
+    h('pre', { class: 'reply', id: 'act-reply-text' }, JSON.stringify(r.v, null, 1)));
+  await refreshStatus();
+  if (r.v && r.v.frame) { await refreshData(); S.view = { ch: 'z', dir: 'forward' }; await select('frame', r.v.frame); }
+  else if (r.v && r.v.spectrum) { await refreshData(); await select('spectrum', r.v.spectrum); }
+}
+
+// ── data ──
+const frameOf = (name) => S.data.frames.find((f) => f.frame === name);
+function renderLists() {
+  const on = (kind, name) => S.sel && S.sel.kind === kind && S.sel.name === name;
+  const item = (kind, name, info) => h('button', { class: 'item' + (on(kind, name) ? ' on' : ''), type: 'button', title: name,
+                                                    onclick: () => select(kind, name) },
+    h('span', { class: 'mono nm' }, name), h('span', { class: 'small muted' }, info));
+  const fr = [...S.data.frames].reverse(), sp = [...S.data.spectra].reverse();
+  $('n-frames').textContent = fr.length; $('n-spectra').textContent = sp.length;
+  $('frames').replaceChildren(...(fr.length ? fr.map((f) => item('frame', f.frame,
+    `${fmtNum(f.size_nm)} nm · ${f.pixels} px · 中心 centre (${fmtNum(f.center_nm[0])}, ${fmtNum(f.center_nm[1])}) nm` + (f.angle_deg ? ` · ${fmtNum(f.angle_deg)}°` : '')))
+    : [h('div', { class: 'muted small', style: 'padding:4px 8px' }, bi('还没有帧', 'no frames yet'))]));
+  $('spectra').replaceChildren(...(sp.length ? sp.map((s) => item('spectrum', s.spectrum,
+    `${s.kind} · ${s.points} 点 points · 针尖 tip ${fmtVal(s.tip_nm)} nm`))
+    : [h('div', { class: 'muted small', style: 'padding:4px 8px' }, bi('还没有谱', 'no spectra yet'))]));
+}
+async function select(kind, name) {
+  S.sel = { kind, name }; renderLists();
+  if (kind === 'frame') {
+    const f = frameOf(name);
+    if (f && !(f.channels || ['z']).includes(S.view.ch)) S.view.ch = 'z';
+    S.values = null; renderViewer(); await loadImage();
+  } else {
+    const sp = await observe(() => api('/api/spectrum?s=' + encodeURIComponent(name)));
+    if (!sp) return;
+    S.spec = sp;
+    const cols = numericCols(sp);
+    S.specX = ['v', 'z_rel'].find((c) => cols.includes(c)) || cols[0];
+    S.specY = ['didv', 'df', 'i'].find((c) => cols.includes(c)) || cols[1] || cols[0];
+    renderViewer();
+  }
+}
+async function loadImage() {
+  const s = S.sel; const img = $('frame-img');
+  if (!s || s.kind !== 'frame' || !img) return;
+  const url = `/api/frame.png?f=${encodeURIComponent(s.name)}&ch=${encodeURIComponent(S.view.ch)}&dir=${encodeURIComponent(S.view.dir)}`;
+  try {
+    const r = await fetch(url);
+    if (!r.ok) { const j = await r.json().catch(() => ({})); throw new Error(j.error || `HTTP ${r.status}`); }
+    const blob = await r.blob();
+    if (S.imgUrl) URL.revokeObjectURL(S.imgUrl);
+    S.imgUrl = URL.createObjectURL(blob); img.src = S.imgUrl;
+  } catch (e) { showErr(e.message); }
+}
+function renderViewer() {
+  const box = $('viewer'), s = S.sel;
+  if (!s) { box.replaceChildren(h('div', { class: 'muted empty' }, bi('还没有数据：先扫描一幅图。', 'No data yet: take a scan first.'))); return; }
+  if (s.kind === 'frame') return renderFrameView(box, s.name);
+  return renderSpectrumView(box, s.name);
+}
+function renderFrameView(box, name) {
+  const f = frameOf(name);
+  if (!f) { box.replaceChildren(h('div', { class: 'muted empty' }, name)); return; }
+  const chs = f.channels || ['z', 'current'];
+  const chSel = h('select', { id: 'view-ch', onchange: (e) => { S.view.ch = e.target.value; S.values = null; renderViewer(); loadImage(); } },
+    ...chs.map((c) => h('option', { value: c, selected: c === S.view.ch }, CH[c] || c)));
+  const dirSel = h('select', { id: 'view-dir', onchange: (e) => { S.view.dir = e.target.value; S.values = null; renderViewer(); loadImage(); } },
+    ...['forward', 'backward'].map((d) => h('option', { value: d, selected: d === S.view.dir }, DIR[d])));
+  const loaded = S.values && S.values.key === valuesKey();
+  box.replaceChildren(
+    h('div', { class: 'row vhd' }, h('b', { class: 'mono', id: 'view-name' }, name), h('div', { class: 'grow' }),
+      h('label', { for: 'view-ch' }, bi('通道', 'channel')), chSel, h('label', { for: 'view-dir' }, bi('方向', 'direction')), dirSel,
+      h('button', { id: 'btn-values', type: 'button', onclick: loadValues }, loaded ? bi('数值已读', 'values loaded') : bi('读数值', 'read values'))),
+    h('div', { class: 'small muted', id: 'view-geom' },
+      `中心 centre (${fmtNum(f.center_nm[0])}, ${fmtNum(f.center_nm[1])}) nm · 边长 size ${fmtNum(f.size_nm)} nm · ${f.pixels} px (${fmtNum(f.nm_per_px)} nm/px) · 角度 angle ${fmtNum(f.angle_deg || 0)}° · 扫描方向 ${f.direction} · 开始于 started at ${fmtNum(f.t_start_s)} s`),
+    h('div', { class: 'imgbox' },
+      h('img', { id: 'frame-img', alt: name, draggable: 'false', onmousemove: hover, onmouseleave: () => { $('readout').textContent = ' '; }, onclick: pick }),
+      h('div', { id: 'pin-mark', class: 'pin-mark', hidden: true })),
+    h('div', { class: 'readout', id: 'readout' }, bi('光标坐标：把鼠标移到图上。', 'Cursor: move over the image.')),
+    h('div', { class: 'pinbox', id: 'pinbox' }));
+  renderPin();
+}
+// a point in the shown frame: scan coordinates (x right, y up), as the instrument's frames are laid out
+function pointFrom(ev, img) {
+  const r = img.getBoundingClientRect();
+  const fx = (ev.clientX - r.left) / r.width, fy = (ev.clientY - r.top) / r.height;
+  if (!(fx >= 0 && fx <= 1 && fy >= 0 && fy <= 1)) return null;
+  const f = frameOf(S.sel.name), n = f.pixels, L = f.size_nm;
+  const u = -L / 2 + fx * L, v = L / 2 - fy * L;
+  const a = ((f.angle_deg || 0) * Math.PI) / 180, c = Math.cos(a), s = Math.sin(a);
+  return { fx, fy, col: fx * n - 0.5, row: fy * n - 0.5, px: Math.min(n - 1, Math.floor(fx * n)), py: Math.min(n - 1, Math.floor(fy * n)),
+           x: f.center_nm[0] + c * u - s * v, y: f.center_nm[1] + s * u + c * v };
+}
+function hover(ev) {
+  const p = pointFrom(ev, ev.currentTarget); if (!p) return;
+  let t = `光标 cursor  x = ${p.x.toFixed(3)} nm   y = ${p.y.toFixed(3)} nm   像素 pixel (列 col ${p.px}, 行 row ${p.py})`;
+  const v = valueAt(p); if (v !== null) t += `   ${CHV[S.view.ch] || S.view.ch} ≈ ${v}`;
+  $('readout').textContent = t;
+}
+async function pick(ev) {
+  const p = pointFrom(ev, ev.currentTarget); if (!p) return;
+  const name = S.sel.name;
+  const q = await observe(() => api(`/api/pixel?f=${encodeURIComponent(name)}&col=${p.col}&row=${p.row}`));
+  if (!q) return;
+  S.pin = { frame: name, x: q.x_nm, y: q.y_nm, fx: p.fx, fy: p.fy };
+  renderPin();
+}
+function renderPin() {
+  const box = $('pinbox'), mark = $('pin-mark'), p = S.pin;
+  if (!box) return;
+  if (!p) {
+    box.replaceChildren(h('span', { class: 'muted' }, bi('点击图像选一个点，坐标可填入操作或报告。', 'Click the image to pick a point; its coordinates can fill an action or a report.')));
+    if (mark) mark.hidden = true;
+    return;
+  }
+  const here = S.sel && S.sel.kind === 'frame' && S.sel.name === p.frame;
+  if (mark) { mark.hidden = !here; if (here) { mark.style.left = p.fx * 100 + '%'; mark.style.top = p.fy * 100 + '%'; } }
+  box.replaceChildren(
+    h('span', { class: 'mono', id: 'pin-text' }, `选点 picked  x = ${p.x.toFixed(3)} nm, y = ${p.y.toFixed(3)} nm（帧 frame ${p.frame}）`),
+    h('button', { id: 'btn-fill-action', type: 'button', onclick: fillAction }, bi('填入操作', 'fill action')),
+    h('button', { id: 'btn-fill-report', type: 'button', onclick: fillReport }, bi('填入报告', 'fill report')));
+}
+function fillAction() {
+  const f = $('act-form'), p = S.pin; if (!f || !p) return;
+  const el = (k) => f.elements.namedItem(k);
+  const [kx, ky] = el('x_nm') && el('y_nm') ? ['x_nm', 'y_nm'] : (el('center_x_nm') && el('center_y_nm') ? ['center_x_nm', 'center_y_nm'] : [null, null]);
+  if (!kx) { showErr('这个操作没有坐标参数 this action takes no coordinates'); return; }
+  el(kx).value = p.x.toFixed(3); el(ky).value = p.y.toFixed(3);
+}
+function fillReport() {
+  const f = $('rep-form'), p = S.pin; if (!f || !p) return;
+  f.elements.namedItem('x_nm').value = p.x.toFixed(3);
+  f.elements.namedItem('y_nm').value = p.y.toFixed(3);
+  f.elements.namedItem('frame').value = p.frame;
+}
+const valuesKey = () => `${S.sel && S.sel.name}|${S.view.ch}|${S.view.dir}`;
+async function loadValues() {
+  const s = S.sel; if (!s || s.kind !== 'frame') return;
+  const key = valuesKey();
+  const v = await observe(() => api(`/api/frame_values?f=${encodeURIComponent(s.name)}&ch=${encodeURIComponent(S.view.ch)}&dir=${encodeURIComponent(S.view.dir)}&max_size=128`));
+  if (!v) return;
+  S.values = { key, ...v };
+  const b = $('btn-values'); if (b) b.replaceChildren(...bi('数值已读', 'values loaded'));
+}
+function valueAt(p) {
+  const V = S.values; if (!V || V.key !== valuesKey()) return null;
+  const k = V.block_px, r = Math.floor(p.py / k), c = Math.floor(p.px / k);
+  if (r >= V.shape[0] || c >= V.shape[1]) return null;
+  return `${V.values[r][c]} ${V.unit}（${k}×${k} 像素均值 px mean）`;
+}
+function numericCols(sp) {
+  return Object.keys(sp).filter((k) => Array.isArray(sp[k]) && sp[k].length >= 8 && sp[k].every((x) => x === null || typeof x === 'number'));
+}
+function renderSpectrumView(box, name) {
+  const sp = S.spec;
+  if (!sp || sp.name !== name) { box.replaceChildren(h('div', { class: 'muted empty' }, name)); return; }
+  const cols = numericCols(sp);
+  const sel = (id, value, set) => h('select', { id, onchange: (e) => { set(e.target.value); renderViewer(); } },
+    ...cols.map((c) => h('option', { value: c, selected: c === value }, `${c}${UNITS[c] ? ' (' + UNITS[c] + ')' : ''}`)));
+  const plot = h('div', { id: 'spec-plot' });
+  plot.innerHTML = plotSvg(sp[S.specX] || [], sp[S.specY] || [], `${S.specX} (${UNITS[S.specX] || ''})`, `${S.specY} (${UNITS[S.specY] || ''})`);
+  box.replaceChildren(
+    h('div', { class: 'row vhd' }, h('b', { class: 'mono', id: 'view-name' }, name),
+      h('span', { class: 'muted small' }, `${sp.kind} · 针尖 tip ${fmtVal(sp.tip_nm)} nm · ${fmtNum(sp.t_s)} s`), h('div', { class: 'grow' }),
+      h('label', { for: 'spec-x' }, bi('横轴', 'x')), sel('spec-x', S.specX, (v) => { S.specX = v; }),
+      h('label', { for: 'spec-y' }, bi('纵轴', 'y')), sel('spec-y', S.specY, (v) => { S.specY = v; })),
+    plot);
+}
+function plotSvg(xs, ys, xl, yl) {
+  const W = 760, H = 380, P = { l: 84, r: 16, t: 14, b: 46 };
+  const pts = [];
+  for (let i = 0; i < Math.min(xs.length, ys.length); i++) if (Number.isFinite(xs[i]) && Number.isFinite(ys[i])) pts.push([xs[i], ys[i]]);
+  if (pts.length < 2) return `<div class="muted empty">没有可画的数据 nothing to plot</div>`;
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (const [x, y] of pts) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+  if (x0 === x1) { x0 -= 1; x1 += 1; }
+  if (y0 === y1) { y0 -= Math.abs(y0) || 1; y1 += Math.abs(y1) || 1; }
+  const X = (v) => P.l + ((v - x0) / (x1 - x0)) * (W - P.l - P.r), Y = (v) => H - P.b - ((v - y0) / (y1 - y0)) * (H - P.t - P.b);
+  let g = `<rect x="${P.l}" y="${P.t}" width="${W - P.l - P.r}" height="${H - P.t - P.b}" fill="none" stroke="#c9ced6"/>`;
+  for (let i = 0; i <= 4; i++) {
+    const xv = x0 + ((x1 - x0) * i) / 4, yv = y0 + ((y1 - y0) * i) / 4;
+    g += `<line x1="${X(xv)}" y1="${H - P.b}" x2="${X(xv)}" y2="${H - P.b + 5}" stroke="#888"/><text x="${X(xv)}" y="${H - P.b + 18}" font-size="11" text-anchor="middle">${esc(fmtNum(xv))}</text>`;
+    g += `<line x1="${P.l - 5}" y1="${Y(yv)}" x2="${P.l}" y2="${Y(yv)}" stroke="#888"/><text x="${P.l - 8}" y="${Y(yv) + 4}" font-size="11" text-anchor="end">${esc(fmtNum(yv))}</text>`;
+  }
+  g += `<text x="${(P.l + W - P.r) / 2}" y="${H - 8}" font-size="12" text-anchor="middle">${esc(xl)}</text>`;
+  g += `<text x="14" y="${(P.t + H - P.b) / 2}" font-size="12" text-anchor="middle" transform="rotate(-90 14 ${(P.t + H - P.b) / 2})">${esc(yl)}</text>`;
+  g += `<polyline fill="none" stroke="#1f5fbf" stroke-width="1.4" points="${pts.map(([x, y]) => X(x).toFixed(1) + ',' + Y(y).toFixed(1)).join(' ')}"/>`;
+  return `<svg class="plot" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(yl)} vs ${esc(xl)}" font-family="system-ui, sans-serif">${g}</svg>`;
+}
+
+// ── results ──
+function simple(pfx, k, label, required) {
+  const id = `${pfx}-${k}`;
+  return h('div', { class: 'field' }, h('label', { for: id }, label, required ? h('span', { class: 'req' }, ' *') : null),
+    h('input', { id, name: k, type: 'text', autocomplete: 'off', spellcheck: 'false' }));
+}
+function renderReport() {
+  const claims = (S.session && S.session.claims) || [];
+  $('report').replaceChildren(h('form', { id: 'rep-form', novalidate: true, onsubmit: submitReport },
+    h('div', { class: 'field' }, h('label', { for: 'rep-claim_id' }, bi('哪一项结果', 'claim_id'), h('span', { class: 'req' }, ' *')),
+      h('select', { id: 'rep-claim_id', name: 'claim_id', onchange: claimChanged }, ...claims.map((c) => h('option', { value: c.id }, c.id)))),
+    h('div', { class: 'desc', id: 'rep-say' }),
+    simple('rep', 'value', bi('数值', 'value'), true),
+    h('div', { class: 'row2' }, simple('rep', 'x_nm', 'x_nm'), simple('rep', 'y_nm', 'y_nm')),
+    h('div', { class: 'field' }, h('label', { for: 'rep-frame' }, bi('位置读自哪一帧', 'frame')), h('select', { id: 'rep-frame', name: 'frame' })),
+    h('div', { class: 'field' }, h('div', { class: 'lbl' }, bi('证据：结果来自哪些帧和谱', 'evidence: the frames and spectra the result came from')),
+      h('div', { class: 'evlist', id: 'rep-evidence' })),
+    h('div', { class: 'row2' }, simple('rep', 'unit', bi('单位', 'unit')), simple('rep', 'sigma', bi('不确定度', 'sigma'))),
+    simple('rep', 'note', bi('备注', 'note')),
+    h('div', { class: 'row' }, h('button', { class: 'primary run', type: 'submit', id: 'btn-report' }, bi('提交报告', 'Submit report'))),
+    h('div', { id: 'rep-reply' })));
+  claimChanged(); renderEvidence();
+}
+function claimChanged() {
+  const f = $('rep-form'); if (!f) return;
+  const id = f.elements.namedItem('claim_id').value;
+  const c = ((S.session && S.session.claims) || []).find((x) => x.id === id);
+  $('rep-say').textContent = c ? c.say : '';
+  f.elements.namedItem('unit').value = c && c.unit ? c.unit : '';
+}
+function renderEvidence() {
+  const fsel = $('rep-frame'), box = $('rep-evidence'); if (!fsel || !box) return;
+  const keep = fsel.value;
+  fsel.replaceChildren(h('option', { value: '' }, '— 无 none —'), ...S.data.frames.map((f) => h('option', { value: f.frame, selected: f.frame === keep }, f.frame)));
+  const checked = new Set([...box.querySelectorAll('input:checked')].map((i) => i.value));
+  const names = [...S.data.frames.map((f) => f.frame), ...S.data.spectra.map((s) => s.spectrum)];
+  box.replaceChildren(...(names.length ? names.map((n, i) => h('label', { for: 'ev-' + i },
+    h('input', { type: 'checkbox', value: n, id: 'ev-' + i, checked: checked.has(n) }), h('span', { class: 'mono small' }, n)))
+    : [h('span', { class: 'muted small' }, bi('还没有数据', 'no data yet'))]));
+}
+async function submitReport(ev) {
+  ev.preventDefault();
+  const f = $('rep-form'), body = {};
+  for (const k of ['claim_id', 'value', 'x_nm', 'y_nm', 'frame', 'unit', 'sigma', 'note']) {
+    const v = String(f.elements.namedItem(k).value).trim(); if (v === '') continue;
+    body[k] = ['value', 'x_nm', 'y_nm', 'sigma'].includes(k) && Number.isFinite(Number(v)) ? Number(v) : v;
+  }
+  const evid = [...$('rep-evidence').querySelectorAll('input:checked')].map((i) => i.value);
+  if (evid.length) body.evidence = evid;
+  const r = await call('report_result', body, () => api('/api/report', body));
+  $('rep-reply').replaceChildren(h('pre', { class: 'reply ' + (r.ok ? 'ok' : 'bad'), id: 'rep-reply-text' }, r.ok ? r.v.recorded : r.error));
+}
+function renderTip() {
+  $('tipdiag').replaceChildren(h('form', { id: 'tip-form', novalidate: true, onsubmit: submitTip },
+    simple('tip', 'tip_state', bi('针尖状态', 'tip_state'), true), simple('tip', 'junction', bi('结', 'junction')), simple('tip', 'note', bi('备注', 'note')),
+    h('div', { class: 'row' }, h('button', { class: 'run', type: 'submit', id: 'btn-tip' }, bi('提交诊断', 'Submit diagnosis'))),
+    h('div', { id: 'tip-reply' })));
+}
+async function submitTip(ev) {
+  ev.preventDefault();
+  const f = $('tip-form'), body = {};
+  for (const k of ['tip_state', 'junction', 'note']) { const v = String(f.elements.namedItem(k).value).trim(); if (v !== '') body[k] = v; }
+  const r = await call('report_tip_state', body, () => api('/api/tip_state', body));
+  $('tip-reply').replaceChildren(h('pre', { class: 'reply ' + (r.ok ? 'ok' : 'bad') }, r.ok ? r.v.recorded : r.error));
+}
+function renderFinish() {
+  const box = $('finish-box');
+  if (S.session && S.session.finished) { box.replaceChildren(h('div', { class: 'ok' }, bi('实验已结束，记录已写入。', 'The episode is over; the record is written.'))); return; }
+  if (S.confirmFinish) {
+    box.replaceChildren(h('div', { class: 'warn', style: 'margin-bottom:6px' }, bi('结束后不能再操作或报告。确定结束？', 'No actions or reports after this. Finish now?')),
+      h('div', { class: 'row' }, h('button', { class: 'danger run', id: 'btn-finish-yes', type: 'button', onclick: doFinish }, bi('确认结束', 'Confirm finish')),
+        h('button', { id: 'btn-finish-no', type: 'button', onclick: () => { S.confirmFinish = false; renderFinish(); } }, bi('取消', 'Cancel'))));
+  } else {
+    box.replaceChildren(h('button', { class: 'danger run', id: 'btn-finish', type: 'button', onclick: () => { S.confirmFinish = true; renderFinish(); } }, bi('结束实验', 'Finish the episode')));
+  }
+  renderState();
+}
+async function doFinish() {
+  const r = await call('finish', {}, () => api('/api/finish', {}));
+  if (r.ok) { S.session.finished = true; S.confirmFinish = false; renderFinish(); renderState(); }
+}
+
+// ── log ──
+function addLog(name, args, ok, v) {
+  const t = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+  S.log.unshift({ t, name, args, ok, text: typeof v === 'string' ? v : JSON.stringify(v) });
+  if (S.log.length > 200) S.log.length = 200;
+  renderLog();
+}
+function renderLog() {
+  $('log').replaceChildren(...(S.log.length ? S.log.map((e) => h('div', { class: 'logrow' + (e.ok ? '' : ' bad') },
+    h('span', { class: 'muted small' }, e.t), ' ', h('b', { class: 'mono' }, e.name), ' ',
+    h('span', { class: 'mono small' }, e.args && Object.keys(e.args).length ? JSON.stringify(e.args) : ''),
+    h('div', { class: 'mono small clip' }, (e.ok ? '→ ' : '✗ ') + e.text)))
+    : [h('div', { class: 'muted small' }, bi('还没有操作。', 'Nothing yet.'))]));
+}
+
+// ── boot ──
+$('btn-status').addEventListener('click', refreshStatus);
+$('btn-data').addEventListener('click', refreshData);
+$('btn-info').addEventListener('click', async () => { const i = await observe(() => api('/api/info')); if (i) { S.info = i; renderReadings(); } });
+(async function boot() {
+  const s = await observe(() => api('/api/session'));
+  if (!s) return;
+  S.session = s;
+  if (!s.started) { renderStart(); renderState(); return; }
+  await enter();
+})();
+</script>
+</body>
+</html>
