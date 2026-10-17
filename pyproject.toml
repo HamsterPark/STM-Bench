@@ -29,6 +29,8 @@ dependencies = [
 # calibration indices, Track A manifests, report tables; replay and mode-H pictures (matplotlib)
 bench = ["pandas>=2.2", "pyarrow>=15", "matplotlib>=3.9"]
 dev = ["pytest>=8"]
+# stmbench agent --provider anthropic: Claude through the official SDK
+agent = ["anthropic>=1.15"]
 
 [project.scripts]
 stmsim = "stmsim.__main__:main"

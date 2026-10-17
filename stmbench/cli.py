@@ -5,6 +5,8 @@
     python -m stmbench.cli reference --paper P4 [--seeds 30] [--jobs 4] [--json out.json]      # privileged reference runs
     python -m stmbench.cli baseline --paper P4 [--seeds 30] [--jobs 4] [--json out.json]       # scripted, no truth
     python -m stmbench.cli audit chance [--scenario P3] [--seeds 200] [--jobs 4] [--json out.json]
+    python -m stmbench.cli agent --scenario P4_atom_positioning_cu111 --seed 0 --out <run dir> \
+                                 [--provider anthropic|openai] [--model ID]                    # a model alone
 
 Data roots default to ``$STM_BENCH_DATA`` (see ``stmbench.paths``)."""
 from __future__ import annotations
@@ -106,6 +108,26 @@ def cmd_baseline(a) -> int:
     return 0
 
 
+def cmd_agent(a) -> int:
+    """One episode with a language model at the instrument (stmbench.agent)."""
+    from .agent import AnthropicModel, OpenAICompatibleModel, run_agent_episode
+
+    if a.provider == "anthropic":
+        model = AnthropicModel(a.model or "claude-opus-5-5", effort=a.effort,
+                               max_tokens=a.max_tokens or 64000, fallbacks=a.fallbacks)
+    else:
+        if not a.model:
+            raise SystemExit("--model is required with --provider openai")
+        model = OpenAICompatibleModel(a.model, base_url=a.base_url, api_key_env=a.api_key_env,
+                                      max_tokens=a.max_tokens or 16000, vision=not a.no_images)
+    res = run_agent_episode(a.scenario, a.seed, a.out, model, max_turns=a.max_turns,
+                            max_tool_calls=a.max_tool_calls,
+                            max_wall_s=a.max_wall_min * 60.0 if a.max_wall_min else None,
+                            log=print if a.verbose else None)
+    print(json.dumps(res.as_dict(), ensure_ascii=False, indent=1, default=str))
+    return 1 if res.stop.startswith("error") else 0
+
+
 # ── argparse ────────────────────────────────────────────────────────────────
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="stmbench")
@@ -160,6 +182,30 @@ def main(argv=None) -> int:
     b.add_argument("--jobs", type=int, default=1, help="processes in parallel")
     b.add_argument("--json", default=None, help="also write every run and the summary here")
     b.set_defaults(fn=cmd_baseline)
+
+    g = sub.add_parser("agent", help="one episode with a language model at the instrument, with the instrument's "
+                                     "own tools and nothing else (the model-alone condition)")
+    g.add_argument("--scenario", required=True, help="scenario id or YAML path")
+    g.add_argument("--seed", type=int, required=True)
+    g.add_argument("--out", required=True, help="a new run directory")
+    g.add_argument("--provider", choices=["anthropic", "openai"], default="anthropic",
+                   help="anthropic: Claude through the anthropic SDK (pip install \"stm-bench[agent]\"); "
+                        "openai: any OpenAI-compatible Chat Completions endpoint")
+    g.add_argument("--model", default=None, help="model id (anthropic default: claude-opus-5-5)")
+    g.add_argument("--effort", default="high", choices=["low", "medium", "high", "xhigh", "max"],
+                   help="anthropic: the effort level (recorded in driver.json)")
+    g.add_argument("--max-tokens", type=int, default=None, help="per turn (anthropic 64000, openai 16000)")
+    g.add_argument("--fallbacks", action="store_true",
+                   help="anthropic: allow server-side refusal fallbacks to another model (off by default: a "
+                        "turn answered by another model does not measure the model under test)")
+    g.add_argument("--base-url", default="https://api.openai.com/v1", help="openai: the endpoint's base URL")
+    g.add_argument("--api-key-env", default="OPENAI_API_KEY", help="openai: the variable holding the key")
+    g.add_argument("--no-images", action="store_true", help="openai: the model gets no images (text-only models)")
+    g.add_argument("--max-turns", type=int, default=400)
+    g.add_argument("--max-tool-calls", type=int, default=1000)
+    g.add_argument("--max-wall-min", type=float, default=None, help="wall-clock limit in minutes")
+    g.add_argument("-v", "--verbose", action="store_true", help="print one line per turn")
+    g.set_defaults(fn=cmd_agent)
     a = ap.parse_args(argv)
     return a.fn(a)
 

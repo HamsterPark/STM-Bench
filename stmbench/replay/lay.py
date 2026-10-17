@@ -455,7 +455,14 @@ def _instrument_caption(n: str, a: dict) -> str | None:
         return f"等 {duration(float(sec))}，漂移和蠕变照常进行" if sec is not None else "等一会儿"
     if n == "finish":
         return "结束实验"
-    return None
+    return _OBSERVE.get(n)
+
+
+#: the instrument's observations: they take no instrument time
+_OBSERVE = {"get_task": "读任务、评分规则和仪器说明", "status": "看一眼仪器此刻的读数",
+            "info": "查看仪器的固定参数", "list_data": "列出已经保存的图和谱",
+            "show_frame": "看一幅已经扫好的图", "frame_values": "读一幅图上的数值",
+            "get_spectrum": "读一条谱的数据"}
 
 
 _PATH_RE = re.compile(r"[A-Za-z]:[\\/]|\\\\")

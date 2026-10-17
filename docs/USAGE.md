@@ -127,6 +127,35 @@ measurement), `actions.jsonl` (every call, refused ones included), `events.json`
 `report.json` and `session/` (the saved `.sxm` / `.dat` files). A scenario whose success kind
 the instrument cannot judge (the skill scenarios below) is refused when the episode opens.
 
+### A model alone
+
+```bash
+python -m pip install -e ".[agent]"                       # the anthropic SDK, for --provider anthropic
+python -m stmbench.cli agent --scenario P4_atom_positioning_cu111 --seed 0 --out runs/p4_s0 \
+       --provider anthropic --model claude-opus-5-5 --effort high
+python -m stmbench.cli agent --scenario P4_atom_positioning_cu111 --seed 0 --out runs/p4_s0_b \
+       --provider openai --base-url https://<endpoint>/v1 --api-key-env <VARIABLE> --model <id>
+```
+
+`stmbench.agent` seats a language model at the instrument with the instrument's own MCP tools and
+nothing else — no code sandbox, no files, no helpers — under a short neutral prompt
+(`stmbench.agent.SYSTEM_PROMPT`; its hash, with the tool table, is recorded). Tool calls go
+through the MCP server's own handler, so the model gets exactly the replies and refusals an MCP
+client gets. A turn that calls no tool gets one fixed reminder (at most three in a row); the loop
+ends when the model calls `finish`, at a limit (`--max-turns`, `--max-tool-calls`,
+`--max-wall-min`), on a refusal or on an error, and the instrument is then judged as it stands.
+
+- `--provider anthropic` — Claude through the official SDK: adaptive thinking with summarised
+  thoughts (kept in the record), the effort you pass, automatic prompt caching, history sent back
+  unchanged. Server-side refusal fallbacks stay off unless `--fallbacks` is given: a turn answered
+  by another model would not measure the model under test (every turn records the model that
+  served it).
+- `--provider openai` — any OpenAI-compatible Chat Completions endpoint, over the standard library;
+  images go back in a user message after the tool results (`--no-images` for text-only models).
+
+Next to the instrument's ledger the run directory gets `driver.json` and `transcript.jsonl`
+(below); `verify` and `replay` read the run as usual.
+
 ### The paper scenarios
 
 These are the benchmark. One file per paper, plus a second variant for P3.
@@ -367,6 +396,9 @@ the earlier held-out rounds: `docs/results/p4_baseline_seeds_*.json`, DESIGN §9
 ├── events.json       the world's events (frames, pulses, crashes, atoms moving), in sim time
 ├── report.json       the reports, folded: the last report for each claim
 ├── tip_timeline.json the tip at the start and after every change, with the state it left
+├── driver.json       agent runs: the agent, the prompt's hash, limits, why it stopped, tokens,
+│                     every turn and tool call stamped with instrument time
+├── transcript.jsonl  agent runs: each turn's content as the model returned it
 └── session/          the .sxm frames and .dat spectra the episode saved
 ```
 
@@ -451,6 +483,7 @@ tip-shaping traces under `<data-root>/calibration_inputs/poke_traces/` or pass a
 |---|---|
 | `stmbench/instrument/` | the benchmark instrument: `core.py` (actions, observations, reports, ledger, replay check), `mcp_server.py` (MCP stdio), `render.py` (the PNG a frame observation returns) |
 | `stmbench/trackB/` | the scenarios, `rules.py` (rule card, overrun rule), `claims.py` (claim and evidence checks), `results.py` (the result channel's fold), `truth_criteria.py` (verdicts), `audit.py` (chance audit) |
+| `stmbench/agent/` | the model-alone loop (`stmbench.cli agent`): `loop.py` (prompt, limits, the record), `models.py` (Claude through the anthropic SDK, OpenAI-compatible endpoints, a scripted port) |
 | `stmbench/reference/`, `stmbench/baselines/` | privileged reference solutions; scripted baselines that see only what an agent sees |
 | `stmbench/analysis/` | measurement analysis the references and baselines use (adatoms, drift, tip, spectra, force, corral) |
 | `stmbench/render.py` | frames and spectra as pictures, pixel → scan-frame nm |

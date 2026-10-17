@@ -76,25 +76,16 @@ def driver_from_actions(actions: list[dict], episode: dict | None) -> dict:
     """The steps of an instrument run (``actions.jsonl``) in the shape the timeline reads:
     a stamped ``tool_start`` / ``tool_end`` pair per action, report and diagnosis. Instrument
     time in the log counts from the episode's start (``sim_t0_s``). Observations take no
-    instrument time and are left out. Moves carry the junction resistance they ran at, from
-    the bias and setpoint set before them."""
+    instrument time and are left out."""
     ep = episode or {}
     tb = ep.get("truth_before") or {}
     t0 = float(ep.get("sim_t0_s", tb.get("sim_s", 0.0)) or 0.0)
-    bias = tb.get("bias_v")
-    current_a = tb.get("setpoint_a")
     evs: list[dict] = []
     for rec in actions:
         kind = rec.get("kind")
         if kind == "act":
             name = str(rec.get("name") or "")
             params = dict(rec.get("params") or {})
-            if name == "set_bias":
-                bias = params.get("bias_v", bias)
-            elif name == "set_setpoint" and params.get("current_pa") is not None:
-                current_a = float(params["current_pa"]) * 1e-12
-            if name == "move_tip" and bias is not None and current_a:
-                params["junction_kohm"] = abs(float(bias)) / float(current_a) / 1e3
             res = rec.get("result") if isinstance(rec.get("result"), dict) else {}
             preview = ("存为 " + str(res.get("frame") or res.get("spectrum"))
                        if res.get("frame") or res.get("spectrum") else "")
@@ -266,6 +257,23 @@ def _clean_text(s: str) -> str:
     for mark in ("[DONE]", "[ABORT]"):
         s = s.replace(mark, "")
     return s.strip()
+
+
+def annotate_junction(steps: list[dict], truth_before: dict | None) -> None:
+    """Give each instrument ``move_tip`` the junction resistance it ran at — from the bias and
+    setpoint set before it (the episode's start values first) — and recaption it."""
+    tb = truth_before or {}
+    bias, current_a = tb.get("bias_v"), tb.get("setpoint_a")
+    for s in steps:
+        a = s.get("args") or {}
+        if s["name"] == "set_bias" and isinstance(a.get("bias_v"), (int, float)):
+            bias = a["bias_v"]
+        elif s["name"] == "set_setpoint" and isinstance(a.get("current_pa"), (int, float)):
+            current_a = float(a["current_pa"]) * 1e-12
+        elif s["name"] == "move_tip" and bias is not None and current_a:
+            r_kohm = abs(float(bias)) / float(current_a) / 1e3
+            s["caption"] = lay.tool_caption("move_tip", {**a, "junction_kohm": r_kohm})
+            s["junction_kohm"] = r_kohm
 
 
 # ── frames ──────────────────────────────────────────────────────────────────
@@ -558,6 +566,7 @@ def build_timeline(ledger: Ledger, *, claim_specs: dict[str, dict] | None = None
     sim_end = max(float(ta.get("sim_s", sim_start)), sim_start)
     ts = float(ep.get("time_scale") or 1.0)
     steps, messages, clock = build_steps(ledger.driver, ledger.events, sim_start, sim_end, ts)
+    annotate_junction(steps, tb)
     frames = build_frames(ledger.events)
     tip, tip_source = build_tip(ledger, frames, sim_start, sim_end)
     atoms = build_atoms(ledger)

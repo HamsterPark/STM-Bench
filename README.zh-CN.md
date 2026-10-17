@@ -169,6 +169,12 @@ python -m stmbench.cli episode --scenario P4_atom_positioning_cu111 --seed 0 --o
 python -m stmbench.cli verify runs/p4_s0
 ```
 
+若要让一个模型只用这些工具、不借助任何其他手段操作仪器，可用 `stmbench agent`：它自己运行交互循环——Claude 经由 anthropic SDK（`pip install -e ".[agent]"`），其他模型经由任一兼容 OpenAI 的接口——并在仪器记录旁写下每一轮：
+
+```bash
+python -m stmbench.cli agent --scenario P4_atom_positioning_cu111 --seed 0 --out runs/p4_s0 --model claude-opus-5-5
+```
+
 [仪器使用指南](docs/USAGE.md#the-benchmark-instrument)还介绍了如何通过 `Instrument` 直接调用 Python 接口，以及可用动作、观测格式与回合文件。
 
 ### 可选的控制器接口

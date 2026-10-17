@@ -71,6 +71,8 @@ Other useful boundaries:
 - [stmsim/calibrate/](stmsim/calibrate/) fits lab data;
   [stmsim/validate/](stmsim/validate/) compares simulated and real measurements.
   Their external data requirements differ from the standalone physics tests.
+- [stmbench/agent/](stmbench/agent/) seats a language model at the instrument with its MCP tools
+  and nothing else (`stmbench.cli agent`; tests in [test_agent.py](tests/test_agent.py)).
 - [stmbench/reference/](stmbench/reference/) holds the privileged reference solutions and
   [stmbench/baselines/](stmbench/baselines/) the scripted baselines, which see only what an
   MCP agent sees.
