@@ -75,7 +75,7 @@ def test_the_loop_stops_at_its_limits_and_on_a_refusal(tmp_path):
 
 
 def test_a_tool_error_reaches_the_model_as_an_error_result(tmp_path):
-    model = ScriptedModel([[("scan", {"center_x_nm": 0.0})], [("finish", {})]])        # size_nm missing
+    model = ScriptedModel([[("scan", {"center_x_nm": 0.0})], [("finish", {})]])        # center_y_nm missing
     run_agent_episode(P4, 0, tmp_path / "r", model)
     bad = model.received[0][0]
     assert bad.is_error and "refused" in bad.blocks[0]["text"]
