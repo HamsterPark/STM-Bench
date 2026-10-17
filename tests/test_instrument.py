@@ -17,6 +17,14 @@ P4 = "P4_atom_positioning_cu111"
 P5 = "P5_sader_jarvis_qplus"
 
 
+def test_a_scenario_the_instrument_cannot_judge_is_refused_at_the_start():
+    """The skill scenarios judge on evidence the instrument does not record; an agent must
+    not play a whole episode only for the judge to fail at the end."""
+    with pytest.raises(ValueError, match="success kind is 'tip_repaired'"):
+        Instrument("B5_repair_blunt", 0)
+    assert Instrument(P4, 0).scenario.id == P4                 # the paper scenarios open
+
+
 def _script(inst: Instrument, *, look: bool = False) -> None:
     """A short session touching most actions; ``look`` interleaves observations."""
     def peek():

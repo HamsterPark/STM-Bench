@@ -44,6 +44,10 @@ from ..trackB.rules import OVERRUN_TOLERANCE, RULES_VERSION, task_text
 API_VERSION = 1
 SCENARIO_DIR = Path(__file__).resolve().parents[1] / "trackB" / "scenarios"
 MAX_ACTIONS = 3000
+#: success kinds the instrument can judge from what it records: the paper scenarios'. The
+#: skill scenarios (B*) judge on evidence this instrument does not collect, so they are
+#: refused at the start rather than failing at the end of an episode.
+JUDGED_KINDS = ("claims_verified",)
 _GAIN_FULL_SCALE_NA = {10000.0: 0, 1000.0: 1, 100.0: 2, 10.0: 3, 1.0: 4, 0.1: 5}
 
 
@@ -236,6 +240,10 @@ class Instrument:
         if not isinstance(scenario, Scenario):
             p = Path(scenario)
             scenario = Scenario.load(p if p.exists() else SCENARIO_DIR / f"{scenario}.yaml")
+        kind = (scenario.success or {}).get("kind", "claims_verified")
+        if kind not in JUDGED_KINDS:
+            raise ValueError(f"{scenario.id}: the instrument judges {', '.join(JUDGED_KINDS)} scenarios; "
+                             f"this one's success kind is {kind!r}")
         self.scenario = scenario
         self.seed = int(seed)
         self.out_dir = Path(out_dir) if out_dir is not None else None
