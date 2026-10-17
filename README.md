@@ -8,7 +8,7 @@ STM-Bench turns landmark scanning-probe experiments into reproducible tests of s
 
 > Can an AI carry an experiment from an unfamiliar instrument state to a verified scientific result?
 
-The project brings together a stateful physical simulator, six paper-inspired scenarios in five families, an independent instrument interface, and an evidence-aware judge. Full experiments are available to MCP-capable agents through `stmbench.instrument`; a separate MAST integration supports experiments with a richer instrument-control runtime. Measurement references, seeded variation, and action replay make both the task and its evaluation open to inspection.
+The project brings together a stateful physical simulator, six paper-inspired scenarios in five families, an independent instrument interface, and an evidence-aware judge. Full experiments are available to MCP-capable agents through `stmbench.instrument`. Measurement references, seeded variation, and action replay make both the task and its evaluation open to inspection.
 
 **Current research release:** standalone MCP episodes; reproducible virtual instrument time; versioned scoring rules with explicit evidence and coordinate frames; dI/dV imaging; and documented multi-seed reference results for quantum-corral spectroscopy, single-atom positioning, and qPlus force spectroscopy. See [reference results](#measurement-reference-results) and [getting started](#getting-started).
 
@@ -118,7 +118,6 @@ STM-Bench provides a common experimental environment in which different control 
 | Project | Primary responsibility | Relationship to STM-Bench |
 |---|---|---|
 | **[STM-Bench](https://github.com/HamsterPark/STM-Bench)** | Simulated microscope, paper-inspired tasks, seeded variation, evidence-aware evaluation, and replay. | Defines the experimental environment and checks the scientific outcome. |
-| **[MAST-public](https://github.com/HamsterPark/MAST-public)** | Public subset of the Python instrument-control runtime, experimental skills, state feedback, and workflows. | Exposes the control approach behind the separate MAST evaluation condition; full integration uses the full MAST environment. |
 | **[VISTA-SPM](https://github.com/HamsterPark/VISTA-SPM)** | Reusable visual reasoning, calibrated inspection, metrology, and visual evidence archives. | Supplies a complementary approach to interpreting, revisiting, and measuring SPM observations; a natural component for comparative evaluation. |
 | **[dsh-spm](https://github.com/HamsterPark/dsh-spm)** | TypeScript SPM domain tools and visual-framework integration for DeepSeek Harness. | Provides another agent/runtime integration layer in which SPM reasoning and control methods can develop. |
 
@@ -135,7 +134,7 @@ python -m pip install -e ".[dev,bench]"
 python -m stmbench.cli --help
 ```
 
-Core dependencies are NumPy, SciPy, and PyYAML. The `dev` extra adds pytest; `bench` adds reporting and plotting dependencies. Standalone instrument episodes and reference protocols run without MAST or a model API key. An agent client supplies its own model connection when evaluating a model.
+Core dependencies are NumPy, SciPy, and PyYAML. The `dev` extra adds pytest; `bench` adds reporting and plotting dependencies. Instrument episodes and reference protocols run without a model API key. An agent client supplies its own model connection when evaluating a model.
 
 ### Run a measurement reference
 
@@ -172,9 +171,9 @@ After completion, replay the recorded actions and verify the measurements and ve
 python -m stmbench.cli verify runs/p4_s0
 ```
 
-The [instrument guide](docs/USAGE.md#the-benchmark-instrument-no-mast) also documents direct Python use through `Instrument`, the available actions, observation formats, and episode files.
+The [instrument guide](docs/USAGE.md#the-benchmark-instrument) also documents direct Python use through `Instrument`, the available actions, observation formats, and episode files.
 
-### Optional controller and MAST integration
+### Optional controller interface
 
 The simulator also exposes a local controller TCP interface:
 
@@ -182,21 +181,21 @@ The simulator also exposes a local controller TCP interface:
 python -m stmsim serve --profile reference-stm --seed 0 --material "Au(111)"
 ```
 
-This path supports integration with instrument-control software. With the full MAST environment available, the repository retains mode A for an agent in MAST's loop, mode C for scripted baselines, and mode H for an external or human operator through the browser interface. These conditions exercise a different tool/runtime stack from the standalone primitive instrument. Keep their results labelled by interface, scenario version, seed, and configuration. See the [usage guide](docs/USAGE.md) for setup, drivers, and the HTML replay tools for MAST episodes.
+This path lets instrument-control software that speaks the controller's wire protocol drive the simulator. It runs on the host clock (sim time = wall time × `--time-scale`), so host speed changes what a session measures: it is not a judged benchmark condition, and results obtained through it should be labelled with the interface, scenario version, seed and configuration.
 
 ## Development and documentation
 
-STM-Bench is an **alpha research release**. Its public source contains the simulator, standalone instrument, scenarios, judge, reference protocols, analysis modules, MAST adapters, and historical replay assets. The immediate research programme is to extend calibrated reference coverage, complete the corral-repair protocol, and evaluate autonomous agents under clearly recorded interface conditions.
+STM-Bench is an **alpha research release**. Its public source contains the simulator, standalone instrument, scenarios, judge, reference protocols, scripted baselines, analysis modules, and historical replay assets. The immediate research programme is to extend calibrated reference coverage, complete the corral-repair protocol, and evaluate autonomous agents under clearly recorded interface conditions.
 
-Run the public-checkout checks without MAST or private calibration data:
+Run the checks (tests that need the private calibration data skip themselves):
 
 ```bash
-python -m pytest tests -q -m "not requires_mast and not requires_data"
+python -m pytest tests -q
 ```
 
 | Resource | What it explains |
 |---|---|
-| [Usage guide](docs/USAGE.md) | Instrument and MCP operation, references, audits, MAST integration, and run records. |
+| [Usage guide](docs/USAGE.md) | Instrument and MCP operation, references, baselines, audits, and run records. |
 | [Physical fidelity card](docs/FIDELITY.md) | Model sources, checks, assumptions, and physical scope. |
 | [Design and experimental record](docs/DESIGN.md) | Scientific rationale, calibration decisions, and dated development results; primarily Chinese. |
 | [Scenario definitions](stmbench/trackB/scenarios/) | Tasks, hidden distributions, claims, tolerances, and acquisition requirements. |

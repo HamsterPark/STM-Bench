@@ -10,34 +10,23 @@ documents what the code does today.
 | `STM_BENCH_DATA` | default root for `runs/`, `calib/`, `sessions/`, `index/`, `trackA/`, `fidelity/`, logs — read through `stmsim.paths.data_root()`; explicit CLI paths can override defaults | `~/stm_bench` on every platform |
 | `STM_BENCH_CORPUS_INDEX` | read-only index of the real-instrument corpus (private; calibration scripts and Track A manifests) — `stmsim.paths.corpus_index_dir()` | `<data-root>/corpus_index` |
 | `STM_BENCH_RAW` | raw instrument-file mirror (`.dat` tree for `stmsim.calibrate.index_dat`; private) — `stmsim.paths.raw_mirror_root()` | `<data-root>/raw` |
-| `MAST_ROOT` | MAST checkout; `tests/conftest.py` adds `$MAST_ROOT/MASTv2` to `sys.path`; `stmsim.paths.mast_root()` | the checkout that owns the importable `mast` package |
-| `PYTHONPATH` | add `<MAST>/MASTv2` when MAST is not already importable in the active environment; `MAST_ROOT` alone changes the import path only in tests | — |
 | `STM_BENCH_INDEX` | **deprecated** old name of `STM_BENCH_CORPUS_INDEX`; still honoured when the new one is unset, with a `DeprecationWarning` | — |
-| `MAST_NANONIS_PORT_{MAIN,MONITOR,DATA,EMERGENCY}` | where MAST connects; the harness sets these to the simulator's ports per episode | 6501–6504 |
-| `MAST2_PROJECT_ROOT`, `MAST2_USER_ROOT` | MAST's settings/db/artifacts root; the harness isolates each episode under `<run dir>/mast_root` | — |
-| `MAST2_API_KEY_DIR` | directory of `*.env` provider keys for LLM modes (else `<MAST repo>/api key`, else the provider's own env var) | — |
-| `MAST_VISION_BACKEND` | vision backend the host selects for MAST | harness default |
 
-All four `STM_BENCH_*` / `MAST_ROOT` lookups live in one module, `stmsim/paths.py`
+All three `STM_BENCH_*` lookups live in one module, `stmsim/paths.py`
 (`stmbench.paths` re-exports it); blank values count as unset and `~` is expanded. Script
 `--out` / `--index` / `--root` defaults are computed from it at parse time, so setting the
 variables is enough — no script needs an explicit path on the lab machine.
 
-Python 3.13. MAST and the private calibration corpus are not included in this repository.
+Python 3.13. The private calibration corpus is not included in this repository.
 
 ```bash
 python -m pip install -e ".[dev,bench]"
 export STM_BENCH_DATA=/data/stm_bench
-export MAST_ROOT=/path/to/MAST            # optional; only MAST-backed features need it
 ```
 
-In PowerShell, use `$env:STM_BENCH_DATA = "$env:USERPROFILE/stm_bench"` and,
-if needed, `$env:MAST_ROOT = "C:/path/to/MAST"`. Existing installations that used
-the former lab defaults must set the data, corpus and raw-data variables explicitly.
-
-For MAST-backed commands, use an environment with MAST's dependencies and ensure `mast`
-is importable. If needed, add the checkout's `MASTv2` directory to `PYTHONPATH`;
-setting `MAST_ROOT` alone does not configure the CLI's import path.
+In PowerShell, use `$env:STM_BENCH_DATA = "$env:USERPROFILE/stm_bench"`. Existing
+installations that used the former lab defaults must set the data, corpus and raw-data
+variables explicitly.
 
 ## 2. The simulator on its own
 
@@ -50,9 +39,9 @@ python -m stmsim serve --profile reference-stm --seed 0 --material "Au(111)" \
 - `--profile` — rig profile YAML in `stmsim/profiles/` (`reference-stm`: 4 K, ±169.5 nm Z,
   10 nA preamp, `z_extend_sign = -1`). Rig numbers live in YAML, never in code.
 - `--material` — `Au(111)`, `Cu(111)`, `HOPG` (lattice, herringbone, LDOS template).
-- `--ports` — four loopback ports, one per MAST connection role (main / monitor / data /
+- `--ports` — four loopback ports, one per client connection role (main / monitor / data /
   emergency). Each connection is served serially; all share one `World`.
-- `--session-dir` — where `Scan_Save` writes `.sxm` (MAST looks for the newest file in
+- `--session-dir` — where `Scan_Save` writes `.sxm` (a client looks for the newest file in
   `Util_SessionPathGet`).
 - `--time-scale` — sim seconds per wall second for scan lines and slow physics. Hardware-
   side processes (tip shaper, bias pulse, oscilloscope screens, auto-approach cycles,
@@ -82,59 +71,61 @@ srv.stop()
 Scenario objects build a world from YAML:
 `stmsim.scenario.Scenario.load(path).build_world(seed, session_dir)`.
 
-## 3. Running episodes
+This TCP path runs on the host clock (sim time = wall time × `--time-scale`), so host speed
+changes what a session measures; it is an interface for control software, not a judged
+benchmark condition. Benchmark episodes run through the instrument (§3).
 
-```bash
-python -m stmbench.cli run --scenario <path | id prefix> [--mode C|A|B0|B1] [--seeds 0,1,2]
-       [--out DIR] [--time-scale X] [--params JSON] [--model ID] [--policy default|honeypot]
-       [--max-model-calls N] [--max-tool-calls N] [--run RUN_ID]
+## 3. Episodes
+
+### The benchmark instrument
+
+`stmbench.instrument` runs a paper scenario on the simulator without the wire protocol, on a
+**virtual clock**: instrument time moves only when an action advances it, by the
+action's physical duration (a frame takes pixels × 2 × line time; a spectrum its points × (settle
++ integration) plus overheads). With the same implementation and numerical environment,
+the same seed and actions reproduce the measurements and verdict independently of host
+waiting time. An episode can be re-checked from its ledger.
+
+```python
+from stmbench.instrument import Instrument
+inst = Instrument("P5_sader_jarvis_qplus", seed=0, out_dir="runs/p5_s0")
+print(inst.task())                      # the task with its rule card
+inst.act("pll", on=True, amplitude_pm=50)
+inst.act("move_tip", x_nm=1.2, y_nm=-0.4)
+r = inst.act("zspec", sweep_nm=0.5, z_offset_nm=0.3, points=256)
+inst.spectrum(r["spectrum"])            # read-only: no instrument time, no random draw
+inst.report("f_min_pn", -150.0, evidence=[r["spectrum"], "..."])
+inst.finish()                           # judged with the version-1 rules; ledger written
 ```
 
-- `--scenario` — a YAML path or a prefix matched against `stmbench/trackB/scenarios/`
-  (`B5` runs all three B5 variants; `B5_repair_blunt` one).
-- `--mode` — `C` scripted baseline (no LLM, no key); `A` / `B0` / `B1` LLM modes (need
-  `--model`). See README for the tool surfaces.
-- `--seeds` — comma list; the same seeds are used for every model (paired design).
-- `--out` — run root, default `$STM_BENCH_DATA/runs`.
-- `--time-scale` — overrides the scenario's (default 20 for most families).
-- `--params` — JSON of extra parameters for the family's composite skill (mode C only).
-- `--policy` — HITL auto-resolver policy; default `honeypot` for B8, else `default`.
-- `--max-model-calls` / `--max-tool-calls` — hard caps on the loop (default 400 each; the
-  scenario's sim-hour and command budgets are what should bind).
-- `--run` — run id; default UTC timestamp. An existing run directory is refused.
+Actions (`stmbench.instrument.ACTIONS`, each with a JSON schema): `scan`, `set_bias`,
+`set_setpoint`, `feedback`, `set_current_range`, `move_tip` (in feedback; at a low junction
+resistance it drags what the tip grips), `pulse`, `poke`, `sts`, `zspec`, `pll`, `lockin`
+(bias modulation on: every scan also records a dI/dV map at the scan bias, channel `didv`),
+`drift_comp`, `withdraw`, `approach`, `coarse_move`, `wait`. Only hard instrument limits apply; there is no
+safety gate and there are no composite skills. Observations (`status`, `info`, `list_data`,
+`frame`, `spectrum`) spend no instrument time and draw no random number, so how often an agent
+looks cannot change what it later measures.
 
-### Mode H: drive the instrument yourself
+Any MCP agent can take the instrument's seat:
 
 ```bash
-python -m stmbench.cli gui [--port 8765] [--out DIR] [--time-scale 20] [--no-browser]
+python -m stmbench.cli episode --scenario P4_atom_positioning_cu111 --seed 0 --out runs/p4_s0   # MCP stdio
+python -m stmbench.cli verify runs/p4_s0          # replay the actions, compare every measurement and the verdict
 ```
 
-opens a local page (`http://127.0.0.1:8765/`) on which a person takes the model's seat.
-It is not a separate harness: `stmbench.human.HumanPort` implements MAST's `ChatModelPort`
-and is handed to `run_llm_episode` exactly where a provider model goes, so the person gets
-the same system prompt, the same tool surface as mode A (stubs for unloaded packs
-included), the same `ReportResult` / `ReportTipState` channels, the same budgets polled
-after every tool, the same `[DONE]` / `[ABORT]` end markers and the same judge. The clock
-protocol holds too: the sim clock stands still while the person thinks and runs only
-while a tool executes. The ledger lands under `<out>/<scenario>/seed<N>/H_human_<policy>/`
-and `stmbench.report` reads it like any other episode; mode H is never pooled with the
-leaderboard (it is a way to *feel* a task, not a human anchor — the design record says
-why there is none).
+A frame observation carries `t_start_s` (the instrument time it began: a shift between two frames
+over their time difference is the drift `drift_comp` takes), and a Z spectrum carries `z_abs`, the
+loop's Z at every point as the `.dat` file has it (what lines a curve over an atom up with one
+over bare surface).
 
-What the page adds that a model does not get: the frames and spectra the instrument
-saved, as pictures (`stmbench.human.render`), with a hover read-out of scan-frame
-coordinates — the same coordinates `ReportResult` wants and the judge's footprint test
-uses (`render.pixel_to_scan_nm` is pinned to `claims.frame_covering` by a test). Everything
-else on the page is what the model sees: tolerances and the scenario's notes stay hidden.
-
-Pick a scenario and a seed on the start page, then: choose a tool on the left, fill the
-form the tool's own JSON schema generates (dimensioned parameters are SI strings such as
-`60n`, as MAST demands from a model), call it, read the result in the middle column, look
-at the frames on the right, report each claim through `ReportResult`, and press
-**完成 [DONE]**. The verdict shows every claim with your value, the hidden truth and the
-evidence check. One episode at a time per process; a second episode in the same process
-inherits MAST's process-level state (see the `isolated` note in §7), so restart the command
-for a clean run.
+The MCP tools are the actions, the observations (`show_frame` returns a PNG rendered one fixed
+way — line-flattened, 0.5–99.5 % contrast, integer enlargement to ≥ 512 px — and
+`frame_values` the numbers), `get_task` (task, rule card, manual), `report_result`,
+`report_tip_state` and `finish`. The ledger is `episode.json` (verdict, hashes of every
+measurement), `actions.jsonl` (every call, refused ones included), `events.json`,
+`report.json` and `session/` (the saved `.sxm` / `.dat` files). A scenario whose success kind
+the instrument cannot judge (the skill scenarios below) is refused when the episode opens.
 
 ### The paper scenarios
 
@@ -166,14 +157,19 @@ In P4 the report says which atom was moved: `target_site` is matched to the move
 the reported position, and `bystander_max_shift_nm` (`of_claim: target_site`) is that atom's
 neighbourhood.
 
-### Regression families (B1–B9, not on the leaderboard)
+### Skill scenarios (B1–B9, simulator fixtures)
+
+These judge on evidence the instrument does not record (frames passed through an image
+gate, wrong actions on the controller wire, the share of a budget watched), so the
+instrument refuses them; they remain as worlds for the fault, hidden-variant and clock
+tests and as candidates for future tasks.
 
 | id | family | task | success criterion (`trackB/truth_criteria.py`) |
 |---|---|---|---|
 | `B1_approach_noisy` | B1 | withdrawn → stable tunnelling | `in_tunnelling` |
 | `B2_low_phi_junction` | B2 | judge whether the junction is clean (φ) | `junction_judged` |
 | `B3_find_flat_terrace` | B3 | ≥50 nm step-free, damage-free window | `flat_region_found` |
-| `B4_atomic_resolution` | B4 | atomic resolution on Au(111) | `atomic_resolution_achieved` (frames counted through MAST's atomic-phase gate) |
+| `B4_atomic_resolution` | B4 | atomic resolution on Au(111) | `atomic_resolution_achieved` (frames counted through an atomic-resolution gate) |
 | `B5_repair_{blunt,multi,unstable}` | B5 | hidden tip fault → repair to acceptance | `tip_repaired`: one apex, σ_apex < σ*, λ < λ*, φ ≥ 3 eV |
 | `B6_sts_clean` | B6 | dI/dV on a clean site | `sts_acquired` |
 | `B7_long_watch` | B7 | hours of unattended imaging with faults | `watch_survived` (≥90 % budget consumed, faults fired; idle caps partial at 0.3) |
@@ -271,13 +267,13 @@ checked **within the data the report cites** (`evidence`), and `frame_covers` /
 contain the position and, where `after_event` is set, have been saved after the last such event.
 Constraints and `events` rules have nothing to cite and are checked against the whole episode.
 
-### `ReportResult`
+### The result channel
 
-The harness injects one tool in every mode:
+Results arrive through one call, `Instrument.report` (the MCP tool `report_result`):
 
 ```
-ReportResult(claim_id, value, unit=None, sigma=None, x_nm=None, y_nm=None,
-             frame=None, evidence=None, note=None)
+report(claim_id, value, unit=None, sigma=None, x_nm=None, y_nm=None,
+       frame=None, evidence=None, note=None)
 ```
 
 `claim_id` is an enum of that scenario's claim ids. The last report for a claim wins. Positions
@@ -287,67 +283,18 @@ them onto the sample through the drift of the acquisition row they fall in — e
 records the offset its renderer added to every row (`row_offsets_nm` in `scan_saved`).
 `evidence` lists the frames and spectra the value came from (`.sxm` / `.dat` file names, or
 `frame:N`, `sts:N`, `zspec:N`). Nothing is parsed out of free text: a claim never reported is
-never reproduced, and every turn's continue message lists the claims still missing.
+never reproduced.
 
 ### The rule card
 
 `stmbench.trackB.rules.rule_card(scenario)` states, from the scenario file, everything the judge
 checks: each claim's meaning (`say`), unit, tolerance, pairwise rules and evidence, the citation
 and coordinate conventions, the budget and the 5 % overrun rule. `task_text(scenario)` appends it
-to the task; the LLM driver, the mode-H page and the replay all show that text. Tolerances are
+to the task; `get_task` and the replay show that text. Tolerances are
 public; the values drawn for a seed are not. The ledger records `rules_version`, and the judge
 applies the version-1 rules (citations, the named frame) to episodes with `rules_version ≥ 1`;
 older ledgers re-judge with the rules they ran under. Never state a budget or an evidence rule
 by hand in a task: write it in the claim or the budget, and the card will say it.
-
-### The benchmark instrument (no MAST)
-
-`stmbench.instrument` runs a paper scenario on the simulator without MAST and without the wire
-protocol, on a **virtual clock**: instrument time moves only when an action advances it, by the
-action's physical duration (a frame takes pixels × 2 × line time; a spectrum its points × (settle
-+ integration) plus overheads). With the same implementation and numerical environment,
-the same seed and actions reproduce the measurements and verdict independently of host
-waiting time. An episode can be re-checked from its ledger.
-
-```python
-from stmbench.instrument import Instrument
-inst = Instrument("P5_sader_jarvis_qplus", seed=0, out_dir="runs/p5_s0")
-print(inst.task())                      # the task with its rule card
-inst.act("pll", on=True, amplitude_pm=50)
-inst.act("move_tip", x_nm=1.2, y_nm=-0.4)
-r = inst.act("zspec", sweep_nm=0.5, z_offset_nm=0.3, points=256)
-inst.spectrum(r["spectrum"])            # read-only: no instrument time, no random draw
-inst.report("f_min_pn", -150.0, evidence=[r["spectrum"], "..."])
-inst.finish()                           # judged with the version-1 rules; ledger written
-```
-
-Actions (`stmbench.instrument.ACTIONS`, each with a JSON schema): `scan`, `set_bias`,
-`set_setpoint`, `feedback`, `set_current_range`, `move_tip` (in feedback; at a low junction
-resistance it drags what the tip grips), `pulse`, `poke`, `sts`, `zspec`, `pll`, `lockin`
-(bias modulation on: every scan also records a dI/dV map at the scan bias, channel `didv`),
-`drift_comp`, `withdraw`, `approach`, `coarse_move`, `wait`. Only hard instrument limits apply; there is no
-safety gate and there are no composite skills. Observations (`status`, `info`, `list_data`,
-`frame`, `spectrum`) spend no instrument time and draw no random number, so how often an agent
-looks cannot change what it later measures.
-
-Any MCP agent can take the instrument's seat:
-
-```bash
-python -m stmbench.cli episode --scenario P4_atom_positioning_cu111 --seed 0 --out runs/p4_s0   # MCP stdio
-python -m stmbench.cli verify runs/p4_s0          # replay the actions, compare every measurement and the verdict
-```
-
-A frame observation carries `t_start_s` (the instrument time it began: a shift between two frames
-over their time difference is the drift `drift_comp` takes), and a Z spectrum carries `z_abs`, the
-loop's Z at every point as the `.dat` file has it (what lines a curve over an atom up with one
-over bare surface).
-
-The MCP tools are the actions, the observations (`show_frame` returns a PNG rendered one fixed
-way — line-flattened, 0.5–99.5 % contrast, integer enlargement to ≥ 512 px — and
-`frame_values` the numbers), `get_task` (task, rule card, manual), `report_result`,
-`report_tip_state` and `finish`. The ledger is `episode.json` (verdict, hashes of every
-measurement), `actions.jsonl` (every call, refused ones included), `events.json`,
-`report.json` and `session/` (the saved `.sxm` / `.dat` files).
 
 ### The chance audit
 
@@ -383,7 +330,7 @@ python -m stmbench.cli reference --paper P4 --seeds 30 --jobs 4
 A privileged reference solution (`stmbench.reference`) may use the truth to navigate — where
 the atom is, which nearby spot is bare surface, how far the sample has drifted, whether the
 tip needs a poke — but every number it reports is measured through the instrument and
-computed by `stmbench.analysis` (no MAST). Over many seeds it shows whether a paper is
+computed by `stmbench.analysis`. Over many seeds it shows whether a paper is
 solvable, the error spread of a careful measurement (tolerances are set at about twice its
 p90) and the instrument time it takes. P5 (2026-10-13, seeds 0–29): 30/30 reproduced, |error|
 p90 5.9 % (F_min), 3.7 % (decay length), 8.7 % (E_b), 354 s of instrument time. P3 (seeds
@@ -401,7 +348,7 @@ python -m stmbench.cli baseline --paper P4 --seeds 30 --jobs 4 --json p4-baselin
 ```
 
 A scripted baseline (`stmbench.baselines`) drives the instrument an agent gets over MCP and
-nothing else — no truth, no MAST — and decides everything from what it observes: the tip's
+nothing else — no truth — and decides everything from what it observes: the tip's
 state from how its atoms look (`stmbench.analysis.tip`), which atom to move from a survey, the
 drift from atoms found again, whether the atom moved from current spikes and fiducials. It is
 the bar an agent should clear. P4 (2026-10-14): 150/150 on seeds 450–599, held out
@@ -412,18 +359,17 @@ the earlier held-out rounds: `docs/results/p4_baseline_seeds_*.json`, DESIGN §9
 ### Run directory
 
 ```
-<out>/<scenario_id>/seed<N>/<mode>_<model>_<policy>/<run_id>/     LLM modes
-<out>/<scenario_id>/seed<N>/C/<run_id>/                            mode C
-├── episode.json      ledger: verdict, truth before/after, budget as enforced, faults,
-│                     command counts, wall/sim time, settings snapshot, policy, caps
-├── driver.json       LLM modes: turns, tool calls, stub calls, HITL events, diagnosis reports;
-│                     every event carries the instrument's sim_s
+<out>/                the directory given as --out (or Instrument(..., out_dir=...))
+├── episode.json      ledger: verdict, claims reported / verified, instrument time and budget,
+│                     action count, hashes of every measurement, tip diagnoses, truth after
+├── actions.jsonl     every call in order, refused ones included, with its instrument time
 ├── events.json       the world's events (frames, pulses, crashes, atoms moving), in sim time
-├── tip_timeline.json the tip at the start and after every change, with the state it left
-│                     (the model never sees it; stmbench.replay shows it to an audience)
-├── mast_root/        MAST's isolated project root (settings, db, artifacts)
-└── session/          .sxm frames the episode saved
+├── report.json       the reports, folded: the last report for each claim
+└── session/          the .sxm frames and .dat spectra the episode saved
 ```
+
+`stmbench.cli verify <out>` rebuilds the episode from `actions.jsonl` with the same scenario
+and seed and compares every measurement and the verdict.
 
 ### Replays for an audience
 
@@ -431,7 +377,9 @@ the earlier held-out rounds: `docs/results/p4_baseline_seeds_*.json`, DESIGN §9
 python -m stmbench.cli replay <run dir> [--out DIR] [--single-file] [--bare] [--no-truth] [--open]
 ```
 
-builds a page that plays one episode back for people who have never used an STM. The left
+builds a page that plays one episode back for people who have never used an STM. It reads
+run directories in the earlier ledger format (`driver.json` with the model's steps,
+`tip_timeline.json`); reading the instrument's `actions.jsonl` is still to be added. The left
 side is what the model saw and did: its frames drawn row by row on the instrument clock, each
 tool call retold in plain words, what it said. The right side is what only the audience sees:
 the tip as a drawing with a traffic light (sharp, blunt, double, crashed and flickering,
@@ -449,64 +397,22 @@ events (a few seconds off at most) and the tip between start and end is inferred
 pokes and crashes — the page labels both. Output goes to `<data>/replays/<name>/` by default
 (`index.html` opens from disk); `--single-file` inlines the images into one `.html`.
 
-### Reports
+### Before adding a paper
 
-```bash
-python -m stmbench.report.summarize --runs "$STM_BENCH_DATA/gate1" [--csv out.csv] [--md out.md]
-```
-
-One row per `episode.json`: scenario, family, seed, mode, model, policy, run id, success,
-partial, failed checks, driver outcome, sim seconds vs budget, controller commands, model /
-tool calls, HITL asks, stub calls, `diag` (`ReportTipState` vs truth), wall seconds. Paper
-episodes add `paper`, `reproduced` and `claims` (verified / total).
-
-The Markdown report leads with the headline table, **paper × mode × model**: n, reproduced
-k/n, a Wilson 95 % interval, the mean number of claims verified, and the median sim hours and
-cost. The regression families follow it.
-
-### The solvability gate
-
-Before a paper can be put to a model, the scripted baseline has to show the measurement is
-reachable with the tools on offer inside the stated budget:
-
-```bash
-python -m stmbench.cli run --scenario P1_barth1990_au111 --mode C        --seeds 0,1,2,3,4,5,6,7,8,9 --time-scale 20 --out "$STM_BENCH_DATA/gate_papers"
-python -m stmbench.report.summarize --runs "$STM_BENCH_DATA/gate_papers" --md gate.md
-```
-
-The target is ≥90 % reproduced. A family below it means the tolerances, the budget or the
-baseline's route needs work — **not** that the tolerances should be widened until it passes.
-Whatever the baseline's error distribution turns out to be is what the scenario's `notes`
-records, and the tolerance is set from that (about twice the p90).
-
-As of 2026-09-08 only P1 comes close (6/10 under real drift; the baseline was edited after that gate and has to be re-measured on an idle machine). What the other four are blocked on, family by
-family, is in `docs/DESIGN.md` §9.1; in every case it is the acquisition rather than the
-analysis, and each scenario's `notes` says which measurement is missing.
-
-Three things are worth knowing before adding a paper of your own, because each cost a day to
-find (`docs/DESIGN.md` §9.2 has the full list):
+Three things are worth knowing, because each cost a day to find:
 
 * **Angles from image analysis are in image coordinates.** Row 0 is the high-y edge of the
   window, so the stage-frame angle is the negative, modulo 180°.
 * **Small features need a small, levelled frame.** An adatom is 70 pm on a surface whose steps
-  are 208; in a wide survey it is below the segmentation threshold, and `ExtractClusters`
-  returns frame-corner artefacts instead. `level="plane"` with `threshold_mad=2.0` on a 20 nm
-  frame finds every atom to 0.1 nm.
+  are 208; in a wide survey it is below a segmentation threshold, and a cluster finder returns
+  frame-corner artefacts instead. A plane-levelled 20 nm frame finds every atom to 0.1 nm.
 * **The sample drifts, and the scenario will not slow it down for you.** About 1 nm/min, on
   the sim clock — so a three-hour budget is three hours of drift however fast you run it. Two
-  frames of the same window and `MeasureFrameDrift` give the rate; `SetDriftCompensation` takes
-  the velocity you measured and nulls it; then measure again, because the wrong sign doubles
-  the drift rather than doing nothing. Compensation cancels the steady part only, so keep
-  re-registering on your own feature between steps. And you can only track what your feature
-  constrains: a straight step edge tells you nothing along its own length, so track its normal.
-* **A parsed controller reply is `(error, raw_bytes, [values])`.** The numbers are one level down
-  and name lists are two. Scanning only the top level silently returns nothing.
-
-The whole matrix, once there are models to run:
-
-```bash
-python -m stmbench.cli gate --families P1,P2,P3,P4,P5 --modes C,A --models <m1,m2,...>        --seeds 0,1,2 --gate papers1 --parallel 2
-```
+  frames of the same window give the rate; `drift_comp` takes the velocity you measured and
+  nulls it; then measure again, because the wrong sign doubles the drift rather than doing
+  nothing. Compensation cancels the steady part only, so keep re-registering on your own
+  feature between steps. And you can only track what your feature constrains: a straight step
+  edge tells you nothing along its own length, so track its normal.
 
 ## 4. Thresholds and calibration
 
@@ -517,14 +423,12 @@ input corpus and generated calibration reports are not bundled. Every option bel
 variables set, the bare `python -m …` form does the same thing.
 
 ```bash
-python -m stmbench.trackB.derive_thresholds --seeds 8 --out "$STM_BENCH_DATA/calib/thresholds.json" \
-       --index "$STM_BENCH_CORPUS_INDEX/sxm_index_full.parquet"
 python -m stmsim.calibrate.fit_creep       --csv "$STM_BENCH_CORPUS_INDEX/glance_drift.csv" --out "$STM_BENCH_DATA/calib/creep.json"
 python -m stmsim.calibrate.working_points  --index "$STM_BENCH_CORPUS_INDEX/sxm_index_full.parquet" --out "$STM_BENCH_DATA/calib/working_points.json"
 python -m stmsim.calibrate.index_dat       --root "$STM_BENCH_RAW" --out "$STM_BENCH_DATA/index/dat_index.parquet"
 python -m stmsim.calibrate.hysteresis      --out "$STM_BENCH_DATA/calib/hysteresis.json"
 python -m stmsim.calibrate.lambda_from_rowjump --out "$STM_BENCH_DATA/calib/lambda.json"
-python -m stmsim.spec.extract --out "$STM_BENCH_DATA/command_registry.json"  # exports the local registry; no MAST needed
+python -m stmsim.spec.extract --out "$STM_BENCH_DATA/command_registry.json"  # exports the local registry
 ```
 
 The simulator profiles are `reference-stm` and `reference-stm-qplus`; use these names
@@ -533,71 +437,48 @@ index, group DAT files by their immediate child directory when using `--root`, a
 tip-shaping traces under `<data-root>/calibration_inputs/poke_traces/` or pass an explicit
 `--traces` directory. Older private corpus names are not required by the public checkout.
 
-- σ* = 0.09 nm (apex smearing at which a flat Au(111) terrace stops passing MAST's
-  atomic-phase gate: 10/10 vs 0/10 seeds); λ* = 3.5e-4 /s (task-derived tip-change
-  hazard); φ ≥ 3.0 eV is MAST's own barrier-height acceptance.
+- σ* = 0.09 nm (apex smearing at which a flat Au(111) terrace stops passing an
+  atomic-resolution image gate: 10/10 vs 0/10 seeds, 2026-08-28); λ* = 3.5e-4 /s
+  (task-derived tip-change hazard); φ ≥ 3.0 eV is the usual clean-junction barrier-height
+  acceptance.
 - Creep/drift constants: 983 reference glance intervals (`stmsim/profiles/reference-stm.yaml: drift`).
 
-## 5. Harness pieces (for extending)
+## 5. Module map
 
 | module | role |
 |---|---|
-| `stmbench/harness/runtime_host.py` | starts the simulator, exports the port variables, isolates `MAST2_PROJECT_ROOT`, seeds MAST settings (current monitor on Osci2T, tool refine off…), registers tip / experiment / vacuum attestation / coarse-drive ceiling, hosts `CoreRuntime.setup()` |
-| `stmbench/harness/episode.py` | one episode end to end; run-dir claim; budget caps; verdict incl. budget overrun rule (5 % tolerance, partial ≤ 0.5) and B4 frame counting |
-| `stmbench/harness/ic_driver.py` | multi-turn unattended driver of MAST's instrument-control loop; `ClockPausedPort`; `ReportTipState`; `[DONE]`/`[ABORT]` end-of-reply rule |
-| `stmbench/harness/bind_all_names_mw.py` | every tool name bound on every call; stub calls load the pack and ask for a retry |
-| `stmbench/harness/modes.py` | tool surfaces A / B0 / B1 / C (level ≤ 2 and not instrument-driving = primitive) |
-| `stmbench/harness/hitl_autoresolver.py` | answers `ask_user` / dangerous-action / workflow questions under `default` or `honeypot` |
-| `stmbench/human/` | mode H: `port.py` (a person as the `ChatModelPort`, shared session state), `server.py` (the local web GUI, `stmbench.cli gui`), `render.py` (frames / spectra as PNG, pixel → scan-frame nm) |
-| `stmbench/replay/` | audience replays (`stmbench.cli replay`): `timeline.py` (ledger → one sim-time timeline; clock refit for old ledgers), `lay.py` (plain-language tool calls, tip, papers, claims), `truth_view.py` (true sample rebuilt from scenario + seed: perfect-tip frames, overview), `build.py` + `static/player.html` (the page) |
-| `stmbench/trackB/truth_criteria.py` | verdict functions per family, thresholds table |
+| `stmbench/instrument/` | the benchmark instrument: `core.py` (actions, observations, reports, ledger, replay check), `mcp_server.py` (MCP stdio), `render.py` (the PNG a frame observation returns) |
+| `stmbench/trackB/` | the scenarios, `rules.py` (rule card, overrun rule), `claims.py` (claim and evidence checks), `results.py` (the result channel's fold), `truth_criteria.py` (verdicts), `audit.py` (chance audit) |
+| `stmbench/reference/`, `stmbench/baselines/` | privileged reference solutions; scripted baselines that see only what an agent sees |
+| `stmbench/analysis/` | measurement analysis the references and baselines use (adatoms, drift, tip, spectra, force, corral) |
+| `stmbench/render.py` | frames and spectra as pictures, pixel → scan-frame nm |
+| `stmbench/replay/` | audience replays (`stmbench.cli replay`): `timeline.py` (ledger → one sim-time timeline), `lay.py` (plain-language tool calls, tip, papers, claims), `truth_view.py` (the true sample rebuilt from scenario + seed), `record.py` (clock stamps and the tip timeline a run records), `build.py` + `static/player.html` (the page) |
+| `stmbench/report/stats.py` | Wilson CI, paired Δ against a reference, the sampling-vs-sim variance split |
+| `stmbench/trackA/` | Track A offline decisions on the private corpus (development work) |
 | `stmsim/scenario.py`, `stmsim/faults/` | YAML → world; fault scheduler |
-| `stmbench/harness/host_trial.py`, `forge_trial.py` | manual trials of one skill under the host (`--root`, `--skill`) |
-| `stmbench/harness/probe_*.py` | provider probes (tool-count cliff, forced-call name constraint); throw-away |
 
-Adding a family: a YAML in `trackB/scenarios/`, a criterion in `truth_criteria.CRITERIA`,
-and (mode C) the family → composite mapping in `episode.py`.
+Adding a paper: a YAML in `trackB/scenarios/` with `success: {kind: claims_verified}`, a
+reference solution in `stmbench/reference/` to show it is solvable and to set tolerances, and
+a scripted baseline in `stmbench/baselines/` for the bar an agent should clear.
 
 ## 6. Tests
 
 ```bash
-python -m pytest tests -q -m "not requires_mast and not requires_data"  # public checkout
-python -m pytest tests -q -m "not requires_mast"      # CI (scratch data root absent)
-python -m pytest tests/test_codec.py -q               # wire codec vs MAST's client (needs MAST)
-python -m pytest tests/test_mast_skills_e2e.py -q     # MAST's real skills on the simulator (needs MAST)
+python -m pytest tests -q                             # tests that need STM_BENCH_DATA skip themselves
+python -m pytest tests -q -m "not requires_data"      # the same tests, deselected instead of skipped
 ```
 
 `tests/test_no_machine_paths.py` scans `stmsim/` and `stmbench/` (probes included) for
-machine-specific lab paths and for direct `STM_BENCH_*` / `MAST_ROOT` environment
-reads outside `stmsim/paths.py`; either fails the suite with a file:line list.
+machine-specific lab paths and for direct `STM_BENCH_*` environment reads outside
+`stmsim/paths.py`; either fails the suite with a file:line list.
 
 ## 7. Gotchas
 
 - Any single controller call must answer within 5 s; a server that sleeps past that trips
-  the client's receive timeout and MAST's shared circuit breaker (all four roles, 20 s).
-  B9 uses this deliberately.
+  a client's receive timeout (and a client may then open its circuit breaker). B9 uses this
+  deliberately.
 - Live scan buffers (`Scan_FrameDataGrab`) report unscanned rows as **0**, saved `.sxm`
-  files as NaN — MAST's crash check depends on the former.
-- MAST's runtime takes over stdout once it is up; write trial conclusions to files
-  (`host_trial` persists `truth_after.json`).
+  files as NaN — a client's crash check may depend on the former.
 - Parameters with units are strings (`"50m"`, `"20 mV"`).
 - The simulator's Z sign, ranges and preamp full scale come from the rig profile; all Z
   readings (`ZCtrl_ZPosGet`, `.sxm`, `z_offset`) share one definition.
-
-
-### Tests with an isolated runtime
-
-`tests/test_tilt.py::test_mast_tilt_calibrate_and_auto_tilt_level_the_sim` carries the
-`isolated` marker: its `RuntimeHost` must be the only one in its process. MAST has
-process-level singletons; a second host inherits state from the first. In the trial that
-motivated this marker, AutoTilt measured 0.006° on a 0.29° slope. With MAST available,
-run the groups in separate processes:
-
-```bash
-python -m pytest tests -q -m "not isolated"
-python -m pytest tests -q -m isolated
-```
-
-The first command includes `slow` tests; add `and not slow` to its marker expression for
-a shorter run. CI does not install MAST and deselects `requires_mast`, so it does not
-need the second invocation.

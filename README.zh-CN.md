@@ -8,7 +8,7 @@ STM-Bench 将扫描探针显微学的经典实验转化为可复现的自主实�
 
 > AI 能否从陌生的仪器状态出发，完成一项实验，并获得经验证的科学结果？
 
-项目将具有状态演化的物理模拟器、五个科学主题下的六项论文启发场景、独立的仪器接口与检查采集证据的判分器整合在一起。支持 MCP 的智能体可通过 `stmbench.instrument` 开展完整实验；另设的 MAST 集成路径支持在更丰富的仪器控制运行时中进行实验。测量参考协议、随机种子生成的环境变化与动作重放，使任务本身及其评估过程都可供检验。
+项目将具有状态演化的物理模拟器、五个科学主题下的六项论文启发场景、独立的仪器接口与检查采集证据的判分器整合在一起。支持 MCP 的智能体可通过 `stmbench.instrument` 开展完整实验。测量参考协议、随机种子生成的环境变化与动作重放，使任务本身及其评估过程都可供检验。
 
 **当前研究版本：**独立 MCP 实验回合、可复现的虚拟仪器时间、明确采集证据与坐标参照的版本化判分规则、dI/dV 成像，以及量子围栏谱学、单原子定位和 qPlus 力谱的多种子参考结果。参见[测量参考结果](#测量参考结果)与[快速开始](#快速开始)。
 
@@ -116,7 +116,6 @@ STM-Bench 提供共同的实验环境，用于研究不同控制运行时与视�
 | 项目 | 主要职责 | 与 STM-Bench 的关系 |
 |---|---|---|
 | **[STM-Bench](https://github.com/HamsterPark/STM-Bench)** | 模拟显微镜、论文启发任务、种子控制的环境变化、采集证据评估与回放。 | 定义实验环境，检验科学结果。 |
-| **[MAST-public](https://github.com/HamsterPark/MAST-public)** | Python 仪器控制运行时、实验技能、状态反馈与工作流的公开子集。 | 展示独立 MAST 评估条件所采用的控制方法；完整集成使用完整 MAST 环境。 |
 | **[VISTA-SPM](https://github.com/HamsterPark/VISTA-SPM)** | 可复用的视觉推理、带尺度标定的图像检查、定量测量与视觉证据档案。 | 提供解释、重访和测量 SPM 观测的方法，可作为对照评估中的视觉组件。 |
 | **[dsh-spm](https://github.com/HamsterPark/dsh-spm)** | 面向 DeepSeek Harness 的 TypeScript SPM 领域工具与视觉框架集成。 | 提供另一种智能体与运行时集成环境，支持发展 SPM 推理与控制方法。 |
 
@@ -133,7 +132,7 @@ python -m pip install -e ".[dev,bench]"
 python -m stmbench.cli --help
 ```
 
-核心依赖为 NumPy、SciPy 和 PyYAML。`dev` 可选依赖组提供 pytest，`bench` 提供报表与绘图依赖。独立仪器回合与参考协议无需 MAST 或模型 API 密钥。评估模型时，由智能体客户端提供自己的模型连接。
+核心依赖为 NumPy、SciPy 和 PyYAML。`dev` 可选依赖组提供 pytest，`bench` 提供报表与绘图依赖。仪器回合与参考协议无需模型 API 密钥。评估模型时，由智能体客户端提供自己的模型连接。
 
 ### 运行测量参考协议
 
@@ -170,9 +169,9 @@ python -m stmbench.cli episode --scenario P4_atom_positioning_cu111 --seed 0 --o
 python -m stmbench.cli verify runs/p4_s0
 ```
 
-[仪器使用指南](docs/USAGE.md#the-benchmark-instrument-no-mast)还介绍了如何通过 `Instrument` 直接调用 Python 接口，以及可用动作、观测格式与回合文件。
+[仪器使用指南](docs/USAGE.md#the-benchmark-instrument)还介绍了如何通过 `Instrument` 直接调用 Python 接口，以及可用动作、观测格式与回合文件。
 
-### 可选的控制器与 MAST 集成
+### 可选的控制器接口
 
 模拟器也提供本地控制器 TCP 接口：
 
@@ -180,21 +179,21 @@ python -m stmbench.cli verify runs/p4_s0
 python -m stmsim serve --profile reference-stm --seed 0 --material "Au(111)"
 ```
 
-这一路径支持与仪器控制软件集成。在完整 MAST 环境中，仓库保留模式 A，用于 MAST 循环内的智能体；模式 C，用于脚本基线；以及模式 H，用于通过浏览器接口操作的外部智能体或人工操作者。这些条件采用的工具与运行时组合，与独立基础动作仪器接口有所不同。结果应注明接口、场景版本、种子和配置。[使用指南](docs/USAGE.md)提供环境设置、驱动方式和 MAST 回合 HTML 回放工具的说明。
+这一路径让支持该控制器线协议的仪器控制软件驱动模拟器。它运行在主机时钟上（仿真时间 = 墙钟时间 × `--time-scale`），主机速度会改变测量结果，因此不是计分的基准条件；经由这一路径得到的结果应注明接口、场景版本、种子和配置。
 
 ## 开发与文档
 
-STM-Bench 是 **alpha 研究版本**。公开源码包含模拟器、独立仪器、场景、判分器、参考协议、分析模块、MAST 适配器与历史回放资源。近期研究工作将扩展已标定的参考覆盖、完成围栏修复协议，并在明确记录接口条件的前提下评估自主智能体。
+STM-Bench 是 **alpha 研究版本**。公开源码包含模拟器、独立仪器、场景、判分器、参考协议、脚本基线、分析模块与历史回放资源。近期研究工作将扩展已标定的参考覆盖、完成围栏修复协议，并在明确记录接口条件的前提下评估自主智能体。
 
-无需 MAST 或私有标定数据，即可运行公开仓库检查：
+运行仓库检查（需要私有标定数据的测试会自动跳过）：
 
 ```bash
-python -m pytest tests -q -m "not requires_mast and not requires_data"
+python -m pytest tests -q
 ```
 
 | 资源 | 内容 |
 |---|---|
-| [使用指南](docs/USAGE.md) | 仪器与 MCP 操作、参考协议、审计、MAST 集成和运行记录。 |
+| [使用指南](docs/USAGE.md) | 仪器与 MCP 操作、参考协议、脚本基线、审计和运行记录。 |
 | [物理保真度说明](docs/FIDELITY.md) | 模型来源、检查方法、假设与物理适用范围。 |
 | [设计与实验记录](docs/DESIGN.md) | 科学动机、标定决策及注明日期的开发结果；主要以中文记录。 |
 | [场景定义](stmbench/trackB/scenarios/) | 任务、隐藏参数分布、结果项、容差与采集要求。 |

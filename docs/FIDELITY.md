@@ -13,7 +13,7 @@ Design notes in Chinese: [DESIGN.md](DESIGN.md) §5 and §9.
 
 | Behaviour | Source | Check | Known differences |
 |---|---|---|---|
-| Two clocks: hardware-side processes (pulses, pokes, PLL ring-up, approach cycles, spectrum sweeps) on `wall`, scan lines and slow physics on `sim` | model | `test_clock_freeze_and_faults.py` | On the host clock (MAST mode) sim time is wall × `time_scale`, so host speed changes outcomes (`test_determinism_probe.py`, strict xfail) |
+| Two clocks: hardware-side processes (pulses, pokes, PLL ring-up, approach cycles, spectrum sweeps) on `wall`, scan lines and slow physics on `sim` | model | `test_clock_freeze_and_faults.py` | On the host clock (the controller TCP path) sim time is wall × `time_scale`, so host speed changes outcomes (`test_determinism_probe.py`, strict xfail) |
 | Virtual instrument clock for benchmark episodes: time moves only with actions, by their physical duration | model | `test_determinism_probe.py`, `test_instrument.py` | No time is charged for software round-trips or for looking at data |
 
 ## Tip
@@ -45,7 +45,7 @@ Design notes in Chinese: [DESIGN.md](DESIGN.md) §5 and §9.
 | Behaviour | Source | Check | Known differences |
 |---|---|---|---|
 | Tunnelling current I = ∫ρ_s ρ_t T dE with κ from the barrier φ | lit (Tersoff–Hamann form) | `test_physics.py` (I–z returns its φ) | — |
-| Preamplifier ranges, saturation clamp (10.004 nA on the 10 nA range) and desaturation (τ = 0.45 s) | model | `test_world_smoke.py` | τ is not calibrated. **A setpoint above the selected range is followed as if the range covered it**: on a real instrument the reading saturates below the setpoint and the loop drives the tip into the sample (or Safe Tip withdraws it). Careful operation switches the range first (the P4 reference does; MAST's `MoveAtomTo` does) |
+| Preamplifier ranges, saturation clamp (10.004 nA on the 10 nA range) and desaturation (τ = 0.45 s) | model | `test_world_smoke.py` | τ is not calibrated. **A setpoint above the selected range is followed as if the range covered it**: on a real instrument the reading saturates below the setpoint and the loop drives the tip into the sample (or Safe Tip withdraws it). Careful operation switches the range first (the P4 reference does) |
 | Current noise: white floor + shot, 1/f, mains, spectral lines, telegraph noise on dirty tips, coarse-step spikes (82–375 pA) | fit (spike amplitudes) + model | none dedicated | Amplitudes are representative, not per-instrument |
 | Spectrum dI/dV noise: 3 % of the peak at 5 ms per point, ∝ 1/√(integration) | model | `test_physics.py::test_a_longer_integration_lowers_the_spectrum_noise` | Until 2026-10-13 fixed at 3 % whatever the integration; modulation amplitude does not change it |
 | dI/dV map (lock-in during constant-current scans): sample LDOS at the bias energy per pixel × nominal conductance × modulation | model | `test_didv_map.py` | Leaves out the constant-current setpoint effect, modulation broadening and the tip DOS |
@@ -58,7 +58,7 @@ Design notes in Chinese: [DESIGN.md](DESIGN.md) §5 and §9.
 | The loop lags the surface along the fast axis, so features sit v·τ further along the scan direction: an adatom ~0.15 nm at 280 nm/s, ~0.01 nm at 20 nm/s, with a shoulder trailing it | model (follows from the loop above) | `test_analysis_adatoms.py::test_a_slow_frame_places_the_atom_and_a_fast_one_shifts_it_along_the_scan` | Not compared with a measured trace/retrace offset at several speeds |
 | Fast-axis hysteresis: loop profile, mean 1.17 % of the axis, edge fraction 0.62 | fit (39 Au frames 80–120 nm) | `test_fidelity.py::test_retrace_offset_reads_back_at_the_real_median_with_the_measured_shape`, `::test_hysteresis_profile_keeps_the_mean_and_rejects_the_closed_loop` | Slow-axis hysteresis is not modelled |
 | Creep after a move (logarithmic, the creep of every move adding up), thermal drift (3-D, ~1 nm/min lateral on the cold rig), drift compensation that saturates | fit (983 glance intervals: Δz 94 → 26 pm, Δx 0.39 → 0.20 nm) | `test_drift_tracking.py` (incl. `::test_old_moves_keep_their_creep`), `test_drift_mapping.py` | Drift is linear in time between moves. Until 2026-10-14 only the last 20 moves crept, and an older one's creep vanished at once (±10 nm jumps after a long move and back) |
-| Good-tip trace/retrace correlation on 100 nm verify frames ≈ 0.95–0.98 (real frames 0.93–0.98), which sets the bandwidth blur | fit | `test_fidelity.py` (MAST-gated parts) | Unchanged by the 2026-10-13 blur fix (to 1e-3) |
+| Good-tip trace/retrace correlation on 100 nm verify frames ≈ 0.95–0.98 (real frames 0.93–0.98), which sets the bandwidth blur | fit | measured 2026-08-28 with a tip-quality detector suite that is not part of this repository; not re-checked by the public tests | Unchanged by the 2026-10-13 blur fix (to 1e-3) |
 | Fast scanning with a fragile tip scratches the surface (above 450 nm/s with a tip radius over 1.5 nm, 2 % per line): a groove along the line | model | none dedicated | Threshold speeds are representative |
 
 ## Coarse motion and approach
