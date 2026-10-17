@@ -15,7 +15,7 @@ Everything else is the LLM path unchanged, because the port is handed to
   provider, so sim time stands still while the person thinks and runs only while tools run.
 
 What the person gets that a model does not: the frames and spectra the instrument saved,
-rendered as pictures (``stmbench.human.render``). A model in mode A reads them through
+rendered as pictures (``stmbench.render``). A model in mode A reads them through
 the analysis skills; a person reads them with their eyes. That is the one asymmetry, and
 the ledger records the mode so the two are never pooled.
 

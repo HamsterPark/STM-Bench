@@ -42,7 +42,7 @@ from stmsim.scenario import Scenario
 
 from ..harness.episode import _budget_caps, resolve_policy, run_episode
 from ..trackB.rules import task_text
-from . import render
+from .. import render
 from .port import Action, HumanPort, HumanSession, strip_markers
 
 STATIC_DIR = Path(__file__).resolve().parent / "static"

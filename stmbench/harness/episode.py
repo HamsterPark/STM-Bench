@@ -598,25 +598,7 @@ def claim_counts(scenario: Scenario, verdict) -> dict:
             "reproduced": bool(verdict.success)}
 
 
-# OVERRUN_TOLERANCE (imported from trackB.rules, where the rule card states it): 5 % over the
-# scenario's sim budget is still "within budget"
-OVERRUN_PARTIAL_CAP = 0.5
-
-
-def apply_budget_overrun(v, consumed_sim_s: float | None, max_sim_s: float | None):
-    """An episode that used more instrument time than the scenario allows did not do the
-    task as posed: success → False, partial capped. Needed because a single composite tool
-    (mode A's ForgeAuTip: 4.6 sim-h against a 2 h budget, qwen gate run) runs to completion
-    inside one tool call, where the driver's per-tool_end budget check cannot interrupt it.
-    Judged on the sim truth otherwise; the overrun is recorded in the verdict details."""
-    from ..trackB.truth_criteria import Verdict
-
-    if not max_sim_s or consumed_sim_s is None or consumed_sim_s <= max_sim_s * OVERRUN_TOLERANCE:
-        return v
-    details = dict(v.details)
-    details["budget_overrun"] = {"sim_s": float(consumed_sim_s), "max_sim_s": float(max_sim_s),
-                                 "factor": float(consumed_sim_s) / float(max_sim_s)}
-    return Verdict(False, min(v.partial, OVERRUN_PARTIAL_CAP), details)
+from ..trackB.rules import OVERRUN_PARTIAL_CAP, apply_budget_overrun  # noqa: E402,F401
 
 
 def _budget_caps(budget: dict | None) -> tuple[float | None, int | None]:

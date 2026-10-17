@@ -10,7 +10,7 @@ Two rules keep the gate honest:
 * a baseline may only use what the instrument shows it — MAST skills through
   ``host.context()`` and the files they leave in ``session/``. It must never read
   ``world.truth()``; ``tests/test_papers.py`` checks that by inspection.
-* it reports through :class:`stmbench.harness.results.ResultSink`, so the fold the judge sees
+* it reports through :class:`stmbench.trackB.results.ResultSink`, so the fold the judge sees
   is the same shape an LLM episode produces.
 """
 from __future__ import annotations

@@ -21,7 +21,7 @@ from pathlib import Path
 
 import numpy as np
 
-from ..human import render
+from .. import render
 from ..trackB.rules import task_text
 from . import lay
 from .timeline import Ledger, build_timeline

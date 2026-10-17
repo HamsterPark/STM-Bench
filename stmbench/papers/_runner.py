@@ -4,7 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from ..harness.results import ResultSink
+from ..trackB.results import ResultSink
 
 
 class Baseline:

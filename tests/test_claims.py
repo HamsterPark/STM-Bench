@@ -5,7 +5,7 @@ import math
 
 import pytest
 
-from stmbench.harness.results import ResultSink, fold_results, missing_claims
+from stmbench.trackB.results import ResultSink, fold_results, missing_claims
 from stmbench.trackB.claims import (angle_diff, check_evidence, frame_covering,
                                     frame_covering_sample, to_sample_frame)
 from stmbench.trackB.truth_criteria import CRITERIA, judge

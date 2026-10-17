@@ -20,9 +20,12 @@ import re
 #: version of the rule card and of the judging rules it announces
 RULES_VERSION = 1
 
-#: the overrun rule (stmbench.harness.episode.apply_budget_overrun): beyond this factor of the
-#: scenario's budget an episode is not a reproduction
+#: the overrun rule (:func:`apply_budget_overrun`): beyond this factor of the scenario's budget
+#: an episode is not a reproduction (5 % over is still within budget)
 OVERRUN_TOLERANCE = 1.05
+
+#: the partial score an over-budget episode keeps at most
+OVERRUN_PARTIAL_CAP = 0.5
 
 #: a hand-written budget sentence in a task, which the card now states instead
 _BUDGET_SENTENCE = re.compile(r"预算[:：][^。\n]*仪器时间[。]?")
@@ -184,6 +187,21 @@ def task_text(sc) -> str:
     if not sc.paper:
         return task
     return f"{task}\n\n{rule_card(sc)}"
+
+
+def apply_budget_overrun(v, consumed_sim_s: float | None, max_sim_s: float | None):
+    """An episode that used more instrument time than the scenario allows did not do the
+    task as posed: success → False, partial capped. One action can overshoot the budget (a
+    long scan or wait runs to completion), so the rule is applied to the whole episode when it
+    is judged. Judged on the sim truth otherwise; the overrun is recorded in the verdict details."""
+    from .truth_criteria import Verdict
+
+    if not max_sim_s or consumed_sim_s is None or consumed_sim_s <= max_sim_s * OVERRUN_TOLERANCE:
+        return v
+    details = dict(v.details)
+    details["budget_overrun"] = {"sim_s": float(consumed_sim_s), "max_sim_s": float(max_sim_s),
+                                 "factor": float(consumed_sim_s) / float(max_sim_s)}
+    return Verdict(False, min(v.partial, OVERRUN_PARTIAL_CAP), details)
 
 
 def has_budget_sentence(task: str) -> bool:

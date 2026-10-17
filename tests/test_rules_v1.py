@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import pytest
 
-from stmbench.harness.results import ResultSink, fold_results
+from stmbench.trackB.results import ResultSink, fold_results
 from stmbench.trackB import claims as C
 from stmbench.trackB.truth_criteria import judge
 FRAME = {"kind": "scan_saved", "sim_s": 10.0, "idx": 1, "complete": True, "path": "session/sim001.sxm",

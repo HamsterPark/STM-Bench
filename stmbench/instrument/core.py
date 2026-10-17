@@ -16,7 +16,7 @@ Three kinds of call:
   no instrument time and no random draw, so how often an agent looks cannot change what it
   later measures;
 * **reports** (``report``, ``report_tip_state``, ``finish``) - the result channel of
-  :mod:`stmbench.harness.results`, judged by the version-1 rules shown on the rule card.
+  :mod:`stmbench.trackB.results`, judged by the version-1 rules shown on the rule card.
 
 What is deliberately absent: MAST's composite skills and its safety gate. An action does what
 the instrument would do, hard limits only (bias, piezo range, preamplifier range); a poke too
@@ -37,7 +37,7 @@ import numpy as np
 from stmsim.physics.scanner import SIG_CURRENT, SIG_LI_X, SIG_Z
 from stmsim.scenario import Scenario
 
-from ..harness.results import ResultSink, fold_results
+from ..trackB.results import ResultSink, fold_results
 from ..trackB.rules import OVERRUN_TOLERANCE, RULES_VERSION, task_text
 
 #: version of the action set, the observations and the log format
@@ -658,7 +658,7 @@ class Instrument:
         """Judge the episode (version-1 rules, budget overrun rule) and write the ledger."""
         if self.finished:
             return self._summary()
-        from ..harness.episode import apply_budget_overrun
+        from ..trackB.rules import apply_budget_overrun
         from ..trackB.truth_criteria import judge
 
         w = self.world

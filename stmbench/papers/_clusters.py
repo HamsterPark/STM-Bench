@@ -93,7 +93,7 @@ def bright_blobs(path: str | Path, *, channel: str = "Z", **kw) -> list[tuple[fl
     highest first — a drop-in for what the baselines used to read out of ``ExtractClusters``."""
     from mast.skills.builtins._sxm_frame import load_frame
 
-    from ..human.render import frame_meta, pixel_to_scan_nm
+    from ..render import frame_meta, pixel_to_scan_nm
 
     fr = load_frame(str(path), channel)
     if fr.error or fr.forward is None:

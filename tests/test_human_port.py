@@ -21,7 +21,7 @@ SCEN = Path(__file__).resolve().parent.parent / "stmbench" / "trackB" / "scenari
 def test_pixel_to_scan_nm_is_the_inverse_of_the_judges_footprint_test():
     """A position the person reads off a frame must be a position the judge finds covered by
     that frame — same centre, same axes, same rotation sense, row 0 at the high-v edge."""
-    from stmbench.human.render import pixel_to_scan_nm
+    from stmbench.render import pixel_to_scan_nm
     from stmbench.trackB.claims import frame_covering
 
     geom = {"cx_nm": 120.0, "cy_nm": -40.0, "w_nm": 80.0, "h_nm": 50.0, "angle_deg": 33.0, "nx": 64, "ny": 40}
@@ -40,7 +40,7 @@ def test_pixel_to_scan_nm_is_the_inverse_of_the_judges_footprint_test():
 
 
 def test_flatten_removes_a_plane_and_keeps_unacquired_rows_nan():
-    from stmbench.human.render import flatten
+    from stmbench.render import flatten
 
     yy, xx = np.mgrid[0:16, 0:16]
     z = 3.0 * xx + 2.0 * yy + 5.0
@@ -53,7 +53,7 @@ def test_flatten_removes_a_plane_and_keeps_unacquired_rows_nan():
 
 
 def test_frame_geometry_reads_a_controller_header():
-    from stmbench.human.render import frame_geometry
+    from stmbench.render import frame_geometry
 
     h = {"scan_range": "1.200000E-07       6.000000E-08", "scan_offset": "5.000000E-08      -2.000000E-08",
          "scan_angle": "3.000000E+01", "scan_pixels": [384, 192]}
@@ -132,7 +132,7 @@ def test_frames_and_spectra_render_for_the_person(tmp_path):
     pytest.importorskip("matplotlib")
     from stmsim.io.dat_writer import write_dat
 
-    from stmbench.human import render
+    from stmbench import render
 
     w = _tunnelling_world(tmp_path, seed=5, time_scale=20.0)
     w.scan.nx = w.scan.ny = 32

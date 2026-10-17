@@ -67,7 +67,7 @@ from typing import Any, Callable
 
 from .hitl_autoresolver import AutoResolver
 from .modes import MODES, Mode, apply_tool_deny, filtered_registry
-from .results import fold_results, is_result_tool, missing_claims
+from ..trackB.results import fold_results, is_result_tool, missing_claims
 
 # ── the harness-owned diagnosis tool ────────────────────────────────────────
 REPORT_TOOL = "ReportTipState"
@@ -122,7 +122,7 @@ def make_result_tool(sink: list, turn_of: Callable[[], int] | None = None, *, cl
     """The ``ReportResult`` ToolSpec for one scenario's claim list."""
     from mast.agentruntime.tools import ToolSpec
 
-    from .results import RESULT_DESCRIPTION, RESULT_TOOL, ack_text, fold_results, result_schema
+    from ..trackB.results import RESULT_DESCRIPTION, RESULT_TOOL, ack_text, fold_results, result_schema
 
     ids = [str(c.get("id")) for c in claims]
 
@@ -136,7 +136,7 @@ def make_result_tool(sink: list, turn_of: Callable[[], int] | None = None, *, cl
 
 
 def inject_result_tool(loop, sink: list, turn_of: Callable[[], int] | None = None, *, claims=()):
-    from .results import RESULT_TOOL
+    from ..trackB.results import RESULT_TOOL
 
     spec = make_result_tool(sink, turn_of, claims=claims)
     loop.tools[RESULT_TOOL] = spec
