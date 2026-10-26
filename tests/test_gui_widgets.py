@@ -25,7 +25,7 @@ if sys.platform == "win32":
     os.environ.setdefault("QT_QPA_FONTDIR", str(Path(os.environ.get("WINDIR", "")) / "Fonts"))
 
 from PySide6.QtCore import QEvent, QPoint, QPointF, Qt  # noqa: E402
-from PySide6.QtGui import QFont, QImage, QMouseEvent, QWheelEvent  # noqa: E402
+from PySide6.QtGui import QFont, QFontMetrics, QImage, QMouseEvent, QWheelEvent  # noqa: E402
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
 from stmbench.gui.widgets import FrameView, PlotView, frame_thumbnail  # noqa: E402
@@ -762,15 +762,23 @@ def test_a_short_plot_gives_up_its_captions_before_its_curve(app):
     font = QFont("Arial")
     font.setPixelSize(16)
     plot.setFont(font)
+    regular, bold = plot._fonts()
+    fh, bold_h, tpx = QFontMetrics(regular).height(), QFontMetrics(bold).height(), plot._tpx()
+    vpad, tick_len, gap = max(3, tpx // 4), max(4, tpx // 4), 4
+    with_captions = vpad + (bold_h + 4) + vpad + tick_len + gap + fh + gap + fh      # what a tall plot spends round its axes
     heights = {}
     for h in (400, 190, 140, 100):
         plot.resize(330, h)
         plot.set_series(s, [("z", z)], "distance (nm)", "pm", "A to B  4.4 nm  (sim001.sxm)")
         heights[h] = plot.plot_rect().height()
         assert plot.plot_rect().bottom() < h and plot.plot_rect().top() >= 0
-    assert heights[400] > 250
-    assert heights[140] >= 70                                       # the x label gave way (was ~50 px with it)
-    assert heights[190] > heights[140] and heights[100] >= 20
+        full = h - with_captions
+        if full >= 4.3 * fh:
+            assert heights[h] == pytest.approx(full)                                  # room enough: every caption stays
+        else:
+            assert heights[h] >= full + fh                                            # else at least the x label row went
+    assert heights[400] == pytest.approx(400 - with_captions)
+    assert heights[140] >= 140 - with_captions + fh and heights[100] >= 20
     plot.resize(330, 400)
     full = rgb(plot)
     plot.set_series(s, [("z", z)], "", "pm", "")                    # no captions at all: the same axes, taller
