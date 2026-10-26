@@ -11,20 +11,18 @@ from html import escape
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (QAbstractItemView, QFrame, QGridLayout, QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
-                               QPlainTextEdit, QPushButton, QRadioButton, QTabWidget, QTextBrowser, QVBoxLayout, QWidget)
+                               QPushButton, QRadioButton, QVBoxLayout, QWidget)
 
 from . import fmt, style
-from .controls import SelectAllLineEdit, polish
+from .controls import QuietBrowser, QuietText, SelectAllLineEdit, Tabs, polish, strong
 from .labels import tr, two_lines
 
 
 _CHANNEL = {"z": "Z", "current": "I", "didv": "dI/dV"}
 
 
-def _text_view(text: str, mono: bool, size: int) -> QPlainTextEdit:
-    v = QPlainTextEdit()
-    v.setReadOnly(True)
-    v.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
+def _text_view(text: str, mono: bool, size: int) -> QuietText:
+    v = QuietText()
     v.setFont(style.mono_font(size) if mono else style.sans_font(size))
     v.setPlainText(text)
     return v
@@ -110,7 +108,7 @@ class ReportTab(QWidget):
 
         self.submit = QPushButton(tr("rep_submit", lang))
         self.submit.setObjectName("report.submit")
-        self.submit.setProperty("role", "primary")
+        strong(self.submit, "primary")
         self.submit.clicked.connect(self._submit)
         v.addWidget(self.submit)
         self.reply = QLabel()
@@ -126,7 +124,7 @@ class ReportTab(QWidget):
         v.addWidget(self._title(tr("finish_title", lang)))
         self.finish_begin = QPushButton(tr("finish", lang))
         self.finish_begin.setObjectName("finish.begin")
-        self.finish_begin.setProperty("role", "danger")
+        strong(self.finish_begin, "danger")
         self.finish_begin.clicked.connect(self._ask)
         v.addWidget(self.finish_begin)
         self.finish_ask = QWidget()
@@ -139,7 +137,7 @@ class ReportTab(QWidget):
         row = QHBoxLayout()
         self.finish_yes = QPushButton(tr("finish_yes", lang))
         self.finish_yes.setObjectName("finish.confirm")
-        self.finish_yes.setProperty("role", "danger")
+        strong(self.finish_yes, "danger")
         self.finish_yes.clicked.connect(self._confirm)
         self.finish_no = QPushButton(tr("finish_no", lang))
         self.finish_no.setObjectName("finish.cancel")
@@ -160,7 +158,7 @@ class ReportTab(QWidget):
     @staticmethod
     def _title(text: str) -> QLabel:
         lab = QLabel(text)
-        lab.setProperty("role", "bold")
+        strong(lab)
         return lab
 
     # ── the form ──
@@ -230,12 +228,12 @@ class DataTab(QWidget):
         v.setContentsMargins(style.px(8), style.px(8), style.px(8), style.px(8))
         v.setSpacing(style.px(4))
         self.frames_title = QLabel()
-        self.frames_title.setProperty("role", "bold")
+        strong(self.frames_title)
         v.addWidget(self.frames_title)
         self.frames = self._list("data.frames")
         v.addWidget(self.frames, 3)
         self.spectra_title = QLabel()
-        self.spectra_title.setProperty("role", "bold")
+        strong(self.spectra_title)
         v.addWidget(self.spectra_title)
         self.spectra = self._list("data.spectra")
         v.addWidget(self.spectra, 2)
@@ -283,7 +281,7 @@ class DataTab(QWidget):
                         w.setCurrentRow(r)
 
 
-class LogTab(QTextBrowser):
+class LogTab(QuietBrowser):
     """Every call, newest first: instrument time, the action with its parameters, the reply or the
     refusal (red). A call that has not run yet says so until it does."""
 
@@ -292,8 +290,7 @@ class LogTab(QTextBrowser):
         self.setObjectName("log.view")
         self.lang = lang
         self._entries: list[dict] = []
-        self.setFont(style.sans_font(16))
-        self.setOpenLinks(False)
+        self.setFont(style.sans_font(17))
         self._render()
 
     def add(self, job_id: int, label: str, args: dict, t_s: float | None) -> None:
@@ -340,7 +337,7 @@ class LogTab(QTextBrowser):
         self.setHtml("".join(out))
 
 
-class Sidebar(QTabWidget):
+class Sidebar(Tabs):
     """The five tabs; ``tab`` finds one by key."""
 
     KEYS = ("task", "manual", "report", "data", "log")
@@ -351,7 +348,7 @@ class Sidebar(QTabWidget):
         self.lang = lang
         self.task = _text_view(task, mono=False, size=18)
         self.task.setObjectName("task.text")
-        self.manual = _text_view(manual, mono=True, size=16)
+        self.manual = _text_view(manual, mono=True, size=17)
         self.manual.setObjectName("manual.text")
         self.report = ReportTab(claims, lang)
         self.data = DataTab(lang)

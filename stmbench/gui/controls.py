@@ -11,9 +11,20 @@ from typing import Any, Sequence
 
 from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtGui import QIcon, QPixmap
-from PySide6.QtWidgets import QButtonGroup, QHBoxLayout, QLabel, QLineEdit, QPushButton, QSizePolicy, QToolButton, QWidget
+from PySide6.QtWidgets import (QButtonGroup, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit, QPushButton, QSizePolicy,
+                               QTabBar, QTabWidget, QTextBrowser, QToolButton, QWidget)
 
 from . import style
+
+
+def strong(widget: QWidget, role: str = "") -> None:
+    """Bold text for a button or a label, set on its font rather than by the style sheet: a style sheet's
+    weight is not in the widget's size hint, and bold text in a button sized for plain text is clipped."""
+    f = widget.font()
+    f.setBold(True)
+    widget.setFont(f)
+    if role:
+        widget.setProperty("role", role)
 
 
 def polish(widget: QWidget) -> None:
@@ -77,7 +88,13 @@ class Segmented(QWidget):
 
 
 class SelectAllLineEdit(QLineEdit):
-    """A field whose whole content is selected by a click: the next keystrokes replace it."""
+    """A field whose whole content is selected by a click: the next keystrokes replace it. No context
+    menu and no dropped text: the only gestures are clicking and typing."""
+
+    def __init__(self, parent: QWidget | None = None):
+        super().__init__(parent)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
+        self.setAcceptDrops(False)
 
     def mousePressEvent(self, ev) -> None:
         super().mousePressEvent(ev)
@@ -86,6 +103,52 @@ class SelectAllLineEdit(QLineEdit):
     def mouseDoubleClickEvent(self, ev) -> None:
         super().mouseDoubleClickEvent(ev)
         self.selectAll()
+
+
+class QuietText(QPlainTextEdit):
+    """Read-only text that scrolls with the wheel and does nothing else: no context menu, no zoom."""
+
+    def __init__(self, parent: QWidget | None = None):
+        super().__init__(parent)
+        self.setReadOnly(True)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
+        self.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
+
+    def wheelEvent(self, ev) -> None:
+        if ev.modifiers() & Qt.KeyboardModifier.ControlModifier:         # Ctrl + wheel would zoom the text
+            ev.ignore()
+            return
+        super().wheelEvent(ev)
+
+
+class QuietBrowser(QTextBrowser):
+    """The same for rich text (the log)."""
+
+    def __init__(self, parent: QWidget | None = None):
+        super().__init__(parent)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
+        self.setOpenLinks(False)
+
+    def wheelEvent(self, ev) -> None:
+        if ev.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            ev.ignore()
+            return
+        super().wheelEvent(ev)
+
+
+class _FixedTabBar(QTabBar):
+    """Tabs change by click only: a wheel turned over the bar must not switch the page under the reader."""
+
+    def wheelEvent(self, ev) -> None:
+        ev.ignore()
+
+
+class Tabs(QTabWidget):
+    """A tab widget whose tab bar ignores the wheel."""
+
+    def __init__(self, parent: QWidget | None = None):
+        super().__init__(parent)
+        self.setTabBar(_FixedTabBar())
 
 
 class ElidedLabel(QLabel):

@@ -27,10 +27,12 @@ from stmbench.gui.app import MainWindow  # noqa: E402
 from stmbench.gui.panels import token  # noqa: E402
 from stmbench.gui.session import GuiSession, make_private_dir, read_spec  # noqa: E402
 from stmbench.instrument import ACTIONS  # noqa: E402
+from stmbench.instrument.core import SCENARIO_DIR, validate  # noqa: E402
 from stmbench.instrument.export import read_export  # noqa: E402
 from stmbench.render import pixel_to_scan_nm  # noqa: E402
 
 P4 = "P4_atom_positioning_cu111"
+P5 = "P5_sader_jarvis_qplus"
 #: a seed whose digits cannot turn up in a record by chance
 SEED = 913275
 SMALL = {"act.scan.center_x_nm": "0", "act.scan.center_y_nm": "0", "act.scan.size_nm": "8", "act.scan.pixels": "32"}
@@ -57,12 +59,12 @@ def open_window(app, tmp_path):
     """A factory of windows on 1920x1053, shut down afterwards (their worker threads must end)."""
     made: list[MainWindow] = []
 
-    def make(lang: str = "zh", seed: int = 0, sealed: bool = False, name: str = "run") -> MainWindow:
+    def make(lang: str = "zh", seed: int = 0, sealed: bool = False, name: str = "run", scenario: str = P4) -> MainWindow:
         if sealed:
-            sess = GuiSession(P4, seed, run_dir=make_private_dir(tmp_path / "private"), export_dir=tmp_path / "export",
-                              lang=lang)
+            sess = GuiSession(scenario, seed, run_dir=make_private_dir(tmp_path / "private"),
+                              export_dir=tmp_path / "export", lang=lang)
         else:
-            sess = GuiSession(P4, seed, run_dir=tmp_path / name, export_dir=tmp_path / name / "export", lang=lang)
+            sess = GuiSession(scenario, seed, run_dir=tmp_path / name, export_dir=tmp_path / name / "export", lang=lang)
         win = MainWindow(sess, lang=lang, sealed=sealed)
         win.resize(*shots.WINDOW)
         win.show()
@@ -617,3 +619,130 @@ def test_the_sealed_command_runs_as_a_process_that_stays_open_and_keeps_the_seed
         if p.is_file():
             assert str(SEED) not in p.read_text(encoding="utf-8"), p.name
     assert not (private / "episode.json").exists()               # killed, not finished: nothing judged
+
+
+# ── every parameter, every action ──
+#: one call per action (two for those that switch something), every parameter given a value other than
+#: its default; the order keeps the tip in tunnelling until the end
+EVERY = [
+    ("set_bias", {"bias_v": 0.03}),
+    ("set_setpoint", {"current_pa": 60.0}),
+    ("set_current_range", {"full_scale_na": 100.0}),
+    ("feedback", {"on": False}),
+    ("feedback", {"on": True}),
+    ("scan", {"center_x_nm": 1.5, "center_y_nm": -2.0, "size_nm": 6.0, "pixels": 24, "angle_deg": 10.0,
+              "line_time_s": 0.05, "direction": "up"}),
+    ("move_tip", {"x_nm": 0.5, "y_nm": 0.25, "speed_nm_s": 50.0}),
+    ("pulse", {"bias_v": 1.2, "width_ms": 20.0, "z_hold": False}),
+    ("poke", {"depth_nm": 0.1, "bias_v": 0.05, "dwell_s": 0.2}),
+    ("sts", {"v_start": -0.2, "v_end": 0.2, "points": 16, "settle_ms": 2.0, "integration_ms": 3.0,
+             "z_offset_nm": 0.1, "backward": False}),
+    ("pll", {"on": True, "amplitude_pm": 80.0}),
+    ("zspec", {"sweep_nm": 0.1, "points": 16, "z_offset_nm": 0.05, "sweeps": 2, "settle_ms": 2.0,
+               "integration_ms": 3.0, "backward": False}),
+    ("pll", {"on": False}),
+    ("lockin", {"on": True, "amplitude_mv": 5.0}),
+    ("lockin", {"on": False}),
+    ("drift_comp", {"on": True, "vx_nm_per_min": 0.5, "vy_nm_per_min": -0.5, "vz_pm_per_min": 2.0}),
+    ("coarse_move", {"direction": "Y+", "steps": 1}),
+    ("wait", {"seconds": 2.0}),
+    ("withdraw", {}),
+    ("approach", {"timeout_s": 30.0}),
+]
+
+
+def drive(win: MainWindow, action: str, args: dict, held: dict) -> dict:
+    """Set the controls the way a reader would, click the action's button, and return what the fields hold
+    (a field keeps its value after a run, so a later click sends it again)."""
+    spec = ACTIONS[action]
+    cells = [c for _, c in layout.cells() if c.action == action]
+    onoff = any(isinstance(c, layout.OnOff) for c in cells)
+    mine = held.setdefault(action, {})
+    for p in spec.params:
+        if p.name == "on" or p.name not in args:
+            continue
+        v = args[p.name]
+        choices = any(isinstance(c, layout.Choices) and c.param == p.name for c in cells)
+        if p.kind == "boolean":
+            shots.click(win, shots.widget(win, f"act.{action}.{p.name}.{'yes' if v else 'no'}"))
+        elif choices:
+            pass                                                  # the button that runs it is the selector
+        elif p.choices is not None:
+            shots.click(win, shots.widget(win, f"act.{action}.{p.name}.{token(v)}"))
+        else:
+            shots.type_into(win, shots.widget(win, f"act.{action}.{p.name}"), str(v))
+        mine[p.name] = v
+    sent = dict(mine)
+    if onoff:
+        sent = {"on": args["on"], **sent}
+        shots.click(win, shots.widget(win, f"run.{action}.{'on' if args['on'] else 'off'}"))
+    elif any(isinstance(c, layout.Choices) for c in cells):
+        (c,) = [c for c in cells if isinstance(c, layout.Choices)]
+        sent = {c.param: args[c.param]}
+        shots.click(win, shots.widget(win, f"run.{action}.{token(args[c.param])}"))
+    else:
+        shots.click(win, shots.widget(win, f"run.{action}"))
+    shots.settle(win)
+    return sent
+
+
+def test_every_parameter_of_every_action_reaches_the_instrument_as_set_on_the_screen(open_window, tmp_path):
+    win = open_window("en", scenario=P5)
+    assert {a for a, _ in EVERY} == set(ACTIONS)                        # a new action must be added here
+    typed = {(a, k) for a, args in EVERY for k in args}
+    assert {(a, p.name) for a, s in ACTIONS.items() for p in s.params} <= typed     # and each parameter of it
+    held: dict = {}
+    for action, args in EVERY:
+        tab = "spectroscopy" if action in ("sts", "zspec", "pll", "lockin") else "operate"
+        open_right(win, tab)
+        sent = drive(win, action, args, held)
+        assert win.status.result.full_text().startswith("✓"), (action, win.status.result.full_text())
+        done = [r for r in records(tmp_path) if r["kind"] == "act"][-1]
+        assert done["name"] == action
+        assert done["params"] == validate(ACTIONS[action], sent), action
+
+
+def test_a_frame_taken_with_the_lock_in_on_offers_the_didv_channel(open_window):
+    win = open_window("en")
+    open_right(win, "spectroscopy")
+    shots.fill(win, {"act.lockin.amplitude_mv": "5"})
+    run_button(win, "run.lockin.on")
+    shots.settle(win)
+    open_right(win, "operate")
+    name = scan_small(win)
+    assert "Lock-in ON" in win.status.plain_text()
+    didv = shots.widget(win, "view.channel.didv")
+    assert didv.isEnabled()
+    shots.click(win, didv)
+    shots.settle(win)
+    assert (name, "didv", "forward") in win._cache and win.center.current_channel() == "didv"
+    assert "dI/dV" in shots.widget(win, "data.frames").item(0).text()
+
+
+@pytest.mark.parametrize("scenario", sorted(p.stem for p in SCENARIO_DIR.glob("P*.yaml")))
+def test_every_paper_scenario_opens_with_its_reportable_claims_and_a_report_form_that_fits(open_window, scenario):
+    win = open_window("zh", scenario=scenario)
+    claims = win.session.claims()
+    assert claims and set(win.sidebar.report.radios) == {c["id"] for c in claims}
+    open_left(win, "report")
+    page = win.sidebar.report
+    for name in ("report.submit", "finish.begin", "report.value", "report.evidence", "report.note"):
+        w = shots.widget(win, name)
+        shots.hit(win, w)                                        # reachable without scrolling
+        assert w.mapTo(page, w.rect().bottomLeft()).y() <= page.height()
+    for r in page.radios.values():
+        shots.hit(win, r)
+
+
+def test_the_window_shrinks_to_fit_a_screen_its_fonts_would_overflow_and_not_otherwise(app):
+    from PySide6.QtCore import QSize
+
+    from stmbench.gui.app import fit_scale
+    try:
+        assert fit_scale(app, "zh", 1.0, QSize(*shots.WINDOW)) == 1.0           # the screen it was tuned for
+        small = fit_scale(app, "zh", 1.0, QSize(1500, 900))
+        assert 0.7 <= small < 1.0 and style.SCALE == small                       # left applied, for the window to use
+        assert fit_scale(app, "zh", small, QSize(1500, 900)) == small           # and it fits: asking again changes nothing
+        assert fit_scale(app, "en", 1.3, QSize(2560, 1400)) == 1.3              # a larger scale on a larger screen is kept
+    finally:
+        style.apply(app, 1.0)

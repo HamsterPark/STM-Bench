@@ -21,12 +21,13 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import TextIO
 
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QSize, QTimer
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QTabWidget, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QVBoxLayout, QWidget
 
 from . import fmt, jobs, layout, style
 from .center import THUMB_PX, CenterColumn, thumb_pixmap
+from .controls import Tabs
 from .labels import two_lines, tr
 from .panels import ActionPanel
 from .session import GuiSession, SpecError, make_private_dir, read_spec
@@ -34,7 +35,7 @@ from .sidebar import Sidebar
 from .status import StatusStrip
 from .worker import Job, Worker
 
-LEFT_PX, RIGHT_PX = 400, 700
+LEFT_PX, RIGHT_PX = 400, 720
 #: frames kept for instant re-viewing (arrays of at most 1024 x 1024 doubles): a byte budget
 CACHE_BYTES = 256 * 1024 * 1024
 
@@ -74,7 +75,7 @@ class MainWindow(QMainWindow):
         self.center = CenterColumn(lang)
         self.operate = ActionPanel(layout.OPERATE, self.run_action, lang)
         self.spectroscopy = ActionPanel(layout.SPECTROSCOPY, self.run_action, lang)
-        self.right = QTabWidget()
+        self.right = Tabs()
         self.right.setObjectName("right.tabs")
         self.right.addTab(self.operate, two_lines("tab_operate", lang).replace("\n", " "))
         self.right.addTab(self.spectroscopy, two_lines("tab_spectroscopy", lang).replace("\n", " "))
@@ -355,6 +356,37 @@ def _open_session(scenario, seed, out, lang, sealed, private_dir, export_dir, st
         return None
 
 
+def fit_scale(app: QApplication, lang: str, requested: float, available: QSize) -> float:
+    """The largest ui scale, not above ``requested``, at which the window fits ``available`` with the fonts
+    this machine has, and leaves that scale applied.
+
+    Why. The layout is tuned with one family of fonts; another (a wider one on the virtual machine) makes
+    a row of the Operate tab wider than its column, and a window never narrower than its contents either
+    grows past the screen or hides what overflows. Everything scales together, so the window is
+    measured - the three columns' narrowest widths, and the Operate tab's height - and every size is
+    shrunk by what is missing. With the fonts it was tuned for, the answer is ``requested``."""
+    scale = float(requested)
+    for _ in range(4):
+        style.apply(app, scale)
+        panels = [ActionPanel(groups, lambda *_: None, lang) for _, groups in layout.TABS]
+        center, strip, tabs = CenterColumn(lang), StatusStrip("-", lang), Tabs()
+        tabs.addTab(QWidget(), "x")
+        sidebar_need = Sidebar("", "", [], lang).minimumSizeHint().width()
+        right_need = max(p.widget().minimumSizeHint().width() for p in panels) + 2 * style.px(3)
+        height_need = max(p.widget().minimumSizeHint().height() for p in panels)
+        height_have = available.height() - strip.minimumSizeHint().height() - tabs.tabBar().sizeHint().height() \
+            - style.px(6 + 6 + 8) - 2 * style.px(3)
+        total = style.px(LEFT_PX) + style.px(RIGHT_PX) + center.minimumSizeHint().width() + 4 * style.px(8)
+        ratio = min(1.0, available.width() / total, style.px(RIGHT_PX) / right_need, height_have / height_need,
+                    style.px(LEFT_PX) / max(sidebar_need, 1))
+        for w in (*panels, center, strip, tabs):
+            w.deleteLater()
+        if ratio >= 1.0:
+            break
+        scale *= max(0.7, ratio * 0.99)
+    return scale
+
+
 def run(*, scenario: str | None = None, seed: int = 0, out: str | Path | None = None, lang: str = "zh",
         ui_scale: float = 1.0, sealed: bool = False, private_dir: str | Path | None = None,
         export_dir: str | Path | None = None, stdin: TextIO | None = None) -> int:
@@ -363,7 +395,7 @@ def run(*, scenario: str | None = None, seed: int = 0, out: str | Path | None = 
     if session is None:
         return 2
     app = QApplication.instance() or QApplication(["stmbench-gui"])
-    style.apply(app, ui_scale)
+    fit_scale(app, lang, ui_scale, app.primaryScreen().availableGeometry().size())
     win = MainWindow(session, lang=lang, sealed=sealed)
     if not sealed:
         signal.signal(signal.SIGINT, lambda *_: app.quit())

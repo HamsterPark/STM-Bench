@@ -107,15 +107,14 @@ def light_palette() -> QPalette:
 def stylesheet() -> str:
     c = COLORS
     return f"""
-QWidget {{ color: {c['ink']}; font-size: {px(18)}px; }}
+QWidget {{ color: {c['ink']}; }}
 QMainWindow, QWidget#root {{ background: {c['bg']}; }}
 QLabel {{ background: transparent; }}
 QLabel[role="muted"] {{ color: {c['muted']}; }}
 QLabel[role="label"] {{ color: {c['ink']}; font-size: {px(17)}px; }}
-QLabel[role="bold"] {{ font-weight: bold; }}
 QLabel[tone="ok"] {{ color: {c['ok']}; }}
 QLabel[tone="bad"] {{ color: {c['bad']}; }}
-QLabel[role="pill"] {{ border-radius: {px(6)}px; padding: 1px {px(10)}px; font-weight: bold; background: {c['accent_soft']}; color: {c['accent_dark']}; }}
+QLabel[role="pill"] {{ border-radius: {px(6)}px; padding: 1px {px(10)}px; background: {c['accent_soft']}; color: {c['accent_dark']}; }}
 QLabel[role="pill"][tone="busy"] {{ background: #ffe9c2; color: {c['warn']}; }}
 QLabel[role="pill"][tone="done"] {{ background: #d9f0df; color: {c['ok']}; }}
 QFrame#strip {{ background: {c['panel']}; border: 1px solid {c['line']}; border-radius: {px(8)}px; }}
@@ -128,28 +127,28 @@ QPushButton {{ background: {c['button']}; border: 1px solid {c['line_strong']}; 
 QPushButton:hover {{ background: {c['button_hover']}; border-color: {c['accent']}; }}
 QPushButton:pressed {{ background: {c['button_down']}; }}
 QPushButton:disabled {{ color: #8b93a0; background: #f4f5f7; border-color: {c['line']}; }}
-QPushButton[role="primary"] {{ background: {c['accent']}; color: #ffffff; border-color: {c['accent_dark']}; font-weight: bold; }}
+QPushButton[role="primary"] {{ background: {c['accent']}; color: #ffffff; border-color: {c['accent_dark']}; }}
 QPushButton[role="primary"]:hover {{ background: #2a6fd6; }}
 QPushButton[role="primary"]:pressed {{ background: {c['accent_dark']}; }}
-QPushButton[role="danger"] {{ background: #fdecea; color: {c['bad']}; border-color: #e0a29c; font-weight: bold; }}
+QPushButton[role="danger"] {{ background: #fdecea; color: {c['bad']}; border-color: #e0a29c; }}
 QPushButton[role="danger"]:hover {{ background: #fbd9d5; }}
 QPushButton[seg] {{ border-radius: 0; padding: 0 {px(10)}px; margin: 0; }}
 QPushButton[seg="first"] {{ border-top-left-radius: {px(6)}px; border-bottom-left-radius: {px(6)}px; }}
 QPushButton[seg="last"] {{ border-top-right-radius: {px(6)}px; border-bottom-right-radius: {px(6)}px; }}
 QPushButton[seg="only"] {{ border-radius: {px(6)}px; }}
-QPushButton[seg]:checked {{ background: {c['accent']}; color: #ffffff; border-color: {c['accent_dark']}; font-weight: bold; }}
+QPushButton[seg]:checked {{ background: {c['accent']}; color: #ffffff; border-color: {c['accent_dark']}; }}
 QPushButton[seg]:checked:disabled {{ background: #9db7e3; color: #ffffff; }}
 QLineEdit {{ background: {c['field']}; border: 1px solid {c['line_strong']}; border-radius: {px(5)}px;
             padding: 0 {px(6)}px; min-height: {px(30)}px; selection-background-color: {c['accent']}; selection-color: #ffffff; }}
 QLineEdit:focus {{ border: 2px solid {c['accent']}; padding: 0 {px(5)}px; }}
-QRadioButton {{ spacing: {px(8)}px; min-height: {px(28)}px; }}
+QRadioButton {{ spacing: {px(8)}px; min-height: {px(32)}px; }}
 QRadioButton::indicator {{ width: {px(18)}px; height: {px(18)}px; }}
 QTabWidget::pane {{ border: 1px solid {c['line']}; background: {c['panel']}; border-radius: {px(6)}px; top: -1px; }}
 QTabBar::tab {{ background: {c['head']}; border: 1px solid {c['line']}; border-bottom: none; padding: {px(5)}px {px(6)}px;
                min-height: {px(26)}px; font-weight: bold; font-size: {px(17)}px; border-top-left-radius: {px(6)}px; border-top-right-radius: {px(6)}px; }}
 QTabBar::tab:selected {{ background: {c['panel']}; color: {c['accent_dark']}; border-top: {px(3)}px solid {c['accent']}; }}
 QTabBar::tab:!selected:hover {{ background: {c['button_hover']}; }}
-QTableWidget {{ background: {c['field']}; alternate-background-color: {c['stripe']}; gridline-color: {c['line']};
+QTableWidget {{ font-family: "{mono_family()}"; font-size: {px(17)}px; background: {c['field']}; alternate-background-color: {c['stripe']}; gridline-color: {c['line']};
                border: 1px solid {c['line']}; selection-background-color: {c['accent_soft']}; selection-color: {c['ink']}; }}
 QTableWidget::item {{ padding: 0 {px(3)}px; }}
 QHeaderView::section {{ background: {c['head']}; border: none; border-right: 1px solid {c['line']}; border-bottom: 1px solid {c['line']};

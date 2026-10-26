@@ -32,7 +32,7 @@ _X_FIRST = ("v", "z_rel", "z_abs")
 _Y_FIRST = ("didv", "df", "i")
 N_THUMBS = 6
 THUMB_PX = 64
-MARKER_STRIP_PX = 154
+MARKER_STRIP_PX = 176
 
 
 def column_label(key: str) -> str:
@@ -93,7 +93,7 @@ class CenterColumn(QWidget):
         # ── what is shown ──
         self.info = ElidedLabel()
         self.info.setObjectName("view.info")
-        self.info.setFont(style.mono_font(16))
+        self.info.setFont(style.mono_font(17))
         self.info.setMinimumHeight(style.px(24))
         v.addWidget(self.info)
 
@@ -138,19 +138,18 @@ class CenterColumn(QWidget):
         v.addWidget(self.readout)
 
         # ── markers and the profile ──
-        bottom = QHBoxLayout()
+        strip = QWidget()                      # parent first: a widget given a font and re-parented later loses it
+        strip.setFixedHeight(style.px(MARKER_STRIP_PX))
+        bottom = QHBoxLayout(strip)
+        bottom.setContentsMargins(0, 0, 0, 0)
         bottom.setSpacing(style.px(8))
-        self.table = self._marker_table()
-        bottom.addWidget(self.table, 6)
+        self.table = self._marker_table(strip)
+        bottom.addWidget(self.table, 2)
         self.small_plot = PlotView()
         self.small_plot.setObjectName("view.profile")
         self.small_plot.setMinimumWidth(style.px(220))
         self.small_plot.clear(tr("profile", lang))
-        bottom.addWidget(self.small_plot, 4)
-        strip = QWidget()
-        strip.setLayout(bottom)
-        bottom.setContentsMargins(0, 0, 0, 0)
-        strip.setFixedHeight(style.px(MARKER_STRIP_PX))
+        bottom.addWidget(self.small_plot, 1)
         v.addWidget(strip)
         buttons = QHBoxLayout()
         buttons.setSpacing(style.px(8))
@@ -229,9 +228,9 @@ class CenterColumn(QWidget):
             col.addLayout(row)
         return w
 
-    def _marker_table(self) -> QTableWidget:
+    def _marker_table(self, parent: QWidget) -> QTableWidget:
         cols = ["mk_num", "mk_x", "mk_y", "mk_value", "mk_frame", "mk_dist"]
-        t = QTableWidget(0, len(cols))
+        t = QTableWidget(0, len(cols), parent)
         t.setObjectName("markers.table")
         t.setHorizontalHeaderLabels([two_lines(c, self.lang) for c in cols])
         t.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
@@ -239,11 +238,10 @@ class CenterColumn(QWidget):
         t.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         t.setAlternatingRowColors(True)
         t.verticalHeader().hide()
-        t.verticalHeader().setDefaultSectionSize(style.px(27))
+        t.verticalHeader().setDefaultSectionSize(style.px(32))
         t.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
         t.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         t.horizontalHeader().setStretchLastSection(True)
-        t.setFont(style.mono_font(16))
         t.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         t.cellClicked.connect(lambda r, _c: self.frame_view.select_marker(r))
         return t

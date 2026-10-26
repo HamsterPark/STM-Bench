@@ -27,27 +27,27 @@ class StatusStrip(QFrame):
         v = QVBoxLayout(self)
         v.setContentsMargins(style.px(12), style.px(4), style.px(12), style.px(4))
         v.setSpacing(style.px(1))
-        big = style.sans_font(19)
+        big = style.sans_font(18)
 
         top = QHBoxLayout()
         top.setSpacing(style.px(14))
         self.title = QLabel(f"{tr('app', lang)}  ·  {scenario_id}")
         self.title.setObjectName("status.title")
-        self.title.setFont(style.sans_font(19, bold=True))
+        self.title.setFont(style.sans_font(18, bold=True))
         self.state = QLabel()
         self.state.setObjectName("status.state")
         self.state.setProperty("role", "pill")
-        self.state.setFont(big)
+        self.state.setFont(style.sans_font(18, bold=True))
         self.time = QLabel()
         self.time.setObjectName("status.time")
-        self.time.setFont(style.mono_font(19))
+        self.time.setFont(style.mono_font(18))
         self.bar = QProgressBar()
         self.bar.setObjectName("status.bar")
         self.bar.setTextVisible(False)
         self.bar.setFixedWidth(style.px(260))
         self.count = QLabel()
         self.count.setObjectName("status.actions")
-        self.count.setFont(style.mono_font(19))
+        self.count.setFont(style.mono_font(18))
         top.addWidget(self.title)
         top.addWidget(self.state)
         top.addStretch(1)
@@ -60,7 +60,8 @@ class StatusStrip(QFrame):
         self.readings.setObjectName("status.readings")
         self.readings.setTextFormat(Qt.TextFormat.RichText)
         self.readings.setFont(big)
-        self.readings.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
+        self.readings.setWordWrap(True)                  # a second line, never a clipped reading, if the fonts are wide
+        self.readings.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         v.addWidget(self.readings)
 
         self.result = ElidedLabel()
@@ -103,10 +104,10 @@ class StatusStrip(QFrame):
         parts, plain = [], []
         for key, _, value in fmt.reading_items(st, self.lang):
             label = tr(key, self.lang)
-            parts.append(f"<span style='color:{muted}'>{label}</span> "
-                         f"<b style=\"font-family:'{mono}'\">{value.replace('<', '&lt;')}</b>")
+            parts.append(f"<span style='white-space:nowrap'><span style='color:{muted}'>{label}</span> "
+                         f"<b style=\"font-family:'{mono}'\">{value.replace('<', '&lt;')}</b></span>")
             plain.append(f"{label} {value}")
-        self.readings.setText("&nbsp;&nbsp;&nbsp;".join(parts))
+        self.readings.setText("&nbsp;&nbsp; ".join(parts))
         self._plain.update(time=text, readings="   ".join(plain), actions=self.count.text())
 
     # ── line 3 ──

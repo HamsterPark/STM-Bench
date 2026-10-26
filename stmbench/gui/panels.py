@@ -23,7 +23,7 @@ from PySide6.QtWidgets import (QFrame, QGroupBox, QHBoxLayout, QLabel, QPushButt
 
 from ..instrument import ACTIONS
 from . import fmt, style
-from .controls import ElidedLabel, Segmented, SelectAllLineEdit, polish
+from .controls import ElidedLabel, Segmented, SelectAllLineEdit, polish, strong
 from .labels import both, tr
 from .layout import Cell, Choices, F, Group, OnOff, Run
 
@@ -62,7 +62,6 @@ class ActionPanel(QScrollArea):
         self._runs: set[str] = set()
         self.setWidgetResizable(True)
         self.setFrameShape(QFrame.Shape.NoFrame)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         body = QWidget()
         body.setObjectName("panel_body")
         lay = QVBoxLayout(body)
@@ -151,12 +150,11 @@ class ActionPanel(QScrollArea):
         b.setObjectName(name)
         b.setAutoDefault(False)
         if role:
-            b.setProperty("role", role)
+            strong(b, role)
         return b
 
     def _run_cell(self, c: Run) -> QWidget:
         b = self._button(f"run.{c.action}", both(c.en, c.zh, self.lang), "primary")
-        b.setMinimumWidth(style.px(92))
         b.clicked.connect(lambda _=False, a=c.action: self._run(a))
         self.run_buttons[c.action] = b
         return b
@@ -189,7 +187,6 @@ class ActionPanel(QScrollArea):
         seg.setObjectName(f"act.{c.action}.{c.param}")
         for ch in p.choices:
             b = seg.button(ch)
-            b.setMinimumWidth(style.px(54))
             b.clicked.connect(lambda _=False, a=c.action, k=c.param, val=ch: self._submit(a, {k: val}))
             self.run_buttons[f"{c.action}.{token(ch)}"] = b
         self.controls[(c.action, c.param)] = seg
