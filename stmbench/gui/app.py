@@ -36,6 +36,8 @@ from .status import StatusStrip
 from .worker import Job, Worker
 
 LEFT_PX, RIGHT_PX = 400, 720
+#: what a window manager's title bar may take from a maximized window's height
+FRAME_PX = 30
 #: frames kept for instant re-viewing (arrays of at most 1024 x 1024 doubles): a byte budget
 CACHE_BYTES = 256 * 1024 * 1024
 
@@ -368,17 +370,18 @@ def fit_scale(app: QApplication, lang: str, requested: float, available: QSize) 
     for _ in range(4):
         style.apply(app, scale)
         panels = [ActionPanel(groups, lambda *_: None, lang) for _, groups in layout.TABS]
-        center, strip, tabs = CenterColumn(lang), StatusStrip("-", lang), Tabs()
+        center, strip, tabs, sidebar = CenterColumn(lang), StatusStrip("-", lang), Tabs(), Sidebar("", "", [], lang)
         tabs.addTab(QWidget(), "x")
-        sidebar_need = Sidebar("", "", [], lang).minimumSizeHint().width()
+        sidebar_need = sidebar.minimumSizeHint().width()
         right_need = max(p.widget().minimumSizeHint().width() for p in panels) + 2 * style.px(3)
         height_need = max(p.widget().minimumSizeHint().height() for p in panels)
-        height_have = available.height() - strip.minimumSizeHint().height() - tabs.tabBar().sizeHint().height() \
-            - style.px(6 + 6 + 8) - 2 * style.px(3)
+        # the window manager's title bar is not in `available` and takes about FRAME_PX of the height
+        height_have = (available.height() - FRAME_PX - strip.minimumSizeHint().height()
+                       - tabs.tabBar().sizeHint().height() - style.px(6 + 6 + 8) - 2 * style.px(3))
         total = style.px(LEFT_PX) + style.px(RIGHT_PX) + center.minimumSizeHint().width() + 4 * style.px(8)
         ratio = min(1.0, available.width() / total, style.px(RIGHT_PX) / right_need, height_have / height_need,
                     style.px(LEFT_PX) / max(sidebar_need, 1))
-        for w in (*panels, center, strip, tabs):
+        for w in (*panels, center, strip, tabs, sidebar):
             w.deleteLater()
         if ratio >= 1.0:
             break

@@ -425,13 +425,21 @@ def test_markers_are_read_off_the_frame_and_copied_into_forms_by_their_buttons(o
 
 def test_a_profile_is_drawn_by_dragging_with_the_profile_tool(open_window):
     win = open_window("en")
-    scan_small(win)
+    name = scan_small(win)
     fv = win.center.frame_view
+    got: list[dict] = []
+    fv.profile_changed.connect(got.append)
     run_button(win, "view.tool.profile")
     shots.drag(win, fv, fv.pixel_to_widget(5, 16).toPoint(), fv.pixel_to_widget(26, 16).toPoint())
     assert not fv.markers()                                      # a drag with the profile tool places no marker
-    plot = shots.widget(win, "view.profile")
-    assert plot.isVisible()
+    p = got[-1]
+    geom = {"cx_nm": 0.0, "cy_nm": 0.0, "w_nm": 8.0, "h_nm": 8.0, "angle_deg": 0.0, "nx": 32, "ny": 32}
+    (x0, y0), (x1, y1) = pixel_to_scan_nm(geom, 5, 16), pixel_to_scan_nm(geom, 26, 16)
+    assert p["frame"] == name and p["unit"] == "pm" and len(p["values"]) == len(p["s_nm"]) >= 20
+    assert (p["x0_nm"], p["y0_nm"], p["x1_nm"], p["y1_nm"]) == pytest.approx((x0, y0, x1, y1), abs=0.02)
+    assert p["s_nm"][-1] == pytest.approx(math.hypot(x1 - x0, y1 - y0), abs=0.02)
+    run_button(win, "view.clear_markers")                        # clears the line as well: the small plot is emptied
+    assert got[-1] == {}
     run_button(win, "view.tool.marker")
 
 
