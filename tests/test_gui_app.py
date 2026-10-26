@@ -220,7 +220,7 @@ def test_set_bias_set_setpoint_and_move_tip_clicked_back_to_back_run_in_that_ord
     assert acts(records(tmp_path)) == ["set_bias", "set_setpoint", "move_tip"]
     text = shots.widget(win, "log.view").toPlainText()
     assert text.index("move_tip") < text.index("set_setpoint") < text.index("set_bias")      # newest first
-    assert "Bias 5.0 mV" in win.status.plain_text() and "Setpoint 100 nA" in win.status.plain_text()
+    assert "Bias 0.005 V" in win.status.plain_text() and "Setpoint 100000 pA" in win.status.plain_text()   # never mV or nA
 
 
 def test_a_refusal_shows_the_instruments_words_everywhere(open_window, tmp_path):
@@ -359,14 +359,14 @@ def test_a_qplus_rigs_sensor_constants_are_among_the_facts(open_window):
 def test_the_status_strip_reads_in_units_and_counts_instrument_time(open_window):
     win = open_window("en")
     plain = win.status.plain_text()
-    for want in ("Bias 50.0 mV", "Setpoint 200 pA", "Z feedback ON", "Range 10 nA", "Withdrawn no", "Lock-in OFF",
-                 "0:00:00 / 1:30:00", "Actions 0", P4, "READY"):
+    for want in ("Bias 0.050 V", "Setpoint 200 pA", "Z feedback ON", "Range 10 nA", "Withdrawn no", "Lock-in OFF",
+                 "Oscillation n/a", "Drift comp. OFF", "0:00:00 / 1:30:00", "Actions 0", P4, "READY"):
         assert want in plain, want
     assert "e-" not in plain
     scan_small(win)
     assert "Actions 1" in win.status.plain_text() and win.status.bar.value() > 0
     zh = open_window("zh", name="run_zh")
-    assert "偏压 Bias 50.0 mV" in zh.status.plain_text() and "就绪 READY" in zh.status.plain_text()
+    assert "偏压 0.050 V" in zh.status.plain_text() and "就绪 READY" in zh.status.plain_text()
 
 
 # ── the report and the end ──

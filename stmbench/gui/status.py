@@ -2,7 +2,8 @@
 
 1. the program, the scenario's id (never the seed), READY / BUSY with what runs and how many wait,
    instrument time used against the budget, the action count;
-2. the readings the instrument reports after every action, in readable units;
+2. the readings the instrument reports after every action, in the units of the fields that set them
+   (Chinese labels only in ``zh``: eleven readings in two languages would not fit one line);
 3. the last result, in the instrument's words: green with a tick, or red with a cross and the refusal.
 
 The strip is built for a reader looking at a downscaled screenshot: one line each, 18 px text.
@@ -14,7 +15,7 @@ from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QProgressBar, QSizePo
 
 from . import fmt, style
 from .controls import ElidedLabel, polish
-from .labels import S, both, tr
+from .labels import S, both, one, tr
 
 
 class StatusStrip(QFrame):
@@ -103,7 +104,7 @@ class StatusStrip(QFrame):
         mono, muted = style.mono_family(), style.COLORS["muted"]
         parts, plain = [], []
         for key, value in fmt.reading_items(st, self.lang):
-            label = tr(key, self.lang)
+            label = one(key, self.lang)                  # eleven readings in two languages would not fit one line
             parts.append(f"<nobr><span style='color:{muted}'>{label}</span> "
                          f"<b style=\"font-family:'{mono}'\">{value.replace('<', '&lt;')}</b></nobr>")
             plain.append(f"{label} {value}")
