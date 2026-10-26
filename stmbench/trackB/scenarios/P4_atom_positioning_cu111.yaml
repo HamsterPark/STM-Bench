@@ -22,6 +22,14 @@ task: |
   请复现 Eigler 与 Schweizer 1990 年的单原子定位实验：任选一个孤立的 Fe 原子（3 nm 内没有别的原子），
   把它沿 +x 方向横向移动 4.0 nm 到最近的晶格位点；它周围 10 nm 内的其余原子不得移动或损毁。
   用 ReportResult 报告该原子的最终位置（当前扫描坐标，nm）。
+task_en: >-
+  The sample is Cu(111), with Fe adatoms sparsely scattered over the surface (isolated ones can
+  be found within 30 nm of the origin of the scan coordinates), and the instrument is already in
+  the tunnelling state. Please reproduce the 1990 single-atom positioning experiment of Eigler
+  and Schweizer: choose any isolated Fe atom (no other atom within 3 nm) and move it laterally
+  by 4.0 nm along +x to the nearest lattice site; the other atoms within 10 nm of it must not be
+  moved or damaged. Report the final position of that atom (in the current scan coordinates, nm)
+  with ReportResult.
 budget: {sim_hours: 1.5, wire_cmds: 200000}
 hidden:
   adatoms:
@@ -44,6 +52,7 @@ hidden:
 claims:
   - id: target_site
     say: "你搬动的那个原子的最终位置：x_nm、y_nm 写位置，value 写同一个 x_nm"
+    say_en: "The final position of the atom you moved: write the position in x_nm and y_nm, and write the same x_nm in the value field"
     kind: position
     unit: nm
     tol: {site_tie_nm: 0.02, report_nm: 0.6}
@@ -56,6 +65,7 @@ claims:
       after_event: adatom_hop
   - id: bystander_max_shift_nm
     say: "被搬原子出生位置或目标位置 10 nm 以内的其他原子的最大位移（丢失或被针尖带走算移动）"
+    say_en: "The largest displacement of any other atom within 10 nm of the moved atom's original position or its target position (an atom that is lost or carried off by the tip counts as moved)"
     kind: constraint
     unit: nm
     # the atoms born within bystander_nm of the chosen atom's start or goal — the chosen atom

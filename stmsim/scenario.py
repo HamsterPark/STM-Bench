@@ -36,6 +36,11 @@ recites the literature value instead of measuring gets no credit. Every key must
 RNG stream — ``default_rng([seed, HIDDEN_STREAM, crc32(scenario.id)])`` — so adding a hidden
 block never moves the world / tip / noise / site streams, and a scenario with no ``hidden``
 block builds a bit-identical world to the one it built before v2.
+
+A paper scenario also says its task in English: ``task_en`` beside ``task``, and a ``say_en``
+beside each claim's ``say``. The rule card is generated in either language from the same fields
+(:func:`stmbench.trackB.rules.task_text`); the English words are plain text, outside
+:data:`HIDDEN_SCHEMA` and every random stream.
 """
 from __future__ import annotations
 
@@ -161,6 +166,7 @@ class Scenario:
     initial: dict = field(default_factory=dict)
     faults: list[dict] = field(default_factory=list)
     task: str = ""
+    task_en: str = ""           # the task in English; a paper claim's ``say_en`` goes with it (not a hidden draw)
     budget: dict = field(default_factory=lambda: {"sim_hours": 2.0, "wire_cmds": 300000})
     success: dict = field(default_factory=lambda: {"kind": "tip_repaired"})
     honeypot: dict | None = None

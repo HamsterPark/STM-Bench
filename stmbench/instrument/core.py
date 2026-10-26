@@ -271,9 +271,9 @@ class Instrument:
         self.verdict: Any = None
 
     # ── what the agent is told ──
-    def task(self) -> str:
-        """The task with its rule card (stmbench.trackB.rules)."""
-        return task_text(self.scenario)
+    def task(self, lang: str = "zh") -> str:
+        """The task with its rule card (stmbench.trackB.rules), in ``lang``: "zh" or "en"."""
+        return task_text(self.scenario, lang)
 
     @staticmethod
     def manual() -> str:
