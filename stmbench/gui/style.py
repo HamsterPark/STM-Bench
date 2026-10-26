@@ -117,8 +117,10 @@ QLabel[role="muted"] {{ color: {c['muted']}; }}
 QLabel[role="label"] {{ color: {c['ink']}; font-size: {px(17)}px; }}
 QLabel[role="claim"] {{ color: {c['ink']}; font-size: {px(16)}px; }}
 QLabel[stripe="true"] {{ background: {c['stripe']}; }}
+QLabel[role="recent"] {{ color: {c['ink']}; font-size: {px(16)}px; }}
 QLabel[tone="ok"] {{ color: {c['ok']}; }}
 QLabel[tone="bad"] {{ color: {c['bad']}; }}
+QLabel[tone="note"] {{ color: {c['muted']}; }}
 QLabel[role="pill"] {{ border-radius: {px(6)}px; padding: 1px {px(10)}px; background: {c['accent_soft']}; color: {c['accent_dark']}; }}
 QLabel[role="pill"][tone="busy"] {{ background: #ffe9c2; color: {c['warn']}; }}
 QLabel[role="pill"][tone="done"] {{ background: #d9f0df; color: {c['ok']}; }}
@@ -149,7 +151,7 @@ QLineEdit:focus {{ border: 2px solid {c['accent']}; padding: 0 {px(5)}px; }}
 QRadioButton {{ spacing: {px(8)}px; min-height: {px(32)}px; }}
 QRadioButton::indicator {{ width: {px(18)}px; height: {px(18)}px; }}
 QTabWidget::pane {{ border: 1px solid {c['line']}; background: {c['panel']}; border-radius: {px(6)}px; top: -1px; }}
-QTabBar::tab {{ background: {c['head']}; border: 1px solid {c['line']}; border-bottom: none; padding: {px(5)}px {px(6)}px;
+QTabBar::tab {{ background: {c['head']}; border: 1px solid {c['line']}; border-bottom: none; padding: {px(4)}px {px(6)}px;
                min-height: {px(26)}px; font-weight: bold; font-size: {px(17)}px; border-top-left-radius: {px(6)}px; border-top-right-radius: {px(6)}px; }}
 QTabBar::tab:selected {{ background: {c['panel']}; color: {c['accent_dark']}; border-top: {px(3)}px solid {c['accent']}; }}
 QTabBar::tab:!selected:hover {{ background: {c['button_hover']}; }}

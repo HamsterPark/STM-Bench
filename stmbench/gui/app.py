@@ -1,7 +1,8 @@
 """The desktop console's window and its entry point (``stmbench.cli gui``).
 
 One window, three columns under a status strip: the task, the report form, the data and the log on
-the left; the viewer with its markers in the middle; the instrument's actions on the right. Every
+the left; the viewer with its markers in the middle; the instrument's actions on the right, with the
+last five results under them. Every
 click that touches the instrument becomes a job on the worker thread (:mod:`stmbench.gui.worker`);
 this thread only draws what the jobs bring back. The window adds no hint: it shows what the instrument
 said, in the instrument's words, and the instrument is the only validator.
@@ -30,6 +31,7 @@ from .center import THUMB_PX, CenterColumn, thumb_pixmap
 from .controls import Tabs
 from .labels import two_lines, tr
 from .panels import ActionPanel
+from .recent import RecentList
 from .session import GuiSession, SpecError, make_private_dir, read_spec
 from .sidebar import Sidebar
 from .status import StatusStrip
@@ -64,8 +66,8 @@ class MainWindow(QMainWindow):
         root.setObjectName("root")
         self.setCentralWidget(root)
         col = QVBoxLayout(root)
-        col.setContentsMargins(style.px(8), style.px(6), style.px(8), style.px(8))
-        col.setSpacing(style.px(6))
+        col.setContentsMargins(style.px(8), style.px(5), style.px(8), style.px(6))
+        col.setSpacing(style.px(5))
         self.status = StatusStrip(session.scenario_id, lang)
         col.addWidget(self.status)
         row = QHBoxLayout()
@@ -84,9 +86,16 @@ class MainWindow(QMainWindow):
         self.right.tabBar().setObjectName("right.tabbar")
         self.right.tabBar().setExpanding(True)
         self.right.setFixedWidth(style.px(RIGHT_PX))
+        self.recent = RecentList(lang)
+        right_column = QWidget()                         # the tabs, and under them what the last calls answered
+        rc = QVBoxLayout(right_column)
+        rc.setContentsMargins(0, 0, 0, 0)
+        rc.setSpacing(style.px(6))
+        rc.addWidget(self.right, 1)
+        rc.addWidget(self.recent)
         row.addWidget(self.sidebar)
         row.addWidget(self.center, 1)
-        row.addWidget(self.right)
+        row.addWidget(right_column)
 
         # the reader's gestures
         self.sidebar.report.submitted.connect(self._report)
@@ -98,7 +107,7 @@ class MainWindow(QMainWindow):
         self.center.tip_from_marker.connect(lambda x, y: self._fill("move_tip", "x_nm", "y_nm", x, y))
         self.center.scan_from_marker.connect(lambda x, y: self._fill("scan", "center_x_nm", "center_y_nm", x, y))
         self.center.report_from_marker.connect(self._report_from_marker)
-        self.center.notice.connect(lambda text: self.status.set_result(False, text))
+        self.center.notice.connect(lambda text: self.recent.push("note", text))
 
         self.worker = Worker(session, self)
         self.worker.started_job.connect(self._on_started)
@@ -185,7 +194,7 @@ class MainWindow(QMainWindow):
             if out.info:
                 self.sidebar.facts.set_info(out.info)
             if not out.ok:
-                self.status.set_result(False, out.text)
+                self._fail(out.text)
             return
         if out.kind == "view_frame":
             if out.ok:
@@ -193,28 +202,25 @@ class MainWindow(QMainWindow):
                 if self._want == ("frame", out.frame["frame"], out.frame["channel"], out.frame["direction"]):
                     self._display_frame(out.frame)
             else:
-                self.status.set_result(False, ("refused: " if out.refused else "") + out.text)
+                self._fail(("refused: " if out.refused else "") + out.text)
             return
         if out.kind == "view_spectrum":
             if out.ok and self._want == ("spectrum", out.label):
                 self._display_spectrum(out.spectrum)
             elif not out.ok:
-                self.status.set_result(False, ("refused: " if out.refused else "") + out.text)
+                self._fail(("refused: " if out.refused else "") + out.text)
             return
         t = float(out.reply.get("instrument_time_s", self._t_s)) if isinstance(out.reply, dict) else self._t_s
         if not out.ok:
             text = ("refused: " if out.refused else "error: ") + out.text
-            self.status.set_result(False, text)
+            self._fail(text)
             self.sidebar.log.done(job.id, False, text, self._t_s)
-            if out.kind == "act":
-                self._panel_for(job.label).set_reply(job.label, False, text)
-            elif out.kind == "report":
+            if out.kind == "report":
                 self.sidebar.report.set_reply(False, text)
             return
         if out.kind == "act":
             summary = fmt.reply_summary(job.label, out.reply)
-            self._panel_for(job.label).set_reply(job.label, True, summary)
-            self.status.set_result(True, summary)
+            self._succeed(summary)
             self.sidebar.log.done(job.id, True, fmt.reply_full(out.reply), t)
             if out.frame is not None:
                 self._remember(out.frame)
@@ -227,16 +233,25 @@ class MainWindow(QMainWindow):
             if lists:
                 self.center.show_trace(job.label, lists)
             if out.text:                                      # a read after the action failed
-                self.status.set_result(False, out.text)
+                self._fail(out.text)
         elif out.kind == "report":
-            self.status.set_result(True, str(out.reply))
+            self._succeed(str(out.reply))
             self.sidebar.report.set_reply(True, str(out.reply))
             self.sidebar.log.done(job.id, True, str(out.reply), self._t_s)
         elif out.kind == "finish":
             self._finished = True
             self.sidebar.report.set_finished()
-            self.status.set_result(True, tr("over", self.lang))
+            self._succeed(tr("over", self.lang))
             self.sidebar.log.done(job.id, True, str(out.reply), self._t_s)
+
+    def _succeed(self, text: str) -> None:
+        """What the last call answered: the strip's last line, and the list of recent results."""
+        self.status.set_result(True, text)
+        self.recent.push("ok", text)
+
+    def _fail(self, text: str) -> None:
+        self.status.set_result(False, text)
+        self.recent.push("bad", text)
 
     # ── data and views ──
     def _apply_data(self, data: dict) -> None:
@@ -374,16 +389,18 @@ def fit_scale(app: QApplication, lang: str, requested: float, available: QSize) 
         panels = [ActionPanel(groups, lambda *_: None, lang) for _, groups in layout.TABS]
         center, strip, tabs, sidebar = CenterColumn(lang), StatusStrip("-", lang), Tabs(), Sidebar("", "", [], lang)
         tabs.addTab(QWidget(), "x")
+        recent = RecentList(lang)
         sidebar_need = sidebar.minimumSizeHint().width()
         right_need = max(p.widget().minimumSizeHint().width() for p in panels) + 2 * style.px(3)
         height_need = max(p.widget().minimumSizeHint().height() for p in panels)
         # the window manager's title bar is not in `available` and takes about FRAME_PX of the height
         height_have = (available.height() - FRAME_PX - strip.minimumSizeHint().height()
-                       - tabs.tabBar().sizeHint().height() - style.px(6 + 6 + 8) - 2 * style.px(3))
+                       - tabs.tabBar().sizeHint().height() - style.px(5 + 6 + 5) - 2 * style.px(2)
+                       - recent.sizeHint().height() - style.px(6))
         total = style.px(LEFT_PX) + style.px(RIGHT_PX) + center.minimumSizeHint().width() + 4 * style.px(8)
         ratio = min(1.0, available.width() / total, style.px(RIGHT_PX) / right_need, height_have / height_need,
                     style.px(LEFT_PX) / max(sidebar_need, 1))
-        for w in (*panels, center, strip, tabs, sidebar):
+        for w in (*panels, center, strip, tabs, sidebar, recent):
             w.deleteLater()
         if ratio >= 1.0:
             break

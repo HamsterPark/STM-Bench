@@ -10,7 +10,8 @@ instrument refuses it in its own words.
 Object names are the window's address book for tests and for anyone who scripts the screen:
 ``act.<action>.<param>`` for every parameter's control, ``run.<action>`` for a run button,
 ``run.<action>.on`` / ``.off`` for an On / Off pair, ``run.<action>.<value>`` for one of a row of
-value buttons, ``reply.<group>`` for a group's reply line.
+value buttons. What an action answered is not shown here: every result goes to the list of recent
+results under the tabs (:mod:`stmbench.gui.recent`), where several calls of one step stay side by side.
 """
 from __future__ import annotations
 
@@ -23,7 +24,7 @@ from PySide6.QtWidgets import (QFrame, QGroupBox, QHBoxLayout, QLabel, QPushButt
 
 from ..instrument import ACTIONS
 from . import fmt, style
-from .controls import ElidedLabel, Segmented, SelectAllLineEdit, polish, strong
+from .controls import Segmented, SelectAllLineEdit, strong
 from .labels import both, tr
 from .layout import Cell, Choices, F, Group, OnOff, Run
 
@@ -56,7 +57,6 @@ class ActionPanel(QScrollArea):
         self._submit = submit
         self.controls: dict[tuple[str, str], QWidget] = {}
         self.run_buttons: dict[str, QPushButton] = {}
-        self.reply_labels: dict[str, ElidedLabel] = {}
         self._group_of: dict[str, str] = {}
         self._onoff: set[str] = set()
         self._runs: set[str] = set()
@@ -65,7 +65,7 @@ class ActionPanel(QScrollArea):
         body = QWidget()
         body.setObjectName("panel_body")
         lay = QVBoxLayout(body)
-        lay.setContentsMargins(style.px(3), style.px(3), style.px(3), style.px(3))
+        lay.setContentsMargins(style.px(2), style.px(2), style.px(2), style.px(2))
         lay.setSpacing(style.px(3))
         for g in groups:
             lay.addWidget(self._group(g))
@@ -87,12 +87,6 @@ class ActionPanel(QScrollArea):
                 widget, stretch = self._cell(cell)
                 h.addWidget(widget, stretch, Qt.AlignmentFlag.AlignBottom)
             v.addLayout(h)
-        reply = ElidedLabel()
-        reply.setObjectName(f"reply.{g.key}")
-        reply.setProperty("role", "label")
-        reply.setMinimumHeight(style.px(20))
-        self.reply_labels[g.key] = reply
-        v.addWidget(reply)
         return box
 
     def _cell(self, c: Cell) -> tuple[QWidget, int]:
@@ -234,11 +228,3 @@ class ActionPanel(QScrollArea):
             return False
         w.setText(text)
         return True
-
-    def set_reply(self, action: str, ok: bool, text: str) -> None:
-        lab = self.reply_labels.get(self._group_of.get(action, ""))
-        if lab is None:
-            return
-        lab.set_full_text(("✓ " if ok else "✗ ") + text)
-        lab.setProperty("tone", "ok" if ok else "bad")
-        polish(lab)

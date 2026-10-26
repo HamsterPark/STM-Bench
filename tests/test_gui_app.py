@@ -155,7 +155,7 @@ def test_the_operate_and_spectroscopy_tabs_show_everything_without_scrolling_at_
         assert not panel.verticalScrollBar().isVisible() and not panel.horizontalScrollBar().isVisible(), tab
         vp = panel.viewport().rect()
         for w in panel.widget().findChildren(QWidget):
-            if w.isVisible() and (w.objectName().startswith(("act.", "run.", "reply.", "lbl.", "group."))):
+            if w.isVisible() and (w.objectName().startswith(("act.", "run.", "lbl.", "group."))):
                 inside = w.rect().translated(w.mapTo(panel.viewport(), w.rect().topLeft()))
                 assert vp.contains(inside), (tab, w.objectName(), inside, vp)
     # no part of the window asks for more than the screen gives, so Qt never widens it
@@ -175,7 +175,7 @@ def test_every_control_is_big_enough_to_hit_and_text_is_large(open_window):
     for w in win.findChildren(QLineEdit):
         assert w.font().pixelSize() >= 17, w.objectName()
     for w in win.findChildren(QLabel):
-        if w.objectName().startswith(("lbl.", "reply.")):
+        if w.objectName().startswith(("lbl.", "recent.")):
             assert w.font().pixelSize() >= 16 or w.property("role") == "label", w.objectName()
 
 
@@ -196,7 +196,7 @@ def test_a_scan_started_by_a_click_shows_its_frame(open_window, tmp_path):
     fv = win.center.frame_view
     assert fv.image_rect().width() > 100
     assert f"✓ scan → {name}" in win.status.plain_text()
-    assert shots.widget(win, "reply.scan").full_text().startswith(f"✓ scan → {name}")
+    assert shots.widget(win, "recent.0").text().startswith(f"✓ scan → {name}")
     assert shots.widget(win, "data.frames").count() == 1 and name in shots.widget(win, "data.frames").item(0).text()
     assert shots.widget(win, "thumb.0").isVisible() and shots.widget(win, "thumb.0").name == name
     assert "Instrument time 0:00:38 / 1:30:00" in win.status.plain_text()     # 32 lines, two ways, 0.586 s each
@@ -231,8 +231,8 @@ def test_a_refusal_shows_the_instruments_words_everywhere(open_window, tmp_path)
     words = "refused: move_tip: outside the piezo range"
     assert win.status.result.full_text() == "✗ " + words
     assert win.status.result.property("tone") == "bad"
-    reply = shots.widget(win, "reply.tip")
-    assert reply.full_text() == "✗ " + words and reply.property("tone") == "bad"
+    newest = shots.widget(win, "recent.0")
+    assert newest.text() == "✗ " + words and newest.property("tone") == "bad"
     assert "move_tip: outside the piezo range" in shots.widget(win, "log.view").toPlainText()
     assert not acts(records(tmp_path))                          # nothing happened on the instrument
     # an empty required field sends nothing, a field that is not a number is sent as typed: both are refused,
@@ -469,7 +469,7 @@ def test_markers_are_read_off_the_frame_and_copied_into_forms_by_their_buttons(o
     run_button(win, "view.clear_markers")
     assert not fv.markers() and table.rowCount() == 0
     run_button(win, "markers.tip")
-    assert "No marker selected" in win.status.result.full_text()
+    assert win.recent.entries()[0] == ("note", "No marker selected.")
 
 
 def test_a_profile_is_drawn_by_dragging_with_the_profile_tool(open_window):
@@ -816,6 +816,60 @@ def test_the_window_shrinks_to_fit_a_screen_its_fonts_would_overflow_and_not_oth
         assert fit_scale(app, "en", 1.3, QSize(2560, 1400)) == 1.3              # a larger scale on a larger screen is kept
     finally:
         style.apply(app, 1.0)
+
+
+# ── the recent results ──
+def test_the_last_five_results_stay_on_screen_and_a_refusal_is_not_pushed_out_by_later_successes(open_window):
+    win = open_window("en")
+    shots.fill(win, {"act.set_bias.bias_v": "abc", "act.set_setpoint.current_pa": "100", "act.wait.seconds": "1"})
+    for name in ("run.set_bias", "run.set_setpoint", "run.wait"):          # one step, three calls, no looking between
+        run_button(win, name)
+    shots.settle(win)
+    rows = [shots.widget(win, f"recent.{i}") for i in range(3)]
+    assert [r.text() for r in rows] == ["✓ wait → waited_s=1", "✓ set_setpoint → setpoint_pa=100",
+                                        "✗ refused: set_bias: bias_v must be a number"]
+    assert [r.property("tone") for r in rows] == ["ok", "ok", "bad"]        # green, green, red: newest first
+    for r in rows:
+        shots.hit(win, r)                                                   # all three are in view
+    assert not shots.widget(win, "recent.3").isVisible()                    # no row for a call that was not made
+    for _ in range(2):                                                      # five calls in all: the refusal is the oldest
+        run_button(win, "run.wait")
+    shots.settle(win)
+    bad = shots.widget(win, "recent.4")
+    assert bad.text().startswith("✗ refused: set_bias") and bad.property("tone") == "bad"
+    shots.hit(win, bad)
+    run_button(win, "run.wait")                                             # a sixth call: the list holds five
+    shots.settle(win)
+    assert len(win.recent.entries()) == 5 and not any(t == "bad" for t, _ in win.recent.entries())
+    assert win.status.result.full_text().startswith("✓ wait")               # the strip still says the last one
+
+
+def test_the_recent_results_are_under_both_right_tabs_and_do_not_move_between_them(open_window):
+    win = open_window("en")
+    where = {}
+    for tab in ("operate", "spectroscopy", "operate"):
+        open_right(win, tab)
+        box = shots.widget(win, "recent.box")
+        shots.hit(win, box)
+        assert win.rect().contains(box.rect().translated(box.mapTo(win, box.rect().topLeft())))
+        where[tab] = box.mapTo(win, box.rect().topLeft())
+    assert where["operate"] == where["spectroscopy"]
+    tabs = win.right
+    assert box.mapTo(win, box.rect().topLeft()).y() >= tabs.mapTo(win, tabs.rect().bottomLeft()).y()
+
+
+def test_a_long_result_wraps_whole_and_the_list_keeps_its_place(open_window):
+    win = open_window("en")
+    before = shots.widget(win, "recent.box").geometry()
+    long = "refused: coarse_move: " + "the tip is in tunnelling and the coarse positioner would crash it; " * 3
+    win.recent.push("bad", long)
+    win.recent.push("ok", "wait → waited_s=1")
+    QApplication.processEvents()
+    row = shots.widget(win, "recent.1")
+    assert row.wordWrap() and row.text() == "✗ " + long and "…" not in row.text()      # whole, not elided
+    assert row.height() > 2 * row.fontMetrics().height()                                  # on several lines
+    assert shots.widget(win, "recent.box").geometry() == before                           # nothing else moved
+    assert win.recent.scroll.height() >= 6 * win.recent.rows[0].fontMetrics().height()    # room for a wrapped row
 
 
 # ── a whole episode ──

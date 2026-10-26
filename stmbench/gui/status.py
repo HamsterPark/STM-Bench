@@ -26,7 +26,7 @@ class StatusStrip(QFrame):
         self._budget: float | None = None
         self._plain: dict[str, str] = {}
         v = QVBoxLayout(self)
-        v.setContentsMargins(style.px(12), style.px(4), style.px(12), style.px(4))
+        v.setContentsMargins(style.px(12), style.px(3), style.px(12), style.px(3))
         v.setSpacing(style.px(1))
         big = style.sans_font(18)
 
