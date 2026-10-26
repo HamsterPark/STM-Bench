@@ -9,6 +9,7 @@ import io
 import json
 import math
 import os
+import time
 from pathlib import Path
 
 import pytest
@@ -16,7 +17,7 @@ import pytest
 pytest.importorskip("PySide6")
 os.environ["QT_QPA_PLATFORM"] = "offscreen"                 # never a visible window
 
-from PySide6.QtCore import Qt  # noqa: E402
+from PySide6.QtCore import QCoreApplication, QEvent, Qt  # noqa: E402
 from PySide6.QtGui import QCloseEvent, QImage  # noqa: E402
 from PySide6.QtTest import QTest  # noqa: E402
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QLabel, QLineEdit, QListWidget,  # noqa: E402
@@ -54,6 +55,36 @@ def app():
     a.setFont(before[0])
 
 
+@pytest.fixture(params=["default", "dejavu"])
+def fonts(request, app):
+    """The window's text in the fonts it was tuned with, and again in DejaVu Sans / Sans Mono: what a Linux
+    desktop without anything else (the virtual machine) falls back to, wider and with another line height.
+    matplotlib carries the files; without them the second run is skipped. Requested before ``open_window``
+    so that the window is made in these fonts."""
+    if request.param == "default":
+        yield "default"
+        return
+    mpl = pytest.importorskip("matplotlib")
+    from PySide6.QtGui import QFontDatabase
+    folder = Path(mpl.get_data_path()) / "fonts" / "ttf"
+    names = ("DejaVuSans.ttf", "DejaVuSans-Bold.ttf", "DejaVuSansMono.ttf", "DejaVuSansMono-Bold.ttf")
+    if not all((folder / n).is_file() for n in names):
+        pytest.skip("no DejaVu fonts to test with")
+    ids = [QFontDatabase.addApplicationFont(str(folder / n)) for n in names]
+    sans, mono = list(style.SANS), list(style.MONO)
+    style.SANS[:] = ["DejaVu Sans", *sans]
+    style.MONO[:] = ["DejaVu Sans Mono", *mono]
+    style.apply(app, 1.0)
+    try:
+        yield "dejavu"
+    finally:
+        style.SANS[:] = sans
+        style.MONO[:] = mono
+        style.apply(app, 1.0)
+        for i in ids:
+            QFontDatabase.removeApplicationFont(i)
+
+
 @pytest.fixture
 def open_window(app, tmp_path):
     """A factory of windows on 1920x1053, shut down afterwards (their worker threads must end)."""
@@ -76,6 +107,9 @@ def open_window(app, tmp_path):
     for w in made:
         w.shutdown(finish=False)
         w.deleteLater()
+    # really delete them now: a window left until the event loop turns stays in the application, and every
+    # later change of the style sheet (a fixture that swaps the fonts, fit_scale) restyles all of them
+    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
     app.processEvents()
 
 
@@ -155,7 +189,7 @@ def test_the_operate_and_spectroscopy_tabs_show_everything_without_scrolling_at_
         assert not panel.verticalScrollBar().isVisible() and not panel.horizontalScrollBar().isVisible(), tab
         vp = panel.viewport().rect()
         for w in panel.widget().findChildren(QWidget):
-            if w.isVisible() and (w.objectName().startswith(("act.", "run.", "reply.", "lbl.", "group."))):
+            if w.isVisible() and (w.objectName().startswith(("act.", "run.", "lbl.", "group."))):
                 inside = w.rect().translated(w.mapTo(panel.viewport(), w.rect().topLeft()))
                 assert vp.contains(inside), (tab, w.objectName(), inside, vp)
     # no part of the window asks for more than the screen gives, so Qt never widens it
@@ -175,7 +209,7 @@ def test_every_control_is_big_enough_to_hit_and_text_is_large(open_window):
     for w in win.findChildren(QLineEdit):
         assert w.font().pixelSize() >= 17, w.objectName()
     for w in win.findChildren(QLabel):
-        if w.objectName().startswith(("lbl.", "reply.")):
+        if w.objectName().startswith(("lbl.", "recent.")):
             assert w.font().pixelSize() >= 16 or w.property("role") == "label", w.objectName()
 
 
@@ -196,7 +230,7 @@ def test_a_scan_started_by_a_click_shows_its_frame(open_window, tmp_path):
     fv = win.center.frame_view
     assert fv.image_rect().width() > 100
     assert f"✓ scan → {name}" in win.status.plain_text()
-    assert shots.widget(win, "reply.scan").full_text().startswith(f"✓ scan → {name}")
+    assert shots.widget(win, "recent.0").text().startswith(f"✓ scan → {name}")
     assert shots.widget(win, "data.frames").count() == 1 and name in shots.widget(win, "data.frames").item(0).text()
     assert shots.widget(win, "thumb.0").isVisible() and shots.widget(win, "thumb.0").name == name
     assert "Instrument time 0:00:38 / 1:30:00" in win.status.plain_text()     # 32 lines, two ways, 0.586 s each
@@ -220,7 +254,7 @@ def test_set_bias_set_setpoint_and_move_tip_clicked_back_to_back_run_in_that_ord
     assert acts(records(tmp_path)) == ["set_bias", "set_setpoint", "move_tip"]
     text = shots.widget(win, "log.view").toPlainText()
     assert text.index("move_tip") < text.index("set_setpoint") < text.index("set_bias")      # newest first
-    assert "Bias 5.0 mV" in win.status.plain_text() and "Setpoint 100 nA" in win.status.plain_text()
+    assert "Bias 0.005 V" in win.status.plain_text() and "Setpoint 100000 pA" in win.status.plain_text()   # never mV or nA
 
 
 def test_a_refusal_shows_the_instruments_words_everywhere(open_window, tmp_path):
@@ -231,8 +265,8 @@ def test_a_refusal_shows_the_instruments_words_everywhere(open_window, tmp_path)
     words = "refused: move_tip: outside the piezo range"
     assert win.status.result.full_text() == "✗ " + words
     assert win.status.result.property("tone") == "bad"
-    reply = shots.widget(win, "reply.tip")
-    assert reply.full_text() == "✗ " + words and reply.property("tone") == "bad"
+    newest = shots.widget(win, "recent.0")
+    assert newest.text() == "✗ " + words and newest.property("tone") == "bad"
     assert "move_tip: outside the piezo range" in shots.widget(win, "log.view").toPlainText()
     assert not acts(records(tmp_path))                          # nothing happened on the instrument
     # an empty required field sends nothing, a field that is not a number is sent as typed: both are refused,
@@ -359,17 +393,43 @@ def test_a_qplus_rigs_sensor_constants_are_among_the_facts(open_window):
 def test_the_status_strip_reads_in_units_and_counts_instrument_time(open_window):
     win = open_window("en")
     plain = win.status.plain_text()
-    for want in ("Bias 50.0 mV", "Setpoint 200 pA", "Z feedback ON", "Range 10 nA", "Withdrawn no", "Lock-in OFF",
-                 "0:00:00 / 1:30:00", "Actions 0", P4, "READY"):
+    for want in ("Bias 0.050 V", "Setpoint 200 pA", "Z feedback ON", "Range 10 nA", "Withdrawn no", "Lock-in OFF",
+                 "Oscillation n/a", "Drift comp. OFF", "0:00:00 / 1:30:00", "Actions 0", P4, "READY"):
         assert want in plain, want
     assert "e-" not in plain
     scan_small(win)
     assert "Actions 1" in win.status.plain_text() and win.status.bar.value() > 0
     zh = open_window("zh", name="run_zh")
-    assert "偏压 Bias 50.0 mV" in zh.status.plain_text() and "就绪 READY" in zh.status.plain_text()
+    assert "偏压 0.050 V" in zh.status.plain_text() and "就绪 READY" in zh.status.plain_text()
 
 
 # ── the report and the end ──
+def test_the_report_form_marks_what_the_picked_claim_needs_and_enter_sends_it(open_window, tmp_path):
+    win = open_window("en", scenario="P1_barth1990_au111")
+    open_left(win, "report")
+    rep = win.sidebar.report
+    starred = lambda: {k for k, lab in rep.labels.items() if lab.text().endswith("*</span>")}       # noqa: E731
+    assert starred() == {"value"}                                         # no claim yet: a value is always needed
+    run_button(win, "report.claim.stripe_period_nm")                     # a number about the whole surface
+    assert starred() == {"value"} and rep.required_fields() == {"value"}
+    run_button(win, "report.claim.stripe_orientation_deg")               # an angle at a place: where, and in which frame
+    assert starred() == {"value", "x_nm", "y_nm", "frame"}
+    run_button(win, "report.claim.stripe_period_nm")                     # and back
+    assert starred() == {"value"}
+    assert shots.widget(win, "report.label.x_nm").text().startswith("x_nm ")      # the name still comes first
+    # Enter in any field sends the report, as the button does
+    run_button(win, "report.claim.stripe_orientation_deg")
+    shots.fill(win, {"report.x_nm": "1"})
+    QTest.keyClick(shots.widget(win, "report.x_nm"), Qt.Key.Key_Return)        # no value: the instrument says so
+    shots.settle(win)
+    assert rep.reply.text() == "✗ refused: report: value is required"
+    shots.fill(win, {"report.value": "30", "report.y_nm": "2", "report.frame": "sim001.sxm", "report.evidence": "sim001.sxm"})
+    QTest.keyClick(shots.widget(win, "report.evidence"), Qt.Key.Key_Enter)    # the keypad's Enter too
+    shots.settle(win)
+    assert rep.reply.text().startswith("✓ recorded stripe_orientation_deg = 30")
+    assert [r["kind"] for r in records(tmp_path) if r["kind"] == "report"] == ["report"]       # the one that was complete
+
+
 def test_a_report_and_the_end_through_the_report_tab(open_window, tmp_path):
     win = open_window("en")
     name = scan_small(win)
@@ -469,7 +529,41 @@ def test_markers_are_read_off_the_frame_and_copied_into_forms_by_their_buttons(o
     run_button(win, "view.clear_markers")
     assert not fv.markers() and table.rowCount() == 0
     run_button(win, "markers.tip")
-    assert "No marker selected" in win.status.result.full_text()
+    assert win.recent.entries()[0] == ("note", "No marker selected.")
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_a_marker_is_deleted_by_a_button_and_the_table_scrolls_to_the_newest(fonts, open_window, lang):
+    win = open_window(lang)
+    scan_small(win)
+    fv = win.center.frame_view
+    table = shots.widget(win, "markers.table")
+    assert table.horizontalHeader().height() >= 23                              # 15 px or more in the 1280x720 picture
+    assert table.viewport().height() >= 5 * table.verticalHeader().defaultSectionSize()      # five rows without scrolling
+    for i in range(5):
+        shots.click(win, fv, fv.pixel_to_widget(3 + 4 * i, 6 + 5 * (i % 3)).toPoint())
+    assert table.rowCount() == 5 and not table.verticalScrollBar().isVisible()
+    for i in range(5, 9):
+        shots.click(win, fv, fv.pixel_to_widget(3 + 3 * i, 5 + 4 * (i % 4)).toPoint())
+    assert table.rowCount() == 9
+    bar = table.verticalScrollBar()
+    assert bar.isVisible() and bar.maximum() > 0                                 # more rows than fit: it scrolls
+    newest = table.visualItemRect(table.item(8, 0))
+    assert table.viewport().rect().contains(newest)                              # the newest, the selected, is in view
+    xs = [m["x_nm"] for m in fv.markers()]
+    bar.setValue(0)
+    shots.click(win, table.viewport(), table.visualItemRect(table.item(2, 1)).center())      # select the third
+    assert win.center.selected_row() == 2 and fv.selected_marker()["x_nm"] == xs[2]
+    shots.hit(win, shots.widget(win, "markers.delete"))
+    run_button(win, "markers.delete")
+    assert [m["x_nm"] for m in fv.markers()] == xs[:2] + xs[3:] and table.rowCount() == 8
+    assert [table.item(r, 0).text() for r in range(8)] == [str(r + 1) for r in range(8)]    # numbered again
+    assert win.center.selected_row() == 7                                        # the selection moves to the newest
+    assert float(table.item(7, 1).text()) == pytest.approx(xs[-1], abs=5e-4)
+    run_button(win, "view.clear_markers")
+    run_button(win, "markers.delete")                                            # none to delete: said, not ignored
+    tone, text = win.recent.entries()[0]
+    assert tone == "note" and text.endswith("No marker selected.") and table.rowCount() == 0
 
 
 def test_a_profile_is_drawn_by_dragging_with_the_profile_tool(open_window):
@@ -620,10 +714,18 @@ def test_in_the_sealed_mode_the_seed_is_in_no_widget_title_or_file_and_close_doe
 def test_the_screenshot_script_renders_every_state_at_both_sizes(app, tmp_path):
     saved = shots.render_states(tmp_path / "png", "en", work=tmp_path / "work")
     names = sorted(p.name for p in saved)
-    assert len(names) == 16 and any(n.startswith("a_started") for n in names) and any(n.startswith("e_refusal") for n in names)
+    assert len(names) == 18 and any(n.startswith("a_started") for n in names) and any(n.startswith("e_refusal") for n in names)
+    assert any(n.startswith("i_busy") for n in names)
     for p in saved:
         img = QImage(str(p))
         assert (img.width(), img.height()) == (shots.DOWNSCALED if p.stem.endswith("1280x720") else shots.SCREEN), p.name
+    # the pictures are of the full-screen window (the one an agent is shown): no desktop bar above it, so
+    # the first row of pixels is the status strip's frame, not the bar's grey
+    top = QImage(str(next(p for p in saved if p.name == "a_started_en.png"))).pixelColor(960, 2)
+    assert top.name() != "#2e3436"
+    maximized = shots.render_states(tmp_path / "png_dev", "en", work=tmp_path / "work_dev", fullscreen=False)
+    dev_top = QImage(str(next(p for p in maximized if p.name == "a_started_en.png"))).pixelColor(960, 2)
+    assert dev_top.name() == "#2e3436"                                      # a maximized window leaves the 27 px bar
     app.processEvents()
 
 
@@ -810,12 +912,353 @@ def test_the_window_shrinks_to_fit_a_screen_its_fonts_would_overflow_and_not_oth
     from stmbench.gui.app import fit_scale
     try:
         assert fit_scale(app, "zh", 1.0, QSize(*shots.WINDOW)) == 1.0           # the screen it was tuned for
+        # a maximized window under GNOME's top bar and its own 37 px title bar (1016 of the 1080), and the sealed
+        # mode's full-screen window (all 1080, no frame)
+        for lang in ("en", "zh"):
+            assert fit_scale(app, lang, 1.0, QSize(1920, 1080 - 27)) == 1.0, lang
+            assert fit_scale(app, lang, 1.0, QSize(1920, 1080), 0) == 1.0, lang
         small = fit_scale(app, "zh", 1.0, QSize(1500, 900))
         assert 0.7 <= small < 1.0 and style.SCALE == small                       # left applied, for the window to use
         assert fit_scale(app, "zh", small, QSize(1500, 900)) == small           # and it fits: asking again changes nothing
         assert fit_scale(app, "en", 1.3, QSize(2560, 1400)) == 1.3              # a larger scale on a larger screen is kept
     finally:
         style.apply(app, 1.0)
+
+
+# ── the recent results ──
+def test_the_last_five_results_stay_on_screen_and_a_refusal_is_not_pushed_out_by_later_successes(open_window):
+    win = open_window("en")
+    shots.fill(win, {"act.set_bias.bias_v": "abc", "act.set_setpoint.current_pa": "100", "act.wait.seconds": "1"})
+    for name in ("run.set_bias", "run.set_setpoint", "run.wait"):          # one step, three calls, no looking between
+        run_button(win, name)
+    shots.settle(win)
+    rows = [shots.widget(win, f"recent.{i}") for i in range(3)]
+    assert [r.text() for r in rows] == ["✓ wait → waited_s=1", "✓ set_setpoint → setpoint_pa=100",
+                                        "✗ refused: set_bias: bias_v must be a number"]
+    assert [r.property("tone") for r in rows] == ["ok", "ok", "bad"]        # green, green, red: newest first
+    for r in rows:
+        shots.hit(win, r)                                                   # all three are in view
+    assert not shots.widget(win, "recent.3").isVisible()                    # no row for a call that was not made
+    for _ in range(2):                                                      # five calls in all: the refusal is the oldest
+        run_button(win, "run.wait")
+    shots.settle(win)
+    bad = shots.widget(win, "recent.4")
+    assert bad.text().startswith("✗ refused: set_bias") and bad.property("tone") == "bad"
+    shots.hit(win, bad)
+    run_button(win, "run.wait")                                             # a sixth call: the list holds five
+    shots.settle(win)
+    assert len(win.recent.entries()) == 5 and not any(t == "bad" for t, _ in win.recent.entries())
+    assert win.status.result.full_text().startswith("✓ wait")               # the strip still says the last one
+
+
+def test_the_recent_results_are_under_both_right_tabs_and_do_not_move_between_them(open_window):
+    win = open_window("en")
+    where = {}
+    for tab in ("operate", "spectroscopy", "operate"):
+        open_right(win, tab)
+        box = shots.widget(win, "recent.box")
+        shots.hit(win, box)
+        assert win.rect().contains(box.rect().translated(box.mapTo(win, box.rect().topLeft())))
+        where[tab] = box.mapTo(win, box.rect().topLeft())
+    assert where["operate"] == where["spectroscopy"]
+    tabs = win.right
+    assert box.mapTo(win, box.rect().topLeft()).y() >= tabs.mapTo(win, tabs.rect().bottomLeft()).y()
+
+
+def test_a_long_result_wraps_whole_and_the_list_keeps_its_place(open_window):
+    win = open_window("en")
+    before = shots.widget(win, "recent.box").geometry()
+    long = "refused: coarse_move: " + "the tip is in tunnelling and the coarse positioner would crash it; " * 3
+    win.recent.push("bad", long)
+    win.recent.push("ok", "wait → waited_s=1")
+    QApplication.processEvents()
+    row = shots.widget(win, "recent.1")
+    assert row.wordWrap() and row.text() == "✗ " + long and "…" not in row.text()      # whole, not elided
+    assert row.height() > 2 * row.fontMetrics().height()                                  # on several lines
+    assert shots.widget(win, "recent.box").geometry() == before                           # nothing else moved
+    assert win.recent.scroll.height() >= 6 * win.recent.rows[0].fontMetrics().height()    # room for a wrapped row
+
+
+# ── hit targets ──
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_every_button_of_a_row_of_choices_is_wide_enough_to_hit_in_a_downscaled_picture(fonts, open_window, lang):
+    """56 px at full size is 37 px in the 1280x720 picture a model is shown; the viewer's Z button was 22 there."""
+    win = open_window(lang)
+    scan_small(win)
+    open_right(win, "spectroscopy")
+    shots.fill(win, {"act.sts.v_start": "-0.5", "act.sts.v_end": "0.5", "act.sts.points": "32"})
+    run_button(win, "run.sts")
+    shots.settle(win)                                                          # the spectrum's axis selectors exist now
+    seen = 0
+    for view in ("spectrum", "frame"):
+        if view == "frame":
+            win.request_frame(win._data["frames"][-1]["frame"])
+            shots.settle(win)
+        for tab in ("operate", "spectroscopy"):
+            open_right(win, tab)
+            for b in win.findChildren(QPushButton):
+                if b.property("seg") and b.isVisible():
+                    seen += 1
+                    assert b.width() >= 56 and b.height() >= 32, (b.objectName(), b.width(), b.height())
+    assert seen > 60                                                          # the panels' and the viewer's, both views
+    assert shots.widget(win, "view.channel.z").width() >= 56                   # the one that was missed
+
+
+# ── nothing is cut off ──
+def lines_fit(label_or_list, lines: list[str], width: int, font=None) -> None:
+    from PySide6.QtGui import QFontMetrics
+    fm = QFontMetrics(font or label_or_list.font())
+    for line in lines:
+        assert fm.horizontalAdvance(line) <= width, (label_or_list.objectName(), line, fm.horizontalAdvance(line), width)
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_what_the_viewer_the_profile_and_the_data_tab_say_is_not_cut_off(fonts, open_window, lang):
+    win = open_window(lang)
+    # a rotated frame away from the origin: the longest numbers the geometry line can carry
+    shots.fill(win, {"act.scan.center_x_nm": "-12.534", "act.scan.center_y_nm": "-5.607", "act.scan.size_nm": "8.25",
+                     "act.scan.pixels": "80", "act.scan.angle_deg": "30"})
+    run_button(win, "run.scan")
+    shots.settle(win)
+    open_right(win, "spectroscopy")
+    shots.fill(win, {"act.sts.v_start": "-0.6", "act.sts.v_end": "0.6", "act.sts.points": "64"})
+    run_button(win, "run.sts")
+    shots.settle(win)
+    info = shots.widget(win, "view.info")
+    assert "…" not in info.text() and len(info.text().split(chr(10))) == 2
+    lines_fit(info, info.text().split(chr(10)), info.width())                         # the spectrum's two lines
+    win.request_frame(win.viewed[1] if win.viewed[0] == "frame" else win._data["frames"][-1]["frame"])
+    shots.settle(win)
+    assert win.viewed[0] == "frame"
+    lines_fit(info, info.text().split(chr(10)), info.width())                         # and the frame's
+    assert "angle 30°" in info.text() and "centre (-12.534, -5.607) nm" in info.text()
+    fv = win.center.frame_view
+    shots.click(win, shots.widget(win, "view.tool.profile"))
+    shots.drag(win, fv, fv.pixel_to_widget(5, 5).toPoint(), fv.pixel_to_widget(70, 60).toPoint())
+    plot = win.center.small_plot
+    reg, bold = plot._fonts()
+    title = plot._title
+    assert title.startswith("A→B ") and "…" not in title
+    lines_fit(plot, [title], plot.width() - 2 * 8, bold)                                # the title is whole
+    open_left(win, "data")
+    for lst in (shots.widget(win, "data.frames"), shots.widget(win, "data.spectra")):
+        assert lst.count() == 1 and not lst.horizontalScrollBar().isVisible()
+        text = lst.item(0).text().split(chr(10))
+        assert len(text) == 3                                                           # three lines, each whole
+        lines_fit(lst, text, lst.viewport().width() - 2 * style.px(6) - 2)
+    assert "centre (-12.534, -5.607) nm" in shots.widget(win, "data.frames").item(0).text()
+
+
+# ── the state the buttons show ──
+def checked(win: MainWindow, name: str) -> bool:
+    return shots.widget(win, name).isChecked()
+
+
+def test_on_off_pairs_and_the_range_row_show_the_state_the_instrument_reports(open_window):
+    win = open_window("en")
+    assert checked(win, "run.feedback.on") and not checked(win, "run.feedback.off")            # tunnelling, loop closed
+    assert checked(win, "run.set_current_range.10") and not checked(win, "run.set_current_range.1")
+    assert not checked(win, "run.drift_comp.on") and checked(win, "run.drift_comp.off")
+    run_button(win, "run.feedback.off")
+    shots.settle(win)
+    assert checked(win, "run.feedback.off") and not checked(win, "run.feedback.on")
+    assert "Z feedback OFF" in win.status.plain_text()
+    run_button(win, "run.feedback.on")
+    run_button(win, "run.set_current_range.1")
+    shots.settle(win)
+    assert checked(win, "run.feedback.on") and checked(win, "run.set_current_range.1")
+    assert not checked(win, "run.set_current_range.10") and "Range 1 nA" in win.status.plain_text()
+    shots.fill(win, {"act.drift_comp.vx_nm_per_min": "0.5", "act.drift_comp.vy_nm_per_min": "-0.25"})
+    run_button(win, "run.drift_comp.on")                                   # the compensation was not in status() before
+    shots.settle(win)
+    assert checked(win, "run.drift_comp.on") and not checked(win, "run.drift_comp.off")
+    assert "Drift comp. ON (0.5, -0.25) nm/min" in win.status.plain_text()
+    run_button(win, "run.drift_comp.off")
+    shots.settle(win)
+    assert checked(win, "run.drift_comp.off") and "Drift comp. OFF" in win.status.plain_text()
+    open_right(win, "spectroscopy")
+    assert checked(win, "run.lockin.off")
+    run_button(win, "run.lockin.on")
+    shots.settle(win)
+    assert checked(win, "run.lockin.on") and not checked(win, "run.lockin.off") and "Lock-in ON" in win.status.plain_text()
+
+
+def test_a_switch_the_rig_does_not_have_shows_neither_state_and_a_refused_click_does_not_stick(open_window):
+    win = open_window("en")
+    open_right(win, "spectroscopy")
+    assert not checked(win, "run.pll.on") and not checked(win, "run.pll.off")          # P4 has no qPlus sensor
+    assert "Oscillation n/a" in win.status.plain_text()
+    run_button(win, "run.pll.on")                                                       # the instrument refuses
+    shots.settle(win)
+    assert win.status.result.full_text() == "✗ refused: pll: this instrument has no qPlus sensor"
+    assert not checked(win, "run.pll.on") and not checked(win, "run.pll.off")          # the click did not leave it selected
+    qp = open_window("en", name="run_qplus", scenario=P5)
+    open_right(qp, "spectroscopy")
+    assert checked(qp, "run.pll.off") and "Oscillation OFF" in qp.status.plain_text()
+    run_button(qp, "run.pll.on")
+    shots.settle(qp)
+    assert checked(qp, "run.pll.on") and not checked(qp, "run.pll.off") and "Oscillation ON" in qp.status.plain_text()
+
+
+# ── the screens it opens on ──
+@pytest.mark.parametrize("height", [1080, 1016])
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_window_fits_a_full_screen_and_a_maximized_window_under_a_title_bar(fonts, open_window, lang, height):
+    """1080: the sealed mode's window is the screen. 1016: a maximized dev window under GNOME's 27 px top bar
+    and its 37 px title bar. Nothing scrolls, nothing is hidden, in the window's fonts and in DejaVu."""
+    if lang == "zh" and fonts == "dejavu":
+        pytest.skip("both languages on every label, in the wider font, overflow the right column: fit_scale shrinks it")
+    win = open_window(lang)
+    win.resize(1920, height)
+    shots.settle(win)
+    QApplication.processEvents()
+    for tab, panel in (("operate", win.operate), ("spectroscopy", win.spectroscopy)):
+        open_right(win, tab)
+        win.wait_idle()
+        assert not panel.verticalScrollBar().isVisible() and not panel.horizontalScrollBar().isVisible(), (tab, height)
+        vp = panel.viewport().rect()
+        for w in panel.widget().findChildren(QWidget):
+            if w.isVisible() and w.objectName().startswith(("act.", "run.", "lbl.", "group.")):
+                inside = w.rect().translated(w.mapTo(panel.viewport(), w.rect().topLeft()))
+                assert vp.contains(inside), (tab, height, w.objectName())
+    box = shots.widget(win, "recent.box")
+    assert win.rect().contains(box.rect().translated(box.mapTo(win, box.rect().topLeft())))     # the list is on screen
+    assert win.status.readings.height() < 2 * win.status.readings.fontMetrics().height()           # one line of readings
+    open_left(win, "report")
+    assert not win.sidebar.report_scroll.verticalScrollBar().isVisible()
+    assert win.center.frame_view.height() >= 400                                                  # the image keeps its room
+
+
+def test_a_sealed_window_opens_full_screen_and_a_dev_window_maximized(open_window, tmp_path):
+    from stmbench.gui.app import show_window
+    sealed = open_window("en", sealed=True, seed=SEED)
+    dev = open_window("en", name="dev")
+    sealed.hide()
+    dev.hide()
+    show_window(sealed)
+    assert sealed.isFullScreen() and not sealed.isMaximized()
+    show_window(dev)
+    assert dev.isMaximized() and not dev.isFullScreen()
+    sealed.showNormal()
+    dev.showNormal()
+
+
+# ── a busy instrument ──
+class Gate:
+    """A job that holds the worker until the test opens the gate: a scan that is "running" for as long as
+    the test wants, whatever the speed of the machine."""
+
+    def __init__(self, win: MainWindow, kind: str = "act", label: str = "scan", args: dict | None = None):
+        import threading
+
+        from stmbench.gui.jobs import Outcome
+        from stmbench.gui.worker import Job
+        self.event = threading.Event()
+        self.args = args if args is not None else {"center_x_nm": 0, "center_y_nm": 0, "size_nm": 40, "pixels": 1024}
+
+        def hold(_session):
+            self.event.wait(60)
+            return Outcome(kind, label, dict(self.args), ok=False, refused=True, text=f"{label}: held by the test")
+
+        self.win = win
+        win._submit(Job(kind, label, dict(self.args), hold))
+        end = time.monotonic() + 10
+        # until the window has heard that it runs: the worker sets it running a moment before it says so
+        while win.status.result.property("tone") != "busy" and time.monotonic() < end:
+            QApplication.processEvents()
+            time.sleep(0.005)
+        QApplication.processEvents()
+
+    def open(self) -> None:
+        self.event.set()
+        shots.settle(self.win)
+
+
+def test_the_strip_says_what_runs_and_how_many_wait_and_the_viewer_says_a_scan_is_running(open_window):
+    win = open_window("en")
+    gate = Gate(win)
+    try:
+        want = "running: scan centre (0, 0) size 40 nm, 1024 px"
+        assert win.status.result.full_text() == want and win.status.result.property("tone") == "busy"
+        assert "BUSY: scan" in win.status.plain_text()
+        over = shots.widget(win, "view.busy")
+        assert over.isVisible() and over.text() == "scan running…"
+        assert over.geometry() == win.center.stack.rect()                      # over the whole viewer
+        assert not shots.widget(win, "status.cancel").isVisible()               # nothing waits: nothing to cancel
+        shots.fill(win, {"act.set_bias.bias_v": "0.1", "act.set_setpoint.current_pa": "100"})
+        run_button(win, "run.set_bias")
+        run_button(win, "run.set_setpoint")                                     # clicked while the instrument is busy
+        QApplication.processEvents()
+        assert win.status.result.full_text() == want + " (+2 queued)"
+        assert shots.widget(win, "status.cancel").isVisible()
+        shots.hit(win, shots.widget(win, "status.cancel"))
+    finally:
+        gate.open()
+    assert win.status.result.full_text().startswith("✓ set_setpoint")           # idle again: the last result
+    assert not shots.widget(win, "view.busy").isVisible()
+    assert not shots.widget(win, "status.cancel").isVisible()
+    assert win.recent.entries()[2] == ("bad", "refused: scan: held by the test")
+
+
+def test_a_scan_that_waits_behind_another_call_is_shown_as_running_too(open_window):
+    win = open_window("en")
+    gate = Gate(win, "act", "wait", {"seconds": 5})
+    try:
+        assert not shots.widget(win, "view.busy").isVisible()                  # a wait is not a scan
+        shots.fill(win, SMALL)
+        run_button(win, "run.scan")
+        QApplication.processEvents()
+        assert shots.widget(win, "view.busy").isVisible()                      # queued: it will be the next thing running
+        assert win.status.result.full_text() == "running: wait seconds=5 (+1 queued)"
+    finally:
+        gate.open()
+    assert not shots.widget(win, "view.busy").isVisible() and win.viewed is not None
+
+
+def test_cancel_queued_drops_what_has_not_started_and_nothing_else(open_window, tmp_path):
+    win = open_window("en")
+    gate = Gate(win, "act", "wait", {"seconds": 5})
+    try:
+        shots.fill(win, {"act.set_bias.bias_v": "0.1", "act.set_setpoint.current_pa": "100", **SMALL})
+        for name in ("run.set_bias", "run.set_setpoint", "run.scan"):
+            run_button(win, name)
+        QApplication.processEvents()
+        assert win.worker.waiting == 3 and shots.widget(win, "view.busy").isVisible()    # a scan is among them
+        run_button(win, "status.cancel")
+        QApplication.processEvents()
+        assert win.worker.waiting == 0 and win.worker.running is not None         # the running one is not touched
+        assert win.recent.entries()[0] == ("note", "cancelled queued: set_bias, set_setpoint, scan")
+        assert not shots.widget(win, "status.cancel").isVisible()
+        assert not shots.widget(win, "view.busy").isVisible()                   # the scan will not run
+        assert win.status.result.full_text() == "running: wait seconds=5"
+        text = shots.widget(win, "log.view").toPlainText()
+        assert text.count("cancelled") == 3 and "queued" not in text and "set_bias" in text
+    finally:
+        gate.open()
+    assert win.is_idle() and win.worker.idle
+    assert not acts(records(tmp_path))                                           # none of the three reached the instrument
+    run_button(win, "run.set_bias")                                               # and the window works as before
+    shots.settle(win)
+    assert acts(records(tmp_path)) == ["set_bias"]
+
+
+def test_a_click_on_a_viewer_that_shows_no_frame_leaves_a_note_and_a_frame_takes_markers(open_window):
+    win = open_window("en")
+    fv = win.center.frame_view
+    shots.click(win, fv)
+    assert win.recent.entries()[0] == ("note", "no frame shown: nothing marked")
+    assert shots.widget(win, "recent.0").property("tone") == "note" and not fv.markers()
+    gate = Gate(win)                                                              # the overlay lets the pointer through
+    try:
+        shots.click(win, fv)
+        assert len([e for e in win.recent.entries() if e[1].startswith("no frame")]) == 2
+    finally:
+        gate.open()
+    scan_small(win)
+    notes = lambda: [e for e in win.recent.entries() if e[1].startswith("no frame")]        # noqa: E731
+    before = notes()
+    shots.click(win, fv, fv.pixel_to_widget(16, 16).toPoint())
+    assert len(fv.markers()) == 1 and notes() == before                           # a frame takes the click: no note
 
 
 # ── a whole episode ──

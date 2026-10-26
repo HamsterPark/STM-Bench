@@ -20,6 +20,13 @@ def tr(key: str, lang: str = "zh") -> str:
     return both(*S[key], lang)
 
 
+def one(key: str, lang: str = "zh") -> str:
+    """One language only (the Chinese in ``zh``, else the English): for a line of many short readings,
+    which in both languages at once would not fit the width of the window."""
+    en, zh = S[key]
+    return zh if lang != "en" and zh else en
+
+
 def two_lines(key: str, lang: str = "zh") -> str:
     """A tab or column title: English alone, or the Chinese above its English."""
     en, zh = S[key]
@@ -45,7 +52,13 @@ S: dict[str, Pair] = {
     "withdrawn": ("Withdrawn", "撤针"),
     "lockin": ("Lock-in", "锁相"),
     "oscillation": ("Oscillation", "振荡"),
+    "drift": ("Drift comp.", "漂移补偿"),
     "no_call": ("No call yet.", "还没有操作。"),
+    "running": ("running", "运行中"),
+    "cancel_queued": ("Cancel queued", "取消排队"),
+    "cancelled": ("cancelled", "已取消"),
+    "cancelled_note": ("cancelled queued", "已取消排队"),
+    "recent_title": ("Recent results", "最近结果"),
     "stays_open": ("This program stays open; it is closed from outside.", "此程序保持打开，由外部关闭。"),
     # the instrument's facts (top of the Manual tab)
     "facts_title": ("Instrument facts", "仪器参数"),
@@ -105,6 +118,9 @@ S: dict[str, Pair] = {
     "lbl_x": ("x axis", "横轴"),
     "lbl_y": ("y axis", "纵轴"),
     "no_view": ("Nothing shown.", "没有显示的内容。"),
+    "scan_running": ("scan running…", "扫描进行中…"),
+    "no_frame_click": ("no frame shown: nothing marked", "没有显示的帧：未标记"),
+    "delete_marker": ("Delete marker", "删除标记"),
     "mk_num": ("#", "#"),
     "mk_x": ("x nm", "x nm"),
     "mk_y": ("y nm", "y nm"),

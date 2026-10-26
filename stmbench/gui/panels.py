@@ -10,7 +10,8 @@ instrument refuses it in its own words.
 Object names are the window's address book for tests and for anyone who scripts the screen:
 ``act.<action>.<param>`` for every parameter's control, ``run.<action>`` for a run button,
 ``run.<action>.on`` / ``.off`` for an On / Off pair, ``run.<action>.<value>`` for one of a row of
-value buttons, ``reply.<group>`` for a group's reply line.
+value buttons. What an action answered is not shown here: every result goes to the list of recent
+results under the tabs (:mod:`stmbench.gui.recent`), where several calls of one step stay side by side.
 """
 from __future__ import annotations
 
@@ -23,7 +24,7 @@ from PySide6.QtWidgets import (QFrame, QGroupBox, QHBoxLayout, QLabel, QPushButt
 
 from ..instrument import ACTIONS
 from . import fmt, style
-from .controls import ElidedLabel, Segmented, SelectAllLineEdit, polish, strong
+from .controls import Segmented, SelectAllLineEdit, strong
 from .labels import both, tr
 from .layout import Cell, Choices, F, Group, OnOff, Run
 
@@ -56,16 +57,16 @@ class ActionPanel(QScrollArea):
         self._submit = submit
         self.controls: dict[tuple[str, str], QWidget] = {}
         self.run_buttons: dict[str, QPushButton] = {}
-        self.reply_labels: dict[str, ElidedLabel] = {}
         self._group_of: dict[str, str] = {}
         self._onoff: set[str] = set()
         self._runs: set[str] = set()
+        self._ranges: dict[str, str] = {}                # actions with one button per value: the parameter
         self.setWidgetResizable(True)
         self.setFrameShape(QFrame.Shape.NoFrame)
         body = QWidget()
         body.setObjectName("panel_body")
         lay = QVBoxLayout(body)
-        lay.setContentsMargins(style.px(3), style.px(3), style.px(3), style.px(3))
+        lay.setContentsMargins(style.px(2), style.px(2), style.px(2), style.px(2))
         lay.setSpacing(style.px(3))
         for g in groups:
             lay.addWidget(self._group(g))
@@ -78,7 +79,7 @@ class ActionPanel(QScrollArea):
         box.setObjectName(f"group.{g.key}")
         v = QVBoxLayout(box)
         v.setContentsMargins(style.px(6), 0, style.px(6), style.px(1))
-        v.setSpacing(style.px(3))
+        v.setSpacing(style.px(2))
         for line in g.lines:
             h = QHBoxLayout()
             h.setSpacing(style.px(8))
@@ -87,12 +88,6 @@ class ActionPanel(QScrollArea):
                 widget, stretch = self._cell(cell)
                 h.addWidget(widget, stretch, Qt.AlignmentFlag.AlignBottom)
             v.addLayout(h)
-        reply = ElidedLabel()
-        reply.setObjectName(f"reply.{g.key}")
-        reply.setProperty("role", "label")
-        reply.setMinimumHeight(style.px(20))
-        self.reply_labels[g.key] = reply
-        v.addWidget(reply)
         return box
 
     def _cell(self, c: Cell) -> tuple[QWidget, int]:
@@ -124,7 +119,7 @@ class ActionPanel(QScrollArea):
         cell = QWidget()
         v = QVBoxLayout(cell)
         v.setContentsMargins(0, 0, 0, 0)
-        v.setSpacing(style.px(1))
+        v.setSpacing(0)
         v.addWidget(self._label(f"lbl.{c.action}.{c.param}", c.en, c.zh, c.unit, p.required))
         name = f"act.{c.action}.{c.param}"
         if p.kind == "boolean" or p.choices is not None:
@@ -163,10 +158,11 @@ class ActionPanel(QScrollArea):
         cell = QWidget()
         v = QVBoxLayout(cell)
         v.setContentsMargins(0, 0, 0, 0)
-        v.setSpacing(style.px(1))
+        v.setSpacing(0)
         v.addWidget(self._label(f"lbl.{c.action}.on", c.en, c.zh))
+        # checkable: the selected one is the state the instrument reports (see show_state), not a pending choice
         seg = Segmented([(True, tr("on", self.lang), f"run.{c.action}.on"),
-                         (False, tr("off", self.lang), f"run.{c.action}.off")], checkable=False)
+                         (False, tr("off", self.lang), f"run.{c.action}.off")])
         seg.setObjectName(f"act.{c.action}.on")
         for value in (True, False):
             b = seg.button(value)
@@ -181,9 +177,10 @@ class ActionPanel(QScrollArea):
         cell = QWidget()
         v = QVBoxLayout(cell)
         v.setContentsMargins(0, 0, 0, 0)
-        v.setSpacing(style.px(1))
+        v.setSpacing(0)
         v.addWidget(self._label(f"lbl.{c.action}.{c.param}", c.en, c.zh, c.unit))
-        seg = Segmented([(ch, token(ch), f"run.{c.action}.{token(ch)}") for ch in p.choices], checkable=False)
+        seg = Segmented([(ch, token(ch), f"run.{c.action}.{token(ch)}") for ch in p.choices])
+        self._ranges[c.action] = c.param
         seg.setObjectName(f"act.{c.action}.{c.param}")
         for ch in p.choices:
             b = seg.button(ch)
@@ -228,17 +225,19 @@ class ActionPanel(QScrollArea):
     def has_action(self, action: str) -> bool:
         return action in self._group_of
 
+    def show_state(self, state: dict) -> None:
+        """Mark what the instrument reports as the selected button of each On / Off pair and of the range
+        row (``state`` is :func:`stmbench.gui.fmt.instrument_state`): the pairs and the row look like
+        selectors, so they must show the state. No click is made."""
+        for action, value in state.items():
+            if action in self._onoff:
+                self.controls[(action, "on")].show_value(value)
+            elif action in self._ranges:
+                self.controls[(action, self._ranges[action])].show_value(value)
+
     def set_field(self, action: str, param: str, text: str) -> bool:
         w = self.controls.get((action, param))
         if w is None or isinstance(w, Segmented):
             return False
         w.setText(text)
         return True
-
-    def set_reply(self, action: str, ok: bool, text: str) -> None:
-        lab = self.reply_labels.get(self._group_of.get(action, ""))
-        if lab is None:
-            return
-        lab.set_full_text(("✓ " if ok else "✗ ") + text)
-        lab.setProperty("tone", "ok" if ok else "bad")
-        polish(lab)

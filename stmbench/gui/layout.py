@@ -8,7 +8,10 @@ table exactly (``tests/test_gui_layout.py``): every action, every parameter, not
 A panel is a stack of groups; a group is a few lines; a line is a row of cells. A cell is one
 parameter's field (:class:`F`), the button that runs an action (:class:`Run`), the On / Off pair of an
 action that switches something (:class:`OnOff`), or one button per allowed value that runs the action
-at once (:class:`Choices`). Labels say what a control is, with its unit; they carry no advice.
+at once (:class:`Choices`). Labels say what a control is, with its unit; they carry no advice, and no two controls carry the same
+label (``tests/test_gui_layout.py``): two fields named "bias (V)" are one misread away from a wrong call.
+The one exception is the same setting of the two sweeps (points, settle, integration, sweep back of
+the STS and of the Z spectrum), each in a box named for its sweep with its own Run button.
 """
 from __future__ import annotations
 
@@ -97,7 +100,7 @@ OPERATE: tuple[Group, ...] = (
          F("pulse", "z_hold", "hold Z", "保持"),
          Run("pulse", "Pulse", "脉冲")),
         (F("poke", "depth_nm", "depth", "深度", "nm"),
-         F("poke", "bias_v", "bias", "偏压", "V"),
+         F("poke", "bias_v", "poke bias", "压针偏压", "V"),
          F("poke", "dwell_s", "dwell", "停留", "s"),
          Run("poke", "Poke", "压针")),
     )),
@@ -120,7 +123,7 @@ SPECTROSCOPY: tuple[Group, ...] = (
          F("sts", "points", "points", "点数"),
          F("sts", "settle_ms", "settle", "稳定", "ms")),
         (F("sts", "integration_ms", "integration", "积分", "ms"),
-         F("sts", "z_offset_nm", "z offset", "Z 偏移", "nm"),
+         F("sts", "z_offset_nm", "tip offset", "针尖偏移", "nm"),
          F("sts", "backward", "sweep back", "回扫"),
          Run("sts", "Run STS", "测 STS")),
     )),
@@ -128,14 +131,14 @@ SPECTROSCOPY: tuple[Group, ...] = (
         (F("zspec", "sweep_nm", "sweep", "扫程", "nm"),
          F("zspec", "points", "points", "点数"),
          F("zspec", "z_offset_nm", "z offset", "Z 偏移", "nm"),
-         F("zspec", "sweeps", "sweeps", "平均次数")),
+         F("zspec", "sweeps", "averaged", "平均次数")),
         (F("zspec", "settle_ms", "settle", "稳定", "ms"),
          F("zspec", "integration_ms", "integration", "积分", "ms"),
          F("zspec", "backward", "sweep back", "回扫"),
          Run("zspec", "Run Z spectrum", "测 Z 谱")),
     )),
     Group("lockin", "Lock-in", "锁相放大器", (
-        (F("lockin", "amplitude_mv", "amplitude", "调制幅度", "mV"),
+        (F("lockin", "amplitude_mv", "modulation", "调制幅度", "mV"),
          OnOff("lockin", "Lock-in", "锁相")),
     )),
     Group("pll", "qPlus oscillation (PLL)", "qPlus 振荡 PLL", (
@@ -170,5 +173,5 @@ def runners() -> list[str]:
 
 
 def group_of_action() -> dict[str, str]:
-    """The group each action's reply line belongs to."""
+    """The group each action is in."""
     return {c.action: key for key, c in cells()}

@@ -105,7 +105,10 @@ resistance it drags what the tip grips), `pulse`, `poke`, `sts`, `zspec`, `pll`,
 `drift_comp`, `withdraw`, `approach`, `coarse_move`, `wait`. Only hard instrument limits apply; there is no
 safety gate and there are no composite skills. Observations (`status`, `info`, `list_data`,
 `frame`, `spectrum`) spend no instrument time and draw no random number, so how often an agent
-looks cannot change what it later measures.
+looks cannot change what it later measures. `status` reads the junction and the loop (bias, setpoint,
+feedback, Z, current, current range, tip position, withdrawn) and what was switched on: the lock-in, the
+qPlus oscillation (`null` without a sensor) and the drift compensation (`drift_comp`: on or off and the
+velocities it was programmed with, in the units of the action).
 
 Any MCP agent can take the instrument's seat:
 
@@ -206,22 +209,30 @@ manual, the same ledger; and the export directory, written as the episode happen
 
 The window is laid out for a reader of a screenshot downscaled to about 1280x720. A status strip across
 the top shows the instrument time against the budget, the readings after every action (bias, setpoint,
-Z feedback, current, Z, preamplifier range, tip position, lock-in, oscillation) in readable units, and the
-last result: a tick and the instrument's reply, or a cross and its refusal. On the left, tabs Task,
+Z feedback, current, Z, preamplifier range, tip position, lock-in, oscillation, drift compensation) in the
+units of the fields that set them (bias in V, setpoint and current in pA; `n/a` for a switch the rig does
+not have), and in its last line what runs while the instrument is busy (the call with its parameters, how
+many wait, and a Cancel queued button that drops the ones that have not started) or else the last result:
+a tick and the instrument's reply, or a cross and its refusal. On the left, tabs Task,
 Manual (the instrument's fixed facts, `Instrument.info()` read once when the window opens: the piezo,
 bias and current ranges, the budget, the temperature, the material and a qPlus sensor's f0, k and Q, above
 the manual), Report (one radio button per reportable claim, titled "Report a result (ReportResult)", with
 the fields named as `ReportResult` and the rule card name them - value, x_nm, y_nm, frame, evidence, unit,
-sigma, note - and Finish with an inline two-click confirmation), Data and Log; in the middle the viewer (a frame with nm
+sigma, note, the ones the picked claim needs starred as in the action panels, Enter in a field sending the
+report - and Finish with an inline two-click confirmation), Data and Log; in the middle the viewer (a frame with nm
 axes, a colour bar, a cursor readout, flatten modes, numbered markers with their coordinates and the
 distance to the previous one, a line profile, the last frames as thumbnails; or a spectrum with chosen
 columns; over a spectrum or a line profile a cursor reads out the data point nearest the pointer, its x
-and each curve's y, and a left click pins it); on the right the Operate tab (every action a P4 episode uses, without scrolling at 1920x1053)
-and the Spectroscopy tab. A click queues its job at once with the field values read at that moment and
+and each curve's y, and a left click pins it); on the right the Operate tab (every action a P4 episode uses,
+without scrolling at 1920x1080 or 1920x1016) and the Spectroscopy tab, whose On / Off pairs and range row
+show the state the instrument reports as the selected button, and under them the last five results, newest
+first, in the instrument's words (a refusal stays among them until five calls have followed it). A click queues its job at once with the field values read at that moment and
 buttons stay enabled while the instrument works, because one agent step often clicks several in a row;
 jobs run in click order on one worker thread. An empty field sends nothing (the instrument's default
 applies, or it refuses); a field that is not a number is sent as typed. The three `← marker` buttons
-copy a marker's coordinates into the move-tip or scan fields or the report form.
+copy a marker's coordinates into the move-tip or scan fields or the report form, and Delete marker removes
+the selected one. While a scan runs or waits the viewer says so over what it shows, and a click on a viewer
+that has shown no frame leaves a note among the recent results instead of being lost.
 
 What it deliberately does not do: find atoms, estimate drift, suggest a value, explain a physical effect,
 offer a procedure, or show anything from the episode's truth, the seed, the tolerances beyond the rule
@@ -234,7 +245,9 @@ stands, as the web console does on Ctrl-C. *Sealed mode* is what the virtual mac
 account: the scenario and the seed arrive as one JSON line on stdin and appear nowhere else (not in argv,
 the title, any widget, the export, stdout or stderr; the error for a bad line never repeats it); the
 run directory (`--private-dir`, mode 0700 on POSIX) holds the seed and, after the end, the truth; the
-window opens maximized, its close button only says in the status strip that the program stays open, and
+window opens full screen (the whole 1920x1080, whatever title bar the window manager would draw around a
+maximized one; a dev window is maximized and the layout fits 1920x1016, a title bar under GNOME's top bar),
+its close button only says in the status strip that the program stays open, and
 the process ends when it is killed. Everything the agent did is then already in the export directory
 (`session.json`, `actions.jsonl`, `digests.jsonl`, `report.json`; read it with
 `stmbench.instrument.export.read_export`), so an episode that is stopped from outside is graded as it

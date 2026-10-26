@@ -41,7 +41,27 @@ def test_the_operate_tab_holds_every_action_a_p4_episode_uses_and_spectroscopy_t
     assert actions(layout.OPERATE) | actions(layout.SPECTROSCOPY) == set(ACTIONS)
 
 
-def test_a_group_has_one_reply_line_for_all_its_actions():
+def test_no_two_controls_carry_the_same_label_but_the_same_setting_of_the_two_sweeps():
+    """A reader of a screenshot tells controls apart by their labels: "bias (V)" over the junction's field and
+    over the poke's is one misread away from a wrong call. The same setting of the STS and of the Z
+    spectrum (points, settle, integration, sweep back) may be named alike: each sits in its own box, named
+    for its sweep, beside the button that runs it."""
+    from stmbench.gui.labels import both
+    twins = {("sts", "points"), ("zspec", "points"), ("sts", "settle_ms"), ("zspec", "settle_ms"),
+             ("sts", "integration_ms"), ("zspec", "integration_ms"), ("sts", "backward"), ("zspec", "backward")}
+    for lang in ("en", "zh"):
+        shown: dict[str, list[tuple[str, str]]] = {}
+        for _, c in layout.cells():
+            if isinstance(c, (F, Choices)):
+                text = f"{both(c.en, c.zh, lang)} ({c.unit})" if c.unit else both(c.en, c.zh, lang)
+                shown.setdefault(text, []).append((c.action, c.param))
+            elif isinstance(c, OnOff):
+                shown.setdefault(both(c.en, c.zh, lang), []).append((c.action, "on"))
+        for text, owners in shown.items():
+            assert len(owners) == 1 or (set(owners) <= twins and {a for a, _ in owners} == {"sts", "zspec"}), (lang, text, owners)
+
+
+def test_a_group_owns_each_of_its_actions():
     owner = layout.group_of_action()
     assert set(owner) == set(ACTIONS)
     keys = [g.key for _, groups in layout.TABS for g in groups]

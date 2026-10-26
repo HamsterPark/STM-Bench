@@ -3,7 +3,8 @@
 The task text with its rule card and the manual are what every agent is told, shown unchanged. The
 report form is the result channel: one radio button per reportable claim, with the line the rule card
 says about it; nothing is chosen for the reader except the unit once a claim is picked. Data lists what
-the instrument saved; Log keeps every call, newest first, queued ones marked until they run.
+the instrument saved; Log keeps every call, newest first, queued ones marked until they run (and the
+ones dropped before they did, as cancelled).
 """
 from __future__ import annotations
 
@@ -28,12 +29,13 @@ def _text_view(text: str, mono: bool, size: int) -> QuietText:
     return v
 
 
-def _field_label(key: str, lang: str) -> str:
+def _field_label(key: str, lang: str, required: bool = False) -> str:
     """A report field as ReportResult and the rule card name it (``frame``, ``evidence``, ``x_nm`` ...), then
-    what it is."""
+    what it is, as rich text with the red asterisk the action panels put on a field that is required."""
     en, zh = S[f"rep_{key}"]
     desc = en if lang == "en" else zh
-    return f"{key} ({desc})" if desc else key
+    html = f"{key} <span style='color:{style.COLORS['muted']}'>({desc})</span>" if desc else key
+    return html + (f" <span style='color:{style.COLORS['bad']}'>*</span>" if required else "")
 
 
 class _ClaimLabel(QLabel):
@@ -83,13 +85,18 @@ class ReportTab(QWidget):
         grid.setVerticalSpacing(style.px(3))
         self.fields: dict[str, SelectAllLineEdit] = {}
 
+        self.labels: dict[str, QLabel] = {}
+
         def field(key: str, row: int, col: int, span: int = 1, beside: QWidget | None = None) -> None:
-            lab = QLabel(_field_label(key, lang))
+            lab = QLabel(_field_label(key, lang, key == "value"))
             lab.setObjectName(f"report.label.{key}")
+            lab.setTextFormat(Qt.TextFormat.RichText)
             lab.setProperty("role", "label")
+            self.labels[key] = lab
             e = SelectAllLineEdit()
             e.setObjectName(f"report.{key}")
             e.setFont(style.mono_font(18))
+            e.returnPressed.connect(self._submit)                # Enter in any field sends the report, like the button
             self.fields[key] = e
             grid.addWidget(lab, row * 2, col, 1, span)
             if beside is None:
@@ -175,6 +182,19 @@ class ReportTab(QWidget):
 
     def _claim_picked(self, cid: str) -> None:
         self.fields["unit"].setText(self._claims[cid]["unit"])          # the one thing prefilled
+        self._mark_required(cid)
+
+    def required_fields(self) -> set[str]:
+        """The fields the picked claim needs: the value always, and the position (x_nm, y_nm) and the frame it
+        was read in when the claim is about a place."""
+        cid = self.claim_id()
+        needs_position = bool(cid) and bool(self._claims[cid].get("position"))
+        return {"value"} | ({"x_nm", "y_nm", "frame"} if needs_position else set())
+
+    def _mark_required(self, _cid: str = "") -> None:
+        need = self.required_fields()
+        for key, lab in self.labels.items():
+            lab.setText(_field_label(key, self.lang, key in need))
 
     def _submit(self) -> None:
         body = {"claim_id": self.claim_id()}
@@ -223,9 +243,9 @@ class ReportTab(QWidget):
 
 
 class DataTab(QWidget):
-    """What the instrument saved, newest first: each frame or spectrum is two lines (its name, start time
-    and channels; its geometry), which carry every column of a table in the width of this column. A click
-    shows the item in the viewer."""
+    """What the instrument saved, newest first: each frame or spectrum is three short lines (its name, start
+    time and channels; its size; where it is), which carry every column of a table in the width of this
+    column without cutting any of them off. A click shows the item in the viewer."""
 
     frame_clicked = Signal(str)
     spectrum_clicked = Signal(str)
@@ -258,6 +278,9 @@ class DataTab(QWidget):
         w.setFont(style.sans_font(17))
         w.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         w.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+        w.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)      # no line is longer than the column
+        w.setWordWrap(True)                                                       # and one that is wraps rather than hides
+        w.setTextElideMode(Qt.TextElideMode.ElideNone)
         return w
 
     def set_data(self, frames: list[dict], spectra: list[dict]) -> None:
@@ -267,24 +290,24 @@ class DataTab(QWidget):
         self._fill(self.spectra, [self._spectrum_lines(s) for s in reversed(spectra)])
 
     @staticmethod
-    def _frame_lines(f: dict) -> tuple[str, str, str]:
-        """``(name, first line, second line)``: name, start and channels; then the geometry."""
+    def _frame_lines(f: dict) -> tuple[str, list[str]]:
+        """``(name, lines)``: name, start and channels; the size; the centre."""
         channels = " ".join(_CHANNEL[c] for c in f.get("channels", []))
         cx, cy = f["center_nm"]
-        return (f["frame"], f"{f['frame']}   {fmt.hms(f['t_start_s'])}   {channels}",
-                f"{fmt.num(f['size_nm'], 5)} nm · {f['pixels']} px · centre ({fmt.num(cx, 5)}, {fmt.num(cy, 5)}) nm · "
-                f"{fmt.num(f['angle_deg'], 4)}°")
+        return (f["frame"], [f"{f['frame']}   {fmt.hms(f['t_start_s'])}   {channels}",
+                             f"size {fmt.num(f['size_nm'], 5)} nm · {f['pixels']} px · angle {fmt.num(f['angle_deg'], 4)}°",
+                             f"centre ({fmt.num(cx, 5)}, {fmt.num(cy, 5)}) nm"])
 
     @staticmethod
-    def _spectrum_lines(s: dict) -> tuple[str, str, str]:
-        return (s["spectrum"], f"{s['spectrum']}   {s['kind']}   {fmt.hms(s['t_s'])}",
-                f"tip ({s['tip_nm'][0]:.3f}, {s['tip_nm'][1]:.3f}) nm · {s['points']} points")
+    def _spectrum_lines(s: dict) -> tuple[str, list[str]]:
+        return (s["spectrum"], [s["spectrum"], f"{s['kind']} · {fmt.hms(s['t_s'])}",
+                                f"tip ({s['tip_nm'][0]:.3f}, {s['tip_nm'][1]:.3f}) nm · {s['points']} points"])
 
     @staticmethod
-    def _fill(w: QListWidget, rows: list[tuple[str, str, str]]) -> None:
+    def _fill(w: QListWidget, rows: list[tuple[str, list[str]]]) -> None:
         w.clear()
-        for name, first, second in rows:
-            item = QListWidgetItem(f"{first}\n{second}")
+        for name, lines in rows:
+            item = QListWidgetItem(chr(10).join(lines))
             item.setData(Qt.ItemDataRole.UserRole, name)
             w.addItem(item)
 
@@ -318,6 +341,10 @@ class LogTab(QuietBrowser):
     def running(self, job_id: int) -> None:
         self._set(job_id, state="running")
 
+    def cancelled(self, job_id: int) -> None:
+        """A call dropped before it started: it stays in the log, said to be cancelled."""
+        self._set(job_id, state="cancelled")
+
     def done(self, job_id: int, ok: bool, text: str, t_s: float | None) -> None:
         self._set(job_id, state="done", ok=ok, text=text, t=t_s)
 
@@ -346,6 +373,8 @@ class LogTab(QuietBrowser):
                 tail = f"<span style='color:{c['warn']}'>{escape(tr('queued', self.lang))}</span>"
             elif e["state"] == "running":
                 tail = f"<span style='color:{c['warn']}'>{escape(tr('log_running', self.lang))}</span>"
+            elif e["state"] == "cancelled":
+                tail = f"<span style='color:{c['muted']}'>{escape(tr('cancelled', self.lang))}</span>"
             else:
                 color = c["ok"] if e["ok"] else c["bad"]
                 tail = (f"<span style=\"color:{color};font-family:'{mono}'\">"

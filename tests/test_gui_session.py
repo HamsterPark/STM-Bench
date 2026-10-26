@@ -225,17 +225,37 @@ def test_the_package_imports_without_qt_and_names_no_seed_in_its_exports():
 
 
 # ── what the window writes ──
-def test_readings_are_written_in_readable_units():
+def test_readings_are_written_in_the_units_of_the_fields_that_set_them():
     st = {"bias_v": 0.05, "setpoint_pa": 200.0, "feedback": True, "current_pa": 198.31, "z_nm": -1.2345,
           "current_full_scale_na": 10.0, "tip_nm": [1.0, -2.5], "withdrawn": False, "lockin": False,
-          "oscillating": None}
+          "oscillating": None, "drift_comp": {"on": False, "v_nm_per_min": [0.0, 0.0], "vz_pm_per_min": 0.0}}
     texts = dict(fmt.reading_items(st))
-    assert texts == {"bias": "50.0 mV", "setpoint": "200 pA", "feedback": "ON", "current": "198.3 pA",
+    assert texts == {"bias": "0.050 V", "setpoint": "200 pA", "feedback": "ON", "current": "198.3 pA",
                      "z": "-1.234 nm", "range": "10 nA", "tip": "(1.000, -2.500) nm", "withdrawn": "no",
-                     "lockin": "OFF", "oscillation": "-"}
-    assert fmt.volts(1.2) == "1.200 V" and fmt.picoamps(1.5e5) == "150 nA" and fmt.picoamps(0.1) == "0.1 pA"
+                     "lockin": "OFF", "oscillation": "n/a", "drift": "OFF"}
+    # bias is always V (the millivolt kept: the field takes 0.050), setpoint and current always pA, never nA
+    assert [fmt.volts(v) for v in (1.2, 0.05, -1.25, 0.0125, 0.0, -1e-9, 10.0, -0.001)] == [
+        "1.200 V", "0.050 V", "-1.250 V", "0.0125 V", "0.000 V", "0.000 V", "10.000 V", "-0.001 V"]
+    assert [fmt.picoamps(v) for v in (1.5e5, 1500.0, 0.1, 198.31, 12345.6, 999.96, -50.0)] == [
+        "150000 pA", "1500 pA", "0.1 pA", "198.3 pA", "12346 pA", "1000 pA", "-50 pA"]
+    # a switch the rig does not have is n/a, a drift compensation that is on shows what it was given
+    assert fmt.on_off(None) == "n/a" and fmt.on_off(True, "zh") == "开 ON"
+    on = {"on": True, "v_nm_per_min": [1.5, -2.25], "vz_pm_per_min": 30.0}
+    assert fmt.drift_comp_text(on) == "ON (1.5, -2.25) nm/min, 30 pm/min" and fmt.drift_comp_text(on, "zh").startswith("开 ON (")
+    assert fmt.drift_comp_text({**on, "vz_pm_per_min": 0.0}) == "ON (1.5, -2.25) nm/min"
+    assert fmt.drift_comp_text(None) == "n/a" and fmt.drift_comp_text({**on, "on": False}, "zh") == "关 OFF"
     assert fmt.hms(845.4) == "0:14:05" and fmt.hms(5400) == "1:30:00" and fmt.hms(None) == "0:00:00"
     assert "e-" not in " ".join(texts.values())
+
+
+def test_the_switches_and_the_range_are_read_off_status_by_the_action_that_sets_them():
+    st = {"feedback": True, "lockin": False, "oscillating": None, "current_full_scale_na": 10.0,
+          "drift_comp": {"on": True, "v_nm_per_min": [1.0, 0.0], "vz_pm_per_min": 0.0}}
+    assert fmt.instrument_state(st) == {"feedback": True, "lockin": False, "pll": None, "drift_comp": True,
+                                        "set_current_range": 10.0}
+    old_status = {"feedback": False, "lockin": True, "oscillating": True}               # no drift_comp, no range
+    assert fmt.instrument_state(old_status) == {"feedback": False, "lockin": True, "pll": True, "drift_comp": None,
+                                                "set_current_range": None}
 
 
 def test_a_reply_is_summarised_in_the_instruments_words():

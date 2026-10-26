@@ -1,7 +1,9 @@
 """How the window writes numbers and replies (no Qt).
 
-Readings are written in the unit a person reads them in (mV or V, pA or nA, nm), never as
-``1.2e-10``; instrument time as ``H:MM:SS``. A reply is shown in the instrument's own words: the
+Readings are written in the unit of the field that sets them (bias in V, setpoint and current in pA,
+positions in nm), never as ``1.2e-10`` and never switching unit with the size of the value: an operator
+who reads 0.050 V types 0.050, and one who reads 1500 pA does not have to convert 1.5 nA. Instrument
+time is ``H:MM:SS``. A reply is shown in the instrument's own words: the
 one-line summary names what the action made (the frame or spectrum a report must cite) and the full
 form is the reply as the instrument sent it.
 """
@@ -48,13 +50,15 @@ def value_text(v: Any) -> str:
 
 
 def volts(v: float) -> str:
-    """Bias or amplitude: mV below 1 V, V from there."""
-    return f"{v * 1e3:.1f} mV" if abs(v) < 1.0 else f"{v:.3f} V"
+    """A voltage in V with at least the millivolt the bias field takes (``0.050 V``), more decimals when
+    the value has them (``0.0125 V``), at most six."""
+    whole, _, frac = f"{0.0 if abs(v) < 5e-7 else v:.6f}".rstrip("0").partition(".")
+    return f"{whole}.{frac.ljust(3, '0')} V"
 
 
 def picoamps(pa: float) -> str:
-    """A current given in pA, as pA below 1 nA and nA from there."""
-    return f"{pa / 1e3:.4g} nA" if abs(pa) >= 1000.0 else f"{pa:.4g} pA"
+    """A current in pA, the unit of the setpoint field, whatever its size: ``1500 pA``, never ``1.5 nA``."""
+    return f"{pa:.0f} pA" if abs(pa) >= 1000.0 else f"{pa:.4g} pA"
 
 
 def nanometres(v: float, digits: int = 3) -> str:
@@ -66,8 +70,9 @@ def position(xy) -> str:
 
 
 def on_off(flag: bool | None, lang: str = "en") -> str:
+    """ON or OFF; ``n/a`` for a switch the instrument does not have (no qPlus sensor, so no oscillation)."""
     if flag is None:
-        return "-"
+        return "n/a"
     return ("开 ON" if flag else "关 OFF") if lang == "zh" else ("ON" if flag else "OFF")
 
 
@@ -75,6 +80,28 @@ def yes_no(flag: bool | None, lang: str = "en") -> str:
     if flag is None:
         return "-"
     return ("是 yes" if flag else "否 no") if lang == "zh" else ("yes" if flag else "no")
+
+
+def instrument_state(st: dict) -> dict[str, Any]:
+    """The switches and the current range as ``status()`` reports them, by the name of the action that sets
+    each: what the window's On / Off pairs and range buttons show as selected. ``None``: the instrument
+    has no such switch (no qPlus sensor), or the reading is missing."""
+    dc = st.get("drift_comp")
+    return {"feedback": st.get("feedback"), "lockin": st.get("lockin"), "pll": st.get("oscillating"),
+            "drift_comp": dc.get("on") if isinstance(dc, dict) else None,
+            "set_current_range": st.get("current_full_scale_na")}
+
+
+def drift_comp_text(dc: dict | None, lang: str = "en") -> str:
+    """The programmed drift compensation as ``status()`` reports it: OFF, or ON with the velocities it
+    was programmed with (the units of the ``drift_comp`` action's fields)."""
+    if not isinstance(dc, dict):
+        return "n/a"
+    if not dc.get("on"):
+        return on_off(False, lang)
+    vx, vy = dc["v_nm_per_min"]
+    vz = dc.get("vz_pm_per_min") or 0.0                  # the z velocity only when there is one: the line is long enough
+    return f"{on_off(True, lang)} ({num(vx, 4)}, {num(vy, 4)}) nm/min" + (f", {num(vz, 4)} pm/min" if vz else "")
 
 
 def reading_items(st: dict, lang: str = "en") -> list[tuple[str, str]]:
@@ -91,6 +118,7 @@ def reading_items(st: dict, lang: str = "en") -> list[tuple[str, str]]:
         ("withdrawn", yes_no(st["withdrawn"], lang)),
         ("lockin", on_off(st["lockin"], lang)),
         ("oscillation", on_off(st.get("oscillating"), lang)),
+        ("drift", drift_comp_text(st.get("drift_comp"), lang)),
     ]
 
 
@@ -111,6 +139,24 @@ def facts_items(info: dict) -> list[tuple[str, str]]:
         rows += [("fact_qplus_f0", f"{num(q['f0_hz'], 9)} Hz"), ("fact_qplus_k", f"{num(q['k_n_per_m'], 9)} N/m"),
                  ("fact_qplus_q", num(q["q"], 9))]
     return rows
+
+
+def describe_job(kind: str, label: str, args: dict | None = None) -> str:
+    """What a job asks of the instrument, in a few words, for the strip while it runs: a scan by its
+    centre, size and pixels, any other action by its name and the parameters it was clicked with."""
+    a = dict(args or {})
+    if kind == "act":
+        if label == "scan" and all(k in a for k in ("center_x_nm", "center_y_nm", "size_nm")):
+            px = f", {num(a['pixels'])} px" if "pixels" in a else ""
+            return f"scan centre ({num(a['center_x_nm'])}, {num(a['center_y_nm'])}) size {num(a['size_nm'])} nm{px}"
+        return f"{label} {params_text(a)}".strip()
+    if kind == "report":
+        return f"report_result {label}"
+    if kind in ("view_frame", "view_spectrum"):
+        return f"reading {label}"
+    if kind == "boot":
+        return "reading the instrument's state"
+    return label
 
 
 def params_text(args: dict | None) -> str:
