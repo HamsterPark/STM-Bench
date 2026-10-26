@@ -695,14 +695,20 @@ class Instrument:
                 "claims_verified": det.get("n_verified"), "instrument_time_s": _r(self.used_s, 3),
                 "actions": self.n_actions, "budget_overrun": det.get("budget_overrun")}
 
+    def frame_digest(self, name: str) -> dict:
+        """Hashes of one saved frame's arrays (the frame's entry in :meth:`digest`)."""
+        f = self.frames[name]
+        return {k: array_digest(getattr(f, k)) for k in ("z_fwd", "z_bwd", "i_fwd", "i_bwd", "didv_fwd", "didv_bwd")
+                if getattr(f, k) is not None}
+
+    def spectrum_digest(self, name: str) -> dict:
+        """Hashes of one saved spectrum's arrays (the spectrum's entry in :meth:`digest`)."""
+        return {k: array_digest(v) for k, v in self.spectra[name].items() if isinstance(v, np.ndarray)}
+
     def digest(self) -> dict:
         """Hashes of everything measured, for re-checking an episode by replay."""
-        return {"frames": {n: {k: array_digest(getattr(f, k)) for k in
-                               ("z_fwd", "z_bwd", "i_fwd", "i_bwd", "didv_fwd", "didv_bwd")
-                               if getattr(f, k) is not None}
-                           for n, f in self.frames.items()},
-                "spectra": {n: {k: array_digest(v) for k, v in s.items() if isinstance(v, np.ndarray)}
-                            for n, s in self.spectra.items()},
+        return {"frames": {n: self.frame_digest(n) for n in self.frames},
+                "spectra": {n: self.spectrum_digest(n) for n in self.spectra},
                 "events": hashlib.sha256(json.dumps(_portable_events(self.world.events), sort_keys=True,
                                                     default=str).encode()).hexdigest()}
 
