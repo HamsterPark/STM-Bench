@@ -115,6 +115,7 @@ QMainWindow, QWidget#root {{ background: {c['bg']}; }}
 QLabel {{ background: transparent; }}
 QLabel[role="muted"] {{ color: {c['muted']}; }}
 QLabel[role="label"] {{ color: {c['ink']}; font-size: {px(17)}px; }}
+QLabel[stripe="true"] {{ background: {c['stripe']}; }}
 QLabel[tone="ok"] {{ color: {c['ok']}; }}
 QLabel[tone="bad"] {{ color: {c['bad']}; }}
 QLabel[role="pill"] {{ border-radius: {px(6)}px; padding: 1px {px(10)}px; background: {c['accent_soft']}; color: {c['accent_dark']}; }}

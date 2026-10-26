@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QFrame, QGridLayout, QHBoxLayo
 
 from . import fmt, style
 from .controls import QuietBrowser, QuietText, SelectAllLineEdit, Tabs, polish, strong
-from .labels import tr, two_lines
+from .labels import S, tr, two_lines
 
 
 _CHANNEL = {"z": "Z", "current": "I", "didv": "dI/dV"}
@@ -26,6 +26,14 @@ def _text_view(text: str, mono: bool, size: int) -> QuietText:
     v.setFont(style.mono_font(size) if mono else style.sans_font(size))
     v.setPlainText(text)
     return v
+
+
+def _field_label(key: str, lang: str) -> str:
+    """A report field as ReportResult and the rule card name it (``frame``, ``evidence``, ``x_nm`` ...), then
+    what it is."""
+    en, zh = S[f"rep_{key}"]
+    desc = en if lang == "en" else zh
+    return f"{key} ({desc})" if desc else key
 
 
 class _ClaimLabel(QLabel):
@@ -56,7 +64,9 @@ class ReportTab(QWidget):
         v = QVBoxLayout(self)
         v.setContentsMargins(style.px(10), style.px(8), style.px(10), style.px(8))
         v.setSpacing(style.px(5))
-        v.addWidget(self._title(tr("report_title", lang)))
+        self.title = self._title(f"{tr('report_title', lang)} (ReportResult)")
+        self.title.setObjectName("report.title")
+        v.addWidget(self.title)
         self.radios: dict[str, QRadioButton] = {}
         for c in claims:
             r = QRadioButton(c["id"])
@@ -73,8 +83,9 @@ class ReportTab(QWidget):
         grid.setVerticalSpacing(style.px(3))
         self.fields: dict[str, SelectAllLineEdit] = {}
 
-        def field(key: str, label: str, row: int, col: int, span: int = 1, beside: QWidget | None = None) -> None:
-            lab = QLabel(label)
+        def field(key: str, row: int, col: int, span: int = 1, beside: QWidget | None = None) -> None:
+            lab = QLabel(_field_label(key, lang))
+            lab.setObjectName(f"report.label.{key}")
             lab.setProperty("role", "label")
             e = SelectAllLineEdit()
             e.setObjectName(f"report.{key}")
@@ -94,14 +105,14 @@ class ReportTab(QWidget):
         self.viewed_button = QPushButton("+ " + tr("rep_viewed", lang))
         self.viewed_button.setObjectName("report.viewed")
         self.viewed_button.clicked.connect(self._append_viewed)
-        field("value", tr("rep_value", lang), 0, 0)
-        field("x_nm", tr("rep_x", lang), 0, 1)
-        field("y_nm", tr("rep_y", lang), 0, 2)
-        field("frame", tr("rep_frame", lang), 1, 0, 3)
-        field("evidence", tr("rep_evidence", lang), 2, 0, 3, beside=self.viewed_button)
-        field("unit", tr("rep_unit", lang), 3, 0)
-        field("sigma", tr("rep_sigma", lang), 3, 1)
-        field("note", tr("rep_note", lang), 4, 0, 3)
+        field("value", 0, 0)
+        field("x_nm", 0, 1)
+        field("y_nm", 0, 2)
+        field("frame", 1, 0, 3)
+        field("evidence", 2, 0, 3, beside=self.viewed_button)
+        field("unit", 3, 0)
+        field("sigma", 3, 1)
+        field("note", 4, 0, 3)
         for c in range(3):
             grid.setColumnStretch(c, 1)
         v.addLayout(grid)
@@ -345,6 +356,67 @@ class LogTab(QuietBrowser):
         self.setHtml("".join(out))
 
 
+class FactsTable(QFrame):
+    """The instrument's fixed facts (``info()``), read once when the window opens: what an operator finds
+    registered on the instrument, in readable units. A grid of labels, so that a long value wraps in its
+    cell and the table is exactly as tall as its text (a table widget's rows are sized before it knows
+    its width, and cut a wrapped line off)."""
+
+    def __init__(self, lang: str, parent: QWidget | None = None):
+        super().__init__(parent)
+        self.setObjectName("facts.table")
+        self.setProperty("role", "panel")
+        self.lang = lang
+        self.rows: list[tuple[QLabel, QLabel]] = []
+        self._grid = QGridLayout(self)
+        self._grid.setContentsMargins(1, 1, 1, 1)
+        self._grid.setSpacing(0)
+        self._grid.setColumnStretch(0, 11)
+        self._grid.setColumnStretch(1, 9)
+
+    def set_info(self, info: dict) -> None:
+        for lab, val in self.rows:
+            for w in (lab, val):
+                self._grid.removeWidget(w)
+                w.deleteLater()
+        self.rows = []
+        for r, (key, value) in enumerate(fmt.facts_items(info)):
+            lab, val = QLabel(tr(key, self.lang)), QLabel(value)
+            lab.setObjectName(f"facts.label.{key}")
+            val.setObjectName(f"facts.value.{key}")
+            lab.setFont(style.sans_font(17))
+            val.setFont(style.mono_font(17))
+            for col, w in enumerate((lab, val)):
+                w.setWordWrap(True)
+                w.setContentsMargins(style.px(6), style.px(3), style.px(6), style.px(3))
+                w.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+                w.setProperty("stripe", r % 2 == 1)
+                self._grid.addWidget(w, r, col)
+            self.rows.append((lab, val))
+
+    def facts(self) -> dict[str, str]:
+        """``{label as shown: value as shown}``, for tests and logs."""
+        return {lab.text(): val.text() for lab, val in self.rows}
+
+
+class ManualTab(QWidget):
+    """The instrument's facts above the manual: everything an agent is told about the instrument."""
+
+    def __init__(self, manual: str, lang: str, parent: QWidget | None = None):
+        super().__init__(parent)
+        v = QVBoxLayout(self)
+        v.setContentsMargins(style.px(6), style.px(6), style.px(6), style.px(6))
+        v.setSpacing(style.px(4))
+        title = QLabel(tr("facts_title", lang))
+        strong(title)
+        v.addWidget(title)
+        self.facts = FactsTable(lang)
+        v.addWidget(self.facts)
+        self.text = _text_view(manual, mono=True, size=17)
+        self.text.setObjectName("manual.text")
+        v.addWidget(self.text, 1)
+
+
 class Sidebar(Tabs):
     """The five tabs; ``tab`` finds one by key."""
 
@@ -356,8 +428,7 @@ class Sidebar(Tabs):
         self.lang = lang
         self.task = _text_view(task, mono=False, size=18)
         self.task.setObjectName("task.text")
-        self.manual = _text_view(manual, mono=True, size=17)
-        self.manual.setObjectName("manual.text")
+        self.manual = ManualTab(manual, lang)
         self.report = ReportTab(claims, lang)
         self.data = DataTab(lang)
         self.log = LogTab(lang)
@@ -367,6 +438,10 @@ class Sidebar(Tabs):
         self.tabBar().setObjectName("sidebar.tabs")
         self.tabBar().setExpanding(True)
         self.tabBar().setUsesScrollButtons(False)
+
+    @property
+    def facts(self) -> FactsTable:
+        return self.manual.facts
 
     def show_tab(self, key: str) -> None:
         self.setCurrentIndex(self.KEYS.index(key))

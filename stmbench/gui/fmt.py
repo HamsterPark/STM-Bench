@@ -94,6 +94,25 @@ def reading_items(st: dict, lang: str = "en") -> list[tuple[str, str]]:
     ]
 
 
+def facts_items(info: dict) -> list[tuple[str, str]]:
+    """The instrument's fixed facts (``info()``) as ``(label key, value text)`` in the units an operator
+    finds them registered in; a qPlus rig adds its sensor's constants."""
+    rx, ry = info["piezo_xy_range_nm"]
+    lo, hi = info["bias_range_v"]
+    rows = [("fact_material", str(info["material"])),
+            ("fact_temperature", f"{num(info['temperature_k'], 4)} K"),
+            ("fact_piezo_xy", f"{num(rx)} × {num(ry)} nm"),
+            ("fact_piezo_z", f"{num(info['piezo_z_range_nm'])} nm"),
+            ("fact_bias_range", f"{num(lo)} … {num(hi)} V"),
+            ("fact_current_ranges", ", ".join(num(v) for v in info["current_ranges_na"]) + " nA"),
+            ("fact_budget", hms(info["budget_s"]) if info.get("budget_s") else "-")]
+    q = info.get("qplus")
+    if q:
+        rows += [("fact_qplus_f0", f"{num(q['f0_hz'], 9)} Hz"), ("fact_qplus_k", f"{num(q['k_n_per_m'], 9)} N/m"),
+                 ("fact_qplus_q", num(q["q"], 9))]
+    return rows
+
+
 def params_text(args: dict | None) -> str:
     """The parameters of a call as sent, ``name=value`` in order."""
     return ", ".join(f"{k}={value_text(v)}" for k, v in (args or {}).items())

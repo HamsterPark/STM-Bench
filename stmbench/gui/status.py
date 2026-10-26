@@ -59,7 +59,7 @@ class StatusStrip(QFrame):
         self.readings = QLabel()
         self.readings.setObjectName("status.readings")
         self.readings.setTextFormat(Qt.TextFormat.RichText)
-        self.readings.setFont(big)
+        self.readings.setFont(style.sans_font(17))
         self.readings.setWordWrap(True)                  # a second line, never a clipped reading, if the fonts are wide
         self.readings.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         v.addWidget(self.readings)
@@ -104,10 +104,10 @@ class StatusStrip(QFrame):
         parts, plain = [], []
         for key, value in fmt.reading_items(st, self.lang):
             label = tr(key, self.lang)
-            parts.append(f"<span style='white-space:nowrap'><span style='color:{muted}'>{label}</span> "
-                         f"<b style=\"font-family:'{mono}'\">{value.replace('<', '&lt;')}</b></span>")
+            parts.append(f"<nobr><span style='color:{muted}'>{label}</span> "
+                         f"<b style=\"font-family:'{mono}'\">{value.replace('<', '&lt;')}</b></nobr>")
             plain.append(f"{label} {value}")
-        self.readings.setText("&nbsp;&nbsp; ".join(parts))
+        self.readings.setText("&nbsp; ".join(parts))
         self._plain.update(time=text, readings="   ".join(plain), actions=self.count.text())
 
     # ── line 3 ──

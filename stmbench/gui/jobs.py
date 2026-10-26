@@ -27,6 +27,7 @@ class Outcome:
     text: str = ""                  # the refusal's words, or a fault's description
     reply: Any = None               # an action's reply (dict) or a report's acknowledgement (str)
     status: dict | None = None
+    info: dict | None = None
     data: dict | None = None
     frame: dict | None = None
     spectrum: dict | None = None
@@ -46,7 +47,7 @@ def _fail(out: Outcome, exc: Exception) -> Outcome:
 def run_boot(sess: GuiSession) -> Outcome:
     out = Outcome("boot", "start")
     try:
-        out.status, out.data = sess.status(), sess.data()
+        out.status, out.info, out.data = sess.status(), sess.info(), sess.data()
     except Exception as exc:  # noqa: BLE001 - shown in the status strip; the window stays up
         return _fail(out, exc)
     return out

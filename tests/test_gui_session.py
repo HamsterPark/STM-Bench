@@ -132,7 +132,7 @@ def test_a_sealed_session_leaves_its_seed_nowhere_an_agent_could_read(tmp_path):
 def test_the_session_exposes_nothing_of_the_episodes_truth(tmp_path):
     sess = _session(tmp_path, seed=SEED)
     public = {n for n in dir(sess) if not n.startswith("_")}
-    assert public == {"act", "claims", "data", "finish", "finished", "frame", "lang", "manual", "report",
+    assert public == {"act", "claims", "data", "finish", "finished", "frame", "info", "lang", "manual", "report",
                       "scenario_id", "spectrum", "status", "task_text"}
     assert str(SEED) not in json.dumps({n: repr(getattr(sess, n)) for n in public if not callable(getattr(sess, n))})
 
@@ -327,3 +327,36 @@ def test_the_base_package_needs_no_qt_and_the_gui_command_says_which_extra_to_in
     assert ok.returncode == 0 and ok.stdout.strip() == "imported", ok.stderr
     out = _without_qt("from stmbench import cli; cli.main(['gui', '--scenario', 'P4_atom_positioning_cu111', '--out', 'x'])")
     assert out.returncode != 0 and "stm-bench[gui]" in out.stderr and "Traceback" not in out.stderr, out.stderr
+
+
+def test_the_task_follows_the_sessions_language_and_the_claims_carry_both_wordings(tmp_path):
+    zh = GuiSession(P4, 0, run_dir=tmp_path / "zh", export_dir=tmp_path / "zh_export", lang="zh")
+    en = GuiSession(P4, 0, run_dir=tmp_path / "en", export_dir=tmp_path / "en_export", lang="en")
+    assert zh.task_text() == Instrument(P4, 0).task(lang="zh") and "【评分规则 v1】" in zh.task_text()
+    assert en.task_text() == Instrument(P4, 0).task(lang="en") and "[Scoring rules v1]" in en.task_text()
+    assert en.claims()[0]["say_en"].startswith("The final position of the atom you moved") and zh.claims()[0]["say"]
+    assert GuiSession(P4, 0, run_dir=tmp_path / "x", export_dir=tmp_path / "x_export", lang="fr").lang == "zh"
+
+
+def test_the_instruments_facts_are_an_observation_that_costs_no_time(tmp_path):
+    sess = _session(tmp_path)
+    t0 = sess.status()["instrument_time_s"]
+    info = sess.info()
+    assert info["piezo_xy_range_nm"][0] > 0 and info["bias_range_v"] == [-10.0, 10.0] and info["material"] == "Cu(111)"
+    assert "qplus" not in info and sess.status()["instrument_time_s"] == t0
+    recs = read_export(tmp_path / "run_export")["records"]
+    assert [r["what"] for r in recs if r["kind"] == "observe"] == ["status", "info", "status"]
+    qp = GuiSession("P5_sader_jarvis_qplus", 0, run_dir=tmp_path / "p5", export_dir=tmp_path / "p5_export").info()["qplus"]
+    assert set(qp) == {"f0_hz", "k_n_per_m", "q"} and qp["k_n_per_m"] > 0
+
+
+def test_the_facts_are_written_in_the_units_they_are_registered_in():
+    info = {"piezo_xy_range_nm": [2669.0, 2600.0], "piezo_z_range_nm": 339.0, "bias_range_v": [-10.0, 10.0],
+            "current_ranges_na": [10000.0, 1000.0, 0.1], "budget_s": 5400.0, "temperature_k": 4.36, "material": "Cu(111)",
+            "qplus": {"f0_hz": 34182.312, "k_n_per_m": 1773.666, "q": 18309.9}}
+    assert fmt.facts_items(info) == [
+        ("fact_material", "Cu(111)"), ("fact_temperature", "4.36 K"), ("fact_piezo_xy", "2669 × 2600 nm"),
+        ("fact_piezo_z", "339 nm"), ("fact_bias_range", "-10 … 10 V"), ("fact_current_ranges", "10000, 1000, 0.1 nA"),
+        ("fact_budget", "1:30:00"), ("fact_qplus_f0", "34182.312 Hz"), ("fact_qplus_k", "1773.666 N/m"),
+        ("fact_qplus_q", "18309.9")]
+    assert fmt.facts_items({**info, "budget_s": None, "qplus": None})[-1] == ("fact_budget", "-")

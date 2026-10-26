@@ -302,11 +302,58 @@ def test_clicking_a_text_field_selects_its_whole_content(open_window):
 
 
 def test_the_task_the_manual_and_the_claims_are_what_every_agent_is_told(open_window):
+    en, zh = open_window("en"), open_window("zh", name="run_zh")
+    task, manual = en.session.task_text(), en.session.manual()
+    assert shots.widget(en, "task.text").toPlainText() == task and manual == zh.session.manual()
+    assert "[Scoring rules v1]" in task and "ReportResult" in task and "评分规则" not in task       # the English card
+    assert "【评分规则 v1】" in shots.widget(zh, "task.text").toPlainText()                          # the Chinese one
+    assert shots.widget(en, "manual.text").toPlainText() == manual and "move_tip" in manual
+    assert en.windowTitle() == f"STM-Bench console · {P4}"
+    # the report form shows the rule card's line about the claim in the window's language
+    def claim_texts(w: MainWindow) -> str:
+        return " ".join(label.text() for label in w.sidebar.report.findChildren(QLabel))
+    assert "write the same x_nm in the value field" in claim_texts(en) and "value 写同一个 x_nm" in claim_texts(zh)
+
+
+def test_the_report_form_names_its_fields_as_reportresult_and_the_rule_card_name_them(open_window):
+    for lang in ("en", "zh"):
+        win = open_window(lang, name=f"run_{lang}")
+        rep = win.sidebar.report
+        assert rep.title.text().endswith("(ReportResult)") and ("Report a result" in rep.title.text())
+        for key in ("value", "x_nm", "y_nm", "frame", "evidence", "unit", "sigma", "note"):
+            assert shots.widget(win, f"report.label.{key}").text().split(" ")[0] == key         # the exact name comes first
+            assert shots.widget(win, f"report.{key}") is rep.fields[key]
+
+
+def test_the_instruments_facts_head_the_manual_tab(open_window, tmp_path):
     win = open_window("en")
-    task, manual = win.session.task_text(), win.session.manual()
-    assert shots.widget(win, "task.text").toPlainText() == task and "target_site" in task and "评分规则" in task
-    assert shots.widget(win, "manual.text").toPlainText() == manual and "move_tip" in manual
-    assert win.windowTitle() == f"STM-Bench console · {P4}"
+    info = win.session.info()
+    facts = win.sidebar.facts.facts()
+    rx, ry = info["piezo_xy_range_nm"]
+    assert facts["Piezo XY range"] == f"{rx:g} × {ry:g} nm" and facts["Piezo Z range"] == f"{info['piezo_z_range_nm']:g} nm"
+    assert facts["Bias range"] == "-10 … 10 V" and facts["Material"] == "Cu(111)" and facts["Time budget"] == "1:30:00"
+    assert facts["Current ranges (full scale)"] == "10000, 1000, 100, 10, 1, 0.1 nA"
+    assert facts["Temperature"] == f"{info['temperature_k']:g} K" and not [k for k in facts if k.startswith("qPlus")]
+    boot = [r["what"] for r in records(tmp_path) if r["kind"] == "observe"][:3]
+    assert boot == ["status", "info", "list_data"]                  # read once, at the start, as an observation
+    open_left(win, "manual")
+    table, text = shots.widget(win, "facts.table"), shots.widget(win, "manual.text")
+    shots.hit(win, table)
+    assert table.mapTo(win, table.rect().topLeft()).y() < text.mapTo(win, text.rect().topLeft()).y()      # above the manual
+    lab, val = win.sidebar.facts.rows[0]
+    assert lab.font().pixelSize() >= 16 and val.font().pixelSize() >= 16 and len(win.sidebar.facts.rows) == 7
+    assert all(shots.hit(win, w) for pair in win.sidebar.facts.rows for w in pair)       # every cell on screen, none scrolled off
+    assert table.mapTo(win, table.rect().bottomLeft()).y() < text.mapTo(win, text.rect().topLeft()).y() + 1
+    zh = open_window("zh", name="run_zh")
+    assert "压电 XY 量程 Piezo XY range" in " ".join(zh.sidebar.facts.facts())
+
+
+def test_a_qplus_rigs_sensor_constants_are_among_the_facts(open_window):
+    win = open_window("en", scenario=P5)
+    q = win.session.info()["qplus"]
+    facts = win.sidebar.facts.facts()
+    assert facts["qPlus k"] == f"{q['k_n_per_m']:.9g} N/m" and facts["qPlus f0"] == f"{q['f0_hz']:.9g} Hz"
+    assert facts["qPlus Q"] == f"{q['q']:.9g}"
 
 
 def test_the_status_strip_reads_in_units_and_counts_instrument_time(open_window):
@@ -370,8 +417,8 @@ def test_a_report_and_the_end_through_the_report_tab(open_window, tmp_path):
     assert win.status.result.full_text() == "✗ refused: the episode is over"
     assert json.loads((tmp_path / "run" / "episode.json").read_text(encoding="utf-8"))["success"] in (True, False)
     assert read_export(tmp_path / "run" / "export")["session"]["finished"]
-    texts = _all_text(win)
-    assert not any(w in texts.lower() for w in ("verdict", "success", "truth", "partial"))
+    texts = _all_text(win, own_only=True)
+    assert not any(w in texts.lower() for w in ("verdict", "success", "truth", "partial", "score"))
 
 
 def test_closing_the_dev_window_finishes_the_episode(open_window, tmp_path):
@@ -503,9 +550,13 @@ def test_the_log_lists_every_call_newest_first_and_marks_a_call_that_has_not_run
 
 
 # ── the sealed mode ──
-def _all_text(win: QWidget) -> str:
+def _all_text(win: QWidget, own_only: bool = False) -> str:
+    """Every text a widget of the window shows. ``own_only`` leaves out the task and the manual, which are the
+    scenario's and the instrument's words (the rule card says "successful" of an overrun)."""
     out = [win.windowTitle()]
     for w in win.findChildren(QWidget):
+        if own_only and w.objectName() in ("task.text", "manual.text"):
+            continue
         out.append(w.toolTip())
         out.append(w.statusTip())
         if isinstance(w, QLabel):

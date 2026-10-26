@@ -182,6 +182,8 @@ class MainWindow(QMainWindow):
         if out.data:
             self._apply_data(out.data)
         if out.kind == "boot":
+            if out.info:
+                self.sidebar.facts.set_info(out.info)
             if not out.ok:
                 self.status.set_result(False, out.text)
             return

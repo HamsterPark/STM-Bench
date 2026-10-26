@@ -208,8 +208,11 @@ The window is laid out for a reader of a screenshot downscaled to about 1280x720
 the top shows the instrument time against the budget, the readings after every action (bias, setpoint,
 Z feedback, current, Z, preamplifier range, tip position, lock-in, oscillation) in readable units, and the
 last result: a tick and the instrument's reply, or a cross and its refusal. On the left, tabs Task,
-Manual, Report (one radio button per reportable claim, the fields of `report_result`, and
-Finish with an inline two-click confirmation), Data and Log; in the middle the viewer (a frame with nm
+Manual (the instrument's fixed facts, `Instrument.info()` read once when the window opens: the piezo,
+bias and current ranges, the budget, the temperature, the material and a qPlus sensor's f0, k and Q, above
+the manual), Report (one radio button per reportable claim, titled "Report a result (ReportResult)", with
+the fields named as `ReportResult` and the rule card name them - value, x_nm, y_nm, frame, evidence, unit,
+sigma, note - and Finish with an inline two-click confirmation), Data and Log; in the middle the viewer (a frame with nm
 axes, a colour bar, a cursor readout, flatten modes, numbered markers with their coordinates and the
 distance to the previous one, a line profile, the last frames as thumbnails; or a spectrum with chosen
 columns); on the right the Operate tab (every action a P4 episode uses, without scrolling at 1920x1053)
@@ -234,8 +237,9 @@ window opens maximized, its close button only says in the status strip that the 
 the process ends when it is killed. Everything the agent did is then already in the export directory
 (`session.json`, `actions.jsonl`, `digests.jsonl`, `report.json`; read it with
 `stmbench.instrument.export.read_export`), so an episode that is stopped from outside is graded as it
-stands. `--lang en` shows English labels; `--lang zh` (the default) shows each Chinese label followed by
-its English, and the task text is the scenario's own (Chinese). `--ui-scale` multiplies every font and
+stands. `--lang en` shows English labels, the English task text with its rule card and each claim's
+`say_en`; `--lang zh` (the default) shows each Chinese label followed by its English, the Chinese task
+text and `say`. `--ui-scale` multiplies every font and
 size; it is an upper bound, because the window is measured with the fonts the machine has and every size
 is shrunk if it would not fit the screen (1.0 is tuned for 1920x1080).
 

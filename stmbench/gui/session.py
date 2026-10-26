@@ -99,9 +99,9 @@ class GuiSession:
 
     # ── what the agent is told ──
     def task_text(self) -> str:
-        """The task with its rule card."""
+        """The task with its rule card, in the window's language."""
         with self._call() as inst:
-            return inst.task()  # TODO(rules-en): pass lang=self.lang once Instrument.task takes it
+            return inst.task(lang=self.lang)
 
     def manual(self) -> str:
         with self._call() as inst:
@@ -124,6 +124,11 @@ class GuiSession:
     def status(self) -> dict:
         with self._call() as inst:
             return inst.status()
+
+    def info(self) -> dict:
+        """The instrument's fixed facts: ranges, budget, temperature, material, a qPlus sensor's constants."""
+        with self._call() as inst:
+            return inst.info()
 
     def data(self) -> dict:
         """The saved frames (geometry, start time, channels) and spectra, oldest first."""
