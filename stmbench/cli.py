@@ -318,23 +318,23 @@ def main(argv=None) -> int:
     w.add_argument("--no-browser", action="store_true", help="do not open a browser")
     w.set_defaults(fn=cmd_console)
 
-    k = sub.add_parser("gui", help="the instrument in a native window (needs the gui extra), for a person or an "
-                                   "agent working through a screen; the same ledger as an MCP episode, plus an "
-                                   "export directory")
-    k.add_argument("--scenario", default=None, help="scenario id or YAML path (not with --sealed)")
-    k.add_argument("--seed", type=int, default=None, help="with --scenario (default 0); not with --sealed")
-    k.add_argument("--out", default=None, help="a new run directory; the export goes to <out>/export (not with --sealed)")
-    k.add_argument("--lang", choices=["zh", "en"], default="zh",
-                   help="zh: each label in Chinese followed by its English (default); en: English only")
-    k.add_argument("--ui-scale", type=float, default=1.0, help="multiplies every font and size (1.0 suits 1920x1080)")
-    k.add_argument("--sealed", action="store_true",
-                   help="read {\"scenario\": ..., \"seed\": ...} as one JSON line on stdin and keep the seed out of "
-                        "argv, the window, the export and every message; the window opens maximized and its close "
-                        "button does nothing")
-    k.add_argument("--private-dir", default=None, help="with --sealed: the run directory, made readable by its owner "
-                                                       "only (it holds the seed and, after the end, the truth)")
-    k.add_argument("--export-dir", default=None, help="with --sealed: where the agent-visible export is written")
-    k.set_defaults(fn=cmd_gui)
+    gu = sub.add_parser("gui", help="the instrument in a native window (needs the gui extra), for a person or an "
+                                    "agent working through a screen; the same ledger as an MCP episode, plus an "
+                                    "export directory")
+    gu.add_argument("--scenario", default=None, help="scenario id or YAML path (not with --sealed)")
+    gu.add_argument("--seed", type=int, default=None, help="with --scenario (default 0); not with --sealed")
+    gu.add_argument("--out", default=None, help="a new run directory; the export goes to <out>/export (not with --sealed)")
+    gu.add_argument("--lang", choices=["zh", "en"], default="zh",
+                    help="zh: each label in Chinese followed by its English (default); en: English only")
+    gu.add_argument("--ui-scale", type=float, default=1.0, help="multiplies every font and size (1.0 suits 1920x1080)")
+    gu.add_argument("--sealed", action="store_true",
+                    help="read {\"scenario\": ..., \"seed\": ...} as one JSON line on stdin and keep the seed out of "
+                         "argv, the window, the export and every message; the window opens maximized and its close "
+                         "button does nothing")
+    gu.add_argument("--private-dir", default=None, help="with --sealed: the run directory, made readable by its owner "
+                                                        "only (it holds the seed and, after the end, the truth)")
+    gu.add_argument("--export-dir", default=None, help="with --sealed: where the agent-visible export is written")
+    gu.set_defaults(fn=cmd_gui)
     a = ap.parse_args(argv)
     return a.fn(a)
 
