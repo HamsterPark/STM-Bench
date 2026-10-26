@@ -34,6 +34,11 @@ def polish(widget: QWidget) -> None:
     widget.update()
 
 
+#: no button of a row of choices is narrower than this: "Z" was 22 px wide in the 1280x720 picture and was
+#: missed for its neighbour
+SEG_MIN_PX = 56
+
+
 def _same(a: Any, b: Any) -> bool:
     """Equal as the instrument's readings are: a number to its rounding, a flag to a flag."""
     if isinstance(a, bool) or isinstance(b, bool):
@@ -66,6 +71,7 @@ class Segmented(QWidget):
             b.setCheckable(checkable)
             b.setProperty("seg", "only" if n == 1 else "first" if i == 0 else "last" if i == n - 1 else "mid")
             b.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+            b.setMinimumWidth(style.px(SEG_MIN_PX))
             self._group.addButton(b, i)
             self._buttons[i] = (val, b)
             lay.addWidget(b)

@@ -529,6 +529,40 @@ def test_markers_are_read_off_the_frame_and_copied_into_forms_by_their_buttons(o
     assert win.recent.entries()[0] == ("note", "No marker selected.")
 
 
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_a_marker_is_deleted_by_a_button_and_the_table_scrolls_to_the_newest(fonts, open_window, lang):
+    win = open_window(lang)
+    scan_small(win)
+    fv = win.center.frame_view
+    table = shots.widget(win, "markers.table")
+    assert table.horizontalHeader().height() >= 23                              # 15 px or more in the 1280x720 picture
+    assert table.viewport().height() >= 5 * table.verticalHeader().defaultSectionSize()      # five rows without scrolling
+    for i in range(5):
+        shots.click(win, fv, fv.pixel_to_widget(3 + 4 * i, 6 + 5 * (i % 3)).toPoint())
+    assert table.rowCount() == 5 and not table.verticalScrollBar().isVisible()
+    for i in range(5, 9):
+        shots.click(win, fv, fv.pixel_to_widget(3 + 3 * i, 5 + 4 * (i % 4)).toPoint())
+    assert table.rowCount() == 9
+    bar = table.verticalScrollBar()
+    assert bar.isVisible() and bar.maximum() > 0                                 # more rows than fit: it scrolls
+    newest = table.visualItemRect(table.item(8, 0))
+    assert table.viewport().rect().contains(newest)                              # the newest, the selected, is in view
+    xs = [m["x_nm"] for m in fv.markers()]
+    bar.setValue(0)
+    shots.click(win, table.viewport(), table.visualItemRect(table.item(2, 1)).center())      # select the third
+    assert win.center.selected_row() == 2 and fv.selected_marker()["x_nm"] == xs[2]
+    shots.hit(win, shots.widget(win, "markers.delete"))
+    run_button(win, "markers.delete")
+    assert [m["x_nm"] for m in fv.markers()] == xs[:2] + xs[3:] and table.rowCount() == 8
+    assert [table.item(r, 0).text() for r in range(8)] == [str(r + 1) for r in range(8)]    # numbered again
+    assert win.center.selected_row() == 7                                        # the selection moves to the newest
+    assert float(table.item(7, 1).text()) == pytest.approx(xs[-1], abs=5e-4)
+    run_button(win, "view.clear_markers")
+    run_button(win, "markers.delete")                                            # none to delete: said, not ignored
+    tone, text = win.recent.entries()[0]
+    assert tone == "note" and text.endswith("No marker selected.") and table.rowCount() == 0
+
+
 def test_a_profile_is_drawn_by_dragging_with_the_profile_tool(open_window):
     win = open_window("en")
     name = scan_small(win)
@@ -927,6 +961,31 @@ def test_a_long_result_wraps_whole_and_the_list_keeps_its_place(open_window):
     assert row.height() > 2 * row.fontMetrics().height()                                  # on several lines
     assert shots.widget(win, "recent.box").geometry() == before                           # nothing else moved
     assert win.recent.scroll.height() >= 6 * win.recent.rows[0].fontMetrics().height()    # room for a wrapped row
+
+
+# ── hit targets ──
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_every_button_of_a_row_of_choices_is_wide_enough_to_hit_in_a_downscaled_picture(fonts, open_window, lang):
+    """56 px at full size is 37 px in the 1280x720 picture a model is shown; the viewer's Z button was 22 there."""
+    win = open_window(lang)
+    scan_small(win)
+    open_right(win, "spectroscopy")
+    shots.fill(win, {"act.sts.v_start": "-0.5", "act.sts.v_end": "0.5", "act.sts.points": "32"})
+    run_button(win, "run.sts")
+    shots.settle(win)                                                          # the spectrum's axis selectors exist now
+    seen = 0
+    for view in ("spectrum", "frame"):
+        if view == "frame":
+            win.request_frame(win._data["frames"][-1]["frame"])
+            shots.settle(win)
+        for tab in ("operate", "spectroscopy"):
+            open_right(win, tab)
+            for b in win.findChildren(QPushButton):
+                if b.property("seg") and b.isVisible():
+                    seen += 1
+                    assert b.width() >= 56 and b.height() >= 32, (b.objectName(), b.width(), b.height())
+    assert seen > 60                                                          # the panels' and the viewer's, both views
+    assert shots.widget(win, "view.channel.z").width() >= 56                   # the one that was missed
 
 
 # ── nothing is cut off ──

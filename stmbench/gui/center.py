@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QHBoxLayout, QHeaderView, QLab
 
 from . import fmt, style
 from .controls import ElidedLabel, Segmented, ThumbButton
-from .labels import S, both, tr, two_lines
+from .labels import S, both, one, tr
 from .widgets.frame_view import FrameView, frame_thumbnail
 from .widgets.plot_view import PlotView
 
@@ -33,6 +33,7 @@ _Y_FIRST = ("didv", "df", "i")
 N_THUMBS = 6
 THUMB_PX = 64
 MARKER_STRIP_PX = 176
+ROW_PX, HEADER_PX = 30, 24
 
 
 def column_label(key: str) -> str:
@@ -169,13 +170,15 @@ class CenterColumn(QWidget):
         self.to_tip = self._marker_button("markers.tip", "mk_tip")
         self.to_scan = self._marker_button("markers.scan", "mk_scan")
         self.to_report = self._marker_button("markers.report", "mk_report")
-        for b in (self.to_tip, self.to_scan, self.to_report):
-            buttons.addWidget(b)
+        self.delete_marker = self._marker_button("markers.delete", "delete_marker")
+        for b in (self.to_tip, self.to_scan, self.to_report, self.delete_marker):
+            buttons.addWidget(b, len(b.text().split(chr(10))[-1]))        # room by the length of the English text
         v.addLayout(buttons)
         self.to_tip.clicked.connect(lambda: self._copy_marker(lambda m: self.tip_from_marker.emit(m["x_nm"], m["y_nm"])))
         self.to_scan.clicked.connect(lambda: self._copy_marker(lambda m: self.scan_from_marker.emit(m["x_nm"], m["y_nm"])))
         self.to_report.clicked.connect(
             lambda: self._copy_marker(lambda m: self.report_from_marker.emit(m["x_nm"], m["y_nm"], m.get("frame", ""))))
+        self.delete_marker.clicked.connect(self._delete_selected)
 
         fv = self.frame_view
         fv.cursor_moved.connect(self._cursor)
@@ -260,14 +263,17 @@ class CenterColumn(QWidget):
         cols = ["mk_num", "mk_x", "mk_y", "mk_value", "mk_frame", "mk_dist"]
         t = QTableWidget(0, len(cols), parent)
         t.setObjectName("markers.table")
-        t.setHorizontalHeaderLabels([two_lines(c, self.lang) for c in cols])
+        # one line each, in one language: a header of two lines took a third of the strip in Chinese, and
+        # the table holds five rows (30 px each under a 24 px header) in the strip's 176 px
+        t.setHorizontalHeaderLabels([one(c, self.lang) for c in cols])
         t.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         t.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         t.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         t.setAlternatingRowColors(True)
         t.verticalHeader().hide()
-        t.verticalHeader().setDefaultSectionSize(style.px(32))
+        t.verticalHeader().setDefaultSectionSize(style.px(ROW_PX))
         t.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
+        t.horizontalHeader().setFixedHeight(style.px(HEADER_PX))
         t.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         t.horizontalHeader().setStretchLastSection(True)
         t.setFocusPolicy(Qt.FocusPolicy.NoFocus)
@@ -276,11 +282,11 @@ class CenterColumn(QWidget):
 
     def _marker_button(self, name: str, key: str) -> QPushButton:
         en, zh = S[key]
-        # in Chinese the two names go on two lines: three of these side by side must fit a column that is
-        # not wide, and Ignored lets the layout share it instead of widening the window
+        # in Chinese the two names go on two lines: four of these side by side must fit a column that is
+        # not wide, each as wide as its own text needs and the rest shared
         b = QPushButton(en if self.lang == "en" else f"{zh}\n{en}")
         b.setObjectName(name)
-        b.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
+        b.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         if self.lang != "en":
             b.setFixedHeight(style.px(52))
         return b
@@ -386,6 +392,7 @@ class CenterColumn(QWidget):
         n = self.table.rowCount()
         if n:
             self.table.selectRow(n - 1)
+            self.table.scrollToItem(self.table.item(n - 1, 0))        # the new one is in view even past the fifth
 
     def _markers_changed(self, markers: list) -> None:
         t = self.table
@@ -406,6 +413,7 @@ class CenterColumn(QWidget):
             idx = next((i for i, m in enumerate(markers) if m["x_nm"] == sel["x_nm"] and m["y_nm"] == sel["y_nm"]),
                        len(markers) - 1)
             t.selectRow(idx)
+            t.scrollToItem(t.item(idx, 0))
         else:
             t.clearSelection()
 
@@ -428,6 +436,18 @@ class CenterColumn(QWidget):
         else:
             x, series, xl = list(range(len(lists[names[0]]))), [(names[0], lists[names[0]])], "index"
         self.small_plot.set_series(x, series, xl, "", f"{tr('trace', self.lang)}: {title}")
+
+    def selected_row(self) -> int | None:
+        """The marker the table has selected (0-based), if any."""
+        rows = self.table.selectionModel().selectedRows()
+        return rows[0].row() if rows else None
+
+    def _delete_selected(self) -> None:
+        row = self.selected_row()
+        if row is None or self.frame_view.selected_marker() is None:
+            self.notice.emit(tr("mk_none", self.lang))
+            return
+        self.frame_view.remove_marker(row)
 
     def _copy_marker(self, deliver) -> None:
         m = self.frame_view.selected_marker()
