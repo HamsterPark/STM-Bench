@@ -131,6 +131,24 @@ def facts_items(info: dict) -> list[tuple[str, str]]:
     return rows
 
 
+def describe_job(kind: str, label: str, args: dict | None = None) -> str:
+    """What a job asks of the instrument, in a few words, for the strip while it runs: a scan by its
+    centre, size and pixels, any other action by its name and the parameters it was clicked with."""
+    a = dict(args or {})
+    if kind == "act":
+        if label == "scan" and all(k in a for k in ("center_x_nm", "center_y_nm", "size_nm")):
+            px = f", {num(a['pixels'])} px" if "pixels" in a else ""
+            return f"scan centre ({num(a['center_x_nm'])}, {num(a['center_y_nm'])}) size {num(a['size_nm'])} nm{px}"
+        return f"{label} {params_text(a)}".strip()
+    if kind == "report":
+        return f"report_result {label}"
+    if kind in ("view_frame", "view_spectrum"):
+        return f"reading {label}"
+    if kind == "boot":
+        return "reading the instrument's state"
+    return label
+
+
 def params_text(args: dict | None) -> str:
     """The parameters of a call as sent, ``name=value`` in order."""
     return ", ".join(f"{k}={value_text(v)}" for k, v in (args or {}).items())

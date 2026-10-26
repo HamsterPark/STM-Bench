@@ -12,7 +12,7 @@ import math
 import re
 
 import numpy as np
-from PySide6.QtCore import QRect, Qt, Signal
+from PySide6.QtCore import QEvent, QRect, Qt, Signal
 from PySide6.QtGui import QColor, QPainter, QPixmap
 from PySide6.QtWidgets import (QAbstractItemView, QHBoxLayout, QHeaderView, QLabel, QPushButton, QSizePolicy,
                                QStackedWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
@@ -83,6 +83,7 @@ class CenterColumn(QWidget):
         super().__init__(parent)
         self.lang = lang
         self._spec: dict | None = None
+        self._has_frame = False                       # a frame has been shown: before that a click on the view marks nothing
         v = QVBoxLayout(self)
         v.setContentsMargins(0, 0, 0, 0)
         v.setSpacing(style.px(4))
@@ -112,6 +113,16 @@ class CenterColumn(QWidget):
         self.plot.setObjectName("view.plot")
         self.stack.addWidget(self.frame_view)
         self.stack.addWidget(self.plot)
+        # while a scan runs (or waits) the viewer says so over whatever it shows; the pointer passes through it
+        self.overlay = QLabel(tr("scan_running", lang), self.stack)
+        self.overlay.setObjectName("view.busy")
+        self.overlay.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.overlay.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
+        self.overlay.setFont(style.sans_font(30, bold=True))
+        self.overlay.setProperty("role", "overlay")
+        self.overlay.hide()
+        self.stack.installEventFilter(self)
+        self.frame_view.installEventFilter(self)
         view.addWidget(self.stack, 1)
         column = QVBoxLayout()
         column.setSpacing(style.px(3))
@@ -167,6 +178,21 @@ class CenterColumn(QWidget):
         fv.markers_changed.connect(self._markers_changed)
         fv.marker_added.connect(self._marker_added)
         fv.profile_changed.connect(self._profile)
+
+    def set_scan_pending(self, pending: bool) -> None:
+        """Show or hide "scan running..." over the viewer."""
+        self.overlay.setGeometry(self.stack.rect())
+        self.overlay.setVisible(pending)
+        if pending:
+            self.overlay.raise_()
+
+    def eventFilter(self, obj, ev) -> bool:
+        if obj is self.stack and ev.type() == QEvent.Type.Resize:
+            self.overlay.setGeometry(self.stack.rect())
+        elif (obj is self.frame_view and ev.type() == QEvent.Type.MouseButtonPress and not self._has_frame
+              and ev.button() == Qt.MouseButton.LeftButton):
+            self.notice.emit(tr("no_frame_click", self.lang))        # said, not lost: nothing was marked
+        return False
 
     # ── building ──
     def _seg(self, options, name: str, value) -> Segmented:
@@ -267,6 +293,7 @@ class CenterColumn(QWidget):
         of the data list (its start time)."""
         self.toolbars.setCurrentIndex(0)
         self.stack.setCurrentIndex(0)
+        self._has_frame = True
         chans = channels or ["z", "current"]
         self.channel.set_enabled_values(chans)
         self.channel.set_value(frame.get("channel", "z"))

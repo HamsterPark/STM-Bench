@@ -3,7 +3,8 @@
 The task text with its rule card and the manual are what every agent is told, shown unchanged. The
 report form is the result channel: one radio button per reportable claim, with the line the rule card
 says about it; nothing is chosen for the reader except the unit once a claim is picked. Data lists what
-the instrument saved; Log keeps every call, newest first, queued ones marked until they run.
+the instrument saved; Log keeps every call, newest first, queued ones marked until they run (and the
+ones dropped before they did, as cancelled).
 """
 from __future__ import annotations
 
@@ -318,6 +319,10 @@ class LogTab(QuietBrowser):
     def running(self, job_id: int) -> None:
         self._set(job_id, state="running")
 
+    def cancelled(self, job_id: int) -> None:
+        """A call dropped before it started: it stays in the log, said to be cancelled."""
+        self._set(job_id, state="cancelled")
+
     def done(self, job_id: int, ok: bool, text: str, t_s: float | None) -> None:
         self._set(job_id, state="done", ok=ok, text=text, t=t_s)
 
@@ -346,6 +351,8 @@ class LogTab(QuietBrowser):
                 tail = f"<span style='color:{c['warn']}'>{escape(tr('queued', self.lang))}</span>"
             elif e["state"] == "running":
                 tail = f"<span style='color:{c['warn']}'>{escape(tr('log_running', self.lang))}</span>"
+            elif e["state"] == "cancelled":
+                tail = f"<span style='color:{c['muted']}'>{escape(tr('cancelled', self.lang))}</span>"
             else:
                 color = c["ok"] if e["ok"] else c["bad"]
                 tail = (f"<span style=\"color:{color};font-family:'{mono}'\">"

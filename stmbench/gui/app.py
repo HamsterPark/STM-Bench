@@ -53,6 +53,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle(f"{tr('app', lang)} · {session.scenario_id}")
         self._open = 0                                   # jobs submitted whose outcome is not drawn yet
         self._running = ""
+        self._running_job: Job | None = None
         self._finished = False
         self._t_s = 0.0                                  # the last instrument time the window was told
         self._data: dict = {"frames": [], "spectra": []}
@@ -108,6 +109,7 @@ class MainWindow(QMainWindow):
         self.center.scan_from_marker.connect(lambda x, y: self._fill("scan", "center_x_nm", "center_y_nm", x, y))
         self.center.report_from_marker.connect(self._report_from_marker)
         self.center.notice.connect(lambda text: self.recent.push("note", text))
+        self.status.cancel_requested.connect(self._cancel_queued)
 
         self.worker = Worker(session, self)
         self.worker.started_job.connect(self._on_started)
@@ -168,13 +170,32 @@ class MainWindow(QMainWindow):
 
     def _on_started(self, job: Job) -> None:
         self._running = job.label
+        self._running_job = job
         self._show_state()
         self.sidebar.log.running(job.id)
 
     def _show_state(self) -> None:
-        # the count is read from the worker, not from a signal's payload: signals from two threads can
+        # the queue is read from the worker, not from a signal's payload: signals from two threads can
         # arrive out of order
-        self.status.set_state(bool(self._running), self._running, self.worker.waiting, self._finished)
+        queued = self.worker.queued()
+        job = self._running_job if self._running else None
+        self.status.set_state(bool(self._running), self._running, len(queued), self._finished)
+        self.status.set_busy(fmt.describe_job(job.kind, job.label, job.args) if job else None, len(queued),
+                             sum(1 for j in queued if j.kind != "boot"))
+        scans = [job, *queued]
+        self.center.set_scan_pending(any(j is not None and j.kind == "act" and j.label == "scan" for j in scans))
+
+    def _cancel_queued(self) -> None:
+        """Drop the calls that have not started: they are not sent to the instrument, so they are on no
+        record but this window's log, which says they were cancelled."""
+        dropped = self.worker.cancel_queued()
+        for job in dropped:
+            self._open -= 1
+            self.sidebar.log.cancelled(job.id)
+        if dropped:
+            names = ", ".join(j.label for j in dropped)
+            self.recent.push("note", f"{tr('cancelled_note', self.lang)}: {names}")
+        self._show_state()
 
     def _on_finished(self, job: Job, out: jobs.Outcome) -> None:
         try:
@@ -182,6 +203,7 @@ class MainWindow(QMainWindow):
         finally:
             self._open -= 1
             self._running = ""
+            self._running_job = None
             self._show_state()
 
     def _apply(self, job: Job, out: jobs.Outcome) -> None:

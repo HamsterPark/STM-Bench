@@ -9,6 +9,7 @@ import io
 import json
 import math
 import os
+import time
 from pathlib import Path
 
 import pytest
@@ -870,6 +871,123 @@ def test_a_long_result_wraps_whole_and_the_list_keeps_its_place(open_window):
     assert row.height() > 2 * row.fontMetrics().height()                                  # on several lines
     assert shots.widget(win, "recent.box").geometry() == before                           # nothing else moved
     assert win.recent.scroll.height() >= 6 * win.recent.rows[0].fontMetrics().height()    # room for a wrapped row
+
+
+# ── a busy instrument ──
+class Gate:
+    """A job that holds the worker until the test opens the gate: a scan that is "running" for as long as
+    the test wants, whatever the speed of the machine."""
+
+    def __init__(self, win: MainWindow, kind: str = "act", label: str = "scan", args: dict | None = None):
+        import threading
+
+        from stmbench.gui.jobs import Outcome
+        from stmbench.gui.worker import Job
+        self.event = threading.Event()
+        self.args = args if args is not None else {"center_x_nm": 0, "center_y_nm": 0, "size_nm": 40, "pixels": 1024}
+
+        def hold(_session):
+            self.event.wait(60)
+            return Outcome(kind, label, dict(self.args), ok=False, refused=True, text=f"{label}: held by the test")
+
+        self.win = win
+        win._submit(Job(kind, label, dict(self.args), hold))
+        end = time.monotonic() + 10
+        while win.worker.running is None and time.monotonic() < end:
+            QApplication.processEvents()
+            time.sleep(0.005)
+        QApplication.processEvents()
+
+    def open(self) -> None:
+        self.event.set()
+        shots.settle(self.win)
+
+
+def test_the_strip_says_what_runs_and_how_many_wait_and_the_viewer_says_a_scan_is_running(open_window):
+    win = open_window("en")
+    gate = Gate(win)
+    try:
+        want = "running: scan centre (0, 0) size 40 nm, 1024 px"
+        assert win.status.result.full_text() == want and win.status.result.property("tone") == "busy"
+        assert "BUSY: scan" in win.status.plain_text()
+        over = shots.widget(win, "view.busy")
+        assert over.isVisible() and over.text() == "scan running…"
+        assert over.geometry() == win.center.stack.rect()                      # over the whole viewer
+        assert not shots.widget(win, "status.cancel").isVisible()               # nothing waits: nothing to cancel
+        shots.fill(win, {"act.set_bias.bias_v": "0.1", "act.set_setpoint.current_pa": "100"})
+        run_button(win, "run.set_bias")
+        run_button(win, "run.set_setpoint")                                     # clicked while the instrument is busy
+        QApplication.processEvents()
+        assert win.status.result.full_text() == want + " (+2 queued)"
+        assert shots.widget(win, "status.cancel").isVisible()
+        shots.hit(win, shots.widget(win, "status.cancel"))
+    finally:
+        gate.open()
+    assert win.status.result.full_text().startswith("✓ set_setpoint")           # idle again: the last result
+    assert not shots.widget(win, "view.busy").isVisible()
+    assert not shots.widget(win, "status.cancel").isVisible()
+    assert win.recent.entries()[2] == ("bad", "refused: scan: held by the test")
+
+
+def test_a_scan_that_waits_behind_another_call_is_shown_as_running_too(open_window):
+    win = open_window("en")
+    gate = Gate(win, "act", "wait", {"seconds": 5})
+    try:
+        assert not shots.widget(win, "view.busy").isVisible()                  # a wait is not a scan
+        shots.fill(win, SMALL)
+        run_button(win, "run.scan")
+        QApplication.processEvents()
+        assert shots.widget(win, "view.busy").isVisible()                      # queued: it will be the next thing running
+        assert win.status.result.full_text() == "running: wait seconds=5 (+1 queued)"
+    finally:
+        gate.open()
+    assert not shots.widget(win, "view.busy").isVisible() and win.viewed is not None
+
+
+def test_cancel_queued_drops_what_has_not_started_and_nothing_else(open_window, tmp_path):
+    win = open_window("en")
+    gate = Gate(win, "act", "wait", {"seconds": 5})
+    try:
+        shots.fill(win, {"act.set_bias.bias_v": "0.1", "act.set_setpoint.current_pa": "100", **SMALL})
+        for name in ("run.set_bias", "run.set_setpoint", "run.scan"):
+            run_button(win, name)
+        QApplication.processEvents()
+        assert win.worker.waiting == 3 and shots.widget(win, "view.busy").isVisible()    # a scan is among them
+        run_button(win, "status.cancel")
+        QApplication.processEvents()
+        assert win.worker.waiting == 0 and win.worker.running is not None         # the running one is not touched
+        assert win.recent.entries()[0] == ("note", "cancelled queued: set_bias, set_setpoint, scan")
+        assert not shots.widget(win, "status.cancel").isVisible()
+        assert not shots.widget(win, "view.busy").isVisible()                   # the scan will not run
+        assert win.status.result.full_text() == "running: wait seconds=5"
+        text = shots.widget(win, "log.view").toPlainText()
+        assert text.count("cancelled") == 3 and "queued" not in text and "set_bias" in text
+    finally:
+        gate.open()
+    assert win.is_idle() and win.worker.idle
+    assert not acts(records(tmp_path))                                           # none of the three reached the instrument
+    run_button(win, "run.set_bias")                                               # and the window works as before
+    shots.settle(win)
+    assert acts(records(tmp_path)) == ["set_bias"]
+
+
+def test_a_click_on_a_viewer_that_shows_no_frame_leaves_a_note_and_a_frame_takes_markers(open_window):
+    win = open_window("en")
+    fv = win.center.frame_view
+    shots.click(win, fv)
+    assert win.recent.entries()[0] == ("note", "no frame shown: nothing marked")
+    assert shots.widget(win, "recent.0").property("tone") == "note" and not fv.markers()
+    gate = Gate(win)                                                              # the overlay lets the pointer through
+    try:
+        shots.click(win, fv)
+        assert len([e for e in win.recent.entries() if e[1].startswith("no frame")]) == 2
+    finally:
+        gate.open()
+    scan_small(win)
+    notes = lambda: [e for e in win.recent.entries() if e[1].startswith("no frame")]        # noqa: E731
+    before = notes()
+    shots.click(win, fv, fv.pixel_to_widget(16, 16).toPoint())
+    assert len(fv.markers()) == 1 and notes() == before                           # a frame takes the click: no note
 
 
 # ── a whole episode ──

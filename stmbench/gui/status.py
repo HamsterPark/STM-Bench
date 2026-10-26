@@ -4,14 +4,17 @@
    instrument time used against the budget, the action count;
 2. the readings the instrument reports after every action, in the units of the fields that set them
    (Chinese labels only in ``zh``: eleven readings in two languages would not fit one line);
-3. the last result, in the instrument's words: green with a tick, or red with a cross and the refusal.
+3. what runs while the instrument is busy (the call, with its parameters, and how many wait, with a
+   button that drops the ones that have not started), else the last result in the instrument's words:
+   green with a tick, or red with a cross and the refusal.
 
 The strip is built for a reader looking at a downscaled screenshot: one line each, 18 px text.
 """
 from __future__ import annotations
 
-from PySide6.QtCore import Qt
-from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QProgressBar, QSizePolicy, QVBoxLayout, QWidget
+from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import (QFrame, QHBoxLayout, QLabel, QProgressBar, QPushButton, QSizePolicy, QVBoxLayout,
+                               QWidget)
 
 from . import fmt, style
 from .controls import ElidedLabel, polish
@@ -19,12 +22,17 @@ from .labels import S, both, one, tr
 
 
 class StatusStrip(QFrame):
+    cancel_requested = Signal()
+
     def __init__(self, scenario_id: str, lang: str = "zh", parent: QWidget | None = None):
         super().__init__(parent)
         self.setObjectName("strip")
         self.lang = lang
         self._budget: float | None = None
         self._plain: dict[str, str] = {}
+        self._last: tuple[bool | None, str] = (None, "")           # the last result: shown whenever nothing runs
+        self._busy: str | None = None
+        self._waiting = 0
         v = QVBoxLayout(self)
         v.setContentsMargins(style.px(12), style.px(3), style.px(12), style.px(3))
         v.setSpacing(style.px(1))
@@ -65,10 +73,21 @@ class StatusStrip(QFrame):
         self.readings.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         v.addWidget(self.readings)
 
+        line = QHBoxLayout()
+        line.setSpacing(style.px(10))
         self.result = ElidedLabel()
         self.result.setObjectName("status.result")
         self.result.setFont(big)
-        v.addWidget(self.result)
+        self.result.setMinimumHeight(style.px(28))               # the row keeps its height whether the button is there or not
+        self.cancel = QPushButton(tr("cancel_queued", lang))
+        self.cancel.setObjectName("status.cancel")
+        self.cancel.setProperty("role", "small")
+        self.cancel.setAutoDefault(False)
+        self.cancel.clicked.connect(self.cancel_requested.emit)
+        self.cancel.hide()
+        line.addWidget(self.result, 1)
+        line.addWidget(self.cancel)
+        v.addLayout(line)
         self.set_state(False, "", 0, False)
         self.set_status(None)
         self.set_result(None, tr("no_call", lang))
@@ -113,11 +132,31 @@ class StatusStrip(QFrame):
 
     # ── line 3 ──
     def set_result(self, ok: bool | None, text: str) -> None:
-        mark = "" if ok is None else ("✓ " if ok else "✗ ")
-        self.result.set_full_text(mark + text)
-        self.result.setProperty("tone", "" if ok is None else ("ok" if ok else "bad"))
+        """The last result; shown at once unless something runs, then as soon as nothing does."""
+        self._last = (ok, text)
+        self._show_line()
+
+    def set_busy(self, running: str | None, waiting: int, cancellable: int = 0) -> None:
+        """``running``: what the instrument is doing (None: nothing); ``waiting``: jobs behind it;
+        ``cancellable`` of them can still be dropped, which shows the Cancel queued button."""
+        self._busy, self._waiting = running, waiting
+        self.cancel.setVisible(cancellable > 0)
+        self._show_line()
+
+    def _show_line(self) -> None:
+        if self._busy is not None:
+            text = f"{tr('running', self.lang)}: {self._busy}"
+            if self._waiting:
+                text += f" (+{self._waiting} {both(*S['queued'], self.lang)})"
+            tone = "busy"
+        else:
+            ok, body = self._last
+            text = ("" if ok is None else ("✓ " if ok else "✗ ")) + body
+            tone = "" if ok is None else ("ok" if ok else "bad")
+        self.result.set_full_text(text)
+        self.result.setProperty("tone", tone)
         polish(self.result)
-        self._plain["result"] = mark + text
+        self._plain["result"] = text
 
     def plain_text(self) -> str:
         """What the strip says, without markup: for tests and for logs."""
