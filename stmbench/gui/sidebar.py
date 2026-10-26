@@ -29,12 +29,13 @@ def _text_view(text: str, mono: bool, size: int) -> QuietText:
     return v
 
 
-def _field_label(key: str, lang: str) -> str:
+def _field_label(key: str, lang: str, required: bool = False) -> str:
     """A report field as ReportResult and the rule card name it (``frame``, ``evidence``, ``x_nm`` ...), then
-    what it is."""
+    what it is, as rich text with the red asterisk the action panels put on a field that is required."""
     en, zh = S[f"rep_{key}"]
     desc = en if lang == "en" else zh
-    return f"{key} ({desc})" if desc else key
+    html = f"{key} <span style='color:{style.COLORS['muted']}'>({desc})</span>" if desc else key
+    return html + (f" <span style='color:{style.COLORS['bad']}'>*</span>" if required else "")
 
 
 class _ClaimLabel(QLabel):
@@ -84,13 +85,18 @@ class ReportTab(QWidget):
         grid.setVerticalSpacing(style.px(3))
         self.fields: dict[str, SelectAllLineEdit] = {}
 
+        self.labels: dict[str, QLabel] = {}
+
         def field(key: str, row: int, col: int, span: int = 1, beside: QWidget | None = None) -> None:
-            lab = QLabel(_field_label(key, lang))
+            lab = QLabel(_field_label(key, lang, key == "value"))
             lab.setObjectName(f"report.label.{key}")
+            lab.setTextFormat(Qt.TextFormat.RichText)
             lab.setProperty("role", "label")
+            self.labels[key] = lab
             e = SelectAllLineEdit()
             e.setObjectName(f"report.{key}")
             e.setFont(style.mono_font(18))
+            e.returnPressed.connect(self._submit)                # Enter in any field sends the report, like the button
             self.fields[key] = e
             grid.addWidget(lab, row * 2, col, 1, span)
             if beside is None:
@@ -176,6 +182,19 @@ class ReportTab(QWidget):
 
     def _claim_picked(self, cid: str) -> None:
         self.fields["unit"].setText(self._claims[cid]["unit"])          # the one thing prefilled
+        self._mark_required(cid)
+
+    def required_fields(self) -> set[str]:
+        """The fields the picked claim needs: the value always, and the position (x_nm, y_nm) and the frame it
+        was read in when the claim is about a place."""
+        cid = self.claim_id()
+        needs_position = bool(cid) and bool(self._claims[cid].get("position"))
+        return {"value"} | ({"x_nm", "y_nm", "frame"} if needs_position else set())
+
+    def _mark_required(self, _cid: str = "") -> None:
+        need = self.required_fields()
+        for key, lab in self.labels.items():
+            lab.setText(_field_label(key, self.lang, key in need))
 
     def _submit(self) -> None:
         body = {"claim_id": self.claim_id()}

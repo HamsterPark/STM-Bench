@@ -371,6 +371,32 @@ def test_the_status_strip_reads_in_units_and_counts_instrument_time(open_window)
 
 
 # ── the report and the end ──
+def test_the_report_form_marks_what_the_picked_claim_needs_and_enter_sends_it(open_window, tmp_path):
+    win = open_window("en", scenario="P1_barth1990_au111")
+    open_left(win, "report")
+    rep = win.sidebar.report
+    starred = lambda: {k for k, lab in rep.labels.items() if lab.text().endswith("*</span>")}       # noqa: E731
+    assert starred() == {"value"}                                         # no claim yet: a value is always needed
+    run_button(win, "report.claim.stripe_period_nm")                     # a number about the whole surface
+    assert starred() == {"value"} and rep.required_fields() == {"value"}
+    run_button(win, "report.claim.stripe_orientation_deg")               # an angle at a place: where, and in which frame
+    assert starred() == {"value", "x_nm", "y_nm", "frame"}
+    run_button(win, "report.claim.stripe_period_nm")                     # and back
+    assert starred() == {"value"}
+    assert shots.widget(win, "report.label.x_nm").text().startswith("x_nm ")      # the name still comes first
+    # Enter in any field sends the report, as the button does
+    run_button(win, "report.claim.stripe_orientation_deg")
+    shots.fill(win, {"report.x_nm": "1"})
+    QTest.keyClick(shots.widget(win, "report.x_nm"), Qt.Key.Key_Return)        # no value: the instrument says so
+    shots.settle(win)
+    assert rep.reply.text() == "✗ refused: report: value is required"
+    shots.fill(win, {"report.value": "30", "report.y_nm": "2", "report.frame": "sim001.sxm", "report.evidence": "sim001.sxm"})
+    QTest.keyClick(shots.widget(win, "report.evidence"), Qt.Key.Key_Enter)    # the keypad's Enter too
+    shots.settle(win)
+    assert rep.reply.text().startswith("✓ recorded stripe_orientation_deg = 30")
+    assert [r["kind"] for r in records(tmp_path) if r["kind"] == "report"] == ["report"]       # the one that was complete
+
+
 def test_a_report_and_the_end_through_the_report_tab(open_window, tmp_path):
     win = open_window("en")
     name = scan_small(win)
