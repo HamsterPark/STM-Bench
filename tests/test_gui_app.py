@@ -692,6 +692,69 @@ def test_the_viewer_toolbar_has_a_contrast_switch_that_starts_on_auto_and_holds_
         assert shots.widget(win, key).width() >= 56
 
 
+def wheel_through_the_window(win: MainWindow, pos, delta: int = 120) -> None:
+    """One notch of the wheel at ``pos`` (window coordinates), delivered as the screen harness does: to the window."""
+    from PySide6.QtCore import QPoint, QPointF
+    from PySide6.QtGui import QWheelEvent
+    qwin = win.windowHandle()
+    ev = QWheelEvent(QPointF(pos), QPointF(qwin.mapToGlobal(QPoint(pos.x(), pos.y()))), QPoint(0, 0), QPoint(0, delta),
+                     Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier, Qt.ScrollPhase.NoScrollPhase, False)
+    QApplication.sendEvent(qwin, ev)
+    QApplication.processEvents()
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_zoom_buttons_the_wheel_and_the_pan_tool_move_the_view_and_a_new_frame_is_shown_whole(open_window, lang):
+    from PySide6.QtCore import QPoint, QPointF
+    win = open_window(lang)
+    first = scan_small(win)
+    fv = win.center.frame_view
+    assert checked(win, "view.zoom.1") and fv.zoom() == 1
+    for level in (2, 4, 8, 1):                                                  # the buttons, ending on Fit
+        run_button(win, f"view.zoom.{level}")
+        assert fv.zoom() == level and checked(win, f"view.zoom.{level}")
+    assert shots.widget(win, "view.zoom.1").text() == ("Fit" if lang == "en" else "全图")
+    # the wheel, through the window: in about the pointer, and the buttons show where it is
+    r = fv.image_rect()
+    spot = QPoint(r.x() + r.width() // 3, r.y() + r.height() // 2)
+    under = fv._point_at(QPointF(spot))
+    for want in (2, 4):
+        wheel_through_the_window(win, fv.mapTo(win, spot))
+        assert fv.zoom() == want and checked(win, f"view.zoom.{want}")
+        now = fv._point_at(QPointF(spot))
+        assert now["x_nm"] == pytest.approx(under["x_nm"], abs=1e-6) and now["y_nm"] == pytest.approx(under["y_nm"], abs=1e-6)
+    wheel_through_the_window(win, fv.mapTo(win, spot), -120)
+    assert fv.zoom() == 2 and checked(win, "view.zoom.2")
+    # a marker placed on the zoomed image is at the scan position of the pixel under the click
+    geom = {"cx_nm": 0.0, "cy_nm": 0.0, "w_nm": 8.0, "h_nm": 8.0, "angle_deg": 0.0, "nx": 32, "ny": 32}
+    click = QPoint(r.x() + r.width() * 3 // 5, r.y() + r.height() * 2 // 5)
+    shots.click(win, fv, click)
+    (m,) = fv.markers()
+    p = fv._point_at(QPointF(click))
+    x, y = pixel_to_scan_nm(geom, p["col_f"], p["row_f"])
+    assert m["x_nm"] == pytest.approx(x, abs=1e-6) and m["y_nm"] == pytest.approx(y, abs=1e-6)
+    assert shots.widget(win, "markers.table").item(0, 1).text() == f"{x:.3f}"
+    # the Pan tool carries the image; the marker tool is the one that places markers
+    run_button(win, "view.tool.hand")
+    c0, r0, _, _ = fv.view_rect()
+    shots.drag(win, fv, QPoint(r.x() + 200, r.y() + 200), QPoint(r.x() + 140, r.y() + 170))
+    c1, r1, _, _ = fv.view_rect()
+    assert c1 > c0 and r1 > r0 and len(fv.markers()) == 1                       # dragged left and up: the view moves right and down
+    run_button(win, "view.tool.marker")
+    # Fit: the whole frame
+    run_button(win, "view.zoom.1")
+    assert fv.view_rect() == (0.0, 0.0, 32.0, 32.0) and checked(win, "view.zoom.1")
+    # another channel of the same frame keeps the zoom, the next frame is shown whole
+    run_button(win, "view.zoom.4")
+    run_button(win, "view.channel.current")
+    shots.settle(win)
+    assert win.viewed == ("frame", first) and fv.zoom() == 4
+    shots.fill(win, {"act.scan.center_x_nm": "1", "act.scan.center_y_nm": "1"})
+    run_button(win, "run.scan")
+    shots.settle(win)
+    assert win.viewed[1] != first and fv.zoom() == 1 and checked(win, "view.zoom.1")
+
+
 def test_a_profile_is_drawn_by_dragging_with_the_profile_tool(open_window):
     win = open_window("en")
     name = scan_small(win)

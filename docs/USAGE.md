@@ -224,7 +224,10 @@ report, and a "+ shown file" button that appends the name of the frame or spectr
 confirmation), Data and Log; in the middle the viewer (a frame with nm
 axes, a colour bar, a cursor readout, flatten modes, a contrast switch (auto: the 0.5-99.5 percentile
 scale of the image an MCP agent gets, the default; full: the frame's minimum to maximum, which keeps the
-top of an atom from saturating; the readings are the same), numbered markers (six rows before the table
+top of an atom from saturating; the readings are the same), a zoom (the wheel steps x1, x2, x4, x8 about the
+pointer, or the Fit, x2, x4 and x8 buttons; the Pan tool drags the zoomed image; a new frame is shown
+whole, another channel of the same frame keeps the view; the axes, the cursor, markers and profiles use the
+same pixel mapping at every zoom, and nothing is found or snapped for the reader), numbered markers (six rows before the table
 scrolls) with their coordinates, the start time of the frame each was placed on and the distance to the
 previous one, a line profile, the last frames as thumbnails; or a spectrum with chosen
 columns; over a spectrum or a line profile a cursor reads out the data point nearest the pointer, its x

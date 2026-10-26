@@ -185,6 +185,7 @@ class CenterColumn(QWidget):
         self.delete_marker.clicked.connect(self._delete_selected)
 
         fv = self.frame_view
+        fv.zoom_changed.connect(self.zoom.set_value)       # the wheel zooms too: the buttons show where it is
         fv.cursor_moved.connect(self._cursor)
         fv.markers_changed.connect(self._markers_changed)
         fv.marker_added.connect(self._marker_added)
@@ -237,18 +238,22 @@ class CenterColumn(QWidget):
                                    "forward")
         self.flatten = self._seg([("line", "flat_line"), ("plane", "flat_plane"), ("none", "flat_none")],
                                  "view.flatten", "line")
-        self.tool = self._seg([("marker", "tool_marker"), ("profile", "tool_profile")], "view.tool", "marker")
+        self.tool = self._seg([("marker", "tool_marker"), ("profile", "tool_profile"), ("hand", "tool_pan")],
+                              "view.tool", "marker")
         self.contrast = self._seg([("auto", "contrast_auto"), ("full", "contrast_full")], "view.contrast", "auto")
+        self.zoom = self._seg([(1, "zoom_fit"), (2, "zoom_2"), (4, "zoom_4"), (8, "zoom_8")], "view.zoom", 1)
         self.clear_markers = QPushButton(one("clear_markers", self.lang))
         self.clear_markers.setObjectName("view.clear_markers")
-        col.addLayout(self._row(self.channel, self.direction, self.clear_markers))
-        col.addLayout(self._row(self._caption("lbl_flatten"), self.flatten, self._caption("lbl_tool"), self.tool,
-                                self._caption("lbl_contrast"), self.contrast))
+        # three rows: what is shown, how its grey scale and size are set, and what a drag on it does
+        col.addLayout(self._row(self.channel, self.direction, self._caption("lbl_flatten"), self.flatten))
+        col.addLayout(self._row(self._caption("lbl_contrast"), self.contrast, self._caption("lbl_zoom"), self.zoom))
+        col.addLayout(self._row(self._caption("lbl_tool"), self.tool, self.clear_markers))
         self.channel.changed.connect(lambda _v: self.view_changed.emit())
         self.direction.changed.connect(lambda _v: self.view_changed.emit())
         self.flatten.changed.connect(lambda m: self.frame_view.set_flatten(m))
         self.tool.changed.connect(lambda t: self.frame_view.set_tool(t))
         self.contrast.changed.connect(lambda m: self.frame_view.set_contrast(m))
+        self.zoom.changed.connect(lambda z: self.frame_view.set_zoom(z))
         self.clear_markers.clicked.connect(lambda: (self.frame_view.clear_markers(), self.frame_view.clear_profile()))
         return w
 
