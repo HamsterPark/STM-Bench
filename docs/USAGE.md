@@ -220,8 +220,11 @@ the manual), Report (one radio button per reportable claim, titled "Report a res
 the fields named as `ReportResult` and the rule card name them - value, x_nm, y_nm, frame, evidence, unit,
 sigma, note, the ones the picked claim needs starred as in the action panels, Enter in a field sending the
 report - and Finish with an inline two-click confirmation), Data and Log; in the middle the viewer (a frame with nm
-axes, a colour bar, a cursor readout, flatten modes, numbered markers with their coordinates and the
-distance to the previous one, a line profile, the last frames as thumbnails; or a spectrum with chosen
+axes, a colour bar, a cursor readout, flatten modes, a contrast switch (auto: the 0.5-99.5 percentile
+scale of the image an MCP agent gets, the default; full: the frame's minimum to maximum, which keeps the
+top of an atom from saturating; the readings are the same), numbered markers (six rows before the table
+scrolls) with their coordinates, the start time of the frame each was placed on and the distance to the
+previous one, a line profile, the last frames as thumbnails; or a spectrum with chosen
 columns; over a spectrum or a line profile a cursor reads out the data point nearest the pointer, its x
 and each curve's y, and a left click pins it); on the right the Operate tab (every action a P4 episode uses,
 without scrolling at 1920x1080 or 1920x1016) and the Spectroscopy tab, whose On / Off pairs and range row

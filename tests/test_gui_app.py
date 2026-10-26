@@ -602,6 +602,34 @@ def test_each_marker_shows_when_the_frame_it_was_placed_on_began_as_the_data_tab
     assert fmt.hms(starts[second]) in data.item(0).text() and fmt.hms(starts[first]) in data.item(1).text()
 
 
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_viewer_toolbar_has_a_contrast_switch_that_starts_on_auto_and_holds_for_the_next_frame(open_window, lang):
+    import numpy as np
+    win = open_window(lang)
+    scan_small(win)
+    fv = win.center.frame_view
+    assert checked(win, "view.contrast.auto") and not checked(win, "view.contrast.full") and fv.contrast() == "auto"
+    shown = fv._shown
+    auto_lo, auto_hi = shown.lo, shown.hi
+    values = shown.values.copy()
+    run_button(win, "view.contrast.full")
+    assert checked(win, "view.contrast.full") and fv.contrast() == "full"
+    assert shown.lo == pytest.approx(np.nanmin(values)) and shown.hi == pytest.approx(np.nanmax(values))
+    assert shown.lo <= auto_lo and shown.hi >= auto_hi                          # the whole range holds the mapped one
+    assert np.array_equal(shown.values, values)                                  # what is read off the image is the same
+    shots.fill(win, {"act.scan.center_x_nm": "1", "act.scan.center_y_nm": "1"})
+    run_button(win, "run.scan")
+    shots.settle(win)
+    assert fv.contrast() == "full" and checked(win, "view.contrast.full")        # the next frame is shown in full too
+    assert fv._shown is not shown and fv._shown.hi == pytest.approx(np.nanmax(fv._shown.values))
+    run_button(win, "view.contrast.auto")
+    assert fv.contrast() == "auto" and fv._shown.hi < np.nanmax(fv._shown.values) + 1e-9
+    caption = shots.widget(win, "view.contrast.full").text()
+    assert caption == ("full" if lang == "en" else "全幅")                        # the viewer's toolbar names its buttons in one language
+    for key in ("view.contrast.auto", "view.contrast.full", "view.channel.z", "view.flatten.line", "view.tool.marker"):
+        assert shots.widget(win, key).width() >= 56
+
+
 def test_a_profile_is_drawn_by_dragging_with_the_profile_tool(open_window):
     win = open_window("en")
     name = scan_small(win)
@@ -750,7 +778,7 @@ def test_in_the_sealed_mode_the_seed_is_in_no_widget_title_or_file_and_close_doe
 def test_the_screenshot_script_renders_every_state_at_both_sizes(app, tmp_path):
     saved = shots.render_states(tmp_path / "png", "en", work=tmp_path / "work")
     names = sorted(p.name for p in saved)
-    assert len(names) == 18 and any(n.startswith("a_started") for n in names) and any(n.startswith("e_refusal") for n in names)
+    assert len(names) == 20 and any(n.startswith("a_started") for n in names) and any(n.startswith("e_refusal") for n in names)
     assert any(n.startswith("i_busy") for n in names)
     for p in saved:
         img = QImage(str(p))

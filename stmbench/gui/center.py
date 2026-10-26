@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QHBoxLayout, QHeaderView, QLab
 
 from . import fmt, style
 from .controls import ElidedLabel, Segmented, ThumbButton
-from .labels import S, both, one, tr
+from .labels import S, one, tr
 from .widgets.frame_view import FrameView, frame_thumbnail
 from .widgets.plot_view import PlotView
 
@@ -207,7 +207,9 @@ class CenterColumn(QWidget):
 
     # ── building ──
     def _seg(self, options, name: str, value) -> Segmented:
-        s = Segmented([(val, both(*S[key], self.lang), f"{name}.{val}") for val, key in options], value)
+        # the viewer's toolbar names its buttons in one language: with the Contrast switch the second row would
+        # not fit the column with Chinese and English on every button
+        s = Segmented([(val, one(key, self.lang), f"{name}.{val}") for val, key in options], value)
         s.setObjectName(name)
         return s
 
@@ -221,7 +223,7 @@ class CenterColumn(QWidget):
         return h
 
     def _caption(self, key: str) -> QLabel:
-        lab = QLabel(tr(key, self.lang))
+        lab = QLabel(one(key, self.lang))
         lab.setProperty("role", "label")
         return lab
 
@@ -236,14 +238,17 @@ class CenterColumn(QWidget):
         self.flatten = self._seg([("line", "flat_line"), ("plane", "flat_plane"), ("none", "flat_none")],
                                  "view.flatten", "line")
         self.tool = self._seg([("marker", "tool_marker"), ("profile", "tool_profile")], "view.tool", "marker")
-        self.clear_markers = QPushButton(tr("clear_markers", self.lang))
+        self.contrast = self._seg([("auto", "contrast_auto"), ("full", "contrast_full")], "view.contrast", "auto")
+        self.clear_markers = QPushButton(one("clear_markers", self.lang))
         self.clear_markers.setObjectName("view.clear_markers")
         col.addLayout(self._row(self.channel, self.direction, self.clear_markers))
-        col.addLayout(self._row(self._caption("lbl_flatten"), self.flatten, self._caption("lbl_tool"), self.tool))
+        col.addLayout(self._row(self._caption("lbl_flatten"), self.flatten, self._caption("lbl_tool"), self.tool,
+                                self._caption("lbl_contrast"), self.contrast))
         self.channel.changed.connect(lambda _v: self.view_changed.emit())
         self.direction.changed.connect(lambda _v: self.view_changed.emit())
         self.flatten.changed.connect(lambda m: self.frame_view.set_flatten(m))
         self.tool.changed.connect(lambda t: self.frame_view.set_tool(t))
+        self.contrast.changed.connect(lambda m: self.frame_view.set_contrast(m))
         self.clear_markers.clicked.connect(lambda: (self.frame_view.clear_markers(), self.frame_view.clear_profile()))
         return w
 
