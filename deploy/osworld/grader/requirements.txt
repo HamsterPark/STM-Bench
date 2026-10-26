@@ -1,0 +1,5 @@
+# The versions the instrument's environment has to use as well, in the virtual machine and here:
+# a replay is only bit-identical with identical numerics (deploy/osworld/README.md).
+numpy==2.5.4
+scipy==1.18.1
+PyYAML==6.0.3
