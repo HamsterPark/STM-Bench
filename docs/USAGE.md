@@ -105,7 +105,10 @@ resistance it drags what the tip grips), `pulse`, `poke`, `sts`, `zspec`, `pll`,
 `drift_comp`, `withdraw`, `approach`, `coarse_move`, `wait`. Only hard instrument limits apply; there is no
 safety gate and there are no composite skills. Observations (`status`, `info`, `list_data`,
 `frame`, `spectrum`) spend no instrument time and draw no random number, so how often an agent
-looks cannot change what it later measures.
+looks cannot change what it later measures. `status` reads the junction and the loop (bias, setpoint,
+feedback, Z, current, current range, tip position, withdrawn) and what was switched on: the lock-in, the
+qPlus oscillation (`null` without a sensor) and the drift compensation (`drift_comp`: on or off and the
+velocities it was programmed with, in the units of the action).
 
 Any MCP agent can take the instrument's seat:
 

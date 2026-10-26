@@ -271,3 +271,28 @@ def test_the_judge_maps_an_atom_through_the_apex_that_imaged_it():
     bare = {k: v for k, v in ev.items() if k != "apex_runs_nm"}
     qx, qy = to_sample_frame(bare, hit[0], hit[1])
     assert abs(math.hypot(qx - ax, qy - ay) - 2.0) < 0.2
+
+
+def test_status_reports_the_programmed_drift_compensation_and_reading_it_changes_nothing():
+    """The drift compensation an operator programmed is a reading like the lock-in's state: on or off, and
+    the velocities it was given, in the units the action takes (what was set, never the drift itself)."""
+    inst = Instrument(P4, 0)
+    assert inst.status()["drift_comp"] == {"on": False, "v_nm_per_min": [0.0, 0.0], "vz_pm_per_min": 0.0}
+    inst.act("drift_comp", on=True, vx_nm_per_min=1.5, vy_nm_per_min=-2.25, vz_pm_per_min=30.0)
+    t = inst.used_s
+    st = inst.status()
+    assert st["drift_comp"] == {"on": True, "v_nm_per_min": [1.5, -2.25], "vz_pm_per_min": 30.0}
+    assert inst.status() == st and inst.used_s == t                    # reading takes no time and changes no reading
+    inst.act("drift_comp", on=False, vx_nm_per_min=0.5)
+    assert inst.status()["drift_comp"] == {"on": False, "v_nm_per_min": [0.5, 0.0], "vz_pm_per_min": 0.0}
+    # the reading is the programmed value in the units the action took, and reads no random number: an
+    # instrument that was looked at after every action measures what one nobody looked at does
+    quiet, curious = Instrument(P4, 3), Instrument(P4, 3)
+    for inst_, look in ((quiet, False), (curious, True)):
+        inst_.act("drift_comp", on=True, vx_nm_per_min=-0.75, vy_nm_per_min=0.5)
+        if look:
+            assert inst_.status()["drift_comp"]["v_nm_per_min"] == [-0.75, 0.5]
+        inst_.act("scan", center_x_nm=0.0, center_y_nm=0.0, size_nm=12.0, pixels=32)
+        if look:
+            inst_.status()
+    assert quiet.digest() == curious.digest()

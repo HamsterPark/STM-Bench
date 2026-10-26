@@ -585,6 +585,7 @@ class Instrument:
         self._observe("status")
         z, i = self._z_and_current()
         p = getattr(w, "pll", None)
+        dv = w.drift_comp_v                      # m/s as set_drift_comp stored them: what was programmed, not the drift
         return {"instrument_time_s": _r(self.used_s, 3), "budget_s": self.max_sim_s,
                 "bias_v": _r(w.bias_v, 6), "setpoint_pa": _r(w.zctrl.setpoint_a * 1e12, 4),
                 "feedback": bool(w.zctrl.on), "withdrawn": bool(w.withdrawn),
@@ -593,6 +594,9 @@ class Instrument:
                 "current_full_scale_na": _r(w.preamp.full_scale_a * 1e9, 4),
                 "oscillating": bool(p.output_on) if p is not None else None,
                 "lockin": bool(getattr(w, "lockin_on", False)),
+                # shaped like the drift_comp action's reply, so a reading can be compared with what was set
+                "drift_comp": {"on": bool(w.drift_comp_on), "v_nm_per_min": [_r(dv[0] * 6e10), _r(dv[1] * 6e10)],
+                               "vz_pm_per_min": _r(dv[2] * 6e13)},
                 "actions": self.n_actions}
 
     def info(self) -> dict:
