@@ -461,6 +461,37 @@ events (a few seconds off at most) and the tip between start and end is inferred
 pokes and crashes — the page labels both. Output goes to `<data>/replays/<name>/` by default
 (`index.html` opens from disk); `--single-file` inlines the images into one `.html`.
 
+### Grading an exported episode
+
+```bash
+python -m stmbench.cli grade <export dir> --scenario P4_atom_positioning_cu111 --seed 0 [--no-strict] [--out result.json]
+```
+
+An agent that works through a screen plays on a machine the instrument's private ledger (the
+seed, the truth, the verdict) never reaches; what leaves it is an **export directory**
+(`stmbench/instrument/export.py`: `session.json`, `actions.jsonl` — the instrument's log records,
+appended as they happen — `digests.jsonl`, the hashes of every saved frame and spectrum, and
+`report.json`). `grade` runs on a host that holds the seed, and trusts nothing in the export
+about what was measured or how it was judged: it **replays** the recorded actions and reports
+with the scenario and seed it is given (`stmbench.instrument.core.replay_records`) and judges the
+replay as it stands, so an episode whose agent ran out of steps is graded like one that called
+`finish`.
+
+The replay also has to be the recorded episode: every action's reply and instrument times, and
+every frame's and spectrum's hashes, must equal the export's, and every file the replay saved must
+have its hash line. Otherwise `replay.consistent` is false and, by default (strict), the score is
+0, the episode is no success, and the numbers that describe the replay are `null` (it was not the
+episode the agent saw); `--no-strict` keeps the replay's own score and still lists the
+differences. Hashes are bit-exact, so they agree only in the same numerical environment.
+
+The result: `score` (0-1: the fraction of claims verified, capped when over budget; 1.0 reproduces
+the paper), `success`, `partial`, `claims_total`, `claims_verified`, `instrument_time_s`, `actions`,
+`finished_in_episode`, `replay` (`consistent`, `result_mismatches`, `digest_mismatches`, `torn`,
+`records`), `scenario_id`, `rules_version`, `export_version`, `note`. It carries no seed, truth or
+per-claim detail. The exit status is 0 when graded and 2 when the directory is not a gradable
+export of this scenario (not an export, another scenario, or another rules, API or export
+version; the reason is on stderr): a wrong pairing is an error, never a score.
+
 ### Before adding a paper
 
 Three things are worth knowing, because each cost a day to find:

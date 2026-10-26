@@ -2,6 +2,7 @@
 
     python -m stmbench.cli episode --scenario P5_sader_jarvis_qplus --seed 0 --out <run dir>   # MCP stdio
     python -m stmbench.cli verify <run dir>                                                     # replay + compare
+    python -m stmbench.cli grade <export dir> --scenario P4_atom_positioning_cu111 --seed 0 [--no-strict] [--out result.json]
     python -m stmbench.cli reference --paper P4 [--seeds 30] [--jobs 4] [--json out.json]      # privileged reference runs
     python -m stmbench.cli baseline --paper P4 [--seeds 30] [--jobs 4] [--json out.json]       # scripted, no truth
     python -m stmbench.cli audit chance [--scenario P3] [--seeds 200] [--jobs 4] [--json out.json]
@@ -79,6 +80,23 @@ def cmd_verify(a) -> int:
     res = verify(a.run_dir)
     print(json.dumps(res, ensure_ascii=False, indent=1))
     return 0 if res["ok"] else 1
+
+
+def cmd_grade(a) -> int:
+    """Grade an exported episode by replaying it with the scenario and seed this host holds
+    (stmbench.instrument.grade): 0 when graded, 2 when the input is not a gradable export."""
+    from .instrument.grade import grade_export
+
+    try:
+        res = grade_export(a.export_dir, a.scenario, a.seed, strict=not a.no_strict)
+    except ValueError as exc:
+        print(f"grade: {exc}", file=sys.stderr)
+        return 2
+    text = json.dumps(res, indent=1)
+    print(text)
+    if a.out:
+        Path(a.out).write_text(text + "\n", encoding="utf-8")
+    return 0
 
 
 def cmd_reference(a) -> int:
@@ -176,6 +194,16 @@ def main(argv=None) -> int:
                                       "every measurement and the verdict")
     v.add_argument("run_dir")
     v.set_defaults(fn=cmd_verify)
+
+    gr = sub.add_parser("grade", help="grade an exported episode: replay its recorded calls with the scenario "
+                                      "and seed only this host holds, and judge the replay")
+    gr.add_argument("export_dir", help="the export directory (session.json, actions.jsonl, digests.jsonl)")
+    gr.add_argument("--scenario", required=True, help="scenario id or YAML path")
+    gr.add_argument("--seed", type=int, required=True)
+    gr.add_argument("--no-strict", action="store_true",
+                    help="score a replay that differs from the recorded episode as replayed (default: 0)")
+    gr.add_argument("--out", default=None, help="also write the result here")
+    gr.set_defaults(fn=cmd_grade)
 
     f = sub.add_parser("reference", help="privileged reference solutions: the truth navigates, every reported "
                                          "number is measured; reports success, error spread and instrument time")
