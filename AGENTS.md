@@ -73,6 +73,13 @@ Other useful boundaries:
   Their external data requirements differ from the standalone physics tests.
 - [stmbench/console/](stmbench/console/) serves the instrument as a web page for a person or a
   screen-driven agent (`stmbench.cli console`; tests in [test_console.py](tests/test_console.py)).
+- [stmbench/gui/](stmbench/gui/) is the desktop console: a native window (PySide6, the `gui`
+  extra) for an agent that works through screenshots, mouse and keyboard, with no network listener
+  (`stmbench.cli gui`; tests in [test_gui_session.py](tests/test_gui_session.py),
+  [test_gui_layout.py](tests/test_gui_layout.py), [test_gui_app.py](tests/test_gui_app.py) and
+  [test_gui_widgets.py](tests/test_gui_widgets.py)). [session.py](stmbench/gui/session.py) is its one door to the
+  instrument and the export; it must never reach the truth, the verdict or the seed (a source scan
+  enforces it), and in the sealed mode the seed appears in no widget, file or message.
 - [stmbench/agent/](stmbench/agent/) seats a language model at the instrument with its MCP tools
   and nothing else (`stmbench.cli agent`; tests in [test_agent.py](tests/test_agent.py)).
 - [stmbench/reference/](stmbench/reference/) holds the privileged reference solutions and
@@ -230,7 +237,7 @@ These apply across the simulator, the instrument, the judge and the presentation
 - Keep the simulator's name vendor-neutral. Preserve required compatibility API and file-format
   tokens allowed by that same guard; do not erase protocol provenance from documentation.
 - Write code, comments and docstrings in English. Chinese belongs in scenario task text,
-  the replay page, the console page's labels (beside their English), and `docs/DESIGN.md`.
+  the replay page, the console page's and the desktop console's labels (beside their English), and `docs/DESIGN.md`.
 - Update `docs/DESIGN.md` when a design decision changes. Keep operational instructions in
   `docs/USAGE.md` and release claims in `README.md` consistent with the implementation.
   When committing, use one logical change per commit, a present-tense subject, and a body

@@ -31,6 +31,8 @@ bench = ["pandas>=2.2", "pyarrow>=15", "matplotlib>=3.9"]
 dev = ["pytest>=8"]
 # stmbench agent --provider anthropic: Claude through the official SDK
 agent = ["anthropic>=1.15"]
+# stmbench gui: the desktop console, a native window; the base package does not need Qt
+gui = ["PySide6-Essentials>=6.7"]
 
 [project.scripts]
 stmsim = "stmsim.__main__:main"

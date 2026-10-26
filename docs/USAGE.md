@@ -186,6 +186,69 @@ it. An episode not finished on the page is finished, and judged as it stands, by
 `POST /api/finish` or when the server stops (Ctrl-C). `stmbench/console/server.py` lists the
 endpoints.
 
+### The desktop console
+
+```bash
+python -m pip install -e ".[gui]"                          # PySide6; the base package does not need Qt
+python -m stmbench.cli gui --scenario P4_atom_positioning_cu111 --seed 0 --out runs/gui_p4 [--lang zh|en] [--ui-scale 1.0]
+echo '{"scenario": "P4_atom_positioning_cu111", "seed": 0}' | \
+  python -m stmbench.cli gui --sealed --private-dir /srv/ep/private --export-dir /srv/ep/export
+```
+
+`stmbench.gui` is the program an agent that works only through screenshots, mouse and keyboard operates,
+as in a desktop-agent benchmark's virtual machine. It is a native window with no network listener of any
+kind: its screen is the only way to operate it (the web console's HTTP API, by contrast, is a door any
+process on the machine can use). It drives the same `Instrument` an MCP agent gets, through `GuiSession`
+(`stmbench/gui/session.py`): the same actions and parameters (every field comes from `ACTIONS`; the
+arrangement in `stmbench/gui/layout.py` is checked against it by `tests/test_gui_layout.py`), the same
+replies and refusals in the instrument's own words, the same task text with its rule card and the same
+manual, the same ledger; and the export directory, written as the episode happens.
+
+The window is laid out for a reader of a screenshot downscaled to about 1280x720. A status strip across
+the top shows the instrument time against the budget, the readings after every action (bias, setpoint,
+Z feedback, current, Z, preamplifier range, tip position, lock-in, oscillation) in readable units, and the
+last result: a tick and the instrument's reply, or a cross and its refusal. On the left, tabs Task,
+Manual (the instrument's fixed facts, `Instrument.info()` read once when the window opens: the piezo,
+bias and current ranges, the budget, the temperature, the material and a qPlus sensor's f0, k and Q, above
+the manual), Report (one radio button per reportable claim, titled "Report a result (ReportResult)", with
+the fields named as `ReportResult` and the rule card name them - value, x_nm, y_nm, frame, evidence, unit,
+sigma, note - and Finish with an inline two-click confirmation), Data and Log; in the middle the viewer (a frame with nm
+axes, a colour bar, a cursor readout, flatten modes, numbered markers with their coordinates and the
+distance to the previous one, a line profile, the last frames as thumbnails; or a spectrum with chosen
+columns); on the right the Operate tab (every action a P4 episode uses, without scrolling at 1920x1053)
+and the Spectroscopy tab. A click queues its job at once with the field values read at that moment and
+buttons stay enabled while the instrument works, because one agent step often clicks several in a row;
+jobs run in click order on one worker thread. An empty field sends nothing (the instrument's default
+applies, or it refuses); a field that is not a number is sent as typed. The three `← marker` buttons
+copy a marker's coordinates into the move-tip or scan fields or the report form.
+
+What it deliberately does not do: find atoms, estimate drift, suggest a value, explain a physical effect,
+offer a procedure, or show anything from the episode's truth, the seed, the tolerances beyond the rule
+card, or the verdict (finishing does not show the score; it stays in the private ledger). It has no
+control for `report_tip_state`, which no scenario judges.
+
+*Dev mode* (the first command) writes the usual run directory, so `verify` and `replay` read it, and an
+export beside it at `<out>/export`; closing the window finishes the episode and judges it as it
+stands, as the web console does on Ctrl-C. *Sealed mode* is what the virtual machine runs under a separate
+account: the scenario and the seed arrive as one JSON line on stdin and appear nowhere else (not in argv,
+the title, any widget, the export, stdout or stderr; the error for a bad line never repeats it); the
+run directory (`--private-dir`, mode 0700 on POSIX) holds the seed and, after the end, the truth; the
+window opens maximized, its close button only says in the status strip that the program stays open, and
+the process ends when it is killed. Everything the agent did is then already in the export directory
+(`session.json`, `actions.jsonl`, `digests.jsonl`, `report.json`; read it with
+`stmbench.instrument.export.read_export`), so an episode that is stopped from outside is graded as it
+stands. `--lang en` shows English labels, the English task text with its rule card and each claim's
+`say_en`; `--lang zh` (the default) shows each Chinese label followed by its English, the Chinese task
+text and `say`. `--ui-scale` multiplies every font and
+size; it is an upper bound, because the window is measured with the fonts the machine has and every size
+is shrunk if it would not fit the screen (1.0 is tuned for 1920x1080).
+
+`python -m stmbench.gui.shots --out <dir>` renders the window offscreen in scripted states (just
+started; after a scan with markers and a profile; a spectrum; the report form; a refusal; the data,
+log and manual tabs) at 1920x1080 and at the 1280x720 a model is shown, through the same clicks and
+keystrokes; look at those pictures after any change to the layout. Every Qt process of the tests and
+of that script runs with `QT_QPA_PLATFORM=offscreen`: no window is ever opened.
+
 ### The paper scenarios
 
 These are the benchmark. One file per paper, plus a second variant for P3.
@@ -557,6 +620,7 @@ tip-shaping traces under `<data-root>/calibration_inputs/poke_traces/` or pass a
 | `stmbench/instrument/` | the benchmark instrument: `core.py` (actions, observations, reports, ledger, replay check), `mcp_server.py` (MCP stdio), `render.py` (the PNG a frame observation returns) |
 | `stmbench/trackB/` | the scenarios, `rules.py` (rule card, overrun rule), `claims.py` (claim and evidence checks), `results.py` (the result channel's fold), `truth_criteria.py` (verdicts), `audit.py` (chance audit) |
 | `stmbench/console/` | the instrument in a web page (`stmbench.cli console`): `server.py` (the endpoints over `Instrument`), `static/index.html` (the page) |
+| `stmbench/gui/` | the instrument in a native window (`stmbench.cli gui`; the `gui` extra): `session.py` (`GuiSession`, the one door to `Instrument` and the export; `read_spec` for the sealed mode), `layout.py` (which action goes where, checked against `ACTIONS`), `jobs.py` + `worker.py` (every instrument call on one thread, in click order), `app.py` / `panels.py` / `status.py` / `sidebar.py` / `center.py` (the window), `widgets/` (`FrameView`, `PlotView`), `shots.py` (offscreen screenshots) |
 | `stmbench/agent/` | the model-alone loop (`stmbench.cli agent`): `loop.py` (prompt, limits, the record), `models.py` (Claude through the anthropic SDK, OpenAI-compatible endpoints, a scripted port) |
 | `stmbench/reference/`, `stmbench/baselines/` | privileged reference solutions; scripted baselines that see only what an agent sees |
 | `stmbench/analysis/` | measurement analysis the references and baselines use (adatoms, drift, tip, spectra, force, corral) |
@@ -580,6 +644,11 @@ python -m pytest tests -q -m "not requires_data"      # the same tests, deselect
 `tests/test_no_machine_paths.py` scans `stmsim/` and `stmbench/` (probes included) for
 machine-specific lab paths and for direct `STM_BENCH_*` environment reads outside
 `stmsim/paths.py`; either fails the suite with a file:line list.
+
+The desktop console's tests (`tests/test_gui_session.py`, `test_gui_layout.py` need no Qt;
+`test_gui_app.py`, `test_gui_widgets.py` skip without PySide6) run offscreen. They click at widget
+positions the way an agent's clicks arrive, and `test_gui_session.py` scans the source of `stmbench/gui/` for
+network modules and for reads of the episode's truth, verdict or seed.
 
 ## 7. Gotchas
 
