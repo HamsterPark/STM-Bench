@@ -9,9 +9,10 @@ said, in the instrument's words, and the instrument is the only validator.
 
 Two ways to run it. *Dev*: a scenario and a seed on the command line, a run directory (the usual full
 ledger at the end) with the export beside it; closing the window finishes the episode, judged as it
-stands. *Sealed*: the seed arrives on stdin and appears nowhere else; the window opens maximized and
-its close button only says that the program stays open (the process ends when it is killed, and
-everything the agent did is already in the export).
+stands. *Sealed*: the seed arrives on stdin and appears nowhere else; the window opens full screen (a
+maximized window keeps the title bar GNOME draws, so its size depends on the window manager and a
+full-screen window's is the screen's) and its close button only says that the program stays open (the
+process ends when it is killed, and everything the agent did is already in the export).
 """
 from __future__ import annotations
 
@@ -404,7 +405,7 @@ def _open_session(scenario, seed, out, lang, sealed, private_dir, export_dir, st
         return None
 
 
-def fit_scale(app: QApplication, lang: str, requested: float, available: QSize) -> float:
+def fit_scale(app: QApplication, lang: str, requested: float, available: QSize, frame_px: int = FRAME_PX) -> float:
     """The largest ui scale, not above ``requested``, at which the window fits ``available`` with the fonts
     this machine has, and leaves that scale applied.
 
@@ -412,7 +413,10 @@ def fit_scale(app: QApplication, lang: str, requested: float, available: QSize) 
     a row of the Operate tab wider than its column, and a window never narrower than its contents either
     grows past the screen or hides what overflows. Everything scales together, so the window is
     measured - the three columns' narrowest widths, and the Operate tab's height - and every size is
-    shrunk by what is missing. With the fonts it was tuned for, the answer is ``requested``."""
+    shrunk by what is missing. With the fonts it was tuned for, the answer is ``requested``.
+
+    ``frame_px`` is what a window manager's title bar takes from ``available``: :data:`FRAME_PX` for a
+    maximized window, 0 for a full-screen one (which is all of the screen)."""
     scale = float(requested)
     for _ in range(4):
         style.apply(app, scale)
@@ -423,8 +427,8 @@ def fit_scale(app: QApplication, lang: str, requested: float, available: QSize) 
         sidebar_need = sidebar.minimumSizeHint().width()
         right_need = max(p.widget().minimumSizeHint().width() for p in panels) + 2 * style.px(3)
         height_need = max(p.widget().minimumSizeHint().height() for p in panels)
-        # the window manager's title bar is not in `available` and takes about FRAME_PX of the height
-        height_have = (available.height() - FRAME_PX - strip.minimumSizeHint().height()
+        # the window manager's title bar is not in `available` and takes about frame_px of the height
+        height_have = (available.height() - frame_px - strip.minimumSizeHint().height()
                        - tabs.tabBar().sizeHint().height() - style.px(5 + 6 + 5) - 2 * style.px(2)
                        - recent.sizeHint().height() - style.px(6))
         total = style.px(LEFT_PX) + style.px(RIGHT_PX) + center.minimumSizeHint().width() + 4 * style.px(8)
@@ -438,6 +442,15 @@ def fit_scale(app: QApplication, lang: str, requested: float, available: QSize) 
     return scale
 
 
+def show_window(win: MainWindow) -> None:
+    """Open the window as its mode wants: the sealed one full screen, whatever the window manager would
+    draw around a maximized window; a dev one maximized, which leaves the desktop's own bars."""
+    if win.sealed:
+        win.showFullScreen()
+    else:
+        win.showMaximized()
+
+
 def run(*, scenario: str | None = None, seed: int = 0, out: str | Path | None = None, lang: str = "zh",
         ui_scale: float = 1.0, sealed: bool = False, private_dir: str | Path | None = None,
         export_dir: str | Path | None = None, stdin: TextIO | None = None) -> int:
@@ -446,14 +459,18 @@ def run(*, scenario: str | None = None, seed: int = 0, out: str | Path | None = 
     if session is None:
         return 2
     app = QApplication.instance() or QApplication(["stmbench-gui"])
-    fit_scale(app, lang, ui_scale, app.primaryScreen().availableGeometry().size())
+    screen = app.primaryScreen()
+    # a full-screen window covers the whole screen, the desktop's top bar included; a maximized one has what
+    # is left of it, less its own title bar
+    fit_scale(app, lang, ui_scale, (screen.geometry() if sealed else screen.availableGeometry()).size(),
+              0 if sealed else FRAME_PX)
     win = MainWindow(session, lang=lang, sealed=sealed)
     if not sealed:
         signal.signal(signal.SIGINT, lambda *_: app.quit())
         ticker = QTimer()                                # lets Python see Ctrl-C while Qt's loop runs
         ticker.start(250)
         ticker.timeout.connect(lambda: None)
-    win.showMaximized()
+    show_window(win)
     try:
         return int(app.exec())
     finally:

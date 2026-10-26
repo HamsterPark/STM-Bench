@@ -715,6 +715,13 @@ def test_the_screenshot_script_renders_every_state_at_both_sizes(app, tmp_path):
     for p in saved:
         img = QImage(str(p))
         assert (img.width(), img.height()) == (shots.DOWNSCALED if p.stem.endswith("1280x720") else shots.SCREEN), p.name
+    # the pictures are of the full-screen window (the one an agent is shown): no desktop bar above it, so
+    # the first row of pixels is the status strip's frame, not the bar's grey
+    top = QImage(str(next(p for p in saved if p.name == "a_started_en.png"))).pixelColor(960, 2)
+    assert top.name() != "#2e3436"
+    maximized = shots.render_states(tmp_path / "png_dev", "en", work=tmp_path / "work_dev", fullscreen=False)
+    dev_top = QImage(str(next(p for p in maximized if p.name == "a_started_en.png"))).pixelColor(960, 2)
+    assert dev_top.name() == "#2e3436"                                      # a maximized window leaves the 27 px bar
     app.processEvents()
 
 
@@ -901,6 +908,11 @@ def test_the_window_shrinks_to_fit_a_screen_its_fonts_would_overflow_and_not_oth
     from stmbench.gui.app import fit_scale
     try:
         assert fit_scale(app, "zh", 1.0, QSize(*shots.WINDOW)) == 1.0           # the screen it was tuned for
+        # a maximized window under GNOME's top bar and its own 37 px title bar (1016 of the 1080), and the sealed
+        # mode's full-screen window (all 1080, no frame)
+        for lang in ("en", "zh"):
+            assert fit_scale(app, lang, 1.0, QSize(1920, 1080 - 27)) == 1.0, lang
+            assert fit_scale(app, lang, 1.0, QSize(1920, 1080), 0) == 1.0, lang
         small = fit_scale(app, "zh", 1.0, QSize(1500, 900))
         assert 0.7 <= small < 1.0 and style.SCALE == small                       # left applied, for the window to use
         assert fit_scale(app, "zh", small, QSize(1500, 900)) == small           # and it fits: asking again changes nothing
@@ -1082,6 +1094,49 @@ def test_a_switch_the_rig_does_not_have_shows_neither_state_and_a_refused_click_
     run_button(qp, "run.pll.on")
     shots.settle(qp)
     assert checked(qp, "run.pll.on") and not checked(qp, "run.pll.off") and "Oscillation ON" in qp.status.plain_text()
+
+
+# ── the screens it opens on ──
+@pytest.mark.parametrize("height", [1080, 1016])
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_window_fits_a_full_screen_and_a_maximized_window_under_a_title_bar(fonts, open_window, lang, height):
+    """1080: the sealed mode's window is the screen. 1016: a maximized dev window under GNOME's 27 px top bar
+    and its 37 px title bar. Nothing scrolls, nothing is hidden, in the window's fonts and in DejaVu."""
+    if lang == "zh" and fonts == "dejavu":
+        pytest.skip("both languages on every label, in the wider font, overflow the right column: fit_scale shrinks it")
+    win = open_window(lang)
+    win.resize(1920, height)
+    shots.settle(win)
+    QApplication.processEvents()
+    for tab, panel in (("operate", win.operate), ("spectroscopy", win.spectroscopy)):
+        open_right(win, tab)
+        win.wait_idle()
+        assert not panel.verticalScrollBar().isVisible() and not panel.horizontalScrollBar().isVisible(), (tab, height)
+        vp = panel.viewport().rect()
+        for w in panel.widget().findChildren(QWidget):
+            if w.isVisible() and w.objectName().startswith(("act.", "run.", "lbl.", "group.")):
+                inside = w.rect().translated(w.mapTo(panel.viewport(), w.rect().topLeft()))
+                assert vp.contains(inside), (tab, height, w.objectName())
+    box = shots.widget(win, "recent.box")
+    assert win.rect().contains(box.rect().translated(box.mapTo(win, box.rect().topLeft())))     # the list is on screen
+    assert win.status.readings.height() < 2 * win.status.readings.fontMetrics().height()           # one line of readings
+    open_left(win, "report")
+    assert not win.sidebar.report_scroll.verticalScrollBar().isVisible()
+    assert win.center.frame_view.height() >= 400                                                  # the image keeps its room
+
+
+def test_a_sealed_window_opens_full_screen_and_a_dev_window_maximized(open_window, tmp_path):
+    from stmbench.gui.app import show_window
+    sealed = open_window("en", sealed=True, seed=SEED)
+    dev = open_window("en", name="dev")
+    sealed.hide()
+    dev.hide()
+    show_window(sealed)
+    assert sealed.isFullScreen() and not sealed.isMaximized()
+    show_window(dev)
+    assert dev.isMaximized() and not dev.isFullScreen()
+    sealed.showNormal()
+    dev.showNormal()
 
 
 # ── a busy instrument ──

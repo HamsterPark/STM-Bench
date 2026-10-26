@@ -329,7 +329,7 @@ def main(argv=None) -> int:
     gu.add_argument("--ui-scale", type=float, default=1.0, help="multiplies every font and size (1.0 suits 1920x1080)")
     gu.add_argument("--sealed", action="store_true",
                     help="read {\"scenario\": ..., \"seed\": ...} as one JSON line on stdin and keep the seed out of "
-                         "argv, the window, the export and every message; the window opens maximized and its close "
+                         "argv, the window, the export and every message; the window opens full screen and its close "
                          "button does nothing")
     gu.add_argument("--private-dir", default=None, help="with --sealed: the run directory, made readable by its owner "
                                                         "only (it holds the seed and, after the end, the truth)")

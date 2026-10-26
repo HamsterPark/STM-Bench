@@ -237,7 +237,9 @@ stands, as the web console does on Ctrl-C. *Sealed mode* is what the virtual mac
 account: the scenario and the seed arrive as one JSON line on stdin and appear nowhere else (not in argv,
 the title, any widget, the export, stdout or stderr; the error for a bad line never repeats it); the
 run directory (`--private-dir`, mode 0700 on POSIX) holds the seed and, after the end, the truth; the
-window opens maximized, its close button only says in the status strip that the program stays open, and
+window opens full screen (the whole 1920x1080, whatever title bar the window manager would draw around a
+maximized one; a dev window is maximized and the layout fits 1920x1016, a title bar under GNOME's top bar),
+its close button only says in the status strip that the program stays open, and
 the process ends when it is killed. Everything the agent did is then already in the export directory
 (`session.json`, `actions.jsonl`, `digests.jsonl`, `report.json`; read it with
 `stmbench.instrument.export.read_export`), so an episode that is stopped from outside is graded as it
