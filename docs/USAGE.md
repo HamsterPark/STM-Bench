@@ -276,7 +276,8 @@ is shrunk if it would not fit the screen (1.0 is tuned for 1920x1080).
 
 `python -m stmbench.gui.shots --out <dir>` renders the window offscreen in scripted states (just
 started; after a scan with markers and a profile; a spectrum; the report form; a refusal; the data,
-log and manual tabs) at 1920x1080 and at the 1280x720 a model is shown, through the same clicks and
+log and manual tabs; a step with a refusal in it; the image zoomed with the wheel and then panned) at
+1920x1080 and at the 1280x720 a model is shown, through the same clicks and
 keystrokes; look at those pictures after any change to the layout. Every Qt process of the tests and
 of that script runs with `QT_QPA_PLATFORM=offscreen`: no window is ever opened.
 

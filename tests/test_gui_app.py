@@ -714,17 +714,6 @@ def test_the_visible_contrast_button_sets_the_scale_by_the_part_in_view(open_win
     assert (fv._shown.lo, fv._shown.hi) == full
 
 
-def wheel_through_the_window(win: MainWindow, pos, delta: int = 120) -> None:
-    """One notch of the wheel at ``pos`` (window coordinates), delivered as the screen harness does: to the window."""
-    from PySide6.QtCore import QPoint, QPointF
-    from PySide6.QtGui import QWheelEvent
-    qwin = win.windowHandle()
-    ev = QWheelEvent(QPointF(pos), QPointF(qwin.mapToGlobal(QPoint(pos.x(), pos.y()))), QPoint(0, 0), QPoint(0, delta),
-                     Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier, Qt.ScrollPhase.NoScrollPhase, False)
-    QApplication.sendEvent(qwin, ev)
-    QApplication.processEvents()
-
-
 @pytest.mark.parametrize("lang", ["en", "zh"])
 def test_the_zoom_buttons_the_wheel_and_the_pan_tool_move_the_view_and_a_new_frame_is_shown_whole(open_window, lang):
     from PySide6.QtCore import QPoint, QPointF
@@ -741,11 +730,11 @@ def test_the_zoom_buttons_the_wheel_and_the_pan_tool_move_the_view_and_a_new_fra
     spot = QPoint(r.x() + r.width() // 3, r.y() + r.height() // 2)
     under = fv._point_at(QPointF(spot))
     for want in (2, 4):
-        wheel_through_the_window(win, fv.mapTo(win, spot))
+        shots.wheel(win, fv, spot)
         assert fv.zoom() == want and checked(win, f"view.zoom.{want}")
         now = fv._point_at(QPointF(spot))
         assert now["x_nm"] == pytest.approx(under["x_nm"], abs=1e-6) and now["y_nm"] == pytest.approx(under["y_nm"], abs=1e-6)
-    wheel_through_the_window(win, fv.mapTo(win, spot), -120)
+    shots.wheel(win, fv, spot, -120)
     assert fv.zoom() == 2 and checked(win, "view.zoom.2")
     # a marker placed on the zoomed image is at the scan position of the pixel under the click
     geom = {"cx_nm": 0.0, "cy_nm": 0.0, "w_nm": 8.0, "h_nm": 8.0, "angle_deg": 0.0, "nx": 32, "ny": 32}
@@ -925,8 +914,8 @@ def test_in_the_sealed_mode_the_seed_is_in_no_widget_title_or_file_and_close_doe
 def test_the_screenshot_script_renders_every_state_at_both_sizes(app, tmp_path):
     saved = shots.render_states(tmp_path / "png", "en", work=tmp_path / "work")
     names = sorted(p.name for p in saved)
-    assert len(names) == 22 and any(n.startswith("a_started") for n in names) and any(n.startswith("e_refusal") for n in names)
-    assert any(n.startswith("i_busy") for n in names)
+    assert len(names) == 26 and any(n.startswith("a_started") for n in names) and any(n.startswith("e_refusal") for n in names)
+    assert any(n.startswith("i_busy") for n in names) and any(n.startswith("l_zoomed") for n in names)
     for p in saved:
         img = QImage(str(p))
         assert (img.width(), img.height()) == (shots.DOWNSCALED if p.stem.endswith("1280x720") else shots.SCREEN), p.name
