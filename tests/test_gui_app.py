@@ -828,3 +828,17 @@ def test_a_whole_p4_episode_played_on_the_screen_measures_and_scores_as_the_same
     direct, screen = (json.loads((tmp_path / d / "episode.json").read_text(encoding="utf-8")) for d in ("direct", "screen"))
     assert screen["digest"] == direct["digest"] and screen["verdict"] == direct["verdict"]
     assert screen["instrument_time_s"] == direct["instrument_time_s"] and screen["success"] is True
+
+
+def test_no_tooltip_comes_up_under_the_pointer(open_window):
+    """The pointer rests on the control just clicked; a tooltip would cover the next one in the next screenshot."""
+    from PySide6.QtCore import QEvent, QPoint
+    from PySide6.QtGui import QHelpEvent
+    from PySide6.QtWidgets import QToolTip
+    win = open_window("en")
+    b = shots.widget(win, "run.scan")
+    assert not any(w.toolTip() for w in win.findChildren(QWidget))       # the window sets none ...
+    b.setToolTip("this would cover the next control")                    # ... and one set anyway is never shown
+    QApplication.sendEvent(b, QHelpEvent(QEvent.Type.ToolTip, QPoint(5, 5), b.mapToGlobal(QPoint(5, 5))))
+    QApplication.processEvents()
+    assert not QToolTip.isVisible()

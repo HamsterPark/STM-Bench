@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import os
 
-from PySide6.QtCore import QStandardPaths
+from PySide6.QtCore import QEvent, QObject, QStandardPaths
 from PySide6.QtGui import QColor, QFont, QFontDatabase, QPalette
 from PySide6.QtWidgets import QApplication
 
@@ -169,6 +169,17 @@ QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{ height: 0; }}
 """
 
 
+class _NoToolTips(QObject):
+    """Swallows every tooltip request. The pointer rests on the control the reader just clicked, so a
+    tooltip would come up under it before the next screenshot and cover the control to click next."""
+
+    def eventFilter(self, obj, ev) -> bool:
+        return ev.type() == QEvent.Type.ToolTip
+
+
+_FILTERS: list[_NoToolTips] = []                  # the filter's Python object must outlive its use
+
+
 def apply(app: QApplication, scale: float = 1.0) -> None:
     """Install the look on the application (once, before any window)."""
     global SCALE
@@ -178,3 +189,7 @@ def apply(app: QApplication, scale: float = 1.0) -> None:
     app.setPalette(light_palette())
     app.setFont(sans_font(18))
     app.setStyleSheet(stylesheet())
+    if not app.property("stmbench_no_tooltips"):
+        _FILTERS.append(_NoToolTips(app))
+        app.installEventFilter(_FILTERS[-1])
+        app.setProperty("stmbench_no_tooltips", True)

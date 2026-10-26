@@ -138,9 +138,6 @@ class ActionPanel(QScrollArea):
             w.setFont(style.mono_font(18))
             ph = placeholder(p)
             w.setPlaceholderText(ph)
-            if p.lo is not None or p.hi is not None:             # the range, for whoever hovers; nothing needs it
-                w.setToolTip(f"{p.doc}  [{'-inf' if p.lo is None else fmt.num(p.lo)}, "
-                             f"{'inf' if p.hi is None else fmt.num(p.hi)}]")
             w.setMinimumWidth(max(style.px(84), QFontMetrics(w.font()).horizontalAdvance(ph) + style.px(24)))
             w.returnPressed.connect(lambda a=c.action: self._enter(a))
         w.setObjectName(name)
