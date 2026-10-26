@@ -311,3 +311,19 @@ def test_the_gui_command_is_listed_with_its_options(capsys):
     out = capsys.readouterr().out
     for flag in ("--scenario", "--seed", "--out", "--lang", "--ui-scale", "--sealed", "--private-dir", "--export-dir"):
         assert flag in out
+
+
+def _without_qt(code: str):
+    """Run ``code`` in a fresh interpreter in which importing PySide6 fails, as it does where the gui extra is not installed."""
+    import subprocess
+    import sys
+    root = Path(__file__).resolve().parents[1]
+    return subprocess.run([sys.executable, "-c", "import sys; sys.modules['PySide6'] = None\n" + code], cwd=root,
+                          capture_output=True, text=True, timeout=300)
+
+
+def test_the_base_package_needs_no_qt_and_the_gui_command_says_which_extra_to_install():
+    ok = _without_qt("import stmbench.gui, stmbench.cli; print('imported')")
+    assert ok.returncode == 0 and ok.stdout.strip() == "imported", ok.stderr
+    out = _without_qt("from stmbench import cli; cli.main(['gui', '--scenario', 'P4_atom_positioning_cu111', '--out', 'x'])")
+    assert out.returncode != 0 and "stm-bench[gui]" in out.stderr and "Traceback" not in out.stderr, out.stderr
