@@ -126,6 +126,7 @@ S: dict[str, Pair] = {
     "mk_y": ("y nm", "y nm"),
     "mk_value": ("value", "值"),
     "mk_frame": ("frame", "帧"),
+    "mk_start": ("start", "起始"),
     "mk_dist": ("to prev. nm", "距前 nm"),
     "mk_tip": ("Tip ← marker", "针尖 ← 标记"),
     "mk_scan": ("Scan centre ← marker", "扫描中心 ← 标记"),

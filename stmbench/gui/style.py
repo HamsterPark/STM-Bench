@@ -160,9 +160,9 @@ QTabBar::tab:selected {{ background: {c['panel']}; color: {c['accent_dark']}; bo
 QTabBar::tab:!selected:hover {{ background: {c['button_hover']}; }}
 QTableWidget {{ font-family: "{mono_family()}"; font-size: {px(17)}px; background: {c['field']}; alternate-background-color: {c['stripe']}; gridline-color: {c['line']};
                border: 1px solid {c['line']}; selection-background-color: {c['accent_soft']}; selection-color: {c['ink']}; }}
-QTableWidget::item {{ padding: 0 {px(3)}px; }}
+QTableWidget::item {{ padding: 0 {px(2)}px; }}
 QHeaderView::section {{ background: {c['head']}; border: none; border-right: 1px solid {c['line']}; border-bottom: 1px solid {c['line']};
-                       padding: {px(1)}px {px(5)}px; font-weight: bold; font-size: {px(15)}px; }}
+                       padding: {px(1)}px {px(4)}px; font-weight: bold; font-size: {px(15)}px; }}
 QListWidget {{ background: {c['field']}; alternate-background-color: {c['stripe']}; border: 1px solid {c['line']}; border-radius: {px(5)}px; }}
 QListWidget::item {{ padding: {px(4)}px {px(6)}px; border-bottom: 1px solid {c['line']}; }}
 QListWidget::item:selected {{ background: {c['accent_soft']}; color: {c['ink']}; border-left: {px(4)}px solid {c['accent']}; }}
