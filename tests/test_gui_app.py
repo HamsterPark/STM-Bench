@@ -746,3 +746,75 @@ def test_the_window_shrinks_to_fit_a_screen_its_fonts_would_overflow_and_not_oth
         assert fit_scale(app, "en", 1.3, QSize(2560, 1400)) == 1.3              # a larger scale on a larger screen is kept
     finally:
         style.apply(app, 1.0)
+
+
+# ── a whole episode ──
+def drive_exact(win: MainWindow, action: str, params: dict) -> None:
+    """Make every control of the action show what the call holds (clearing a field the call leaves out),
+    then click its button."""
+    cells = [c for _, c in layout.cells() if c.action == action]
+    open_right(win, "spectroscopy" if action in ("sts", "zspec", "pll", "lockin") else "operate")
+    for p in ACTIONS[action].params:
+        if p.name == "on" or any(isinstance(c, layout.Choices) and c.param == p.name for c in cells):
+            continue
+        if p.kind == "boolean" or p.choices is not None:
+            if p.name in params:
+                v = params[p.name]
+                suffix = ("yes" if v else "no") if p.kind == "boolean" else token(v)
+                shots.click(win, shots.widget(win, f"act.{action}.{p.name}.{suffix}"))
+            continue
+        w = shots.widget(win, f"act.{action}.{p.name}")
+        if p.name in params:
+            shots.type_into(win, w, repr(params[p.name]))
+        elif w.text():
+            shots.click(win, w)
+            QTest.keyClick(w, Qt.Key.Key_Delete)
+    if any(isinstance(c, layout.OnOff) for c in cells):
+        run_button(win, f"run.{action}.{'on' if params['on'] else 'off'}")
+    elif any(isinstance(c, layout.Choices) for c in cells):
+        (c,) = [c for c in cells if isinstance(c, layout.Choices)]
+        run_button(win, f"run.{action}.{token(params[c.param])}")
+    else:
+        run_button(win, f"run.{action}")
+
+
+def test_a_whole_p4_episode_played_on_the_screen_measures_and_scores_as_the_same_calls_do(open_window, tmp_path):
+    """The calls of the scripted baseline's episode for seed 3 (12 scans, 14 tip moves, pokes, a pulse,
+    drift compensation ...), once straight into the instrument and once by clicks and keystrokes: the
+    same measurements, the same verdict, the same instrument time."""
+    from stmbench.instrument import Instrument
+
+    fixture = json.loads((Path(__file__).parent / "fixtures" / "p4_seed3_baseline_actions.json").read_text(encoding="utf-8"))
+    steps, seed = fixture["steps"], fixture["seed"]
+    inst = Instrument(P4, seed, out_dir=tmp_path / "direct")
+    for s in steps:
+        if s["kind"] == "act":
+            inst.act(s["name"], **s["params"])
+        elif s["kind"] == "report":
+            a = dict(s["args"])
+            inst.report(a.pop("claim_id"), a.pop("value"), **a)
+        else:
+            inst.finish()
+    win = open_window("zh", seed=seed, name="screen")
+    for s in steps:
+        if s["kind"] == "act":
+            drive_exact(win, s["name"], s["params"])
+            shots.settle(win)
+            assert win.status.result.full_text().startswith("✓"), (s, win.status.result.full_text())
+        elif s["kind"] == "report":
+            a = s["args"]
+            open_left(win, "report")
+            run_button(win, f"report.claim.{a['claim_id']}")
+            shots.fill(win, {"report.value": repr(a["value"]), "report.x_nm": repr(a["x_nm"]), "report.y_nm": repr(a["y_nm"]),
+                             "report.frame": a["frame"], "report.evidence": ", ".join(a["evidence"])})
+            run_button(win, "report.submit")
+            shots.settle(win)
+            assert win.sidebar.report.reply.text().startswith("✓ recorded target_site")
+        else:
+            run_button(win, "finish.begin")
+            run_button(win, "finish.confirm")
+            shots.settle(win)
+    assert win.session.finished
+    direct, screen = (json.loads((tmp_path / d / "episode.json").read_text(encoding="utf-8")) for d in ("direct", "screen"))
+    assert screen["digest"] == direct["digest"] and screen["verdict"] == direct["verdict"]
+    assert screen["instrument_time_s"] == direct["instrument_time_s"] and screen["success"] is True
