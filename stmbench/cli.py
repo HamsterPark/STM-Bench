@@ -8,6 +8,8 @@
     python -m stmbench.cli agent --scenario P4_atom_positioning_cu111 --seed 0 --out <run dir> \
                                  [--provider anthropic|openai] [--model ID]                    # a model alone
     python -m stmbench.cli console --scenario P4_atom_positioning_cu111 --seed 0 --out <run dir> [--port 8765]
+    python -m stmbench.cli gui --scenario P4_atom_positioning_cu111 --seed 0 --out <run dir> [--lang zh|en]
+    python -m stmbench.cli gui --sealed --private-dir <dir> --export-dir <dir>      # the seed on stdin, as one JSON line
 
 Data roots default to ``$STM_BENCH_DATA`` (see ``stmbench.paths``)."""
 from __future__ import annotations
@@ -139,6 +141,29 @@ def cmd_console(a) -> int:
     return 0
 
 
+def cmd_gui(a) -> int:
+    """The instrument in a native window (stmbench.gui)."""
+    if a.sealed:
+        if a.scenario is not None or a.seed is not None or a.out is not None:
+            raise SystemExit("--sealed reads the scenario and the seed from one JSON line on stdin: "
+                             "do not give --scenario, --seed or --out")
+        if not (a.private_dir and a.export_dir):
+            raise SystemExit("--sealed needs --private-dir and --export-dir")
+    else:
+        if a.scenario is None or a.out is None:
+            raise SystemExit("gui needs --scenario and --out (or --sealed with --private-dir and --export-dir)")
+        if a.private_dir or a.export_dir:
+            raise SystemExit("--private-dir and --export-dir belong to --sealed")
+    try:
+        from .gui.app import run
+    except ModuleNotFoundError as exc:
+        if (exc.name or "").split(".")[0] != "PySide6":
+            raise
+        raise SystemExit('the desktop console needs Qt: pip install "stm-bench[gui]"') from exc
+    return run(scenario=a.scenario, seed=0 if a.seed is None else a.seed, out=a.out, lang=a.lang,
+               ui_scale=a.ui_scale, sealed=a.sealed, private_dir=a.private_dir, export_dir=a.export_dir)
+
+
 # ── argparse ────────────────────────────────────────────────────────────────
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(prog="stmbench")
@@ -229,6 +254,24 @@ def main(argv=None) -> int:
     w.add_argument("--port", type=int, default=8765)
     w.add_argument("--no-browser", action="store_true", help="do not open a browser")
     w.set_defaults(fn=cmd_console)
+
+    k = sub.add_parser("gui", help="the instrument in a native window (needs the gui extra), for a person or an "
+                                   "agent working through a screen; the same ledger as an MCP episode, plus an "
+                                   "export directory")
+    k.add_argument("--scenario", default=None, help="scenario id or YAML path (not with --sealed)")
+    k.add_argument("--seed", type=int, default=None, help="with --scenario (default 0); not with --sealed")
+    k.add_argument("--out", default=None, help="a new run directory; the export goes to <out>/export (not with --sealed)")
+    k.add_argument("--lang", choices=["zh", "en"], default="zh",
+                   help="zh: each label in Chinese followed by its English (default); en: English only")
+    k.add_argument("--ui-scale", type=float, default=1.0, help="multiplies every font and size (1.0 suits 1920x1080)")
+    k.add_argument("--sealed", action="store_true",
+                   help="read {\"scenario\": ..., \"seed\": ...} as one JSON line on stdin and keep the seed out of "
+                        "argv, the window, the export and every message; the window opens maximized and its close "
+                        "button does nothing")
+    k.add_argument("--private-dir", default=None, help="with --sealed: the run directory, made readable by its owner "
+                                                       "only (it holds the seed and, after the end, the truth)")
+    k.add_argument("--export-dir", default=None, help="with --sealed: where the agent-visible export is written")
+    k.set_defaults(fn=cmd_gui)
     a = ap.parse_args(argv)
     return a.fn(a)
 

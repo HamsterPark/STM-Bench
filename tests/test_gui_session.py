@@ -285,3 +285,29 @@ def test_an_action_job_reads_what_the_window_shows_next(tmp_path):
     done = jobs.run_finish(sess)
     assert done.finished and done.ok and sess.finished
     assert jobs.run_act(sess, "wait", {"seconds": 1}).text == "the episode is over"
+
+
+# ── the command line ──
+@pytest.mark.parametrize("argv", [
+    ["gui"], ["gui", "--scenario", P4], ["gui", "--out", "x"],
+    ["gui", "--sealed"], ["gui", "--sealed", "--private-dir", "a"], ["gui", "--sealed", "--export-dir", "b"],
+    ["gui", "--sealed", "--private-dir", "a", "--export-dir", "b", "--seed", "7"],
+    ["gui", "--sealed", "--private-dir", "a", "--export-dir", "b", "--scenario", P4],
+    ["gui", "--sealed", "--private-dir", "a", "--export-dir", "b", "--out", "x"],
+    ["gui", "--scenario", P4, "--out", "x", "--private-dir", "a"],
+    ["gui", "--scenario", P4, "--out", "x", "--export-dir", "b"]])
+def test_the_gui_command_refuses_a_bad_combination_of_options_before_it_loads_qt(argv, capsys):
+    from stmbench import cli
+    with pytest.raises(SystemExit) as exc:
+        cli.main(argv)
+    assert exc.value.code not in (0, None) and "913275" not in str(exc.value)
+
+
+def test_the_gui_command_is_listed_with_its_options(capsys):
+    from stmbench import cli
+    with pytest.raises(SystemExit) as exc:
+        cli.main(["gui", "--help"])
+    assert exc.value.code == 0
+    out = capsys.readouterr().out
+    for flag in ("--scenario", "--seed", "--out", "--lang", "--ui-scale", "--sealed", "--private-dir", "--export-dir"):
+        assert flag in out

@@ -562,3 +562,58 @@ def test_the_screenshot_script_renders_every_state_at_both_sizes(app, tmp_path):
         img = QImage(str(p))
         assert (img.width(), img.height()) == (shots.DOWNSCALED if p.stem.endswith("1280x720") else shots.SCREEN), p.name
     app.processEvents()
+
+
+# ── the entry point ──
+def test_run_refuses_what_it_cannot_open_without_repeating_the_seed(app, tmp_path, capsys):
+    from stmbench.gui.app import run
+    junk = json.dumps({"scenario": P4, "seed": SEED, "extra": 1})
+    assert run(sealed=True, private_dir=tmp_path / "p", export_dir=tmp_path / "e", stdin=io.StringIO(junk)) == 2
+    assert run(sealed=True, private_dir=tmp_path / "p", export_dir=tmp_path / "e", stdin=io.StringIO("not json")) == 2
+    taken = tmp_path / "taken"
+    taken.mkdir()
+    (taken / "x").write_text("x")
+    good = json.dumps({"scenario": P4, "seed": SEED})
+    assert run(sealed=True, private_dir=taken, export_dir=tmp_path / "e", stdin=io.StringIO(good)) == 2
+    assert run(scenario=P4, seed=SEED, out=taken, lang="en") == 2                # a run directory holds one episode
+    err = capsys.readouterr().err
+    assert err.count("error:") == 4 and str(SEED) not in err
+    assert not (tmp_path / "p").exists() and not (tmp_path / "e").exists()
+
+
+def test_the_sealed_command_runs_as_a_process_that_stays_open_and_keeps_the_seed_to_itself(tmp_path):
+    """The whole path of the virtual machine's launch: the spec on stdin, a window that never closes by
+    itself, an export that fills as the program starts, and the seed nowhere it could be read."""
+    import subprocess
+    import sys
+    import time
+
+    export, private = tmp_path / "export", tmp_path / "private"
+    argv = [sys.executable, "-m", "stmbench.cli", "gui", "--sealed", "--private-dir", str(private),
+            "--export-dir", str(export), "--lang", "en"]
+    assert str(SEED) not in " ".join(argv)
+    env = {**os.environ, "QT_QPA_PLATFORM": "offscreen"}
+    proc = subprocess.Popen(argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+                            env=env, cwd=Path(__file__).resolve().parents[1])
+    try:
+        proc.stdin.write(json.dumps({"scenario": P4, "seed": SEED}) + "\n")
+        proc.stdin.flush()
+        end = time.monotonic() + 120
+        seen = False
+        while time.monotonic() < end and proc.poll() is None and not seen:
+            time.sleep(0.5)
+            try:
+                seen = {r.get("what") for r in read_export(export)["records"]} >= {"status", "list_data"}
+            except (OSError, ValueError, KeyError):
+                pass
+        assert seen, "the window did not start: " + (proc.stderr.read() if proc.poll() is not None else "")
+        time.sleep(1.0)
+        assert proc.poll() is None                               # a sealed window stays open until it is killed
+    finally:
+        proc.kill()
+        out, err = proc.communicate(timeout=60)
+    assert str(SEED) not in out + err
+    for p in export.rglob("*"):
+        if p.is_file():
+            assert str(SEED) not in p.read_text(encoding="utf-8"), p.name
+    assert not (private / "episode.json").exists()               # killed, not finished: nothing judged
