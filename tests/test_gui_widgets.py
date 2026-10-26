@@ -25,8 +25,8 @@ if sys.platform == "win32":
     os.environ.setdefault("QT_QPA_FONTDIR", str(Path(os.environ.get("WINDIR", "")) / "Fonts"))
 
 from PySide6.QtCore import QEvent, QPoint, QPointF, Qt  # noqa: E402
-from PySide6.QtGui import QFont, QFontMetrics, QImage, QMouseEvent, QWheelEvent  # noqa: E402
-from PySide6.QtWidgets import QApplication  # noqa: E402
+from PySide6.QtGui import QColor, QFont, QFontDatabase, QFontInfo, QFontMetrics, QImage, QMouseEvent, QWheelEvent  # noqa: E402
+from PySide6.QtWidgets import QApplication, QWidget  # noqa: E402
 
 from stmbench.gui.widgets import FrameView, PlotView, frame_thumbnail  # noqa: E402
 from stmbench.gui.widgets import frame_view as fv  # noqa: E402
@@ -38,6 +38,8 @@ from stmbench.render import pixel_to_scan_nm  # noqa: E402
 WIDGET_SIZE = (860, 740)
 BLUE = np.array([0x00, 0x72, 0xB2])                     # PlotView's first series colour
 ORANGE = np.array([0xD5, 0x5E, 0x00])                   # its second
+SERIES = [np.array(QColor(c).getRgb()[:3]) for c in pv.SERIES_COLORS]
+READOUT_BG = pv.READOUT_BG
 
 
 @pytest.fixture(scope="module")
@@ -798,6 +800,330 @@ def test_plotview_text_is_at_least_14_px_whatever_the_widget_font(app):
     plot.setFont(big)
     assert plot._fpx() == 22
     assert plot.sizeHint().height() > plot.minimumSizeHint().height() > 0
+
+
+# ── PlotView: the cursor readout ───────────────────────────────────────────────────────────
+NAMES = ["dI/dV (nS)", "dI/dV back (nS)", "I (pA)"]
+
+
+def sts_plot(n=201, size=(600, 330), series=1, px=16):
+    """A PlotView holding STS-like curves on a +-1 V sweep: what an agent reads an energy off."""
+    plot = PlotView()
+    font = QFont("Arial")
+    font.setPixelSize(px)
+    plot.setFont(font)
+    plot.resize(*size)
+    x = np.linspace(-1.0, 1.0, n)
+    ys = [5.0 + 2.0 * np.exp(-((x + 0.43) / 0.08) ** 2) + 0.7 * k * x for k in range(series)]
+    plot.set_series(x, list(zip(NAMES, ys)), "Bias (V)", "dI/dV (nS)", "spectrum")
+    return plot, x, ys
+
+
+def reading(i, x, ys, names=NAMES):
+    """What the cursor must report at point i."""
+    return {"index": i, "x": float(x[i]), "values": [[nm, float(y[i])] for nm, y in zip(names, ys)]}
+
+
+def leave(widget):
+    QApplication.sendEvent(widget, QEvent(QEvent.Type.Leave))
+
+
+def box_of(plot: PlotView):
+    """(left, top, right, bottom) of the readout box in the rendered axes, found as the pixels of
+    exactly its background colour; None when none is drawn."""
+    shot, r = rgb(plot), plot.plot_rect()
+    bg = np.array([READOUT_BG.red(), READOUT_BG.green(), READOUT_BG.blue()])
+    x0, y0 = int(r.left()), int(r.top())
+    mask = (shot[y0:int(r.bottom()), x0:int(r.right())] == bg).all(axis=2)
+    ys_, xs_ = np.nonzero(mask)
+    return None if xs_.size == 0 else (x0 + xs_.min(), y0 + ys_.min(), x0 + xs_.max(), y0 + ys_.max())
+
+
+def test_a_wheel_over_the_plot_leaves_the_cursor_where_it_is(app):
+    plot, x, ys = sts_plot()
+    got = Capture(plot.point_picked)
+    click(plot, plot.point_position(46))
+    before = rgb(plot)
+    for delta in (120, -120, 480):
+        ev = QWheelEvent(QPointF(200, 150), QPointF(plot.mapToGlobal(QPoint(200, 150))), QPoint(0, 0), QPoint(0, delta),
+                         Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier, Qt.ScrollPhase.NoScrollPhase, False)
+        QApplication.sendEvent(plot, ev)
+        assert ev.isAccepted()
+    assert np.array_equal(rgb(plot), before) and plot.pinned_point() == reading(46, x, ys) and len(got.items) == 1
+
+
+def test_the_readout_digits_follow_each_quantitys_range():
+    assert [pv.reading_decimals(s) for s in (2.0, 0.2, 20.0, 0.0, float("nan"))] == [3, 4, 2, 3, 3]
+    assert pv.format_number(-0.432161, 3, sig=4) == "-0.432"                  # a peak to a millivolt on a +-1 V sweep
+    assert pv.format_number(5.9123, 3, sig=4) == "5.912"
+    assert pv.format_number(1.23456e-7, 3, sig=4) == "1.235e-07"
+    assert pv.format_number(1.23456e-7, 3) == "1.23e-07"                       # the axes keep their three
+    plot, x, _ = sts_plot(201)
+    assert plot._x_decimals == 3 and plot._y_decimals == [3]
+    plot, x, _ = sts_plot(4097)                                                 # 0.5 mV apart: a tenth of a millivolt shows
+    assert plot._x_decimals == 4
+    plot.set_series([0.0, 100.0, 200.0], [("a", [1.0, 2.0, 3.0]), ("b", [1000.0, 2000.0, 3000.0])], "x", "y")
+    assert plot._x_decimals == 1 and plot._y_decimals == [3, 0]                 # four digits of each range, curve by curve
+
+
+@pytest.mark.parametrize("i", [0, 17, 100, 183, 200])
+def test_hovering_a_data_point_reads_that_points_values(app, i):
+    plot, x, ys = sts_plot()
+    got = Capture(plot.point_picked)
+    move(plot, plot.point_position(i))
+    assert plot.cursor_point() == reading(i, x, ys)                            # exactly the point's own numbers
+    assert plot.pinned_point() is None and got.items == []                     # a hover is not a pick
+    leave(plot)
+    assert plot.cursor_point() is None
+
+
+@pytest.mark.parametrize("i", [17, 100, 183])
+def test_the_cursor_is_drawn_at_the_point_with_a_dot_on_the_curve(app, i):
+    plot, x, ys = sts_plot()
+    bare = rgb(plot)
+    pos = plot.point_position(i)
+    move(plot, pos)
+    shot = rgb(plot)
+    r = plot.plot_rect()
+    diff = np.abs(shot.astype(int) - bare.astype(int)).sum(axis=2)[int(r.top()):int(r.bottom())]
+    column = int(diff.sum(axis=0).argmax())                                    # the cursor line: the column changed most, top to bottom
+    assert column == round(pos.x()) and (diff[:, column] > 0).sum() > 0.9 * diff.shape[0]
+    yy, xx = np.mgrid[0:shot.shape[0], 0:shot.shape[1]]
+    disc = np.hypot(xx + 0.5 - pos.x(), yy + 0.5 - pos.y()) <= 3.5            # a dot fills it; the curve alone covers about half
+    assert near(shot, BLUE)[disc].sum() >= 0.9 * disc.sum()
+
+
+def test_the_pointer_between_points_picks_the_nearest_in_x_whatever_its_height(app):
+    plot, x, ys = sts_plot()
+    r = plot.plot_rect()
+    step = r.width() / 200
+    for i, off, want in ((60, 0.3, 60), (60, 0.7, 61), (60, -0.4, 60), (60, -0.6, 59)):
+        move(plot, QPointF(plot.point_position(i).x() + off * step, r.bottom() - 3))      # near the bottom: y plays no part
+        assert plot.cursor_point()["index"] == want
+
+
+def test_the_pointer_off_the_axes_shows_no_hover(app):
+    plot, x, ys = sts_plot()
+    r = plot.plot_rect()
+    mid = plot.point_position(100)
+    for pos in (QPointF(r.left() - 3, mid.y()), QPointF(mid.x(), r.top() - 3), QPointF(mid.x(), r.bottom() + 3),
+                QPointF(r.right() + 3, mid.y())):
+        move(plot, mid)
+        assert plot.cursor_point() is not None
+        move(plot, pos)
+        assert plot.cursor_point() is None
+
+
+def test_a_click_pins_the_point_and_reports_it(app):
+    plot, x, ys = sts_plot(series=2)
+    names = NAMES[:2]
+    got = Capture(plot.point_picked)
+    click(plot, plot.point_position(46))
+    assert got.items == [reading(46, x, ys, names)]
+    (p,) = got.items
+    assert set(p) == {"index", "x", "values"} and type(p["index"]) is int and type(p["x"]) is float
+    assert all(type(lab) is str and type(v) is float for lab, v in p["values"])
+    assert plot.pinned_point() == reading(46, x, ys, names) == plot.cursor_point()
+    # the line and box stay when the pointer leaves, drawn as they were
+    with_pointer = rgb(plot)
+    leave(plot)
+    assert plot.cursor_point() == plot.pinned_point() == reading(46, x, ys, names)
+    assert np.array_equal(rgb(plot), with_pointer)
+    assert len(got.items) == 1
+    # a later click moves the pin
+    click(plot, plot.point_position(150, 1))
+    assert got.items[-1] == reading(150, x, ys, names) and plot.pinned_point() == reading(150, x, ys, names)
+    assert len(got.items) == 2
+
+
+def test_hovering_shows_the_point_under_the_pointer_and_the_pin_returns_when_it_leaves(app):
+    plot, x, ys = sts_plot()
+    got = Capture(plot.point_picked)
+    click(plot, plot.point_position(46))
+    move(plot, plot.point_position(120))
+    assert plot.cursor_point() == reading(120, x, ys) and plot.pinned_point() == reading(46, x, ys)
+    assert len(got.items) == 1                                                 # moving picks nothing
+    leave(plot)
+    assert plot.cursor_point() == reading(46, x, ys)
+    pinned_picture = rgb(plot)
+    move(plot, plot.point_position(46))                                        # over the pin itself: drawn the same
+    assert np.array_equal(rgb(plot), pinned_picture)
+
+
+def test_new_data_or_clear_removes_the_pin_and_the_hover_for_good(app):
+    plot, x, ys = sts_plot()
+    fresh = rgb(sts_plot()[0])
+    for how in ("set_series", "clear"):
+        click(plot, plot.point_position(46))
+        move(plot, plot.point_position(120))
+        assert rgb(plot).tobytes() != fresh.tobytes()
+        if how == "set_series":
+            plot.set_series(x, [(NAMES[0], ys[0])], "Bias (V)", "dI/dV (nS)", "spectrum")
+        else:
+            plot.clear("nothing")
+        assert plot.cursor_point() is None and plot.pinned_point() is None
+        shot = rgb(plot)                                                      # (a grab of a hidden widget resizes it: still none)
+        assert plot.cursor_point() is None
+        if how == "set_series":
+            assert np.array_equal(shot, fresh)                                # no line, dots or box left over
+        leave(plot)
+        assert plot.cursor_point() is None
+
+
+def test_points_with_nothing_to_read_are_skipped_when_finding_the_nearest(app):
+    nan, inf = float("nan"), float("inf")
+    plot = PlotView()
+    plot.resize(600, 330)
+    x = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, nan, 7.0, inf, 9.0]
+    a = [1.0, nan, 3.0, 4.0, nan, 6.0, 7.0, 8.0, 9.0, 10.0]
+    b = [nan, nan, 3.0, nan, nan, 6.0, 7.0, 8.0, 9.0, nan]
+    plot.set_series(x, [("a", a), ("b", b)], "x", "y")
+    r = plot.plot_rect()
+
+    def px(v: float) -> float:                                                  # the finite points span x = 0 .. 9
+        return r.left() + v / 9.0 * r.width()
+
+    got = Capture(plot.point_picked)
+    # readable points sit at x = 0, 2, 3, 5, 7, 9: 1 (nothing to read), 4 (likewise), 6 (no x) and 8 (infinite x) are skipped
+    for xv, want in ((0.8, 0), (1.2, 2), (3.8, 3), (4.2, 5), (5.7, 5), (6.3, 7), (7.8, 7), (8.2, 9)):
+        move(plot, QPointF(px(xv), r.center().y()))
+        assert plot.cursor_point()["index"] == want, xv
+    assert plot.point_position(1) is None and plot.point_position(6) is None and plot.point_position(8) is None
+    assert plot.point_position(3, 1) is None and plot.point_position(3, 0) is not None
+    click(plot, QPointF(px(3.2), r.center().y()))                              # a point with one series missing
+    (p,) = got.items
+    assert p["index"] == 3 and p["x"] == 3.0 and p["values"][0] == ["a", 4.0]
+    assert p["values"][1][0] == "b" and math.isnan(p["values"][1][1])
+    for xv in np.linspace(0, 9, 90):                                           # sweeping the pointer never lands on a skipped point
+        move(plot, QPointF(px(xv), r.center().y()))
+        assert plot.cursor_point()["index"] in (0, 2, 3, 5, 7, 9)
+
+
+@pytest.mark.parametrize("build", ["fresh", "cleared", "empty", "all nan x", "all nan y"])
+def test_a_plot_with_no_data_has_no_cursor(app, build):
+    plot = PlotView()
+    plot.resize(600, 330)
+    if build == "cleared":
+        plot.clear("No spectrum yet")
+    elif build == "empty":
+        plot.set_series([], [("a", [])], "x", "y")
+    elif build == "all nan x":
+        plot.set_series([float("nan")] * 4, [("a", [1.0, 2.0, 3.0, 4.0])], "x", "y")
+    elif build == "all nan y":
+        plot.set_series([1.0, 2.0, 3.0], [("a", [float("nan")] * 3)], "x", "y")
+    got = Capture(plot.point_picked)
+    before = rgb(plot)
+    for pos in (QPointF(300, 150), QPointF(20, 20), QPointF(590, 320)):
+        move(plot, pos)
+        click(plot, pos)
+    assert plot.cursor_point() is None and plot.pinned_point() is None and got.items == []
+    assert plot.point_position(0) is None and plot.plot_rect().isNull()
+    assert np.array_equal(rgb(plot), before)
+
+
+def test_only_a_left_click_on_the_axes_picks_and_a_double_click_picks_once(app):
+    plot, x, ys = sts_plot()
+    got = Capture(plot.point_picked)
+    r = plot.plot_rect()
+    pos = plot.point_position(60)
+    click(plot, pos, Qt.MouseButton.RightButton)
+    click(plot, pos, Qt.MouseButton.MiddleButton)
+    click(plot, QPointF(r.left() - 5, pos.y()))                                # the margin
+    click(plot, QPointF(pos.x(), r.bottom() + 5))
+    assert got.items == [] and plot.pinned_point() is None
+    L, N = Qt.MouseButton.LeftButton, Qt.MouseButton.NoButton
+    send(plot, QEvent.Type.MouseButtonPress, pos, L, L)
+    send(plot, QEvent.Type.MouseButtonRelease, pos, L, N)
+    send(plot, QEvent.Type.MouseButtonDblClick, pos, L, L)
+    send(plot, QEvent.Type.MouseButtonRelease, pos, L, N)
+    assert len(got.items) == 1 and plot.pinned_point()["index"] == 60
+
+
+def test_the_readout_box_sits_top_left_and_hops_right_when_the_cursor_is_under_it(app):
+    plot, x, ys = sts_plot()
+    r = plot.plot_rect()
+    move(plot, plot.point_position(180))                                       # the cursor is far from the top-left corner
+    left, top, right, bottom = box_of(plot)
+    assert left <= r.left() + 12 and top <= r.top() + 12 and right < r.center().x()
+    move(plot, plot.point_position(10))                                        # now it would be under the box
+    left, top, right, bottom = box_of(plot)
+    assert right >= r.right() - 12 and top <= r.top() + 12 and left > r.center().x()
+    assert not (left <= plot.point_position(10).x() <= right)                  # and the point itself is in the clear
+
+
+def test_a_big_plot_reads_a_table_and_a_small_one_a_single_line(app):
+    lh = QFontMetrics(sts_plot()[0]._mono_font()).height()
+    plot, x, ys = sts_plot(series=3)
+    move(plot, plot.point_position(180))
+    left, top, right, bottom = box_of(plot)
+    assert bottom - top + 1 >= 4 * lh                                          # the x row and one row per curve
+    swatches = [near(rgb(plot), SERIES[k])[top:bottom, left:right].sum() for k in range(3)]
+    assert all(n > 20 for n in swatches)                                       # each row carries its curve's colour
+    small, x, ys = sts_plot(size=(310, 140))
+    small.set_series(x, [(NAMES[0], ys[0])], "distance (nm)", "pm", "A to B  4.400 nm")
+    move(small, small.point_position(150))
+    left, top, right, bottom = box_of(small)
+    assert bottom - top + 1 <= lh + 12                                         # one line, not the two-row table
+    tiny = PlotView()
+    tiny.resize(120, 60)
+    tiny.set_series([0, 1, 2], [("a", [1, 3, 2])], "x", "y")
+    move(tiny, tiny.point_position(1))                                         # no room for a box: the line and dot remain
+    assert tiny.cursor_point()["index"] == 1 and box_of(tiny) is None
+
+
+def test_a_readout_too_wide_for_the_plot_gives_up_words_before_digits(app):
+    """The cascade: labelled table, one labelled line, one line with x= / y= tags, the x alone, the number alone."""
+    holder = QWidget()                               # a child: a top-level window cannot be made as narrow as this
+    plot = PlotView(holder)
+    plot.resize(1000, 200)
+    plot.set_series([0.0, 0.5, 1.0], [("a very long series label indeed", [1.0, 2.5, 3.0])],
+                    "bias voltage of the sample against the tip (V)", "pA")
+    mfm = QFontMetrics(plot._mono_font())
+
+    def need(text):                                  # the axes width a line of this text asks for (box padding + margins)
+        return 12 + mfm.horizontalAdvance(text) + 12
+
+    def rows_at(axes_width):
+        for _ in range(8):                           # the margins depend a little on the width (tick labels): home in
+            delta = axes_width - plot.plot_rect().width()
+            if abs(delta) <= 1:
+                break
+            plot.resize(plot.width() + round(delta), 200)
+        assert abs(plot.plot_rect().width() - axes_width) <= 1
+        rows, _ = plot._readout_rows(plot._fields(1), mfm, plot.plot_rect(), 6)
+        move(plot, plot.point_position(1))
+        assert plot.cursor_point()["index"] == 1 and rgb(plot).shape == (200, plot.width(), 3)   # it draws, whatever the width
+        return rows
+
+    table = rows_at(1000)                                                                   # room: a row per field, equals aligned
+    assert len(table) == 2 and table[0].index("=") == table[1].index("=") and table[0].endswith("= 0.500")
+    assert rows_at(need("x=0.500  y=2.500") + 5) == ["x=0.500  y=2.500"]                    # labels too long: x= and y= tags
+    assert rows_at(need("x=0.500  y=2.500") - 5) == ["x=0.500"]                             # then x alone
+    assert rows_at(need("x=0.500") - 5) == ["0.500"]                                        # then just the number
+
+
+def test_the_readout_text_is_fixed_pitch_and_at_least_14_px(app):
+    plot, x, ys = sts_plot()
+    font = plot._mono_font()
+    assert font.pixelSize() >= 14
+    if any(f in QFontDatabase.families() for f in pv.MONO_FAMILIES):
+        assert QFontInfo(font).fixedPitch()
+    small = PlotView()
+    tiny_font = QFont("Arial")
+    tiny_font.setPixelSize(9)
+    small.setFont(tiny_font)
+    assert small._mono_font().pixelSize() >= 14
+
+
+def test_a_series_without_a_name_reads_with_the_y_label_and_an_unlabelled_x_as_x(app):
+    plot = PlotView()
+    plot.resize(600, 330)
+    plot.set_series([0.0, 1.0, 2.0], [("", [1.0, 2.0, 3.0])], "", "pm")
+    move(plot, plot.point_position(1))
+    assert plot.cursor_point()["values"] == [["pm", 2.0]]
+    assert plot._fields(1)[0][1] == "x"
+    plot.set_series([0.0, 1.0, 2.0], [("", [1.0, 2.0, 3.0])], "t", "")
+    assert plot._fields(1)[1][1] == "y"
 
 
 # ── a real frame from the instrument ────────────────────────────────────────────────────────
