@@ -205,7 +205,9 @@ def render_states(out: Path, lang: str = "zh", scale: float = 1.0, scenario: str
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(prog="stmbench.gui.shots", description=__doc__.splitlines()[0])
+    ap = argparse.ArgumentParser(prog="stmbench.gui.shots", description="Render the desktop console offscreen in "
+                                 "scripted states (P4, seed 0) and save each as a 1920x1080 screen and as the "
+                                 "1280x720 picture a model is shown.")
     ap.add_argument("--out", required=True, help="directory for the PNGs")
     ap.add_argument("--lang", default="zh", choices=["zh", "en"])
     ap.add_argument("--ui-scale", type=float, default=1.0)
