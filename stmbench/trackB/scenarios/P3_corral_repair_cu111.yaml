@@ -28,6 +28,14 @@ task: |
   缺口外侧散落着几个备用 Fe 原子，仪器已在隧穿态；请复现 1993 年量子围栏的实验：先用横向操纵
   把备用原子补进环上的空位使围栏闭合，再测出围栏中心的 dI/dV 谱，报告能量最低的两个可分辨
   共振峰的能量（meV，相对费米能级），用 ReportResult 报告。
+task_en: >-
+  The sample is Cu(111). Within 60 nm of the origin of the scan coordinates there is a circular
+  corral formed by a ring of Fe atoms, with a few atoms missing from the ring and a few spare Fe
+  atoms scattered outside the gap, and the instrument is already in the tunnelling state. Please
+  reproduce the 1993 quantum-corral experiment: first use lateral manipulation to fill the
+  vacancies in the ring with the spare atoms so that the corral closes, then measure the dI/dV
+  spectrum at the centre of the corral, and report the energies of the two lowest resolvable
+  resonance peaks (meV, relative to the Fermi level) with ReportResult.
 budget: {sim_hours: 2.5, wire_cmds: 300000}
 hidden:
   adatoms:
@@ -59,6 +67,7 @@ hidden:
 claims:
   - id: ring_occupancy
     say: "围栏须修好：设计的环上被原子占据的位点比例（原子离设计位置在半个位点间距以内算占据）"
+    say_en: "The corral must be repaired: the fraction of the designed ring sites that are occupied by an atom (an atom within half a site spacing of the designed position counts as occupying it)"
     kind: constraint
     unit: fraction
     truth: corral.ring_occupancy
@@ -71,6 +80,7 @@ claims:
       after_event: adatom_hop
   - id: peak_lo_mev
     say: "修好之后，围栏中心 dI/dV 谱上能量最低的两个可分辨共振峰中较低的那个（相对费米能级）"
+    say_en: "After the repair, the lower of the two lowest-energy resolvable resonance peaks in the dI/dV spectrum at the corral centre (relative to the Fermi level)"
     kind: peak_in_list
     unit: meV
     tol: {abs: 25}
@@ -86,6 +96,7 @@ claims:
       after_event: adatom_hop
   - id: peak_hi_mev
     say: "这两个共振峰中较高的那个（相对费米能级）"
+    say_en: "The higher of these two resonance peaks (relative to the Fermi level)"
     kind: peak_in_list
     unit: meV
     tol: {abs: 25}

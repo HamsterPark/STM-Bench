@@ -2,6 +2,7 @@
 
     python -m stmbench.cli episode --scenario P5_sader_jarvis_qplus --seed 0 --out <run dir>   # MCP stdio
     python -m stmbench.cli verify <run dir>                                                     # replay + compare
+    python -m stmbench.cli task --scenario P4_atom_positioning_cu111 [--lang zh|en]            # the task text
     python -m stmbench.cli reference --paper P4 [--seeds 30] [--jobs 4] [--json out.json]      # privileged reference runs
     python -m stmbench.cli baseline --paper P4 [--seeds 30] [--jobs 4] [--json out.json]       # scripted, no truth
     python -m stmbench.cli audit chance [--scenario P3] [--seeds 200] [--jobs 4] [--json out.json]
@@ -79,6 +80,33 @@ def cmd_verify(a) -> int:
     res = verify(a.run_dir)
     print(json.dumps(res, ensure_ascii=False, indent=1))
     return 0 if res["ok"] else 1
+
+
+def cmd_task(a) -> int:
+    """Print what an agent is told for a scenario: its task and, for a paper, the rule card
+    (stmbench.trackB.rules.task_text), for building the task files of other harnesses."""
+    from stmsim.scenario import Scenario
+    from .trackB.rules import task_text
+
+    exact = SCENARIO_DIR / f"{a.scenario}.yaml"
+    hits = [exact] if exact.is_file() else _resolve(a.scenario)
+    if len(hits) != 1:
+        raise SystemExit(f"{a.scenario!r} matches {len(hits)} scenarios ({', '.join(h.stem for h in hits)}); "
+                         f"name one")
+    try:
+        text = task_text(Scenario.load(hits[0]), a.lang)
+    except ValueError as e:                  # e.g. a scenario without its English text
+        raise SystemExit(str(e))
+    # UTF-8 bytes with plain line breaks, whatever the console's code page and newline translation:
+    # the output is meant to be redirected into a task file
+    sys.stdout.flush()
+    out = getattr(sys.stdout, "buffer", None)
+    if out is None:
+        print(text)
+    else:
+        out.write(text.encode("utf-8") + b"\n")
+        out.flush()
+    return 0
 
 
 def cmd_reference(a) -> int:
@@ -176,6 +204,13 @@ def main(argv=None) -> int:
                                       "every measurement and the verdict")
     v.add_argument("run_dir")
     v.set_defaults(fn=cmd_verify)
+
+    k = sub.add_parser("task", help="print the task text an agent is given: the scenario's task and, for a "
+                                    "paper, its rule card")
+    k.add_argument("--scenario", required=True, help="scenario id or YAML path")
+    k.add_argument("--lang", choices=["zh", "en"], default="zh",
+                   help="zh (default) or en; en needs the scenario's task_en and its claims' say_en")
+    k.set_defaults(fn=cmd_task)
 
     f = sub.add_parser("reference", help="privileged reference solutions: the truth navigates, every reported "
                                          "number is measured; reports success, error spread and instrument time")

@@ -27,6 +27,13 @@ task: |
   样品是 Cu(111)，扫描坐标原点附近 60 nm 内有一圈 Fe 原子排成的圆形围栏，仪器已在隧穿态；
   请复现 1993 年量子围栏的观测：从形貌图量出围栏的半径（nm），测出围栏中心的 dI/dV 谱，报告
   能量最低的两个可分辨共振峰的能量（meV，相对费米能级），用 ReportResult 报告。
+task_en: >-
+  The sample is Cu(111). Within 60 nm of the origin of the scan coordinates there is a circular
+  corral formed by a ring of Fe atoms, and the instrument is already in the tunnelling state.
+  Please reproduce the 1993 observation of the quantum corral: measure the radius of the corral
+  (nm) from a topograph, measure the dI/dV spectrum at the centre of the corral, and report the
+  energies of the two lowest resolvable resonance peaks (meV, relative to the Fermi level) with
+  ReportResult.
 budget: {sim_hours: 1.5, wire_cmds: 150000}
 hidden:
   adatoms:
@@ -57,6 +64,7 @@ hidden:
 claims:
   - id: peak_lo_mev
     say: "围栏中心 dI/dV 谱上能量最低的两个可分辨共振峰中较低的那个（相对费米能级）"
+    say_en: "The lower of the two lowest-energy resolvable resonance peaks in the dI/dV spectrum at the corral centre (relative to the Fermi level)"
     kind: peak_in_list
     unit: meV
     tol: {abs: 10}
@@ -71,6 +79,7 @@ claims:
       v_hi_min: 0.1
   - id: peak_hi_mev
     say: "这两个共振峰中较高的那个（相对费米能级）"
+    say_en: "The higher of these two resonance peaks (relative to the Fermi level)"
     kind: peak_in_list
     unit: meV
     tol: {abs: 10}
@@ -81,6 +90,7 @@ claims:
     evidence: *centre
   - id: radius_nm
     say: "围栏的半径：围栏原子中心所在圆的半径"
+    say_en: "Radius of the corral: the radius of the circle on which the centres of the corral atoms lie"
     kind: scalar
     unit: nm
     tol: {abs: 0.15}
