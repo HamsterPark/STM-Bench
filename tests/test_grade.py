@@ -175,6 +175,21 @@ def test_a_whole_p4_episode_replays_bit_for_bit(tmp_path):
     assert res["score"] == own["partial"]
 
 
+def test_an_episode_over_its_instrument_time_budget_is_graded_and_said_so(tmp_path):
+    """The overrun rule is the judge's: the replay spends the time again and ends over budget."""
+    inst = Instrument(P4, 0)
+    exp = ExportWriter(inst, tmp_path / "export")
+    inst.act("wait", seconds=7200.0)                      # the budget is 1.5 h of instrument time
+    with pytest.raises(ActionError, match="budget"):
+        inst.act("wait", seconds=1.0)
+    own = inst.finish()
+    exp.sync()
+    res = grade_export(tmp_path / "export", P4, 0)
+    assert own["budget_overrun"] and res["replay"]["consistent"]
+    assert res["success"] is False and res["instrument_time_s"] == own["instrument_time_s"] == 7200.0
+    assert "over the instrument-time budget" in res["note"]
+
+
 def test_the_result_holds_no_seed_truth_or_claim_detail(tmp_path):
     inst = Instrument(P4, SEED)
     exp = ExportWriter(inst, tmp_path / "export")
