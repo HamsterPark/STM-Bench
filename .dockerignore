@@ -1,0 +1,22 @@
+# What a docker build sends as its context. The grader image (deploy/osworld/grader/Dockerfile)
+# copies only the source and the pinned requirements; everything else stays out.
+.git
+.github
+output
+.venv*
+runs
+tmp
+build
+dist
+.pytest_cache
+**/__pycache__
+**/*.pyc
+**/*.egg-info
+# generated data lives outside the source tree (see .gitignore)
+**/*.sxm
+**/*.dat
+**/*.npy
+**/*.h5
+**/*.parquet
+**/.env
+**/*.env
