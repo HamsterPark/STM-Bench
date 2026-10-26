@@ -688,8 +688,30 @@ def test_the_viewer_toolbar_has_a_contrast_switch_that_starts_on_auto_and_holds_
     assert fv.contrast() == "auto" and fv._shown.hi < np.nanmax(fv._shown.values) + 1e-9
     caption = shots.widget(win, "view.contrast.full").text()
     assert caption == ("full" if lang == "en" else "全幅")                        # the viewer's toolbar names its buttons in one language
-    for key in ("view.contrast.auto", "view.contrast.full", "view.channel.z", "view.flatten.line", "view.tool.marker"):
+    assert shots.widget(win, "view.contrast.visible").text() == ("visible" if lang == "en" else "可见区")
+    for key in ("view.contrast.auto", "view.contrast.full", "view.contrast.visible", "view.channel.z", "view.flatten.line",
+                "view.tool.marker", "view.tool.hand", "view.zoom.1", "view.zoom.8"):
         assert shots.widget(win, key).width() >= 56
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_visible_contrast_button_sets_the_scale_by_the_part_in_view(open_window, lang):
+    import numpy as np
+    win = open_window(lang)
+    scan_small(win)
+    fv = win.center.frame_view
+    run_button(win, "view.contrast.full")
+    full = (fv._shown.lo, fv._shown.hi)
+    run_button(win, "view.contrast.visible")
+    assert checked(win, "view.contrast.visible") and not checked(win, "view.contrast.full") and fv.contrast() == "visible"
+    assert (fv._shown.lo, fv._shown.hi) == full                                   # the whole frame in view: the same as full
+    run_button(win, "view.zoom.8")
+    r0, r1, c0, c1 = fv._region()
+    part = fv._shown.values[r0:r1, c0:c1]
+    assert fv._shown.lo == pytest.approx(np.nanmin(part)) and fv._shown.hi == pytest.approx(np.nanmax(part))
+    assert fv._shown.lo >= full[0] - 1e-9 and fv._shown.hi <= full[1] + 1e-9      # a part of the frame: inside its range
+    run_button(win, "view.zoom.1")
+    assert (fv._shown.lo, fv._shown.hi) == full
 
 
 def wheel_through_the_window(win: MainWindow, pos, delta: int = 120) -> None:

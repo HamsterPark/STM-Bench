@@ -125,6 +125,7 @@ S: dict[str, Pair] = {
     "tool_pan": ("Pan", "平移"),
     "contrast_auto": ("auto", "自动"),
     "contrast_full": ("full", "全幅"),
+    "contrast_visible": ("visible", "可见区"),
     "lbl_tool": ("Tool", "工具"),
     "lbl_x": ("x axis", "横轴"),
     "lbl_y": ("y axis", "纵轴"),

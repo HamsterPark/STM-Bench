@@ -42,8 +42,9 @@ from .plot_view import MIN_FONT_PX, font_px, format_number, format_ticks, nice_t
 
 FLATTEN_MODES = ("line", "plane", "none")
 #: how the grey scale is set: ``auto`` maps the 0.5-99.5 percentile range (the image an MCP agent gets), ``full``
-#: the frame's own minimum to maximum, so that the top of an atom is not saturated white
-CONTRAST_MODES = ("auto", "full")
+#: the frame's own minimum to maximum, so that the top of an atom is not saturated white, ``visible`` the minimum to
+#: maximum of the part of the frame in view (a step far outside a zoomed view no longer flattens what is in it)
+CONTRAST_MODES = ("auto", "full", "visible")
 TOOLS = ("marker", "profile", "hand", "none")
 #: the zoom levels, steps of the wheel: the whole frame, then a half, a quarter, an eighth of its width
 ZOOM_LEVELS = (1, 2, 4, 8)
@@ -148,10 +149,12 @@ def _resample_axis(a: np.ndarray, m: int, axis: int, mean: bool) -> np.ndarray:
     return np.diff(integral, axis=axis) / np.diff(edges).reshape(shape)
 
 
-def _display_values(array: np.ndarray, channel: str, mode: str, contrast: str = "auto"):
+def _display_values(array: np.ndarray, channel: str, mode: str, contrast: str = "auto",
+                    region: tuple[int, int, int, int] | None = None):
     """``(flattened array in SI, 8-bit image, lo, hi)`` for a flatten mode; ``lo``/``hi`` (SI) are
     the range the image maps onto 0-255. In ``"line"`` mode with ``"auto"`` contrast the image is
-    ``display_array``'s own; ``"full"`` maps the flattened frame's minimum and maximum instead."""
+    ``display_array``'s own; ``"full"`` maps the flattened frame's minimum and maximum instead, and
+    ``"visible"`` those of ``region`` (``row0, row1, col0, col1``: the part in view; None: the frame)."""
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", RuntimeWarning)          # an all-NaN line: NaN, as in display_array
         if mode == "line":
@@ -162,12 +165,17 @@ def _display_values(array: np.ndarray, channel: str, mode: str, contrast: str = 
             grey = display_array(flat, _AS_RECORDED)
         finite = flat[np.isfinite(flat)]
         if finite.size:
-            if contrast == "full":
-                lo, hi = float(finite.min()), float(finite.max())
+            if contrast in ("full", "visible"):
+                span = finite
+                if contrast == "visible" and region is not None:
+                    r0, r1, c0, c1 = region
+                    part = flat[r0:r1, c0:c1]
+                    span = part[np.isfinite(part)] if np.isfinite(part).any() else finite
+                lo, hi = float(span.min()), float(span.max())
             else:
                 lo, hi = (float(v) for v in np.percentile(finite, _PERCENTILES))
             hi = hi if hi > lo else lo + 1e-30
-            if contrast == "full":                                # the same mapping as display_array's, over the whole range
+            if contrast in ("full", "visible"):                   # the same mapping as display_array's, over that range
                 y = np.clip((np.nan_to_num(flat, nan=lo) - lo) / (hi - lo), 0.0, 1.0)
                 grey = np.round(y * 255.0).astype(np.uint8)
         else:
@@ -227,8 +235,8 @@ class _Shown:
         self.array = array
         self.set_mode(mode, contrast)
 
-    def set_mode(self, mode: str, contrast: str = "auto") -> None:
-        flat, self.grey, lo, hi = _display_values(self.array, self.channel, mode, contrast)
+    def set_mode(self, mode: str, contrast: str = "auto", region=None) -> None:
+        flat, self.grey, lo, hi = _display_values(self.array, self.channel, mode, contrast, region)
         self.values = flat * self.scale                           # what every readout shows
         self.lo, self.hi = lo * self.scale, hi * self.scale        # the colour bar's range
         nan = ~np.isfinite(flat)
@@ -286,6 +294,8 @@ class FrameView(QWidget):
         self._shown = new
         if not same:
             self._zoom, self._c0, self._r0 = 1, 0.0, 0.0
+        elif self._contrast == "visible":                  # the same frame in another channel: the part in view sets the scale
+            new.set_mode(self._flatten, "visible", self._region())
         self._pan_last = None
         self._invalidate()
         self._reconcile_profile()
@@ -300,7 +310,7 @@ class FrameView(QWidget):
             return
         self._flatten = mode
         if self._shown is not None:
-            self._shown.set_mode(mode, self._contrast)
+            self._shown.set_mode(mode, self._contrast, self._region())
         self._invalidate()
         self._reconcile_profile()
         self.update()
@@ -308,15 +318,17 @@ class FrameView(QWidget):
     def set_contrast(self, mode: str) -> None:
         """``"auto"`` (the default): the grey scale spans the 0.5-99.5 percentile range, as the image an MCP
         agent gets. ``"full"``: it spans the frame's minimum to maximum, which keeps the top of an atom
-        from saturating; the colour bar follows. Readouts, markers and profiles are the same either way
-        (they read the flattened data, not the grey level), and the mode holds for the frames shown next."""
+        from saturating; ``"visible"``: the minimum to maximum of the part in view, so that zoomed onto a terrace
+        its atoms are not flattened by a step elsewhere in the frame (with the whole frame in view it is
+        ``"full"``). The colour bar follows. Readouts, markers and profiles are the same in every mode (they
+        read the flattened data, not the grey level), and the mode holds for the frames shown next."""
         if mode not in CONTRAST_MODES:
             raise ValueError(f"contrast mode {mode!r}: one of {CONTRAST_MODES}")
         if mode == self._contrast:
             return
         self._contrast = mode
         if self._shown is not None:
-            self._shown.set_mode(self._flatten, mode)
+            self._shown.set_mode(self._flatten, mode, self._region())
         self._invalidate()
         self.update()
 
@@ -399,7 +411,16 @@ class FrameView(QWidget):
             self._c0, self._r0 = c, r
             self._view_changed()
 
+    def _region(self) -> tuple[int, int, int, int] | None:
+        """The rows and columns the view covers (``row0, row1, col0, col1``), or None when it is the whole frame."""
+        if self._shown is None or self._zoom == 1:
+            return None
+        c0, r0, wv, hv = self._view_rect()
+        return int(math.floor(r0)), int(math.ceil(r0 + hv)), int(math.floor(c0)), int(math.ceil(c0 + wv))
+
     def _view_changed(self) -> None:
+        if self._contrast == "visible" and self._shown is not None:      # the grey scale follows what is in view
+            self._shown.set_mode(self._flatten, "visible", self._region())
         self._invalidate()
         self.update()
 

@@ -240,7 +240,8 @@ class CenterColumn(QWidget):
                                  "view.flatten", "line")
         self.tool = self._seg([("marker", "tool_marker"), ("profile", "tool_profile"), ("hand", "tool_pan")],
                               "view.tool", "marker")
-        self.contrast = self._seg([("auto", "contrast_auto"), ("full", "contrast_full")], "view.contrast", "auto")
+        self.contrast = self._seg([("auto", "contrast_auto"), ("full", "contrast_full"), ("visible", "contrast_visible")],
+                                  "view.contrast", "auto")
         self.zoom = self._seg([(1, "zoom_fit"), (2, "zoom_2"), (4, "zoom_4"), (8, "zoom_8")], "view.zoom", 1)
         self.clear_markers = QPushButton(one("clear_markers", self.lang))
         self.clear_markers.setObjectName("view.clear_markers")
