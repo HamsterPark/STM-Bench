@@ -80,7 +80,6 @@ S: dict[str, Pair] = {
     "rep_note": ("", "备注"),
     "rep_viewed": ("viewed", "当前"),
     "rep_submit": ("Submit report", "提交报告"),
-    "finish_title": ("Finish the episode", "结束实验"),
     "finish": ("Finish episode", "结束实验"),
     "finish_ask": ("No actions or reports after this. Finish now?", "结束后不能再操作或报告。确定结束？"),
     "finish_yes": ("Confirm finish", "确认结束"),

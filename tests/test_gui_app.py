@@ -780,19 +780,28 @@ def test_a_frame_taken_with_the_lock_in_on_offers_the_didv_channel(open_window):
     assert "dI/dV" in shots.widget(win, "data.frames").item(0).text()
 
 
+@pytest.mark.parametrize("lang", ["zh", "en"])
 @pytest.mark.parametrize("scenario", sorted(p.stem for p in SCENARIO_DIR.glob("P*.yaml")))
-def test_every_paper_scenario_opens_with_its_reportable_claims_and_a_report_form_that_fits(open_window, scenario):
-    win = open_window("zh", scenario=scenario)
+def test_every_paper_scenario_opens_with_its_reportable_claims_and_a_report_form_that_fits(open_window, scenario, lang):
+    """In both languages: the longest claims (P1's four, in English) leave the form whole and on screen, none
+    of its controls over another, and no scroll bar to reach it."""
+    win = open_window(lang, scenario=scenario)
     claims = win.session.claims()
     assert claims and set(win.sidebar.report.radios) == {c["id"] for c in claims}
     open_left(win, "report")
+    win.wait_idle()
+    QApplication.processEvents()
     page = win.sidebar.report
-    for name in ("report.submit", "finish.begin", "report.value", "report.evidence", "report.note"):
-        w = shots.widget(win, name)
+    assert not win.sidebar.report_scroll.verticalScrollBar().isVisible()
+    controls = [*page.radios.values(), *page.fields.values(), page.viewed_button, page.submit, page.finish_begin]
+    rects = {}
+    for w in controls:
         shots.hit(win, w)                                        # reachable without scrolling
+        rects[w] = w.rect().translated(w.mapTo(win, w.rect().topLeft()))
         assert w.mapTo(page, w.rect().bottomLeft()).y() <= page.height()
-    for r in page.radios.values():
-        shots.hit(win, r)
+    for i, a in enumerate(controls):
+        for b in controls[i + 1:]:
+            assert not rects[a].intersects(rects[b]), (a.objectName(), b.objectName())
 
 
 def test_the_window_shrinks_to_fit_a_screen_its_fonts_would_overflow_and_not_otherwise(app):

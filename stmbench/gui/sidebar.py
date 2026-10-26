@@ -11,7 +11,7 @@ from html import escape
 
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (QAbstractItemView, QFrame, QGridLayout, QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
-                               QPushButton, QRadioButton, QVBoxLayout, QWidget)
+                               QPushButton, QRadioButton, QScrollArea, QVBoxLayout, QWidget)
 
 from . import fmt, style
 from .controls import QuietBrowser, QuietText, SelectAllLineEdit, Tabs, polish, strong
@@ -43,8 +43,8 @@ class _ClaimLabel(QLabel):
         super().__init__(text)
         self._radio = radio
         self.setWordWrap(True)
-        self.setProperty("role", "label")
-        self.setContentsMargins(style.px(26), 0, 0, style.px(4))
+        self.setProperty("role", "claim")
+        self.setContentsMargins(style.px(26), 0, 0, style.px(2))
 
     def mousePressEvent(self, ev) -> None:
         self._radio.click()
@@ -62,8 +62,8 @@ class ReportTab(QWidget):
         self._claims = {c["id"]: c for c in claims}
         self._viewed = ""
         v = QVBoxLayout(self)
-        v.setContentsMargins(style.px(10), style.px(8), style.px(10), style.px(8))
-        v.setSpacing(style.px(5))
+        v.setContentsMargins(style.px(8), style.px(4), style.px(8), style.px(4))
+        v.setSpacing(style.px(3))
         self.title = self._title(f"{tr('report_title', lang)} (ReportResult)")
         self.title.setObjectName("report.title")
         v.addWidget(self.title)
@@ -112,7 +112,7 @@ class ReportTab(QWidget):
         field("evidence", 2, 0, 3, beside=self.viewed_button)
         field("unit", 3, 0)
         field("sigma", 3, 1)
-        field("note", 4, 0, 3)
+        field("note", 3, 2)
         for c in range(3):
             grid.setColumnStretch(c, 1)
         v.addLayout(grid)
@@ -128,11 +128,7 @@ class ReportTab(QWidget):
         self.reply.setProperty("role", "label")
         v.addWidget(self.reply)
 
-        line = QFrame()
-        line.setFrameShape(QFrame.Shape.HLine)
-        v.addSpacing(style.px(6))
-        v.addWidget(line)
-        v.addWidget(self._title(tr("finish_title", lang)))
+        v.addSpacing(style.px(10))
         self.finish_begin = QPushButton(tr("finish", lang))
         self.finish_begin.setObjectName("finish.begin")
         strong(self.finish_begin, "danger")
@@ -163,6 +159,7 @@ class ReportTab(QWidget):
         self.finish_message.setWordWrap(True)
         self.finish_message.setProperty("tone", "ok")
         self.finish_message.setProperty("role", "label")
+        self.finish_message.hide()                       # nothing to say until the end
         v.addWidget(self.finish_message)
         v.addStretch(1)
 
@@ -222,6 +219,7 @@ class ReportTab(QWidget):
         self.finish_ask.hide()
         self.finish_begin.hide()
         self.finish_message.setText(tr("over", self.lang))
+        self.finish_message.show()
 
 
 class DataTab(QWidget):
@@ -430,9 +428,17 @@ class Sidebar(Tabs):
         self.task.setObjectName("task.text")
         self.manual = ManualTab(manual, lang)
         self.report = ReportTab(claims, lang)
+        # in a scroll area, as a last resort: the claims' wrapped lines are taller than the layout's minimum
+        # says, and a form squeezed below that overlaps itself (P1 in English: four long claims)
+        self.report_scroll = QScrollArea()
+        self.report_scroll.setObjectName("report.scroll")
+        self.report_scroll.setWidgetResizable(True)
+        self.report_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        self.report_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.report_scroll.setWidget(self.report)
         self.data = DataTab(lang)
         self.log = LogTab(lang)
-        for key, w in zip(self.KEYS, (self.task, self.manual, self.report, self.data, self.log)):
+        for key, w in zip(self.KEYS, (self.task, self.manual, self.report_scroll, self.data, self.log)):
             self.addTab(w, two_lines(f"tab_{key}", lang))
         self.setDocumentMode(False)
         self.tabBar().setObjectName("sidebar.tabs")
