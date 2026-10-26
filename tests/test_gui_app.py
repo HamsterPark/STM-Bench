@@ -873,6 +873,57 @@ def test_a_long_result_wraps_whole_and_the_list_keeps_its_place(open_window):
     assert win.recent.scroll.height() >= 6 * win.recent.rows[0].fontMetrics().height()    # room for a wrapped row
 
 
+# ── the state the buttons show ──
+def checked(win: MainWindow, name: str) -> bool:
+    return shots.widget(win, name).isChecked()
+
+
+def test_on_off_pairs_and_the_range_row_show_the_state_the_instrument_reports(open_window):
+    win = open_window("en")
+    assert checked(win, "run.feedback.on") and not checked(win, "run.feedback.off")            # tunnelling, loop closed
+    assert checked(win, "run.set_current_range.10") and not checked(win, "run.set_current_range.1")
+    assert not checked(win, "run.drift_comp.on") and checked(win, "run.drift_comp.off")
+    run_button(win, "run.feedback.off")
+    shots.settle(win)
+    assert checked(win, "run.feedback.off") and not checked(win, "run.feedback.on")
+    assert "Z feedback OFF" in win.status.plain_text()
+    run_button(win, "run.feedback.on")
+    run_button(win, "run.set_current_range.1")
+    shots.settle(win)
+    assert checked(win, "run.feedback.on") and checked(win, "run.set_current_range.1")
+    assert not checked(win, "run.set_current_range.10") and "Range 1 nA" in win.status.plain_text()
+    shots.fill(win, {"act.drift_comp.vx_nm_per_min": "0.5", "act.drift_comp.vy_nm_per_min": "-0.25"})
+    run_button(win, "run.drift_comp.on")                                   # the compensation was not in status() before
+    shots.settle(win)
+    assert checked(win, "run.drift_comp.on") and not checked(win, "run.drift_comp.off")
+    assert "Drift comp. ON (0.5, -0.25) nm/min" in win.status.plain_text()
+    run_button(win, "run.drift_comp.off")
+    shots.settle(win)
+    assert checked(win, "run.drift_comp.off") and "Drift comp. OFF" in win.status.plain_text()
+    open_right(win, "spectroscopy")
+    assert checked(win, "run.lockin.off")
+    run_button(win, "run.lockin.on")
+    shots.settle(win)
+    assert checked(win, "run.lockin.on") and not checked(win, "run.lockin.off") and "Lock-in ON" in win.status.plain_text()
+
+
+def test_a_switch_the_rig_does_not_have_shows_neither_state_and_a_refused_click_does_not_stick(open_window):
+    win = open_window("en")
+    open_right(win, "spectroscopy")
+    assert not checked(win, "run.pll.on") and not checked(win, "run.pll.off")          # P4 has no qPlus sensor
+    assert "Oscillation n/a" in win.status.plain_text()
+    run_button(win, "run.pll.on")                                                       # the instrument refuses
+    shots.settle(win)
+    assert win.status.result.full_text() == "✗ refused: pll: this instrument has no qPlus sensor"
+    assert not checked(win, "run.pll.on") and not checked(win, "run.pll.off")          # the click did not leave it selected
+    qp = open_window("en", name="run_qplus", scenario=P5)
+    open_right(qp, "spectroscopy")
+    assert checked(qp, "run.pll.off") and "Oscillation OFF" in qp.status.plain_text()
+    run_button(qp, "run.pll.on")
+    shots.settle(qp)
+    assert checked(qp, "run.pll.on") and not checked(qp, "run.pll.off") and "Oscillation ON" in qp.status.plain_text()
+
+
 # ── a busy instrument ──
 class Gate:
     """A job that holds the worker until the test opens the gate: a scan that is "running" for as long as
@@ -893,7 +944,8 @@ class Gate:
         self.win = win
         win._submit(Job(kind, label, dict(self.args), hold))
         end = time.monotonic() + 10
-        while win.worker.running is None and time.monotonic() < end:
+        # until the window has heard that it runs: the worker sets it running a moment before it says so
+        while win.status.state.property("tone") != "busy" and time.monotonic() < end:
             QApplication.processEvents()
             time.sleep(0.005)
         QApplication.processEvents()

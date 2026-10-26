@@ -54,6 +54,7 @@ class MainWindow(QMainWindow):
         self._open = 0                                   # jobs submitted whose outcome is not drawn yet
         self._running = ""
         self._running_job: Job | None = None
+        self._state: dict | None = None                  # the last status(): what the On / Off buttons show
         self._finished = False
         self._t_s = 0.0                                  # the last instrument time the window was told
         self._data: dict = {"frames": [], "spectra": []}
@@ -210,6 +211,8 @@ class MainWindow(QMainWindow):
         if out.status:
             self._t_s = float(out.status["instrument_time_s"])
             self.status.set_status(out.status)
+            self._state = fmt.instrument_state(out.status)
+        self._show_instrument_state()                    # also after a refusal: a clicked button goes back to the truth
         if out.data:
             self._apply_data(out.data)
         if out.kind == "boot":
@@ -265,6 +268,11 @@ class MainWindow(QMainWindow):
             self.sidebar.report.set_finished()
             self._succeed(tr("over", self.lang))
             self.sidebar.log.done(job.id, True, str(out.reply), self._t_s)
+
+    def _show_instrument_state(self) -> None:
+        if self._state is not None:
+            for panel in (self.operate, self.spectroscopy):
+                panel.show_state(self._state)
 
     def _succeed(self, text: str) -> None:
         """What the last call answered: the strip's last line, and the list of recent results."""

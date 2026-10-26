@@ -55,6 +55,11 @@ class RecentList(QGroupBox):
         col = QVBoxLayout(body)
         col.setContentsMargins(0, 0, 0, 0)
         col.setSpacing(style.px(1))
+        self.empty = QLabel(tr("no_call", lang))                  # until the first call: the box is not just a frame
+        self.empty.setObjectName("recent.empty")
+        self.empty.setProperty("role", "recent")
+        self.empty.setProperty("tone", "note")
+        col.addWidget(self.empty)
         self.rows: list[QLabel] = []
         for i in range(N_RECENT):
             lab = QLabel()
@@ -85,6 +90,7 @@ class RecentList(QGroupBox):
 
     def _render(self) -> None:
         shown = self.entries()
+        self.empty.setVisible(not shown)
         for i, lab in enumerate(self.rows):
             if i < len(shown):
                 tone, text = shown[i]

@@ -82,6 +82,16 @@ def yes_no(flag: bool | None, lang: str = "en") -> str:
     return ("是 yes" if flag else "否 no") if lang == "zh" else ("yes" if flag else "no")
 
 
+def instrument_state(st: dict) -> dict[str, Any]:
+    """The switches and the current range as ``status()`` reports them, by the name of the action that sets
+    each: what the window's On / Off pairs and range buttons show as selected. ``None``: the instrument
+    has no such switch (no qPlus sensor), or the reading is missing."""
+    dc = st.get("drift_comp")
+    return {"feedback": st.get("feedback"), "lockin": st.get("lockin"), "pll": st.get("oscillating"),
+            "drift_comp": dc.get("on") if isinstance(dc, dict) else None,
+            "set_current_range": st.get("current_full_scale_na")}
+
+
 def drift_comp_text(dc: dict | None, lang: str = "en") -> str:
     """The programmed drift compensation as ``status()`` reports it: OFF, or ON with the velocities it
     was programmed with (the units of the ``drift_comp`` action's fields)."""

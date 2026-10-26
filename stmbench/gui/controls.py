@@ -34,6 +34,15 @@ def polish(widget: QWidget) -> None:
     widget.update()
 
 
+def _same(a: Any, b: Any) -> bool:
+    """Equal as the instrument's readings are: a number to its rounding, a flag to a flag."""
+    if isinstance(a, bool) or isinstance(b, bool):
+        return a is b or (isinstance(a, bool) and isinstance(b, bool) and a == b)
+    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+        return abs(a - b) <= 1e-9 * max(1.0, abs(a), abs(b))
+    return a == b
+
+
 class Segmented(QWidget):
     """A row of buttons, one selected (or none yet): the visible state is the value.
 
@@ -75,6 +84,15 @@ class Segmented(QWidget):
             if val == value:
                 b.setChecked(True)
                 return
+
+    def show_value(self, value: Any) -> None:
+        """Show ``value`` as the selected one without a click: the state the instrument reports, not a
+        choice made here. A value no button has (or None) leaves none selected."""
+        match = next((b for val, b in self._buttons.values() if _same(val, value)), None)
+        self._group.setExclusive(False)
+        for _, b in self._buttons.values():
+            b.setChecked(b is match)
+        self._group.setExclusive(True)
 
     def button(self, value: Any) -> QPushButton | None:
         return next((b for val, b in self._buttons.values() if val == value), None)

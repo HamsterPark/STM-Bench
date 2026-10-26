@@ -248,6 +248,16 @@ def test_readings_are_written_in_the_units_of_the_fields_that_set_them():
     assert "e-" not in " ".join(texts.values())
 
 
+def test_the_switches_and_the_range_are_read_off_status_by_the_action_that_sets_them():
+    st = {"feedback": True, "lockin": False, "oscillating": None, "current_full_scale_na": 10.0,
+          "drift_comp": {"on": True, "v_nm_per_min": [1.0, 0.0], "vz_pm_per_min": 0.0}}
+    assert fmt.instrument_state(st) == {"feedback": True, "lockin": False, "pll": None, "drift_comp": True,
+                                        "set_current_range": 10.0}
+    old_status = {"feedback": False, "lockin": True, "oscillating": True}               # no drift_comp, no range
+    assert fmt.instrument_state(old_status) == {"feedback": False, "lockin": True, "pll": True, "drift_comp": None,
+                                                "set_current_range": None}
+
+
 def test_a_reply_is_summarised_in_the_instruments_words():
     scan = {"frame": "sim005.sxm", "duration_s": 300.2, "size_nm": 30.0, "instrument_time_s": 312.5, "budget_s": 5400.0}
     assert fmt.reply_summary("scan", scan) == "scan → sim005.sxm (300.2 s)"

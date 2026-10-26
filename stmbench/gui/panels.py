@@ -60,6 +60,7 @@ class ActionPanel(QScrollArea):
         self._group_of: dict[str, str] = {}
         self._onoff: set[str] = set()
         self._runs: set[str] = set()
+        self._ranges: dict[str, str] = {}                # actions with one button per value: the parameter
         self.setWidgetResizable(True)
         self.setFrameShape(QFrame.Shape.NoFrame)
         body = QWidget()
@@ -159,8 +160,9 @@ class ActionPanel(QScrollArea):
         v.setContentsMargins(0, 0, 0, 0)
         v.setSpacing(style.px(1))
         v.addWidget(self._label(f"lbl.{c.action}.on", c.en, c.zh))
+        # checkable: the selected one is the state the instrument reports (see show_state), not a pending choice
         seg = Segmented([(True, tr("on", self.lang), f"run.{c.action}.on"),
-                         (False, tr("off", self.lang), f"run.{c.action}.off")], checkable=False)
+                         (False, tr("off", self.lang), f"run.{c.action}.off")])
         seg.setObjectName(f"act.{c.action}.on")
         for value in (True, False):
             b = seg.button(value)
@@ -177,7 +179,8 @@ class ActionPanel(QScrollArea):
         v.setContentsMargins(0, 0, 0, 0)
         v.setSpacing(style.px(1))
         v.addWidget(self._label(f"lbl.{c.action}.{c.param}", c.en, c.zh, c.unit))
-        seg = Segmented([(ch, token(ch), f"run.{c.action}.{token(ch)}") for ch in p.choices], checkable=False)
+        seg = Segmented([(ch, token(ch), f"run.{c.action}.{token(ch)}") for ch in p.choices])
+        self._ranges[c.action] = c.param
         seg.setObjectName(f"act.{c.action}.{c.param}")
         for ch in p.choices:
             b = seg.button(ch)
@@ -221,6 +224,16 @@ class ActionPanel(QScrollArea):
     # ── what the window tells the panel ──
     def has_action(self, action: str) -> bool:
         return action in self._group_of
+
+    def show_state(self, state: dict) -> None:
+        """Mark what the instrument reports as the selected button of each On / Off pair and of the range
+        row (``state`` is :func:`stmbench.gui.fmt.instrument_state`): the pairs and the row look like
+        selectors, so they must show the state. No click is made."""
+        for action, value in state.items():
+            if action in self._onoff:
+                self.controls[(action, "on")].show_value(value)
+            elif action in self._ranges:
+                self.controls[(action, self._ranges[action])].show_value(value)
 
     def set_field(self, action: str, param: str, text: str) -> bool:
         w = self.controls.get((action, param))
