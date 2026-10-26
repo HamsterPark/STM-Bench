@@ -236,11 +236,11 @@ def test_a_refusal_shows_the_instruments_words_everywhere(open_window, tmp_path)
     assert "move_tip: outside the piezo range" in shots.widget(win, "log.view").toPlainText()
     assert not acts(records(tmp_path))                          # nothing happened on the instrument
     # an empty required field sends nothing, a field that is not a number is sent as typed: both are refused,
-    # and the instrument puts a refusal it makes before acting on record
+    # and every refusal is on record, the instrument's own range check above included
     run_button(win, "run.scan")
     shots.settle(win)
     assert win.status.result.full_text() == "✗ refused: scan: center_x_nm is required"
-    assert [r["kind"] for r in records(tmp_path) if r["kind"] != "observe"] == ["refused"]
+    assert [r["kind"] for r in records(tmp_path) if r["kind"] != "observe"] == ["refused", "refused"]
     shots.fill(win, {"act.set_bias.bias_v": "abc"})
     run_button(win, "run.set_bias")
     shots.settle(win)

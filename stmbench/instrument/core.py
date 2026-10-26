@@ -330,7 +330,14 @@ class Instrument:
                              "error": str(exc), "t_s": _r(self.used_s, 6)})
             raise
         t0 = self.used_s
-        out = getattr(self, f"_do_{name}")(**params)
+        try:
+            out = getattr(self, f"_do_{name}")(**params)
+        except ActionError as exc:
+            # the instrument's own checks (piezo range, a withdrawn tip, no qPlus sensor) refuse
+            # before anything moves: a refusal like the ones above, and on the record as one
+            self.log.append({"i": len(self.log), "kind": "refused", "name": name, "args": _jsonable(args),
+                             "error": str(exc), "t_s": _r(self.used_s, 6)})
+            raise
         self.n_actions += 1
         self.log.append({"i": len(self.log), "kind": "act", "name": name, "params": params,
                          "t0_s": _r(t0, 6), "t1_s": _r(self.used_s, 6), "result": _jsonable(out)})

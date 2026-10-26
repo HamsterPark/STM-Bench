@@ -70,6 +70,25 @@ def test_a_bad_call_is_refused_and_costs_nothing(args, needle):
     assert inst.log[-1]["kind"] == "refused"
 
 
+def test_a_refusal_by_the_instruments_own_checks_is_on_the_record_and_costs_nothing():
+    """Range and state checks inside an action refuse before anything moves; the ledger (and an
+    export, which a grader replays) holds them as it holds a refused bad call."""
+    inst = Instrument(P4, 0)
+    t = inst.used_s
+    with pytest.raises(ActionError, match="outside the piezo range"):
+        inst.act("move_tip", x_nm=1.0e6, y_nm=0.0)
+    with pytest.raises(ActionError, match="exceeds the piezo range"):
+        inst.act("scan", center_x_nm=1.0e6, center_y_nm=0.0, size_nm=10.0)
+    inst.act("withdraw")
+    t_withdrawn = inst.used_s
+    with pytest.raises(ActionError, match="withdrawn"):
+        inst.act("pulse", bias_v=3.0)
+    assert inst.used_s == t_withdrawn > t and inst.n_actions == 1
+    assert [r["kind"] for r in inst.log] == ["refused", "refused", "act", "refused"]
+    assert inst.log[0]["error"] == "move_tip: outside the piezo range"
+    assert inst.log[0]["args"] == {"x_nm": 1.0e6, "y_nm": 0.0}
+
+
 def test_the_same_actions_give_the_same_measurements():
     a, b = Instrument(P4, 3), Instrument(P4, 3)
     _script(a)
