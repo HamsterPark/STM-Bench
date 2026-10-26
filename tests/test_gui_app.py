@@ -17,7 +17,7 @@ import pytest
 pytest.importorskip("PySide6")
 os.environ["QT_QPA_PLATFORM"] = "offscreen"                 # never a visible window
 
-from PySide6.QtCore import Qt  # noqa: E402
+from PySide6.QtCore import QCoreApplication, QEvent, Qt  # noqa: E402
 from PySide6.QtGui import QCloseEvent, QImage  # noqa: E402
 from PySide6.QtTest import QTest  # noqa: E402
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QLabel, QLineEdit, QListWidget,  # noqa: E402
@@ -107,6 +107,9 @@ def open_window(app, tmp_path):
     for w in made:
         w.shutdown(finish=False)
         w.deleteLater()
+    # really delete them now: a window left until the event loop turns stays in the application, and every
+    # later change of the style sheet (a fixture that swaps the fonts, fit_scale) restyles all of them
+    QCoreApplication.sendPostedEvents(None, QEvent.Type.DeferredDelete)
     app.processEvents()
 
 
@@ -711,7 +714,8 @@ def test_in_the_sealed_mode_the_seed_is_in_no_widget_title_or_file_and_close_doe
 def test_the_screenshot_script_renders_every_state_at_both_sizes(app, tmp_path):
     saved = shots.render_states(tmp_path / "png", "en", work=tmp_path / "work")
     names = sorted(p.name for p in saved)
-    assert len(names) == 16 and any(n.startswith("a_started") for n in names) and any(n.startswith("e_refusal") for n in names)
+    assert len(names) == 18 and any(n.startswith("a_started") for n in names) and any(n.startswith("e_refusal") for n in names)
+    assert any(n.startswith("i_busy") for n in names)
     for p in saved:
         img = QImage(str(p))
         assert (img.width(), img.height()) == (shots.DOWNSCALED if p.stem.endswith("1280x720") else shots.SCREEN), p.name

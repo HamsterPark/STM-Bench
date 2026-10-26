@@ -6,7 +6,8 @@ window) at the size it has on a 1920x1080 screen (full screen, as the sealed mod
 is shown; ``--maximized`` for the dev mode's window under GNOME's top bar), drives it with the same clicks and
 keystrokes an agent's would be, and saves each state twice: as the full screen and as the 1280x720 picture a model
 is shown. The states, for P4 seed 0: (a) just started, (b) after a 30 nm, 256 px scan with three
-markers and a profile, (c) an STS spectrum, (d) the Report tab filled in, (e) a refusal.
+markers and a profile, (c) an STS spectrum, (d) the Report tab filled in, (e) a refusal, (f-h) the Data,
+Log and Manual tabs, (i) a 1024 px scan running with two calls queued behind it.
 
 The helpers (:func:`click`, :func:`type_into`, :func:`drag`) are shared with the tests: they send
 events to the deepest widget under a window position, so a control that is hidden or covered fails
@@ -201,6 +202,17 @@ def render_states(out: Path, lang: str = "zh", scale: float = 1.0, scenario: str
     for key, label in (("data", "f_data"), ("log", "g_log"), ("manual", "h_manual")):
         click(win, bar, bar.tabRect(win.sidebar.KEYS.index(key)).center())
         snap(f"{label}_{lang}")
+
+    # (i) a scan that takes a second or more, and two calls clicked behind it: the strip says what runs, the
+    # viewer says a scan is running, the log shows the two as queued, the Cancel queued button is there
+    click(win, bar, bar.tabRect(win.sidebar.KEYS.index("log")).center())
+    fill(win, {"act.scan.center_x_nm": "0", "act.scan.center_y_nm": "0", "act.scan.size_nm": "40",
+               "act.scan.pixels": "1024", "act.set_bias.bias_v": "0.1", "act.set_setpoint.current_pa": "100"})
+    for name in ("run.scan", "run.set_bias", "run.set_setpoint"):
+        click(win, widget(win, name))
+    app.processEvents()
+    snap(f"i_busy_{lang}")
+    settle(win)
     win.shutdown(finish=False)
     win.deleteLater()
     return saved
