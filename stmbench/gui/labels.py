@@ -58,6 +58,7 @@ S: dict[str, Pair] = {
     "cancel_queued": ("Cancel queued", "取消排队"),
     "cancelled": ("cancelled", "已取消"),
     "cancelled_note": ("cancelled queued", "已取消排队"),
+    "not_run": ("not run: an earlier call was refused", "未执行:前面的调用被拒绝了"),
     "recent_title": ("Recent results", "最近结果"),
     "stays_open": ("This program stays open; it is closed from outside.", "此程序保持打开，由外部关闭。"),
     # the instrument's facts (top of the Manual tab)

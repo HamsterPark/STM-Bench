@@ -36,7 +36,8 @@ class RecentList(QGroupBox):
         super().__init__(tr("recent_title", lang), parent)
         self.setObjectName("recent.box")
         self.lang = lang
-        self._items: deque[tuple[str, str]] = deque(maxlen=N_RECENT)          # oldest first
+        self._items: deque[tuple[str, str, str | None]] = deque(maxlen=N_RECENT)     # (tone, text, key), oldest first
+        self._not_run: list[str] = []
         v = QVBoxLayout(self)
         v.setContentsMargins(style.px(6), 0, style.px(2), style.px(2))
         v.setSpacing(0)
@@ -75,14 +76,28 @@ class RecentList(QGroupBox):
         v.addWidget(self.scroll)
         self._render()
 
-    def push(self, tone: str, text: str) -> None:
-        """Add a result: ``tone`` is ``ok``, ``bad`` or ``note``. The sixth oldest drops off."""
-        self._items.append((tone if tone in MARKS else "note", str(text)))
+    def push(self, tone: str, text: str, key: str | None = None) -> None:
+        """Add a result: ``tone`` is ``ok``, ``bad`` or ``note``. The sixth oldest drops off. An entry with a
+        ``key`` replaces the newest one when that has the same key (a note that grows)."""
+        entry = (tone if tone in MARKS else "note", str(text), key)
+        if key is not None and self._items and self._items[-1][2] == key:
+            self._items[-1] = entry
+        else:
+            self._items.append(entry)
         self._render()
+
+    def not_run(self, names: list[str], reason: str) -> None:
+        """Calls that were not run: one note naming them, which grows while more are turned away straight after,
+        so that a long step cannot push the refusal itself out of the five."""
+        if self._items and self._items[-1][2] == "not_run":
+            self._not_run += names
+        else:
+            self._not_run = list(names)
+        self.push("note", f"{reason}: {', '.join(self._not_run)}", key="not_run")
 
     def entries(self) -> list[tuple[str, str]]:
         """``(tone, text)`` of what is listed, newest first (the text without its mark)."""
-        return list(reversed(self._items))
+        return [(t, x) for t, x, _ in reversed(self._items)]
 
     def texts(self) -> list[str]:
         """What the rows say, newest first, with their marks: for tests and logs."""

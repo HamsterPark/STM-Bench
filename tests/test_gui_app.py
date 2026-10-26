@@ -97,6 +97,7 @@ def open_window(app, tmp_path):
         else:
             sess = GuiSession(scenario, seed, run_dir=tmp_path / name, export_dir=tmp_path / name / "export", lang=lang)
         win = MainWindow(sess, lang=lang, sealed=sealed)
+        win.worker.guard_s = 0.0                          # the tests click one refusal after another; see the guard tests
         win.resize(*shots.WINDOW)
         win.show()
         made.append(win)
@@ -778,7 +779,7 @@ def test_in_the_sealed_mode_the_seed_is_in_no_widget_title_or_file_and_close_doe
 def test_the_screenshot_script_renders_every_state_at_both_sizes(app, tmp_path):
     saved = shots.render_states(tmp_path / "png", "en", work=tmp_path / "work")
     names = sorted(p.name for p in saved)
-    assert len(names) == 20 and any(n.startswith("a_started") for n in names) and any(n.startswith("e_refusal") for n in names)
+    assert len(names) == 22 and any(n.startswith("a_started") for n in names) and any(n.startswith("e_refusal") for n in names)
     assert any(n.startswith("i_busy") for n in names)
     for p in saved:
         img = QImage(str(p))
@@ -993,9 +994,9 @@ def test_the_window_shrinks_to_fit_a_screen_its_fonts_would_overflow_and_not_oth
 def test_the_last_five_results_stay_on_screen_and_a_refusal_is_not_pushed_out_by_later_successes(open_window):
     win = open_window("en")
     shots.fill(win, {"act.set_bias.bias_v": "abc", "act.set_setpoint.current_pa": "100", "act.wait.seconds": "1"})
-    for name in ("run.set_bias", "run.set_setpoint", "run.wait"):          # one step, three calls, no looking between
-        run_button(win, name)
-    shots.settle(win)
+    for name in ("run.set_bias", "run.set_setpoint", "run.wait"):          # three steps: a refusal, then two successes
+        run_button(win, name)                                               # (calls of one step after a refusal do not run)
+        shots.settle(win)
     rows = [shots.widget(win, f"recent.{i}") for i in range(3)]
     assert [r.text() for r in rows] == ["✓ wait → waited_s=1", "✓ set_setpoint → setpoint_pa=100",
                                         "✗ refused: set_bias: bias_v must be a number"]
@@ -1264,7 +1265,8 @@ class Gate:
     """A job that holds the worker until the test opens the gate: a scan that is "running" for as long as
     the test wants, whatever the speed of the machine."""
 
-    def __init__(self, win: MainWindow, kind: str = "act", label: str = "scan", args: dict | None = None):
+    def __init__(self, win: MainWindow, kind: str = "act", label: str = "scan", args: dict | None = None,
+                 refuse: bool = False):
         import threading
 
         from stmbench.gui.jobs import Outcome
@@ -1274,7 +1276,9 @@ class Gate:
 
         def hold(_session):
             self.event.wait(60)
-            return Outcome(kind, label, dict(self.args), ok=False, refused=True, text=f"{label}: held by the test")
+            if refuse:
+                return Outcome(kind, label, dict(self.args), ok=False, refused=True, text=f"{label}: held by the test")
+            return Outcome(kind, label, dict(self.args), ok=True, reply={"held": True})
 
         self.win = win
         win._submit(Job(kind, label, dict(self.args), hold))
@@ -1313,7 +1317,7 @@ def test_the_strip_says_what_runs_and_how_many_wait_and_the_viewer_says_a_scan_i
     assert win.status.result.full_text().startswith("✓ set_setpoint")           # idle again: the last result
     assert not shots.widget(win, "view.busy").isVisible()
     assert not shots.widget(win, "status.cancel").isVisible()
-    assert win.recent.entries()[2] == ("bad", "refused: scan: held by the test")
+    assert win.recent.entries()[2] == ("ok", "scan → held=true")
 
 
 def test_a_scan_that_waits_behind_another_call_is_shown_as_running_too(open_window):
@@ -1375,6 +1379,101 @@ def test_a_click_on_a_viewer_that_shows_no_frame_leaves_a_note_and_a_frame_takes
     before = notes()
     shots.click(win, fv, fv.pixel_to_widget(16, 16).toPoint())
     assert len(fv.markers()) == 1 and notes() == before                           # a frame takes the click: no note
+
+
+# ── a refused call ends its step ──
+def test_a_refused_call_takes_the_calls_of_its_step_that_were_waiting_with_it(open_window, tmp_path):
+    win = open_window("en")
+    gate = Gate(win, "act", "wait", {"seconds": 5})                   # holds the worker, so that one step's clicks queue
+    try:
+        shots.fill(win, {"act.set_bias.bias_v": "abc", "act.set_setpoint.current_pa": "100", "act.wait.seconds": "1"})
+        for name in ("run.set_bias", "run.set_setpoint", "run.wait"):
+            run_button(win, name)
+        QApplication.processEvents()
+        assert win.worker.waiting == 3
+    finally:
+        gate.open()
+    # the first of the three was refused: the two behind it did not run, and the strip says what was refused
+    assert win.status.result.full_text() == "✗ refused: set_bias: bias_v must be a number"
+    assert win.status.result.property("tone") == "bad"
+    assert acts(records(tmp_path)) == [] and win.is_idle()
+    log = shots.widget(win, "log.view").toPlainText()
+    assert log.count("not run: an earlier call was refused") == 2 and "queued" not in log
+    top, second = win.recent.entries()[:2]
+    assert top == ("note", "not run: an earlier call was refused: set_setpoint, wait")
+    assert second == ("bad", "refused: set_bias: bias_v must be a number")
+    assert shots.widget(win, "recent.1").property("tone") == "bad"
+    run_button(win, "run.wait")                                         # the next step is not touched
+    shots.settle(win)
+    assert acts(records(tmp_path)) == ["wait"] and win.status.result.full_text().startswith("✓ wait")
+
+
+def test_a_refusal_made_by_the_instruments_own_checks_ends_the_step_too(open_window, tmp_path):
+    win = open_window("en")
+    gate = Gate(win, "act", "wait", {"seconds": 5})
+    try:
+        shots.fill(win, {"act.move_tip.x_nm": "1000000", "act.move_tip.y_nm": "0", "act.set_setpoint.current_pa": "100"})
+        run_button(win, "run.move_tip")
+        run_button(win, "run.set_setpoint")
+        QApplication.processEvents()
+    finally:
+        gate.open()
+    assert win.status.result.full_text() == "✗ refused: move_tip: outside the piezo range"
+    recs = records(tmp_path)
+    assert [r["kind"] for r in recs if r["kind"] != "observe"] == ["refused"]      # the refusal is on record, set_setpoint is not
+    assert win.recent.entries()[0] == ("note", "not run: an earlier call was refused: set_setpoint")
+
+
+def test_a_refused_report_stops_the_end_clicked_behind_it_and_the_button_comes_back(open_window, tmp_path):
+    win = open_window("en")
+    gate = Gate(win, "act", "wait", {"seconds": 5})
+    try:
+        open_left(win, "report")
+        run_button(win, "report.submit")                                  # no claim, no value: refused
+        run_button(win, "finish.begin")
+        run_button(win, "finish.confirm")                                 # the end, asked for in the same step
+        QApplication.processEvents()
+        assert win.worker.waiting == 2
+    finally:
+        gate.open()
+    assert win.status.result.full_text().startswith("✗ refused: report:")
+    assert not win.session.finished and win.recent.entries()[0][1].startswith("not run: an earlier call was refused: finish")
+    assert shots.widget(win, "finish.begin").isVisible() and not shots.widget(win, "finish.confirm").isVisible()
+
+
+def test_clicks_that_follow_a_refusal_straight_away_are_not_run_but_a_click_after_a_pause_is(open_window, tmp_path):
+    win = open_window("en")
+    now = [100.0]
+    win.worker._clock = lambda: now[0]
+    win.worker.guard_s = 3.0                                              # what a window opens with
+    shots.fill(win, {"act.set_bias.bias_v": "abc", "act.set_setpoint.current_pa": "100"})
+    run_button(win, "run.set_bias")
+    shots.settle(win)                                                     # refused, and answered, before the next click
+    refusal = "✗ refused: set_bias: bias_v must be a number"
+    assert win.status.result.full_text() == refusal
+    now[0] = 101.5                                                        # 1.5 s on: the same step
+    run_button(win, "run.set_setpoint")
+    shots.settle(win)
+    assert acts(records(tmp_path)) == [] and win.is_idle()
+    assert win.status.result.full_text() == refusal                       # nothing that did not run replaces it
+    assert win.recent.entries()[0] == ("note", "not run: an earlier call was refused: set_setpoint")
+    assert "not run: an earlier call was refused" in shots.widget(win, "log.view").toPlainText()
+    now[0] = 103.0                                                        # turned away at 101.5: the guard runs to 104.5
+    run_button(win, "run.set_setpoint")
+    shots.settle(win)
+    assert acts(records(tmp_path)) == []
+    assert win.recent.entries()[0] == ("note", "not run: an earlier call was refused: set_setpoint, set_setpoint")
+    now[0] = 107.6                                                        # a pause: a new step
+    run_button(win, "run.set_setpoint")
+    shots.settle(win)
+    assert acts(records(tmp_path)) == ["set_setpoint"] and win.status.result.full_text().startswith("✓ set_setpoint")
+    # closing the window still ends the episode, whatever the guard says
+    now[0] = 108.0
+    shots.fill(win, {"act.set_bias.bias_v": "abc"})
+    run_button(win, "run.set_bias")
+    shots.settle(win)
+    win.shutdown(finish=True)
+    assert win.session.finished
 
 
 # ── a whole episode ──

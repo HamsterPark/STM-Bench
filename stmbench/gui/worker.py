@@ -8,11 +8,20 @@ and Move tip in quick succession, and a disabled button would drop the second cl
 The jobs run in the order they were clicked. Jobs that have not started can be cancelled, all at once
 (a click on Cancel queued): the one running is never touched, and nothing that was cancelled reaches the
 instrument, so it is on no record but the window's own log.
+
+A call that fails (the instrument refuses it) ends the step it was in. An agent clicks a dozen buttons
+and looks at the screen once, and a refused Set setpoint followed by a drag would run the drag at a
+junction resistance nobody chose. So when a call of the operator's (an action, a report, the end) fails, the
+operator calls waiting behind it are dropped before the worker takes the next one, and for ``guard_s``
+seconds after it (renewed by every click that is turned away) a new operator call is not accepted either:
+the clicks of the same step that come after the refusal was already answered. A click after a pause is a new
+step. Reads (a frame, a spectrum) are never dropped. Nothing dropped reaches the instrument.
 """
 from __future__ import annotations
 
 import itertools
 import threading
+import time
 from collections import deque
 from dataclasses import dataclass, field
 from typing import Callable
@@ -21,6 +30,12 @@ from PySide6.QtCore import QThread, Signal
 
 from .jobs import Outcome
 from .session import GuiSession
+
+
+#: the calls that change the instrument or the record: a refusal of one of them stops the rest of its step
+OPERATOR_KINDS = ("act", "report", "finish")
+#: seconds after a refusal during which a click that would start another operator call is turned away
+GUARD_S = 3.0
 
 
 @dataclass
@@ -39,10 +54,15 @@ class Worker(QThread):
     started_job = Signal(object)                # Job
     finished_job = Signal(object, object)       # Job, Outcome
     queue_changed = Signal(int)                 # jobs waiting, not counting the one running
+    dropped = Signal(object)                    # list[Job]: operator calls that were waiting when a call failed
 
-    def __init__(self, session: GuiSession, parent=None):
+    def __init__(self, session: GuiSession, parent=None, clock: Callable[[], float] = time.monotonic,
+                 guard_s: float = GUARD_S):
         super().__init__(parent)
         self.session = session
+        self.guard_s = guard_s
+        self._clock = clock
+        self._guard_until = 0.0
         self._lock = threading.Lock()
         self._turn = threading.Condition(self._lock)
         self._pending: deque[Job | None] = deque()       # None ends the thread
@@ -51,12 +71,18 @@ class Worker(QThread):
     def _count(self) -> int:
         return sum(1 for j in self._pending if j is not None)
 
-    def submit(self, job: Job) -> None:
+    def submit(self, job: Job, force: bool = False) -> bool:
+        """Queue a job. False when it is turned away: an operator call within ``guard_s`` seconds of a failed
+        one (``force`` queues it anyway: the end of the episode when the window is closed)."""
         with self._turn:
+            if not force and job.kind in OPERATOR_KINDS and self._clock() < self._guard_until:
+                self._guard_until = self._clock() + self.guard_s          # the step is still going on
+                return False
             self._pending.append(job)
             n = self._count()
             self._turn.notify()
         self.queue_changed.emit(n)
+        return True
 
     def stop(self) -> None:
         """Let the jobs already queued run, then end the thread."""
@@ -112,6 +138,22 @@ class Worker(QThread):
                 out = job.fn(self.session)
             except Exception as exc:  # noqa: BLE001 - a job function reports its own faults; this is the last net
                 out = Outcome(job.kind, job.label, job.args, ok=False, text=f"{type(exc).__name__}: {exc}")
+            if job.kind in OPERATOR_KINDS and not out.ok:
+                with self._turn:
+                    self._running = None
+                    # before the next job is taken: the calls of this step that were already waiting do not run
+                    gone = [j for j in self._pending if j is not None and j.kind in OPERATOR_KINDS]
+                    self._pending = deque(j for j in self._pending if j is None or j.kind not in OPERATOR_KINDS)
+                    self._guard_until = self._clock() + self.guard_s
+                    n = self._count()
+                    # said under the lock that turns a click away, so that the window hears of the refusal before
+                    # it hears of any click that was turned away because of it (the order of the recent results)
+                    self.finished_job.emit(job, out)
+                    if gone:
+                        self.dropped.emit(gone)
+                if gone:
+                    self.queue_changed.emit(n)
+                continue
             with self._lock:
                 self._running = None
             self.finished_job.emit(job, out)

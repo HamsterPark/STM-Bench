@@ -235,6 +235,11 @@ class ReportTab(QWidget):
         self.finish_ask.hide()
         self.finish_requested.emit()
 
+    def finish_not_run(self) -> None:
+        """The end was asked for but did not happen (the call was refused or not run): the button is back."""
+        self.finish_ask.hide()
+        self.finish_begin.show()
+
     def set_finished(self) -> None:
         self.finish_ask.hide()
         self.finish_begin.hide()
@@ -345,6 +350,10 @@ class LogTab(QuietBrowser):
         """A call dropped before it started: it stays in the log, said to be cancelled."""
         self._set(job_id, state="cancelled")
 
+    def not_run(self, job_id: int) -> None:
+        """A call that was not run because an earlier call of its step was refused."""
+        self._set(job_id, state="skipped")
+
     def done(self, job_id: int, ok: bool, text: str, t_s: float | None) -> None:
         self._set(job_id, state="done", ok=ok, text=text, t=t_s)
 
@@ -375,6 +384,8 @@ class LogTab(QuietBrowser):
                 tail = f"<span style='color:{c['warn']}'>{escape(tr('log_running', self.lang))}</span>"
             elif e["state"] == "cancelled":
                 tail = f"<span style='color:{c['muted']}'>{escape(tr('cancelled', self.lang))}</span>"
+            elif e["state"] == "skipped":
+                tail = f"<span style='color:{c['bad']}'>{escape(tr('not_run', self.lang))}</span>"
             else:
                 color = c["ok"] if e["ok"] else c["bad"]
                 tail = (f"<span style=\"color:{color};font-family:'{mono}'\">"

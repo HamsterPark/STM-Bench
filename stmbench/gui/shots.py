@@ -8,7 +8,7 @@ keystrokes an agent's would be, and saves each state twice: as the full screen a
 is shown. The states, for P4 seed 0: (a) just started, (b) after a 30 nm, 256 px scan with three
 markers and a profile, (c) an STS spectrum, (d) the Report tab filled in, (e) a refusal, (f-h) the Data,
 Log and Manual tabs, (i) a 1024 px scan running with two calls queued behind it, (j) that frame in full contrast
-with seven markers.
+with seven markers, (k) a step with a refusal in it: the calls clicked after the refusal do not run.
 
 The helpers (:func:`click`, :func:`type_into`, :func:`drag`) are shared with the tests: they send
 events to the deepest widget under a window position, so a control that is hidden or covered fails
@@ -148,6 +148,7 @@ def render_states(out: Path, lang: str = "zh", scale: float = 1.0, scenario: str
     work = Path(work) if work else Path(tempfile.mkdtemp(prefix="stmbench_shots_"))
     sess = GuiSession(scenario, seed, run_dir=work / "run", export_dir=work / "run" / "export", lang=lang)
     win = MainWindow(sess, lang=lang)
+    win.worker.guard_s = 0.0          # this script clicks on after a refusal at once; (k) turns the guard on
     win.resize(*(FULLSCREEN if fullscreen else WINDOW))
     win.show()
     settle(win)
@@ -222,6 +223,16 @@ def render_states(out: Path, lang: str = "zh", scale: float = 1.0, scenario: str
     for c, r in brightest_spots(win.cached_frame(name)["array"], n=7, apart=60):
         click(win, fv, fv.pixel_to_widget(c, r).toPoint())
     snap(f"j_contrast_markers_{lang}")
+
+    # (k) one step: Set bias with a bad value (refused), then Set setpoint and Wait clicked straight after it. The
+    # refusal stays on the strip's last line and the two calls after it do not run
+    win.worker.guard_s = 3.0
+    fill(win, {"act.set_bias.bias_v": "abc", "act.set_setpoint.current_pa": "100", "act.wait.seconds": "1"})
+    for name in ("run.set_bias", "run.set_setpoint", "run.wait"):
+        click(win, widget(win, name))
+    settle(win)
+    snap(f"k_refused_step_{lang}")
+    win.worker.guard_s = 0.0
     win.shutdown(finish=False)
     win.deleteLater()
     return saved
