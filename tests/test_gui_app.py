@@ -888,6 +888,14 @@ def test_a_whole_p4_episode_played_on_the_screen_measures_and_scores_as_the_same
     direct, screen = (json.loads((tmp_path / d / "episode.json").read_text(encoding="utf-8")) for d in ("direct", "screen"))
     assert screen["digest"] == direct["digest"] and screen["verdict"] == direct["verdict"]
     assert screen["instrument_time_s"] == direct["instrument_time_s"] and screen["success"] is True
+    # the export the window wrote while it was played is what the grading host replays: it must be the episode
+    from stmbench.instrument.grade import grade_export
+    graded = grade_export(tmp_path / "screen" / "export", P4, seed)
+    assert graded["replay"]["consistent"] and graded["success"] is True and graded["finished_in_episode"] is True
+    assert graded["claims_verified"] == graded["claims_total"] == 2
+    assert graded["instrument_time_s"] == pytest.approx(direct["instrument_time_s"], abs=1e-3)   # the grade rounds to ms
+    assert graded["actions"] == direct["actions"] == 56
+    assert not grade_export(tmp_path / "screen" / "export", P4, seed + 1)["replay"]["consistent"]   # another seed's world
 
 
 def test_no_tooltip_comes_up_under_the_pointer(open_window):
