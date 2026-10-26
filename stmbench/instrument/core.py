@@ -741,25 +741,102 @@ class Instrument:
 
 
 # ── re-checking an episode ──────────────────────────────────────────────────
+_ABSENT = object()
+
+
+def replay_records(scenario: Scenario | str | Path, seed: int, records: list[dict], *,
+                   out_dir: str | Path | None = None,
+                   raise_refused: bool = False) -> tuple[Instrument, list[dict]]:
+    """Rebuild an episode from its log records: the same scenario and seed, the same calls in order.
+
+    ``act`` records are run again (their ``params``), ``report`` and ``diagnosis`` records sent
+    again (their ``args``); ``refused`` and ``observe`` records changed nothing and are skipped.
+    The records end at ``finish``, and the instrument is then finished: judged as it stands,
+    which is also how an episode that never reached ``finish`` is judged. What the records say
+    was measured or judged is never used, only what was done.
+
+    Each act's reply, and the instrument times around it, are compared with the record's, since
+    the same seed and calls only measure the same thing in the same numerical environment. What
+    differs comes back with the instrument, as ``{"i", "name", "field"}`` for a reply or a time
+    that differs and ``{"i", "name", "error"}`` for a call the replay refused or a record it could
+    not read: a divergence is reported, not raised. ``raise_refused`` raises a refused call's
+    :class:`ActionError` instead (what :func:`replay` does)."""
+    inst = Instrument(scenario, int(seed), out_dir)
+    mismatches: list[dict] = []
+    over = False
+    for rec in records:
+        if not isinstance(rec, dict):
+            mismatches.append({"i": None, "name": None, "error": "a record is not an object"})
+            continue
+        kind, i = rec.get("kind"), rec.get("i")
+        if kind == "finish":
+            over = True
+        elif over:
+            # after the end the instrument refuses actions and reports, and logs a refusal, not an
+            # act or a report; a diagnosis is the one record it still takes, and it judges nothing
+            if kind in ("act", "report"):
+                mismatches.append({"i": i, "name": rec.get("name") if kind == "act" else kind,
+                                   "error": "a call after finish"})
+        elif kind == "act":
+            _replay_act(inst, rec, mismatches, raise_refused)
+        elif kind in ("report", "diagnosis"):
+            _replay_report(inst, rec, mismatches, raise_refused)
+        elif kind not in ("refused", "observe"):
+            mismatches.append({"i": i, "name": str(kind), "error": "unknown record kind"})
+    inst.finish()
+    return inst, mismatches
+
+
+def _replay_act(inst: Instrument, rec: dict, mismatches: list[dict], raise_refused: bool) -> None:
+    i, name, params = rec.get("i"), rec.get("name"), rec.get("params")
+    if not isinstance(name, str) or not isinstance(params, dict) or "name" in params:
+        mismatches.append({"i": i, "name": name if isinstance(name, str) else None,
+                           "error": "malformed act record"})
+        return
+    try:
+        inst.act(name, **params)
+    except ActionError as exc:
+        if raise_refused:
+            raise
+        mismatches.append({"i": i, "name": name, "error": str(exc)})
+        return
+    done = inst.log[-1]            # what the act just logged: its result as the log stores it, and its times
+    want = rec.get("result")
+    if isinstance(want, dict):
+        fields = [k for k in sorted(set(done["result"]) | set(want))
+                  if done["result"].get(k, _ABSENT) != want.get(k, _ABSENT)]
+    else:
+        fields = ["result"]
+    fields += [k for k in ("t0_s", "t1_s") if done[k] != rec.get(k)]
+    mismatches.extend({"i": i, "name": name, "field": k} for k in fields)
+
+
+def _replay_report(inst: Instrument, rec: dict, mismatches: list[dict], raise_refused: bool) -> None:
+    kind, args = rec["kind"], rec.get("args")
+    try:
+        if not isinstance(args, dict):
+            raise ValueError(f"malformed {kind} record")
+        if kind == "diagnosis":
+            inst.report_tip_state(**args)
+        else:
+            a = dict(args)
+            if "claim_id" not in a or "value" not in a:
+                raise ValueError("malformed report record")
+            inst.report(a.pop("claim_id"), a.pop("value"), **a)
+    except ActionError as exc:
+        if raise_refused:
+            raise
+        mismatches.append({"i": rec.get("i"), "name": kind, "error": str(exc)})
+    except (TypeError, ValueError) as exc:      # arguments the instrument cannot take at all
+        mismatches.append({"i": rec.get("i"), "name": kind, "error": str(exc)})
+
+
 def replay(run_dir: str | Path) -> Instrument:
     """Rebuild an episode from its ledger: same scenario and seed, the same calls in order."""
     run_dir = Path(run_dir)
     ep = json.loads((run_dir / "episode.json").read_text(encoding="utf-8"))
-    inst = Instrument(ep["scenario_id"], int(ep["seed"]))
-    for line in (run_dir / "actions.jsonl").read_text(encoding="utf-8").splitlines():
-        rec = json.loads(line)
-        kind = rec.get("kind")
-        if kind == "act":
-            inst.act(rec["name"], **rec["params"])
-        elif kind == "report":
-            a = dict(rec["args"])
-            inst.report(a.pop("claim_id"), a.pop("value"), **a)
-        elif kind == "diagnosis":
-            inst.report_tip_state(**rec["args"])
-        elif kind == "finish":
-            break
-    inst.finish()
-    return inst
+    records = [json.loads(line) for line in (run_dir / "actions.jsonl").read_text(encoding="utf-8").splitlines()]
+    return replay_records(ep["scenario_id"], int(ep["seed"]), records, raise_refused=True)[0]
 
 
 def verify(run_dir: str | Path) -> dict:
@@ -812,5 +889,5 @@ def _jsonable(obj):
     return json.loads(json.dumps(obj, default=_json_default))
 
 
-__all__ = ["ACTIONS", "API_VERSION", "ActionError", "ActionSpec", "Instrument", "Param", "replay", "validate",
-           "verify", "fold_results"]
+__all__ = ["ACTIONS", "API_VERSION", "ActionError", "ActionSpec", "Instrument", "Param", "replay",
+           "replay_records", "validate", "verify", "fold_results"]
