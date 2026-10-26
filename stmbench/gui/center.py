@@ -19,7 +19,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QHBoxLayout, QHeaderView, QLab
 
 from . import fmt, style
 from .controls import ElidedLabel, Segmented, ThumbButton
-from .labels import S, both, one, tr
+from .labels import S, one, tr
 from .widgets.frame_view import FrameView, frame_thumbnail
 from .widgets.plot_view import PlotView
 
@@ -32,8 +32,11 @@ _X_FIRST = ("v", "z_rel", "z_abs")
 _Y_FIRST = ("didv", "df", "i")
 N_THUMBS = 6
 THUMB_PX = 64
-MARKER_STRIP_PX = 176
-ROW_PX, HEADER_PX = 30, 24
+#: the marker table shows this many rows before it scrolls: its strip is exactly a header, the rows and the frame
+#: (a viewport that is not a whole number of rows leaves the first row cut off under the header when scrolled)
+MARKER_ROWS = 6
+ROW_PX, HEADER_PX = 26, 24
+MARKER_STRIP_PX = HEADER_PX + MARKER_ROWS * ROW_PX + 2
 
 
 def column_label(key: str) -> str:
@@ -85,6 +88,7 @@ class CenterColumn(QWidget):
         self.lang = lang
         self._spec: dict | None = None
         self._has_frame = False                       # a frame has been shown: before that a click on the view marks nothing
+        self._frame_start: dict[str, float] = {}      # frame name -> instrument time its scan began (s)
         v = QVBoxLayout(self)
         v.setContentsMargins(0, 0, 0, 0)
         v.setSpacing(style.px(4))
@@ -158,12 +162,12 @@ class CenterColumn(QWidget):
         bottom.setContentsMargins(0, 0, 0, 0)
         bottom.setSpacing(style.px(8))
         self.table = self._marker_table(strip)
-        bottom.addWidget(self.table, 2)
+        bottom.addWidget(self.table, 7)                  # seven columns want almost four fifths of the strip
         self.small_plot = PlotView()
         self.small_plot.setObjectName("view.profile")
-        self.small_plot.setMinimumWidth(style.px(220))
+        self.small_plot.setMinimumWidth(style.px(180))
         self.small_plot.clear(tr("profile", lang))
-        bottom.addWidget(self.small_plot, 1)
+        bottom.addWidget(self.small_plot, 2)
         v.addWidget(strip)
         buttons = QHBoxLayout()
         buttons.setSpacing(style.px(8))
@@ -203,7 +207,9 @@ class CenterColumn(QWidget):
 
     # ── building ──
     def _seg(self, options, name: str, value) -> Segmented:
-        s = Segmented([(val, both(*S[key], self.lang), f"{name}.{val}") for val, key in options], value)
+        # the viewer's toolbar names its buttons in one language: with the Contrast switch the second row would
+        # not fit the column with Chinese and English on every button
+        s = Segmented([(val, one(key, self.lang), f"{name}.{val}") for val, key in options], value)
         s.setObjectName(name)
         return s
 
@@ -217,7 +223,7 @@ class CenterColumn(QWidget):
         return h
 
     def _caption(self, key: str) -> QLabel:
-        lab = QLabel(tr(key, self.lang))
+        lab = QLabel(one(key, self.lang))
         lab.setProperty("role", "label")
         return lab
 
@@ -232,14 +238,17 @@ class CenterColumn(QWidget):
         self.flatten = self._seg([("line", "flat_line"), ("plane", "flat_plane"), ("none", "flat_none")],
                                  "view.flatten", "line")
         self.tool = self._seg([("marker", "tool_marker"), ("profile", "tool_profile")], "view.tool", "marker")
-        self.clear_markers = QPushButton(tr("clear_markers", self.lang))
+        self.contrast = self._seg([("auto", "contrast_auto"), ("full", "contrast_full")], "view.contrast", "auto")
+        self.clear_markers = QPushButton(one("clear_markers", self.lang))
         self.clear_markers.setObjectName("view.clear_markers")
         col.addLayout(self._row(self.channel, self.direction, self.clear_markers))
-        col.addLayout(self._row(self._caption("lbl_flatten"), self.flatten, self._caption("lbl_tool"), self.tool))
+        col.addLayout(self._row(self._caption("lbl_flatten"), self.flatten, self._caption("lbl_tool"), self.tool,
+                                self._caption("lbl_contrast"), self.contrast))
         self.channel.changed.connect(lambda _v: self.view_changed.emit())
         self.direction.changed.connect(lambda _v: self.view_changed.emit())
         self.flatten.changed.connect(lambda m: self.frame_view.set_flatten(m))
         self.tool.changed.connect(lambda t: self.frame_view.set_tool(t))
+        self.contrast.changed.connect(lambda m: self.frame_view.set_contrast(m))
         self.clear_markers.clicked.connect(lambda: (self.frame_view.clear_markers(), self.frame_view.clear_profile()))
         return w
 
@@ -260,7 +269,7 @@ class CenterColumn(QWidget):
         return w
 
     def _marker_table(self, parent: QWidget) -> QTableWidget:
-        cols = ["mk_num", "mk_x", "mk_y", "mk_value", "mk_frame", "mk_dist"]
+        cols = ["mk_num", "mk_x", "mk_y", "mk_value", "mk_frame", "mk_start", "mk_dist"]
         t = QTableWidget(0, len(cols), parent)
         t.setObjectName("markers.table")
         # one line each, in one language: a header of two lines took a third of the strip in Chinese, and
@@ -271,12 +280,15 @@ class CenterColumn(QWidget):
         t.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         t.setAlternatingRowColors(True)
         t.verticalHeader().hide()
+        t.verticalHeader().setMinimumSectionSize(1)       # the header's own minimum (about a font's height) would make rows taller
         t.verticalHeader().setDefaultSectionSize(style.px(ROW_PX))
         t.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
         t.horizontalHeader().setFixedHeight(style.px(HEADER_PX))
         t.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
         t.horizontalHeader().setStretchLastSection(True)
         t.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        # never a bar along the bottom: it would take rows' room, and the strip's rows must stay whole
+        t.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         t.cellClicked.connect(lambda r, _c: self.frame_view.select_marker(r))
         return t
 
@@ -394,6 +406,12 @@ class CenterColumn(QWidget):
             self.table.selectRow(n - 1)
             self.table.scrollToItem(self.table.item(n - 1, 0))        # the new one is in view even past the fifth
 
+    def set_frame_starts(self, starts: dict[str, float]) -> None:
+        """When each saved frame's scan began, for the table's start column: the frame a marker was placed on,
+        as the Data tab gives it."""
+        self._frame_start = dict(starts)
+        self._markers_changed(self.frame_view.markers())
+
     def _markers_changed(self, markers: list) -> None:
         t = self.table
         t.setRowCount(len(markers))
@@ -402,7 +420,10 @@ class CenterColumn(QWidget):
             d = "" if prev is None else f"{math.hypot(m['x_nm'] - prev['x_nm'], m['y_nm'] - prev['y_nm']):.3f}"
             val = m.get("value")
             vtxt = f"{float(val):.2f} {m.get('unit', '')}" if val is not None and math.isfinite(float(val)) else "-"
-            for c, text in enumerate([str(i + 1), f"{m['x_nm']:.3f}", f"{m['y_nm']:.3f}", vtxt, str(m.get("frame", "")), d]):
+            started = self._frame_start.get(str(m.get("frame", "")))
+            stxt = fmt.hms(started) if started is not None else "-"
+            for c, text in enumerate([str(i + 1), f"{m['x_nm']:.3f}", f"{m['y_nm']:.3f}", vtxt, str(m.get("frame", "")),
+                                      stxt, d]):
                 item = QTableWidgetItem(text)
                 item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | (Qt.AlignmentFlag.AlignLeft if c == 4
                                                                        else Qt.AlignmentFlag.AlignRight))

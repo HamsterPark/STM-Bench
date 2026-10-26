@@ -38,7 +38,7 @@ from .sidebar import Sidebar
 from .status import StatusStrip
 from .worker import Job, Worker
 
-LEFT_PX, RIGHT_PX = 400, 720
+LEFT_PX, RIGHT_PX = 360, 704
 #: what a window manager's title bar may take from a maximized window's height (GNOME: 37 px, so 1016 of a 1080 screen)
 FRAME_PX = 37
 #: frames kept for instant re-viewing (arrays of at most 1024 x 1024 doubles): a byte budget
@@ -287,6 +287,7 @@ class MainWindow(QMainWindow):
     # ── data and views ──
     def _apply_data(self, data: dict) -> None:
         self._data = data
+        self.center.set_frame_starts({f["frame"]: f["t_start_s"] for f in data["frames"]})
         self.sidebar.data.set_data(data["frames"], data["spectra"])
         self._refresh_thumbs()
 

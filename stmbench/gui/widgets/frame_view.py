@@ -5,7 +5,8 @@ The image is the one an MCP agent gets: with the default ``"line"`` flatten it i
 ``stmbench.instrument.render.display_array(array, channel)``, greyscale, drawn by nearest neighbour
 (each screen pixel takes one frame pixel; no smoothing that would invent detail). Everything read
 off it (cursor value, marker value, profile) comes from the same flattened array, in the unit
-the colour bar states.
+the colour bar states. ``set_contrast("full")`` spreads the grey scale over the frame's whole range
+instead of its 0.5-99.5 percentiles (which saturate the top of an atom); the readings do not change.
 
 Coordinates. A point at fractional pixel ``(col, row)`` has pixel centres at integers, row 0 at
 the top, and maps to scan nm through :func:`stmbench.render.pixel_to_scan_nm`, the inverse of the
@@ -34,6 +35,9 @@ from stmbench.render import pixel_to_scan_nm
 from .plot_view import MIN_FONT_PX, font_px, format_number, format_ticks, nice_ticks, tick_decimals
 
 FLATTEN_MODES = ("line", "plane", "none")
+#: how the grey scale is set: ``auto`` maps the 0.5-99.5 percentile range (the image an MCP agent gets), ``full``
+#: the frame's own minimum to maximum, so that the top of an atom is not saturated white
+CONTRAST_MODES = ("auto", "full")
 TOOLS = ("marker", "profile", "none")
 
 #: channel -> (display unit, factor from the frame's SI unit); z is in m, current and lock-in X in A
@@ -136,9 +140,10 @@ def _resample_axis(a: np.ndarray, m: int, axis: int, mean: bool) -> np.ndarray:
     return np.diff(integral, axis=axis) / np.diff(edges).reshape(shape)
 
 
-def _display_values(array: np.ndarray, channel: str, mode: str):
+def _display_values(array: np.ndarray, channel: str, mode: str, contrast: str = "auto"):
     """``(flattened array in SI, 8-bit image, lo, hi)`` for a flatten mode; ``lo``/``hi`` (SI) are
-    the range the image maps onto 0-255. In ``"line"`` mode the image is ``display_array``'s own."""
+    the range the image maps onto 0-255. In ``"line"`` mode with ``"auto"`` contrast the image is
+    ``display_array``'s own; ``"full"`` maps the flattened frame's minimum and maximum instead."""
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", RuntimeWarning)          # an all-NaN line: NaN, as in display_array
         if mode == "line":
@@ -149,8 +154,14 @@ def _display_values(array: np.ndarray, channel: str, mode: str):
             grey = display_array(flat, _AS_RECORDED)
         finite = flat[np.isfinite(flat)]
         if finite.size:
-            lo, hi = (float(v) for v in np.percentile(finite, _PERCENTILES))
+            if contrast == "full":
+                lo, hi = float(finite.min()), float(finite.max())
+            else:
+                lo, hi = (float(v) for v in np.percentile(finite, _PERCENTILES))
             hi = hi if hi > lo else lo + 1e-30
+            if contrast == "full":                                # the same mapping as display_array's, over the whole range
+                y = np.clip((np.nan_to_num(flat, nan=lo) - lo) / (hi - lo), 0.0, 1.0)
+                grey = np.round(y * 255.0).astype(np.uint8)
         else:
             lo = hi = 0.0
     return flat, grey, lo, hi
@@ -192,7 +203,7 @@ def marker_radius(fpx: int) -> float:
 class _Shown:
     """The frame on display and everything derived from it for the current flatten mode."""
 
-    def __init__(self, frame: dict, mode: str) -> None:
+    def __init__(self, frame: dict, mode: str, contrast: str = "auto") -> None:
         array = np.array(frame["array"], dtype=np.float64)
         if array.ndim != 2 or min(array.shape) < 2:
             raise ValueError("a frame needs a 2-D array of at least 2 x 2 pixels")
@@ -206,10 +217,10 @@ class _Shown:
         self.nm_per_px = self.geom["w_nm"] / self.nx
         self.unit, self.scale = _DISPLAY.get(self.channel, (str(frame.get("unit", "")), 1.0))
         self.array = array
-        self.set_mode(mode)
+        self.set_mode(mode, contrast)
 
-    def set_mode(self, mode: str) -> None:
-        flat, self.grey, lo, hi = _display_values(self.array, self.channel, mode)
+    def set_mode(self, mode: str, contrast: str = "auto") -> None:
+        flat, self.grey, lo, hi = _display_values(self.array, self.channel, mode, contrast)
         self.values = flat * self.scale                           # what every readout shows
         self.lo, self.hi = lo * self.scale, hi * self.scale        # the colour bar's range
         nan = ~np.isfinite(flat)
@@ -235,6 +246,7 @@ class FrameView(QWidget):
         super().__init__(parent)
         self._shown: _Shown | None = None
         self._flatten = "line"
+        self._contrast = "auto"
         self._tool = "marker"
         self._markers: list[dict] = []
         self._selected = -1
@@ -254,7 +266,7 @@ class FrameView(QWidget):
     def set_frame(self, frame: dict | None) -> None:
         """Show an ``Instrument.frame()`` dict (None: the empty view). Markers stay; a profile line
         stays only for the frame it was drawn on, and is measured again on this data."""
-        self._shown = None if frame is None else _Shown(frame, self._flatten)
+        self._shown = None if frame is None else _Shown(frame, self._flatten, self._contrast)
         self._invalidate()
         self._reconcile_profile()
         self.update()
@@ -266,10 +278,28 @@ class FrameView(QWidget):
             return
         self._flatten = mode
         if self._shown is not None:
-            self._shown.set_mode(mode)
+            self._shown.set_mode(mode, self._contrast)
         self._invalidate()
         self._reconcile_profile()
         self.update()
+
+    def set_contrast(self, mode: str) -> None:
+        """``"auto"`` (the default): the grey scale spans the 0.5-99.5 percentile range, as the image an MCP
+        agent gets. ``"full"``: it spans the frame's minimum to maximum, which keeps the top of an atom
+        from saturating; the colour bar follows. Readouts, markers and profiles are the same either way
+        (they read the flattened data, not the grey level), and the mode holds for the frames shown next."""
+        if mode not in CONTRAST_MODES:
+            raise ValueError(f"contrast mode {mode!r}: one of {CONTRAST_MODES}")
+        if mode == self._contrast:
+            return
+        self._contrast = mode
+        if self._shown is not None:
+            self._shown.set_mode(self._flatten, mode)
+        self._invalidate()
+        self.update()
+
+    def contrast(self) -> str:
+        return self._contrast
 
     def set_tool(self, tool: str) -> None:
         if tool not in TOOLS:
@@ -563,7 +593,7 @@ class FrameView(QWidget):
         sh = self._shown
         dpr = self.devicePixelRatioF()
         pw, ph = max(1, round(w * dpr)), max(1, round(h * dpr))
-        key = (id(sh), pw, ph, self._flatten)
+        key = (id(sh), pw, ph, self._flatten, self._contrast)
         if self._image_cache is not None and self._image_cache[0] == key:
             return self._image_cache[1]
         ri = np.minimum(((np.arange(ph) + 0.5) * sh.ny / ph).astype(np.intp), sh.ny - 1)

@@ -506,9 +506,10 @@ def test_markers_are_read_off_the_frame_and_copied_into_forms_by_their_buttons(o
         assert m["frame"] == name
     table = shots.widget(win, "markers.table")
     assert table.rowCount() == 2 and table.item(1, 1).text() == f"{markers[1]['x_nm']:.3f}"
-    assert not table.item(0, 5).text()                           # the first marker has no previous one
-    assert float(table.item(1, 5).text()) == pytest.approx(math.hypot(markers[1]["x_nm"] - markers[0]["x_nm"],
+    assert not table.item(0, 6).text()                           # the first marker has no previous one
+    assert float(table.item(1, 6).text()) == pytest.approx(math.hypot(markers[1]["x_nm"] - markers[0]["x_nm"],
                                                                        markers[1]["y_nm"] - markers[0]["y_nm"]), abs=1e-3)
+    assert table.item(0, 5).text() == "0:00:00"                  # when the frame it was placed on began
     shots.click(win, table.viewport(), table.visualItemRect(table.item(0, 0)).center())
     assert fv.selected_marker() == markers[0]
     run_button(win, "markers.tip")
@@ -538,18 +539,28 @@ def test_a_marker_is_deleted_by_a_button_and_the_table_scrolls_to_the_newest(fon
     scan_small(win)
     fv = win.center.frame_view
     table = shots.widget(win, "markers.table")
+    row = table.verticalHeader().defaultSectionSize()
     assert table.horizontalHeader().height() >= 23                              # 15 px or more in the 1280x720 picture
-    assert table.viewport().height() >= 5 * table.verticalHeader().defaultSectionSize()      # five rows without scrolling
-    for i in range(5):
+    assert table.viewport().height() == 6 * row                                 # six whole rows: none is cut by the header
+    for i in range(6):
         shots.click(win, fv, fv.pixel_to_widget(3 + 4 * i, 6 + 5 * (i % 3)).toPoint())
-    assert table.rowCount() == 5 and not table.verticalScrollBar().isVisible()
-    for i in range(5, 9):
+    assert table.rowCount() == 6 and not table.verticalScrollBar().isVisible()
+    for i in range(6, 9):
         shots.click(win, fv, fv.pixel_to_widget(3 + 3 * i, 5 + 4 * (i % 4)).toPoint())
     assert table.rowCount() == 9
     bar = table.verticalScrollBar()
     assert bar.isVisible() and bar.maximum() > 0                                 # more rows than fit: it scrolls
     newest = table.visualItemRect(table.item(8, 0))
     assert table.viewport().rect().contains(newest)                              # the newest, the selected, is in view
+    # scrolled to the end or the start, the first row shown is whole under the header and the last one ends the view
+    for value in (bar.maximum(), 0, bar.maximum() // 2):
+        bar.setValue(value)
+        first, last = table.rowAt(0), table.rowAt(table.viewport().height() - 1)
+        assert table.rowViewportPosition(first) == 0
+        assert table.rowViewportPosition(last) + row == table.viewport().height()
+    bar.setValue(bar.maximum())
+    assert not table.horizontalScrollBar().isVisible()                           # the seven columns fit beside the scroll bar
+    assert table.horizontalHeader().length() <= table.viewport().width()
     xs = [m["x_nm"] for m in fv.markers()]
     bar.setValue(0)
     shots.click(win, table.viewport(), table.visualItemRect(table.item(2, 1)).center())      # select the third
@@ -564,6 +575,59 @@ def test_a_marker_is_deleted_by_a_button_and_the_table_scrolls_to_the_newest(fon
     run_button(win, "markers.delete")                                            # none to delete: said, not ignored
     tone, text = win.recent.entries()[0]
     assert tone == "note" and text.endswith("No marker selected.") and table.rowCount() == 0
+
+
+def test_each_marker_shows_when_the_frame_it_was_placed_on_began_as_the_data_tab_gives_it(open_window):
+    win = open_window("en")
+    first = scan_small(win)
+    shots.fill(win, {"act.scan.center_x_nm": "1", "act.scan.center_y_nm": "1", "act.scan.size_nm": "6", "act.scan.pixels": "24"})
+    run_button(win, "run.scan")
+    shots.settle(win)
+    second = win.viewed[1]
+    assert first != second
+    fv = win.center.frame_view
+    table = shots.widget(win, "markers.table")
+    headers = [table.horizontalHeaderItem(i).text() for i in range(table.columnCount())]
+    assert headers == ["#", "x nm", "y nm", "value", "frame", "start", "to prev. nm"]
+    shots.click(win, fv, fv.pixel_to_widget(12, 12).toPoint())                  # on the second frame
+    win.request_frame(first)
+    shots.settle(win)
+    shots.click(win, fv, fv.pixel_to_widget(10, 10).toPoint())                  # and on the first
+    starts = {f["frame"]: f["t_start_s"] for f in win._data["frames"]}
+    assert starts[first] != starts[second]
+    from stmbench.gui import fmt
+    assert [(table.item(r, 4).text(), table.item(r, 5).text()) for r in range(2)] == [
+        (second, fmt.hms(starts[second])), (first, fmt.hms(starts[first]))]
+    data = shots.widget(win, "data.frames")                                        # the same h:mm:ss the Data tab shows
+    assert fmt.hms(starts[second]) in data.item(0).text() and fmt.hms(starts[first]) in data.item(1).text()
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_viewer_toolbar_has_a_contrast_switch_that_starts_on_auto_and_holds_for_the_next_frame(open_window, lang):
+    import numpy as np
+    win = open_window(lang)
+    scan_small(win)
+    fv = win.center.frame_view
+    assert checked(win, "view.contrast.auto") and not checked(win, "view.contrast.full") and fv.contrast() == "auto"
+    shown = fv._shown
+    auto_lo, auto_hi = shown.lo, shown.hi
+    values = shown.values.copy()
+    run_button(win, "view.contrast.full")
+    assert checked(win, "view.contrast.full") and fv.contrast() == "full"
+    assert shown.lo == pytest.approx(np.nanmin(values)) and shown.hi == pytest.approx(np.nanmax(values))
+    assert shown.lo <= auto_lo and shown.hi >= auto_hi                          # the whole range holds the mapped one
+    assert np.array_equal(shown.values, values)                                  # what is read off the image is the same
+    shots.fill(win, {"act.scan.center_x_nm": "1", "act.scan.center_y_nm": "1"})
+    run_button(win, "run.scan")
+    shots.settle(win)
+    assert fv.contrast() == "full" and checked(win, "view.contrast.full")        # the next frame is shown in full too
+    assert fv._shown is not shown and fv._shown.hi == pytest.approx(np.nanmax(fv._shown.values))
+    run_button(win, "view.contrast.auto")
+    assert fv.contrast() == "auto" and fv._shown.hi < np.nanmax(fv._shown.values) + 1e-9
+    caption = shots.widget(win, "view.contrast.full").text()
+    assert caption == ("full" if lang == "en" else "全幅")                        # the viewer's toolbar names its buttons in one language
+    for key in ("view.contrast.auto", "view.contrast.full", "view.channel.z", "view.flatten.line", "view.tool.marker"):
+        assert shots.widget(win, key).width() >= 56
 
 
 def test_a_profile_is_drawn_by_dragging_with_the_profile_tool(open_window):
@@ -714,7 +778,7 @@ def test_in_the_sealed_mode_the_seed_is_in_no_widget_title_or_file_and_close_doe
 def test_the_screenshot_script_renders_every_state_at_both_sizes(app, tmp_path):
     saved = shots.render_states(tmp_path / "png", "en", work=tmp_path / "work")
     names = sorted(p.name for p in saved)
-    assert len(names) == 18 and any(n.startswith("a_started") for n in names) and any(n.startswith("e_refusal") for n in names)
+    assert len(names) == 20 and any(n.startswith("a_started") for n in names) and any(n.startswith("e_refusal") for n in names)
     assert any(n.startswith("i_busy") for n in names)
     for p in saved:
         img = QImage(str(p))
@@ -1047,6 +1111,58 @@ def test_what_the_viewer_the_profile_and_the_data_tab_say_is_not_cut_off(fonts, 
         assert len(text) == 3                                                           # three lines, each whole
         lines_fit(lst, text, lst.viewport().width() - 2 * style.px(6) - 2)
     assert "centre (-12.534, -5.607) nm" in shots.widget(win, "data.frames").item(0).text()
+
+
+# ── text fields ──
+def press_release(win: MainWindow, w: QWidget, dx: int = 0, steps: int = 0) -> None:
+    """A click on ``w`` the way the screen harness and a real pointer make it: through the window, the pointer
+    arriving first, then press, ``steps`` moves ``dx`` px away with the button down, release."""
+    from PySide6.QtCore import QPoint
+    left, none = Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier
+    qwin = win.windowHandle()
+    c = w.mapTo(win, w.rect().center())
+    QTest.mouseMove(qwin, c)
+    QTest.mousePress(qwin, left, none, c)
+    for i in range(1, steps + 1):
+        QTest.mouseMove(qwin, QPoint(c.x() + dx * i // steps, c.y()))
+    QTest.mouseRelease(qwin, left, none, QPoint(c.x() + dx, c.y()))
+    QApplication.processEvents()
+
+
+def test_every_click_in_a_field_selects_all_of_it_so_that_click_then_type_replaces(open_window):
+    win = open_window("en")
+    open_left(win, "report")
+    fields = ["act.scan.size_nm", "act.scan.pixels", "act.move_tip.x_nm", "report.value", "report.evidence", "report.note"]
+    for name in fields:
+        w = shots.widget(win, name)
+        for prior in ("unfocused", "focused with the whole text selected", "caret in the middle", "caret at the end"):
+            for label, args in (("a click", (0, 0)), ("a click with a wobble", (3, 1)), ("a small drag", (30, 5)),
+                                ("a pointer that moves a lot", (-40, 8))):
+                w.setText("4012")
+                w.clearFocus()
+                if prior != "unfocused":
+                    w.setFocus()
+                    w.selectAll() if prior.startswith("focused") else w.setCursorPosition(2 if "middle" in prior else 4)
+                    if not prior.startswith("focused"):
+                        w.deselect()
+                press_release(win, w, *args)
+                assert w.selectedText() == "4012", (name, prior, label)
+                QTest.keyClicks(w, "7")
+                assert w.text() == "7", (name, prior, label, w.text())
+    # a second click while the first one's selection is still there, then typing, as in the screen trial
+    w = shots.widget(win, "act.scan.size_nm")
+    w.setText("60")
+    press_release(win, w)
+    press_release(win, w)
+    QTest.keyClicks(w, "16")
+    assert w.text() == "16"
+    # the double click selects it all too, and the keyboard still moves the caret (Home, then a digit goes first)
+    w.setText("25")
+    QTest.mouseDClick(win.windowHandle(), Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, w.mapTo(win, w.rect().center()))
+    assert w.selectedText() == "25"
+    QTest.keyClick(w, Qt.Key.Key_Home)
+    QTest.keyClicks(w, "1")
+    assert w.text() == "125"
 
 
 # ── the state the buttons show ──
