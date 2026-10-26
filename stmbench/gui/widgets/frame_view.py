@@ -15,8 +15,14 @@ judge's footprint mapping; a position a fraction ``fx`` of the image width from 
 on every frame whose footprint holds them, so a marker placed in one frame shows where the same
 scan coordinates lie in the next.
 
-There is no zoom, pan, wheel handling or context menu: the agent that works this widget has a
-mouse and a screenshot, and every extra gesture is one it can trigger by accident.
+Zoom. The wheel (without Ctrl) steps the view through x1, x2, x4 and x8 about the pointer, ``set_zoom`` and
+``fit`` do the same from a control, and with the ``"hand"`` tool a drag moves the zoomed image. The axes, the
+cursor, the markers and the profile use the same pixel / scan mapping at every zoom (the view is a window
+of the frame in pixel edges, ``view_rect``), the grey scale and the colour bar do not change with it unless the
+contrast is ``"visible"``, and a new frame is shown whole. Nothing is found, fitted or snapped to a peak.
+
+There is no context menu and no keyboard focus, and a wheel with Ctrl does nothing: the agent that works this
+widget has a mouse and a screenshot, and every extra gesture is one it can trigger by accident.
 """
 from __future__ import annotations
 
@@ -36,9 +42,12 @@ from .plot_view import MIN_FONT_PX, font_px, format_number, format_ticks, nice_t
 
 FLATTEN_MODES = ("line", "plane", "none")
 #: how the grey scale is set: ``auto`` maps the 0.5-99.5 percentile range (the image an MCP agent gets), ``full``
-#: the frame's own minimum to maximum, so that the top of an atom is not saturated white
-CONTRAST_MODES = ("auto", "full")
-TOOLS = ("marker", "profile", "none")
+#: the frame's own minimum to maximum, so that the top of an atom is not saturated white, ``visible`` the minimum to
+#: maximum of the part of the frame in view (a step far outside a zoomed view no longer flattens what is in it)
+CONTRAST_MODES = ("auto", "full", "visible")
+TOOLS = ("marker", "profile", "hand", "none")
+#: the zoom levels, steps of the wheel: the whole frame, then a half, a quarter, an eighth of its width
+ZOOM_LEVELS = (1, 2, 4, 8)
 
 #: channel -> (display unit, factor from the frame's SI unit); z is in m, current and lock-in X in A
 _DISPLAY = {"z": ("pm", 1e12), "current": ("pA", 1e12), "didv": ("pA", 1e12)}
@@ -140,10 +149,12 @@ def _resample_axis(a: np.ndarray, m: int, axis: int, mean: bool) -> np.ndarray:
     return np.diff(integral, axis=axis) / np.diff(edges).reshape(shape)
 
 
-def _display_values(array: np.ndarray, channel: str, mode: str, contrast: str = "auto"):
+def _display_values(array: np.ndarray, channel: str, mode: str, contrast: str = "auto",
+                    region: tuple[int, int, int, int] | None = None):
     """``(flattened array in SI, 8-bit image, lo, hi)`` for a flatten mode; ``lo``/``hi`` (SI) are
     the range the image maps onto 0-255. In ``"line"`` mode with ``"auto"`` contrast the image is
-    ``display_array``'s own; ``"full"`` maps the flattened frame's minimum and maximum instead."""
+    ``display_array``'s own; ``"full"`` maps the flattened frame's minimum and maximum instead, and
+    ``"visible"`` those of ``region`` (``row0, row1, col0, col1``: the part in view; None: the frame)."""
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", RuntimeWarning)          # an all-NaN line: NaN, as in display_array
         if mode == "line":
@@ -154,12 +165,17 @@ def _display_values(array: np.ndarray, channel: str, mode: str, contrast: str = 
             grey = display_array(flat, _AS_RECORDED)
         finite = flat[np.isfinite(flat)]
         if finite.size:
-            if contrast == "full":
-                lo, hi = float(finite.min()), float(finite.max())
+            if contrast in ("full", "visible"):
+                span = finite
+                if contrast == "visible" and region is not None:
+                    r0, r1, c0, c1 = region
+                    part = flat[r0:r1, c0:c1]
+                    span = part[np.isfinite(part)] if np.isfinite(part).any() else finite
+                lo, hi = float(span.min()), float(span.max())
             else:
                 lo, hi = (float(v) for v in np.percentile(finite, _PERCENTILES))
             hi = hi if hi > lo else lo + 1e-30
-            if contrast == "full":                                # the same mapping as display_array's, over the whole range
+            if contrast in ("full", "visible"):                   # the same mapping as display_array's, over that range
                 y = np.clip((np.nan_to_num(flat, nan=lo) - lo) / (hi - lo), 0.0, 1.0)
                 grey = np.round(y * 255.0).astype(np.uint8)
         else:
@@ -219,8 +235,8 @@ class _Shown:
         self.array = array
         self.set_mode(mode, contrast)
 
-    def set_mode(self, mode: str, contrast: str = "auto") -> None:
-        flat, self.grey, lo, hi = _display_values(self.array, self.channel, mode, contrast)
+    def set_mode(self, mode: str, contrast: str = "auto", region=None) -> None:
+        flat, self.grey, lo, hi = _display_values(self.array, self.channel, mode, contrast, region)
         self.values = flat * self.scale                           # what every readout shows
         self.lo, self.hi = lo * self.scale, hi * self.scale        # the colour bar's range
         nan = ~np.isfinite(flat)
@@ -241,6 +257,7 @@ class FrameView(QWidget):
     marker_added = Signal(dict)
     markers_changed = Signal(list)
     profile_changed = Signal(dict)
+    zoom_changed = Signal(int)                       # the zoom level, when it changes (or a control asked for another)
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -248,6 +265,9 @@ class FrameView(QWidget):
         self._flatten = "line"
         self._contrast = "auto"
         self._tool = "marker"
+        self._zoom = 1
+        self._c0 = self._r0 = 0.0                    # the view's top-left corner, in pixel edges of the frame
+        self._pan_last: QPointF | None = None        # where the pointer was at the last move of a hand drag
         self._markers: list[dict] = []
         self._selected = -1
         self._profile: dict | None = None            # its ends in scan nm, and the frame it was drawn on
@@ -265,11 +285,23 @@ class FrameView(QWidget):
     # ── what is shown ──
     def set_frame(self, frame: dict | None) -> None:
         """Show an ``Instrument.frame()`` dict (None: the empty view). Markers stay; a profile line
-        stays only for the frame it was drawn on, and is measured again on this data."""
-        self._shown = None if frame is None else _Shown(frame, self._flatten, self._contrast)
+        stays only for the frame it was drawn on, and is measured again on this data. The view is the
+        whole frame again, unless this is the same frame in another channel or direction."""
+        new = None if frame is None else _Shown(frame, self._flatten, self._contrast)
+        same = (new is not None and self._shown is not None and new.name == self._shown.name
+                and (new.nx, new.ny) == (self._shown.nx, self._shown.ny))
+        was = self._zoom
+        self._shown = new
+        if not same:
+            self._zoom, self._c0, self._r0 = 1, 0.0, 0.0
+        elif self._contrast == "visible":                  # the same frame in another channel: the part in view sets the scale
+            new.set_mode(self._flatten, "visible", self._region())
+        self._pan_last = None
         self._invalidate()
         self._reconcile_profile()
         self.update()
+        if self._zoom != was:
+            self.zoom_changed.emit(self._zoom)
 
     def set_flatten(self, mode: str) -> None:
         if mode not in FLATTEN_MODES:
@@ -278,7 +310,7 @@ class FrameView(QWidget):
             return
         self._flatten = mode
         if self._shown is not None:
-            self._shown.set_mode(mode, self._contrast)
+            self._shown.set_mode(mode, self._contrast, self._region())
         self._invalidate()
         self._reconcile_profile()
         self.update()
@@ -286,27 +318,120 @@ class FrameView(QWidget):
     def set_contrast(self, mode: str) -> None:
         """``"auto"`` (the default): the grey scale spans the 0.5-99.5 percentile range, as the image an MCP
         agent gets. ``"full"``: it spans the frame's minimum to maximum, which keeps the top of an atom
-        from saturating; the colour bar follows. Readouts, markers and profiles are the same either way
-        (they read the flattened data, not the grey level), and the mode holds for the frames shown next."""
+        from saturating; ``"visible"``: the minimum to maximum of the part in view, so that zoomed onto a terrace
+        its atoms are not flattened by a step elsewhere in the frame (with the whole frame in view it is
+        ``"full"``). The colour bar follows. Readouts, markers and profiles are the same in every mode (they
+        read the flattened data, not the grey level), and the mode holds for the frames shown next."""
         if mode not in CONTRAST_MODES:
             raise ValueError(f"contrast mode {mode!r}: one of {CONTRAST_MODES}")
         if mode == self._contrast:
             return
         self._contrast = mode
         if self._shown is not None:
-            self._shown.set_mode(self._flatten, mode)
+            self._shown.set_mode(self._flatten, mode, self._region())
         self._invalidate()
         self.update()
 
     def contrast(self) -> str:
         return self._contrast
 
+    # ── zoom and pan ──
+    def zoom(self) -> int:
+        return self._zoom
+
+    def view_rect(self) -> tuple[float, float, float, float]:
+        """The part of the frame the image shows, in pixel edges: ``(col0, row0, width, height)``; the
+        whole frame (``0, 0, nx, ny``) at zoom 1."""
+        return self._view_rect()
+
+    def _view_rect(self) -> tuple[float, float, float, float]:
+        sh = self._shown
+        nx, ny = (sh.nx, sh.ny) if sh is not None else (1, 1)
+        z = float(self._zoom)
+        return self._c0, self._r0, nx / z, ny / z
+
+    def _clamp_origin(self, c0: float, r0: float) -> tuple[float, float]:
+        """The corner kept inside the frame: the view never shows what is not there."""
+        _, _, wv, hv = self._view_rect()
+        sh = self._shown
+        return min(max(c0, 0.0), sh.nx - wv), min(max(r0, 0.0), sh.ny - hv)
+
+    def set_zoom(self, level: int, about: QPointF | None = None) -> None:
+        """Show ``1/level`` of the frame's width and height. ``about`` is a widget position that keeps what is
+        under it (the wheel's pointer); without it the view's centre stays. A level that is not one of
+        :data:`ZOOM_LEVELS` is refused; with no frame shown only :attr:`zoom_changed` answers, so that a
+        control that asked for another level goes back."""
+        if level not in ZOOM_LEVELS:
+            raise ValueError(f"zoom {level!r}: one of {ZOOM_LEVELS}")
+        sh = self._shown
+        if sh is None or level == self._zoom:
+            self.zoom_changed.emit(self._zoom)
+            return
+        img = self._layout().img
+        anchored = about is not None and img.contains(about.toPoint())
+        fx, fy = ((about.x() - img.x()) / img.width(), (about.y() - img.y()) / img.height()) if anchored else (0.5, 0.5)
+        c0, r0, wv, hv = self._view_rect()
+        cx, cy = c0 + fx * wv, r0 + fy * hv                 # the pixel edge under the pointer: it stays there
+        self._zoom = level
+        wv, hv = sh.nx / level, sh.ny / level
+        self._c0, self._r0 = self._clamp_origin(cx - fx * wv, cy - fy * hv)
+        for _ in range(4):
+            # the axes' labels have other widths now, so the image may sit a few pixels elsewhere: place the
+            # view again for where it is, until the pixel under the pointer is the one that was
+            self._invalidate()
+            if not anchored:
+                break
+            img = self._layout().img
+            fx, fy = min(max((about.x() - img.x()) / img.width(), 0.0), 1.0), min(max((about.y() - img.y()) / img.height(), 0.0), 1.0)
+            c, r = self._clamp_origin(cx - fx * wv, cy - fy * hv)
+            if abs(c - self._c0) < 1e-9 and abs(r - self._r0) < 1e-9:
+                break
+            self._c0, self._r0 = c, r
+        self._view_changed()
+        self.zoom_changed.emit(self._zoom)
+
+    def zoom_step(self, direction: int, about: QPointF | None = None) -> None:
+        """One level in (``direction`` > 0) or out, as one notch of the wheel does."""
+        i = ZOOM_LEVELS.index(self._zoom) + (1 if direction > 0 else -1)
+        self.set_zoom(ZOOM_LEVELS[min(max(i, 0), len(ZOOM_LEVELS) - 1)], about)
+
+    def fit(self) -> None:
+        """The whole frame."""
+        self.set_zoom(1)
+
+    def pan_by(self, dx_px: float, dy_px: float) -> None:
+        """Move the zoomed image by ``dx_px``, ``dy_px`` widget pixels (a drag: the image follows the pointer),
+        as far as the frame goes."""
+        if self._shown is None or self._zoom == 1:
+            return
+        img = self._layout().img
+        c0, r0, wv, hv = self._view_rect()
+        c, r = self._clamp_origin(c0 - dx_px * wv / img.width(), r0 - dy_px * hv / img.height())
+        if (c, r) != (self._c0, self._r0):
+            self._c0, self._r0 = c, r
+            self._view_changed()
+
+    def _region(self) -> tuple[int, int, int, int] | None:
+        """The rows and columns the view covers (``row0, row1, col0, col1``), or None when it is the whole frame."""
+        if self._shown is None or self._zoom == 1:
+            return None
+        c0, r0, wv, hv = self._view_rect()
+        return int(math.floor(r0)), int(math.ceil(r0 + hv)), int(math.floor(c0)), int(math.ceil(c0 + wv))
+
+    def _view_changed(self) -> None:
+        if self._contrast == "visible" and self._shown is not None:      # the grey scale follows what is in view
+            self._shown.set_mode(self._flatten, "visible", self._region())
+        self._invalidate()
+        self.update()
+
     def set_tool(self, tool: str) -> None:
         if tool not in TOOLS:
             raise ValueError(f"tool {tool!r}: one of {TOOLS}")
         self._tool = tool
         self._drag = None
-        self.setCursor(Qt.CursorShape.ArrowCursor if tool == "none" else Qt.CursorShape.CrossCursor)
+        self._pan_last = None
+        self.setCursor({"none": Qt.CursorShape.ArrowCursor, "hand": Qt.CursorShape.OpenHandCursor}.get(
+            tool, Qt.CursorShape.CrossCursor))
         self.update()
 
     def set_placeholder(self, text: str) -> None:
@@ -410,10 +535,21 @@ class FrameView(QWidget):
         measured from its centre, of a rotated one (the scan axes are no longer its edges)."""
         g = self._shown.geom
         w, h, ang = g["w_nm"], g["h_nm"], g["angle_deg"]
-        if abs(ang) < 1e-9:
-            return ((g["cx_nm"] - w / 2, g["cx_nm"] + w / 2), (g["cy_nm"] - h / 2, g["cy_nm"] + h / 2),
-                    "x (nm)", "y (nm)")
-        return (-w / 2, w / 2), (-h / 2, h / 2), f"u (nm), frame rotated {ang:g}°", "v (nm)"
+        rotated = abs(ang) >= 1e-9
+        if self._zoom == 1:
+            if not rotated:
+                return ((g["cx_nm"] - w / 2, g["cx_nm"] + w / 2), (g["cy_nm"] - h / 2, g["cy_nm"] + h / 2),
+                        "x (nm)", "y (nm)")
+            return (-w / 2, w / 2), (-h / 2, h / 2), f"u (nm), frame rotated {ang:g}°", "v (nm)"
+        # zoomed: the part of the frame in view, as fractions of its width and height (rows go down)
+        c0, r0, wv, hv = self._view_rect()
+        nx, ny = self._shown.nx, self._shown.ny
+        fx0, fx1, fy0, fy1 = c0 / nx, (c0 + wv) / nx, r0 / ny, (r0 + hv) / ny
+        x_lo, y_top = (-w / 2, h / 2) if rotated else (g["cx_nm"] - w / 2, g["cy_nm"] + h / 2)
+        xs, ys = (x_lo + fx0 * w, x_lo + fx1 * w), (y_top - fy1 * h, y_top - fy0 * h)
+        if rotated:
+            return xs, ys, f"u (nm), frame rotated {ang:g}°", "v (nm)"
+        return xs, ys, "x (nm)", "y (nm)"
 
     def _bar_ticks(self, fm: QFontMetrics, bar_h: int) -> tuple[list[tuple[float, str]], int]:
         """Colour-bar labels as ``(fraction from the top, text)`` and the decimals they use: the two
@@ -486,18 +622,19 @@ class FrameView(QWidget):
     def pixel_to_widget(self, col: float, row: float) -> QPointF:
         """Widget position of fractional pixel ``(col, row)`` (pixel centres at integers)."""
         r = self._layout().img
-        sh = self._shown
-        nx, ny = (sh.nx, sh.ny) if sh is not None else (1, 1)
-        return QPointF(r.x() + (col + 0.5) * r.width() / nx, r.y() + (row + 0.5) * r.height() / ny)
+        c0, r0, wv, hv = self._view_rect()
+        return QPointF(r.x() + (col + 0.5 - c0) * r.width() / wv, r.y() + (row + 0.5 - r0) * r.height() / hv)
 
     def scan_to_widget(self, x_nm: float, y_nm: float) -> QPointF | None:
-        """Widget position of a scan-frame point; None when this frame does not cover it."""
+        """Widget position of a scan-frame point; None when this frame does not cover it, or the view (zoomed)
+        does not show it."""
         sh = self._shown
         if sh is None:
             return None
         col, row = scan_to_pixel(sh.geom, x_nm, y_nm)
+        c0, r0, wv, hv = self._view_rect()
         eps = 1e-9
-        if not (-0.5 - eps <= col <= sh.nx - 0.5 + eps and -0.5 - eps <= row <= sh.ny - 0.5 + eps):
+        if not (c0 - 0.5 - eps <= col <= c0 + wv - 0.5 + eps and r0 - 0.5 - eps <= row <= r0 + hv - 0.5 + eps):
             return None
         return self.pixel_to_widget(col, row)
 
@@ -512,7 +649,8 @@ class FrameView(QWidget):
             fx, fy = min(max(fx, 0.0), 1.0), min(max(fy, 0.0), 1.0)
         elif not (0.0 <= fx < 1.0 and 0.0 <= fy < 1.0):
             return None
-        col, row = fx * sh.nx - 0.5, fy * sh.ny - 0.5
+        c0, r0, wv, hv = self._view_rect()
+        col, row = c0 + fx * wv - 0.5, r0 + fy * hv - 0.5
         x, y = pixel_to_scan_nm(sh.geom, col, row)
         ci = min(max(int(math.floor(col + 0.5)), 0), sh.nx - 1)
         ri = min(max(int(math.floor(row + 0.5)), 0), sh.ny - 1)
@@ -522,6 +660,9 @@ class FrameView(QWidget):
     # ── mouse ──
     def mouseMoveEvent(self, ev) -> None:
         pos = ev.position()
+        if self._pan_last is not None:                       # the hand carries the image with the pointer
+            self.pan_by(pos.x() - self._pan_last.x(), pos.y() - self._pan_last.y())
+            self._pan_last = QPointF(pos)
         if self._drag is not None:
             self._drag = (self._drag[0], self._clamped(pos))
             self.update()
@@ -551,6 +692,11 @@ class FrameView(QWidget):
         if p is None:
             ev.accept()
             return
+        if self._tool == "hand":
+            self._pan_last = QPointF(ev.position())
+            self.setCursor(Qt.CursorShape.ClosedHandCursor)
+            ev.accept()
+            return
         if self._tool == "marker":
             m = {**p, "frame": self._shown.name}
             self._markers.append(m)
@@ -567,6 +713,11 @@ class FrameView(QWidget):
         ev.accept()                                  # a double click is one click: the press before it did the work
 
     def mouseReleaseEvent(self, ev) -> None:
+        if ev.button() == Qt.MouseButton.LeftButton and self._pan_last is not None:
+            self._pan_last = None
+            self.setCursor(Qt.CursorShape.OpenHandCursor)
+            ev.accept()
+            return
         if ev.button() != Qt.MouseButton.LeftButton or self._drag is None:
             ev.accept()
             return
@@ -580,8 +731,15 @@ class FrameView(QWidget):
         self.update()
         ev.accept()
 
-    def wheelEvent(self, ev) -> None:                # accepted and dropped: no zoom, no pan, no scrolling of a parent
+    def wheelEvent(self, ev) -> None:
+        """A notch of the wheel is one zoom level about the pointer (up: in). Always accepted: a parent never
+        scrolls. With Ctrl it does nothing."""
         ev.accept()
+        if self._shown is None or ev.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            return
+        dy = ev.angleDelta().y()
+        if dy:
+            self.zoom_step(1 if dy > 0 else -1, ev.position())
 
     def contextMenuEvent(self, ev) -> None:
         ev.accept()
@@ -593,11 +751,12 @@ class FrameView(QWidget):
         sh = self._shown
         dpr = self.devicePixelRatioF()
         pw, ph = max(1, round(w * dpr)), max(1, round(h * dpr))
-        key = (id(sh), pw, ph, self._flatten, self._contrast)
+        c0, r0, wv, hv = self._view_rect()
+        key = (id(sh), pw, ph, self._flatten, self._contrast, self._zoom, c0, r0)
         if self._image_cache is not None and self._image_cache[0] == key:
             return self._image_cache[1]
-        ri = np.minimum(((np.arange(ph) + 0.5) * sh.ny / ph).astype(np.intp), sh.ny - 1)
-        ci = np.minimum(((np.arange(pw) + 0.5) * sh.nx / pw).astype(np.intp), sh.nx - 1)
+        ri = np.minimum(np.floor(r0 + (np.arange(ph) + 0.5) * hv / ph).astype(np.intp), sh.ny - 1)
+        ci = np.minimum(np.floor(c0 + (np.arange(pw) + 0.5) * wv / pw).astype(np.intp), sh.nx - 1)
         nan = None if sh.nan_mask is None else sh.nan_mask[ri[:, None], ci[None, :]]
         img = _gray_image(sh.grey[ri[:, None], ci[None, :]], nan)
         img.setDevicePixelRatio(dpr)
@@ -756,6 +915,8 @@ class FrameView(QWidget):
             return
         ux, uy = (b.x() - a.x()) / d, (b.y() - a.y()) / d
         for text, pt, sign in (("A", a, -1.0), ("B", b, 1.0)):    # each letter sits beyond its own end
+            if not lay.img.adjusted(-6, -6, 6, 6).contains(pt.toPoint()):
+                continue                                         # an end beyond the view (zoomed): only the line shows
             p.setPen(Qt.PenStyle.NoPen)
             p.setBrush(PROFILE_COLOR)
             p.drawEllipse(pt, 3.5, 3.5)

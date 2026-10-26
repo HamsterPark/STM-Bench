@@ -219,10 +219,17 @@ bias and current ranges, the budget, the temperature, the material and a qPlus s
 the manual), Report (one radio button per reportable claim, titled "Report a result (ReportResult)", with
 the fields named as `ReportResult` and the rule card name them - value, x_nm, y_nm, frame, evidence, unit,
 sigma, note, the ones the picked claim needs starred as in the action panels, Enter in a field sending the
-report - and Finish with an inline two-click confirmation), Data and Log; in the middle the viewer (a frame with nm
+report, and a "+ shown file" button that appends the name of the frame or spectrum the viewer shows to
+`evidence` (or says in the recent results that none is shown) - and Finish with an inline two-click
+confirmation), Data and Log; in the middle the viewer (a frame with nm
 axes, a colour bar, a cursor readout, flatten modes, a contrast switch (auto: the 0.5-99.5 percentile
 scale of the image an MCP agent gets, the default; full: the frame's minimum to maximum, which keeps the
-top of an atom from saturating; the readings are the same), numbered markers (six rows before the table
+top of an atom from saturating; visible: the minimum to maximum of the part of the frame in view, so that a
+step elsewhere does not flatten the atoms in a zoomed view, and the same as full while the whole frame is in
+view; the readings are the same), a zoom (the wheel steps x1, x2, x4, x8 about the
+pointer, or the Fit, x2, x4 and x8 buttons; the Pan tool drags the zoomed image; a new frame is shown
+whole, another channel of the same frame keeps the view; the axes, the cursor, markers and profiles use the
+same pixel mapping at every zoom, and nothing is found or snapped for the reader), numbered markers (six rows before the table
 scrolls) with their coordinates, the start time of the frame each was placed on and the distance to the
 previous one, a line profile, the last frames as thumbnails; or a spectrum with chosen
 columns; over a spectrum or a line profile a cursor reads out the data point nearest the pointer, its x
@@ -231,7 +238,13 @@ without scrolling at 1920x1080 or 1920x1016) and the Spectroscopy tab, whose On 
 show the state the instrument reports as the selected button, and under them the last five results, newest
 first, in the instrument's words (a refusal stays among them until five calls have followed it). A click queues its job at once with the field values read at that moment and
 buttons stay enabled while the instrument works, because one agent step often clicks several in a row;
-jobs run in click order on one worker thread. An empty field sends nothing (the instrument's default
+jobs run in click order on one worker thread. A refused call ends its step: the actions, reports and
+end-of-episode clicks still waiting behind it do not run, and for 3 s after the refusal (renewed by every
+click turned away) a click that would start another is not run either, because an agent clicks a dozen
+buttons and looks at the screen once, and a drag after a refused Set setpoint would run at a junction
+resistance nobody chose; the Log and the recent results say "not run: an earlier call was refused" (they
+never reach the instrument or the export), the refusal stays on the strip's last line until a call is accepted,
+and reads (a frame, a spectrum) are not affected. An empty field sends nothing (the instrument's default
 applies, or it refuses); a field that is not a number is sent as typed; every click in a field selects all
 of it, so click then type replaces the content. The three `← marker` buttons
 copy a marker's coordinates into the move-tip or scan fields or the report form, and Delete marker removes
@@ -263,7 +276,8 @@ is shrunk if it would not fit the screen (1.0 is tuned for 1920x1080).
 
 `python -m stmbench.gui.shots --out <dir>` renders the window offscreen in scripted states (just
 started; after a scan with markers and a profile; a spectrum; the report form; a refusal; the data,
-log and manual tabs) at 1920x1080 and at the 1280x720 a model is shown, through the same clicks and
+log and manual tabs; a step with a refusal in it; the image zoomed with the wheel and then panned) at
+1920x1080 and at the 1280x720 a model is shown, through the same clicks and
 keystrokes; look at those pictures after any change to the layout. Every Qt process of the tests and
 of that script runs with `QT_QPA_PLATFORM=offscreen`: no window is ever opened.
 

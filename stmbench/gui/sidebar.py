@@ -11,12 +11,12 @@ from __future__ import annotations
 from html import escape
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import (QAbstractItemView, QFrame, QGridLayout, QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
-                               QPushButton, QRadioButton, QScrollArea, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel, QListWidget,
+                               QListWidgetItem, QPushButton, QRadioButton, QScrollArea, QVBoxLayout, QWidget)
 
 from . import fmt, style
 from .controls import QuietBrowser, QuietText, SelectAllLineEdit, Tabs, polish, strong
-from .labels import S, tr, two_lines
+from .labels import S, one, tr, two_lines
 
 
 _CHANNEL = {"z": "Z", "current": "I", "didv": "dI/dV"}
@@ -57,6 +57,7 @@ class ReportTab(QWidget):
 
     submitted = Signal(dict)
     finish_requested = Signal()
+    notice = Signal(str)                                   # something the form wants said among the recent results
 
     def __init__(self, claims: list[dict], lang: str, parent: QWidget | None = None):
         super().__init__(parent)
@@ -70,15 +71,24 @@ class ReportTab(QWidget):
         self.title.setObjectName("report.title")
         v.addWidget(self.title)
         self.radios: dict[str, QRadioButton] = {}
+        self.claim_labels: dict[str, QLabel] = {}
+        # in a group of their own: a lone auto-exclusive radio button can be clicked off, and P4 has one claim;
+        # in an exclusive QButtonGroup the one that is checked stays checked when it is clicked again
+        self.claim_group = QButtonGroup(self)
+        self.claim_group.setExclusive(True)
         for c in claims:
             r = QRadioButton(c["id"])
             r.setObjectName(f"report.claim.{c['id']}")
             r.setFont(style.mono_font(17, bold=True))
             r.toggled.connect(lambda on, cid=c["id"]: on and self._claim_picked(cid))
             self.radios[c["id"]] = r
+            self.claim_group.addButton(r)
             v.addWidget(r)
             say = c["say_en"] if lang == "en" and c.get("say_en") else c["say"]
-            v.addWidget(_ClaimLabel(say, r))
+            lab = _ClaimLabel(say, r)
+            lab.setObjectName(f"report.say.{c['id']}")
+            self.claim_labels[c["id"]] = lab
+            v.addWidget(lab)
 
         grid = QGridLayout()
         grid.setHorizontalSpacing(style.px(8))
@@ -108,8 +118,9 @@ class ReportTab(QWidget):
             line.addWidget(beside)
             grid.addLayout(line, row * 2 + 1, col, 1, span)
 
-        # the button that appends the viewed item's name sits at the end of the evidence field's line
-        self.viewed_button = QPushButton("+ " + tr("rep_viewed", lang))
+        # the button that appends the name of the file the viewer shows sits at the end of the evidence field's line;
+        # its label says what it adds ("+ shown file"), and it is in one language: the line is not wide
+        self.viewed_button = QPushButton("+ " + one("rep_viewed", lang))
         self.viewed_button.setObjectName("report.viewed")
         self.viewed_button.clicked.connect(self._append_viewed)
         field("value", 0, 0)
@@ -205,7 +216,8 @@ class ReportTab(QWidget):
         self._viewed = name
 
     def _append_viewed(self) -> None:
-        if not self._viewed:
+        if not self._viewed:                               # nothing in the viewer: say so rather than do nothing
+            self.notice.emit(tr("rep_nothing_shown", self.lang))
             return
         have = [t.strip() for t in self.fields["evidence"].text().replace("，", ",").split(",") if t.strip()]
         if self._viewed not in have:
@@ -234,6 +246,11 @@ class ReportTab(QWidget):
     def _confirm(self) -> None:
         self.finish_ask.hide()
         self.finish_requested.emit()
+
+    def finish_not_run(self) -> None:
+        """The end was asked for but did not happen (the call was refused or not run): the button is back."""
+        self.finish_ask.hide()
+        self.finish_begin.show()
 
     def set_finished(self) -> None:
         self.finish_ask.hide()
@@ -345,6 +362,10 @@ class LogTab(QuietBrowser):
         """A call dropped before it started: it stays in the log, said to be cancelled."""
         self._set(job_id, state="cancelled")
 
+    def not_run(self, job_id: int) -> None:
+        """A call that was not run because an earlier call of its step was refused."""
+        self._set(job_id, state="skipped")
+
     def done(self, job_id: int, ok: bool, text: str, t_s: float | None) -> None:
         self._set(job_id, state="done", ok=ok, text=text, t=t_s)
 
@@ -375,6 +396,8 @@ class LogTab(QuietBrowser):
                 tail = f"<span style='color:{c['warn']}'>{escape(tr('log_running', self.lang))}</span>"
             elif e["state"] == "cancelled":
                 tail = f"<span style='color:{c['muted']}'>{escape(tr('cancelled', self.lang))}</span>"
+            elif e["state"] == "skipped":
+                tail = f"<span style='color:{c['bad']}'>{escape(tr('not_run', self.lang))}</span>"
             else:
                 color = c["ok"] if e["ok"] else c["bad"]
                 tail = (f"<span style=\"color:{color};font-family:'{mono}'\">"

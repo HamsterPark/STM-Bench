@@ -97,6 +97,7 @@ def open_window(app, tmp_path):
         else:
             sess = GuiSession(scenario, seed, run_dir=tmp_path / name, export_dir=tmp_path / name / "export", lang=lang)
         win = MainWindow(sess, lang=lang, sealed=sealed)
+        win.worker.guard_s = 0.0                          # the tests click one refusal after another; see the guard tests
         win.resize(*shots.WINDOW)
         win.show()
         made.append(win)
@@ -404,6 +405,67 @@ def test_the_status_strip_reads_in_units_and_counts_instrument_time(open_window)
 
 
 # ── the report and the end ──
+def test_a_picked_claim_stays_picked_when_it_is_clicked_again_with_one_claim_or_several(open_window):
+    win = open_window("en")                                              # P4 has one reportable claim
+    open_left(win, "report")
+    rep = win.sidebar.report
+    assert list(rep.radios) == ["target_site"] and rep.claim_id() == ""
+    for click in ("radio", "radio", "its line", "its line", "radio"):       # the trial's second click took it back
+        if click == "radio":
+            run_button(win, "report.claim.target_site")
+        else:
+            shots.click(win, shots.widget(win, "report.say.target_site"))
+        assert rep.claim_id() == "target_site" and shots.widget(win, "report.claim.target_site").isChecked()
+    assert rep.fields["unit"].text() == "nm"
+    # several claims (P1): one at a time, and the one that is picked stays picked
+    win = open_window("en", name="run_p1", scenario="P1_barth1990_au111")
+    open_left(win, "report")
+    rep = win.sidebar.report
+    ids = list(rep.radios)
+    assert len(ids) == 4 and rep.claim_id() == ""
+    for cid in (ids[0], ids[0], ids[2], ids[2], ids[1]):
+        run_button(win, f"report.claim.{cid}")
+        assert rep.claim_id() == cid and sum(r.isChecked() for r in rep.radios.values()) == 1
+    shots.click(win, shots.widget(win, f"report.say.{ids[3]}"))                 # a click on a claim's own line picks it
+    assert rep.claim_id() == ids[3] and rep.fields["unit"].text() == "deg"
+    shots.click(win, shots.widget(win, f"report.say.{ids[3]}"))
+    assert rep.claim_id() == ids[3]
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_shown_file_button_adds_the_name_of_what_the_viewer_shows_or_says_there_is_none(open_window, lang):
+    win = open_window(lang)
+    open_left(win, "report")
+    rep = win.sidebar.report
+    button = shots.widget(win, "report.viewed")
+    assert button.text() == ("+ shown file" if lang == "en" else "+ 显示中的文件")
+    evidence = rep.fields["evidence"]
+    run_button(win, "report.viewed")                                      # nothing shown yet
+    assert evidence.text() == ""
+    tone, text = win.recent.entries()[0]
+    assert tone == "note" and "no frame or spectrum is shown" in text
+    first = scan_small(win)
+    open_left(win, "report")
+    run_button(win, "report.viewed")
+    assert evidence.text() == first
+    run_button(win, "report.viewed")                                      # again: the name is not added twice
+    assert evidence.text() == first
+    open_right(win, "spectroscopy")
+    shots.fill(win, {"act.sts.v_start": "-0.2", "act.sts.v_end": "0.2", "act.sts.points": "16"})
+    run_button(win, "run.sts")
+    shots.settle(win)
+    spectrum = win.viewed[1]
+    assert win.viewed[0] == "spectrum" and spectrum.endswith(".dat")
+    open_left(win, "report")
+    run_button(win, "report.viewed")                                      # the file in the viewer now is the spectrum
+    assert evidence.text() == f"{first}, {spectrum}"
+    win.request_frame(first)                                              # back to the frame, by the thumbnail's way
+    shots.settle(win)
+    evidence.setText("")
+    run_button(win, "report.viewed")
+    assert evidence.text() == first
+
+
 def test_the_report_form_marks_what_the_picked_claim_needs_and_enter_sends_it(open_window, tmp_path):
     win = open_window("en", scenario="P1_barth1990_au111")
     open_left(win, "report")
@@ -626,8 +688,82 @@ def test_the_viewer_toolbar_has_a_contrast_switch_that_starts_on_auto_and_holds_
     assert fv.contrast() == "auto" and fv._shown.hi < np.nanmax(fv._shown.values) + 1e-9
     caption = shots.widget(win, "view.contrast.full").text()
     assert caption == ("full" if lang == "en" else "全幅")                        # the viewer's toolbar names its buttons in one language
-    for key in ("view.contrast.auto", "view.contrast.full", "view.channel.z", "view.flatten.line", "view.tool.marker"):
+    assert shots.widget(win, "view.contrast.visible").text() == ("visible" if lang == "en" else "可见区")
+    for key in ("view.contrast.auto", "view.contrast.full", "view.contrast.visible", "view.channel.z", "view.flatten.line",
+                "view.tool.marker", "view.tool.hand", "view.zoom.1", "view.zoom.8"):
         assert shots.widget(win, key).width() >= 56
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_visible_contrast_button_sets_the_scale_by_the_part_in_view(open_window, lang):
+    import numpy as np
+    win = open_window(lang)
+    scan_small(win)
+    fv = win.center.frame_view
+    run_button(win, "view.contrast.full")
+    full = (fv._shown.lo, fv._shown.hi)
+    run_button(win, "view.contrast.visible")
+    assert checked(win, "view.contrast.visible") and not checked(win, "view.contrast.full") and fv.contrast() == "visible"
+    assert (fv._shown.lo, fv._shown.hi) == full                                   # the whole frame in view: the same as full
+    run_button(win, "view.zoom.8")
+    r0, r1, c0, c1 = fv._region()
+    part = fv._shown.values[r0:r1, c0:c1]
+    assert fv._shown.lo == pytest.approx(np.nanmin(part)) and fv._shown.hi == pytest.approx(np.nanmax(part))
+    assert fv._shown.lo >= full[0] - 1e-9 and fv._shown.hi <= full[1] + 1e-9      # a part of the frame: inside its range
+    run_button(win, "view.zoom.1")
+    assert (fv._shown.lo, fv._shown.hi) == full
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_zoom_buttons_the_wheel_and_the_pan_tool_move_the_view_and_a_new_frame_is_shown_whole(open_window, lang):
+    from PySide6.QtCore import QPoint, QPointF
+    win = open_window(lang)
+    first = scan_small(win)
+    fv = win.center.frame_view
+    assert checked(win, "view.zoom.1") and fv.zoom() == 1
+    for level in (2, 4, 8, 1):                                                  # the buttons, ending on Fit
+        run_button(win, f"view.zoom.{level}")
+        assert fv.zoom() == level and checked(win, f"view.zoom.{level}")
+    assert shots.widget(win, "view.zoom.1").text() == ("Fit" if lang == "en" else "全图")
+    # the wheel, through the window: in about the pointer, and the buttons show where it is
+    r = fv.image_rect()
+    spot = QPoint(r.x() + r.width() // 3, r.y() + r.height() // 2)
+    under = fv._point_at(QPointF(spot))
+    for want in (2, 4):
+        shots.wheel(win, fv, spot)
+        assert fv.zoom() == want and checked(win, f"view.zoom.{want}")
+        now = fv._point_at(QPointF(spot))
+        assert now["x_nm"] == pytest.approx(under["x_nm"], abs=1e-6) and now["y_nm"] == pytest.approx(under["y_nm"], abs=1e-6)
+    shots.wheel(win, fv, spot, -120)
+    assert fv.zoom() == 2 and checked(win, "view.zoom.2")
+    # a marker placed on the zoomed image is at the scan position of the pixel under the click
+    geom = {"cx_nm": 0.0, "cy_nm": 0.0, "w_nm": 8.0, "h_nm": 8.0, "angle_deg": 0.0, "nx": 32, "ny": 32}
+    click = QPoint(r.x() + r.width() * 3 // 5, r.y() + r.height() * 2 // 5)
+    shots.click(win, fv, click)
+    (m,) = fv.markers()
+    p = fv._point_at(QPointF(click))
+    x, y = pixel_to_scan_nm(geom, p["col_f"], p["row_f"])
+    assert m["x_nm"] == pytest.approx(x, abs=1e-6) and m["y_nm"] == pytest.approx(y, abs=1e-6)
+    assert shots.widget(win, "markers.table").item(0, 1).text() == f"{x:.3f}"
+    # the Pan tool carries the image; the marker tool is the one that places markers
+    run_button(win, "view.tool.hand")
+    c0, r0, _, _ = fv.view_rect()
+    shots.drag(win, fv, QPoint(r.x() + 200, r.y() + 200), QPoint(r.x() + 140, r.y() + 170))
+    c1, r1, _, _ = fv.view_rect()
+    assert c1 > c0 and r1 > r0 and len(fv.markers()) == 1                       # dragged left and up: the view moves right and down
+    run_button(win, "view.tool.marker")
+    # Fit: the whole frame
+    run_button(win, "view.zoom.1")
+    assert fv.view_rect() == (0.0, 0.0, 32.0, 32.0) and checked(win, "view.zoom.1")
+    # another channel of the same frame keeps the zoom, the next frame is shown whole
+    run_button(win, "view.zoom.4")
+    run_button(win, "view.channel.current")
+    shots.settle(win)
+    assert win.viewed == ("frame", first) and fv.zoom() == 4
+    shots.fill(win, {"act.scan.center_x_nm": "1", "act.scan.center_y_nm": "1"})
+    run_button(win, "run.scan")
+    shots.settle(win)
+    assert win.viewed[1] != first and fv.zoom() == 1 and checked(win, "view.zoom.1")
 
 
 def test_a_profile_is_drawn_by_dragging_with_the_profile_tool(open_window):
@@ -778,8 +914,8 @@ def test_in_the_sealed_mode_the_seed_is_in_no_widget_title_or_file_and_close_doe
 def test_the_screenshot_script_renders_every_state_at_both_sizes(app, tmp_path):
     saved = shots.render_states(tmp_path / "png", "en", work=tmp_path / "work")
     names = sorted(p.name for p in saved)
-    assert len(names) == 20 and any(n.startswith("a_started") for n in names) and any(n.startswith("e_refusal") for n in names)
-    assert any(n.startswith("i_busy") for n in names)
+    assert len(names) == 26 and any(n.startswith("a_started") for n in names) and any(n.startswith("e_refusal") for n in names)
+    assert any(n.startswith("i_busy") for n in names) and any(n.startswith("l_zoomed") for n in names)
     for p in saved:
         img = QImage(str(p))
         assert (img.width(), img.height()) == (shots.DOWNSCALED if p.stem.endswith("1280x720") else shots.SCREEN), p.name
@@ -993,9 +1129,9 @@ def test_the_window_shrinks_to_fit_a_screen_its_fonts_would_overflow_and_not_oth
 def test_the_last_five_results_stay_on_screen_and_a_refusal_is_not_pushed_out_by_later_successes(open_window):
     win = open_window("en")
     shots.fill(win, {"act.set_bias.bias_v": "abc", "act.set_setpoint.current_pa": "100", "act.wait.seconds": "1"})
-    for name in ("run.set_bias", "run.set_setpoint", "run.wait"):          # one step, three calls, no looking between
-        run_button(win, name)
-    shots.settle(win)
+    for name in ("run.set_bias", "run.set_setpoint", "run.wait"):          # three steps: a refusal, then two successes
+        run_button(win, name)                                               # (calls of one step after a refusal do not run)
+        shots.settle(win)
     rows = [shots.widget(win, f"recent.{i}") for i in range(3)]
     assert [r.text() for r in rows] == ["✓ wait → waited_s=1", "✓ set_setpoint → setpoint_pa=100",
                                         "✗ refused: set_bias: bias_v must be a number"]
@@ -1264,7 +1400,8 @@ class Gate:
     """A job that holds the worker until the test opens the gate: a scan that is "running" for as long as
     the test wants, whatever the speed of the machine."""
 
-    def __init__(self, win: MainWindow, kind: str = "act", label: str = "scan", args: dict | None = None):
+    def __init__(self, win: MainWindow, kind: str = "act", label: str = "scan", args: dict | None = None,
+                 refuse: bool = False):
         import threading
 
         from stmbench.gui.jobs import Outcome
@@ -1274,7 +1411,9 @@ class Gate:
 
         def hold(_session):
             self.event.wait(60)
-            return Outcome(kind, label, dict(self.args), ok=False, refused=True, text=f"{label}: held by the test")
+            if refuse:
+                return Outcome(kind, label, dict(self.args), ok=False, refused=True, text=f"{label}: held by the test")
+            return Outcome(kind, label, dict(self.args), ok=True, reply={"held": True})
 
         self.win = win
         win._submit(Job(kind, label, dict(self.args), hold))
@@ -1313,7 +1452,7 @@ def test_the_strip_says_what_runs_and_how_many_wait_and_the_viewer_says_a_scan_i
     assert win.status.result.full_text().startswith("✓ set_setpoint")           # idle again: the last result
     assert not shots.widget(win, "view.busy").isVisible()
     assert not shots.widget(win, "status.cancel").isVisible()
-    assert win.recent.entries()[2] == ("bad", "refused: scan: held by the test")
+    assert win.recent.entries()[2] == ("ok", "scan → held=true")
 
 
 def test_a_scan_that_waits_behind_another_call_is_shown_as_running_too(open_window):
@@ -1375,6 +1514,101 @@ def test_a_click_on_a_viewer_that_shows_no_frame_leaves_a_note_and_a_frame_takes
     before = notes()
     shots.click(win, fv, fv.pixel_to_widget(16, 16).toPoint())
     assert len(fv.markers()) == 1 and notes() == before                           # a frame takes the click: no note
+
+
+# ── a refused call ends its step ──
+def test_a_refused_call_takes_the_calls_of_its_step_that_were_waiting_with_it(open_window, tmp_path):
+    win = open_window("en")
+    gate = Gate(win, "act", "wait", {"seconds": 5})                   # holds the worker, so that one step's clicks queue
+    try:
+        shots.fill(win, {"act.set_bias.bias_v": "abc", "act.set_setpoint.current_pa": "100", "act.wait.seconds": "1"})
+        for name in ("run.set_bias", "run.set_setpoint", "run.wait"):
+            run_button(win, name)
+        QApplication.processEvents()
+        assert win.worker.waiting == 3
+    finally:
+        gate.open()
+    # the first of the three was refused: the two behind it did not run, and the strip says what was refused
+    assert win.status.result.full_text() == "✗ refused: set_bias: bias_v must be a number"
+    assert win.status.result.property("tone") == "bad"
+    assert acts(records(tmp_path)) == [] and win.is_idle()
+    log = shots.widget(win, "log.view").toPlainText()
+    assert log.count("not run: an earlier call was refused") == 2 and "queued" not in log
+    top, second = win.recent.entries()[:2]
+    assert top == ("note", "not run: an earlier call was refused: set_setpoint, wait")
+    assert second == ("bad", "refused: set_bias: bias_v must be a number")
+    assert shots.widget(win, "recent.1").property("tone") == "bad"
+    run_button(win, "run.wait")                                         # the next step is not touched
+    shots.settle(win)
+    assert acts(records(tmp_path)) == ["wait"] and win.status.result.full_text().startswith("✓ wait")
+
+
+def test_a_refusal_made_by_the_instruments_own_checks_ends_the_step_too(open_window, tmp_path):
+    win = open_window("en")
+    gate = Gate(win, "act", "wait", {"seconds": 5})
+    try:
+        shots.fill(win, {"act.move_tip.x_nm": "1000000", "act.move_tip.y_nm": "0", "act.set_setpoint.current_pa": "100"})
+        run_button(win, "run.move_tip")
+        run_button(win, "run.set_setpoint")
+        QApplication.processEvents()
+    finally:
+        gate.open()
+    assert win.status.result.full_text() == "✗ refused: move_tip: outside the piezo range"
+    recs = records(tmp_path)
+    assert [r["kind"] for r in recs if r["kind"] != "observe"] == ["refused"]      # the refusal is on record, set_setpoint is not
+    assert win.recent.entries()[0] == ("note", "not run: an earlier call was refused: set_setpoint")
+
+
+def test_a_refused_report_stops_the_end_clicked_behind_it_and_the_button_comes_back(open_window, tmp_path):
+    win = open_window("en")
+    gate = Gate(win, "act", "wait", {"seconds": 5})
+    try:
+        open_left(win, "report")
+        run_button(win, "report.submit")                                  # no claim, no value: refused
+        run_button(win, "finish.begin")
+        run_button(win, "finish.confirm")                                 # the end, asked for in the same step
+        QApplication.processEvents()
+        assert win.worker.waiting == 2
+    finally:
+        gate.open()
+    assert win.status.result.full_text().startswith("✗ refused: report:")
+    assert not win.session.finished and win.recent.entries()[0][1].startswith("not run: an earlier call was refused: finish")
+    assert shots.widget(win, "finish.begin").isVisible() and not shots.widget(win, "finish.confirm").isVisible()
+
+
+def test_clicks_that_follow_a_refusal_straight_away_are_not_run_but_a_click_after_a_pause_is(open_window, tmp_path):
+    win = open_window("en")
+    now = [100.0]
+    win.worker._clock = lambda: now[0]
+    win.worker.guard_s = 3.0                                              # what a window opens with
+    shots.fill(win, {"act.set_bias.bias_v": "abc", "act.set_setpoint.current_pa": "100"})
+    run_button(win, "run.set_bias")
+    shots.settle(win)                                                     # refused, and answered, before the next click
+    refusal = "✗ refused: set_bias: bias_v must be a number"
+    assert win.status.result.full_text() == refusal
+    now[0] = 101.5                                                        # 1.5 s on: the same step
+    run_button(win, "run.set_setpoint")
+    shots.settle(win)
+    assert acts(records(tmp_path)) == [] and win.is_idle()
+    assert win.status.result.full_text() == refusal                       # nothing that did not run replaces it
+    assert win.recent.entries()[0] == ("note", "not run: an earlier call was refused: set_setpoint")
+    assert "not run: an earlier call was refused" in shots.widget(win, "log.view").toPlainText()
+    now[0] = 103.0                                                        # turned away at 101.5: the guard runs to 104.5
+    run_button(win, "run.set_setpoint")
+    shots.settle(win)
+    assert acts(records(tmp_path)) == []
+    assert win.recent.entries()[0] == ("note", "not run: an earlier call was refused: set_setpoint, set_setpoint")
+    now[0] = 107.6                                                        # a pause: a new step
+    run_button(win, "run.set_setpoint")
+    shots.settle(win)
+    assert acts(records(tmp_path)) == ["set_setpoint"] and win.status.result.full_text().startswith("✓ set_setpoint")
+    # closing the window still ends the episode, whatever the guard says
+    now[0] = 108.0
+    shots.fill(win, {"act.set_bias.bias_v": "abc"})
+    run_button(win, "run.set_bias")
+    shots.settle(win)
+    win.shutdown(finish=True)
+    assert win.session.finished
 
 
 # ── a whole episode ──

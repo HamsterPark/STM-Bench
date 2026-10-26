@@ -23,7 +23,7 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import TextIO
 
-from PySide6.QtCore import QSize, QTimer
+from PySide6.QtCore import QSize, Qt, QTimer, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QVBoxLayout, QWidget
 
@@ -46,6 +46,8 @@ CACHE_BYTES = 256 * 1024 * 1024
 
 
 class MainWindow(QMainWindow):
+    _turned_away = Signal(object)                        # clicks the worker did not accept, to be told in order
+
     def __init__(self, session: GuiSession, *, lang: str = "zh", sealed: bool = False):
         super().__init__()
         self.session = session
@@ -103,6 +105,7 @@ class MainWindow(QMainWindow):
         # the reader's gestures
         self.sidebar.report.submitted.connect(self._report)
         self.sidebar.report.finish_requested.connect(self._finish)
+        self.sidebar.report.notice.connect(lambda text: self.recent.push("note", text))
         self.sidebar.data.frame_clicked.connect(self._pick_frame)
         self.sidebar.data.spectrum_clicked.connect(self.request_spectrum)
         self.center.thumb_clicked.connect(self._pick_frame)
@@ -117,6 +120,8 @@ class MainWindow(QMainWindow):
         self.worker.started_job.connect(self._on_started)
         self.worker.finished_job.connect(self._on_finished)
         self.worker.queue_changed.connect(self._on_queue)
+        self.worker.dropped.connect(self._on_dropped)
+        self._turned_away.connect(self._not_run, Qt.ConnectionType.QueuedConnection)
         self.worker.start()
         self._submit(Job("boot", "start", {}, jobs.run_boot), log=False)
 
@@ -125,8 +130,24 @@ class MainWindow(QMainWindow):
         self._open += 1
         if log:
             self.sidebar.log.add(job.id, job.label, job.args, self._t_s)
-        self.worker.submit(job)
+        if not self.worker.submit(job):                  # a click of the same step as a refusal: not run
+            self._open -= 1
+            self._turned_away.emit([job])                # queued: after the refusal's own result has been drawn
         return job.id
+
+    def _not_run(self, jobs: list[Job]) -> None:
+        """Calls that were not run because an earlier call was refused: said in the log and in the recent
+        results; the refusal itself stays on the strip's last line, which nothing that did not run replaces."""
+        for job in jobs:
+            self.sidebar.log.not_run(job.id)
+            if job.kind == "finish":
+                self.sidebar.report.finish_not_run()
+        self.recent.not_run([j.label for j in jobs], tr("not_run", self.lang))
+
+    def _on_dropped(self, jobs: list[Job]) -> None:
+        self._open -= len(jobs)
+        self._not_run(jobs)
+        self._show_state()
 
     def run_action(self, name: str, args: dict) -> int:
         """Queue one action with the values the fields held at the click."""
@@ -243,6 +264,8 @@ class MainWindow(QMainWindow):
             self.sidebar.log.done(job.id, False, text, self._t_s)
             if out.kind == "report":
                 self.sidebar.report.set_reply(False, text)
+            elif out.kind == "finish":
+                self.sidebar.report.finish_not_run()
             return
         if out.kind == "act":
             summary = fmt.reply_summary(job.label, out.reply)
@@ -367,13 +390,13 @@ class MainWindow(QMainWindow):
         """Stop the worker after the jobs already queued; with ``finish`` end the episode first."""
         if not self.worker.isRunning():
             return
-        for sig in (self.worker.started_job, self.worker.finished_job, self.worker.queue_changed):
+        for sig in (self.worker.started_job, self.worker.finished_job, self.worker.queue_changed, self.worker.dropped):
             try:
                 sig.disconnect()
             except (RuntimeError, TypeError):
                 pass
         if finish and not self.session.finished:
-            self.worker.submit(Job("finish", "finish", {}, jobs.run_finish))
+            self.worker.submit(Job("finish", "finish", {}, jobs.run_finish), force=True)
         self.worker.stop()
         self.worker.wait()
 

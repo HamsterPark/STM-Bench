@@ -8,7 +8,9 @@ keystrokes an agent's would be, and saves each state twice: as the full screen a
 is shown. The states, for P4 seed 0: (a) just started, (b) after a 30 nm, 256 px scan with three
 markers and a profile, (c) an STS spectrum, (d) the Report tab filled in, (e) a refusal, (f-h) the Data,
 Log and Manual tabs, (i) a 1024 px scan running with two calls queued behind it, (j) that frame in full contrast
-with seven markers.
+with seven markers, (k) a step with a refusal in it: the calls clicked after the refusal do not run, (l) the
+wheel at the first atom (x8) with the grey scale over the part in view and a marker on the zoomed image, (m) the
+same view after a drag with the Pan tool.
 
 The helpers (:func:`click`, :func:`type_into`, :func:`drag`) are shared with the tests: they send
 events to the deepest widget under a window position, so a control that is hidden or covered fails
@@ -25,8 +27,8 @@ from pathlib import Path
 os.environ["QT_QPA_PLATFORM"] = "offscreen"                  # never a visible window: set before Qt loads
 
 import numpy as np  # noqa: E402
-from PySide6.QtCore import QPoint, Qt  # noqa: E402
-from PySide6.QtGui import QColor, QImage, QPainter  # noqa: E402
+from PySide6.QtCore import QPoint, QPointF, Qt  # noqa: E402
+from PySide6.QtGui import QColor, QImage, QPainter, QWheelEvent  # noqa: E402
 from PySide6.QtTest import QTest  # noqa: E402
 from PySide6.QtWidgets import QApplication, QWidget  # noqa: E402
 
@@ -61,6 +63,19 @@ def hit(win: QWidget, w: QWidget, local: QPoint | None = None) -> tuple[QWidget,
 def click(win: QWidget, w: QWidget, local: QPoint | None = None) -> None:
     target, at = hit(win, w, local)
     QTest.mouseClick(target, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, at)
+
+
+def wheel(win: QWidget, w: QWidget, local: QPoint | None = None, delta: int = 120) -> None:
+    """One notch of the mouse wheel at ``local`` (in ``w``'s coordinates; default its centre; ``delta`` > 0 is up),
+    delivered to the window as the screen does, so that it reaches the widget under the pointer the way a real
+    one would. Fails, as a click does, when the pointer is not over ``w``."""
+    hit(win, w, local)
+    pos = w.mapTo(win, w.rect().center() if local is None else local)
+    qwin = win.windowHandle()
+    ev = QWheelEvent(QPointF(pos), QPointF(qwin.mapToGlobal(pos)), QPoint(0, 0), QPoint(0, delta),
+                     Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier, Qt.ScrollPhase.NoScrollPhase, False)
+    QApplication.sendEvent(qwin, ev)
+    QApplication.processEvents()
 
 
 def type_into(win: QWidget, w: QWidget, text: str) -> None:
@@ -148,6 +163,7 @@ def render_states(out: Path, lang: str = "zh", scale: float = 1.0, scenario: str
     work = Path(work) if work else Path(tempfile.mkdtemp(prefix="stmbench_shots_"))
     sess = GuiSession(scenario, seed, run_dir=work / "run", export_dir=work / "run" / "export", lang=lang)
     win = MainWindow(sess, lang=lang)
+    win.worker.guard_s = 0.0          # this script clicks on after a refusal at once; (k) turns the guard on
     win.resize(*(FULLSCREEN if fullscreen else WINDOW))
     win.show()
     settle(win)
@@ -222,6 +238,30 @@ def render_states(out: Path, lang: str = "zh", scale: float = 1.0, scenario: str
     for c, r in brightest_spots(win.cached_frame(name)["array"], n=7, apart=60):
         click(win, fv, fv.pixel_to_widget(c, r).toPoint())
     snap(f"j_contrast_markers_{lang}")
+
+    # (k) one step: Set bias with a bad value (refused), then Set setpoint and Wait clicked straight after it. The
+    # refusal stays on the strip's last line and the two calls after it do not run
+    win.worker.guard_s = 3.0
+    fill(win, {"act.set_bias.bias_v": "abc", "act.set_setpoint.current_pa": "100", "act.wait.seconds": "1"})
+    for name in ("run.set_bias", "run.set_setpoint", "run.wait"):
+        click(win, widget(win, name))
+    settle(win)
+    snap(f"k_refused_step_{lang}")
+    win.worker.guard_s = 0.0
+
+    # (l) the wheel at the first atom (x8), the grey scale over the part in view, a marker on the zoomed image
+    click(win, widget(win, "view.contrast.visible"))
+    name = win.viewed[1]
+    c, r = brightest_spots(win.cached_frame(name)["array"], n=1)[0]
+    for _ in range(3):
+        wheel(win, fv, fv.pixel_to_widget(c, r).toPoint())
+    click(win, fv, fv.pixel_to_widget(c, r).toPoint())
+    snap(f"l_zoomed_{lang}")
+
+    # (m) the same view, dragged with the Pan tool
+    click(win, widget(win, "view.tool.hand"))
+    drag(win, fv, fv.rect().center() + QPoint(60, 40), fv.rect().center() - QPoint(40, 20))
+    snap(f"m_panned_{lang}")
     win.shutdown(finish=False)
     win.deleteLater()
     return saved
