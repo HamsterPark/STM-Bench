@@ -300,6 +300,30 @@ def test_unacquired_pixels_are_drawn_flat_blue_not_as_low(app):
     assert tuple(rgb(view)[int(pt.y()), int(pt.x())]) == fv._NAN_RGB
 
 
+@pytest.mark.parametrize("name", ["constant", "all nan", "nan row", "inf", "huge", "tiny", "2x2", "wide"])
+@pytest.mark.parametrize("channel", ["z", "current"])
+def test_degenerate_frames_draw_without_warnings_in_every_flatten_mode(app, name, channel):
+    rng = np.random.default_rng(0)
+    arrays = {
+        "constant": np.full((16, 16), 1e-10), "all nan": np.full((16, 16), np.nan),
+        "nan row": np.where(np.arange(16)[:, None] == 5, np.nan, rng.normal(0, 1e-11, (16, 16))),
+        "inf": np.where((np.arange(16)[:, None] == 5) & (np.arange(16)[None, :] == 7), np.inf, rng.normal(0, 1e-11, (16, 16))),
+        "huge": rng.normal(0, 1e-3, (16, 16)), "tiny": rng.normal(0, 1e-25, (16, 16)),
+        "2x2": np.array([[0.0, 1e-11], [2e-11, 3e-11]]), "wide": rng.normal(0, 1e-11, (8, 40)),
+    }
+    frame = make_frame(arrays[name], channel=channel)
+    view = make_view(app)
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")                      # a numpy RuntimeWarning from the data would show here
+        for mode in ("line", "plane", "none"):
+            view.set_flatten(mode)
+            view.set_frame(frame)
+            assert rgb(view).shape == (WIDGET_SIZE[1], WIDGET_SIZE[0], 3)
+            assert view._layout().bar_ticks                      # the colour bar always has its two end labels
+        thumb = frame_thumbnail(frame, 32)
+    assert (thumb.width(), thumb.height()) == (32, 32)
+
+
 def test_the_view_is_square_and_inside_the_widget_at_any_size(app):
     frame = make_frame(bumpy(64))
     for size, px in [(WIDGET_SIZE, 16), ((500, 420), 16), ((1000, 560), 16), ((300, 200), 16), (WIDGET_SIZE, 24)]:
