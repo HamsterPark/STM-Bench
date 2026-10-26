@@ -165,7 +165,7 @@ def test_visible_contrast_is_full_for_the_whole_frame_and_the_range_of_the_part_
     assert view._shown.hi == pytest.approx(np.percentile(flat, 99.5))             # auto does not depend on the view
     view.set_contrast("visible")
     # panned to the corner with the block, the range is the block's; panned to the quiet corner, the noise's
-    view.set_tool("hand")
+    view.set_tool("pan")
     view.pan_by(1e4, 1e4)
     assert view.view_rect()[:2] == (0.0, 0.0) and view._shown.hi > 500
     view.pan_by(-1e4, -1e4)

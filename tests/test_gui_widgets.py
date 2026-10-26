@@ -524,7 +524,7 @@ def test_only_a_left_click_with_the_marker_tool_on_the_image_adds_a_marker(app):
     click(view, centre)
     assert len(got.items) == 1
     with pytest.raises(ValueError):
-        view.set_tool("pan")
+        view.set_tool("lasso")
     with pytest.raises(ValueError):
         view.set_flatten("cubic")
 
@@ -658,8 +658,12 @@ def test_the_profile_line_and_its_ends_are_drawn(app):
     assert near(before, fv.PROFILE_COLOR).sum() == 0
 
 
-# ── no zoom, pan, wheel or menus ───────────────────────────────────────────────────────────
-def test_a_wheel_event_changes_nothing(app):
+# ── a wheel with Ctrl, menus and focus: nothing (the plain wheel zooms: tests/test_gui_zoom.py) ───
+def test_a_wheel_with_ctrl_changes_nothing_and_neither_widget_has_a_menu_or_takes_focus(app):
+    """Ctrl + wheel is taken and dropped by both widgets: the picture, the layout, the markers and the signals
+    stay as they were, and no parent scrolls. (The plain wheel is the viewer's zoom, tested in test_gui_zoom.py;
+    in the plot it does nothing: test_a_wheel_over_the_plot_leaves_the_cursor_where_it_is.) Neither widget
+    has a context menu or takes the keyboard focus."""
     view = make_view(app)
     view.set_frame(make_frame(bumpy(32)))
     click(view, view.pixel_to_widget(7, 7))

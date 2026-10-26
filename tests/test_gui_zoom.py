@@ -1,4 +1,4 @@
-"""The viewer's zoom and pan (``FrameView.set_zoom``, the wheel, the ``"hand"`` tool): the same pixel / scan
+"""The viewer's zoom and pan (``FrameView.set_zoom``, the wheel, the ``"pan"`` tool): the same pixel / scan
 mapping at every zoom, so that what is read off a zoomed image (cursor, markers, profile, axes) is what the
 judge's mapping gives for the pixel under it, and nothing is found, fitted or snapped for the reader.
 
@@ -110,7 +110,7 @@ def test_the_pixel_widget_and_scan_mappings_agree_at_every_zoom_and_pan(app, ang
     for level in (1, 2, 4, 8):
         view.set_zoom(level)
         for dx, dy in ((0, 0), (-90, 40), (500, -300)):               # the corners of the pan range, and between
-            view.set_tool("hand")
+            view.set_tool("pan")
             view.pan_by(dx, dy)
             for fx, fy in ((0.02, 0.03), (0.5, 0.5), (0.97, 0.9), (0.31, 0.68)):
                 pos = inside(view, fx, fy)
@@ -159,7 +159,7 @@ def test_the_axes_show_the_part_of_the_frame_in_view(app):
 def test_the_painted_image_is_the_nearest_pixels_of_the_part_in_view(app):
     view = make_view(bump_frame())
     view.set_zoom(4)
-    view.set_tool("hand")
+    view.set_tool("pan")
     view.pan_by(-60, -25)
     img = view.grab().toImage()
     sh = view._shown
@@ -184,12 +184,12 @@ def drag(view: FrameView, a: QPointF, b: QPointF, steps: int = 6) -> None:
     QTest.mouseRelease(view, left, none, b.toPoint())
 
 
-def test_the_hand_tool_moves_the_zoomed_image_with_the_pointer_and_stops_at_the_frame(app):
+def test_the_pan_tool_moves_the_zoomed_image_with_the_pointer_and_stops_at_the_frame(app):
     view = make_view(bump_frame())
     got = {"markers": [], "profiles": []}
     view.markers_changed.connect(got["markers"].append)
     view.profile_changed.connect(got["profiles"].append)
-    view.set_tool("hand")
+    view.set_tool("pan")
     drag(view, inside(view, 0.4, 0.4), inside(view, 0.7, 0.2))            # at zoom 1 there is nothing to move
     assert view.view_rect() == (0.0, 0.0, 64.0, 64.0)
     view.set_zoom(4)
@@ -205,7 +205,7 @@ def test_the_hand_tool_moves_the_zoomed_image_with_the_pointer_and_stops_at_the_
         drag(view, inside(view, 0.5, 0.1), inside(view, 0.5, 0.95), steps=10) # and down: the top of the frame
     c, rr, wv, hv = view.view_rect()
     assert c == pytest.approx(64 - 16) and rr == pytest.approx(0.0, abs=1e-9)
-    assert got["markers"] == [] and got["profiles"] == []                  # the hand placed no marker, drew no line
+    assert got["markers"] == [] and got["profiles"] == []                  # the pan tool placed no marker, drew no line
     # a marker placed afterwards is where the judge's mapping puts the pixel under the click
     frame = bump_frame()
     view.set_tool("marker")
@@ -255,7 +255,7 @@ def test_a_new_frame_is_shown_whole_and_another_channel_of_the_same_frame_keeps_
     got: list[int] = []
     view.zoom_changed.connect(got.append)
     view.set_zoom(4)
-    view.set_tool("hand")
+    view.set_tool("pan")
     view.pan_by(-30, -30)
     corner = view.view_rect()
     other = bump_frame("sim001.sxm", channel="current", seed=9)           # the same frame, its current channel
@@ -278,8 +278,8 @@ def test_a_level_that_is_not_one_is_refused_and_with_no_frame_the_control_is_ans
     for bad in (0, 3, 16, -2):
         with pytest.raises(ValueError, match="zoom"):
             view.set_zoom(bad)
-    view.set_tool("hand")
+    view.set_tool("pan")
     assert view.cursor().shape() == Qt.CursorShape.OpenHandCursor
     with pytest.raises(ValueError):
-        view.set_tool("pan")                                               # the viewer's tests pin that name as invalid
+        view.set_tool("lasso")                                             # not a tool
     assert math.isfinite(view.view_rect()[2])
