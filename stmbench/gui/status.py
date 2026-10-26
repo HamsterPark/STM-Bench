@@ -102,7 +102,7 @@ class StatusStrip(QFrame):
         self.count.setText(f"{tr('actions', self.lang)} {st['actions']}")
         mono, muted = style.mono_family(), style.COLORS["muted"]
         parts, plain = [], []
-        for key, _, value in fmt.reading_items(st, self.lang):
+        for key, value in fmt.reading_items(st, self.lang):
             label = tr(key, self.lang)
             parts.append(f"<span style='white-space:nowrap'><span style='color:{muted}'>{label}</span> "
                          f"<b style=\"font-family:'{mono}'\">{value.replace('<', '&lt;')}</b></span>")

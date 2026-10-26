@@ -197,8 +197,7 @@ class MainWindow(QMainWindow):
             elif not out.ok:
                 self.status.set_result(False, ("refused: " if out.refused else "") + out.text)
             return
-        t = float(out.reply["instrument_time_s"]) if out.ok and isinstance(out.reply, dict) \
-            and "instrument_time_s" in out.reply else self._t_s
+        t = float(out.reply.get("instrument_time_s", self._t_s)) if isinstance(out.reply, dict) else self._t_s
         if not out.ok:
             text = ("refused: " if out.refused else "error: ") + out.text
             self.status.set_result(False, text)

@@ -13,7 +13,7 @@ import re
 
 import numpy as np
 from PySide6.QtCore import QRect, Qt, Signal
-from PySide6.QtGui import QColor, QFont, QPainter, QPixmap
+from PySide6.QtGui import QColor, QPainter, QPixmap
 from PySide6.QtWidgets import (QAbstractItemView, QHBoxLayout, QHeaderView, QLabel, QPushButton, QSizePolicy,
                                QStackedWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
@@ -61,8 +61,7 @@ def thumb_pixmap(frame: dict, size: int) -> QPixmap:
     m = re.search(r"(\d+)(?=\.\w+$)", str(frame.get("frame", "")))
     text = (m.group(1)[-3:] if m else str(frame.get("frame", ""))[:3])
     p = QPainter(pm)
-    f = QFont(style.sans_font(15, bold=True))
-    p.setFont(f)
+    p.setFont(style.sans_font(15, bold=True))
     w = p.fontMetrics().horizontalAdvance(text) + 6
     h = p.fontMetrics().height() + 2
     p.fillRect(QRect(0, pm.height() - h, w, h), QColor(0, 0, 0, 190))
@@ -75,7 +74,6 @@ def thumb_pixmap(frame: dict, size: int) -> QPixmap:
 class CenterColumn(QWidget):
     view_changed = Signal()                       # the reader toggled channel or direction
     thumb_clicked = Signal(str)
-    spectrum_axes_changed = Signal()
     tip_from_marker = Signal(float, float)
     scan_from_marker = Signal(float, float)
     report_from_marker = Signal(float, float, str)
@@ -85,7 +83,6 @@ class CenterColumn(QWidget):
         super().__init__(parent)
         self.lang = lang
         self._spec: dict | None = None
-        self._frame_meta: dict | None = None
         v = QVBoxLayout(self)
         v.setContentsMargins(0, 0, 0, 0)
         v.setSpacing(style.px(4))
@@ -280,7 +277,6 @@ class CenterColumn(QWidget):
             f"{frame['frame']}  centre ({fmt.num(cx, 5)}, {fmt.num(cy, 5)}) nm  size {fmt.num(frame['size_nm'], 5)} nm  "
             f"{frame['pixels']} px  angle {fmt.num(frame['angle_deg'], 4)}°  start {fmt.hms(t0) if t0 is not None else '-'}")
         self.readout.set_full_text("")
-        self.table.clearSelection()
         for b in self.thumbs:
             b.setChecked(b.name == frame["frame"])
 
@@ -321,22 +317,14 @@ class CenterColumn(QWidget):
 
     def _draw_spectrum(self, xk: str, yk: str) -> None:
         spec = self._spec
-        xn, xs, xu = SPECTRUM_COLUMNS[xk]
-        yn, ys, yu = SPECTRUM_COLUMNS[yk]
-        x = np.asarray(spec[xk], float) * xs
-        y = np.asarray(spec[yk], float) * ys
+        x = np.asarray(spec[xk], float) * SPECTRUM_COLUMNS[xk][1]
+        y = np.asarray(spec[yk], float) * SPECTRUM_COLUMNS[yk][1]
         self.plot.set_series(x, [(column_label(yk), y)], column_label(xk), column_label(yk), spec["name"])
 
     def current_spectrum_axes(self) -> tuple[str, str] | None:
         if self._spec is None or not (self.spec_x and self.spec_y):
             return None
         return self.spec_x.value(), self.spec_y.value()
-
-    def clear_view(self) -> None:
-        self.toolbars.setCurrentIndex(0)
-        self.stack.setCurrentIndex(0)
-        self.frame_view.set_frame(None)
-        self.info.set_full_text("")
 
     def set_thumbs(self, items: list[tuple[str, QPixmap]], current: str = "") -> None:
         """The last frames, newest first."""

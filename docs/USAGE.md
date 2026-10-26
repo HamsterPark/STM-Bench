@@ -236,7 +236,8 @@ the process ends when it is killed. Everything the agent did is then already in 
 `stmbench.instrument.export.read_export`), so an episode that is stopped from outside is graded as it
 stands. `--lang en` shows English labels; `--lang zh` (the default) shows each Chinese label followed by
 its English, and the task text is the scenario's own (Chinese). `--ui-scale` multiplies every font and
-size.
+size; it is an upper bound, because the window is measured with the fonts the machine has and every size
+is shrunk if it would not fit the screen (1.0 is tuned for 1920x1080).
 
 `python -m stmbench.gui.shots --out <dir>` renders the window offscreen in scripted states (just
 started; after a scan with markers and a profile; a spectrum; the report form; a refusal; the data,

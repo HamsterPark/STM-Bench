@@ -77,20 +77,20 @@ def yes_no(flag: bool | None, lang: str = "en") -> str:
     return ("是 yes" if flag else "否 no") if lang == "zh" else ("yes" if flag else "no")
 
 
-def reading_items(st: dict, lang: str = "en") -> list[tuple[str, str, str]]:
-    """The status strip's second line: ``(key, English label, value text)`` for every reading of
-    ``status()``, in the order an operator reads them."""
+def reading_items(st: dict, lang: str = "en") -> list[tuple[str, str]]:
+    """The status strip's second line: ``(label key, value text)`` for every reading of ``status()``, in
+    the order an operator reads them."""
     return [
-        ("bias", "Bias", volts(st["bias_v"])),
-        ("setpoint", "Setpoint", picoamps(st["setpoint_pa"])),
-        ("feedback", "Z feedback", on_off(st["feedback"], lang)),
-        ("current", "Current", picoamps(st["current_pa"])),
-        ("z", "Z", nanometres(st["z_nm"])),
-        ("range", "Range", f"{num(st['current_full_scale_na'], 4)} nA"),
-        ("tip", "Tip x, y", position(st["tip_nm"])),
-        ("withdrawn", "Withdrawn", yes_no(st["withdrawn"], lang)),
-        ("lockin", "Lock-in", on_off(st["lockin"], lang)),
-        ("oscillation", "Oscillation", on_off(st.get("oscillating"), lang)),
+        ("bias", volts(st["bias_v"])),
+        ("setpoint", picoamps(st["setpoint_pa"])),
+        ("feedback", on_off(st["feedback"], lang)),
+        ("current", picoamps(st["current_pa"])),
+        ("z", nanometres(st["z_nm"])),
+        ("range", f"{num(st['current_full_scale_na'], 4)} nA"),
+        ("tip", position(st["tip_nm"])),
+        ("withdrawn", yes_no(st["withdrawn"], lang)),
+        ("lockin", on_off(st["lockin"], lang)),
+        ("oscillation", on_off(st.get("oscillating"), lang)),
     ]
 
 

@@ -47,14 +47,14 @@ def ensure_fonts() -> None:
     already knows families (the Linux desktop)."""
     if QFontDatabase.families():
         return
+    wanted = {n.lower() for n in _FALLBACK_FILES}
     for folder in QStandardPaths.standardLocations(QStandardPaths.StandardLocation.FontsLocation):
-        try:
-            present = {n.lower(): n for n in os.listdir(folder)}
-        except OSError:
-            continue
-        for want in _FALLBACK_FILES:
-            if want.lower() in present:
-                QFontDatabase.addApplicationFont(os.path.join(folder, present[want.lower()]))
+        for root, dirs, files in os.walk(folder):
+            if root[len(folder):].count(os.sep) >= 3:            # /usr/share/fonts/truetype/dejavu, no deeper
+                dirs.clear()
+            for name in files:
+                if name.lower() in wanted:
+                    QFontDatabase.addApplicationFont(os.path.join(root, name))
 
 
 def _first_family(candidates: list[str], default: str) -> str:

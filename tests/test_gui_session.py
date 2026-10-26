@@ -229,7 +229,7 @@ def test_readings_are_written_in_readable_units():
     st = {"bias_v": 0.05, "setpoint_pa": 200.0, "feedback": True, "current_pa": 198.31, "z_nm": -1.2345,
           "current_full_scale_na": 10.0, "tip_nm": [1.0, -2.5], "withdrawn": False, "lockin": False,
           "oscillating": None}
-    texts = {k: v for k, _, v in fmt.reading_items(st)}
+    texts = dict(fmt.reading_items(st))
     assert texts == {"bias": "50.0 mV", "setpoint": "200 pA", "feedback": "ON", "current": "198.3 pA",
                      "z": "-1.234 nm", "range": "10 nA", "tip": "(1.000, -2.500) nm", "withdrawn": "no",
                      "lockin": "OFF", "oscillation": "-"}
