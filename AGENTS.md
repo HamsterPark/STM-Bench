@@ -80,6 +80,12 @@ Other useful boundaries:
   [test_gui_widgets.py](tests/test_gui_widgets.py)). [session.py](stmbench/gui/session.py) is its one door to the
   instrument and the export; it must never reach the truth, the verdict or the seed (a source scan
   enforces it), and in the sealed mode the seed appears in no widget, file or message.
+- [stmbench/instrument/export.py](stmbench/instrument/export.py) writes, while an episode happens, the
+  export directory that leaves an agent's machine (records and measurement hashes; no seed, truth or
+  verdict), and [grade.py](stmbench/instrument/grade.py) grades it elsewhere by replaying it with the
+  seed only the grader holds (`stmbench.cli grade`; tests in [test_export.py](tests/test_export.py)
+  and [test_grade.py](tests/test_grade.py)). [deploy/osworld/](deploy/osworld/) holds the
+  OSWorld-Science host-side adapter and grader image; neither has run inside that harness yet.
 - [stmbench/agent/](stmbench/agent/) seats a language model at the instrument with its MCP tools
   and nothing else (`stmbench.cli agent`; tests in [test_agent.py](tests/test_agent.py)).
 - [stmbench/reference/](stmbench/reference/) holds the privileged reference solutions and
@@ -248,8 +254,10 @@ These apply across the simulator, the instrument, the judge and the presentation
 1. Add a YAML under `stmbench/trackB/scenarios/` with `paper`, `initial`, `hidden`,
    `claims`, `budget` and `task`. Hidden ranges need physical justification; each claim
    needs its kind, truth reference, acceptance threshold or tolerance, acquisition-evidence
-   rule and a `say` line (its meaning, for the rule card). Require a report where the claim
-   kind calls for one. Mark `knowledge: allowed` only on a material constant.
+   rule and a `say` line (its meaning, for the rule card) with its English `say_en`; the task
+   needs a `task_en` beside `task` (`task_text(sc, "en")` refuses a paper scenario without them,
+   and `tests/test_rule_card_en.py` checks that both cards state the same numbers). Require a
+   report where the claim kind calls for one. Mark `knowledge: allowed` only on a material constant.
    Run `python -m stmbench.cli audit chance --scenario <id>` and record the per-claim and
    joint chance in the scenario notes.
 2. Implement the required physics and expose the truth through `World.truth()` or an

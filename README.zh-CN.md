@@ -181,6 +181,12 @@ python -m stmbench.cli agent --scenario P4_atom_positioning_cu111 --seed 0 --out
 python -m stmbench.cli console --scenario P4_atom_positioning_cu111 --seed 0 --out runs/console_p4
 ```
 
+只看截图、只用鼠标键盘操作的智能体，用的是同一台仪器的桌面窗口版 `stmbench gui`（`pip install -e ".[gui]"`）。它不开任何网络端口，屏幕是唯一入口。密封模式从标准输入读种子，在任何地方都不显示；边做边写的导出目录让判分方在别处重放并判分（`stmbench grade`）：
+
+```bash
+python -m stmbench.cli gui --scenario P4_atom_positioning_cu111 --seed 0 --out runs/gui_p4 --lang en
+```
+
 [仪器使用指南](docs/USAGE.md#the-benchmark-instrument)还介绍了如何通过 `Instrument` 直接调用 Python 接口，以及可用动作、观测格式与回合文件。
 
 ### 可选的控制器接口

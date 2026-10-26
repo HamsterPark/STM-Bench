@@ -183,6 +183,12 @@ For a person, or an agent that works through a screen, `stmbench console` serves
 python -m stmbench.cli console --scenario P4_atom_positioning_cu111 --seed 0 --out runs/console_p4
 ```
 
+An agent that sees only screenshots and acts only with mouse and keyboard gets the same instrument in a native window instead, `stmbench gui` (`pip install -e ".[gui]"`). It opens no network port, so the screen is the only way in. A sealed mode takes the seed on standard input and shows it nowhere, and an export directory written while the episode happens lets a grader elsewhere replay and judge it (`stmbench grade`):
+
+```bash
+python -m stmbench.cli gui --scenario P4_atom_positioning_cu111 --seed 0 --out runs/gui_p4 --lang en
+```
+
 The [instrument guide](docs/USAGE.md#the-benchmark-instrument) also documents direct Python use through `Instrument`, the available actions, observation formats, and episode files.
 
 ### Optional controller interface
