@@ -46,7 +46,6 @@ S: dict[str, Pair] = {
     "lockin": ("Lock-in", "锁相"),
     "oscillation": ("Oscillation", "振荡"),
     "no_call": ("No call yet.", "还没有操作。"),
-    "refused": ("refused", "被拒绝"),
     "stays_open": ("This program stays open; it is closed from outside.", "此程序保持打开，由外部关闭。"),
     # tabs
     "tab_task": ("Task", "任务"),
@@ -77,17 +76,6 @@ S: dict[str, Pair] = {
     # data
     "frames": ("Frames", "帧"),
     "spectra": ("Spectra", "谱"),
-    "col_name": ("name", "名称"),
-    "col_start": ("start", "开始"),
-    "col_size": ("size nm", "边长 nm"),
-    "col_pixels": ("px", "像素"),
-    "col_centre": ("centre nm", "中心 nm"),
-    "col_angle": ("angle", "角度"),
-    "col_channels": ("channels", "通道"),
-    "col_kind": ("kind", "类型"),
-    "col_tip": ("tip x, y nm", "针尖 x, y nm"),
-    "col_points": ("points", "点数"),
-    "col_time": ("time", "时间"),
     # viewer
     "ch_z": ("Z", "Z"),
     "ch_current": ("Current", "电流"),
@@ -117,7 +105,6 @@ S: dict[str, Pair] = {
     "mk_none": ("No marker selected.", "没有选中的标记。"),
     "profile": ("Profile", "剖面"),
     "trace": ("Reply", "回复"),
-    "last_frames": ("Last frames", "最近的帧"),
     # log
     "log_empty": ("Nothing yet.", "还没有操作。"),
     "log_running": ("running", "运行中"),

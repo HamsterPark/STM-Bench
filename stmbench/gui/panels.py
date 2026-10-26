@@ -65,8 +65,8 @@ class ActionPanel(QScrollArea):
         body = QWidget()
         body.setObjectName("panel_body")
         lay = QVBoxLayout(body)
-        lay.setContentsMargins(style.px(4), style.px(4), style.px(4), style.px(4))
-        lay.setSpacing(style.px(4))
+        lay.setContentsMargins(style.px(3), style.px(3), style.px(3), style.px(3))
+        lay.setSpacing(style.px(3))
         for g in groups:
             lay.addWidget(self._group(g))
         lay.addStretch(1)
@@ -77,8 +77,8 @@ class ActionPanel(QScrollArea):
         box = QGroupBox(both(g.en, g.zh, self.lang))
         box.setObjectName(f"group.{g.key}")
         v = QVBoxLayout(box)
-        v.setContentsMargins(style.px(6), style.px(2), style.px(6), style.px(2))
-        v.setSpacing(style.px(4))
+        v.setContentsMargins(style.px(6), 0, style.px(6), style.px(1))
+        v.setSpacing(style.px(3))
         for line in g.lines:
             h = QHBoxLayout()
             h.setSpacing(style.px(8))
@@ -90,7 +90,7 @@ class ActionPanel(QScrollArea):
         reply = ElidedLabel()
         reply.setObjectName(f"reply.{g.key}")
         reply.setProperty("role", "label")
-        reply.setMinimumHeight(style.px(22))
+        reply.setMinimumHeight(style.px(20))
         self.reply_labels[g.key] = reply
         v.addWidget(reply)
         return box
@@ -124,7 +124,7 @@ class ActionPanel(QScrollArea):
         cell = QWidget()
         v = QVBoxLayout(cell)
         v.setContentsMargins(0, 0, 0, 0)
-        v.setSpacing(style.px(2))
+        v.setSpacing(style.px(1))
         v.addWidget(self._label(f"lbl.{c.action}.{c.param}", c.en, c.zh, c.unit, p.required))
         name = f"act.{c.action}.{c.param}"
         if p.kind == "boolean" or p.choices is not None:
@@ -166,7 +166,7 @@ class ActionPanel(QScrollArea):
         cell = QWidget()
         v = QVBoxLayout(cell)
         v.setContentsMargins(0, 0, 0, 0)
-        v.setSpacing(style.px(2))
+        v.setSpacing(style.px(1))
         v.addWidget(self._label(f"lbl.{c.action}.on", c.en, c.zh))
         seg = Segmented([(True, tr("on", self.lang), f"run.{c.action}.on"),
                          (False, tr("off", self.lang), f"run.{c.action}.off")], checkable=False)
@@ -184,7 +184,7 @@ class ActionPanel(QScrollArea):
         cell = QWidget()
         v = QVBoxLayout(cell)
         v.setContentsMargins(0, 0, 0, 0)
-        v.setSpacing(style.px(2))
+        v.setSpacing(style.px(1))
         v.addWidget(self._label(f"lbl.{c.action}.{c.param}", c.en, c.zh, c.unit))
         seg = Segmented([(ch, token(ch), f"run.{c.action}.{token(ch)}") for ch in p.choices], checkable=False)
         seg.setObjectName(f"act.{c.action}.{c.param}")

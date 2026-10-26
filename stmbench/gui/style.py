@@ -123,7 +123,7 @@ QLabel[role="pill"][tone="done"] {{ background: #d9f0df; color: {c['ok']}; }}
 QFrame#strip {{ background: {c['panel']}; border: 1px solid {c['line']}; border-radius: {px(8)}px; }}
 QFrame[role="panel"] {{ background: {c['panel']}; border: 1px solid {c['line']}; border-radius: {px(8)}px; }}
 QGroupBox {{ background: {c['panel']}; border: 1px solid {c['line_strong']}; border-radius: {px(8)}px;
-            margin-top: {px(12)}px; padding: {px(14)}px {px(2)}px {px(2)}px {px(2)}px; font-weight: bold; }}
+            margin-top: {px(11)}px; padding: {px(12)}px {px(2)}px {px(2)}px {px(2)}px; font-weight: bold; }}
 QGroupBox::title {{ subcontrol-origin: margin; subcontrol-position: top left; left: {px(12)}px; padding: 0 {px(6)}px; color: {c['accent_dark']}; }}
 QPushButton {{ background: {c['button']}; border: 1px solid {c['line_strong']}; border-radius: {px(6)}px;
               padding: 0 {px(12)}px; min-height: {px(32)}px; font-size: {px(17)}px; }}
