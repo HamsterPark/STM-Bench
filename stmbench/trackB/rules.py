@@ -98,7 +98,7 @@ def _tolerance(c: dict, sc, lang: str) -> str:
     if kind == "peak_in_list":
         rank, abs_tol = int(c.get("rank_max", 3)), tol.get("abs", 0)
         return _t(lang, f"与围栏中能量最低的 {rank} 个真实共振能级中的任一个相差不超过 {_num(abs_tol)} {unit}",
-                  f"the reported value differs by at most {_amount(abs_tol, unit)} from any one of the "
+                  f"the reported value differs by at most {_amount(abs_tol, unit)} from at least one of the "
                   f"{rank} lowest-energy true resonance levels of the corral")
     if kind == "position":
         ini = (sc.initial or {}).get("adatoms") or {}
@@ -109,10 +109,10 @@ def _tolerance(c: dict, sc, lang: str) -> str:
                  f"所报位置须在某个被你搬动过的原子 {report_nm} nm 以内（按 frame 指定的帧换算到样品上）；"
                  f"这个原子出生时 {isolation_nm} nm 内没有别的原子，"
                  f"并且现在正好占据'出生位置平移 {shift} nm 后最近的那个晶格位点'",
-                 f"the reported position must be within {report_nm} nm of an atom that you have moved "
-                 f"(converted to the sample using the frame named in the frame field); that atom initially "
-                 f"had no other atom within {isolation_nm} nm, and must now sit exactly on 'the lattice "
-                 f"site nearest to its initial position shifted by {shift} nm'")
+                 f"the reported position, converted to the sample using the frame named in the frame field, "
+                 f"must be within {report_nm} nm of an atom that you have moved; that atom originally had "
+                 f"no other atom within {isolation_nm} nm, and now sits exactly on 'the lattice site nearest "
+                 f"to the point obtained by shifting its original position by {shift} nm'")
         tie = float(tol.get("site_tie_nm", 0.0) or 0.0)
         if tie > 0:
             out += _t(lang, f"（若另有格点离那一点只比最近的远不到 {_num(tie)} nm，占据它也算）",
@@ -183,9 +183,9 @@ def _evidence(c: dict, lang: str) -> str:
             terms = _frame_terms(rule, lang)
             return _t(lang, f"（不需要引用）{since or '本局开始'}之后，本局至少新扫并保存过一张覆盖围栏中心的帧，"
                             f"须{terms}",
-                      f"(no citation needed) after {since or 'the start of the episode'}, this episode must "
-                      f"have scanned and saved at least one new frame covering the corral centre; that "
-                      f"frame must {terms}")
+                      f"(no citation needed) after {since or 'the start of the episode'}, this episode has "
+                      f"scanned and saved at least one new frame covering the corral centre; that frame "
+                      f"must {terms}")
         return f"{inside}{_frame_terms(rule, lang, since)}"
     if kind == "spectra_near_scatterer":
         n, positions = int(rule.get("min_n", 1)), int(rule.get("min_positions", 1))
@@ -198,10 +198,10 @@ def _evidence(c: dict, lang: str) -> str:
                   f"偏压范围覆盖 {v_lo} V 到 {v_hi} V，谱中途没有突变（针尖不稳造成的跳变）",
                   f"cite at least {_count(n, 'dI/dV spectrum', 'dI/dV spectra')} in the evidence field, "
                   f"spread over at least {_count(positions, 'different position', 'different positions')} "
-                  f"(positions are told apart on a 0.5 nm grid); each spectrum must be within {near} nm of "
-                  f"the nearest scatterer (step edge or adatom), have at least "
+                  f"(positions are distinguished on a 0.5 nm grid); each spectrum is within {near} nm of "
+                  f"the nearest scatterer (step edge or adatom), has at least "
                   f"{_count(points, 'point', 'points')} and a bias range covering {v_lo} V to {v_hi} V, and "
-                  f"show no sudden jump midway (a jump caused by an unstable tip)")
+                  f"shows no sudden jump along the way (a jump caused by an unstable tip)")
     if kind == "sts_at_corral_centre":
         n, points = int(rule.get("min_n", 1)), int(rule.get("min_points", 0))
         centre, v_lo, v_hi = _num(rule.get("max_centre_dist_nm", 1.0)), _num(rule.get("v_lo_max")), \
@@ -209,7 +209,7 @@ def _evidence(c: dict, lang: str) -> str:
         late = _t(lang, f"，并且在{since}之后采集" if after else "", f"acquired after {since}" if after else "")
         spectra = _and([f"taken within {centre} nm of the corral centre",
                         f"having at least {_count(points, 'point', 'points')}",
-                        f"covering a bias range of {v_lo} V to {v_hi} V", "showing no sudden jump midway"]
+                        f"covering a bias range of {v_lo} V to {v_hi} V", "showing no sudden jump along the way"]
                        + ([late] if after else []))
         return _t(lang,
                   f"evidence 中至少引用 {n} 条 dI/dV 谱：取谱处离围栏中心不超过 "
@@ -244,13 +244,13 @@ def _evidence(c: dict, lang: str) -> str:
                   f"{near} nm，图须{terms}",
                   f"cite at least {_count(n, 'constant-current scan map', 'constant-current scan maps')} in "
                   f"the evidence field, recorded with the lock-in (lockin) on (dI/dV maps), with at least "
-                  f"{_count(energies, 'different bias value', 'different bias values')} (told apart at "
-                  f"10 mV) covering {v_lo} V to {v_hi} V; the centre of each map must be within {near} nm of "
+                  f"{_count(energies, 'different bias value', 'different bias values')} (distinguished at "
+                  f"10 mV) covering {v_lo} V to {v_hi} V; the centre of each map is within {near} nm of "
                   f"the nearest scatterer (step edge or adatom), and the maps must {terms}")
     if kind == "any_of":
         alts = [_evidence({"evidence": r}, lang) for r in rule.get("rules") or []]
         return _t(lang, "以下任一组即可——" + "；或者，".join(f"（{chr(0x61 + i)}）{a}" for i, a in enumerate(alts)),
-                  "any one of the following sets will do — "
+                  "any one of the following alternatives will do — "
                   + "; or ".join(f"({chr(0x61 + i)}) {a}" for i, a in enumerate(alts)))
     if kind == "events":
         n = int(rule.get("min_n", 1))
@@ -337,8 +337,8 @@ def rule_card(sc, lang: str = "zh") -> str:
                  "frame 写明坐标取自哪一张帧，判分按这张帧逐行记录的漂移把坐标换算到样品上，你不需要自己修正漂移。"
                  "角度在同一坐标系里从 +x 轴逆时针量；图像数组的行号向下增大，在像素里量角度时要把符号取反。",
                  "Positions and angles: positions are in scan coordinates (nm), with x to the right and y "
-                 "upward, the same coordinates as the centre coordinates of the scan frame; for results that "
-                 "are positions you must also name in the frame field the frame the coordinates were read "
+                 "upward, the same coordinates as the centre coordinates of the scan window; for results that "
+                 "carry a position you must also name in the frame field the frame the coordinates were read "
                  "from, and scoring converts the coordinates to the sample using the drift recorded row by "
                  "row in that frame, so you do not need to correct the drift yourself. Angles are measured "
                  "in the same coordinate system, counter-clockwise from the +x axis; the row index of an "
@@ -353,8 +353,8 @@ def rule_card(sc, lang: str = "zh") -> str:
                  f"{percent}% 以上，本次复现不算成功。",
                  f"Instrument time: this task's budget is {_num(hours)} "
                  f"{'hour' if float(hours) == 1 else 'hours'} of instrument time (counted in simulated "
-                 f"time; the instrument is paused while the model thinks). If the use exceeds the budget by "
-                 f"more than {percent}%, this reproduction does not count as successful.")
+                 f"time; the instrument is paused while the model thinks). If the instrument time used "
+                 f"exceeds the budget by more than {percent}%, this reproduction does not count as successful.")
         if budget.get("wire_cmds"):
             commands = int(budget["wire_cmds"])
             txt += _t(lang, f"控制器命令上限 {commands} 条。",

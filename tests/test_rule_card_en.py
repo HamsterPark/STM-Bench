@@ -130,7 +130,9 @@ def test_the_english_card_states_the_budget_the_overrun_rule_uses(name):
     card = R.rule_card(sc, "en")
     hours = float(sc.budget["sim_hours"])
     assert f"budget is {_num(hours)} {'hour' if hours == 1 else 'hours'} of instrument time" in card
-    assert f"by more than {_num(round(100 * (R.OVERRUN_TOLERANCE - 1), 6))}%" in card
+    assert f"If the instrument time used exceeds the budget by more than " \
+           f"{_num(round(100 * (R.OVERRUN_TOLERANCE - 1), 6))}%, this reproduction does not count as " \
+           f"successful" in card
     assert f"command limit is {int(sc.budget['wire_cmds'])} commands" in card
     assert "paused while the model thinks" in card
 
@@ -166,9 +168,16 @@ def test_the_p4_verification_frame_is_on_the_english_card():
            f"not when it was saved" in card
     assert "the frame named in the frame field" in card
     assert f"by less than {_num(claim['tol']['site_tie_nm'])} nm" in card
-    assert "shifted by (4, 0) nm" in card and "no other atom within 3 nm" in card
+    assert "no other atom within 3 nm" in card
     assert "(no report needed)" in card and "(no citation needed)" in card
     assert "It concerns the atom that target_site was matched to" in card
+    # the shift applies to the position, and the site is the one nearest to the shifted point
+    assert "now sits exactly on 'the lattice site nearest to the point obtained by shifting its original " \
+           "position by (4, 0) nm'" in card
+    # the frame names the reported position's conversion, not the atom
+    assert "the reported position, converted to the sample using the frame named in the frame field, must " \
+           "be within 0.6 nm of an atom that you have moved" in card
+    assert "write the same x_nm in the value field" in card
 
 
 def test_the_english_card_explains_citations_and_coordinates():
@@ -177,6 +186,9 @@ def test_the_english_card_explains_citations_and_coordinates():
                    "ReportResult"):
         assert needle in card
     assert re.search(rf"\[Scoring rules v{R.RULES_VERSION}\]", card)
+    # every result that carries a position names its frame (P1's orientations are angles with a place)
+    assert "for results that carry a position you must also name in the frame field" in card
+    assert "the centre coordinates of the scan window" in card
 
 
 def test_the_english_card_keeps_the_pairwise_rules_and_the_either_arm_rule():
@@ -187,20 +199,28 @@ def test_the_english_card_keeps_the_pairwise_rules_and_the_either_arm_rule():
     p3 = R.rule_card(Scenario.load(SCEN / "P3_corral_cu111.yaml"), "en")
     assert "It must correspond to a different true level than peak_lo_mev" in p3
     assert "The value must be greater than peak_lo_mev" in p3
-    assert "3 lowest-energy true resonance levels" in p3
+    assert "from at least one of the 3 lowest-energy true resonance levels" in p3
 
 
 def test_the_english_card_offers_p2_either_route_to_its_evidence():
     card = R.rule_card(Scenario.load(SCEN / "P2_standing_waves_cu111.yaml"), "en")
-    assert card.count("any one of the following sets will do — (a) cite at least 8 dI/dV spectra") == 2
+    assert card.count("any one of the following alternatives will do — (a) cite at least 8 dI/dV spectra") == 2
     assert card.count("; or (b) cite at least 4 constant-current scan maps") == 2
     assert "recorded with the lock-in (lockin) on" in card
+    # the Chinese states what each spectrum and map is like without a modal ("须" only before the frame
+    # terms of the maps), and the judge counts the qualifying ones among those cited: no "must" is added
+    assert card.count("each spectrum is within 8 nm of the nearest scatterer (step edge or adatom), has at "
+                      "least 64 points and a bias range covering -0.5 V to 0.1 V") == 2
+    assert card.count("the centre of each map is within 10 nm of the nearest scatterer") == 2
+    assert "must be within 8 nm" not in card and "must be within 10 nm" not in card
+    assert card.count("and the maps must have been scanned in the tunnelling state") == 2
+    assert "(positions are distinguished on a 0.5 nm grid)" in card and "(distinguished at 10 mV)" in card
 
 
 def test_the_english_card_of_the_repair_asks_for_frame_and_spectra_after_the_last_hop():
     card = R.rule_card(Scenario.load(SCEN / "P3_corral_repair_cu111.yaml"), "en")
-    assert f"(no citation needed) after {_AFTER_HOP}, this episode must have scanned and saved at least one " \
-           f"new frame" in card
+    assert f"(no citation needed) after {_AFTER_HOP}, this episode has scanned and saved at least one " \
+           f"new frame covering the corral centre; that frame must have been scanned" in card
     assert card.count(f"and acquired after {_AFTER_HOP}") == 2
     assert "this quantity is at least 0.97" in card
 

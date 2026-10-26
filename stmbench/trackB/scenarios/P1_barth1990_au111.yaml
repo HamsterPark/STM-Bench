@@ -45,7 +45,7 @@ hidden:
 claims:
   - id: stripe_period_nm
     say: "重构条纹的周期：相邻两条亮条纹之间、垂直于条纹方向的距离（在锯齿的一条臂上量，即帧的傅里叶谱中条纹峰对应的周期）"
-    say_en: "Period of the reconstruction stripes: the distance between two adjacent bright stripes, perpendicular to the stripe direction (measured on one arm of the zigzag, i.e. the period belonging to the stripe peak in the frame's Fourier spectrum)"
+    say_en: "Period of the reconstruction stripes: the distance between two adjacent bright stripes, perpendicular to the stripe direction (measured on one arm of the zigzag, i.e. the period corresponding to the stripe peak in the frame's Fourier spectrum)"
     kind: scalar
     unit: nm
     # a material constant: knowing it is part of the skill, so the chance audit records how
