@@ -304,9 +304,9 @@ class FrameView(QWidget):
         self.update()
         self.markers_changed.emit(self.markers())
 
-    def select_marker(self, index: int) -> None:
-        """Highlight marker ``index`` (0-based); an index outside the list clears the selection."""
-        self._selected = index if 0 <= index < len(self._markers) else -1
+    def select_marker(self, index: int | None) -> None:
+        """Highlight marker ``index`` (0-based); None or an index outside the list clears the selection."""
+        self._selected = index if index is not None and 0 <= index < len(self._markers) else -1
         self.update()
 
     def selected_marker(self) -> dict | None:
@@ -408,7 +408,8 @@ class FrameView(QWidget):
     def _compute_layout(self) -> SimpleNamespace:
         W, H = max(1, self.width()), max(1, self.height())
         fpx = self._fpx()
-        regular, bold = self._fonts(fpx)
+        tpx = fpx + 2          # ticks, titles and labels are read off a screenshot that may be shrunk: above the base text
+        regular, bold = self._fonts(tpx)
         fm = QFontMetrics(regular)
         fh = fm.height()
         pad = max(6, fpx // 2)
@@ -426,10 +427,10 @@ class FrameView(QWidget):
         asp = sh.geom["w_nm"] / sh.geom["h_nm"]
         (x0, x1), (y0, y1), lay.x_title, lay.y_title = self._axis_spec()
         avail_h = max(32, H - top - bottom)
-        yt, ystep = nice_ticks(y0, y1, max(3, int(avail_h / (fpx * 3.2))))
+        yt, ystep = nice_ticks(y0, y1, max(3, int(avail_h / (tpx * 3.2))))
         yw = max((fm.horizontalAdvance(s) for s in format_ticks(yt, ystep)), default=0)
         left = pad + fh + gap + yw + gap + tick_len
-        lay.bar_w = max(14, int(fpx * 1.1))
+        lay.bar_w = max(14, int(tpx))
         bar_labels, _ = self._bar_ticks(fm, int(avail_h * 0.9))
         right = 12 + lay.bar_w + 6 + max(fm.horizontalAdvance(s) for _, s in bar_labels) + pad
         avail_w = max(32, W - left - right)
@@ -438,8 +439,8 @@ class FrameView(QWidget):
         x = (W - (left + w_px + right)) // 2 + left
         y = (H - (top + h_px + bottom)) // 2 + top
         lay.img = QRect(x, y, w_px, h_px)
-        xt, xstep = nice_ticks(x0, x1, max(3, int(w_px / (fpx * 4.0))))
-        yt, ystep = nice_ticks(y0, y1, max(3, int(h_px / (fpx * 3.2))))
+        xt, xstep = nice_ticks(x0, x1, max(3, int(w_px / (tpx * 4.0))))
+        yt, ystep = nice_ticks(y0, y1, max(3, int(h_px / (tpx * 3.2))))
         lay.x_ticks = [((t - x0) / (x1 - x0) * w_px, s) for t, s in zip(xt, format_ticks(xt, xstep))]
         lay.y_ticks = [((y1 - t) / (y1 - y0) * h_px, s) for t, s in zip(yt, format_ticks(yt, ystep))]
         bar_top = lay.img.top() + int(fh * 1.8)               # the unit sits in the row above the bar
@@ -524,8 +525,8 @@ class FrameView(QWidget):
             self._markers.append(m)
             self._selected = len(self._markers) - 1
             self.update()
-            self.marker_added.emit(dict(m))
-            self.markers_changed.emit(self.markers())
+            self.markers_changed.emit(self.markers())      # the list first, then the event: a slot of the
+            self.marker_added.emit(dict(m))                # latter finds the former already refreshed
         else:
             self._drag = (QPointF(ev.position()), QPointF(ev.position()))
             self.update()

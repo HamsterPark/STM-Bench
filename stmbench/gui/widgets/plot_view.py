@@ -156,9 +156,14 @@ class PlotView(QWidget):
             self.update()
 
     # ── painting ──
+    def _tpx(self) -> int:
+        """Pixel size of tick numbers, labels and legend: a little above the widget's base text,
+        which is itself never below :data:`MIN_FONT_PX`."""
+        return self._fpx() + 1
+
     def _fonts(self) -> tuple[QFont, QFont]:
         regular = QFont(self.font())
-        regular.setPixelSize(self._fpx())
+        regular.setPixelSize(self._tpx())
         regular.setBold(False)
         bold = QFont(regular)
         bold.setBold(True)
@@ -239,7 +244,7 @@ class PlotView(QWidget):
             p.end()
             return
         fm, bold_fm = QFontMetrics(regular), QFontMetrics(bold)
-        lay = self._layout(ext, fm, bold_fm, self._fpx())
+        lay = self._layout(ext, fm, bold_fm, self._tpx())
         plot = lay.plot
         p.setRenderHint(QPainter.RenderHint.Antialiasing, True)
         p.setFont(regular)

@@ -263,9 +263,9 @@ def test_the_centre_pixel_of_an_unrotated_frame_is_the_scan_offset_and_row_0_is_
 
 
 # ── the picture ────────────────────────────────────────────────────────────────────────────
-@pytest.mark.parametrize("channel", ["z", "current", "didv"])
-def test_line_mode_draws_exactly_display_array(app, channel):
-    n = 48
+@pytest.mark.parametrize("channel, n", [("z", 48), ("current", 48), ("didv", 48), ("z", 256)])
+def test_line_mode_draws_exactly_display_array(app, channel, n):
+    """At every pixel centre, also where the enlargement is not a whole number (256 px in ~680)."""
     z = bumpy(n)
     array = z if channel == "z" else 2e-10 + 1e-12 * np.cumsum(z - z.mean(), axis=1) / n
     view = make_view(app)
@@ -431,6 +431,9 @@ def test_marker_api(app):
     assert view.selected_marker()["col"] == 4 and len(changed.items) == n_changed        # selecting changes no list
     view.select_marker(7)
     assert view.selected_marker() is None
+    view.select_marker(2)
+    view.select_marker(None)
+    assert view.selected_marker() is None
     view.select_marker(1)
     copy = view.markers()
     copy[0]["x_nm"] = 1e9                                             # the caller's copy is its own
@@ -442,6 +445,18 @@ def test_marker_api(app):
     n_changed = len(changed.items)
     view.clear_markers()
     assert len(changed.items) == n_changed                             # nothing to clear: nothing emitted
+
+
+def test_the_marker_list_is_announced_before_the_marker_event(app):
+    """Both already hold the new marker (and its selection) by the time any slot runs."""
+    view = make_view(app)
+    view.set_frame(make_frame(bumpy(32)))
+    order: list = []
+    view.markers_changed.connect(lambda ms: order.append(("changed", len(ms), view.selected_marker()["col"])))
+    view.marker_added.connect(lambda m: order.append(("added", len(view.markers()), view.selected_marker()["col"])))
+    click(view, view.pixel_to_widget(6, 6))
+    click(view, view.pixel_to_widget(25, 25))
+    assert order == [("changed", 1, 6), ("added", 1, 6), ("changed", 2, 25), ("added", 2, 25)]
 
 
 def test_only_a_left_click_with_the_marker_tool_on_the_image_adds_a_marker(app):
