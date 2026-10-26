@@ -482,7 +482,8 @@ every frame's and spectrum's hashes, must equal the export's, and every file the
 have its hash line. Otherwise `replay.consistent` is false and, by default (strict), the score is
 0, the episode is no success, and the numbers that describe the replay are `null` (it was not the
 episode the agent saw); `--no-strict` keeps the replay's own score and still lists the
-differences. Hashes are bit-exact, so they agree only in the same numerical environment.
+differences. Hashes are bit-exact, so they agree only in the same numerical environment (the
+pinned versions in `deploy/osworld/grader/requirements.txt`).
 
 The result: `score` (0-1: the fraction of claims verified, capped when over budget; 1.0 reproduces
 the paper), `success`, `partial`, `claims_total`, `claims_verified`, `instrument_time_s`, `actions`,
@@ -491,6 +492,9 @@ the paper), `success`, `partial`, `claims_total`, `claims_verified`, `instrument
 per-claim detail. The exit status is 0 when graded and 2 when the directory is not a gradable
 export of this scenario (not an export, another scenario, or another rules, API or export
 version; the reason is on stderr): a wrong pairing is an error, never a score.
+
+`deploy/osworld/` holds the adapter OSWorld-Science's `module_metric` calls on the host, the
+grader's Docker image and the notes on wiring them up (`deploy/osworld/README.md`).
 
 ### Before adding a paper
 

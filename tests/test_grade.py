@@ -1,12 +1,16 @@
 """Grading an export (stmbench.instrument.grade). The host holds the scenario and the seed the
 machine of the episode never had: it replays the recorded calls on its own instrument and judges
 the replay, and the replay has to be the recorded episode (every reply, instrument time and
-hash), or the episode scores 0. Also the pieces around it: ``replay_records`` and the ``grade``
-command."""
+hash), or the episode scores 0. Also the pieces around it: ``replay_records``, the ``grade``
+command, the OSWorld-Science adapter and the files of the grader image."""
 from __future__ import annotations
 
+import ast
+import importlib.util
 import json
 import math
+import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -22,6 +26,7 @@ from stmbench.instrument.grade import _digest_mismatches, grade_export
 from stmbench.trackB.rules import RULES_VERSION
 
 ROOT = Path(__file__).resolve().parent.parent
+DEPLOY = ROOT / "deploy" / "osworld"
 P4 = "P4_atom_positioning_cu111"
 P5 = "P5_sader_jarvis_qplus"
 #: a seed whose digits cannot turn up in a result by chance
@@ -433,3 +438,123 @@ def test_no_strict_keeps_the_replays_score_and_the_difference(tmp_path, capsys):
     strict = json.loads(capsys.readouterr().out)
     assert strict["score"] == 0.0 and strict["partial"] is None and strict["replay"] == res["replay"]
     assert res["partial"] == 0.0 and res["actions"] == 1
+
+
+# ── the OSWorld-Science adapter ─────────────────────────────────────────────
+def _adapter():
+    spec = importlib.util.spec_from_file_location("stm_metric_under_test", DEPLOY / "stm_metric.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)                              # by path, as the harness loads it
+    return mod
+
+
+def _oracle(tmp_path: Path, **gt) -> dict:
+    d = tmp_path / "oracle"
+    d.mkdir(exist_ok=True)
+    (d / "gt.json").write_text(json.dumps({"scenario": P5, "seed": 0, "grader_image": "stmbench-grader:test", **gt}),
+                               encoding="utf-8")
+    return {"type": "rule", "rules": {"oracle_dir": str(d)}}
+
+
+def test_the_adapter_returns_the_score_of_the_grade_command(p5, graded, tmp_path, monkeypatch):
+    mod = _adapter()
+    monkeypatch.chdir(ROOT)                                   # the command imports the worktree's package
+    monkeypatch.setenv(mod.CMD_ENV, f"{shlex.quote(Path(sys.executable).as_posix())} -m stmbench.cli")
+    got = mod.grade_episode(str(p5[0] / "actions.jsonl"), _oracle(tmp_path))
+    assert got == (graded["score"], graded["note"]) and got[0] == 1.0
+    # a failed grade is a score with its reason, never an exception
+    score, note = mod.grade_episode(str(p5[0] / "actions.jsonl"), _oracle(tmp_path, scenario=P4))
+    assert score == 0.0 and note.startswith("grader failed: exit 2: grade: the export is of scenario")
+    no_gt = {"type": "rule", "rules": {"oracle_dir": str(tmp_path)}}                # no gt.json in there
+    score, note = mod.grade_episode(str(p5[0] / "actions.jsonl"), no_gt)
+    assert score == 0.0 and note.startswith("grader failed: ") and "gt.json" in note
+    monkeypatch.setenv(mod.CMD_ENV, "stmbench-no-such-program")
+    assert mod.grade_episode(str(p5[0] / "actions.jsonl"), _oracle(tmp_path))[0] == 0.0
+
+
+def test_the_adapter_runs_the_grader_image_without_network_on_a_read_only_export(tmp_path, monkeypatch):
+    mod = _adapter()
+    monkeypatch.delenv(mod.CMD_ENV, raising=False)
+    export = tmp_path / "export"
+    export.mkdir()
+    (export / "actions.jsonl").write_text("", encoding="utf-8")
+    calls = []
+
+    def fake_run(cmd, **kw):
+        calls.append((cmd, kw))
+        return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps({"score": 0.5, "note": "half"}), stderr="")
+    monkeypatch.setattr(mod.subprocess, "run", fake_run)
+    assert mod.grade_episode(str(export / "actions.jsonl"), _oracle(tmp_path, seed=7)) == (0.5, "half")
+    cmd, kw = calls[0]
+    name = cmd[cmd.index("--name") + 1]
+    assert cmd == ["docker", "run", "--rm", "--name", name, "--network", "none",
+                   "-v", f"{export.resolve()}:/export:ro", "stmbench-grader:test",
+                   "grade", "/export", "--scenario", P5, "--seed", "7"]
+    assert kw["timeout"] == 30 * 60
+
+    def out_of_range(cmd, **kw):
+        return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps({"score": 2.0, "note": "x"}), stderr="")
+    monkeypatch.setattr(mod.subprocess, "run", out_of_range)
+    assert mod.grade_episode(str(export / "actions.jsonl"), _oracle(tmp_path))[1].startswith("grader failed: ")
+    for stdout in ("", "not json", '{"note": "no score"}'):
+        monkeypatch.setattr(mod.subprocess, "run",
+                            lambda cmd, _out=stdout, **kw: subprocess.CompletedProcess(cmd, 0, _out, ""))
+        assert mod.grade_episode(str(export / "actions.jsonl"), _oracle(tmp_path))[0] == 0.0
+
+    def failing(cmd, **kw):
+        return subprocess.CompletedProcess(cmd, 125, stdout="", stderr="docker: Unable to find image\nsecond line")
+    monkeypatch.setattr(mod.subprocess, "run", failing)
+    assert mod.grade_episode(str(export / "actions.jsonl"), _oracle(tmp_path)) == \
+        (0.0, "grader failed: exit 125: second line")
+
+
+def test_a_grader_that_times_out_is_a_zero_and_its_container_is_killed(tmp_path, monkeypatch):
+    mod = _adapter()
+    monkeypatch.delenv(mod.CMD_ENV, raising=False)
+    (tmp_path / "actions.jsonl").write_text("", encoding="utf-8")
+    calls = []
+
+    def hung(cmd, **kw):
+        calls.append(cmd)
+        if cmd[1] == "run":
+            raise subprocess.TimeoutExpired(cmd, kw["timeout"])
+        return subprocess.CompletedProcess(cmd, 0, "", "")
+    monkeypatch.setattr(mod.subprocess, "run", hung)
+    assert mod.grade_episode(str(tmp_path / "actions.jsonl"), _oracle(tmp_path)) == \
+        (0.0, "grader failed: no result within 30 min")
+    assert calls[1] == ["docker", "kill", calls[0][calls[0].index("--name") + 1]]
+
+
+def test_the_adapter_is_standard_library_only_and_python_3_11_syntax():
+    src = (DEPLOY / "stm_metric.py").read_text(encoding="utf-8")
+    tree = ast.parse(src, feature_version=(3, 11))
+    names = {a.name.split(".")[0] for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names}
+    names |= {n.module.split(".")[0] for n in ast.walk(tree) if isinstance(n, ast.ImportFrom) and n.module}
+    assert names <= set(sys.stdlib_module_names) and "stmbench" not in names
+
+
+# ── the grader image ────────────────────────────────────────────────────────
+def test_the_grader_image_copies_what_exists_and_pins_what_the_replay_needs():
+    """The image is not built in the suite (it needs Docker): what can be checked is that its
+    inputs exist, are not ignored by the build context, and pin the numerics."""
+    docker = (DEPLOY / "grader" / "Dockerfile").read_text(encoding="utf-8")
+    ignore = [ln.strip() for ln in (ROOT / ".dockerignore").read_text(encoding="utf-8").splitlines()
+              if ln.strip() and not ln.startswith("#")]
+    sources = []
+    for ln in docker.splitlines():
+        if ln.startswith("COPY "):
+            *srcs, _dest = ln.split()[1:]
+            sources += srcs
+    assert {"pyproject.toml", "README.md", "LICENSE", "THIRD_PARTY_NOTICES.md", "stmsim", "stmbench",
+            "deploy/osworld/grader/requirements.txt"} <= set(sources)
+    for s in sources:
+        assert (ROOT / s).exists(), s
+        assert s not in ignore and not any(s.startswith(p.rstrip("/") + "/") for p in ignore if "*" not in p), s
+    for must in ("output", ".venv*", "runs", ".git"):
+        assert must in ignore, must
+    pins = dict(re.findall(r"^([A-Za-z0-9_.-]+)==([0-9][0-9A-Za-z.]*)\s*$",
+                           (DEPLOY / "grader" / "requirements.txt").read_text(encoding="utf-8"), re.M))
+    assert set(pins) == {"numpy", "scipy", "PyYAML"}
+    assert 'ENTRYPOINT ["python", "-m", "stmbench.cli"]' in docker and "FROM ${PYTHON_IMAGE}" in docker
+    assert "ARG PYTHON_IMAGE=python:3.13-slim" in docker and "pip install --no-deps ." in docker
+    assert re.search(r"^USER (?!root)\S+", docker, re.M)
