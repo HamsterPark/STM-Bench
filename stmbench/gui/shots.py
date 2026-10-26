@@ -259,7 +259,7 @@ def render_states(out: Path, lang: str = "zh", scale: float = 1.0, scenario: str
     snap(f"l_zoomed_{lang}")
 
     # (m) the same view, dragged with the Pan tool
-    click(win, widget(win, "view.tool.hand"))
+    click(win, widget(win, "view.tool.pan"))
     drag(win, fv, fv.rect().center() + QPoint(60, 40), fv.rect().center() - QPoint(40, 20))
     snap(f"m_panned_{lang}")
     win.shutdown(finish=False)

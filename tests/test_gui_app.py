@@ -690,7 +690,7 @@ def test_the_viewer_toolbar_has_a_contrast_switch_that_starts_on_auto_and_holds_
     assert caption == ("full" if lang == "en" else "全幅")                        # the viewer's toolbar names its buttons in one language
     assert shots.widget(win, "view.contrast.visible").text() == ("visible" if lang == "en" else "可见区")
     for key in ("view.contrast.auto", "view.contrast.full", "view.contrast.visible", "view.channel.z", "view.flatten.line",
-                "view.tool.marker", "view.tool.hand", "view.zoom.1", "view.zoom.8"):
+                "view.tool.marker", "view.tool.pan", "view.zoom.1", "view.zoom.8"):
         assert shots.widget(win, key).width() >= 56
 
 
@@ -746,7 +746,7 @@ def test_the_zoom_buttons_the_wheel_and_the_pan_tool_move_the_view_and_a_new_fra
     assert m["x_nm"] == pytest.approx(x, abs=1e-6) and m["y_nm"] == pytest.approx(y, abs=1e-6)
     assert shots.widget(win, "markers.table").item(0, 1).text() == f"{x:.3f}"
     # the Pan tool carries the image; the marker tool is the one that places markers
-    run_button(win, "view.tool.hand")
+    run_button(win, "view.tool.pan")
     c0, r0, _, _ = fv.view_rect()
     shots.drag(win, fv, QPoint(r.x() + 200, r.y() + 200), QPoint(r.x() + 140, r.y() + 170))
     c1, r1, _, _ = fv.view_rect()

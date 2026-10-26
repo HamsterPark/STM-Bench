@@ -16,7 +16,7 @@ on every frame whose footprint holds them, so a marker placed in one frame shows
 scan coordinates lie in the next.
 
 Zoom. The wheel (without Ctrl) steps the view through x1, x2, x4 and x8 about the pointer, ``set_zoom`` and
-``fit`` do the same from a control, and with the ``"hand"`` tool a drag moves the zoomed image. The axes, the
+``fit`` do the same from a control, and with the ``"pan"`` tool a drag moves the zoomed image. The axes, the
 cursor, the markers and the profile use the same pixel / scan mapping at every zoom (the view is a window
 of the frame in pixel edges, ``view_rect``), the grey scale and the colour bar do not change with it unless the
 contrast is ``"visible"``, and a new frame is shown whole. Nothing is found, fitted or snapped to a peak.
@@ -45,7 +45,7 @@ FLATTEN_MODES = ("line", "plane", "none")
 #: the frame's own minimum to maximum, so that the top of an atom is not saturated white, ``visible`` the minimum to
 #: maximum of the part of the frame in view (a step far outside a zoomed view no longer flattens what is in it)
 CONTRAST_MODES = ("auto", "full", "visible")
-TOOLS = ("marker", "profile", "hand", "none")
+TOOLS = ("marker", "profile", "pan", "none")
 #: the zoom levels, steps of the wheel: the whole frame, then a half, a quarter, an eighth of its width
 ZOOM_LEVELS = (1, 2, 4, 8)
 
@@ -267,7 +267,7 @@ class FrameView(QWidget):
         self._tool = "marker"
         self._zoom = 1
         self._c0 = self._r0 = 0.0                    # the view's top-left corner, in pixel edges of the frame
-        self._pan_last: QPointF | None = None        # where the pointer was at the last move of a hand drag
+        self._pan_last: QPointF | None = None        # where the pointer was at the last move of a pan drag
         self._markers: list[dict] = []
         self._selected = -1
         self._profile: dict | None = None            # its ends in scan nm, and the frame it was drawn on
@@ -430,7 +430,7 @@ class FrameView(QWidget):
         self._tool = tool
         self._drag = None
         self._pan_last = None
-        self.setCursor({"none": Qt.CursorShape.ArrowCursor, "hand": Qt.CursorShape.OpenHandCursor}.get(
+        self.setCursor({"none": Qt.CursorShape.ArrowCursor, "pan": Qt.CursorShape.OpenHandCursor}.get(
             tool, Qt.CursorShape.CrossCursor))
         self.update()
 
@@ -660,7 +660,7 @@ class FrameView(QWidget):
     # ── mouse ──
     def mouseMoveEvent(self, ev) -> None:
         pos = ev.position()
-        if self._pan_last is not None:                       # the hand carries the image with the pointer
+        if self._pan_last is not None:                       # a pan drag carries the image with the pointer
             self.pan_by(pos.x() - self._pan_last.x(), pos.y() - self._pan_last.y())
             self._pan_last = QPointF(pos)
         if self._drag is not None:
@@ -692,7 +692,7 @@ class FrameView(QWidget):
         if p is None:
             ev.accept()
             return
-        if self._tool == "hand":
+        if self._tool == "pan":
             self._pan_last = QPointF(ev.position())
             self.setCursor(Qt.CursorShape.ClosedHandCursor)
             ev.accept()

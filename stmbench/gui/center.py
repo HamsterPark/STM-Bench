@@ -238,7 +238,7 @@ class CenterColumn(QWidget):
                                    "forward")
         self.flatten = self._seg([("line", "flat_line"), ("plane", "flat_plane"), ("none", "flat_none")],
                                  "view.flatten", "line")
-        self.tool = self._seg([("marker", "tool_marker"), ("profile", "tool_profile"), ("hand", "tool_pan")],
+        self.tool = self._seg([("marker", "tool_marker"), ("profile", "tool_profile"), ("pan", "tool_pan")],
                               "view.tool", "marker")
         self.contrast = self._seg([("auto", "contrast_auto"), ("full", "contrast_full"), ("visible", "contrast_visible")],
                                   "view.contrast", "auto")
