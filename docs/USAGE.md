@@ -215,7 +215,8 @@ the fields named as `ReportResult` and the rule card name them - value, x_nm, y_
 sigma, note - and Finish with an inline two-click confirmation), Data and Log; in the middle the viewer (a frame with nm
 axes, a colour bar, a cursor readout, flatten modes, numbered markers with their coordinates and the
 distance to the previous one, a line profile, the last frames as thumbnails; or a spectrum with chosen
-columns); on the right the Operate tab (every action a P4 episode uses, without scrolling at 1920x1053)
+columns; over a spectrum or a line profile a cursor reads out the data point nearest the pointer, its x
+and each curve's y, and a left click pins it); on the right the Operate tab (every action a P4 episode uses, without scrolling at 1920x1053)
 and the Spectroscopy tab. A click queues its job at once with the field values read at that moment and
 buttons stay enabled while the instrument works, because one agent step often clicks several in a row;
 jobs run in click order on one worker thread. An empty field sends nothing (the instrument's default
