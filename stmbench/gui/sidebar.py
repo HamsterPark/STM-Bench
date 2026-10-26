@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QFrame, QGridLay
 
 from . import fmt, style
 from .controls import QuietBrowser, QuietText, SelectAllLineEdit, Tabs, polish, strong
-from .labels import S, tr, two_lines
+from .labels import S, one, tr, two_lines
 
 
 _CHANNEL = {"z": "Z", "current": "I", "didv": "dI/dV"}
@@ -57,6 +57,7 @@ class ReportTab(QWidget):
 
     submitted = Signal(dict)
     finish_requested = Signal()
+    notice = Signal(str)                                   # something the form wants said among the recent results
 
     def __init__(self, claims: list[dict], lang: str, parent: QWidget | None = None):
         super().__init__(parent)
@@ -117,8 +118,9 @@ class ReportTab(QWidget):
             line.addWidget(beside)
             grid.addLayout(line, row * 2 + 1, col, 1, span)
 
-        # the button that appends the viewed item's name sits at the end of the evidence field's line
-        self.viewed_button = QPushButton("+ " + tr("rep_viewed", lang))
+        # the button that appends the name of the file the viewer shows sits at the end of the evidence field's line;
+        # its label says what it adds ("+ shown file"), and it is in one language: the line is not wide
+        self.viewed_button = QPushButton("+ " + one("rep_viewed", lang))
         self.viewed_button.setObjectName("report.viewed")
         self.viewed_button.clicked.connect(self._append_viewed)
         field("value", 0, 0)
@@ -214,7 +216,8 @@ class ReportTab(QWidget):
         self._viewed = name
 
     def _append_viewed(self) -> None:
-        if not self._viewed:
+        if not self._viewed:                               # nothing in the viewer: say so rather than do nothing
+            self.notice.emit(tr("rep_nothing_shown", self.lang))
             return
         have = [t.strip() for t in self.fields["evidence"].text().replace("，", ",").split(",") if t.strip()]
         if self._viewed not in have:

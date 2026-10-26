@@ -219,7 +219,9 @@ bias and current ranges, the budget, the temperature, the material and a qPlus s
 the manual), Report (one radio button per reportable claim, titled "Report a result (ReportResult)", with
 the fields named as `ReportResult` and the rule card name them - value, x_nm, y_nm, frame, evidence, unit,
 sigma, note, the ones the picked claim needs starred as in the action panels, Enter in a field sending the
-report - and Finish with an inline two-click confirmation), Data and Log; in the middle the viewer (a frame with nm
+report, and a "+ shown file" button that appends the name of the frame or spectrum the viewer shows to
+`evidence` (or says in the recent results that none is shown) - and Finish with an inline two-click
+confirmation), Data and Log; in the middle the viewer (a frame with nm
 axes, a colour bar, a cursor readout, flatten modes, a contrast switch (auto: the 0.5-99.5 percentile
 scale of the image an MCP agent gets, the default; full: the frame's minimum to maximum, which keeps the
 top of an atom from saturating; the readings are the same), numbered markers (six rows before the table

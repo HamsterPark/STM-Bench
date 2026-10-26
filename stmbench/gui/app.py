@@ -105,6 +105,7 @@ class MainWindow(QMainWindow):
         # the reader's gestures
         self.sidebar.report.submitted.connect(self._report)
         self.sidebar.report.finish_requested.connect(self._finish)
+        self.sidebar.report.notice.connect(lambda text: self.recent.push("note", text))
         self.sidebar.data.frame_clicked.connect(self._pick_frame)
         self.sidebar.data.spectrum_clicked.connect(self.request_spectrum)
         self.center.thumb_clicked.connect(self._pick_frame)

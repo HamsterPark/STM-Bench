@@ -432,6 +432,40 @@ def test_a_picked_claim_stays_picked_when_it_is_clicked_again_with_one_claim_or_
     assert rep.claim_id() == ids[3]
 
 
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_shown_file_button_adds_the_name_of_what_the_viewer_shows_or_says_there_is_none(open_window, lang):
+    win = open_window(lang)
+    open_left(win, "report")
+    rep = win.sidebar.report
+    button = shots.widget(win, "report.viewed")
+    assert button.text() == ("+ shown file" if lang == "en" else "+ 显示中的文件")
+    evidence = rep.fields["evidence"]
+    run_button(win, "report.viewed")                                      # nothing shown yet
+    assert evidence.text() == ""
+    tone, text = win.recent.entries()[0]
+    assert tone == "note" and "no frame or spectrum is shown" in text
+    first = scan_small(win)
+    open_left(win, "report")
+    run_button(win, "report.viewed")
+    assert evidence.text() == first
+    run_button(win, "report.viewed")                                      # again: the name is not added twice
+    assert evidence.text() == first
+    open_right(win, "spectroscopy")
+    shots.fill(win, {"act.sts.v_start": "-0.2", "act.sts.v_end": "0.2", "act.sts.points": "16"})
+    run_button(win, "run.sts")
+    shots.settle(win)
+    spectrum = win.viewed[1]
+    assert win.viewed[0] == "spectrum" and spectrum.endswith(".dat")
+    open_left(win, "report")
+    run_button(win, "report.viewed")                                      # the file in the viewer now is the spectrum
+    assert evidence.text() == f"{first}, {spectrum}"
+    win.request_frame(first)                                              # back to the frame, by the thumbnail's way
+    shots.settle(win)
+    evidence.setText("")
+    run_button(win, "report.viewed")
+    assert evidence.text() == first
+
+
 def test_the_report_form_marks_what_the_picked_claim_needs_and_enter_sends_it(open_window, tmp_path):
     win = open_window("en", scenario="P1_barth1990_au111")
     open_left(win, "report")
