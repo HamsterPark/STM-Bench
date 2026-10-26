@@ -94,8 +94,10 @@ def test_every_claim_id_and_field_name_is_carried_over_verbatim(name):
         assert en.count(cid) == zh.count(cid) > 0, (name, cid)
         assert en.index(cid) > last, f"{name}: {cid} is out of order"
         last = en.index(cid)
-    assert _identifiers(en) == _identifiers(zh), (name, _identifiers(zh) - _identifiers(en),
-                                                  _identifiers(en) - _identifiers(zh))
+    # the English names the report's two position fields where the Chinese says "位置类结果"
+    both_fields = Counter({"x_nm": 1, "y_nm": 1})
+    assert _identifiers(en) == _identifiers(zh) + both_fields, (name, _identifiers(zh) - _identifiers(en),
+                                                                _identifiers(en) - _identifiers(zh))
     for token in _VERBATIM:
         if token in zh:
             assert token in en, (name, token)
@@ -168,12 +170,15 @@ def test_the_p4_verification_frame_is_on_the_english_card():
            f"not when it was saved" in card
     assert "the frame named in the frame field" in card
     assert f"by less than {_num(claim['tol']['site_tie_nm'])} nm" in card
-    assert "no other atom within 3 nm" in card
     assert "(no report needed)" in card and "(no citation needed)" in card
     assert "It concerns the atom that target_site was matched to" in card
-    # the shift applies to the position, and the site is the one nearest to the shifted point
-    assert "now sits exactly on 'the lattice site nearest to the point obtained by shifting its original " \
-           "position by (4, 0) nm'" in card
+    # 出生 is the position at the start of the episode, not "initial" (which can mean before the last move);
+    # the shift applies to that position first, and the site is the one nearest to the shifted point
+    assert "at the start of the episode that atom had no other atom within 3 nm" in card
+    assert "it now sits exactly on 'the lattice site nearest to the point obtained by shifting its position " \
+           "at the start of the episode by (4, 0) nm'" in card
+    assert "within 10 nm of the position the moved atom had when the episode began, or of its target " \
+           "position" in card
     # the frame names the reported position's conversion, not the atom
     assert "the reported position, converted to the sample using the frame named in the frame field, must " \
            "be within 0.6 nm of an atom that you have moved" in card
@@ -187,19 +192,24 @@ def test_the_english_card_explains_citations_and_coordinates():
         assert needle in card
     assert re.search(rf"\[Scoring rules v{R.RULES_VERSION}\]", card)
     # every result that carries a position names its frame (P1's orientations are angles with a place)
-    assert "for results that carry a position you must also name in the frame field" in card
+    assert "for results that carry a position (x_nm, y_nm) you must also name in the frame field" in card
     assert "the centre coordinates of the scan window" in card
 
 
 def test_the_english_card_keeps_the_pairwise_rules_and_the_either_arm_rule():
     p1 = R.rule_card(Scenario.load(SCEN / "P1_barth1990_au111.yaml"), "en")
     assert "must differ by at least 30°" in p1 and "do not count as two domains" in p1
-    assert p1.count("the direction of either of the two arms, or the mean direction of the two arms") == 3
+    # what counts as the true direction, not one more condition on the reported value
+    assert p1.count("the herringbone stripes are zigzag-shaped, so the direction of either of the two arms, "
+                    "or the mean direction of the two arms, is accepted as the true direction") == 3
     assert "angles are taken modulo 180°" in p1
     p3 = R.rule_card(Scenario.load(SCEN / "P3_corral_cu111.yaml"), "en")
     assert "It must correspond to a different true level than peak_lo_mev" in p3
     assert "The value must be greater than peak_lo_mev" in p3
     assert "from at least one of the 3 lowest-energy true resonance levels" in p3
+    assert p3.count("showing no sudden jump along the sweep") == 2
+    p5 = R.rule_card(Scenario.load(SCEN / "P5_sader_jarvis_qplus.yaml"), "en")
+    assert p5.count("with no jump and no contact along the sweep") == 3
 
 
 def test_the_english_card_offers_p2_either_route_to_its_evidence():
@@ -214,7 +224,8 @@ def test_the_english_card_offers_p2_either_route_to_its_evidence():
     assert card.count("the centre of each map is within 10 nm of the nearest scatterer") == 2
     assert "must be within 8 nm" not in card and "must be within 10 nm" not in card
     assert card.count("and the maps must have been scanned in the tunnelling state") == 2
-    assert "(positions are distinguished on a 0.5 nm grid)" in card and "(distinguished at 10 mV)" in card
+    assert card.count("shows no sudden jump along the sweep (a jump caused by an unstable tip)") == 2
+    assert "(positions are binned on a 0.5 nm grid)" in card and "(binned in 10 mV steps)" in card
 
 
 def test_the_english_card_of_the_repair_asks_for_frame_and_spectra_after_the_last_hop():
