@@ -188,9 +188,18 @@ class PlotView(QWidget):
             used += item
         return rows if rows[0] else []
 
+    def plot_rect(self) -> QRectF:
+        """The axes rectangle in widget coordinates (a null rectangle when there is nothing to draw)."""
+        ext = self._extent()
+        if ext is None:
+            return QRectF()
+        regular, bold = self._fonts()
+        return QRectF(self._layout(ext, QFontMetrics(regular), QFontMetrics(bold), self._tpx()).plot)
+
     def _layout(self, ext, fm: QFontMetrics, bold_fm: QFontMetrics, fpx: int) -> SimpleNamespace:
         W, H = self.width(), self.height()
         pad = max(6, fpx // 2)
+        vpad = max(3, fpx // 4)                      # height is what a small plot lacks
         fh = fm.height()
         tick_len = max(4, fpx // 4)
         gap = 4
@@ -205,12 +214,26 @@ class PlotView(QWidget):
         else:
             margin = 0.05 * (y1 - y0)
             y0, y1 = y0 - margin, y1 + margin
-        title_h = bold_fm.height() + 4 if self._title else 0
         legend = self._legend_rows(fm, W - 2 * pad)
         legend_h = len(legend) * (fh + 3) + (3 if legend else 0)
-        top = pad + title_h + legend_h
-        bottom = pad + tick_len + gap + fh + ((gap + fh) if self._x_label else 0)
-        plot_h = max(20, H - top - bottom)
+        show_x_label, show_title = bool(self._x_label), bool(self._title)
+
+        def vertical() -> tuple[int, int, int]:
+            top = vpad + ((bold_fm.height() + 4) if show_title else 0) + legend_h
+            bottom = vpad + tick_len + gap + fh + ((gap + fh) if show_x_label else 0)
+            return top, bottom, H - top - bottom
+
+        top, bottom, plot_h = vertical()
+        # a short plot (the line profile beside the marker table) keeps its curve rather than its
+        # captions: the x label goes first (the title usually names the unit too), then the title
+        if plot_h < 4.3 * fh and show_x_label:
+            show_x_label = False
+            top, bottom, plot_h = vertical()
+        if plot_h < 2.8 * fh and show_title:
+            show_title = False
+            top, bottom, plot_h = vertical()
+        title_h = bold_fm.height() + 4 if show_title else 0
+        plot_h = max(20, plot_h)
         # y ticks first: their label width sets the left margin, which sets the width x gets
         yt, ystep = nice_ticks(y0, y1, max(2, min(8, int(plot_h / (fh * 2.3)))))
         ylabels = format_ticks(yt, ystep)
@@ -226,9 +249,9 @@ class PlotView(QWidget):
                 break
         right = max(pad, (widths[-1] // 2 + 3) if widths else pad)
         plot = QRectF(left, top, max(20.0, W - left - right), plot_h)
-        return SimpleNamespace(W=W, H=H, pad=pad, fh=fh, tick_len=tick_len, gap=gap, plot=plot, legend=legend,
-                               title_h=title_h, x0=x0, x1=x1, y0=y0, y1=y1, xt=xt, xlabels=xlabels,
-                               yt=yt, ylabels=ylabels, top=top)
+        return SimpleNamespace(W=W, H=H, pad=pad, vpad=vpad, fh=fh, tick_len=tick_len, gap=gap, plot=plot,
+                               legend=legend, title_h=title_h, show_x_label=show_x_label, show_title=show_title,
+                               x0=x0, x1=x1, y0=y0, y1=y1, xt=xt, xlabels=xlabels, yt=yt, ylabels=ylabels, top=top)
 
     def paintEvent(self, _ev) -> None:
         p = QPainter(self)
@@ -291,7 +314,7 @@ class PlotView(QWidget):
         # axis labels and title
         p.setFont(bold)
         p.setPen(_TEXT)
-        if self._x_label:
+        if lay.show_x_label:
             r = QRectF(plot.left(), plot.bottom() + lay.tick_len + lay.gap + lay.fh, plot.width(), lay.fh)
             p.drawText(r, int(Qt.AlignmentFlag.AlignCenter),
                        bold_fm.elidedText(self._x_label, Qt.TextElideMode.ElideMiddle, int(plot.width())))
@@ -303,15 +326,15 @@ class PlotView(QWidget):
                        int(Qt.AlignmentFlag.AlignCenter),
                        bold_fm.elidedText(self._y_label, Qt.TextElideMode.ElideMiddle, int(plot.height())))
             p.restore()
-        if self._title:
-            r = QRectF(lay.pad, lay.pad, lay.W - 2 * lay.pad, lay.title_h)
+        if lay.show_title:
+            r = QRectF(lay.pad, lay.vpad, lay.W - 2 * lay.pad, lay.title_h)
             p.drawText(r, int(Qt.AlignmentFlag.AlignCenter),
                        bold_fm.elidedText(self._title, Qt.TextElideMode.ElideRight, int(r.width())))
 
         # legend strip between the title and the axes
         p.setFont(regular)
         p.setRenderHint(QPainter.RenderHint.Antialiasing, True)
-        y = lay.pad + lay.title_h
+        y = lay.vpad + lay.title_h
         for row in lay.legend:
             x = lay.pad
             for name, color, w in row:

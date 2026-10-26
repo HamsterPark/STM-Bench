@@ -710,6 +710,32 @@ def test_plotview_draws_each_series_in_its_colour_and_leaves_gaps_for_nan(app):
     assert near(rgb(plot), BLUE).sum() > 200 and near(rgb(plot), ORANGE).sum() > 200
 
 
+def test_a_short_plot_gives_up_its_captions_before_its_curve(app):
+    """The line profile sits in a strip beside the marker table, a few hundred by ~140 px: the x
+    label goes first, then the title, so the curve keeps room to be read."""
+    s = np.linspace(0, 4.4, 41)
+    z = 120 + 25 * np.exp(-((s - 2.2) / 0.7) ** 2)
+    plot = PlotView()
+    font = QFont("Arial")
+    font.setPixelSize(16)
+    plot.setFont(font)
+    heights = {}
+    for h in (400, 190, 140, 100):
+        plot.resize(330, h)
+        plot.set_series(s, [("z", z)], "distance (nm)", "pm", "A to B  4.4 nm  (sim001.sxm)")
+        heights[h] = plot.plot_rect().height()
+        assert plot.plot_rect().bottom() < h and plot.plot_rect().top() >= 0
+    assert heights[400] > 250
+    assert heights[140] >= 70                                       # the x label gave way (was ~50 px with it)
+    assert heights[190] > heights[140] and heights[100] >= 20
+    plot.resize(330, 400)
+    full = rgb(plot)
+    plot.set_series(s, [("z", z)], "", "pm", "")                    # no captions at all: the same axes, taller
+    assert plot.plot_rect().height() > heights[400]
+    assert not (rgb(plot) == full).all()
+    assert PlotView().plot_rect().isNull()
+
+
 def test_plotview_text_is_at_least_14_px_whatever_the_widget_font(app):
     plot = PlotView()
     small = QFont("Arial")
