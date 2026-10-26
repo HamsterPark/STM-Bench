@@ -135,7 +135,8 @@ class CenterColumn(QWidget):
         v.addWidget(self.readout)
 
         # ── markers and the profile ──
-        strip = QWidget()                      # parent first: a widget given a font and re-parented later loses it
+        # (the table's font is in the style sheet: a font set on a widget was lost when an ancestor was re-parented)
+        strip = QWidget()
         strip.setFixedHeight(style.px(MARKER_STRIP_PX))
         bottom = QHBoxLayout(strip)
         bottom.setContentsMargins(0, 0, 0, 0)
@@ -300,7 +301,8 @@ class CenterColumn(QWidget):
         self._draw_spectrum(xk, yk)
 
     def _rebuild_axes(self, cols: list[str], xk: str, yk: str) -> None:
-        for attr, row, name, val in (("spec_x", self.spec_x_row, "view.spec_x", xk), ("spec_y", self.spec_y_row, "view.spec_y", yk)):
+        for attr, row, name, val in (("spec_x", self.spec_x_row, "view.spec_x", xk),
+                                     ("spec_y", self.spec_y_row, "view.spec_y", yk)):
             old = getattr(self, attr)
             if old is not None:
                 row.removeWidget(old)

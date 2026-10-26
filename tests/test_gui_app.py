@@ -231,7 +231,8 @@ def test_a_refusal_shows_the_instruments_words_everywhere(open_window, tmp_path)
     words = "refused: move_tip: outside the piezo range"
     assert win.status.result.full_text() == "✗ " + words
     assert win.status.result.property("tone") == "bad"
-    assert shots.widget(win, "reply.tip").full_text() == "✗ " + words and shots.widget(win, "reply.tip").property("tone") == "bad"
+    reply = shots.widget(win, "reply.tip")
+    assert reply.full_text() == "✗ " + words and reply.property("tone") == "bad"
     assert "move_tip: outside the piezo range" in shots.widget(win, "log.view").toPlainText()
     assert not acts(records(tmp_path))                          # nothing happened on the instrument
     # an empty required field sends nothing, a field that is not a number is sent as typed: both are refused,
@@ -345,7 +346,8 @@ def test_a_report_and_the_end_through_the_report_tab(open_window, tmp_path):
     run_button(win, "report.submit")
     shots.settle(win)
     assert rep.reply.text().startswith("✓ recorded target_site = 1.5") and rep.reply.property("tone") == "ok"
-    assert json.loads((tmp_path / "run" / "export" / "report.json").read_text(encoding="utf-8"))["claims"]["target_site"]["value"] == 1.5
+    folded = json.loads((tmp_path / "run" / "export" / "report.json").read_text(encoding="utf-8"))
+    assert folded["claims"]["target_site"]["value"] == 1.5
     sent = [r for r in records(tmp_path) if r["kind"] == "report"][-1]["args"]
     assert sent["claim_id"] == "target_site" and sent["frame"] == name and sent["evidence"] == [name]
     # finishing takes two clicks and no dialog

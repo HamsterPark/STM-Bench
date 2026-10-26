@@ -105,6 +105,9 @@ def light_palette() -> QPalette:
 
 
 def stylesheet() -> str:
+    """The one style sheet. Two things in it are deliberate: weights of buttons and labels are not here
+    (a style sheet's bold is not in a widget's size hint, so bold text is clipped; see ``controls.strong``),
+    and the marker table's font is (the font set on it in code was lost when an ancestor was re-parented)."""
     c = COLORS
     return f"""
 QWidget {{ color: {c['ink']}; }}

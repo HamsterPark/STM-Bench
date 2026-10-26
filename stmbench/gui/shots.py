@@ -49,7 +49,8 @@ def hit(win: QWidget, w: QWidget, local: QPoint | None = None) -> tuple[QWidget,
         node = node.parentWidget()
     if node is None:
         got = (target.objectName() or target.__class__.__name__) if target else "nothing"
-        raise AssertionError(f"a click at {pos.x()},{pos.y()} meant for {w.objectName() or w.__class__.__name__} reaches {got}")
+        meant = w.objectName() or w.__class__.__name__
+        raise AssertionError(f"a click at {pos.x()},{pos.y()} meant for {meant} reaches {got}")
     return target, target.mapFrom(win, pos)
 
 
@@ -126,7 +127,8 @@ def brightest_spots(array: np.ndarray, n: int = 3, apart: int = 24, edge: int = 
         r, c = divmod(int(k), nx)
         if not np.isfinite(bump[r, c]):
             break
-        if edge <= c < nx - edge and edge <= r < ny - edge and all((c - c2) ** 2 + (r - r2) ** 2 >= apart ** 2 for c2, r2 in out):
+        inside = edge <= c < nx - edge and edge <= r < ny - edge
+        if inside and all((c - c2) ** 2 + (r - r2) ** 2 >= apart ** 2 for c2, r2 in out):
             out.append((c, r))
             if len(out) == n:
                 break

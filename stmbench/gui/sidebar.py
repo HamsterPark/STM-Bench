@@ -254,14 +254,22 @@ class DataTab(QWidget):
     def set_data(self, frames: list[dict], spectra: list[dict]) -> None:
         self.frames_title.setText(f"{tr('frames', self.lang)} ({len(frames)})")
         self.spectra_title.setText(f"{tr('spectra', self.lang)} ({len(spectra)})")
-        self._fill(self.frames, [(f["frame"], "   ".join(filter(None, [f["frame"], fmt.hms(f["t_start_s"]),
-                                                                       " ".join(_CHANNEL[c] for c in f.get("channels", []))])),
-                                  f"{fmt.num(f['size_nm'], 5)} nm · {f['pixels']} px · centre ({fmt.num(f['center_nm'][0], 5)}, "
-                                  f"{fmt.num(f['center_nm'][1], 5)}) nm · {fmt.num(f['angle_deg'], 4)}°")
-                                 for f in reversed(frames)])
-        self._fill(self.spectra, [(s["spectrum"], f"{s['spectrum']}   {s['kind']}   {fmt.hms(s['t_s'])}",
-                                   f"tip ({s['tip_nm'][0]:.3f}, {s['tip_nm'][1]:.3f}) nm · {s['points']} points")
-                                  for s in reversed(spectra)])
+        self._fill(self.frames, [self._frame_lines(f) for f in reversed(frames)])
+        self._fill(self.spectra, [self._spectrum_lines(s) for s in reversed(spectra)])
+
+    @staticmethod
+    def _frame_lines(f: dict) -> tuple[str, str, str]:
+        """``(name, first line, second line)``: name, start and channels; then the geometry."""
+        channels = " ".join(_CHANNEL[c] for c in f.get("channels", []))
+        cx, cy = f["center_nm"]
+        return (f["frame"], f"{f['frame']}   {fmt.hms(f['t_start_s'])}   {channels}",
+                f"{fmt.num(f['size_nm'], 5)} nm · {f['pixels']} px · centre ({fmt.num(cx, 5)}, {fmt.num(cy, 5)}) nm · "
+                f"{fmt.num(f['angle_deg'], 4)}°")
+
+    @staticmethod
+    def _spectrum_lines(s: dict) -> tuple[str, str, str]:
+        return (s["spectrum"], f"{s['spectrum']}   {s['kind']}   {fmt.hms(s['t_s'])}",
+                f"tip ({s['tip_nm'][0]:.3f}, {s['tip_nm'][1]:.3f}) nm · {s['points']} points")
 
     @staticmethod
     def _fill(w: QListWidget, rows: list[tuple[str, str, str]]) -> None:
