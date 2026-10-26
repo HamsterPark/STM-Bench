@@ -7,12 +7,12 @@ collected ``actions.jsonl``; the rest of the export (``session.json``, ``digests
 
     {"scenario": "P4_atom_positioning_cu111", "seed": 0, "grader_image": "stmbench-grader:<tag>"}
 
-The harness runs Python 3.11 with its own dependencies; STM-Bench needs Python 3.13 and numpy 2,
-so this module only runs the real grader (``python -m stmbench.cli grade``) as a separate
-process and reads its JSON: inside the Docker image ``grader_image`` names (no network, the
-export mounted read-only), or, when ``STMBENCH_GRADER_CMD`` is set, through that command prefix
-(``<python> -m stmbench.cli``, split like a shell would). Standard library only. It never
-raises: a grade that could not be made is ``(0.0, "grader failed: <why>")``.
+The runner requires only Python 3.11 and brings its own dependencies, while STM-Bench needs
+Python 3.13 and numpy 2. So this module only runs the real grader (``python -m stmbench.cli
+grade``) as a separate process and reads its JSON: in the Docker image ``grader_image`` names (no
+network, the export mounted read-only) or, when ``STMBENCH_GRADER_CMD`` is set, through that
+command prefix (``<python> -m stmbench.cli``, split like a shell would). Standard library only.
+It never raises: a grade that could not be made is ``(0.0, "grader failed: <why>")``.
 """
 from __future__ import annotations
 

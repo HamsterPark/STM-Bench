@@ -4,7 +4,7 @@ An agent that works through a screen plays the STM-Bench console inside a virtua
 runner copies named files out of the machine when the task ends and scores them on the host. This
 directory is the host side. Status: written against the runner's public documentation
 (`docs/user_guide/adding-a-task.md`, `docs/developer_guide/adding-a-domain.md`,
-`evaluators/external.py` in `DiscoAILab/OSWorld-Science`). It has not run inside the runner, and
+`src/osworld_science/evaluators/external.py` in `DiscoAILab/OSWorld-Science`). It has not run inside the runner, and
 the Docker image has not been built.
 
 ```
@@ -49,8 +49,9 @@ directory; the grader does not read it, because the records hold every report.
 Private tree, `data/<domain>/private/reference_private/<task_id>/` (never enters the machine):
 
 - `stm_metric.py`, a copy of `deploy/osworld/stm_metric.py`: standard library only, Python 3.11
-  syntax, loaded by path. It runs the real grader as a separate process, because the runner's
-  Python 3.11 cannot import STM-Bench (Python 3.13, numpy 2). It never raises: any failure is
+  syntax, loaded by path. It runs the real grader as a separate process, because the runner
+  requires only Python 3.11 and brings its own dependencies, while STM-Bench needs Python 3.13
+  and numpy 2. It never raises: any failure is
   `(0.0, "grader failed: <why>")`, with a 30 minute limit (`docker kill` on a timeout).
 - `gt.json`: `{"scenario": "P4_atom_positioning_cu111", "seed": 17, "grader_image": "stmbench-grader:<tag>"}`.
 
