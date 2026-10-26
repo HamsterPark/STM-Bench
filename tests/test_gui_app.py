@@ -405,6 +405,33 @@ def test_the_status_strip_reads_in_units_and_counts_instrument_time(open_window)
 
 
 # ── the report and the end ──
+def test_a_picked_claim_stays_picked_when_it_is_clicked_again_with_one_claim_or_several(open_window):
+    win = open_window("en")                                              # P4 has one reportable claim
+    open_left(win, "report")
+    rep = win.sidebar.report
+    assert list(rep.radios) == ["target_site"] and rep.claim_id() == ""
+    for click in ("radio", "radio", "its line", "its line", "radio"):       # the trial's second click took it back
+        if click == "radio":
+            run_button(win, "report.claim.target_site")
+        else:
+            shots.click(win, shots.widget(win, "report.say.target_site"))
+        assert rep.claim_id() == "target_site" and shots.widget(win, "report.claim.target_site").isChecked()
+    assert rep.fields["unit"].text() == "nm"
+    # several claims (P1): one at a time, and the one that is picked stays picked
+    win = open_window("en", name="run_p1", scenario="P1_barth1990_au111")
+    open_left(win, "report")
+    rep = win.sidebar.report
+    ids = list(rep.radios)
+    assert len(ids) == 4 and rep.claim_id() == ""
+    for cid in (ids[0], ids[0], ids[2], ids[2], ids[1]):
+        run_button(win, f"report.claim.{cid}")
+        assert rep.claim_id() == cid and sum(r.isChecked() for r in rep.radios.values()) == 1
+    shots.click(win, shots.widget(win, f"report.say.{ids[3]}"))                 # a click on a claim's own line picks it
+    assert rep.claim_id() == ids[3] and rep.fields["unit"].text() == "deg"
+    shots.click(win, shots.widget(win, f"report.say.{ids[3]}"))
+    assert rep.claim_id() == ids[3]
+
+
 def test_the_report_form_marks_what_the_picked_claim_needs_and_enter_sends_it(open_window, tmp_path):
     win = open_window("en", scenario="P1_barth1990_au111")
     open_left(win, "report")

@@ -11,8 +11,8 @@ from __future__ import annotations
 from html import escape
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import (QAbstractItemView, QFrame, QGridLayout, QHBoxLayout, QLabel, QListWidget, QListWidgetItem,
-                               QPushButton, QRadioButton, QScrollArea, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel, QListWidget,
+                               QListWidgetItem, QPushButton, QRadioButton, QScrollArea, QVBoxLayout, QWidget)
 
 from . import fmt, style
 from .controls import QuietBrowser, QuietText, SelectAllLineEdit, Tabs, polish, strong
@@ -70,15 +70,24 @@ class ReportTab(QWidget):
         self.title.setObjectName("report.title")
         v.addWidget(self.title)
         self.radios: dict[str, QRadioButton] = {}
+        self.claim_labels: dict[str, QLabel] = {}
+        # in a group of their own: a lone auto-exclusive radio button can be clicked off, and P4 has one claim;
+        # in an exclusive QButtonGroup the one that is checked stays checked when it is clicked again
+        self.claim_group = QButtonGroup(self)
+        self.claim_group.setExclusive(True)
         for c in claims:
             r = QRadioButton(c["id"])
             r.setObjectName(f"report.claim.{c['id']}")
             r.setFont(style.mono_font(17, bold=True))
             r.toggled.connect(lambda on, cid=c["id"]: on and self._claim_picked(cid))
             self.radios[c["id"]] = r
+            self.claim_group.addButton(r)
             v.addWidget(r)
             say = c["say_en"] if lang == "en" and c.get("say_en") else c["say"]
-            v.addWidget(_ClaimLabel(say, r))
+            lab = _ClaimLabel(say, r)
+            lab.setObjectName(f"report.say.{c['id']}")
+            self.claim_labels[c["id"]] = lab
+            v.addWidget(lab)
 
         grid = QGridLayout()
         grid.setHorizontalSpacing(style.px(8))
