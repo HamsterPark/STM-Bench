@@ -112,17 +112,27 @@ class Segmented(QWidget):
 
 
 class SelectAllLineEdit(QLineEdit):
-    """A field whose whole content is selected by a click: the next keystrokes replace it. No context
-    menu and no dropped text: the only gestures are clicking and typing."""
+    """A field whose whole content is selected by every click, not only the one that gives it the focus: the
+    next keystrokes replace it, whether the field was focused before, had a selection already, had its caret
+    somewhere, or the pointer wobbled between press and release. No context menu, no dropped text, no dragged
+    selection: the only gestures are clicking and typing (the keyboard still moves the caret)."""
 
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
         self.setAcceptDrops(False)
+        self.setDragEnabled(False)            # a press on selected text would wait for a drag and, released, drop the selection
 
     def mousePressEvent(self, ev) -> None:
         super().mousePressEvent(ev)
         self.selectAll()
+
+    def mouseMoveEvent(self, ev) -> None:
+        ev.accept()                           # a pointer that moves with the button down must not drag a partial selection
+
+    def mouseReleaseEvent(self, ev) -> None:
+        super().mouseReleaseEvent(ev)
+        self.selectAll()                      # whatever the press and the moves in between did
 
     def mouseDoubleClickEvent(self, ev) -> None:
         super().mouseDoubleClickEvent(ev)

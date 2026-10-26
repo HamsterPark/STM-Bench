@@ -229,7 +229,8 @@ show the state the instrument reports as the selected button, and under them the
 first, in the instrument's words (a refusal stays among them until five calls have followed it). A click queues its job at once with the field values read at that moment and
 buttons stay enabled while the instrument works, because one agent step often clicks several in a row;
 jobs run in click order on one worker thread. An empty field sends nothing (the instrument's default
-applies, or it refuses); a field that is not a number is sent as typed. The three `← marker` buttons
+applies, or it refuses); a field that is not a number is sent as typed; every click in a field selects all
+of it, so click then type replaces the content. The three `← marker` buttons
 copy a marker's coordinates into the move-tip or scan fields or the report form, and Delete marker removes
 the selected one. While a scan runs or waits the viewer says so over what it shows, and a click on a viewer
 that has shown no frame leaves a note among the recent results instead of being lost.

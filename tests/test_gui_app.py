@@ -1049,6 +1049,58 @@ def test_what_the_viewer_the_profile_and_the_data_tab_say_is_not_cut_off(fonts, 
     assert "centre (-12.534, -5.607) nm" in shots.widget(win, "data.frames").item(0).text()
 
 
+# ── text fields ──
+def press_release(win: MainWindow, w: QWidget, dx: int = 0, steps: int = 0) -> None:
+    """A click on ``w`` the way the screen harness and a real pointer make it: through the window, the pointer
+    arriving first, then press, ``steps`` moves ``dx`` px away with the button down, release."""
+    from PySide6.QtCore import QPoint
+    left, none = Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier
+    qwin = win.windowHandle()
+    c = w.mapTo(win, w.rect().center())
+    QTest.mouseMove(qwin, c)
+    QTest.mousePress(qwin, left, none, c)
+    for i in range(1, steps + 1):
+        QTest.mouseMove(qwin, QPoint(c.x() + dx * i // steps, c.y()))
+    QTest.mouseRelease(qwin, left, none, QPoint(c.x() + dx, c.y()))
+    QApplication.processEvents()
+
+
+def test_every_click_in_a_field_selects_all_of_it_so_that_click_then_type_replaces(open_window):
+    win = open_window("en")
+    open_left(win, "report")
+    fields = ["act.scan.size_nm", "act.scan.pixels", "act.move_tip.x_nm", "report.value", "report.evidence", "report.note"]
+    for name in fields:
+        w = shots.widget(win, name)
+        for prior in ("unfocused", "focused with the whole text selected", "caret in the middle", "caret at the end"):
+            for label, args in (("a click", (0, 0)), ("a click with a wobble", (3, 1)), ("a small drag", (30, 5)),
+                                ("a pointer that moves a lot", (-40, 8))):
+                w.setText("4012")
+                w.clearFocus()
+                if prior != "unfocused":
+                    w.setFocus()
+                    w.selectAll() if prior.startswith("focused") else w.setCursorPosition(2 if "middle" in prior else 4)
+                    if not prior.startswith("focused"):
+                        w.deselect()
+                press_release(win, w, *args)
+                assert w.selectedText() == "4012", (name, prior, label)
+                QTest.keyClicks(w, "7")
+                assert w.text() == "7", (name, prior, label, w.text())
+    # a second click while the first one's selection is still there, then typing, as in the screen trial
+    w = shots.widget(win, "act.scan.size_nm")
+    w.setText("60")
+    press_release(win, w)
+    press_release(win, w)
+    QTest.keyClicks(w, "16")
+    assert w.text() == "16"
+    # the double click selects it all too, and the keyboard still moves the caret (Home, then a digit goes first)
+    w.setText("25")
+    QTest.mouseDClick(win.windowHandle(), Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, w.mapTo(win, w.rect().center()))
+    assert w.selectedText() == "25"
+    QTest.keyClick(w, Qt.Key.Key_Home)
+    QTest.keyClicks(w, "1")
+    assert w.text() == "125"
+
+
 # ── the state the buttons show ──
 def checked(win: MainWindow, name: str) -> bool:
     return shots.widget(win, name).isChecked()
