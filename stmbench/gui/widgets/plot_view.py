@@ -2,9 +2,17 @@
 
 White background, 1-2-5 axis ticks with light grid lines, several series in colours that stay
 distinct for the common colour-vision deficiencies, a legend strip when there is more than one
-series. No interaction of any kind: the picture is read from a screenshot, so it favours large
-text (never below :data:`MIN_FONT_PX`) and thick lines over detail. Non-finite points are
-skipped, never drawn as zero; a series with nothing finite, or no series at all, shows a message.
+series. The picture is read from a screenshot, so it favours large text (never below
+:data:`MIN_FONT_PX`) and thick lines over detail. Non-finite points are skipped, never drawn as
+zero; a series with nothing finite, or no series at all, shows a message.
+
+The one interaction is a cursor, as on an instrument's graph: over the axes a vertical line marks
+the data point nearest the pointer in x, with a dot on every curve there and a box that reads the
+point's x and each series' y (fixed-pitch numbers; the digits come from each quantity's own range,
+a millivolt on a +-1 V sweep), so an energy is read off the spectrum, not estimated from the ticks.
+A left click pins the point (and emits ``point_picked``): off the axes the readout shows the pin,
+over them it follows the pointer; a later click moves the pin; new data removes it. There is no zoom,
+pan, wheel handling or context menu.
 """
 from __future__ import annotations
 
@@ -12,18 +20,24 @@ import math
 from types import SimpleNamespace
 
 import numpy as np
-from PySide6.QtCore import QEvent, QPointF, QRectF, QSize, Qt
-from PySide6.QtGui import QColor, QFont, QFontMetrics, QPainter, QPainterPath, QPen
+from PySide6.QtCore import QEvent, QPointF, QRectF, QSize, Qt, Signal
+from PySide6.QtGui import QColor, QFont, QFontDatabase, QFontMetrics, QPainter, QPainterPath, QPen
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
 MIN_FONT_PX = 14
 #: Okabe-Ito colours (no yellow: it vanishes on white); more series than colours cycle
 SERIES_COLORS = ("#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00", "#56B4E9", "#000000")
+#: the readout's numbers are fixed-pitch so that digits line up; the first family the machine has wins
+MONO_FAMILIES = ("Cascadia Mono", "Consolas", "DejaVu Sans Mono", "Liberation Mono", "Noto Sans Mono", "Courier New")
+#: the readout box: opaque, so grid lines and curves under it do not run through the numbers
+READOUT_BG = QColor("#eef3fb")
 _BACKGROUND = QColor("#ffffff")
 _TEXT = QColor("#111111")
 _MUTED = QColor("#555b63")
 _GRID = QColor("#e1e5ea")
 _AXIS = QColor("#3d434b")
+_CURSOR_LIVE = QColor(25, 25, 25, 215)
+_CURSOR_PIN = QColor("#111111")
 _NO_DATA = "No data"
 
 
@@ -61,14 +75,23 @@ def tick_decimals(step: float) -> int:
     return min(9, max(0, -math.floor(math.log10(step) + 1e-9)))
 
 
-def format_number(v: float, decimals: int) -> str:
-    """Fixed-point text without a negative zero; scientific notation beyond 1e7 or below 1e-5."""
+def format_number(v: float, decimals: int, sig: int = 3) -> str:
+    """Fixed-point text without a negative zero; scientific notation (``sig`` significant digits)
+    beyond 1e7 or below 1e-5."""
     if not math.isfinite(v):
         return "nan" if math.isnan(v) else ("inf" if v > 0 else "-inf")
     if abs(v) >= 1e7 or (v != 0 and abs(v) < 1e-5):
-        return f"{v:.3g}"
+        return f"{v:.{sig}g}"
     s = f"{v:.{decimals}f}"
     return s[1:] if s.startswith("-") and float(s) == 0 else s
+
+
+def reading_decimals(span: float, sig: int = 4) -> int:
+    """Digits after the point that give ``sig`` significant digits of a quantity that ranges over
+    ``span``: with four, an axis of +-1 V (span 2) reads to a millivolt."""
+    if not math.isfinite(span) or span <= 0:
+        return sig - 1
+    return min(9, max(0, sig - 1 - math.floor(math.log10(span))))
 
 
 def format_ticks(ticks: list[float], step: float) -> list[str]:
@@ -83,8 +106,21 @@ def _as_floats(a) -> np.ndarray:
         return np.empty(0)
 
 
+def _finite_span(a: np.ndarray) -> float:
+    """Largest minus smallest finite value (0 with none)."""
+    f = a[np.isfinite(a)]
+    return float(f.max() - f.min()) if f.size else 0.0
+
+
 class PlotView(QWidget):
-    """Line plot of one shared x and any number of named y series. See the module docstring."""
+    """Line plot of one shared x and any number of named y series, with a cursor readout. See the
+    module docstring.
+
+    ``point_picked`` (a left click on the axes, never a hover): ``{"index": i, "x": x, "values":
+    [[series label, y], ...]}``, the point's index in the arrays given to :meth:`set_series`, its x,
+    and every series' y there (NaN where a series has none)."""
+
+    point_picked = Signal(dict)
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -94,6 +130,17 @@ class PlotView(QWidget):
         self._y_label = ""
         self._title = ""
         self._message = ""
+        self._ext: tuple[float, float, float, float] | None = None
+        self._layout_cache: tuple | None = None
+        self._values = np.empty((0, 0))                 # y of every series by point; NaN beyond a series' end
+        self._valid = np.empty(0, dtype=np.intp)        # the points the cursor can stand on
+        self._x_decimals = 3
+        self._y_decimals: list[int] = []
+        self._hover: int | None = None
+        self._pin: int | None = None
+        self._pointer: QPointF | None = None            # where the pointer last was over the widget
+        self.setMouseTracking(True)
+        self.setCursor(Qt.CursorShape.CrossCursor)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
@@ -102,21 +149,47 @@ class PlotView(QWidget):
     def set_series(self, x, series: list[tuple[str, "array-like"]], x_label: str, y_label: str,
                    title: str = "") -> None:
         """Plot each ``(name, y)`` against ``x``. A series longer than ``x`` is cut to it (and the
-        reverse); NaN and infinities leave gaps; nothing finite shows ``No data``."""
+        reverse); NaN and infinities leave gaps; nothing finite shows ``No data``. Removes the
+        cursor's pin."""
         xs = _as_floats(x)
         self._x = xs
         self._series = [(str(name), _as_floats(y)[:len(xs)]) for name, y in series]
         self._x_label, self._y_label, self._title = str(x_label), str(y_label), str(title)
-        self._message = "" if self._extent() is not None else _NO_DATA
+        self._ext = self._extent()
+        self._message = "" if self._ext is not None else _NO_DATA
+        self._index_points()
         self.update()
 
     def clear(self, message: str = "") -> None:
-        """Empty the plot; ``message`` (default none) is shown in its place."""
+        """Empty the plot (and its cursor); ``message`` (default none) is shown in its place."""
         self._x = np.empty(0)
         self._series = []
         self._x_label = self._y_label = self._title = ""
         self._message = str(message)
+        self._ext = None
+        self._index_points()
         self.update()
+
+    def _index_points(self) -> None:
+        """What the cursor needs from new data: y by series and point, the points it may stand on
+        (finite x and some finite y: a point nothing is drawn at is skipped), and the digits its
+        readout shows. Drops the hover and the pin."""
+        n = len(self._x)
+        vals = np.full((len(self._series), n), np.nan)
+        for k, (_, y) in enumerate(self._series):
+            vals[k, :len(y)] = y
+        self._values = vals
+        self._valid = np.flatnonzero(np.isfinite(self._x) & np.isfinite(vals).any(axis=0)) if len(vals) \
+            else np.empty(0, dtype=np.intp)
+        xs = self._x[self._valid]
+        digits = reading_decimals(_finite_span(xs))
+        steps = np.diff(np.unique(xs)) if xs.size > 1 else np.empty(0)
+        if steps.size:                                  # and at least half the point spacing: neighbours never print alike
+            digits = max(digits, min(9, math.ceil(-math.log10(float(np.median(steps)) / 2) - 1e-9)))
+        self._x_decimals = digits
+        self._y_decimals = [reading_decimals(_finite_span(row)) for row in vals]
+        self._hover = self._pin = self._pointer = None   # until the pointer moves again
+        self._layout_cache = None
 
     def _extent(self) -> tuple[float, float, float, float] | None:
         """Finite data bounds ``(x0, x1, y0, y1)``, or None when no point has both coordinates."""
@@ -155,6 +228,75 @@ class PlotView(QWidget):
         if ev.type() == QEvent.Type.FontChange:
             self.update()
 
+    def resizeEvent(self, ev) -> None:
+        # the pointer stayed where it was, the data moved under it (a hidden widget that is grabbed
+        # gets a resize event of its own size each time, which must change nothing)
+        self._hover = None if self._pointer is None else self._index_at(self._pointer)
+        super().resizeEvent(ev)
+
+    # ── the cursor ──
+    def _index_at(self, pos: QPointF) -> int | None:
+        """The point the cursor stands on for a pointer at ``pos``: the one nearest in x among the
+        points that can be read, when the pointer is over the axes."""
+        lay = self._layout_now()
+        if lay is None or self._valid.size == 0:
+            return None
+        plot = lay.plot
+        if not (plot.left() <= pos.x() <= plot.right() and plot.top() <= pos.y() <= plot.bottom()):
+            return None                           # closed: the last point's own position is on the edge
+        target = lay.x0 + (pos.x() - plot.left()) / plot.width() * (lay.x1 - lay.x0)
+        return int(self._valid[int(np.argmin(np.abs(self._x[self._valid] - target)))])
+
+    def _series_label(self, k: int) -> str:
+        return self._series[k][0] or self._y_label or "y"
+
+    def _payload(self, i: int) -> dict:
+        return {"index": int(i), "x": float(self._x[i]),
+                "values": [[self._series_label(k), float(self._values[k, i])] for k in range(len(self._series))]}
+
+    def cursor_point(self) -> dict | None:
+        """The point the readout shows now (the hovered one, else the pinned one), as
+        ``point_picked`` carries it; None when there is no cursor."""
+        i = self._hover if self._hover is not None else self._pin
+        return None if i is None else self._payload(i)
+
+    def pinned_point(self) -> dict | None:
+        return None if self._pin is None else self._payload(self._pin)
+
+    def point_position(self, index: int, series: int = 0) -> QPointF | None:
+        """Widget position of data point ``index`` of series ``series``; None when it is not drawn."""
+        lay = self._layout_now()
+        if lay is None or not (0 <= index < len(self._x) and 0 <= series < len(self._series)):
+            return None
+        xv, yv = float(self._x[index]), float(self._values[series, index])
+        return self._to_px(lay, xv, yv) if math.isfinite(xv) and math.isfinite(yv) else None
+
+    def mouseMoveEvent(self, ev) -> None:
+        self._pointer = QPointF(ev.position())
+        i = self._index_at(self._pointer)
+        if i != self._hover:
+            self._hover = i
+            self.update()
+
+    def leaveEvent(self, ev) -> None:
+        self._pointer = None
+        if self._hover is not None:
+            self._hover = None
+            self.update()
+        super().leaveEvent(ev)
+
+    def mousePressEvent(self, ev) -> None:
+        self._pointer = QPointF(ev.position())
+        i = self._index_at(self._pointer) if ev.button() == Qt.MouseButton.LeftButton else None
+        if i is not None:
+            self._pin = self._hover = i
+            self.update()
+            self.point_picked.emit(self._payload(i))
+        ev.accept()
+
+    def mouseDoubleClickEvent(self, ev) -> None:
+        ev.accept()                              # a double click is one click: the press before it did the work
+
     # ── painting ──
     def _tpx(self) -> int:
         """Pixel size of tick numbers, labels and legend: a little above the widget's base text,
@@ -188,13 +330,28 @@ class PlotView(QWidget):
             used += item
         return rows if rows[0] else []
 
+    def _layout_now(self) -> SimpleNamespace | None:
+        """The layout for the data, size and font as they are (None with nothing to draw), kept
+        until one of them changes: the cursor asks for it on every pointer move."""
+        if self._ext is None:
+            return None
+        regular, bold = self._fonts()
+        key = (self.width(), self.height(), self._tpx(), regular.key())
+        if self._layout_cache is None or self._layout_cache[0] != key:
+            lay = self._layout(self._ext, QFontMetrics(regular), QFontMetrics(bold), self._tpx())
+            self._layout_cache = (key, lay)
+        return self._layout_cache[1]
+
+    @staticmethod
+    def _to_px(lay: SimpleNamespace, xv: float, yv: float) -> QPointF:
+        plot = lay.plot
+        return QPointF(plot.left() + (xv - lay.x0) / (lay.x1 - lay.x0) * plot.width(),
+                       plot.bottom() - (yv - lay.y0) / (lay.y1 - lay.y0) * plot.height())
+
     def plot_rect(self) -> QRectF:
         """The axes rectangle in widget coordinates (a null rectangle when there is nothing to draw)."""
-        ext = self._extent()
-        if ext is None:
-            return QRectF()
-        regular, bold = self._fonts()
-        return QRectF(self._layout(ext, QFontMetrics(regular), QFontMetrics(bold), self._tpx()).plot)
+        lay = self._layout_now()
+        return QRectF() if lay is None else QRectF(lay.plot)
 
     def _layout(self, ext, fm: QFontMetrics, bold_fm: QFontMetrics, fpx: int) -> SimpleNamespace:
         W, H = self.width(), self.height()
@@ -256,9 +413,9 @@ class PlotView(QWidget):
     def paintEvent(self, _ev) -> None:
         p = QPainter(self)
         p.fillRect(self.rect(), _BACKGROUND)
-        ext = self._extent()
+        lay = self._layout_now()
         regular, bold = self._fonts()
-        if ext is None:
+        if lay is None:
             if self._message:
                 p.setFont(regular)
                 p.setPen(_MUTED)
@@ -266,15 +423,13 @@ class PlotView(QWidget):
                            int(Qt.AlignmentFlag.AlignCenter | Qt.TextFlag.TextWordWrap), self._message)
             p.end()
             return
-        fm, bold_fm = QFontMetrics(regular), QFontMetrics(bold)
-        lay = self._layout(ext, fm, bold_fm, self._tpx())
+        bold_fm = QFontMetrics(bold)
         plot = lay.plot
         p.setRenderHint(QPainter.RenderHint.Antialiasing, True)
         p.setFont(regular)
 
         def to_px(xv: float, yv: float) -> QPointF:
-            return QPointF(plot.left() + (xv - lay.x0) / (lay.x1 - lay.x0) * plot.width(),
-                           plot.bottom() - (yv - lay.y0) / (lay.y1 - lay.y0) * plot.height())
+            return self._to_px(lay, xv, yv)
 
         # grid, then the data under the frame
         p.setPen(QPen(_GRID, 1))
@@ -344,7 +499,103 @@ class PlotView(QWidget):
                 p.drawText(QRectF(x + 32, y, w + 4, lay.fh), int(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter), name)
                 x += 26 + 6 + w + 18
             y += lay.fh + 3
+        self._paint_cursor(p, lay, to_px)
         p.end()
+
+    # the cursor: a line at the point, a dot on each curve, a box with the numbers
+    def _mono_font(self) -> QFont:
+        have = set(QFontDatabase.families())            # ask only for families the machine has: a missing one is looked up (slowly) each time
+        f = QFont()
+        f.setFamilies([n for n in MONO_FAMILIES if n in have] or ["monospace"])
+        f.setStyleHint(QFont.StyleHint.Monospace)
+        f.setFixedPitch(True)
+        f.setPixelSize(self._tpx() + 2)                 # the numbers the picture is read for: larger than the ticks
+        return f
+
+    def _fields(self, i: int) -> list[tuple[QColor | None, str, str]]:
+        """What the readout says at point ``i``: (curve colour, or None for x; label; number), x first."""
+        fields: list[tuple[QColor | None, str, str]] = [
+            (None, self._x_label or "x", format_number(float(self._x[i]), self._x_decimals, sig=4))]
+        for k in range(len(self._series)):
+            fields.append((QColor(SERIES_COLORS[k % len(SERIES_COLORS)]), self._series_label(k),
+                           format_number(float(self._values[k, i]), self._y_decimals[k], sig=4)))
+        return fields
+
+    @staticmethod
+    def _readout_rows(fields, mfm: QFontMetrics, plot: QRectF, pad: int) -> tuple[list[str], int]:
+        """The readout's text rows and the width of the swatch column in front of them. The table, one
+        ``label = number`` row per field with the equal signs and the digits lined up, when it takes
+        up little of the axes; else a single line, the most of it that fits, so that a small plot
+        (the line profile beside the marker table) keeps its curve in view."""
+        wl, wv = max(len(f[1]) for f in fields), max(len(f[2]) for f in fields)
+        swatch = 16 if len(fields) > 2 else 0               # a colour key where several curves are read
+        rows = [f"{lab.ljust(wl)} = {val.rjust(wv)}" for _, lab, val in fields]
+        w = 2 * pad + swatch + max(mfm.horizontalAdvance(r) for r in rows)
+        if w <= 0.8 * plot.width() and 2 * pad + len(rows) * mfm.height() <= 0.5 * plot.height():
+            return rows, swatch
+        labelled = [f"{lab} = {val}" for _, lab, val in fields]
+        tags = [f"x={fields[0][2]}"] + ([f"y={fields[1][2]}"] if len(fields) == 2
+                                        else [f"y{k}={f[2]}" for k, f in enumerate(fields[1:], 1)])
+        for text in ("  ".join(labelled), "  ".join(labelled[:2]), "  ".join(tags), "  ".join(tags[:2]), labelled[0],
+                     tags[0]):
+            if 2 * pad + mfm.horizontalAdvance(text) <= plot.width() - 12:
+                return [text], 0
+        return [fields[0][2]], 0                             # too narrow even for that: the number alone, never cut
+
+    def _paint_cursor(self, p: QPainter, lay: SimpleNamespace, to_px) -> None:
+        i = self._hover if self._hover is not None else self._pin
+        if i is None or not 0 <= i < len(self._x):
+            return
+        pinned = i == self._pin
+        plot = lay.plot
+        xv = float(self._x[i])
+        gx = round(to_px(xv, lay.y0).x())
+        p.save()
+        p.setClipRect(plot.adjusted(-2, -2, 2, 2))           # as the curves: the end points sit on the border
+        p.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+        p.setBrush(Qt.BrushStyle.NoBrush)
+        if pinned:                                           # two pixels wide on the pixel grid
+            p.setPen(QPen(_CURSOR_PIN, 2.0))
+            p.drawLine(QPointF(gx, plot.top()), QPointF(gx, plot.bottom()))
+        else:
+            p.setPen(QPen(_CURSOR_LIVE, 1.5))
+            p.drawLine(QPointF(gx + 0.5, plot.top()), QPointF(gx + 0.5, plot.bottom()))
+        r = 5.4 if pinned else 4.6
+        for k in range(len(self._series)):
+            yv = float(self._values[k, i])
+            if math.isfinite(yv):
+                p.setPen(QPen(QColor("#ffffff"), 1.6))
+                p.setBrush(QColor(SERIES_COLORS[k % len(SERIES_COLORS)]))
+                p.drawEllipse(to_px(xv, yv), r, r)
+        p.restore()
+
+        mono = self._mono_font()
+        mfm = QFontMetrics(mono)
+        lh, pad, margin = mfm.height(), 6, 6
+        fields = self._fields(i)
+        rows, swatch = self._readout_rows(fields, mfm, plot, pad)
+        w = 2 * pad + swatch + max(mfm.horizontalAdvance(t) for t in rows)
+        h = 2 * pad + lh * len(rows)
+        if h > 0.85 * plot.height():                         # no room for even one line: the line and dots say it
+            return
+        left = QRectF(plot.left() + margin, plot.top() + margin, w, h)
+        right = QRectF(plot.right() - margin - w, plot.top() + margin, w, h)
+
+        def over_line(b: QRectF) -> bool:
+            return b.left() - 8 <= gx <= b.right() + 8
+
+        box = right if over_line(left) and not over_line(right) else left       # never hide the point itself
+        inset = 1.0 if pinned else 0.5                                          # the border's centre, on the pixel grid
+        p.setPen(QPen(_CURSOR_PIN if pinned else _AXIS, 2.0 if pinned else 1.0))
+        p.setBrush(READOUT_BG)
+        p.drawRoundedRect(box.adjusted(inset, inset, -inset, -inset), 3, 3)
+        p.setFont(mono)
+        for n, text in enumerate(rows):
+            row = QRectF(box.left() + pad + swatch, box.top() + pad + n * lh, w - 2 * pad - swatch, lh)
+            p.setPen(_TEXT)
+            p.drawText(row, int(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter), text)
+            if swatch and fields[n][0] is not None:
+                p.fillRect(QRectF(box.left() + pad, row.center().y() - 2, 11, 4), fields[n][0])
 
     @staticmethod
     def _draw_series(p: QPainter, x: np.ndarray, y: np.ndarray, color: QColor, to_px) -> None:
