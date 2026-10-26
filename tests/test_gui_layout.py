@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import Counter
 
 from stmbench.gui import layout
-from stmbench.gui.layout import Choices, F, OnOff, Run
+from stmbench.gui.layout import Choices, F, OnOff
 from stmbench.instrument import ACTIONS
 
 #: the actions a P4 episode uses: the Operate tab shows all of them

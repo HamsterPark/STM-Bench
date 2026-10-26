@@ -66,8 +66,8 @@ class Group:
 
 OPERATE: tuple[Group, ...] = (
     Group("scan", "Scan", "扫描", (
-        (F("scan", "center_x_nm", "centre x", "中心 x", "nm"),
-         F("scan", "center_y_nm", "centre y", "中心 y", "nm"),
+        (F("scan", "center_x_nm", "centre x", "中心", "nm"),
+         F("scan", "center_y_nm", "centre y", "中心", "nm"),
          F("scan", "size_nm", "size", "边长", "nm"),
          F("scan", "pixels", "pixels", "像素")),
         (F("scan", "angle_deg", "angle", "角度", "°"),
@@ -83,23 +83,21 @@ OPERATE: tuple[Group, ...] = (
         (OnOff("feedback", "Z feedback", "Z 反馈"),
          Choices("set_current_range", "full_scale_na", "preamp range", "前放量程", "nA")),
     )),
-    Group("tip", "Tip position", "针尖位置", (
-        (F("move_tip", "x_nm", "tip x", "针尖 x", "nm"),
-         F("move_tip", "y_nm", "tip y", "针尖 y", "nm"),
+    Group("tip", "Tip", "针尖", (
+        (F("move_tip", "x_nm", "tip x", "针尖", "nm"),
+         F("move_tip", "y_nm", "tip y", "针尖", "nm"),
          F("move_tip", "speed_nm_s", "speed", "速度", "nm/s"),
          Run("move_tip", "Move tip", "移动针尖")),
-        (F("drift_comp", "vx_nm_per_min", "drift vx", "漂移 vx", "nm/min"),
-         F("drift_comp", "vy_nm_per_min", "drift vy", "漂移 vy", "nm/min"),
-         F("drift_comp", "vz_pm_per_min", "drift vz", "漂移 vz", "pm/min"),
+        (F("drift_comp", "vx_nm_per_min", "vx", "漂移", "nm/min"),
+         F("drift_comp", "vy_nm_per_min", "vy", "漂移", "nm/min"),
+         F("drift_comp", "vz_pm_per_min", "vz", "漂移", "pm/min"),
          OnOff("drift_comp", "Drift comp.", "漂移补偿")),
-    )),
-    Group("conditioning", "Tip conditioning", "针尖修整", (
-        (F("pulse", "bias_v", "pulse bias", "脉冲偏压", "V"),
+        (F("pulse", "bias_v", "pulse", "脉冲偏压", "V"),
          F("pulse", "width_ms", "width", "脉宽", "ms"),
-         F("pulse", "z_hold", "hold Z", "保持 Z"),
+         F("pulse", "z_hold", "hold Z", "保持"),
          Run("pulse", "Pulse", "脉冲")),
         (F("poke", "depth_nm", "depth", "深度", "nm"),
-         F("poke", "bias_v", "poke bias", "压针偏压", "V"),
+         F("poke", "bias_v", "bias", "偏压", "V"),
          F("poke", "dwell_s", "dwell", "停留", "s"),
          Run("poke", "Poke", "压针")),
     )),

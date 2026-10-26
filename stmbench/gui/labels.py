@@ -20,9 +20,15 @@ def tr(key: str, lang: str = "zh") -> str:
     return both(*S[key], lang)
 
 
+def two_lines(key: str, lang: str = "zh") -> str:
+    """A tab or column title: English alone, or the Chinese above its English."""
+    en, zh = S[key]
+    return en if lang == "en" or not zh or zh == en else zh + chr(10) + en
+
+
 S: dict[str, Pair] = {
     # window and status strip
-    "app": ("STM-Bench console", "STM-Bench 控制台"),
+    "app": ("STM-Bench console", "控制台"),
     "ready": ("READY", "就绪"),
     "busy": ("BUSY", "运行中"),
     "finished": ("FINISHED", "已结束"),
@@ -56,8 +62,8 @@ S: dict[str, Pair] = {
     "rep_x": ("x (nm)", "x (nm)"),
     "rep_y": ("y (nm)", "y (nm)"),
     "rep_frame": ("frame the position was read in", "位置读自哪一帧"),
-    "rep_evidence": ("evidence (file names, comma-separated)", "证据（文件名，逗号分隔）"),
-    "rep_viewed": ("+ viewed", "+ 当前"),
+    "rep_evidence": ("evidence, comma-separated", "证据，逗号分隔"),
+    "rep_viewed": ("viewed", "当前"),
     "rep_unit": ("unit", "单位"),
     "rep_sigma": ("sigma", "不确定度"),
     "rep_note": ("note", "备注"),
@@ -94,8 +100,6 @@ S: dict[str, Pair] = {
     "tool_marker": ("Marker", "标记"),
     "tool_profile": ("Profile", "剖面"),
     "clear_markers": ("Clear markers", "清除标记"),
-    "lbl_channel": ("Channel", "通道"),
-    "lbl_direction": ("Direction", "方向"),
     "lbl_flatten": ("Flatten", "拉平"),
     "lbl_tool": ("Tool", "工具"),
     "lbl_x": ("x axis", "横轴"),
@@ -106,7 +110,7 @@ S: dict[str, Pair] = {
     "mk_y": ("y nm", "y nm"),
     "mk_value": ("value", "值"),
     "mk_frame": ("frame", "帧"),
-    "mk_dist": ("to previous nm", "距上一个 nm"),
+    "mk_dist": ("to prev. nm", "距前 nm"),
     "mk_tip": ("Tip ← marker", "针尖 ← 标记"),
     "mk_scan": ("Scan centre ← marker", "扫描中心 ← 标记"),
     "mk_report": ("Report ← marker", "报告 ← 标记"),
