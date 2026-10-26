@@ -92,8 +92,8 @@ def _tolerance(c: dict, sc, lang: str) -> str:
                  f"(angles are taken modulo {mod_deg}°)")
         if c.get("truth") == "orientation_at":
             out += _t(lang, "；鱼骨条纹呈锯齿形，两条臂中任一条的方向、或两臂的平均方向，都算对",
-                      "; the herringbone stripes are zigzag-shaped, and the direction of either of the two "
-                      "arms, or the mean direction of the two arms, counts as correct")
+                      "; the herringbone stripes are zigzag-shaped, so the direction of either of the two "
+                      "arms, or the mean direction of the two arms, is accepted as the true direction")
         return out
     if kind == "peak_in_list":
         rank, abs_tol = int(c.get("rank_max", 3)), tol.get("abs", 0)
@@ -110,9 +110,10 @@ def _tolerance(c: dict, sc, lang: str) -> str:
                  f"这个原子出生时 {isolation_nm} nm 内没有别的原子，"
                  f"并且现在正好占据'出生位置平移 {shift} nm 后最近的那个晶格位点'",
                  f"the reported position, converted to the sample using the frame named in the frame field, "
-                 f"must be within {report_nm} nm of an atom that you have moved; that atom originally had "
-                 f"no other atom within {isolation_nm} nm, and now sits exactly on 'the lattice site nearest "
-                 f"to the point obtained by shifting its original position by {shift} nm'")
+                 f"must be within {report_nm} nm of an atom that you have moved; at the start of the episode "
+                 f"that atom had no other atom within {isolation_nm} nm, and it now sits exactly on 'the "
+                 f"lattice site nearest to the point obtained by shifting its position at the start of the "
+                 f"episode by {shift} nm'")
         tie = float(tol.get("site_tie_nm", 0.0) or 0.0)
         if tie > 0:
             out += _t(lang, f"（若另有格点离那一点只比最近的远不到 {_num(tie)} nm，占据它也算）",
@@ -198,10 +199,10 @@ def _evidence(c: dict, lang: str) -> str:
                   f"偏压范围覆盖 {v_lo} V 到 {v_hi} V，谱中途没有突变（针尖不稳造成的跳变）",
                   f"cite at least {_count(n, 'dI/dV spectrum', 'dI/dV spectra')} in the evidence field, "
                   f"spread over at least {_count(positions, 'different position', 'different positions')} "
-                  f"(positions are distinguished on a 0.5 nm grid); each spectrum is within {near} nm of "
+                  f"(positions are binned on a 0.5 nm grid); each spectrum is within {near} nm of "
                   f"the nearest scatterer (step edge or adatom), has at least "
                   f"{_count(points, 'point', 'points')} and a bias range covering {v_lo} V to {v_hi} V, and "
-                  f"shows no sudden jump along the way (a jump caused by an unstable tip)")
+                  f"shows no sudden jump along the sweep (a jump caused by an unstable tip)")
     if kind == "sts_at_corral_centre":
         n, points = int(rule.get("min_n", 1)), int(rule.get("min_points", 0))
         centre, v_lo, v_hi = _num(rule.get("max_centre_dist_nm", 1.0)), _num(rule.get("v_lo_max")), \
@@ -209,7 +210,7 @@ def _evidence(c: dict, lang: str) -> str:
         late = _t(lang, f"，并且在{since}之后采集" if after else "", f"acquired after {since}" if after else "")
         spectra = _and([f"taken within {centre} nm of the corral centre",
                         f"having at least {_count(points, 'point', 'points')}",
-                        f"covering a bias range of {v_lo} V to {v_hi} V", "showing no sudden jump along the way"]
+                        f"covering a bias range of {v_lo} V to {v_hi} V", "showing no sudden jump along the sweep"]
                        + ([late] if after else []))
         return _t(lang,
                   f"evidence 中至少引用 {n} 条 dI/dV 谱：取谱处离围栏中心不超过 "
@@ -230,7 +231,7 @@ def _evidence(c: dict, lang: str) -> str:
                   f"cite at least {_count(a_n, 'Δf(z) curve', 'Δf(z) curves')} in the evidence field, "
                   f"measured directly above the adatom (lateral offset at most {lateral} nm), continuing at "
                   f"least {span} pm closer after passing the Δf minimum, with no jump and no contact along "
-                  f"the way; and at least {_count(b_n, 'curve', 'curves')} measured on the clean surface "
+                  f"the sweep; and at least {_count(b_n, 'curve', 'curves')} measured on the clean surface "
                   f"more than {far} nm from the adatom (no contact)")
     if kind == "didv_maps":
         n, energies = int(rule.get("min_n", 1)), int(rule.get("min_energies", 1))
@@ -244,8 +245,8 @@ def _evidence(c: dict, lang: str) -> str:
                   f"{near} nm，图须{terms}",
                   f"cite at least {_count(n, 'constant-current scan map', 'constant-current scan maps')} in "
                   f"the evidence field, recorded with the lock-in (lockin) on (dI/dV maps), with at least "
-                  f"{_count(energies, 'different bias value', 'different bias values')} (distinguished at "
-                  f"10 mV) covering {v_lo} V to {v_hi} V; the centre of each map is within {near} nm of "
+                  f"{_count(energies, 'different bias value', 'different bias values')} (binned in 10 mV "
+                  f"steps) covering {v_lo} V to {v_hi} V; the centre of each map is within {near} nm of "
                   f"the nearest scatterer (step edge or adatom), and the maps must {terms}")
     if kind == "any_of":
         alts = [_evidence({"evidence": r}, lang) for r in rule.get("rules") or []]
@@ -338,12 +339,12 @@ def rule_card(sc, lang: str = "zh") -> str:
                  "角度在同一坐标系里从 +x 轴逆时针量；图像数组的行号向下增大，在像素里量角度时要把符号取反。",
                  "Positions and angles: positions are in scan coordinates (nm), with x to the right and y "
                  "upward, the same coordinates as the centre coordinates of the scan window; for results that "
-                 "carry a position you must also name in the frame field the frame the coordinates were read "
-                 "from, and scoring converts the coordinates to the sample using the drift recorded row by "
-                 "row in that frame, so you do not need to correct the drift yourself. Angles are measured "
-                 "in the same coordinate system, counter-clockwise from the +x axis; the row index of an "
-                 "image array increases downward, so when you measure an angle in pixels you must flip its "
-                 "sign.")]
+                 "carry a position (x_nm, y_nm) you must also name in the frame field the frame the "
+                 "coordinates were read from, and scoring converts the coordinates to the sample using the "
+                 "drift recorded row by row in that frame, so you do not need to correct the drift yourself. "
+                 "Angles are measured in the same coordinate system, counter-clockwise from the +x axis; the "
+                 "row index of an image array increases downward, so when you measure an angle in pixels you "
+                 "must flip its sign.")]
     budget = sc.budget or {}
     hours = budget.get("sim_hours")
     if hours:

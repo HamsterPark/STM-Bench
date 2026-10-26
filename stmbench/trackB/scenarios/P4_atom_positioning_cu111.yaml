@@ -65,7 +65,7 @@ claims:
       after_event: adatom_hop
   - id: bystander_max_shift_nm
     say: "被搬原子出生位置或目标位置 10 nm 以内的其他原子的最大位移（丢失或被针尖带走算移动）"
-    say_en: "The largest displacement of any other atom within 10 nm of the moved atom's original position or its target position (an atom that is lost or carried off by the tip counts as moved)"
+    say_en: "The largest displacement of any other atom within 10 nm of the position the moved atom had when the episode began, or of its target position (an atom that is lost or carried off by the tip counts as moved)"
     kind: constraint
     unit: nm
     # the atoms born within bystander_nm of the chosen atom's start or goal — the chosen atom
