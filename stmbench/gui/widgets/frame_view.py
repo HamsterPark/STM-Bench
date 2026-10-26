@@ -533,7 +533,7 @@ class FrameView(QWidget):
         ev.accept()
 
     def mouseDoubleClickEvent(self, ev) -> None:
-        self.mousePressEvent(ev)                     # a quick second click is one more click, not a gesture
+        ev.accept()                                  # a double click is one click: the press before it did the work
 
     def mouseReleaseEvent(self, ev) -> None:
         if ev.button() != Qt.MouseButton.LeftButton or self._drag is None:

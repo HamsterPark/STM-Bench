@@ -471,6 +471,25 @@ def test_marker_api(app):
     assert len(changed.items) == n_changed                             # nothing to clear: nothing emitted
 
 
+def test_a_double_click_places_one_marker(app):
+    """What an agent's pyautogui.doubleClick delivers: press, release, double-click, release."""
+    view = make_view(app)
+    view.set_frame(make_frame(bumpy(32)))
+    pos = view.pixel_to_widget(12, 9)
+    L, N = Qt.MouseButton.LeftButton, Qt.MouseButton.NoButton
+    send(view, QEvent.Type.MouseButtonPress, pos, L, L)
+    send(view, QEvent.Type.MouseButtonRelease, pos, L, N)
+    send(view, QEvent.Type.MouseButtonDblClick, pos, L, L)
+    send(view, QEvent.Type.MouseButtonRelease, pos, L, N)
+    assert len(view.markers()) == 1
+    view.set_tool("profile")
+    got = Capture(view.profile_changed)
+    for kind, buttons in ((QEvent.Type.MouseButtonPress, L), (QEvent.Type.MouseButtonRelease, N),
+                          (QEvent.Type.MouseButtonDblClick, L), (QEvent.Type.MouseButtonRelease, N)):
+        send(view, kind, pos, L, buttons)
+    assert got.items == [] and len(view.markers()) == 1
+
+
 def test_the_marker_list_is_announced_before_the_marker_event(app):
     """Both already hold the new marker (and its selection) by the time any slot runs."""
     view = make_view(app)
