@@ -79,7 +79,7 @@ class ActionPanel(QScrollArea):
         box.setObjectName(f"group.{g.key}")
         v = QVBoxLayout(box)
         v.setContentsMargins(style.px(6), 0, style.px(6), style.px(1))
-        v.setSpacing(style.px(3))
+        v.setSpacing(style.px(2))
         for line in g.lines:
             h = QHBoxLayout()
             h.setSpacing(style.px(8))
@@ -119,7 +119,7 @@ class ActionPanel(QScrollArea):
         cell = QWidget()
         v = QVBoxLayout(cell)
         v.setContentsMargins(0, 0, 0, 0)
-        v.setSpacing(style.px(1))
+        v.setSpacing(0)
         v.addWidget(self._label(f"lbl.{c.action}.{c.param}", c.en, c.zh, c.unit, p.required))
         name = f"act.{c.action}.{c.param}"
         if p.kind == "boolean" or p.choices is not None:
@@ -158,7 +158,7 @@ class ActionPanel(QScrollArea):
         cell = QWidget()
         v = QVBoxLayout(cell)
         v.setContentsMargins(0, 0, 0, 0)
-        v.setSpacing(style.px(1))
+        v.setSpacing(0)
         v.addWidget(self._label(f"lbl.{c.action}.on", c.en, c.zh))
         # checkable: the selected one is the state the instrument reports (see show_state), not a pending choice
         seg = Segmented([(True, tr("on", self.lang), f"run.{c.action}.on"),
@@ -177,7 +177,7 @@ class ActionPanel(QScrollArea):
         cell = QWidget()
         v = QVBoxLayout(cell)
         v.setContentsMargins(0, 0, 0, 0)
-        v.setSpacing(style.px(1))
+        v.setSpacing(0)
         v.addWidget(self._label(f"lbl.{c.action}.{c.param}", c.en, c.zh, c.unit))
         seg = Segmented([(ch, token(ch), f"run.{c.action}.{token(ch)}") for ch in p.choices])
         self._ranges[c.action] = c.param

@@ -38,8 +38,8 @@ from .status import StatusStrip
 from .worker import Job, Worker
 
 LEFT_PX, RIGHT_PX = 400, 720
-#: what a window manager's title bar may take from a maximized window's height
-FRAME_PX = 30
+#: what a window manager's title bar may take from a maximized window's height (GNOME: 37 px, so 1016 of a 1080 screen)
+FRAME_PX = 37
 #: frames kept for instant re-viewing (arrays of at most 1024 x 1024 doubles): a byte budget
 CACHE_BYTES = 256 * 1024 * 1024
 

@@ -55,6 +55,36 @@ def app():
     a.setFont(before[0])
 
 
+@pytest.fixture(params=["default", "dejavu"])
+def fonts(request, app):
+    """The window's text in the fonts it was tuned with, and again in DejaVu Sans / Sans Mono: what a Linux
+    desktop without anything else (the virtual machine) falls back to, wider and with another line height.
+    matplotlib carries the files; without them the second run is skipped. Requested before ``open_window``
+    so that the window is made in these fonts."""
+    if request.param == "default":
+        yield "default"
+        return
+    mpl = pytest.importorskip("matplotlib")
+    from PySide6.QtGui import QFontDatabase
+    folder = Path(mpl.get_data_path()) / "fonts" / "ttf"
+    names = ("DejaVuSans.ttf", "DejaVuSans-Bold.ttf", "DejaVuSansMono.ttf", "DejaVuSansMono-Bold.ttf")
+    if not all((folder / n).is_file() for n in names):
+        pytest.skip("no DejaVu fonts to test with")
+    ids = [QFontDatabase.addApplicationFont(str(folder / n)) for n in names]
+    sans, mono = list(style.SANS), list(style.MONO)
+    style.SANS[:] = ["DejaVu Sans", *sans]
+    style.MONO[:] = ["DejaVu Sans Mono", *mono]
+    style.apply(app, 1.0)
+    try:
+        yield "dejavu"
+    finally:
+        style.SANS[:] = sans
+        style.MONO[:] = mono
+        style.apply(app, 1.0)
+        for i in ids:
+            QFontDatabase.removeApplicationFont(i)
+
+
 @pytest.fixture
 def open_window(app, tmp_path):
     """A factory of windows on 1920x1053, shut down afterwards (their worker threads must end)."""
@@ -899,6 +929,51 @@ def test_a_long_result_wraps_whole_and_the_list_keeps_its_place(open_window):
     assert win.recent.scroll.height() >= 6 * win.recent.rows[0].fontMetrics().height()    # room for a wrapped row
 
 
+# ── nothing is cut off ──
+def lines_fit(label_or_list, lines: list[str], width: int, font=None) -> None:
+    from PySide6.QtGui import QFontMetrics
+    fm = QFontMetrics(font or label_or_list.font())
+    for line in lines:
+        assert fm.horizontalAdvance(line) <= width, (label_or_list.objectName(), line, fm.horizontalAdvance(line), width)
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_what_the_viewer_the_profile_and_the_data_tab_say_is_not_cut_off(fonts, open_window, lang):
+    win = open_window(lang)
+    # a rotated frame away from the origin: the longest numbers the geometry line can carry
+    shots.fill(win, {"act.scan.center_x_nm": "-12.534", "act.scan.center_y_nm": "-5.607", "act.scan.size_nm": "8.25",
+                     "act.scan.pixels": "80", "act.scan.angle_deg": "30"})
+    run_button(win, "run.scan")
+    shots.settle(win)
+    open_right(win, "spectroscopy")
+    shots.fill(win, {"act.sts.v_start": "-0.6", "act.sts.v_end": "0.6", "act.sts.points": "64"})
+    run_button(win, "run.sts")
+    shots.settle(win)
+    info = shots.widget(win, "view.info")
+    assert "…" not in info.text() and len(info.text().split(chr(10))) == 2
+    lines_fit(info, info.text().split(chr(10)), info.width())                         # the spectrum's two lines
+    win.request_frame(win.viewed[1] if win.viewed[0] == "frame" else win._data["frames"][-1]["frame"])
+    shots.settle(win)
+    assert win.viewed[0] == "frame"
+    lines_fit(info, info.text().split(chr(10)), info.width())                         # and the frame's
+    assert "angle 30°" in info.text() and "centre (-12.534, -5.607) nm" in info.text()
+    fv = win.center.frame_view
+    shots.click(win, shots.widget(win, "view.tool.profile"))
+    shots.drag(win, fv, fv.pixel_to_widget(5, 5).toPoint(), fv.pixel_to_widget(70, 60).toPoint())
+    plot = win.center.small_plot
+    reg, bold = plot._fonts()
+    title = plot._title
+    assert title.startswith("A→B ") and "…" not in title
+    lines_fit(plot, [title], plot.width() - 2 * 8, bold)                                # the title is whole
+    open_left(win, "data")
+    for lst in (shots.widget(win, "data.frames"), shots.widget(win, "data.spectra")):
+        assert lst.count() == 1 and not lst.horizontalScrollBar().isVisible()
+        text = lst.item(0).text().split(chr(10))
+        assert len(text) == 3                                                           # three lines, each whole
+        lines_fit(lst, text, lst.viewport().width() - 2 * style.px(6) - 2)
+    assert "centre (-12.534, -5.607) nm" in shots.widget(win, "data.frames").item(0).text()
+
+
 # ── the state the buttons show ──
 def checked(win: MainWindow, name: str) -> bool:
     return shots.widget(win, name).isChecked()
@@ -971,7 +1046,7 @@ class Gate:
         win._submit(Job(kind, label, dict(self.args), hold))
         end = time.monotonic() + 10
         # until the window has heard that it runs: the worker sets it running a moment before it says so
-        while win.status.state.property("tone") != "busy" and time.monotonic() < end:
+        while win.status.result.property("tone") != "busy" and time.monotonic() < end:
             QApplication.processEvents()
             time.sleep(0.005)
         QApplication.processEvents()

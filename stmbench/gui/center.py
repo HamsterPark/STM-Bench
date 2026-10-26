@@ -13,7 +13,7 @@ import re
 
 import numpy as np
 from PySide6.QtCore import QEvent, QRect, Qt, Signal
-from PySide6.QtGui import QColor, QPainter, QPixmap
+from PySide6.QtGui import QColor, QFontMetrics, QPainter, QPixmap
 from PySide6.QtWidgets import (QAbstractItemView, QHBoxLayout, QHeaderView, QLabel, QPushButton, QSizePolicy,
                                QStackedWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
@@ -89,10 +89,14 @@ class CenterColumn(QWidget):
         v.setSpacing(style.px(4))
 
         # ── what is shown ──
-        self.info = ElidedLabel()
+        # what is shown, in two lines that each fit the column (the frame's name, and its geometry): one line
+        # long enough for the geometry was cut off with an ellipsis on a wider font
+        self.info = QLabel()
         self.info.setObjectName("view.info")
-        self.info.setFont(style.mono_font(17))
-        self.info.setMinimumHeight(style.px(24))
+        self.info.setFont(style.sans_font(17))
+        self.info.setWordWrap(True)
+        self.info.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignTop)
+        self.info.setFixedHeight(2 * QFontMetrics(self.info.font()).lineSpacing() + style.px(4))
         v.addWidget(self.info)
 
         self.toolbars = QStackedWidget()
@@ -301,9 +305,10 @@ class CenterColumn(QWidget):
         self.frame_view.set_frame(frame)
         t0 = (meta or {}).get("t_start_s", frame.get("t_start_s"))
         cx, cy = frame["center_nm"]
-        self.info.set_full_text(
-            f"{frame['frame']}  centre ({fmt.num(cx, 5)}, {fmt.num(cy, 5)}) nm  size {fmt.num(frame['size_nm'], 5)} nm  "
-            f"{frame['pixels']} px  angle {fmt.num(frame['angle_deg'], 4)}°  start {fmt.hms(t0) if t0 is not None else '-'}")
+        self.info.setText(
+            f"{frame['frame']}   start {fmt.hms(t0) if t0 is not None else '-'}\n"
+            f"centre ({fmt.num(cx, 5)}, {fmt.num(cy, 5)}) nm · size {fmt.num(frame['size_nm'], 5)} nm · "
+            f"{frame['pixels']} px · angle {fmt.num(frame['angle_deg'], 4)}°")
         self.readout.set_full_text("")
         for b in self.thumbs:
             b.setChecked(b.name == frame["frame"])
@@ -323,8 +328,9 @@ class CenterColumn(QWidget):
         for b in self.thumbs:
             b.setChecked(False)
         self.readout.set_full_text("")
-        self.info.set_full_text(f"{spec['name']}  {spec['kind']}  tip ({spec['tip_nm'][0]:.3f}, {spec['tip_nm'][1]:.3f}) nm  "
-                                f"{np.size(spec[cols[0]])} points  at {fmt.hms(spec['t_s'])}")
+        self.info.setText(f"{spec['name']}   at {fmt.hms(spec['t_s'])}\n"
+                          f"{spec['kind']} · tip ({spec['tip_nm'][0]:.3f}, {spec['tip_nm'][1]:.3f}) nm · "
+                          f"{np.size(spec[cols[0]])} points")
         self._draw_spectrum(xk, yk)
 
     def _rebuild_axes(self, cols: list[str], xk: str, yk: str) -> None:
@@ -408,8 +414,10 @@ class CenterColumn(QWidget):
             self.small_plot.clear(tr("profile", self.lang))
             return
         length = float(p["s_nm"][-1]) if p.get("s_nm") else 0.0
+        # the frame is the one on show (a profile drawn on another is dropped), so the title is the length alone:
+        # the plot is a third of the column wide
         self.small_plot.set_series(p["s_nm"], [("profile", p["values"])], "distance (nm)", p.get("unit", ""),
-                                   f"A → B  {length:.3f} nm  ({p.get('frame', '')})")
+                                   f"A→B {length:.2f} nm")
 
     def show_trace(self, title: str, lists: dict[str, list[float]]) -> None:
         """Plot the equal-length numeric lists of an action's reply: the first against the others when

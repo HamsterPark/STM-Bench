@@ -243,9 +243,9 @@ class ReportTab(QWidget):
 
 
 class DataTab(QWidget):
-    """What the instrument saved, newest first: each frame or spectrum is two lines (its name, start time
-    and channels; its geometry), which carry every column of a table in the width of this column. A click
-    shows the item in the viewer."""
+    """What the instrument saved, newest first: each frame or spectrum is three short lines (its name, start
+    time and channels; its size; where it is), which carry every column of a table in the width of this
+    column without cutting any of them off. A click shows the item in the viewer."""
 
     frame_clicked = Signal(str)
     spectrum_clicked = Signal(str)
@@ -278,6 +278,9 @@ class DataTab(QWidget):
         w.setFont(style.sans_font(17))
         w.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         w.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerPixel)
+        w.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)      # no line is longer than the column
+        w.setWordWrap(True)                                                       # and one that is wraps rather than hides
+        w.setTextElideMode(Qt.TextElideMode.ElideNone)
         return w
 
     def set_data(self, frames: list[dict], spectra: list[dict]) -> None:
@@ -287,24 +290,24 @@ class DataTab(QWidget):
         self._fill(self.spectra, [self._spectrum_lines(s) for s in reversed(spectra)])
 
     @staticmethod
-    def _frame_lines(f: dict) -> tuple[str, str, str]:
-        """``(name, first line, second line)``: name, start and channels; then the geometry."""
+    def _frame_lines(f: dict) -> tuple[str, list[str]]:
+        """``(name, lines)``: name, start and channels; the size; the centre."""
         channels = " ".join(_CHANNEL[c] for c in f.get("channels", []))
         cx, cy = f["center_nm"]
-        return (f["frame"], f"{f['frame']}   {fmt.hms(f['t_start_s'])}   {channels}",
-                f"{fmt.num(f['size_nm'], 5)} nm · {f['pixels']} px · centre ({fmt.num(cx, 5)}, {fmt.num(cy, 5)}) nm · "
-                f"{fmt.num(f['angle_deg'], 4)}°")
+        return (f["frame"], [f"{f['frame']}   {fmt.hms(f['t_start_s'])}   {channels}",
+                             f"size {fmt.num(f['size_nm'], 5)} nm · {f['pixels']} px · angle {fmt.num(f['angle_deg'], 4)}°",
+                             f"centre ({fmt.num(cx, 5)}, {fmt.num(cy, 5)}) nm"])
 
     @staticmethod
-    def _spectrum_lines(s: dict) -> tuple[str, str, str]:
-        return (s["spectrum"], f"{s['spectrum']}   {s['kind']}   {fmt.hms(s['t_s'])}",
-                f"tip ({s['tip_nm'][0]:.3f}, {s['tip_nm'][1]:.3f}) nm · {s['points']} points")
+    def _spectrum_lines(s: dict) -> tuple[str, list[str]]:
+        return (s["spectrum"], [s["spectrum"], f"{s['kind']} · {fmt.hms(s['t_s'])}",
+                                f"tip ({s['tip_nm'][0]:.3f}, {s['tip_nm'][1]:.3f}) nm · {s['points']} points"])
 
     @staticmethod
-    def _fill(w: QListWidget, rows: list[tuple[str, str, str]]) -> None:
+    def _fill(w: QListWidget, rows: list[tuple[str, list[str]]]) -> None:
         w.clear()
-        for name, first, second in rows:
-            item = QListWidgetItem(f"{first}\n{second}")
+        for name, lines in rows:
+            item = QListWidgetItem(chr(10).join(lines))
             item.setData(Qt.ItemDataRole.UserRole, name)
             w.addItem(item)
 
