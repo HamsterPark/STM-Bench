@@ -111,10 +111,11 @@ def _bilinear(a: np.ndarray, col: np.ndarray, row: np.ndarray) -> np.ndarray:
     r0 = np.minimum(np.floor(r).astype(np.intp), ny - 2)
     fc, fr = c - c0, r - r0
     out = np.zeros(c.shape)
-    for dr, wr in ((0, 1.0 - fr), (1, fr)):
-        for dc, wc in ((0, 1.0 - fc), (1, fc)):
-            w = wr * wc
-            out += np.where(w > 0.0, w * a[r0 + dr, c0 + dc], 0.0)
+    with np.errstate(invalid="ignore"):                       # 0 * inf: a hot pixel with no weight
+        for dr, wr in ((0, 1.0 - fr), (1, fr)):
+            for dc, wc in ((0, 1.0 - fc), (1, fc)):
+                w = wr * wc
+                out += np.where(w > 0.0, w * a[r0 + dr, c0 + dc], 0.0)
     return out
 
 

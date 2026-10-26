@@ -838,6 +838,10 @@ def test_bilinear_sampling():
     a[1, 1] = np.nan
     assert fv._bilinear(a, np.array([0.0]), np.array([1.0]))[0] == 4.0       # a NaN neighbour with no weight is ignored
     assert np.isnan(fv._bilinear(a, np.array([1.0, 1.5]), np.array([1.0, 1.0]))).all()
+    a[1, 1] = np.inf
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")                                       # ... and so is an infinite one, silently
+        assert fv._bilinear(a, np.array([0.0]), np.array([1.0]))[0] == 4.0
 
 
 def test_resample_axis_averages_by_area():
