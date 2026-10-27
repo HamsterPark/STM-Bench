@@ -23,13 +23,21 @@ from .labels import S, one, tr
 from .widgets.frame_view import FrameView, frame_thumbnail
 from .widgets.plot_view import PlotView
 
-#: spectrum columns as the viewer plots them: (button text, factor from the stored unit, unit)
+#: spectrum columns as the viewer plots them: (button text, factor from the stored unit, unit); a move trace's
+#: own are the distance along the move and the time since it began
 SPECTRUM_COLUMNS = {
     "v": ("V", 1.0, "V"), "i": ("I", 1e12, "pA"), "didv": ("dI/dV", 1e9, "nS"), "z_rel": ("z rel", 1e12, "pm"),
     "z_abs": ("z", 1e9, "nm"), "df": ("Δf", 1.0, "Hz"), "amp": ("amplitude", 1e12, "pm"),
+    "dist": ("distance", 1e9, "nm"), "t": ("time", 1.0, "s"),
 }
 _X_FIRST = ("v", "z_rel", "z_abs")
 _Y_FIRST = ("didv", "df", "i")
+#: a move trace is read along the move, or in time, against what the instrument recorded there: Z, then current
+MOVE_X, MOVE_Y = ("dist", "t"), ("z_abs", "i")
+#: the columns that are words, not symbols, with the label that names them in the window's language
+_COLUMN_WORDS = {"dist": "col_dist", "t": "col_t"}
+#: a spectrum has at least this many points (STS and Z sweeps take eight or more), a move trace two
+_SPECTRUM_MIN, _MOVE_MIN = 8, 2
 N_THUMBS = 6
 THUMB_PX = 64
 #: the marker table shows this many rows before it scrolls: its strip is exactly a header, the rows and the frame
@@ -39,18 +47,34 @@ ROW_PX, HEADER_PX = 26, 24
 MARKER_STRIP_PX = HEADER_PX + MARKER_ROWS * ROW_PX + 2
 
 
-def column_label(key: str) -> str:
+def column_label(key: str, lang: str = "en") -> str:
     name, _, unit = SPECTRUM_COLUMNS[key]
+    if key in _COLUMN_WORDS:
+        name = tr(_COLUMN_WORDS[key], lang)
     return name if name == unit else f"{name} ({unit})"
 
 
 def spectrum_columns(spec: dict) -> list[str]:
-    """The plottable columns of a spectrum, in a fixed order."""
-    return [k for k in SPECTRUM_COLUMNS if k in spec and np.size(spec[k]) >= 8]
+    """The plottable columns of a spectrum (or of a move trace, which may be as short as two points), in a
+    fixed order."""
+    least = _MOVE_MIN if spec.get("kind") == "move" else _SPECTRUM_MIN
+    return [k for k in SPECTRUM_COLUMNS if k in spec and np.size(spec[k]) >= least]
+
+
+def axis_columns(spec: dict) -> tuple[list[str], list[str]]:
+    """The columns offered for the x axis and for the y axis: every plottable column for either, except a move
+    trace's, whose x is the distance along the move or the time and whose y is Z or the current."""
+    cols = spectrum_columns(spec)
+    if spec.get("kind") == "move":
+        return [c for c in MOVE_X if c in cols], [c for c in MOVE_Y if c in cols]
+    return cols, cols
 
 
 def default_axes(spec: dict) -> tuple[str, str]:
-    """The sweep axis against the first signal that varies."""
+    """The sweep axis against the first signal that varies (a move trace: Z against the distance along it)."""
+    if spec.get("kind") == "move":
+        xs, ys = axis_columns(spec)
+        return xs[0], ys[0]
     cols = spectrum_columns(spec)
     x = next((c for c in _X_FIRST if c in cols), cols[0])
     ys = [c for c in cols if c != x]
@@ -338,33 +362,52 @@ class CenterColumn(QWidget):
             b.setChecked(b.name == frame["frame"])
 
     def show_spectrum(self, spec: dict, axes: tuple[str, str] | None = None) -> None:
+        """Show a spectrum, or a move trace (``kind`` "move"), plotted against the columns the reader picks."""
         self._spec = spec
-        cols = spectrum_columns(spec)
-        if not cols:
+        xcols, ycols = axis_columns(spec)
+        if not xcols or not ycols:
             self.plot.clear(tr("no_view", self.lang))
             self.toolbars.setCurrentIndex(1)
             self.stack.setCurrentIndex(1)
             return
         xk, yk = axes or default_axes(spec)
-        self._rebuild_axes(cols, xk, yk)
+        self._rebuild_axes(xcols, ycols, xk, yk)
         self.toolbars.setCurrentIndex(1)
         self.stack.setCurrentIndex(1)
         for b in self.thumbs:
             b.setChecked(False)
         self.readout.set_full_text("")
-        self.info.setText(f"{spec['name']}   at {fmt.hms(spec['t_s'])}\n"
-                          f"{spec['kind']} · tip ({spec['tip_nm'][0]:.3f}, {spec['tip_nm'][1]:.3f}) nm · "
-                          f"{np.size(spec[cols[0]])} points")
+        self.info.setText(self._spectrum_info(spec, int(np.size(spec[xcols[0]]))))
         self._draw_spectrum(xk, yk)
 
-    def _rebuild_axes(self, cols: list[str], xk: str, yk: str) -> None:
-        for attr, row, name, val in (("spec_x", self.spec_x_row, "view.spec_x", xk),
-                                     ("spec_y", self.spec_y_row, "view.spec_y", yk)):
+    @staticmethod
+    def _spectrum_info(spec: dict, points: int) -> str:
+        """Two lines: the record's name and when it was taken, then what it is. A move trace also says what the
+        instrument recorded of the move (where from and to, how fast, at what bias and setpoint, feedback on or
+        off), the file's own header, and nothing that was read off the curves."""
+        first = f"{spec['name']}   at {fmt.hms(spec['t_s'])}"
+        if spec.get("kind") != "move":
+            x, y = spec["tip_nm"]
+            return f"{first}\n{spec['kind']} · tip ({x:.3f}, {y:.3f}) nm · {points} points"
+        junction = [fmt.volts(spec["bias_v"]) if "bias_v" in spec else "",
+                    fmt.picoamps(spec["setpoint_pa"]) if "setpoint_pa" in spec else "",
+                    f"feedback {fmt.on_off(spec['feedback'])}" if "feedback" in spec else ""]
+        path = "move"
+        if "from_nm" in spec and "to_nm" in spec:                  # five digits like the frame's centre: the line must fit
+            (x0, y0), (x1, y1) = spec["from_nm"], spec["to_nm"]    # the narrowest centre column even at (-150.12, 150.12)
+            path += f" · ({fmt.num(x0, 5)}, {fmt.num(y0, 5)}) → ({fmt.num(x1, 5)}, {fmt.num(y1, 5)}) nm"
+        if "speed_nm_s" in spec:
+            path += f" · {fmt.num(spec['speed_nm_s'], 4)} nm/s"
+        return " · ".join([first, *[j for j in junction if j]]) + f"\n{path} · {points} points"
+
+    def _rebuild_axes(self, xcols: list[str], ycols: list[str], xk: str, yk: str) -> None:
+        for attr, row, name, cols, val in (("spec_x", self.spec_x_row, "view.spec_x", xcols, xk),
+                                           ("spec_y", self.spec_y_row, "view.spec_y", ycols, yk)):
             old = getattr(self, attr)
             if old is not None:
                 row.removeWidget(old)
                 old.deleteLater()
-            seg = Segmented([(c, column_label(c), f"{name}.{c}") for c in cols], val)
+            seg = Segmented([(c, column_label(c, self.lang), f"{name}.{c}") for c in cols], val)
             seg.setObjectName(name)
             seg.changed.connect(lambda _v: self._axes_clicked())
             row.insertWidget(1, seg)
@@ -378,7 +421,8 @@ class CenterColumn(QWidget):
         spec = self._spec
         x = np.asarray(spec[xk], float) * SPECTRUM_COLUMNS[xk][1]
         y = np.asarray(spec[yk], float) * SPECTRUM_COLUMNS[yk][1]
-        self.plot.set_series(x, [(column_label(yk), y)], column_label(xk), column_label(yk), spec["name"])
+        xl, yl = column_label(xk, self.lang), column_label(yk, self.lang)
+        self.plot.set_series(x, [(yl, y)], xl, yl, spec["name"])
 
     def current_spectrum_axes(self) -> tuple[str, str] | None:
         if self._spec is None or not (self.spec_x and self.spec_y):

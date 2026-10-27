@@ -235,7 +235,8 @@ the fields named as `ReportResult` and the rule card name them - value, x_nm, y_
 sigma, note, the ones the picked claim needs starred as in the action panels, Enter in a field sending the
 report, and a "+ shown file" button that appends the name of the frame or spectrum the viewer shows to
 `evidence` (or says in the recent results that none is shown) - and Finish with an inline two-click
-confirmation), Data and Log; in the middle the viewer (a frame with nm
+confirmation), Data (the frames, the spectra and the move traces, each list under a heading of its own) and Log;
+in the middle the viewer (a frame with nm
 axes, a colour bar, a cursor readout, flatten modes, a contrast switch (auto: the 0.5-99.5 percentile
 scale of the image an MCP agent gets, the default; full: the frame's minimum to maximum, which keeps the
 top of an atom from saturating; visible: the minimum to maximum of the part of the frame in view, so that a
@@ -246,8 +247,13 @@ whole, another channel of the same frame keeps the view; the axes, the cursor, m
 same pixel mapping at every zoom, and nothing is found or snapped for the reader), numbered markers (six rows before the table
 scrolls) with their coordinates, the start time of the frame each was placed on and the distance to the
 previous one, a line profile, the last frames as thumbnails; or a spectrum with chosen
-columns; over a spectrum or a line profile a cursor reads out the data point nearest the pointer, its x
-and each curve's y, and a left click pins it); on the right the Operate tab (every action a P4 episode uses,
+columns; or the trace of a tip move, which every `move_tip` saves like a spectrum and the window shows when
+the move is done, as it shows an STS: its distance along the move (nm) or its time (s) against Z (nm) or the
+current (pA), open on Z against the distance, headed by the conditions the instrument recorded of the move
+(from where to where, how fast, the bias, the setpoint, the feedback) and nothing read off the curves - no
+mark, count or note on a step or a spike, which is for the reader to find; over a spectrum, a trace or a line
+profile a cursor reads out the data point nearest the pointer, its x and each curve's y, and a left click
+pins it); on the right the Operate tab (every action a P4 episode uses,
 without scrolling at 1920x1080 or 1920x1016) and the Spectroscopy tab, whose On / Off pairs and range row
 show the state the instrument reports as the selected button, and under them the last five results, newest
 first, in the instrument's words (a refusal stays among them until five calls have followed it). A click queues its job at once with the field values read at that moment and
@@ -259,7 +265,9 @@ buttons and looks at the screen once, and a drag after a refused Set setpoint wo
 resistance nobody chose; the Log and the recent results say "not run: an earlier call was refused" (they
 never reach the instrument or the export), the refusal stays on the strip's last line until a call is accepted,
 and reads (a frame, a spectrum) are not affected. An empty field sends nothing (the instrument's default
-applies, or it refuses); a field that is not a number is sent as typed; every click in a field selects all
+applies, or it refuses: a parameter the action table marks required has a red star, a hint "required" and no
+default, and an empty one is refused in the instrument's words, as the pulse's width and the poke's depth and dwell
+are in API version 2); a field that is not a number is sent as typed; every click in a field selects all
 of it, so click then type replaces the content. The three `← marker` buttons
 copy a marker's coordinates into the move-tip or scan fields or the report form, and Delete marker removes
 the selected one. While a scan runs or waits the viewer says so over what it shows, and a click on a viewer
@@ -285,7 +293,11 @@ stands. `--lang en` shows English labels, the English task text with its rule ca
 `say_en`; `--lang zh` (the default) shows each Chinese label followed by its English, the Chinese task
 text and `say`. `--ui-scale` multiplies every font and
 size; it is an upper bound, because the window is measured with the fonts the machine has and every size
-is shrunk if it would not fit the screen (1.0 is tuned for 1920x1080).
+is shrunk if it would not fit the screen (1.0 is tuned for 1920x1080). The columns are 360, 824 and 704 px
+wide on that screen; a side column whose contents are wider than that with the machine's fonts (the right one,
+with a Chinese label in front of every English one, in a wider font than the window was tuned with) is given the
+width it needs from the centre column, which has 143 px or more to spare, before anything is shrunk: shrinking every size
+cannot mend a column that is too narrow for its contents, since the column shrinks with them.
 
 `python -m stmbench.gui.shots --out <dir>` renders the window offscreen in scripted states (just
 started; after a scan with markers and a profile; a spectrum; the report form; a refusal; the data,

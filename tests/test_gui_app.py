@@ -9,9 +9,12 @@ import io
 import json
 import math
 import os
+import re
 import time
+from dataclasses import replace
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 pytest.importorskip("PySide6")
@@ -23,7 +26,7 @@ from PySide6.QtTest import QTest  # noqa: E402
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QLabel, QLineEdit, QListWidget,  # noqa: E402
                                QPlainTextEdit, QPushButton, QTableWidget, QTabBar, QTextBrowser, QWidget)
 
-from stmbench.gui import layout, shots, style  # noqa: E402
+from stmbench.gui import fmt, layout, shots, style  # noqa: E402
 from stmbench.gui.app import MainWindow  # noqa: E402
 from stmbench.gui.panels import token  # noqa: E402
 from stmbench.gui.session import GuiSession, make_private_dir, read_spec  # noqa: E402
@@ -289,7 +292,7 @@ def test_buttons_selectors_and_on_off_send_what_they_show(open_window, tmp_path)
     win = open_window("en")
     shots.click(win, shots.widget(win, "act.scan.direction.up"))
     shots.click(win, shots.widget(win, "act.pulse.z_hold.no"))
-    shots.fill(win, {"act.pulse.bias_v": "1.0", **SMALL})
+    shots.fill(win, {"act.pulse.bias_v": "1.0", "act.pulse.width_ms": "20", **SMALL})     # the width: required in API v2
     run_button(win, "run.scan")
     run_button(win, "run.pulse")
     run_button(win, "run.feedback.off")
@@ -301,13 +304,91 @@ def test_buttons_selectors_and_on_off_send_what_they_show(open_window, tmp_path)
     shots.settle(win)
     by = {r["name"]: r for r in records(tmp_path) if r["kind"] == "act"}
     assert by["scan"]["params"]["direction"] == "up" and by["pulse"]["params"]["z_hold"] is False
-    assert by["pulse"]["params"]["bias_v"] == 1.0 and by["feedback"]["params"] == {"on": False}
+    assert by["pulse"]["params"]["bias_v"] == 1.0 and by["pulse"]["params"]["width_ms"] == 20.0
+    assert by["feedback"]["params"] == {"on": False}
     assert by["set_current_range"]["params"] == {"full_scale_na": 1.0}
     assert by["drift_comp"]["params"]["on"] is True and by["drift_comp"]["params"]["vx_nm_per_min"] == 1.5
     assert "withdraw" in by
     assert win.status.result.full_text() == "✗ refused: coarse_move: direction is required"
     plain = win.status.plain_text()
     assert "Z feedback OFF" in plain and "Range 1 nA" in plain and "Withdrawn yes" in plain
+
+
+# ── required parameters ──
+def _conditioning_required(monkeypatch) -> None:
+    """The action table as API version 2 has it: the pulse's width and the poke's depth and dwell are required and
+    have no default. The window and the instrument read the one table (``stmbench.instrument.ACTIONS``), so patching
+    it shows what the console does the moment the instrument says so."""
+    for action, names in (("pulse", {"width_ms"}), ("poke", {"depth_nm", "dwell_s"})):
+        spec = ACTIONS[action]
+        params = tuple(replace(p, required=True, default=None) if p.name in names else p for p in spec.params)
+        monkeypatch.setitem(ACTIONS, action, replace(spec, params=params))
+
+
+@pytest.fixture
+def v2_table(monkeypatch):
+    _conditioning_required(monkeypatch)
+
+
+@pytest.fixture(params=["as_it_is", "v2"])
+def table(request, monkeypatch):
+    if request.param == "v2":
+        _conditioning_required(monkeypatch)
+    return request.param
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_every_field_is_starred_hinted_and_left_empty_as_the_action_table_says(table, open_window, lang):
+    """Each text field's red star and grey hint come from its parameter in ``ACTIONS``, whichever the table is:
+    "required" and a star where the parameter is required, "default 50" where it has a default, "optional"
+    otherwise; every field starts empty, because a default is the instrument's to apply, not the window's."""
+    win = open_window(lang)
+    starred = hinted = 0
+    for _, c in layout.cells():
+        if not isinstance(c, layout.F):
+            continue
+        p = next(p for p in ACTIONS[c.action].params if p.name == c.param)
+        label = shots.widget(win, f"lbl.{c.action}.{c.param}")
+        assert ("*" in label.text()) == p.required, (c.action, c.param)
+        starred += p.required
+        w = shots.widget(win, f"act.{c.action}.{c.param}")
+        if isinstance(w, QLineEdit):
+            want = "required" if p.required else f"default {fmt.num(p.default)}" if p.default is not None else "optional"
+            assert w.placeholderText() == want and w.text() == "", (c.action, c.param, w.placeholderText())
+            hinted += 1
+    assert starred >= 10 and hinted > 25                         # the table's required fields, and the text fields
+    if table == "v2":
+        for name in ("pulse.width_ms", "poke.depth_nm", "poke.dwell_s"):
+            assert shots.widget(win, f"act.{name}").placeholderText() == "required"
+        assert shots.widget(win, "act.poke.bias_v").placeholderText() == "optional"       # still not required
+
+
+def test_with_the_conditioning_parameters_required_an_empty_field_sends_nothing_and_the_instrument_refuses(
+        v2_table, open_window, tmp_path):
+    win = open_window("en")
+    assert win.operate.collect("pulse") == {"z_hold": True} and win.operate.collect("poke") == {}    # empty: not sent
+    shots.fill(win, {"act.pulse.bias_v": "1.0"})
+    run_button(win, "run.pulse")                                 # the width left empty
+    shots.settle(win)
+    assert win.status.result.full_text() == "✗ refused: pulse: width_ms is required"
+    refused = [r for r in records(tmp_path) if r["kind"] == "refused"]
+    assert refused[-1]["name"] == "pulse" and refused[-1]["args"] == {"bias_v": 1.0, "z_hold": True}    # no 50 filled in
+    run_button(win, "run.poke")
+    shots.settle(win)
+    assert win.status.result.full_text() == "✗ refused: poke: depth_nm is required"
+    shots.fill(win, {"act.poke.depth_nm": "0.1"})
+    run_button(win, "run.poke")
+    shots.settle(win)
+    assert win.status.result.full_text() == "✗ refused: poke: dwell_s is required"
+    assert win.operate.collect("poke") == {"depth_nm": 0.1}
+    assert not acts(records(tmp_path))                           # nothing reached the instrument but the refusals
+    shots.fill(win, {"act.pulse.width_ms": "20", "act.poke.dwell_s": "0.2"})
+    run_button(win, "run.pulse")
+    run_button(win, "run.poke")
+    shots.settle(win)
+    done = {r["name"]: r["params"] for r in records(tmp_path) if r["kind"] == "act"}
+    assert done == {"pulse": {"bias_v": 1.0, "width_ms": 20.0, "z_hold": True},
+                    "poke": {"depth_nm": 0.1, "dwell_s": 0.2}}
 
 
 def test_enter_in_a_field_runs_its_groups_main_action_and_values_stay(open_window, tmp_path):
@@ -830,6 +911,176 @@ def test_a_spectrum_is_plotted_with_selectable_columns(open_window):
     assert win.center.current_spectrum_axes() == ("v", "i")
     assert shots.widget(win, "data.spectra").count() == 1 and name in shots.widget(win, "data.spectra").item(0).text()
     assert win.status.result.full_text().startswith(f"✓ sts → {name}")
+
+
+# ── move traces ──
+def make_trace(name: str = "move_0001.dat", *, frm=(-6.891, -3.818), to=(-2.887, -3.895), speed: float = 0.25,
+               n: int = 400, bias: float = 0.005, setpoint: float = 100000.0, t_s: float = 612.0,
+               feedback: bool = True, index: int = 1) -> dict:
+    """A move trace as ``Instrument.spectrum(name)`` returns it for ``kind`` "move" (``t`` s, ``dist`` m, ``z_abs`` m,
+    ``i`` A, and the move's own conditions), made by hand so that the window is tested against the record's layout and
+    not against one version of the physics: a corrugation, one atom-sized step 52 % of the way along with a burst of
+    current there, and noise."""
+    rng = np.random.default_rng(7)
+    dist = np.linspace(0.0, math.hypot(to[0] - frm[0], to[1] - frm[1]) * 1e-9, n)
+    z = -1.2e-9 + 6e-12 * np.sin(2 * np.pi * dist / 0.255e-9) + 0.4e-12 * rng.standard_normal(n)
+    i = setpoint * 1e-12 * (1.0 + 0.04 * rng.standard_normal(n))
+    k = int(0.52 * n)
+    z[k:] += 14e-12
+    i[k:k + 4] *= 3.0
+    return {"name": name, "kind": "move", "index": index, "tip_nm": list(to), "from_nm": list(frm), "to_nm": list(to),
+            "speed_nm_s": speed, "bias_v": bias, "setpoint_pa": setpoint, "feedback": feedback, "t_s": t_s,
+            "t": dist / (speed * 1e-9), "dist": dist, "z_abs": z, "i": i}
+
+
+class TraceServer:
+    """Makes a window's session answer ``move_tip`` as the instrument will once it records traces: the reply names
+    the ``trace`` (and has no ``current_spikes``), the data list carries it among the spectra with ``kind`` "move",
+    and ``spectrum(name)`` returns its record. The tip still moves on the instrument that is there; the traces are
+    served in the order they were given."""
+
+    def __init__(self, win: MainWindow, *traces: dict):
+        self.pending, self.served = list(traces), []
+        s = win.session
+        self._act, self._data, self._spectrum = s.act, s.data, s.spectrum
+        s.act, s.data, s.spectrum = self.act, self.data, self.spectrum
+
+    def act(self, name, args=None):
+        reply = self._act(name, args)
+        if name == "move_tip":
+            self.served.append(self.pending.pop(0))
+            reply = {**{k: v for k, v in reply.items() if k != "current_spikes"},
+                     "trace": self.served[-1]["name"], "duration_s": 16.0}
+        return reply
+
+    def data(self):
+        out = self._data()
+        out["spectra"] = [*out["spectra"], *({"spectrum": t["name"], "kind": "move", "tip_nm": t["tip_nm"],
+                                              "points": len(t["t"]), "t_s": t["t_s"]} for t in self.served)]
+        return out
+
+    def spectrum(self, name):
+        return next((t for t in self.served if t["name"] == name), None) or self._spectrum(name)
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_a_finished_tip_move_shows_its_trace_like_a_spectrum_and_the_data_tab_lists_it_as_a_move_trace(
+        fonts, open_window, lang):
+    win = open_window(lang)
+    trace = make_trace()
+    TraceServer(win, trace)
+    frame = scan_small(win)
+    shots.fill(win, {"act.move_tip.x_nm": "-2.887", "act.move_tip.y_nm": "-3.895", "act.move_tip.speed_nm_s": "0.25"})
+    run_button(win, "run.move_tip")
+    shots.settle(win)
+    # what an STS does: the record is shown, in the viewer's plot, open on Z against the distance along the move
+    assert win.viewed == ("spectrum", trace["name"]) and win.center.stack.currentIndex() == 1
+    assert win.center.toolbars.currentIndex() == 1 and not any(b.isChecked() for b in win.center.thumbs)
+    assert win.center.current_spectrum_axes() == ("dist", "z_abs")
+    plot = win.center.plot
+    assert np.allclose(plot._x, trace["dist"] * 1e9) and np.allclose(plot._series[0][1], trace["z_abs"] * 1e9)
+    assert plot._x_label == ("距离 distance (nm)" if lang == "zh" else "distance (nm)") and plot._y_label == "z (nm)"
+    assert plot._title == trace["name"] and plot._message == ""
+    # its own columns: where along the move or when, to read Z or the current at; none of a spectrum's
+    assert [b.objectName() for b in win.center.spec_x.buttons()] == ["view.spec_x.dist", "view.spec_x.t"]
+    assert [b.objectName() for b in win.center.spec_y.buttons()] == ["view.spec_y.z_abs", "view.spec_y.i"]
+    assert shots.widget(win, "view.spec_x.dist").isChecked() and shots.widget(win, "view.spec_y.z_abs").isChecked()
+    for name in ("view.spec_x.t", "view.spec_x.dist", "view.spec_y.i", "view.spec_y.z_abs"):
+        shots.hit(win, shots.widget(win, name))
+    run_button(win, "view.spec_x.t")
+    run_button(win, "view.spec_y.i")
+    assert win.center.current_spectrum_axes() == ("t", "i")
+    assert np.allclose(plot._x, trace["t"]) and np.allclose(plot._series[0][1], trace["i"] * 1e12)
+    assert plot._x_label == ("时间 time (s)" if lang == "zh" else "time (s)") and plot._y_label == "I (pA)"
+    # the list: a heading of its own that names it, not among the spectra
+    data = win.sidebar.data
+    assert data.traces.count() == 1 and data.spectra.count() == 0 and data.frames.count() == 1
+    assert data.traces_title.text() == ("移动轨迹 Move traces (1)" if lang == "zh" else "Move traces (1)")
+    assert data.spectra_title.text() == ("谱 Spectra (0)" if lang == "zh" else "Spectra (0)")
+    item = data.traces.item(0).text().split(chr(10))
+    assert item == [trace["name"], "move trace · 0:10:12", "to (-2.887, -3.895) nm · 400 points"]
+    assert data.traces.currentRow() == 0                                     # the item on show is the selected one
+    # the strip and the recent results say what a spectrum's say: the file a report may cite, and how long it took
+    assert win.status.result.full_text() == f"✓ move_tip → {trace['name']} (16 s)"
+    assert shots.widget(win, "recent.0").text() == f"✓ move_tip → {trace['name']} (16 s)"
+    # the two lines above the plot carry the move's own conditions, whole, in the window's fonts
+    info = shots.widget(win, "view.info")
+    lines = info.text().split(chr(10))
+    assert lines == [f"{trace['name']}   at 0:10:12 · 0.005 V · 100000 pA · feedback ON",
+                     "move · (-6.891, -3.818) → (-2.887, -3.895) nm · 0.25 nm/s · 400 points"]
+    lines_fit(info, lines, info.width())
+    # nothing found, counted or marked: the window says nothing of hops over what the instrument recorded
+    shown = "\n".join(_all_text(w) for w in (win.center, win.status, win.recent, data))
+    assert not re.search(r"\bhops?\b|spike", shown, re.IGNORECASE)
+    # the trace can be cited as evidence, and the frame and the trace are each one click from the other
+    open_left(win, "report")
+    run_button(win, "report.viewed")
+    assert shots.widget(win, "report.evidence").text() == trace["name"]
+    shots.click(win, shots.widget(win, "thumb.0"))
+    shots.settle(win)
+    assert win.viewed == ("frame", frame) and win.center.stack.currentIndex() == 0 and not data.traces.selectedItems()
+    open_left(win, "data")
+    shots.click(win, data.traces.viewport(), data.traces.visualItemRect(data.traces.item(0)).center())
+    shots.settle(win)
+    assert win.viewed == ("spectrum", trace["name"]) and win.center.current_spectrum_axes() == ("dist", "z_abs")
+    assert data.traces.currentRow() == 0
+
+
+def test_every_move_makes_a_trace_the_newest_first_in_the_list_and_a_refused_move_makes_none(open_window):
+    win = open_window("en")
+    first, second = make_trace("move_0001.dat", index=1), make_trace("move_0002.dat", index=2, t_s=700.0,
+                                                                     frm=(-2.887, -3.895), to=(0.0, 0.0))
+    TraceServer(win, first, second)
+    shots.fill(win, {"act.move_tip.x_nm": "1", "act.move_tip.y_nm": "0", "act.move_tip.speed_nm_s": "100"})
+    run_button(win, "run.move_tip")
+    shots.settle(win)
+    shots.fill(win, {"act.move_tip.x_nm": "2", "act.move_tip.y_nm": "0"})
+    run_button(win, "run.move_tip")
+    shots.settle(win)
+    traces = win.sidebar.data.traces
+    assert [traces.item(r).text().split(chr(10))[0] for r in range(traces.count())] == ["move_0002.dat", "move_0001.dat"]
+    assert win.viewed == ("spectrum", "move_0002.dat") and traces.currentRow() == 0
+    shots.fill(win, {"act.move_tip.x_nm": "1000000", "act.move_tip.y_nm": "0"})          # outside the piezo range
+    run_button(win, "run.move_tip")
+    shots.settle(win)
+    assert win.status.result.full_text() == "✗ refused: move_tip: outside the piezo range"
+    assert traces.count() == 2 and win.viewed == ("spectrum", "move_0002.dat")             # nothing new, nothing replaced
+
+
+def test_a_move_trace_of_two_points_is_plotted_and_the_longest_info_fits_the_narrowest_centre_column(fonts, open_window):
+    win = open_window("en")
+    center = win.center
+    center.show_spectrum(make_trace("move_0003.dat", n=2))
+    assert center.plot._x.size == 2 and center.plot._message == "" and center.current_spectrum_axes() == ("dist", "z_abs")
+    assert center.info.text().endswith("· 2 points")
+    longest = make_trace("move_0123.dat", frm=(-150.12, -150.12), to=(150.12, 150.12), speed=10000.0, n=12345,
+                         bias=-10.0, setpoint=100000.0, t_s=5399.0, feedback=False, index=123)
+    center.show_spectrum(longest)
+    lines = center.info.text().split(chr(10))
+    assert len(lines) == 2 and lines[0].endswith("feedback OFF") and lines[1].endswith("12345 points")
+    lines_fit(center.info, lines, center.minimumSizeHint().width())
+    empty = {**make_trace(n=2), "dist": np.zeros(1), "t": np.zeros(1)}                    # no column to read it along
+    center.show_spectrum(empty)
+    assert center.plot._series == [] and center.plot._message == "Nothing shown."
+
+
+def test_a_move_traces_columns_are_its_own_and_a_spectrums_are_as_they_were():
+    from stmbench.gui import center
+    trace = make_trace()
+    assert center.axis_columns(trace) == (["dist", "t"], ["z_abs", "i"]) and center.default_axes(trace) == ("dist", "z_abs")
+    v = np.linspace(-0.5, 0.5, 16)
+    sts = {"name": "sts0001.dat", "kind": "sts", "tip_nm": [0.0, 0.0], "t_s": 1.0, "v": v, "i": v * 1e-10, "didv": v ** 2}
+    assert center.axis_columns(sts) == (["v", "i", "didv"], ["v", "i", "didv"]) and center.default_axes(sts) == ("v", "didv")
+    short_sts = {**sts, "v": v[:4], "i": v[:4], "didv": v[:4]}                  # a spectrum is eight points or more ...
+    assert center.spectrum_columns(short_sts) == []
+    two = {**trace, **{k: trace[k][:2] for k in ("dist", "t", "z_abs", "i")}}      # ... and a move trace's two
+    assert center.spectrum_columns(two) == ["i", "z_abs", "dist", "t"]
+    zspec = {"name": "z0001.dat", "kind": "zspec", "tip_nm": [0.0, 0.0], "t_s": 2.0, "z_rel": v, "i": v, "df": v, "amp": v, "z_abs": v}
+    assert center.default_axes(zspec)[0] == "z_rel" and center.axis_columns(zspec)[0] == center.axis_columns(zspec)[1]
+    assert [center.column_label(c) for c in ("v", "i", "didv", "z_rel", "z_abs", "df", "amp")] == [
+        "V", "I (pA)", "dI/dV (nS)", "z rel (pm)", "z (nm)", "Δf (Hz)", "amplitude (pm)"]
+    assert [center.column_label(c, lang) for c in ("dist", "t") for lang in ("en", "zh")] == [
+        "distance (nm)", "距离 distance (nm)", "time (s)", "时间 time (s)"]
 
 
 def test_the_log_lists_every_call_newest_first_and_marks_a_call_that_has_not_run(open_window):
@@ -1357,15 +1608,24 @@ def test_a_switch_the_rig_does_not_have_shows_neither_state_and_a_refused_click_
 # ── the screens it opens on ──
 @pytest.mark.parametrize("height", [1080, 1016])
 @pytest.mark.parametrize("lang", ["en", "zh"])
-def test_the_window_fits_a_full_screen_and_a_maximized_window_under_a_title_bar(fonts, open_window, lang, height):
+def test_the_window_fits_a_full_screen_and_a_maximized_window_under_a_title_bar(app, fonts, open_window, lang, height):
     """1080: the sealed mode's window is the screen. 1016: a maximized dev window under GNOME's 27 px top bar
-    and its 37 px title bar. Nothing scrolls, nothing is hidden, in the window's fonts and in DejaVu."""
-    if lang == "zh" and fonts == "dejavu":
-        pytest.skip("both languages on every label, in the wider font, overflow the right column: fit_scale shrinks it")
+    and its 37 px title bar. Nothing scrolls, nothing is hidden, in the window's fonts and in DejaVu, in both
+    languages. With Chinese beside English on every label the Operate tab needs 745 px in DejaVu against the right
+    column's set 704: the column takes the width from the centre one, and the scale stays at 1.0 where it was
+    shrunk to 0.733 and the tabs still overflowed."""
+    from PySide6.QtCore import QSize
+
+    from stmbench.gui.app import fit_scale
+    screen = QSize(1920, 1080) if height == 1080 else QSize(1920, 1053)           # the dev window leaves the top bar
+    assert fit_scale(app, lang, 1.0, screen, 0 if height == 1080 else 37) == 1.0
     win = open_window(lang)
     win.resize(1920, height)
     shots.settle(win)
     QApplication.processEvents()
+    need = max(p.widget().minimumSizeHint().width() for p in (win.operate, win.spectroscopy)) + 2 * style.px(3)
+    assert win.right.width() == max(704, need) and win.sidebar.width() == 360          # a column is as wide as it needs
+    assert win.center.width() >= win.center.minimumSizeHint().width()                 # and the centre one is not squeezed
     for tab, panel in (("operate", win.operate), ("spectroscopy", win.spectroscopy)):
         open_right(win, tab)
         win.wait_idle()
@@ -1381,6 +1641,41 @@ def test_the_window_fits_a_full_screen_and_a_maximized_window_under_a_title_bar(
     open_left(win, "report")
     assert not win.sidebar.report_scroll.verticalScrollBar().isVisible()
     assert win.center.frame_view.height() >= 400                                                  # the image keeps its room
+
+
+def test_the_side_columns_are_360_and_704_px_wide_and_one_that_needs_more_takes_it_from_the_centre(
+        open_window, monkeypatch):
+    """The columns of a 1920 px window are 360, 824 and 704 px; a side column its contents need more of is given
+    that, and the centre column keeps the rest (whatever the fonts, so the needs are put in by hand here)."""
+    from stmbench.gui import app as gui_app
+    win = open_window("en")
+    assert (win.sidebar.width(), win.center.width(), win.right.width()) == (360, 824, 704)
+    monkeypatch.setattr(gui_app, "column_needs", lambda sidebar, panels: (330, 760))
+    wide = open_window("en", name="wide")
+    assert (wide.sidebar.width(), wide.center.width(), wide.right.width()) == (360, 768, 760)
+    monkeypatch.setattr(gui_app, "column_needs", lambda sidebar, panels: (400, 740))
+    both_sides = open_window("en", name="both")
+    assert (both_sides.sidebar.width(), both_sides.center.width(), both_sides.right.width()) == (400, 748, 740)
+    assert gui_app.column_widths(330, 704) == (360, 704) and gui_app.column_widths(361, 705) == (361, 705)
+
+
+def test_the_window_shrinks_by_what_the_screen_cannot_hold_and_not_by_what_a_wider_column_needs(app, monkeypatch):
+    """A column that is too narrow for its contents is not mended by shrinking every size (the column and its
+    contents shrink together): with the right column needing 960 px the three columns are 60 to 110 px wider than
+    the 1920 px screen, and the scale is 0.9 to 0.99 - what the screen lacks - not the shrink by 0.73 at every pass
+    that a ratio of the column to its contents asks for, which never fits."""
+    from PySide6.QtCore import QSize
+
+    from stmbench.gui import app as gui_app
+    try:
+        monkeypatch.setattr(gui_app, "column_needs",
+                            lambda sidebar, panels: (round(330 * style.SCALE), round(960 * style.SCALE)))
+        scale = gui_app.fit_scale(app, "en", 1.0, QSize(1920, 1080), 0)
+        assert 0.9 <= scale < 0.99 and style.SCALE == scale                          # left applied, as it says
+        assert gui_app.fit_scale(app, "en", scale, QSize(1920, 1080), 0) == scale    # and it fits
+        assert gui_app.fit_scale(app, "en", 1.0, QSize(2560, 1440), 0) == 1.0        # a screen with the room: no shrink
+    finally:
+        style.apply(app, 1.0)
 
 
 def test_a_sealed_window_opens_full_screen_and_a_dev_window_maximized(open_window, tmp_path):

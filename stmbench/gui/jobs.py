@@ -2,8 +2,9 @@
 
 A job runs on the worker thread and returns an :class:`Outcome`. After an action the job reads what the
 window shows next, as a person's eye would: the readings (``status``), and after a scan the data list and
-the new frame (Z, forward), after a spectrum the spectrum. Those reads are observations: they spend no
-instrument time and draw no random number, and they land in the ledger like an agent's reads.
+the new frame (Z, forward), after a spectrum or a tip move the spectrum or the move's trace. Those reads
+are observations: they spend no instrument time and draw no random number, and they land in the ledger
+like an agent's reads.
 """
 from __future__ import annotations
 
@@ -65,9 +66,9 @@ def run_act(sess: GuiSession, name: str, args: dict) -> Outcome:
         if reply.get("frame"):
             out.data = sess.data()
             out.frame = sess.frame(reply["frame"], "z", "forward")
-        elif reply.get("spectrum"):
+        elif reply.get("spectrum") or reply.get("trace"):         # a move's trace is saved and read like a spectrum
             out.data = sess.data()
-            out.spectrum = sess.spectrum(reply["spectrum"])
+            out.spectrum = sess.spectrum(reply.get("spectrum") or reply["trace"])
     except Exception as exc:  # noqa: BLE001 - the action itself succeeded; say what could not be read
         out.text = f"{type(exc).__name__}: {exc}"
     return out
