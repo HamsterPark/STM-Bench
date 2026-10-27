@@ -315,33 +315,20 @@ def test_buttons_selectors_and_on_off_send_what_they_show(open_window, tmp_path)
 
 
 # ── required parameters ──
-def _conditioning_required(monkeypatch) -> None:
-    """The action table as API version 2 has it: the pulse's width and the poke's depth and dwell are required and
-    have no default. The window and the instrument read the one table (``stmbench.instrument.ACTIONS``), so patching
-    it shows what the console does the moment the instrument says so."""
-    for action, names in (("pulse", {"width_ms"}), ("poke", {"depth_nm", "dwell_s"})):
-        spec = ACTIONS[action]
-        params = tuple(replace(p, required=True, default=None) if p.name in names else p for p in spec.params)
-        monkeypatch.setitem(ACTIONS, action, replace(spec, params=params))
-
-
-@pytest.fixture
-def v2_table(monkeypatch):
-    _conditioning_required(monkeypatch)
-
-
-@pytest.fixture(params=["as_it_is", "v2"])
-def table(request, monkeypatch):
-    if request.param == "v2":
-        _conditioning_required(monkeypatch)
-    return request.param
+def reshape(monkeypatch, action: str, name: str, **changes) -> None:
+    """Change one parameter of the action table (``stmbench.instrument.ACTIONS``, which the window and the instrument
+    both read) for the length of a test."""
+    spec = ACTIONS[action]
+    params = tuple(replace(p, **changes) if p.name == name else p for p in spec.params)
+    monkeypatch.setitem(ACTIONS, action, replace(spec, params=params))
 
 
 @pytest.mark.parametrize("lang", ["en", "zh"])
-def test_every_field_is_starred_hinted_and_left_empty_as_the_action_table_says(table, open_window, lang):
-    """Each text field's red star and grey hint come from its parameter in ``ACTIONS``, whichever the table is:
-    "required" and a star where the parameter is required, "default 50" where it has a default, "optional"
-    otherwise; every field starts empty, because a default is the instrument's to apply, not the window's."""
+def test_every_field_is_starred_hinted_and_left_empty_as_the_action_table_says(open_window, lang):
+    """Each text field's red star and grey hint come from its parameter in ``ACTIONS``: "required" and a star where
+    the parameter is required, "default 50" where it has a default, "optional" otherwise; every field starts empty,
+    because a default is the instrument's to apply, not the window's. The pulse's width and the poke's depth and
+    dwell are required with no default (API version 2): they are starred, hinted "required" and empty like the rest."""
     win = open_window(lang)
     starred = hinted = 0
     for _, c in layout.cells():
@@ -356,15 +343,43 @@ def test_every_field_is_starred_hinted_and_left_empty_as_the_action_table_says(t
             want = "required" if p.required else f"default {fmt.num(p.default)}" if p.default is not None else "optional"
             assert w.placeholderText() == want and w.text() == "", (c.action, c.param, w.placeholderText())
             hinted += 1
-    assert starred >= 10 and hinted > 25                         # the table's required fields, and the text fields
-    if table == "v2":
-        for name in ("pulse.width_ms", "poke.depth_nm", "poke.dwell_s"):
-            assert shots.widget(win, f"act.{name}").placeholderText() == "required"
-        assert shots.widget(win, "act.poke.bias_v").placeholderText() == "optional"       # still not required
+    assert starred >= 13 and hinted > 25                         # the table's required fields, and the text fields
+    for name in ("pulse.width_ms", "poke.depth_nm", "poke.dwell_s"):
+        action, param = name.split(".")
+        p = next(p for p in ACTIONS[action].params if p.name == param)
+        assert p.required and p.default is None, name
+        assert shots.widget(win, f"act.{name}").placeholderText() == "required"
+        assert "*" in shots.widget(win, f"lbl.{name}").text()
+    assert shots.widget(win, "act.poke.bias_v").placeholderText() == "optional"       # still not required
+
+
+def test_a_field_follows_the_action_table_when_it_changes_not_a_list_of_names(open_window, monkeypatch, tmp_path):
+    """The window knows no parameter by name: make a required one optional with a default, one that had a default
+    required, and the star, the hint and what the instrument is sent follow."""
+    reshape(monkeypatch, "wait", "seconds", required=False, default=1.5)           # was required
+    reshape(monkeypatch, "scan", "angle_deg", required=True, default=None)          # had a default of 0
+    reshape(monkeypatch, "poke", "dwell_s", required=False, default=0.5)            # as API version 1 had it
+    win = open_window("en")
+    assert "*" not in shots.widget(win, "lbl.wait.seconds").text()
+    assert shots.widget(win, "act.wait.seconds").placeholderText() == "default 1.5"
+    assert "*" in shots.widget(win, "lbl.scan.angle_deg").text()
+    assert shots.widget(win, "act.scan.angle_deg").placeholderText() == "required"
+    assert "*" not in shots.widget(win, "lbl.poke.dwell_s").text()
+    assert shots.widget(win, "act.poke.dwell_s").placeholderText() == "default 0.5"
+    run_button(win, "run.wait")                                  # empty: nothing sent, the instrument applies its default
+    shots.fill(win, SMALL)
+    run_button(win, "run.scan")                                  # the angle left empty
+    shots.settle(win)
+    assert win.status.result.full_text() == "✗ refused: scan: angle_deg is required"
+    shots.fill(win, {"act.scan.angle_deg": "0"})
+    run_button(win, "run.scan")
+    shots.settle(win)
+    done = {r["name"]: r["params"] for r in records(tmp_path) if r["kind"] == "act"}
+    assert done["wait"] == {"seconds": 1.5} and done["scan"]["angle_deg"] == 0.0
 
 
 def test_with_the_conditioning_parameters_required_an_empty_field_sends_nothing_and_the_instrument_refuses(
-        v2_table, open_window, tmp_path):
+        open_window, tmp_path):
     win = open_window("en")
     assert win.operate.collect("pulse") == {"z_hold": True} and win.operate.collect("poke") == {}    # empty: not sent
     shots.fill(win, {"act.pulse.bias_v": "1.0"})
