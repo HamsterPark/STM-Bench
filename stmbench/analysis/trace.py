@@ -46,7 +46,7 @@ is a hop to the reader whatever made it). Without the jump test the fit alone re
 and 77.6 % of the hopped drags at 0.25, 1 and 4 nm/s, and 0.5 % of those that stayed. The count is right to one hop in 88-100 % of the
 drags in which the atom was left behind (1-11 hops) and to three in 95 % and 88 % of those that
 carried it 12-15 and 16 or more hops (the whole way: about 17 hops, 16 on a lattice row, more with
-a blunt tip's wandering hops). At 1 nm/s 99.2 % and 0.7 %; at 4 nm/s, where an atom hops once or
+a blunt tip's wandering hops). At 1 nm/s 99.1 % and 0.7 %; at 4 nm/s, where an atom hops once or
 twice at most, 97.0 % and 0.6 %. An atom taken up by the tip reads as moved in 96, 90 and 83 % at
 0.25, 1 and 4 nm/s. Drags under two nanometres leave too little of the fall to tell it from a
 drifting background: in drags of 0.2, 0.3, 0.6, 1.0, 1.5 and 2.5 nm an atom that stayed reads as
