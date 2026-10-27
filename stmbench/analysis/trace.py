@@ -28,25 +28,25 @@ more than noise could (:data:`SIGNIFICANT`). **It assumes the tip started over t
 drags** (a drag that begins on bare surface has no fall either); the baselines place the tip
 there by measuring the atom first.
 
-**How well it reads** (2026-10-27, against the world's own events, read after each drag; seeds
-0-119, which draw all five tips, the ladder 400 kohm x 0.8^k for 14 rungs, 4 nm drags, the tip put
-0.05 nm (rms) from the atom as a slow frame would; a small version is
-``tests/test_analysis_trace.py``). At 0.25 nm/s, the scripted baseline's speed (1506 drags in
-which the atom was not picked up): of the 1066 in which an atom hopped, 1029 (96.5 %) read as
-hopping - after 1 hop 78 %, 2-3 hops 94 %, 4 or more 99-100 % - and of the 440 in which it did
-not, 4 (0.9 %). The count is right to one hop in 90-100 % of the drags in which the atom was
-left behind (1-11 hops) and to three in 89 % of those in which it was carried the whole way
-(about 17 hops: 16 on a lattice row, more with a blunt tip's wandering hops). At 1 nm/s 91 % and
-0.9 %; at 4 nm/s, where an atom hops once or twice at most, 78 % and 1.0 %. An atom taken up by
-the tip reads as moved in 84-96 %. Drags under two nanometres leave too little of the fall to
+**How well it reads** (2026-10-27, P4 with its four physics switches on, against the world's own
+events, read after each drag; seeds 0-119, which draw all five tips, the ladder 400 kohm x 0.8^k for
+14 rungs, 4 nm drags, the tip put 0.05 nm (rms) from the atom as a slow frame would; a small
+version is ``tests/test_analysis_trace.py``). At 0.25 nm/s, the scripted baseline's speed (1506
+drags in which the atom was not picked up): of the 1066 in which an atom hopped, 1021 (95.8 %)
+read as hopping - after 1 hop 66 %, 2-3 hops 94 %, 4 or more 100 % - and of the 440 in which it
+did not, 1 (0.2 %). The count is right to one hop in 91-100 % of the drags in which the atom was
+left behind (1-11 hops) and to three in 88 % of those in which it was carried the whole way
+(about 17 hops: 16 on a lattice row, more with a blunt tip's wandering hops). At 1 nm/s 89 % and
+0.4 %; at 4 nm/s, where an atom hops once or twice at most, 74 % and 0.3 %. An atom taken up by
+the tip reads as moved in 83-96 %. Drags under two nanometres leave too little of the fall to
 tell it from a drifting background: in drags of 0.2, 0.3, 0.6, 1.0 and 1.5 nm an atom that
-stayed reads as moved in 100, 100, 92, 63 and 48 %, and one that hopped as hopping in 100, 100, 98,
-96 and 96 % (2.5 nm: 0 % and 96 %; 60 seeds, 7 rungs of the ladder each), so the error is the one a
-baseline can afford. What it misses: a tall atom on a low barrier (a dirty tip) gives teeth of
-15-25 pm that come at times the fitted schedule does not follow, and a drag of the kind can read
-as no hop (P4 seed 453, 2 drags of 11): the atom is looked for where it was, is not there, and the
-baseline surveys; counting the teeth instead does not help (3 clear jumps in 3 % of the
-trains), since most teeth are about as high as the noise.
+stayed reads as moved in 100, 100, 91, 58 and 9 %, and one that hopped as hopping in 100, 100,
+98, 96 and 96 % (2.5 nm: 0 % and 95 %; 60 seeds, 7 rungs of the ladder each), so the error is
+the one a baseline can afford. What it misses: a tall atom on a low barrier (a dirty tip) gives
+teeth of 15-25 pm that come at times the fitted schedule does not follow, and a drag of the kind
+can read as no hop (P4 seed 453, 2 drags of 11): the atom is looked for where it was, is not
+there, and the baseline surveys; counting the teeth instead does not help (3 clear jumps in 3 %
+of the trains), since most teeth are about as high as the noise.
 """
 from __future__ import annotations
 
