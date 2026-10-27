@@ -31,8 +31,7 @@ Endpoints (JSON unless noted)::
     GET  /api/spectrum      ?s= — a spectrum's columns                     (an observation)
     GET  /api/pixel         ?f=&col=&row= — a frame pixel → scan coordinates (geometry only)
     POST /api/report        {claim_id, value, x_nm?, y_nm?, frame?, evidence?, unit?, sigma?, note?}
-    POST /api/tip_state     {tip_state, junction?, note?}
-    POST /api/finish        ends the episode; the record is written
+    POST /api/finish       ends the episode; the record is written
 
 A refused call answers 400 with ``{"error": ...}``, the instrument's own words.
 """
@@ -212,14 +211,6 @@ class Console:
         with self.lock:
             return {"recorded": self._inst().report(str(b.get("claim_id") or ""), float(b["value"]), **args)}
 
-    def tip_state(self, body: dict) -> dict:
-        b = dict(body or {})
-        if not str(b.get("tip_state") or "").strip():
-            raise ActionError("tip_state is required")
-        with self.lock:
-            return {"recorded": self._inst().report_tip_state(str(b["tip_state"]), b.get("junction") or None,
-                                                              str(b.get("note") or ""))}
-
     def finish(self) -> dict:
         with self.lock:
             self._inst().finish()                     # the verdict stays in the ledger, not on the page
@@ -288,8 +279,6 @@ class _Handler(BaseHTTPRequestHandler):
                 self._json(c.pixel(q.get("f", ""), float(q.get("col", 0)), float(q.get("row", 0))))
             elif method == "POST" and p == "/api/report":
                 self._json(c.report(self._body()))
-            elif method == "POST" and p == "/api/tip_state":
-                self._json(c.tip_state(self._body()))
             elif method == "POST" and p == "/api/finish":
                 self._json(c.finish())
             else:

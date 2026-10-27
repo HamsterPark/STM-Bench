@@ -35,9 +35,11 @@ def test_initialize_and_the_tool_table():
     assert "tools" in init["result"]["capabilities"]
     assert srv.handle({"jsonrpc": "2.0", "method": "notifications/initialized"}) is None
     tools = {t["name"]: t for t in srv.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"})["result"]["tools"]}
-    for name in [*ACTIONS, "get_task", "status", "info", "list_data", "show_frame", "frame_values",
-                 "get_spectrum", "report_result", "report_tip_state", "finish"]:
-        assert name in tools and tools[name]["inputSchema"]["type"] == "object", name
+    names = [*ACTIONS, "get_task", "status", "info", "list_data", "show_frame", "frame_values",
+             "get_spectrum", "report_result", "finish"]
+    assert set(tools) == set(names)                  # and no call that judges nothing, such as a tip diagnosis
+    for name in names:
+        assert tools[name]["inputSchema"]["type"] == "object", name
     assert tools["report_result"]["inputSchema"]["properties"]["claim_id"]["enum"] == \
         ["target_site", "bystander_max_shift_nm"]
     assert srv.handle({"jsonrpc": "2.0", "id": 2, "method": "nope"})["error"]["code"] == -32601

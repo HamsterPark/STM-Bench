@@ -110,6 +110,19 @@ feedback, Z, current, current range, tip position, withdrawn) and what was switc
 qPlus oscillation (`null` without a sensor) and the drift compensation (`drift_comp`: on or off and the
 velocities it was programmed with, in the units of the action).
 
+`pulse` and `poke` have no default strength: `pulse.width_ms`, `poke.depth_nm` and `poke.dwell_s`
+are required (their bounds still apply), and a call without one is refused in the instrument's
+words (`pulse: width_ms is required`) before anything happens to the tip, costing no instrument
+time. How hard to condition a tip is the operator's call; a default would be the answer to it.
+
+The API version (`stmbench.instrument.API_VERSION`, now 2) is the first line of the manual and a
+field of `info()`, of the ledger (`episode.json`) and of an export (`session.json`). Calls,
+parameters and record kinds change with it (version 2 dropped the tip-diagnosis call and the
+defaults of `pulse` and `poke`), so `replay`, `verify` and `grade` refuse a ledger or an export of
+another version, saying that it needs the code of its own version, instead of replaying it into a
+mismatch or grading it as a zero. The replay for an audience and the report tables still read the
+records of earlier ledgers.
+
 Any MCP agent can take the instrument's seat:
 
 ```bash
@@ -124,8 +137,9 @@ over bare surface).
 
 The MCP tools are the actions, the observations (`show_frame` returns a PNG rendered one fixed
 way — line-flattened, 0.5–99.5 % contrast, integer enlargement to ≥ 512 px — and
-`frame_values` the numbers), `get_task` (task, rule card, manual), `report_result`,
-`report_tip_state` and `finish`. The ledger is `episode.json` (verdict, hashes of every
+`frame_values` the numbers), `get_task` (task, rule card, manual), `report_result` and `finish`.
+There is no tool for stating a diagnosis of the tip: no scenario scores one, and offering it would
+only tell an agent to worry about its tip. The ledger is `episode.json` (verdict, hashes of every
 measurement), `actions.jsonl` (every call, refused ones included), `events.json`,
 `report.json` and `session/` (the saved `.sxm` / `.dat` files). A scenario whose success kind
 the instrument cannot judge (the skill scenarios below) is refused when the episode opens.
@@ -253,8 +267,7 @@ that has shown no frame leaves a note among the recent results instead of being 
 
 What it deliberately does not do: find atoms, estimate drift, suggest a value, explain a physical effect,
 offer a procedure, or show anything from the episode's truth, the seed, the tolerances beyond the rule
-card, or the verdict (finishing does not show the score; it stays in the private ledger). It has no
-control for `report_tip_state`, which no scenario judges.
+card, or the verdict (finishing does not show the score; it stays in the private ledger).
 
 *Dev mode* (the first command) writes the usual run directory, so `verify` and `replay` read it, and an
 export beside it at `<out>/export`; closing the window finishes the episode and judges it as it
@@ -523,8 +536,8 @@ the earlier held-out rounds: `docs/results/p4_baseline_seeds_*.json`, DESIGN §9
 ```
 <out>/                the directory given as --out (or Instrument(..., out_dir=...))
 ├── episode.json      ledger: verdict, claims reported / verified, instrument time and budget,
-│                     action count, hashes of every measurement, tip diagnoses, the truth
-│                     before and after (for the judge and the replay only)
+│                     action count, hashes of every measurement, the truth before and
+│                     after (for the judge and the replay only)
 ├── actions.jsonl     every call in order, refused ones included, with its instrument time
 ├── events.json       the world's events (frames, pulses, crashes, atoms moving), in sim time
 ├── report.json       the reports, folded: the last report for each claim
@@ -536,7 +549,9 @@ the earlier held-out rounds: `docs/results/p4_baseline_seeds_*.json`, DESIGN §9
 ```
 
 `stmbench.cli verify <out>` rebuilds the episode from `actions.jsonl` with the same scenario
-and seed and compares every measurement and the verdict.
+and seed and compares every measurement and the verdict. It exits 0 when everything matches, 1 when
+something differs, and 2 (the reason on stderr) when the ledger is of another API version: it needs
+the code of that version.
 
 ### Replays for an audience
 
@@ -594,7 +609,8 @@ the paper), `success`, `partial`, `claims_total`, `claims_verified`, `instrument
 `records`), `scenario_id`, `rules_version`, `export_version`, `note`. It carries no seed, truth or
 per-claim detail. The exit status is 0 when graded and 2 when the directory is not a gradable
 export of this scenario (not an export, another scenario, or another rules, API or export
-version; the reason is on stderr): a wrong pairing is an error, never a score.
+version; the reason is on stderr, and an export of another API version is told that it needs
+the code of its own version): a wrong pairing is an error, never a score.
 
 `deploy/osworld/` holds the adapter OSWorld-Science's `module_metric` calls on the host, the
 grader's Docker image and the notes on wiring them up (`deploy/osworld/README.md`).

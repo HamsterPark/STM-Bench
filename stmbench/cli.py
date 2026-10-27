@@ -77,10 +77,16 @@ def cmd_episode(a) -> int:
 
 
 def cmd_verify(a) -> int:
-    """Replay an instrument episode from its ledger and compare measurements and verdict."""
-    from .instrument import verify
+    """Replay an instrument episode from its ledger and compare measurements and verdict: 0 when
+    it re-checks, 1 when it does not, 2 when the ledger is of another API version (it needs the
+    code of its own)."""
+    from .instrument import VersionError, verify
 
-    res = verify(a.run_dir)
+    try:
+        res = verify(a.run_dir)
+    except VersionError as exc:
+        print(f"verify: {exc}", file=sys.stderr)
+        return 2
     print(json.dumps(res, ensure_ascii=False, indent=1))
     return 0 if res["ok"] else 1
 

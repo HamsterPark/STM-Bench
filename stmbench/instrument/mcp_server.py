@@ -101,11 +101,6 @@ class EpisodeServer:
                              "description": "file names of the frames and spectra the result came from"},
                 "unit": {"type": "string"}, "sigma": {"type": "number"}, "note": {"type": "string"}},
             "required": ["claim_id", "value"], "additionalProperties": False}, self._report)
-        self._add("report_tip_state", "State your diagnosis of the tip.", {
-            "type": "object", "properties": {"tip_state": {"type": "string"}, "junction": {"type": "string"},
-                                             "note": {"type": "string"}},
-            "required": ["tip_state"], "additionalProperties": False},
-                  lambda a: [_text(inst.report_tip_state(**a))])
         self._add("finish", "End the episode: no further actions or reports.", none, self._finish)
 
     def _action(self, name: str) -> Callable[[dict], list[dict]]:

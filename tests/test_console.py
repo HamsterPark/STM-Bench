@@ -104,10 +104,6 @@ def test_an_episode_through_the_console(tmp_path):
         code, r = c.post("/api/report", {"claim_id": "target_site", "value": 1.0, "x_nm": 1.0, "y_nm": 0.0,
                                          "frame": frame, "evidence": [frame]})
         assert code == 200 and r["recorded"].startswith("recorded target_site")
-        code, err = c.post("/api/tip_state", {})
-        assert code == 400
-        code, _ = c.post("/api/tip_state", {"tip_state": "sharp"})
-        assert code == 200
         _, st = c.get("/api/status")
         assert st["instrument_time_s"] > 0
 
@@ -124,7 +120,7 @@ def test_an_episode_through_the_console(tmp_path):
     assert verify(run)["ok"]
     kinds = [json.loads(line)["kind"] for line in (run / "actions.jsonl").read_text(encoding="utf-8").splitlines()]
     assert kinds.count("act") == 1 and kinds.count("refused") == 1 and kinds.count("report") == 1
-    assert "diagnosis" in kinds and kinds[-1] == "finish" and "observe" in kinds
+    assert "diagnosis" not in kinds and kinds[-1] == "finish" and "observe" in kinds
     with pytest.raises(ActionError):
         Console(run, P4, 0)                                   # a run directory holds one episode
 
