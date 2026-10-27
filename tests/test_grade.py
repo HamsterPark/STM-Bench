@@ -296,6 +296,24 @@ def test_an_export_with_moves_grades_with_no_mismatch_and_a_changed_trace_is_one
         {"i": lines[1]["i"], "spectrum": lines[1]["spectrum"], "reason": "the hashes differ", "arrays": ["z_abs"]}]
 
 
+def test_a_trace_missing_from_the_digests_is_traced_to_the_move_that_made_it(tmp_path):
+    """A move's reply names its trace under ``trace``, not ``spectrum``: the mismatch for a trace the
+    export has no digest line for still says which record made it."""
+    inst = Instrument(P4, 0)
+    exp = ExportWriter(inst, tmp_path / "e")
+    inst.act("move_tip", x_nm=3.0, y_nm=0.0, speed_nm_s=20.0)
+    inst.act("move_tip", x_nm=0.0, y_nm=0.0)
+    exp.sync()
+    export = read_export(tmp_path / "e")
+    records, lines = export["records"], export["digests"]
+    replayed, mismatches = replay_records(P4, 0, records)
+    assert mismatches == [] and _digest_mismatches(replayed, lines, records) == [] and len(lines) == 2
+    moves = [r["i"] for r in records if r.get("kind") == "act" and r.get("name") == "move_tip"]
+    assert moves == [lines[0]["i"], lines[1]["i"]]
+    assert _digest_mismatches(replayed, lines[:1], records) == [
+        {"i": moves[1], "spectrum": lines[1]["spectrum"], "reason": "the export has no digest line for it"}]
+
+
 # ── not an export of this scenario: an error, not a score ───────────────────
 def test_a_wrong_pairing_or_version_is_an_error_not_a_score(tmp_path):
     base = tmp_path / "base"
