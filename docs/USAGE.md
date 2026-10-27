@@ -110,6 +110,11 @@ feedback, Z, current, current range, tip position, withdrawn) and what was switc
 qPlus oscillation (`null` without a sensor) and the drift compensation (`drift_comp`: on or off and the
 velocities it was programmed with, in the units of the action).
 
+`pulse` and `poke` have no default strength: `pulse.width_ms`, `poke.depth_nm` and `poke.dwell_s`
+are required (their bounds still apply), and a call without one is refused in the instrument's
+words (`pulse: width_ms is required`) before anything happens to the tip, costing no instrument
+time. How hard to condition a tip is the operator's call; a default would be the answer to it.
+
 Any MCP agent can take the instrument's seat:
 
 ```bash

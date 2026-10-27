@@ -118,14 +118,16 @@ ACTIONS: dict[str, ActionSpec] = {s.name: s for s in (
                (_P("x_nm", "number", "target x (scan coordinates, nm)", True),
                 _P("y_nm", "number", "target y (scan coordinates, nm)", True),
                 _P("speed_nm_s", "number", "lateral speed (nm/s)", default=293.0, lo=0.01, hi=10000.0))),
+    # width, depth and dwell are required: any default would be the answer to how hard to condition
+    # the tip (in a screen-only trial one default poke mended a double tip at the first try)
     ActionSpec("pulse", "Apply a bias pulse at the tip's position (tip conditioning).",
                (_P("bias_v", "number", "pulse voltage (V, absolute)", True, lo=-10.0, hi=10.0),
-                _P("width_ms", "number", "pulse width (ms)", default=50.0, lo=0.1, hi=5000.0),
+                _P("width_ms", "number", "pulse width (ms)", True, lo=0.1, hi=5000.0),
                 _P("z_hold", "boolean", "hold Z during the pulse", default=True))),
     ActionSpec("poke", "Indent the tip into the surface and retract (tip conditioning by controlled contact).",
-               (_P("depth_nm", "number", "indentation depth below the tunnelling height (nm)", default=0.5, lo=0.0, hi=20.0),
+               (_P("depth_nm", "number", "indentation depth below the tunnelling height (nm)", True, lo=0.0, hi=20.0),
                 _P("bias_v", "number", "bias during the indentation (V); omit to keep the current bias", lo=-10.0, hi=10.0),
-                _P("dwell_s", "number", "time held at depth (s)", default=0.5, lo=0.0, hi=10.0))),
+                _P("dwell_s", "number", "time held at depth (s)", True, lo=0.0, hi=10.0))),
     ActionSpec("sts", "Take a bias-spectroscopy sweep (I(V) and dI/dV) at the tip's position and save it. "
                       "Returns the spectrum's file name, which reports cite.",
                (_P("v_start", "number", "sweep start (V)", True, lo=-10.0, hi=10.0),

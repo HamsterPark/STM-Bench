@@ -82,7 +82,7 @@ def test_a_refusal_by_the_instruments_own_checks_is_on_the_record_and_costs_noth
     inst.act("withdraw")
     t_withdrawn = inst.used_s
     with pytest.raises(ActionError, match="withdrawn"):
-        inst.act("pulse", bias_v=3.0)
+        inst.act("pulse", bias_v=3.0, width_ms=50.0)
     assert inst.used_s == t_withdrawn > t and inst.n_actions == 1
     assert [r["kind"] for r in inst.log] == ["refused", "refused", "act", "refused"]
     assert inst.log[0]["error"] == "move_tip: outside the piezo range"
