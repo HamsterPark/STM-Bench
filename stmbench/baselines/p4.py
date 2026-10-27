@@ -20,8 +20,10 @@ What the reference (:mod:`stmbench.reference.p4`) reads from the truth, this rea
   centred where the last one put the atom; what an atom that sits still seems to move is
   drift the compensation left, and the goal moves with it
   (:class:`stmbench.reference._manip.Track`);
-* **whether it moved**: current spikes, then a work survey against the fiducials (atoms that
-  match the first work survey after one shift); **whether it is still on the surface**: that
+* **whether it moved**: the trace the drag recorded (Z along the path: an atom left behind
+  makes it fall from the top of its bump, one carried along does not,
+  :func:`stmbench.analysis.trace.count_hops`), then a work survey against the fiducials (atoms
+  that match the first work survey after one shift); **whether it is still on the surface**: that
   survey shows it nowhere along its path. An atom taken by the tip is buried with the pokes and
   another one is taken, more than 11 nm from it.
 
@@ -39,6 +41,7 @@ import numpy as np
 
 from ..analysis.adatoms import lattice_angle, lattice_vector, locate
 from ..analysis.tip import BLUNT_HEIGHT_PM, BLUNT_SIGMA_NM, diagnose
+from ..analysis.trace import count_hops
 from ..instrument import Instrument
 # pure measurement helpers and settings of the reference; none of them reads the world
 from ..reference._manip import (DRAG_NM_S, LADDER_FACTOR, LADDER_KOHM, LADDER_MIN_KOHM, MANIP_MAX_NA,
@@ -187,11 +190,13 @@ class Mover:
         self.v.act("set_current_range", full_scale_na=10.0)
 
     def drag(self, frm, to, r_ohm: float) -> int:
+        """The tip onto ``frm`` at the imaging setpoint, to ``to`` at ``r_ohm``; how often an
+        atom hopped on the way, as the trace of the drag shows it."""
         self.v.act("move_tip", x_nm=frm[0], y_nm=frm[1])
         self.manipulate(r_ohm)
         r = self.v.act("move_tip", x_nm=to[0], y_nm=to[1], speed_nm_s=DRAG_NM_S)
         self.image()
-        return int(r["current_spikes"])
+        return count_hops(self.v.spectrum(r["trace"]))
 
     def measure(self, guess, *, within: float = 1.0):
         """The atom in a slow frame centred on ``guess``: (place, time), or (None, time)."""
@@ -374,9 +379,9 @@ def ladder(ops: Ops, mv: Mover, work: Work, comp, log: dict) -> dict | None:
             if pos is None:
                 raise Lost("the atom is not where the survey put it")
             track = Track(ops.v, comp, (pos[0] + g[0], pos[1] + g[1]), t)
-        spikes = mv.drag(pos, track.goal, r)
-        attempts.append({"r_kohm": round(r / 1e3, 1), "spikes": spikes})
-        if spikes == 0:
+        hops = mv.drag(pos, track.goal, r)
+        attempts.append({"r_kohm": round(r / 1e3, 1), "hops": hops})
+        if hops == 0:
             new, t_new = mv.measure(pos)
             if new is not None:
                 track.still(pos, t, new, t_new)

@@ -113,8 +113,8 @@ ACTIONS: dict[str, ActionSpec] = {s.name: s for s in (
                (_P("on", "boolean", "true = on", True),)),
     ActionSpec("set_current_range", "Select the preamplifier range (full-scale current).",
                (_P("full_scale_na", "number", "full scale (nA)", True, choices=tuple(_GAIN_FULL_SCALE_NA)),)),
-    ActionSpec("move_tip", "Move the tip laterally in a straight line at a set speed, in feedback. At a low "
-                           "junction resistance (|bias| / setpoint) this drags whatever the tip grips.",
+    ActionSpec("move_tip", "Move the tip laterally in a straight line at a set speed, recording Z and the "
+                           "current along the path. Returns the trace's file name, which reports cite.",
                (_P("x_nm", "number", "target x (scan coordinates, nm)", True),
                 _P("y_nm", "number", "target y (scan coordinates, nm)", True),
                 _P("speed_nm_s", "number", "lateral speed (nm/s)", default=293.0, lo=0.01, hi=10000.0))),
@@ -411,19 +411,33 @@ class Instrument:
         return {"full_scale_na": float(full_scale_na)}
 
     def _do_move_tip(self, x_nm, y_nm, speed_nm_s) -> dict:
+        from stmsim.io.dat_writer import save_move_trace
+
         w = self.world
         x, y = x_nm * 1e-9, y_nm * 1e-9
         rx, ry = w.rig.xy_range_m
         if abs(x) > rx / 2 or abs(y) > ry / 2:
             raise ActionError("move_tip: outside the piezo range")
         dist = math.hypot(x - w.tip_x, y - w.tip_y)
-        n_before = len(w.events)
-        w.move_xy_path(x, y, speed_m_s=float(speed_nm_s) * 1e-9)
+        t_start = self.used_s
+        w.move_xy_path(x, y, speed_m_s=float(speed_nm_s) * 1e-9, trace=True)
+        # what the controller recorded along the path, kept like a spectrum: an operator reads
+        # whether atoms hopped from it, and the instrument does not say
+        tr = w.last_move_trace
+        path = save_move_trace(w, "", tr)
+        w.dats_saved.append(path)
+        w._event("dat_saved", path=path, experiment="move trace", idx=len(w.dats_saved), move_idx=tr["index"])
+        name = Path(path).name
+        self.spectra[name] = {"name": name, "kind": "move", "index": int(tr["index"]),
+                              "tip_nm": [_r(x_nm), _r(y_nm)], "from_nm": [_r(v) for v in tr["from_nm"]],
+                              "to_nm": [_r(x_nm), _r(y_nm)], "speed_nm_s": _r(speed_nm_s, 6),
+                              "bias_v": _r(tr["bias_v"], 6), "setpoint_pa": _r(tr["setpoint_pa"], 6),
+                              "feedback": bool(tr["feedback"]), "t_s": t_start,
+                              "t": np.asarray(tr["t"], float), "dist": np.asarray(tr["dist"], float),
+                              "z_abs": np.asarray(tr["z_abs"], float), "i": np.asarray(tr["i"], float)}
         self._settle(dist / (float(speed_nm_s) * 1e-9) + 0.05)
-        # what an operator sees in the current trace: hops show as spikes, not as atom ids
-        hops = sum(int(e.get("n_hops", 1)) for e in w.events[n_before:] if e.get("kind") == "adatom_hop")
-        return {"tip_nm": [_r(x_nm), _r(y_nm)], "distance_nm": _r(dist * 1e9),
-                "current_spikes": int(hops)}
+        return {"tip_nm": [_r(x_nm), _r(y_nm)], "distance_nm": _r(dist * 1e9), "trace": name,
+                "duration_s": _r(float(tr["t"][-1]), 3)}
 
     def _do_pulse(self, bias_v, width_ms, z_hold) -> dict:
         w = self.world
@@ -621,7 +635,7 @@ class Instrument:
         return {"frames": [{"frame": f.name, **f.geometry, "t_start_s": _r(f.t_start_s, 3)}
                            for f in self.frames.values()],
                 "spectra": [{"spectrum": s["name"], "kind": s["kind"], "tip_nm": s["tip_nm"],
-                             "points": int(len(s.get("v", s.get("z_rel", [])))), "t_s": _r(s["t_s"], 3)}
+                             "points": int(len(s.get("v", s.get("z_rel", s.get("t", []))))), "t_s": _r(s["t_s"], 3)}
                             for s in self.spectra.values()]}
 
     def frame(self, name: str, channel: str = "z", direction: str = "forward") -> dict:

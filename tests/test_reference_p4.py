@@ -14,7 +14,7 @@ def test_the_reference_moves_the_atom_onto_its_site():
     assert r["abs_err"]["target_site"] < 0.1
     assert r["tip_rounds"] == 0 and r["pickups"] == 0
     att = r["attempts"]
-    assert att[0]["r_kohm"] == 400.0 and att[0]["spikes"] == 0 and att[-1]["spikes"] > 0
+    assert att[0]["r_kohm"] == 400.0 and att[0]["hops"] == 0 and att[-1]["hops"] > 0
 
 
 def test_an_atom_lost_onto_the_tip_is_buried_and_another_one_moved(monkeypatch):

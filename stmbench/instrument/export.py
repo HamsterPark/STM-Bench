@@ -11,7 +11,7 @@ nothing the agent may not see: no seed (the grader holds it), no truth, no verdi
     <export>/
       session.json   format, versions, scenario id, finished, record count      (replaced)
       actions.jsonl  the instrument's log records, in order                      (appended)
-      digests.jsonl  one line per saved frame or spectrum: its arrays' hashes    (appended)
+      digests.jsonl  one line per saved frame, spectrum or move trace: its hashes (appended)
       report.json    the results reported so far, folded as the judge reads them (replaced)
 
 :class:`ExportWriter` writes it beside an :class:`~stmbench.instrument.core.Instrument`;
@@ -89,6 +89,10 @@ class ExportWriter:
             if res.get("spectrum") in inst.spectra:
                 digests.append({"i": rec["i"], "spectrum": res["spectrum"],
                                 "digest": inst.spectrum_digest(res["spectrum"])})
+            # a move's trace is kept like a spectrum, and the grader re-checks it like one
+            if res.get("trace") in inst.spectra:
+                digests.append({"i": rec["i"], "spectrum": res["trace"],
+                                "digest": inst.spectrum_digest(res["trace"])})
         _append(self.dir / "actions.jsonl", new)
         _append(self.dir / "digests.jsonl", digests)
         if any(r.get("kind") == "report" for r in new):

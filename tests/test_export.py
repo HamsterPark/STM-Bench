@@ -107,3 +107,19 @@ def test_an_export_directory_holds_one_episode(tmp_path):
     _episode(tmp_path, finish=False)
     with pytest.raises(FileExistsError):
         ExportWriter(Instrument(P4, 1), tmp_path / "export")
+
+
+def test_a_moves_trace_is_kept_like_a_spectrum_and_has_its_digest_line(tmp_path):
+    """``move_tip`` replies with the file name of the trace it recorded, not with a ``spectrum``
+    key: the export writes its digest line all the same, and the grader re-checks it."""
+    inst = Instrument(P4, SEED, out_dir=tmp_path / "run")
+    exp = ExportWriter(inst, tmp_path / "export")
+    r = inst.act("move_tip", x_nm=2.0, y_nm=1.0, speed_nm_s=50.0)
+    exp.sync()
+    inst.act("move_tip", x_nm=0.0, y_nm=0.0, speed_nm_s=50.0)
+    exp.sync()
+    got = read_export(tmp_path / "export")
+    lines = [x for x in got["digests"] if x.get("spectrum") == r["trace"]]
+    assert len(lines) == 1 and lines[0]["i"] == 0
+    assert lines[0]["digest"] == inst.spectrum_digest(r["trace"]) and set(lines[0]["digest"]) == {"t", "dist", "z_abs", "i"}
+    assert {x["spectrum"] for x in got["digests"]} == set(inst.spectra) and len(inst.spectra) == 2
