@@ -139,7 +139,8 @@ Every `move_tip` records a trace and keeps it like a spectrum (`list_data` lists
 `"kind": "move"`, `spectrum(name)` returns it, the session directory holds it as a `.dat` file and an
 export carries its hashes): `t` (s since the move's start), `dist` (m along the path), `z_abs` (m,
 the Z controller's output, a larger value is a higher tip) and `i` (A, as measured: noise, and the
-preamplifier's limit when the range is too small for the current), with the move's `from_nm`,
+preamplifier's limit when the range is too small for the current; with `crash_over_range` on and a
+setpoint above the range, Z follows contact and `i` is the clamp), with the move's `from_nm`,
 `to_nm`, `speed_nm_s`, `bias_v`, `setpoint_pa` and `feedback`. The reply has no hop count, and
 nothing else says whether an atom moved: an atom pulled along gives a sawtooth in `z_abs` with the
 lattice period, one left behind makes it fall from the top of its bump; in a trace of a few

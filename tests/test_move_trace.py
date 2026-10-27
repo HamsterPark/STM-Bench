@@ -17,6 +17,8 @@ from stmbench.instrument.core import _json_default
 from stmsim.physics import trace as movetrace
 from stmsim.physics.adatoms import AdatomParams, AdatomRegistry, path_points
 from stmsim.physics.rig import RigProfile
+from stmsim.physics.scanner import SIG_Z, ScanSettings
+from stmsim.physics.switches import PhysicsSwitches
 from stmsim.physics.tip import Apex, Tip
 from stmsim.physics.world import World
 from stmsim.scenario import Scenario
@@ -233,12 +235,136 @@ def test_the_loop_settles_within_a_slow_sample_as_it_does_in_reality(tmp_path):
     assert np.ptp(i) / np.mean(i) < 0.01
 
 
+# ── the scenario's physics: what the trace has to follow ────────────────────
+def _frame_profile(w, ax, ay, theta, n=120, size=6e-9):
+    """The z channel of a slow frame centred on the atom (its tilt plane taken out), along the line
+    through the atom at angle ``theta``, at 0.05 nm: what the same atom looks like in an image."""
+    from scipy import ndimage
+
+    st = ScanSettings(cx=ax, cy=ay, w=size, h=size, nx=n, ny=n, line_time_fwd_s=40.0, line_time_bwd_s=40.0)
+    z = np.asarray(w.renderer.render(st, 0.0).data[SIG_Z][0])
+    yy, xx = np.mgrid[0:n, 0:n]
+    px = size / n
+    far = np.hypot(xx - (n - 1) / 2, yy - (n - 1) / 2) * px > 2.0e-9
+    coef, *_ = np.linalg.lstsq(np.column_stack([np.ones(far.sum()), xx[far], yy[far]]), z[far], rcond=None)
+    z = z - (coef[0] + coef[1] * xx + coef[2] * yy)
+    s = np.linspace(-2e-9, 2e-9, 81)
+    return ndimage.map_coordinates(z, [(n - 1) / 2 - s * math.sin(theta) / px, (n - 1) / 2 + s * math.cos(theta) / px], order=3)
+
+
+@pytest.mark.parametrize("axis_ratio,tip_deg,path_deg", [(1.0, 0.0, 0.0), (0.5, 0.0, 0.0), (0.5, 0.0, 90.0), (0.3, 40.0, 130.0)])
+def test_an_atom_looks_the_same_in_a_trace_as_in_a_frame_for_a_round_tip_and_an_elliptical_one(
+        tmp_path, axis_ratio, tip_deg, path_deg):
+    """The trace blurs an atom as the frame does, the tip's ellipse included (``tip_anisotropy``):
+    the trace of a move across an atom is the frame's profile along the same line, to a fraction of
+    a picometre in 80, and the width along the long axis is the wider one."""
+    w = _world(tmp_path, setpoint=1e-9, quiet=True)                  # imaging: nothing is dragged
+    w.tip.lambda_per_s = 0.0                                         # the frame lasts hours: no change in it
+    w.set_physics(PhysicsSwitches(tip_anisotropy=True))
+    w.tip.axis_ratio, w.tip.angle = axis_ratio, math.radians(tip_deg)
+    reg, atom = _atom(w)
+    ax, ay = reg.site_xy(atom.i, atom.j)
+    th = math.radians(path_deg)
+    prof = _frame_profile(w, ax, ay, th)
+    w.move_xy(ax - 2e-9 * math.cos(th), ay - 2e-9 * math.sin(th))
+    w.move_xy_path(ax + 2e-9 * math.cos(th), ay + 2e-9 * math.sin(th), speed_m_s=0.25e-9, trace=True)
+    tr = w.last_move_trace
+    d = tr["dist"]
+    ends = (d < 0.6e-9) | (d > 3.4e-9)
+    z = tr["z_abs"] - np.polyval(np.polyfit(d[ends], tr["z_abs"][ends], 1), d)         # the tilt of the sample out
+    assert np.sqrt(np.mean((z - prof) ** 2)) < 1.0e-12 and z.max() == pytest.approx(prof.max(), rel=0.03)
+    half = lambda y: float(np.sum(y > y.max() / 2) * 0.05)                              # noqa: E731
+    if axis_ratio < 1.0 and path_deg in (0.0, 90.0):
+        assert half(z) == pytest.approx(0.8 if path_deg == 0.0 else 0.7, abs=0.051)   # long axis along x: wider along x
+
+
+def test_a_tip_pressed_into_the_sample_reads_the_clamp_and_follows_contact(tmp_path, monkeypatch):
+    """With ``crash_over_range`` and a setpoint above the range, the loop's target is contact and the
+    current reads the clamp (:meth:`World.equilibrium_gap`, :meth:`World._dc_current`); the move
+    ploughs, which is a change of the tip at the start. The same move once the range allows the
+    setpoint, over the same surface with the same tip, sits one tunnelling gap higher (the crashed
+    apex's flicker is left out: two traces draw it differently)."""
+    monkeypatch.setattr(Tip, "CRASH_FLICKER_DZ_M", (0.0, 0.0))
+    w = _world(tmp_path, bias=0.05, setpoint=200e-12, quiet=True)
+    w.set_physics(PhysicsSwitches(crash_over_range=True))
+    w.move_xy(-40e-9, -40e-9)                                       # away from the one atom
+    w.preamp.full_scale_a = 10e-9
+    w.set_setpoint(20e-9)                                           # 20 nA on the 10 nA range
+    assert w.over_range()
+    n_crash = sum(1 for e in w.events if e["kind"] == "crash")
+    w.move_xy_path(-40e-9, 0.0, speed_m_s=100e-9, trace=True)
+    pressed = w.last_move_trace
+    assert pressed["over_range"] and pressed["tip_change_samples"] == [0]
+    assert sum(1 for e in w.events if e["kind"] == "crash") == n_crash + 1            # and the plough is a crash
+    assert np.all(pressed["i"] >= 0.999 * w.preamp.clamp_a) and np.mean(pressed["i"]) == pytest.approx(w.preamp.clamp_a, rel=1e-3)
+    w.preamp.full_scale_a = 1e-6                                    # the range reaches the setpoint again: the loop pulls back
+    w.transients.clear()
+    w.move_xy(-40e-9, -40e-9)
+    w.move_xy_path(-40e-9, 0.0, speed_m_s=100e-9, trace=True)
+    free = w.last_move_trace
+    assert not free["over_range"] and np.mean(free["i"]) == pytest.approx(20e-9, rel=0.15)   # the loop lags the pit's flank
+    assert np.median(free["z_abs"] - pressed["z_abs"]) == pytest.approx(w.equilibrium_gap(), abs=10e-12)
+
+
+def _long_move(w, *, length_nm=20.0, speed_nm_s=5.0):
+    w.move_xy(-40e-9, -40e-9)
+    t0 = w.clock.sim()
+    n0 = len(w.tip.events)
+    w.move_xy_path(-40e-9 + length_nm * 1e-9, -40e-9, speed_m_s=speed_nm_s * 1e-9, trace=True)
+    return w.last_move_trace, t0, length_nm / speed_nm_s, w.tip.events[n0:]
+
+
+def test_a_change_of_the_tip_during_a_navigation_move_is_a_step_where_the_tips_log_puts_it(tmp_path):
+    """``tip_changes_outside_scans``: the interval a move tunnels through draws the tip's changes at
+    times of their own, and the trace has each as the step it is, at the sample of its time."""
+    w = _world(tmp_path, bias=0.05, setpoint=200e-12, quiet=True)
+    w.set_physics(PhysicsSwitches(tip_changes_outside_scans=True))
+    w.tip.lambda_per_s = 0.5                                        # a change every couple of seconds
+    tr, t0, dur, events = _long_move(w)
+    changes = [e for e in events if e.kind == "spontaneous_change"]
+    assert len(changes) >= 2
+    want = [int(math.ceil((e.sim_s - t0) / dur * (len(tr["t"]) - 1))) for e in changes]
+    assert tr["tip_change_samples"] == want and all(0 < k < len(tr["t"]) for k in want)
+    dz = np.diff(tr["z_abs"])
+    for k, e in zip(want, changes):
+        assert abs(dz[k - 1]) == pytest.approx(abs(e.detail["dz_pm"]) * 1e-12, rel=0.25, abs=3e-12)
+    assert all(abs(dz[k - 1]) > 15e-12 for k in want)
+
+
+def test_a_recovery_during_a_navigation_move_is_a_step_at_its_time_too(tmp_path, monkeypatch):
+    """``tip_recovery``: a double tip that loses its second apex in the middle of a move shows it
+    where the tip's log says, and the heights after it are the single apex's."""
+    monkeypatch.setitem(Tip.RECOVERY_TAU_S, "apex_lost", 4.0)
+    w = _world(tmp_path, bias=0.05, setpoint=200e-12, quiet=True, tip="double")
+    w.set_physics(PhysicsSwitches(tip_recovery=True))
+    w.tip.lambda_per_s = 0.0
+    tr, t0, dur, events = _long_move(w)
+    lost = [e for e in events if e.kind == "recovery_apex_lost"]
+    assert len(lost) == 1 and w.tip.n_apex == 1
+    k = int(math.ceil((lost[0].sim_s - t0) / dur * (len(tr["t"]) - 1)))
+    assert tr["tip_change_samples"] == [k] and 0 < k < len(tr["t"])
+    assert abs(np.diff(tr["z_abs"])[k - 1]) > 5e-12                  # the ghost apex's share of the height goes at once
+
+
+def test_the_change_a_drag_stamps_at_its_start_is_placed_by_the_traces_own_stream(tmp_path):
+    """A drag's change is logged at the move's start (``Tip.maybe_change``, as before): where in the
+    move it happened is drawn from the trace's stream, the same for the same world."""
+    samples = []
+    for k in range(2):
+        w = _world(tmp_path / str(k), setpoint=200e-9, quiet=True)  # a drag
+        w.tip.lambda_per_s = 1e3
+        _drag(w)
+        samples.append(w.last_move_trace["tip_change_samples"])
+    assert samples[0] == samples[1] and len(samples[0]) == 1 and 0 < samples[0][0] < path_points(4e-9)
+
+
 # ── what the trace may not touch ────────────────────────────────────────────
 def _states(w) -> dict:
     """The state of every random stream the world holds, by name."""
     reg = w.surface.site.adatoms
     gens = {"rng": w.rng, "noise": w.noise.rng, "df": w.df_rng, "tip": w.tip.rng, "layout": reg.rng_layout,
-            "dyn": reg.rng_dyn, "traits": reg.rng_traits}
+            "dyn": reg.rng_dyn, "traits": reg.rng_traits, "outscan": w.rng_outscan, "recovery": w.rng_recovery,
+            "aniso": w.rng_aniso}
     return {k: json.dumps(g.bit_generator.state, sort_keys=True, default=str) for k, g in gens.items()}
 
 
