@@ -251,7 +251,9 @@ buttons and looks at the screen once, and a drag after a refused Set setpoint wo
 resistance nobody chose; the Log and the recent results say "not run: an earlier call was refused" (they
 never reach the instrument or the export), the refusal stays on the strip's last line until a call is accepted,
 and reads (a frame, a spectrum) are not affected. An empty field sends nothing (the instrument's default
-applies, or it refuses); a field that is not a number is sent as typed; every click in a field selects all
+applies, or it refuses: a parameter the action table marks required has a red star, a hint "required" and no
+default, and an empty one is refused in the instrument's words, as the pulse's width and the poke's depth and dwell
+are in API version 2); a field that is not a number is sent as typed; every click in a field selects all
 of it, so click then type replaces the content. The three `← marker` buttons
 copy a marker's coordinates into the move-tip or scan fields or the report form, and Delete marker removes
 the selected one. While a scan runs or waits the viewer says so over what it shows, and a click on a viewer

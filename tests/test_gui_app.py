@@ -11,6 +11,7 @@ import math
 import os
 import re
 import time
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -25,7 +26,7 @@ from PySide6.QtTest import QTest  # noqa: E402
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QLabel, QLineEdit, QListWidget,  # noqa: E402
                                QPlainTextEdit, QPushButton, QTableWidget, QTabBar, QTextBrowser, QWidget)
 
-from stmbench.gui import layout, shots, style  # noqa: E402
+from stmbench.gui import fmt, layout, shots, style  # noqa: E402
 from stmbench.gui.app import MainWindow  # noqa: E402
 from stmbench.gui.panels import token  # noqa: E402
 from stmbench.gui.session import GuiSession, make_private_dir, read_spec  # noqa: E402
@@ -290,7 +291,7 @@ def test_buttons_selectors_and_on_off_send_what_they_show(open_window, tmp_path)
     win = open_window("en")
     shots.click(win, shots.widget(win, "act.scan.direction.up"))
     shots.click(win, shots.widget(win, "act.pulse.z_hold.no"))
-    shots.fill(win, {"act.pulse.bias_v": "1.0", **SMALL})
+    shots.fill(win, {"act.pulse.bias_v": "1.0", "act.pulse.width_ms": "20", **SMALL})     # the width: required in API v2
     run_button(win, "run.scan")
     run_button(win, "run.pulse")
     run_button(win, "run.feedback.off")
@@ -302,13 +303,91 @@ def test_buttons_selectors_and_on_off_send_what_they_show(open_window, tmp_path)
     shots.settle(win)
     by = {r["name"]: r for r in records(tmp_path) if r["kind"] == "act"}
     assert by["scan"]["params"]["direction"] == "up" and by["pulse"]["params"]["z_hold"] is False
-    assert by["pulse"]["params"]["bias_v"] == 1.0 and by["feedback"]["params"] == {"on": False}
+    assert by["pulse"]["params"]["bias_v"] == 1.0 and by["pulse"]["params"]["width_ms"] == 20.0
+    assert by["feedback"]["params"] == {"on": False}
     assert by["set_current_range"]["params"] == {"full_scale_na": 1.0}
     assert by["drift_comp"]["params"]["on"] is True and by["drift_comp"]["params"]["vx_nm_per_min"] == 1.5
     assert "withdraw" in by
     assert win.status.result.full_text() == "✗ refused: coarse_move: direction is required"
     plain = win.status.plain_text()
     assert "Z feedback OFF" in plain and "Range 1 nA" in plain and "Withdrawn yes" in plain
+
+
+# ── required parameters ──
+def _conditioning_required(monkeypatch) -> None:
+    """The action table as API version 2 has it: the pulse's width and the poke's depth and dwell are required and
+    have no default. The window and the instrument read the one table (``stmbench.instrument.ACTIONS``), so patching
+    it shows what the console does the moment the instrument says so."""
+    for action, names in (("pulse", {"width_ms"}), ("poke", {"depth_nm", "dwell_s"})):
+        spec = ACTIONS[action]
+        params = tuple(replace(p, required=True, default=None) if p.name in names else p for p in spec.params)
+        monkeypatch.setitem(ACTIONS, action, replace(spec, params=params))
+
+
+@pytest.fixture
+def v2_table(monkeypatch):
+    _conditioning_required(monkeypatch)
+
+
+@pytest.fixture(params=["as_it_is", "v2"])
+def table(request, monkeypatch):
+    if request.param == "v2":
+        _conditioning_required(monkeypatch)
+    return request.param
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_every_field_is_starred_hinted_and_left_empty_as_the_action_table_says(table, open_window, lang):
+    """Each text field's red star and grey hint come from its parameter in ``ACTIONS``, whichever the table is:
+    "required" and a star where the parameter is required, "default 50" where it has a default, "optional"
+    otherwise; every field starts empty, because a default is the instrument's to apply, not the window's."""
+    win = open_window(lang)
+    starred = hinted = 0
+    for _, c in layout.cells():
+        if not isinstance(c, layout.F):
+            continue
+        p = next(p for p in ACTIONS[c.action].params if p.name == c.param)
+        label = shots.widget(win, f"lbl.{c.action}.{c.param}")
+        assert ("*" in label.text()) == p.required, (c.action, c.param)
+        starred += p.required
+        w = shots.widget(win, f"act.{c.action}.{c.param}")
+        if isinstance(w, QLineEdit):
+            want = "required" if p.required else f"default {fmt.num(p.default)}" if p.default is not None else "optional"
+            assert w.placeholderText() == want and w.text() == "", (c.action, c.param, w.placeholderText())
+            hinted += 1
+    assert starred >= 10 and hinted > 25                         # the table's required fields, and the text fields
+    if table == "v2":
+        for name in ("pulse.width_ms", "poke.depth_nm", "poke.dwell_s"):
+            assert shots.widget(win, f"act.{name}").placeholderText() == "required"
+        assert shots.widget(win, "act.poke.bias_v").placeholderText() == "optional"       # still not required
+
+
+def test_with_the_conditioning_parameters_required_an_empty_field_sends_nothing_and_the_instrument_refuses(
+        v2_table, open_window, tmp_path):
+    win = open_window("en")
+    assert win.operate.collect("pulse") == {"z_hold": True} and win.operate.collect("poke") == {}    # empty: not sent
+    shots.fill(win, {"act.pulse.bias_v": "1.0"})
+    run_button(win, "run.pulse")                                 # the width left empty
+    shots.settle(win)
+    assert win.status.result.full_text() == "✗ refused: pulse: width_ms is required"
+    refused = [r for r in records(tmp_path) if r["kind"] == "refused"]
+    assert refused[-1]["name"] == "pulse" and refused[-1]["args"] == {"bias_v": 1.0, "z_hold": True}    # no 50 filled in
+    run_button(win, "run.poke")
+    shots.settle(win)
+    assert win.status.result.full_text() == "✗ refused: poke: depth_nm is required"
+    shots.fill(win, {"act.poke.depth_nm": "0.1"})
+    run_button(win, "run.poke")
+    shots.settle(win)
+    assert win.status.result.full_text() == "✗ refused: poke: dwell_s is required"
+    assert win.operate.collect("poke") == {"depth_nm": 0.1}
+    assert not acts(records(tmp_path))                           # nothing reached the instrument but the refusals
+    shots.fill(win, {"act.pulse.width_ms": "20", "act.poke.dwell_s": "0.2"})
+    run_button(win, "run.pulse")
+    run_button(win, "run.poke")
+    shots.settle(win)
+    done = {r["name"]: r["params"] for r in records(tmp_path) if r["kind"] == "act"}
+    assert done == {"pulse": {"bias_v": 1.0, "width_ms": 20.0, "z_hold": True},
+                    "poke": {"depth_nm": 0.1, "dwell_s": 0.2}}
 
 
 def test_enter_in_a_field_runs_its_groups_main_action_and_values_stay(open_window, tmp_path):
