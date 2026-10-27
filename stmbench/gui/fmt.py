@@ -4,7 +4,7 @@ Readings are written in the unit of the field that sets them (bias in V, setpoin
 positions in nm), never as ``1.2e-10`` and never switching unit with the size of the value: an operator
 who reads 0.050 V types 0.050, and one who reads 1500 pA does not have to convert 1.5 nA. Instrument
 time is ``H:MM:SS``. A reply is shown in the instrument's own words: the
-one-line summary names what the action made (the frame or spectrum a report must cite) and the full
+one-line summary names what the action made (the frame, spectrum or move trace a report must cite) and the full
 form is the reply as the instrument sent it.
 """
 from __future__ import annotations
@@ -174,6 +174,8 @@ def reply_summary(name: str, reply: Any) -> str:
         return f"scan → {reply['frame']}{tail}"
     if "spectrum" in reply:
         return f"{name} → {reply['spectrum']}{tail}"
+    if "trace" in reply:                                         # a move's recorded Z and current, saved like a spectrum
+        return f"{name} → {reply['trace']}{tail}"
     fields = {k: v for k, v in reply.items() if k not in _HIDDEN_REPLY_KEYS and k != "duration_s"}
     body = ", ".join(f"{k}={value_text(v)}" for k, v in fields.items())
     return f"{name} → {body}{tail}" if body else f"{name} → done{tail}"
@@ -188,7 +190,8 @@ def reply_full(reply: Any) -> str:
 
 def numeric_lists(reply: Any, min_len: int = 8) -> dict[str, list[float]]:
     """The fields of a reply that hold equal-length lists of numbers, ``min_len`` long or more: the
-    most common length wins. A move-tip trace is plotted from these, as any other reply would be."""
+    most common length wins. Any reply that carries such lists is plotted from these (a move's trace is
+    not one: it is saved like a spectrum and shown as one)."""
     if not isinstance(reply, dict):
         return {}
     found: dict[str, list[float]] = {}

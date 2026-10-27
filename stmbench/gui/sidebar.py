@@ -260,9 +260,11 @@ class ReportTab(QWidget):
 
 
 class DataTab(QWidget):
-    """What the instrument saved, newest first: each frame or spectrum is three short lines (its name, start
-    time and channels; its size; where it is), which carry every column of a table in the width of this
-    column without cutting any of them off. A click shows the item in the viewer."""
+    """What the instrument saved, newest first, in three lists: frames, spectra and move traces (the Z and
+    current recorded while the tip moved; the instrument keeps them with the spectra, and so does the viewer,
+    but a list of their own says what they are). Each item is three short lines (its name, start time and
+    channels; its size; where it is), which carry every column of a table in the width of this column without
+    cutting any of them off. A click shows the item in the viewer."""
 
     frame_clicked = Signal(str)
     spectrum_clicked = Signal(str)
@@ -283,8 +285,14 @@ class DataTab(QWidget):
         v.addWidget(self.spectra_title)
         self.spectra = self._list("data.spectra")
         v.addWidget(self.spectra, 2)
+        self.traces_title = QLabel()
+        strong(self.traces_title)
+        v.addWidget(self.traces_title)
+        self.traces = self._list("data.traces")
+        v.addWidget(self.traces, 2)
         self.frames.itemClicked.connect(lambda it: self.frame_clicked.emit(it.data(Qt.ItemDataRole.UserRole)))
-        self.spectra.itemClicked.connect(lambda it: self.spectrum_clicked.emit(it.data(Qt.ItemDataRole.UserRole)))
+        for w in (self.spectra, self.traces):                 # a trace is read from the instrument as a spectrum is
+            w.itemClicked.connect(lambda it: self.spectrum_clicked.emit(it.data(Qt.ItemDataRole.UserRole)))
         self.set_data([], [])
 
     def _list(self, name: str) -> QListWidget:
@@ -301,10 +309,15 @@ class DataTab(QWidget):
         return w
 
     def set_data(self, frames: list[dict], spectra: list[dict]) -> None:
+        """``spectra`` is the instrument's list: the move traces are in it, with ``kind`` "move"."""
+        traces = [s for s in spectra if s.get("kind") == "move"]
+        spectra = [s for s in spectra if s.get("kind") != "move"]
         self.frames_title.setText(f"{tr('frames', self.lang)} ({len(frames)})")
         self.spectra_title.setText(f"{tr('spectra', self.lang)} ({len(spectra)})")
+        self.traces_title.setText(f"{tr('move_traces', self.lang)} ({len(traces)})")
         self._fill(self.frames, [self._frame_lines(f) for f in reversed(frames)])
         self._fill(self.spectra, [self._spectrum_lines(s) for s in reversed(spectra)])
+        self._fill(self.traces, [self._trace_lines(s) for s in reversed(traces)])
 
     @staticmethod
     def _frame_lines(f: dict) -> tuple[str, list[str]]:
@@ -321,6 +334,12 @@ class DataTab(QWidget):
                                 f"tip ({s['tip_nm'][0]:.3f}, {s['tip_nm'][1]:.3f}) nm · {s['points']} points"])
 
     @staticmethod
+    def _trace_lines(s: dict) -> tuple[str, list[str]]:
+        """A move trace: its name; when it began; where the move ended and how many points were recorded."""
+        end = f"to ({s['tip_nm'][0]:.3f}, {s['tip_nm'][1]:.3f}) nm · " if s.get("tip_nm") else ""
+        return (s["spectrum"], [s["spectrum"], f"move trace · {fmt.hms(s['t_s'])}", f"{end}{s['points']} points"])
+
+    @staticmethod
     def _fill(w: QListWidget, rows: list[tuple[str, list[str]]]) -> None:
         w.clear()
         for name, lines in rows:
@@ -330,7 +349,7 @@ class DataTab(QWidget):
 
     def select(self, kind: str, name: str) -> None:
         """Mark the item now in the viewer (no signal)."""
-        for w, k in ((self.frames, "frame"), (self.spectra, "spectrum")):
+        for w, k in ((self.frames, "frame"), (self.spectra, "spectrum"), (self.traces, "spectrum")):
             w.clearSelection()
             if k == kind:
                 for r in range(w.count()):

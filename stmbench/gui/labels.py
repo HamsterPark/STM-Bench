@@ -103,6 +103,7 @@ S: dict[str, Pair] = {
     # data
     "frames": ("Frames", "帧"),
     "spectra": ("Spectra", "谱"),
+    "move_traces": ("Move traces", "移动轨迹"),
     # viewer
     "ch_z": ("Z", "Z"),
     "ch_current": ("Current", "电流"),
@@ -129,6 +130,9 @@ S: dict[str, Pair] = {
     "lbl_tool": ("Tool", "工具"),
     "lbl_x": ("x axis", "横轴"),
     "lbl_y": ("y axis", "纵轴"),
+    # the two columns only a move trace has (the other columns are symbols: V, I, dI/dV, z)
+    "col_dist": ("distance", "距离"),
+    "col_t": ("time", "时间"),
     "no_view": ("Nothing shown.", "没有显示的内容。"),
     "scan_running": ("scan running…", "扫描进行中…"),
     "no_frame_click": ("no frame shown: nothing marked", "没有显示的帧：未标记"),

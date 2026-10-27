@@ -262,8 +262,11 @@ def test_a_reply_is_summarised_in_the_instruments_words():
     scan = {"frame": "sim005.sxm", "duration_s": 300.2, "size_nm": 30.0, "instrument_time_s": 312.5, "budget_s": 5400.0}
     assert fmt.reply_summary("scan", scan) == "scan → sim005.sxm (300.2 s)"
     assert fmt.reply_summary("sts", {"spectrum": "sim006.dat", "points": 16, "duration_s": 2.5}) == "sts → sim006.dat (2.5 s)"
-    move = {"tip_nm": [4.0, 0.0], "distance_nm": 4.0, "current_spikes": 0, "instrument_time_s": 9.0, "budget_s": None}
-    assert fmt.reply_summary("move_tip", move) == "move_tip → tip_nm=(4, 0), distance_nm=4, current_spikes=0"
+    # a move names its trace and its duration, as an STS names its spectrum: the file is what a report may cite;
+    # where the tip went is in the full reply (the Log) and in the trace itself
+    move = {"tip_nm": [4.0, 0.0], "distance_nm": 4.0, "trace": "move_0001.dat", "duration_s": 16.0,
+            "instrument_time_s": 9.0, "budget_s": None}
+    assert fmt.reply_summary("move_tip", move) == "move_tip → move_0001.dat (16 s)"
     assert fmt.reply_summary("withdraw", {"instrument_time_s": 1.0}) == "withdraw → done"
     assert json.loads(fmt.reply_full(move)) == move
 
@@ -305,6 +308,41 @@ def test_an_action_job_reads_what_the_window_shows_next(tmp_path):
     done = jobs.run_finish(sess)
     assert done.finished and done.ok and sess.finished
     assert jobs.run_act(sess, "wait", {"seconds": 1}).text == "the episode is over"
+
+
+def test_a_tip_move_that_made_a_trace_is_read_back_like_a_spectrum_and_one_that_did_not_is_not():
+    """After an action the job reads what the window shows next: a reply that names a ``trace`` (a move's recorded Z
+    and current, kept like a spectrum) gets the data list and the record, as one that names a ``spectrum`` does."""
+    calls: list = []
+
+    class Instrument:                                           # the four calls a job makes, answering as the contract says
+        def __init__(self, reply):
+            self.reply = reply
+
+        def act(self, name, args):
+            calls.append(("act", name))
+            return self.reply
+
+        def status(self):
+            calls.append("status")
+            return {"instrument_time_s": 20.0}
+
+        def data(self):
+            calls.append("data")
+            return {"frames": [], "spectra": [{"spectrum": "move_0001.dat", "kind": "move", "points": 400}]}
+
+        def spectrum(self, name):
+            calls.append(("spectrum", name))
+            return {"name": name, "kind": "move"}
+
+    move = {"tip_nm": [1.0, 0.0], "distance_nm": 4.0, "trace": "move_0001.dat", "duration_s": 16.0, "instrument_time_s": 20.0}
+    out = jobs.run_act(Instrument(move), "move_tip", {"x_nm": 1.0, "y_nm": 0.0})
+    assert out.ok and out.spectrum == {"name": "move_0001.dat", "kind": "move"} and out.frame is None
+    assert out.data["spectra"][0]["kind"] == "move" and out.status == {"instrument_time_s": 20.0}
+    assert calls == [("act", "move_tip"), "status", "data", ("spectrum", "move_0001.dat")]
+    calls.clear()
+    out = jobs.run_act(Instrument({"tip_nm": [1.0, 0.0], "distance_nm": 4.0}), "move_tip", {"x_nm": 1.0, "y_nm": 0.0})
+    assert out.ok and out.spectrum is None and out.data is None and calls == [("act", "move_tip"), "status"]
 
 
 # ── the command line ──

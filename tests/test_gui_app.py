@@ -9,9 +9,11 @@ import io
 import json
 import math
 import os
+import re
 import time
 from pathlib import Path
 
+import numpy as np
 import pytest
 
 pytest.importorskip("PySide6")
@@ -828,6 +830,176 @@ def test_a_spectrum_is_plotted_with_selectable_columns(open_window):
     assert win.center.current_spectrum_axes() == ("v", "i")
     assert shots.widget(win, "data.spectra").count() == 1 and name in shots.widget(win, "data.spectra").item(0).text()
     assert win.status.result.full_text().startswith(f"✓ sts → {name}")
+
+
+# ── move traces ──
+def make_trace(name: str = "move_0001.dat", *, frm=(-6.891, -3.818), to=(-2.887, -3.895), speed: float = 0.25,
+               n: int = 400, bias: float = 0.005, setpoint: float = 100000.0, t_s: float = 612.0,
+               feedback: bool = True, index: int = 1) -> dict:
+    """A move trace as ``Instrument.spectrum(name)`` returns it for ``kind`` "move" (``t`` s, ``dist`` m, ``z_abs`` m,
+    ``i`` A, and the move's own conditions), made by hand so that the window is tested against the record's layout and
+    not against one version of the physics: a corrugation, one atom-sized step 52 % of the way along with a burst of
+    current there, and noise."""
+    rng = np.random.default_rng(7)
+    dist = np.linspace(0.0, math.hypot(to[0] - frm[0], to[1] - frm[1]) * 1e-9, n)
+    z = -1.2e-9 + 6e-12 * np.sin(2 * np.pi * dist / 0.255e-9) + 0.4e-12 * rng.standard_normal(n)
+    i = setpoint * 1e-12 * (1.0 + 0.04 * rng.standard_normal(n))
+    k = int(0.52 * n)
+    z[k:] += 14e-12
+    i[k:k + 4] *= 3.0
+    return {"name": name, "kind": "move", "index": index, "tip_nm": list(to), "from_nm": list(frm), "to_nm": list(to),
+            "speed_nm_s": speed, "bias_v": bias, "setpoint_pa": setpoint, "feedback": feedback, "t_s": t_s,
+            "t": dist / (speed * 1e-9), "dist": dist, "z_abs": z, "i": i}
+
+
+class TraceServer:
+    """Makes a window's session answer ``move_tip`` as the instrument will once it records traces: the reply names
+    the ``trace`` (and has no ``current_spikes``), the data list carries it among the spectra with ``kind`` "move",
+    and ``spectrum(name)`` returns its record. The tip still moves on the instrument that is there; the traces are
+    served in the order they were given."""
+
+    def __init__(self, win: MainWindow, *traces: dict):
+        self.pending, self.served = list(traces), []
+        s = win.session
+        self._act, self._data, self._spectrum = s.act, s.data, s.spectrum
+        s.act, s.data, s.spectrum = self.act, self.data, self.spectrum
+
+    def act(self, name, args=None):
+        reply = self._act(name, args)
+        if name == "move_tip":
+            self.served.append(self.pending.pop(0))
+            reply = {**{k: v for k, v in reply.items() if k != "current_spikes"},
+                     "trace": self.served[-1]["name"], "duration_s": 16.0}
+        return reply
+
+    def data(self):
+        out = self._data()
+        out["spectra"] = [*out["spectra"], *({"spectrum": t["name"], "kind": "move", "tip_nm": t["tip_nm"],
+                                              "points": len(t["t"]), "t_s": t["t_s"]} for t in self.served)]
+        return out
+
+    def spectrum(self, name):
+        return next((t for t in self.served if t["name"] == name), None) or self._spectrum(name)
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_a_finished_tip_move_shows_its_trace_like_a_spectrum_and_the_data_tab_lists_it_as_a_move_trace(
+        fonts, open_window, lang):
+    win = open_window(lang)
+    trace = make_trace()
+    TraceServer(win, trace)
+    frame = scan_small(win)
+    shots.fill(win, {"act.move_tip.x_nm": "-2.887", "act.move_tip.y_nm": "-3.895", "act.move_tip.speed_nm_s": "0.25"})
+    run_button(win, "run.move_tip")
+    shots.settle(win)
+    # what an STS does: the record is shown, in the viewer's plot, open on Z against the distance along the move
+    assert win.viewed == ("spectrum", trace["name"]) and win.center.stack.currentIndex() == 1
+    assert win.center.toolbars.currentIndex() == 1 and not any(b.isChecked() for b in win.center.thumbs)
+    assert win.center.current_spectrum_axes() == ("dist", "z_abs")
+    plot = win.center.plot
+    assert np.allclose(plot._x, trace["dist"] * 1e9) and np.allclose(plot._series[0][1], trace["z_abs"] * 1e9)
+    assert plot._x_label == ("距离 distance (nm)" if lang == "zh" else "distance (nm)") and plot._y_label == "z (nm)"
+    assert plot._title == trace["name"] and plot._message == ""
+    # its own columns: where along the move or when, to read Z or the current at; none of a spectrum's
+    assert [b.objectName() for b in win.center.spec_x.buttons()] == ["view.spec_x.dist", "view.spec_x.t"]
+    assert [b.objectName() for b in win.center.spec_y.buttons()] == ["view.spec_y.z_abs", "view.spec_y.i"]
+    assert shots.widget(win, "view.spec_x.dist").isChecked() and shots.widget(win, "view.spec_y.z_abs").isChecked()
+    for name in ("view.spec_x.t", "view.spec_x.dist", "view.spec_y.i", "view.spec_y.z_abs"):
+        shots.hit(win, shots.widget(win, name))
+    run_button(win, "view.spec_x.t")
+    run_button(win, "view.spec_y.i")
+    assert win.center.current_spectrum_axes() == ("t", "i")
+    assert np.allclose(plot._x, trace["t"]) and np.allclose(plot._series[0][1], trace["i"] * 1e12)
+    assert plot._x_label == ("时间 time (s)" if lang == "zh" else "time (s)") and plot._y_label == "I (pA)"
+    # the list: a heading of its own that names it, not among the spectra
+    data = win.sidebar.data
+    assert data.traces.count() == 1 and data.spectra.count() == 0 and data.frames.count() == 1
+    assert data.traces_title.text() == ("移动轨迹 Move traces (1)" if lang == "zh" else "Move traces (1)")
+    assert data.spectra_title.text() == ("谱 Spectra (0)" if lang == "zh" else "Spectra (0)")
+    item = data.traces.item(0).text().split(chr(10))
+    assert item == [trace["name"], "move trace · 0:10:12", "to (-2.887, -3.895) nm · 400 points"]
+    assert data.traces.currentRow() == 0                                     # the item on show is the selected one
+    # the strip and the recent results say what a spectrum's say: the file a report may cite, and how long it took
+    assert win.status.result.full_text() == f"✓ move_tip → {trace['name']} (16 s)"
+    assert shots.widget(win, "recent.0").text() == f"✓ move_tip → {trace['name']} (16 s)"
+    # the two lines above the plot carry the move's own conditions, whole, in the window's fonts
+    info = shots.widget(win, "view.info")
+    lines = info.text().split(chr(10))
+    assert lines == [f"{trace['name']}   at 0:10:12 · 0.005 V · 100000 pA · feedback ON",
+                     "move · (-6.891, -3.818) → (-2.887, -3.895) nm · 0.25 nm/s · 400 points"]
+    lines_fit(info, lines, info.width())
+    # nothing found, counted or marked: the window says nothing of hops over what the instrument recorded
+    shown = "\n".join(_all_text(w) for w in (win.center, win.status, win.recent, data))
+    assert not re.search(r"\bhops?\b|spike", shown, re.IGNORECASE)
+    # the trace can be cited as evidence, and the frame and the trace are each one click from the other
+    open_left(win, "report")
+    run_button(win, "report.viewed")
+    assert shots.widget(win, "report.evidence").text() == trace["name"]
+    shots.click(win, shots.widget(win, "thumb.0"))
+    shots.settle(win)
+    assert win.viewed == ("frame", frame) and win.center.stack.currentIndex() == 0 and not data.traces.selectedItems()
+    open_left(win, "data")
+    shots.click(win, data.traces.viewport(), data.traces.visualItemRect(data.traces.item(0)).center())
+    shots.settle(win)
+    assert win.viewed == ("spectrum", trace["name"]) and win.center.current_spectrum_axes() == ("dist", "z_abs")
+    assert data.traces.currentRow() == 0
+
+
+def test_every_move_makes_a_trace_the_newest_first_in_the_list_and_a_refused_move_makes_none(open_window):
+    win = open_window("en")
+    first, second = make_trace("move_0001.dat", index=1), make_trace("move_0002.dat", index=2, t_s=700.0,
+                                                                     frm=(-2.887, -3.895), to=(0.0, 0.0))
+    TraceServer(win, first, second)
+    shots.fill(win, {"act.move_tip.x_nm": "1", "act.move_tip.y_nm": "0", "act.move_tip.speed_nm_s": "100"})
+    run_button(win, "run.move_tip")
+    shots.settle(win)
+    shots.fill(win, {"act.move_tip.x_nm": "2", "act.move_tip.y_nm": "0"})
+    run_button(win, "run.move_tip")
+    shots.settle(win)
+    traces = win.sidebar.data.traces
+    assert [traces.item(r).text().split(chr(10))[0] for r in range(traces.count())] == ["move_0002.dat", "move_0001.dat"]
+    assert win.viewed == ("spectrum", "move_0002.dat") and traces.currentRow() == 0
+    shots.fill(win, {"act.move_tip.x_nm": "1000000", "act.move_tip.y_nm": "0"})          # outside the piezo range
+    run_button(win, "run.move_tip")
+    shots.settle(win)
+    assert win.status.result.full_text() == "✗ refused: move_tip: outside the piezo range"
+    assert traces.count() == 2 and win.viewed == ("spectrum", "move_0002.dat")             # nothing new, nothing replaced
+
+
+def test_a_move_trace_of_two_points_is_plotted_and_the_longest_info_fits_the_narrowest_centre_column(fonts, open_window):
+    win = open_window("en")
+    center = win.center
+    center.show_spectrum(make_trace("move_0003.dat", n=2))
+    assert center.plot._x.size == 2 and center.plot._message == "" and center.current_spectrum_axes() == ("dist", "z_abs")
+    assert center.info.text().endswith("· 2 points")
+    longest = make_trace("move_0123.dat", frm=(-150.12, -150.12), to=(150.12, 150.12), speed=10000.0, n=12345,
+                         bias=-10.0, setpoint=100000.0, t_s=5399.0, feedback=False, index=123)
+    center.show_spectrum(longest)
+    lines = center.info.text().split(chr(10))
+    assert len(lines) == 2 and lines[0].endswith("feedback OFF") and lines[1].endswith("12345 points")
+    lines_fit(center.info, lines, center.minimumSizeHint().width())
+    empty = {**make_trace(n=2), "dist": np.zeros(1), "t": np.zeros(1)}                    # no column to read it along
+    center.show_spectrum(empty)
+    assert center.plot._series == [] and center.plot._message == "Nothing shown."
+
+
+def test_a_move_traces_columns_are_its_own_and_a_spectrums_are_as_they_were():
+    from stmbench.gui import center
+    trace = make_trace()
+    assert center.axis_columns(trace) == (["dist", "t"], ["z_abs", "i"]) and center.default_axes(trace) == ("dist", "z_abs")
+    v = np.linspace(-0.5, 0.5, 16)
+    sts = {"name": "sts0001.dat", "kind": "sts", "tip_nm": [0.0, 0.0], "t_s": 1.0, "v": v, "i": v * 1e-10, "didv": v ** 2}
+    assert center.axis_columns(sts) == (["v", "i", "didv"], ["v", "i", "didv"]) and center.default_axes(sts) == ("v", "didv")
+    short_sts = {**sts, "v": v[:4], "i": v[:4], "didv": v[:4]}                  # a spectrum is eight points or more ...
+    assert center.spectrum_columns(short_sts) == []
+    two = {**trace, **{k: trace[k][:2] for k in ("dist", "t", "z_abs", "i")}}      # ... and a move trace's two
+    assert center.spectrum_columns(two) == ["i", "z_abs", "dist", "t"]
+    zspec = {"name": "z0001.dat", "kind": "zspec", "tip_nm": [0.0, 0.0], "t_s": 2.0, "z_rel": v, "i": v, "df": v, "amp": v, "z_abs": v}
+    assert center.default_axes(zspec)[0] == "z_rel" and center.axis_columns(zspec)[0] == center.axis_columns(zspec)[1]
+    assert [center.column_label(c) for c in ("v", "i", "didv", "z_rel", "z_abs", "df", "amp")] == [
+        "V", "I (pA)", "dI/dV (nS)", "z rel (pm)", "z (nm)", "Δf (Hz)", "amplitude (pm)"]
+    assert [center.column_label(c, lang) for c in ("dist", "t") for lang in ("en", "zh")] == [
+        "distance (nm)", "距离 distance (nm)", "time (s)", "时间 time (s)"]
 
 
 def test_the_log_lists_every_call_newest_first_and_marks_a_call_that_has_not_run(open_window):

@@ -221,7 +221,8 @@ the fields named as `ReportResult` and the rule card name them - value, x_nm, y_
 sigma, note, the ones the picked claim needs starred as in the action panels, Enter in a field sending the
 report, and a "+ shown file" button that appends the name of the frame or spectrum the viewer shows to
 `evidence` (or says in the recent results that none is shown) - and Finish with an inline two-click
-confirmation), Data and Log; in the middle the viewer (a frame with nm
+confirmation), Data (the frames, the spectra and the move traces, each list under a heading of its own) and Log;
+in the middle the viewer (a frame with nm
 axes, a colour bar, a cursor readout, flatten modes, a contrast switch (auto: the 0.5-99.5 percentile
 scale of the image an MCP agent gets, the default; full: the frame's minimum to maximum, which keeps the
 top of an atom from saturating; visible: the minimum to maximum of the part of the frame in view, so that a
@@ -232,8 +233,13 @@ whole, another channel of the same frame keeps the view; the axes, the cursor, m
 same pixel mapping at every zoom, and nothing is found or snapped for the reader), numbered markers (six rows before the table
 scrolls) with their coordinates, the start time of the frame each was placed on and the distance to the
 previous one, a line profile, the last frames as thumbnails; or a spectrum with chosen
-columns; over a spectrum or a line profile a cursor reads out the data point nearest the pointer, its x
-and each curve's y, and a left click pins it); on the right the Operate tab (every action a P4 episode uses,
+columns; or the trace of a tip move, which every `move_tip` saves like a spectrum and the window shows when
+the move is done, as it shows an STS: its distance along the move (nm) or its time (s) against Z (nm) or the
+current (pA), open on Z against the distance, headed by the conditions the instrument recorded of the move
+(from where to where, how fast, the bias, the setpoint, the feedback) and nothing read off the curves - no
+mark, count or note on a step or a spike, which is for the reader to find; over a spectrum, a trace or a line
+profile a cursor reads out the data point nearest the pointer, its x and each curve's y, and a left click
+pins it); on the right the Operate tab (every action a P4 episode uses,
 without scrolling at 1920x1080 or 1920x1016) and the Spectroscopy tab, whose On / Off pairs and range row
 show the state the instrument reports as the selected button, and under them the last five results, newest
 first, in the instrument's words (a refusal stays among them until five calls have followed it). A click queues its job at once with the field values read at that moment and
