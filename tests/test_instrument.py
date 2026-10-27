@@ -384,3 +384,14 @@ def test_a_trace_cited_as_evidence_is_not_a_frame_and_judging_goes_on(tmp_path):
     claim = inst.verdict.details["claims"]["target_site"]
     assert claim["unresolved_citations"] == [t] and claim["cited"] == [frame, t, frame]
     assert out["claims_total"] == 2 and claim["evidence"]["kind"] == "frame_covers_after"
+
+
+def test_the_trace_of_an_oscillating_tip_carries_the_setpoint_current():
+    """The loop holds the *averaged* current of a qPlus tip at the setpoint, so the current its
+    trace reads is the setpoint, not the junction's current at the mean height (a third of it
+    at 100 pm of amplitude)."""
+    inst = Instrument(P5, 0)
+    inst.act("pll", on=True, amplitude_pm=100.0)
+    s = inst.spectrum(inst.act("move_tip", x_nm=5.0, y_nm=0.0, speed_nm_s=50.0)["trace"])
+    assert inst.world.osc_factor() > 2.0
+    assert np.mean(s["i"]) == pytest.approx(s["setpoint_pa"] * 1e-12, rel=0.05)

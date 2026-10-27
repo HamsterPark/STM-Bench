@@ -196,7 +196,8 @@ class _PathSurface:
 @dataclass
 class MoveStart:
     """The instrument as a move found it, taken before the move changes anything: the junction
-    (bias, barrier, the gap the loop holds), the Z that would be held, the drift and the tip."""
+    (bias, barrier, the gap the loop holds, the qPlus oscillation's current factor), the Z that
+    would be held, the drift and the tip."""
     x0: float
     y0: float
     x1: float
@@ -214,6 +215,7 @@ class MoveStart:
     kappa_m: float
     phi_ev: float
     gap_m: float
+    osc: float
     loop: object
     tip: object
     drag_log: list[dict] = field(default_factory=list)
@@ -240,7 +242,7 @@ def begin(world, x: float, y: float, speed_m_s: float) -> MoveStart:
                      feedback=bool(world.zctrl.on and not world.withdrawn), withdrawn=bool(world.withdrawn),
                      z_held_tip=float(world.tip_height_m()), bias_v=float(world.bias_v),
                      kappa_m=world.kappa_m(), phi_ev=world.phi_junction(), gap_m=world.equilibrium_gap(),
-                     loop=world.loop_params(), tip=tip_view(world.tip))
+                     osc=world.osc_factor(), loop=world.loop_params(), tip=tip_view(world.tip))
 
 
 def changed(start: MoveStart, world) -> None:
@@ -347,7 +349,9 @@ def finish(world, start: MoveStart, rng: np.random.Generator) -> dict:
         else:
             z_tip = np.full(n, start.z_held_tip)
         z_ctrl = np.asarray(world.z_ctrl_from_tip(z_tip), float)
-        i_dc = current_metal(np.clip(z_tip - h, MIN_GAP_M, None), start.bias_v, start.phi_ev)
+        # an oscillating qPlus tip carries the current its cycle averages to, which is what the
+        # loop holds at the setpoint (World.osc_factor; 1 without oscillation)
+        i_dc = current_metal(np.clip(z_tip - h, MIN_GAP_M, None), start.bias_v, start.phi_ev) * start.osc
     if not (start.withdrawn or float(z_ctrl[0]) in (world.zctrl.limit_high_m, world.zctrl.limit_low_m)):
         # a reading at the rail is exactly the limit; elsewhere it carries the Z noise, more of it
         # on a tip that keeps changing (as in a frame)
