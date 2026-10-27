@@ -252,12 +252,15 @@ def _frame_profile(w, ax, ay, theta, n=120, size=6e-9):
     return ndimage.map_coordinates(z, [(n - 1) / 2 - s * math.sin(theta) / px, (n - 1) / 2 + s * math.cos(theta) / px], order=3)
 
 
-@pytest.mark.parametrize("axis_ratio,tip_deg,path_deg", [(1.0, 0.0, 0.0), (0.5, 0.0, 0.0), (0.5, 0.0, 90.0), (0.3, 40.0, 130.0)])
+@pytest.mark.parametrize("axis_ratio,tip_deg,path_deg", [(1.0, 0.0, 0.0), (0.5, 0.0, 0.0), (0.5, 0.0, 90.0), (0.3, 40.0, 130.0),
+                                                         (0.3, 40.0, 10.0), (0.5, 25.0, 205.0)])
 def test_an_atom_looks_the_same_in_a_trace_as_in_a_frame_for_a_round_tip_and_an_elliptical_one(
         tmp_path, axis_ratio, tip_deg, path_deg):
     """The trace blurs an atom as the frame does, the tip's ellipse included (``tip_anisotropy``):
     the trace of a move across an atom is the frame's profile along the same line, to a fraction of
-    a picometre in 80, and the width along the long axis is the wider one."""
+    a picometre in 80, and the width along the long axis is the wider one. The paths run along the
+    long axis, across it, obliquely to it (30 deg off; 25 deg off in the other sense) and one of them
+    backwards."""
     w = _world(tmp_path, setpoint=1e-9, quiet=True)                  # imaging: nothing is dragged
     w.tip.lambda_per_s = 0.0                                         # the frame lasts hours: no change in it
     w.set_physics(PhysicsSwitches(tip_anisotropy=True))
@@ -276,6 +279,33 @@ def test_an_atom_looks_the_same_in_a_trace_as_in_a_frame_for_a_round_tip_and_an_
     half = lambda y: float(np.sum(y > y.max() / 2) * 0.05)                              # noqa: E731
     if axis_ratio < 1.0 and path_deg in (0.0, 90.0):
         assert half(z) == pytest.approx(0.8 if path_deg == 0.0 else 0.7, abs=0.051)   # long axis along x: wider along x
+
+
+@pytest.mark.parametrize("axis_ratio,tip_deg,scan_deg,scan_dir", [(0.5, 0.0, 0.0, "down"), (0.5, 0.0, 30.0, "up"),
+                                                                  (0.3, 40.0, 75.0, "down"), (0.35, -20.0, 200.0, "up")])
+def test_the_trace_blurs_with_the_covariance_of_the_renderer(tmp_path, axis_ratio, tip_deg, scan_deg, scan_dir):
+    """Whatever frame an image is taken in, the renderer's blur (px², row by column, in a scan frame
+    turned by ``scan_deg``, rows counted either way) is the same ellipse in the sample frame as the
+    one a trace blurs an atom with: taken back to the sample frame it is the trace's covariance."""
+    w = _world(tmp_path, quiet=True)
+    w.set_physics(PhysicsSwitches(tip_anisotropy=True))
+    w.tip.axis_ratio, w.tip.angle = axis_ratio, math.radians(tip_deg)
+    phi = w.phi_junction()
+    st = ScanSettings(w=8e-9, h=6e-9, nx=64, ny=48, angle_deg=scan_deg, scan_dir=scan_dir)   # pixels not square
+    cov = w.renderer._anisotropic_blur_cov(st, w.tip.sigma_eff_m(phi))
+    px_u, px_v = st.w / st.nx, st.h / st.ny
+    sgn = -1.0 if scan_dir == "down" else 1.0
+    c_uu = (cov[1, 1] - w.renderer.MIN_SIGMA_PX ** 2) * px_u ** 2          # the line's bandwidth is not the tip's
+    c_vv = cov[0, 0] * px_v ** 2
+    c_uv = sgn * cov[0, 1] * px_u * px_v
+    th = math.radians(scan_deg)
+    rot = np.array([[math.cos(th), -math.sin(th)], [math.sin(th), math.cos(th)]])
+    in_sample_frame = rot @ np.array([[c_uu, c_uv], [c_uv, c_vv]]) @ rot.T
+    mine = movetrace.blur_covariance(w.tip, phi, True)
+    assert in_sample_frame == pytest.approx(mine, rel=1e-9, abs=1e-30)
+    short, long_ = np.linalg.eigvalsh(mine)                                 # an ellipse: its axes are as the ratio says
+    assert short / long_ == pytest.approx(axis_ratio ** 2, rel=1e-9) and long_ == pytest.approx(w.tip.sigma_eff_m(phi) ** 2)
+    assert movetrace.blur_covariance(w.tip, phi, False) == pytest.approx(np.eye(2) * w.tip.sigma_eff_m(phi) ** 2)
 
 
 def test_a_tip_pressed_into_the_sample_reads_the_clamp_and_follows_contact(tmp_path, monkeypatch):
