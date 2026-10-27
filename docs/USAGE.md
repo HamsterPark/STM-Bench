@@ -99,8 +99,8 @@ inst.finish()                           # judged with the version-1 rules; ledge
 ```
 
 Actions (`stmbench.instrument.ACTIONS`, each with a JSON schema): `scan`, `set_bias`,
-`set_setpoint`, `feedback`, `set_current_range`, `move_tip` (in feedback; at a low junction
-resistance it drags what the tip grips), `pulse`, `poke`, `sts`, `zspec`, `pll`, `lockin`
+`set_setpoint`, `feedback`, `set_current_range`, `move_tip` (records Z and the current along the
+path and replies with the trace's file name), `pulse`, `poke`, `sts`, `zspec`, `pll`, `lockin`
 (bias modulation on: every scan also records a dI/dV map at the scan bias, channel `didv`),
 `drift_comp`, `withdraw`, `approach`, `coarse_move`, `wait`. Only hard instrument limits apply; there is no
 safety gate and there are no composite skills. Observations (`status`, `info`, `list_data`,
@@ -121,6 +121,19 @@ A frame observation carries `t_start_s` (the instrument time it began: a shift b
 over their time difference is the drift `drift_comp` takes), and a Z spectrum carries `z_abs`, the
 loop's Z at every point as the `.dat` file has it (what lines a curve over an atom up with one
 over bare surface).
+
+Every `move_tip` records a trace and keeps it like a spectrum (`list_data` lists it with
+`"kind": "move"`, `spectrum(name)` returns it, the session directory holds it as a `.dat` file and an
+export carries its hashes): `t` (s since the move's start), `dist` (m along the path), `z_abs` (m,
+the Z controller's output, a larger value is a higher tip) and `i` (A, as measured: noise, and the
+preamplifier's limit when the range is too small for the current), with the move's `from_nm`,
+`to_nm`, `speed_nm_s`, `bias_v`, `setpoint_pa` and `feedback`. The reply has no hop count, and
+nothing else says whether an atom moved: an atom pulled along gives a sawtooth in `z_abs` with the
+lattice period, one left behind makes it fall from the top of its bump; in a trace of a few
+nanometres the teeth are about two noises high, and the fall is what shows. A trace's file name
+cited in a report's `evidence` is passed over by the judge (it is listed as unresolved): it is not a
+frame, an STS or a Z spectrum.
+`stmbench.analysis.trace.count_hops` reads a drag's trace (what the scripted baseline does).
 
 The MCP tools are the actions, the observations (`show_frame` returns a PNG rendered one fixed
 way — line-flattened, 0.5–99.5 % contrast, integer enlargement to ≥ 512 px — and
@@ -512,7 +525,7 @@ python -m stmbench.cli baseline --paper P4 --seeds 30 --jobs 4 --json p4-baselin
 A scripted baseline (`stmbench.baselines`) drives the instrument an agent gets over MCP and
 nothing else — no truth — and decides everything from what it observes: the tip's
 state from how its atoms look (`stmbench.analysis.tip`), which atom to move from a survey, the
-drift from atoms found again, whether the atom moved from current spikes and fiducials. It is
+drift from atoms found again, whether the atom moved from the trace of the drag and fiducials. It is
 the bar an agent should clear. P4 (2026-10-14): 150/150 on seeds 450–599, held out
 until the code was final, with 984 s median instrument time (the privileged
 reference: 879 s); 300/300 on seeds 0–299, where it was developed. Per-seed results and
