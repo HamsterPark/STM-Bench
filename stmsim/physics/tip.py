@@ -84,6 +84,11 @@ class Tip:
     persist_frac: float = 0.12        # fraction of a pulse's Z jump that stays (rest relaxes in ~1 s)
     events: list[TipEvent] = field(default_factory=list)
     rng: np.random.Generator = field(default_factory=lambda: np.random.default_rng(0))
+    #: the hazard a settling tip falls back to (None: :data:`LAMBDA_REST_DEFAULT`); a scenario
+    #: records the one it gave the tip before the condition it arrived in raised it
+    lambda_rest_per_s: float | None = None
+    #: the generator of the tip's own recovery (``tip_recovery``); None = the tip never recovers
+    recovery_rng: np.random.Generator | None = field(default=None, repr=False)
 
     # ── derived ──
     @property
@@ -359,10 +364,15 @@ class Tip:
         """Poisson hazard over ``dt_sim``; boosted by current dose and high bias."""
         boost = self.hazard_boost(current_a, bias_v)
         p = 1.0 - math.exp(-self.lambda_per_s * boost * dt_sim)
+        changed = False
         if self.rng.random() < p:
             self.spontaneous_change(sim_s)
-            return True
-        return False
+            changed = True
+        # a tip that recovers (``tip_recovery``) gets its chance in the same interval: scan rows
+        # and drags both come through here, so a recovery is placed like a change
+        if self.recovery_rng is not None and self._maybe_recover(dt_sim, sim_s, current_a, bias_v):
+            changed = True
+        return changed
 
     def spontaneous_change(self, sim_s: float, rng: np.random.Generator | None = None) -> None:
         """One spontaneous change of the apex. ``rng`` is the generator its draws come from: the
@@ -378,6 +388,108 @@ class Tip:
             self.apexes.append(Apex(float(r.normal(0, 1.5e-9)), float(r.normal(0, 1.5e-9)),
                                     -abs(dz), float(r.uniform(0.3, 0.8))))
         self._log(sim_s, "spontaneous_change", dz_pm=dz * 1e12, n_apex=self.n_apex)
+
+    # ── recovery: the tip also gets better on its own (``tip_recovery``) ───────────────────
+    #: The spontaneous hazard only ever made a tip worse. Real tips also settle, shed a spare apex,
+    #: lose what stuck to them, and a crashed cluster freezes. Four processes, each a Poisson
+    #: rate; the mean waiting times below are MODELLING ASSUMPTIONS (nothing measured), chosen so
+    #: that waiting is a poor substitute for conditioning yet matters now and then within the
+    #: 1.5 h of P4's budget: a shallow poke does the same in about two seconds of instrument time.
+    #: At the imaging dose (200 pA, 50 mV) the chance that a process fires within 1000 s is
+    #: settle 24 %, one spare apex lost 15 %, desorption 5 %, flicker stopping 34 %; within the
+    #: whole budget (5400 s) 78 %, 59 %, 22 % and 89 % — but only a tip that is in that state
+    #: gets any chance at all (about one P4 start in seven is metastable, a quarter has a spare
+    #: apex, one in seven is dirty, and a flickering tip needs a crash first).
+    #:
+    #: * ``settle`` — a metastable apex relaxes: ``metastable`` clears and the change hazard falls
+    #:   towards the rest value (the excess over it shrinks by 2.5–10×; it keeps falling, event
+    #:   by event, while any excess is left). Shallow pokes do the same in one step.
+    #: * ``apex_lost`` — one secondary apex detaches; *current*-assisted, like the hazard's
+    #:   own boost: rate × (1 + |I| / 1 nA) per spare apex, so a double tip dragged at tens of nA
+    #:   may clean itself up (at 20 nA: a mean 6 min per apex).
+    #: * ``desorb`` — what is adsorbed on the apex (the "dirty" condition's LDOS peak and lowered
+    #:   barrier) leaves; *field*-assisted: rate × (1 + (|V| / 2 V)²), as the hazard's bias term.
+    #:   A picked-up atom is not an adsorbate and never leaves this way.
+    #: * ``flicker_stop`` — a crashed apex cluster freezes into one configuration (the apex stays
+    #:   blunt and multiple; only the flicker, the trace/retrace disagreement, goes).
+    #:
+    #: A blunt tip does not sharpen, and a dead one does not recover.
+    RECOVERY_TAU_S = {"settle": 3600.0, "apex_lost": 7200.0, "desorb": 21600.0, "flicker_stop": 2400.0}
+    #: the change hazard a tip with no recorded rest value falls back to (the dataclass default)
+    LAMBDA_REST_DEFAULT = 1e-4
+
+    def _lambda_rest(self) -> float:
+        return float(self.lambda_rest_per_s if self.lambda_rest_per_s is not None else self.LAMBDA_REST_DEFAULT)
+
+    def recovery_rates(self, current_a: float = 0.0, bias_v: float = 0.0) -> dict[str, float]:
+        """The rate (1/s) of every recovery that has anything to act on now, at this current
+        dose and bias (see the notes above). Empty for a dead tip or one with nothing to recover."""
+        if self.dead:
+            return {}
+        tau = self.RECOVERY_TAU_S
+        rates: dict[str, float] = {}
+        if self.metastable or self.lambda_per_s > 1.05 * self._lambda_rest():
+            rates["settle"] = 1.0 / tau["settle"]
+        spare = len(self.apexes) - 1
+        if spare > 0:
+            rates["apex_lost"] = spare / tau["apex_lost"] * (1.0 + abs(current_a) / 1e-9)
+        if self.carried is None and self.ldos.extra_peaks:
+            rates["desorb"] = (1.0 / tau["desorb"]) * (1.0 + (abs(bias_v) / 2.0) ** 2)
+        if self.flicker_dz_m > 0.0:
+            rates["flicker_stop"] = 1.0 / tau["flicker_stop"]
+        return rates
+
+    @staticmethod
+    def pick_recovery(rates: dict[str, float], u: float) -> str:
+        """Which recovery fires, given that one does: ``u`` ∈ [0, 1) against the rates' shares."""
+        total = sum(rates.values())
+        acc = 0.0
+        for kind, rate in rates.items():
+            acc += rate / total
+            if u < acc:
+                return kind
+        return next(reversed(rates))
+
+    def recover(self, kind: str, sim_s: float, rng: np.random.Generator) -> None:
+        """One recovery (``kind`` from :meth:`recovery_rates`), logged at ``sim_s``. Draws from
+        ``rng`` only — never from the tip's own stream."""
+        if kind == "settle":
+            rest = self._lambda_rest()
+            self.metastable = False
+            self.lambda_per_s = float(rest + max(self.lambda_per_s - rest, 0.0) * rng.uniform(0.1, 0.4))
+            self._log(sim_s, "recovery_settle", lambda_per_s=self.lambda_per_s)
+        elif kind == "apex_lost":
+            k = 1 + int(rng.integers(0, len(self.apexes) - 1))
+            gone = self.apexes.pop(k)
+            self._log(sim_s, "recovery_apex_lost", n_apex=self.n_apex,
+                      dx_nm=gone.dx * 1e9, dy_nm=gone.dy * 1e9)
+        elif kind == "desorb":
+            # the apex is clean again: no extra peak, and the barrier back to what a clean tip
+            # has (the same state a shallow poke leaves it in; no draw)
+            self.ldos = LDOSTemplate("flat")
+            self.phi_ev = max(self.phi_ev, 4.0)
+            self._log(sim_s, "recovery_desorb")
+        elif kind == "flicker_stop":
+            was = self.flicker_dz_m
+            self.flicker_dz_m = 0.0
+            self.flicker_rate_hz = 0.0
+            self._log(sim_s, "recovery_flicker_stop", flicker_dz_pm=was * 1e12)
+        else:
+            raise ValueError(f"unknown recovery {kind!r} (known: {sorted(self.RECOVERY_TAU_S)})")
+
+    def _maybe_recover(self, dt_sim: float, sim_s: float, current_a: float, bias_v: float) -> bool:
+        """One Poisson chance over ``dt_sim`` for the recoveries that have anything to act on; at
+        most one fires (the intervals this is used for are a scan row or a drag). No draw when the
+        tip has nothing to recover."""
+        rates = self.recovery_rates(current_a, bias_v)
+        total = sum(rates.values())
+        if total <= 0.0:
+            return False
+        r = self.recovery_rng
+        if r.random() >= 1.0 - math.exp(-total * dt_sim):
+            return False
+        self.recover(self.pick_recovery(rates, float(r.random())), sim_s, r)
+        return True
 
     # ── transitions ──
     def pulse(self, sim_s: float, v: float, width_s: float, envelope_v: float = 10.0) -> dict:

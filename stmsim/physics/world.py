@@ -225,6 +225,7 @@ class World:
         """Switch scenario physics on or off (:class:`~stmsim.physics.switches.PhysicsSwitches`)."""
         with self.lock:
             self.physics = physics
+            self.tip.recovery_rng = self.rng_recovery if physics.tip_recovery else None
 
     # ────────────────────────── derived physics ──────────────────────────
     def phi_junction(self) -> float:
@@ -605,38 +606,53 @@ class World:
         With ``tip_changes_outside_scans`` the tip's spontaneous-change hazard runs over the
         interval — the same law as in a scan row (:meth:`Tip.hazard_boost`: λ·(1 + |I| / 1 nA +
         (|V| / 2 V)²)) — so spectroscopy, waiting and moving are not safe places for the tip.
+        With ``tip_recovery`` the tip's recoveries run over it too (:meth:`Tip.recovery_rates`).
         ``current_a`` and ``bias_v`` are the dose and the field of the interval; by default the
         setpoint (the junction current with the loop off) and the bias. A sweep passes its
         largest |I| and |V|.
 
-        The changes form a Poisson process: the first arrival after the interval's start is
-        drawn from the exponential law, then the next from there, up to the end, so a long wait
-        on an unstable tip changes it many times and each change is logged at its own time
-        inside the interval (a replay places it there). All draws are from ``rng_outscan``,
-        including the change itself, so no other stream gains one.
+        Both are Poisson processes, walked together in time: the first arrival of each after
+        the last event is drawn from the exponential law, the earlier one happens (at its own
+        time, logged there, so a replay places it and every snapshot is the tip as that moment
+        left it), and the rates are read again from the tip as it is then — a settled tip
+        changes less. A long wait on an unstable tip changes it many times. Changes draw from
+        ``rng_outscan``, recoveries from ``rng_recovery``, and nothing else is drawn.
 
         An acquisition is atomic with respect to this: a spectrum that straddles a change
         returns the tip it started with, and the change is in the tip's log and in every
         measurement after it. The interval lies ahead of the clock (the action advances it
         afterwards), as the row times of a frame do."""
-        if dt_s <= 0.0 or not self.physics.tip_changes_outside_scans or not self.tunnelling_now():
+        sw = self.physics
+        if dt_s <= 0.0 or not (sw.tip_changes_outside_scans or sw.tip_recovery) or not self.tunnelling_now():
             return []
         with self.lock:
             i_a = abs(float(current_a)) if current_a is not None else (
                 abs(self.zctrl.setpoint_a) if self.zctrl.on else abs(self._dc_current()))
             v = abs(float(bias_v)) if bias_v is not None else abs(self.bias_v)
-            first = len(self.tip.events)
+            tip = self.tip
+            first = len(tip.events)
             t = self.clock.sim()
             end = t + float(dt_s)
             for _ in range(self.OUTSCAN_MAX_EVENTS):
-                rate = self.tip.lambda_per_s * self.tip.hazard_boost(i_a, v)
-                if rate <= 0.0:
-                    break
-                t += float(self.rng_outscan.exponential(1.0 / rate))
+                t_change = math.inf
+                if sw.tip_changes_outside_scans:
+                    rate = tip.lambda_per_s * tip.hazard_boost(i_a, v)
+                    if rate > 0.0:
+                        t_change = t + float(self.rng_outscan.exponential(1.0 / rate))
+                t_recover, rates = math.inf, {}
+                if sw.tip_recovery:
+                    rates = tip.recovery_rates(i_a, v)
+                    total = sum(rates.values())
+                    if total > 0.0:
+                        t_recover = t + float(self.rng_recovery.exponential(1.0 / total))
+                t = min(t_change, t_recover)
                 if t >= end:
                     break
-                self.tip.spontaneous_change(t, rng=self.rng_outscan)
-            return self.tip.events[first:]
+                if t_change <= t_recover:
+                    tip.spontaneous_change(t, rng=self.rng_outscan)
+                else:
+                    tip.recover(tip.pick_recovery(rates, float(self.rng_recovery.random())), t, self.rng_recovery)
+            return tip.events[first:]
 
     def navigation_interval(self, dt_s: float) -> list:
         """The time a move that drags nothing takes: the tip tunnels, at the setpoint, all along."""

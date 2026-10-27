@@ -268,6 +268,9 @@ class Scenario:
             tip.phi_ev = float(tip_cfg["phi_ev"])
         if "lambda_per_s" in tip_cfg:
             tip.lambda_per_s = float(tip_cfg["lambda_per_s"])
+        # the hazard the tip settles back to when it recovers (tip_recovery): what the scenario
+        # gave it, before the condition it arrives in (an unstable one) raises it
+        tip.lambda_rest_per_s = tip.lambda_per_s
         if "apexes" in tip_cfg:
             tip.apexes = [Apex(float(a[0]) * 1e-9, float(a[1]) * 1e-9, float(a[2]) * 1e-9, float(a[3]))
                           for a in tip_cfg["apexes"]]

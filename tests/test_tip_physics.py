@@ -213,3 +213,219 @@ def test_the_same_episode_replays_to_the_same_changes(tmp_path):
         out.append(([(e.sim_s, e.kind, dict(e.detail)) for e in inst.world.tip.events], inst.digest()))
     assert out[0] == out[1]
     assert any(k == "spontaneous_change" for _, k, _ in out[0][0])
+
+
+# ── tip_recovery ─────────────────────────────────────────────────────────────
+def _recoveries(w, since=0):
+    return [e for e in w.tip.events[since:] if e.kind.startswith("recovery_")]
+
+
+def _hurt(w, *, secondary=0, dirty=False, flicker=False, metastable=False, lam=None):
+    """Put the tip of ``w`` in a state with something to recover from."""
+    from stmsim.physics.tip import Apex
+
+    t = w.tip
+    t.apexes = [Apex(0.0, 0.0, 0.0, 1.0)] + [Apex(2e-9 * (k + 1), 0.0, -0.1e-9, 0.7) for k in range(secondary)]
+    if dirty:
+        t.apply_condition("dirty", 0.5)
+    if flicker:
+        t.flicker_dz_m, t.flicker_rate_hz = 0.15e-9, 2.0
+    t.metastable = metastable
+    if lam is not None:
+        t.lambda_per_s = lam
+
+
+def test_nothing_recovers_when_the_switch_is_off_or_there_is_nothing_to_recover(tmp_path):
+    inst = _inst(tmp_path)                                       # off
+    w = inst.world
+    _hurt(w, secondary=2, dirty=True, flicker=True, metastable=True, lam=0.01)
+    assert w.tip.recovery_rng is None
+    n0, before = len(w.tip.events), _states(w)
+    inst.act("wait", seconds=7200.0)
+    assert w.tip.events[n0:] == [] and _states(w) == before
+    inst = _inst(tmp_path / "on", tip_recovery=True)             # on, but a sound tip
+    w = inst.world
+    assert w.tip.recovery_rates(2e-10, 0.05) == {}
+    before = _states(w)
+    inst.act("wait", seconds=7200.0)
+    assert _states(w) == before                                  # nothing to act on: not even a draw
+
+
+def test_each_recovery_clears_what_it_is_for_and_only_that(tmp_path):
+    inst = _inst(tmp_path, tip_recovery=True)
+    w = inst.world
+    t = w.tip
+    _hurt(w, secondary=2, dirty=True, flicker=True, metastable=True, lam=0.02)
+    radius, n_sec = t.radius_m, len(t.apexes) - 1
+    rng = np.random.default_rng(1)
+    t.recover("apex_lost", 1.0, rng)
+    assert len(t.apexes) - 1 == n_sec - 1 and t.apexes[0].w == 1.0           # a spare one, never the main apex
+    t.recover("desorb", 2.0, rng)
+    assert t.ldos.name == "flat" and not t.ldos.extra_peaks and t.phi_ev >= 4.0
+    t.recover("flicker_stop", 3.0, rng)
+    assert t.flicker_dz_m == 0.0 and t.flicker_rate_hz == 0.0 and t.metastable        # still metastable
+    t.recover("settle", 4.0, rng)
+    assert not t.metastable and 1e-4 < t.lambda_per_s < 0.02 * 0.4 + 1e-4
+    assert t.radius_m == radius                                             # a blunt tip does not sharpen
+    assert [e.kind for e in t.events[-4:]] == ["recovery_apex_lost", "recovery_desorb",
+                                               "recovery_flicker_stop", "recovery_settle"]
+    assert [e.sim_s for e in t.events[-4:]] == [1.0, 2.0, 3.0, 4.0]
+    assert all(e.state is not None for e in t.events[-4:])
+
+
+def test_a_blunt_tip_never_sharpens_and_a_dead_one_never_recovers(tmp_path):
+    inst = _inst(tmp_path, tip_recovery=True, tip_changes_outside_scans=True)
+    w = inst.world
+    w.tip.apply_condition("blunt", 1.0)
+    w.tip.lambda_per_s = 0.0
+    n0, r0 = len(w.tip.events), w.tip.radius_m
+    inst.act("wait", seconds=3000.0)
+    assert w.tip.radius_m == r0 and w.tip.events[n0:] == []
+    _hurt(w, secondary=1, metastable=True)
+    w.tip.dead = True
+    assert w.tip.recovery_rates() == {}
+    inst.act("wait", seconds=3000.0)
+    assert _recoveries(w) == []
+
+
+def test_a_picked_up_atom_is_not_an_adsorbate_that_desorbs(tmp_path):
+    inst = _inst(tmp_path, tip_recovery=True)
+    w = inst.world
+    w.tip.pick_up(1.0, "Fe")
+    assert w.tip.ldos.extra_peaks and "desorb" not in w.tip.recovery_rates(0.0, 5.0)
+    w.tip.drop(2.0)
+    assert w.tip.recovery_rates(0.0, 5.0) == {}
+
+
+def test_the_rates_follow_their_assists(tmp_path):
+    inst = _inst(tmp_path, tip_recovery=True)
+    w = inst.world
+    _hurt(w, secondary=2, dirty=True, flicker=True, metastable=True, lam=0.01)
+    t = w.tip
+    base = t.recovery_rates(0.0, 0.0)
+    tau = t.RECOVERY_TAU_S
+    assert base["settle"] == pytest.approx(1 / tau["settle"])
+    assert base["apex_lost"] == pytest.approx(2 / tau["apex_lost"])            # per spare apex
+    assert base["desorb"] == pytest.approx(1 / tau["desorb"])
+    assert base["flicker_stop"] == pytest.approx(1 / tau["flicker_stop"])
+    hot = t.recovery_rates(20e-9, 2.0)
+    assert hot["apex_lost"] == pytest.approx(base["apex_lost"] * 21.0)          # current-assisted
+    assert hot["desorb"] == pytest.approx(base["desorb"] * 2.0)                 # field-assisted: 1 + (2 V / 2 V)^2
+    assert hot["settle"] == base["settle"] and hot["flicker_stop"] == base["flicker_stop"]
+
+
+def test_waiting_is_a_poor_substitute_for_conditioning(tmp_path):
+    """At the imaging dose no process is faster than ten minutes on average, so a wait of the
+    length of a poke (seconds) does nothing, and the 1.5 h of P4's budget is where it matters."""
+    inst = _inst(tmp_path, tip_recovery=True)
+    w = inst.world
+    _hurt(w, secondary=1, dirty=True, flicker=True, metastable=True, lam=0.01)
+    rates = w.tip.recovery_rates(200e-12, 0.05)
+    assert set(rates) == {"settle", "apex_lost", "desorb", "flicker_stop"}
+    assert all(1.0 / r > 600.0 for r in rates.values())
+    assert 1.0 - np.exp(-sum(rates.values()) * 10.0) < 0.05                    # ten seconds: nothing
+    assert 1.0 - np.exp(-sum(rates.values()) * 5400.0) > 0.9                   # the whole budget: something
+
+
+def test_a_long_wait_recovers_a_hurt_tip_in_time_order_with_consistent_snapshots(tmp_path):
+    inst = _inst(tmp_path, tip_recovery=True, tip_changes_outside_scans=True)
+    w = inst.world
+    _hurt(w, secondary=3, dirty=True, flicker=True, metastable=True, lam=3e-3)
+    t0, n0 = w.clock.sim(), len(w.tip.events)
+    inst.act("wait", seconds=7200.0)
+    ev = w.tip.events[n0:]
+    kinds = {e.kind for e in ev}
+    assert {"recovery_settle", "recovery_flicker_stop", "recovery_apex_lost"} <= kinds
+    times = [e.sim_s for e in ev]
+    assert times == sorted(times) and all(t0 <= t <= t0 + 7200.0 for t in times)
+    # every snapshot is the tip right after its own event: the spare apexes only ever go down by
+    # recovery (and up by a change), and a settled tip is not metastable
+    n_apex = 4
+    for e in ev:
+        if e.kind == "recovery_apex_lost":
+            n_apex -= 1
+        elif e.kind == "spontaneous_change":
+            n_apex = e.state["n_apex"]
+        assert e.state["n_apex"] == n_apex
+        if e.kind == "recovery_settle":
+            assert not e.state["metastable"]
+        if e.kind == "recovery_flicker_stop":
+            assert e.state["flicker_dz_pm"] == 0.0
+
+
+def test_only_the_recovery_stream_is_drawn_by_a_recovery_alone(tmp_path):
+    inst = _inst(tmp_path, tip_recovery=True)                  # changes outside scans stay off
+    w = inst.world
+    _hurt(w, secondary=2, dirty=True, flicker=True, metastable=True, lam=0.01)
+    before = _states(w)
+    inst.act("wait", seconds=7200.0)
+    after = _states(w)
+    assert after["recovery"] != before["recovery"]
+    assert {k: v for k, v in after.items() if k != "recovery"} == {k: v for k, v in before.items() if k != "recovery"}
+    assert _recoveries(w)
+
+
+def test_the_apex_loss_is_current_assisted_in_a_run(tmp_path):
+    """A double tip dragged at 20 nA loses its spare apex within minutes; at the imaging dose it
+    mostly keeps it for the same time."""
+    def lost_fraction(current_a, trials=120):
+        inst = _inst(tmp_path / f"i{current_a}", tip_recovery=True)
+        w = inst.world
+        n = 0
+        for _ in range(trials):
+            _hurt(w, secondary=1)
+            w.tunnel_interval(500.0, current_a=current_a)
+            n += int(len(w.tip.apexes) == 1)
+        return n / trials
+
+    assert lost_fraction(20e-9) > 0.55                         # 1 - exp(-500 * 21 / 7200) = 0.77
+    assert lost_fraction(200e-12) < 0.25                       # 1 - exp(-500 * 1.2 / 7200) = 0.08
+
+
+def _scan_world(tmp_path, tau_s):
+    """A P4 world whose tip recovers within a frame (the time constants squeezed to ``tau_s``)."""
+    inst = _inst(tmp_path, tip_recovery=True)
+    w = inst.world
+    w.tip.RECOVERY_TAU_S = {k: tau_s for k in w.tip.RECOVERY_TAU_S}     # per instance: the class stays
+    return inst, w
+
+
+def test_recoveries_in_scan_rows_are_logged_at_the_row_and_counted_with_the_frames_tip_changes(tmp_path):
+    inst, w = _scan_world(tmp_path, 8.0)
+    _hurt(w, secondary=2, flicker=True, metastable=True, lam=1e-3)
+    n0 = len(w.tip.events)
+    inst.act("scan", center_x_nm=0.0, center_y_nm=0.0, size_nm=10.0, pixels=64, line_time_s=0.2)
+    fr = w.frame
+    rec = _recoveries(w, n0)
+    assert rec and fr.tip_change_rows
+    per_row = fr.settings.line_time_fwd_s + fr.settings.line_time_bwd_s
+    rows = {int(round((e.sim_s - fr.row_times_sim[0]) / per_row)) for e in rec}
+    assert rows <= set(fr.tip_change_rows)                      # a replay places each at the row it hit
+    for e in rec:
+        k = int(round((e.sim_s - fr.row_times_sim[0]) / per_row))
+        assert e.sim_s == pytest.approx(float(fr.row_times_sim[k]), abs=1e-9)
+    start = [e for e in w.events if e["kind"] == "scan_start"][-1]
+    assert start["tip_events"] == [n0, len(w.tip.events)]       # the frame owns them
+
+
+def test_recoveries_in_a_drag_come_through_the_drags_own_hazard_call(tmp_path):
+    inst, w = _scan_world(tmp_path, 4.0)
+    _hurt(w, secondary=1, flicker=True, metastable=True, lam=1e-4)
+    inst.act("set_current_range", full_scale_na=100.0)
+    inst.act("set_bias", bias_v=0.005)
+    inst.act("set_setpoint", current_pa=5e4)
+    n0 = len(w.tip.events)
+    for k in range(10):
+        inst.act("move_tip", x_nm=2.0 + k, y_nm=1.0, speed_nm_s=0.3)       # 1 nm at 0.3 nm/s: 3.3 s each
+    assert _recoveries(w, n0)
+
+
+def test_the_unstable_arrival_condition_keeps_the_rest_value_it_was_raised_from(tmp_path):
+    from pathlib import Path
+
+    from stmsim.scenario import Scenario, resolve_hidden
+
+    sc = Scenario.load(Path(__file__).resolve().parent.parent / "stmbench" / "trackB" / "scenarios" / f"{P4}.yaml")
+    seed = next(s for s in range(60) if resolve_hidden(sc.hidden, s, sc.id)["tip"]["condition"] == "unstable")
+    w = sc.build_world(seed, tmp_path / "s", virtual_clock=True)
+    assert w.tip.lambda_per_s >= 3e-3 and w.tip.lambda_rest_per_s == pytest.approx(1e-4)
