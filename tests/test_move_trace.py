@@ -170,8 +170,8 @@ def test_a_withdrawn_tip_records_the_retract_limit_and_no_current(tmp_path):
 
 
 def test_a_manipulation_current_saturates_a_small_range_and_not_a_wide_one(tmp_path):
-    """17 nA is what 33 nA asked for at 5 mV can carry here; the 10 nA range reads its limit all
-    along the move, the 100 nA range reads the current."""
+    """33 nA asked for at 5 mV (152 kohm, below the gap floor's 286 kohm): the 10 nA range reads its
+    limit all along the move, the 100 nA range reads the setpoint, as the status reading does."""
     for full_scale, saturated in ((10e-9, True), (100e-9, False)):
         w = _world(tmp_path / str(full_scale), bias=0.005, setpoint=33e-9)
         w.preamp.full_scale_a = full_scale
@@ -179,7 +179,56 @@ def test_a_manipulation_current_saturates_a_small_range_and_not_a_wide_one(tmp_p
         i = w.last_move_trace["i"]
         assert bool(np.all(i == w.preamp.clamp_a)) is saturated
         if not saturated:
-            assert 10e-9 < np.median(i) < 20e-9
+            assert np.median(i) == pytest.approx(33e-9, rel=0.02)
+
+
+@pytest.mark.parametrize("bias,setpoint,osc", [(0.01, 100e-9, 1.0), (0.002, 100e-9, 1.0), (-0.01, 100e-9, 1.0),
+                                               (0.01, 100e-9, 0.5), (0.01, 20e-9, 1.0), (0.01, 10e-9, 0.5)])
+def test_where_the_loop_holds_its_target_the_trace_reads_the_setpoint_the_status_reads(
+        tmp_path, monkeypatch, bias, setpoint, osc):
+    """Screen trial 3 dragged at 100 nA and 10 mV (100 kohm) and 2 mV (20 kohm) and read a flat 34.78 and
+    6.96 nA in the trace, while the status read the setpoint and the drag ran on the panel resistance.
+    Below about 286 kohm at 4.2 eV the model's gap floor (0.05 nm) binds: the loop's target is the
+    floor and the junction there carries less than the setpoint, but the instrument reads the setpoint
+    where the loop holds its target, and the trace must say what the status says. Where the floor
+    does not bind (20 nA at 10 mV, 500 kohm) the trace is as it was. A cycle-averaged (oscillating)
+    current is the setpoint too, and so is a negative one."""
+    monkeypatch.setattr(World, "osc_factor", lambda self: osc)
+    w = _world(tmp_path, bias=bias, setpoint=setpoint)                # a 1 uA range: nothing clamps
+    w.move_xy(-40e-9, -40e-9)                                         # bare surface, far from the one atom
+    status = w._dc_current()
+    assert status == pytest.approx(math.copysign(setpoint, bias), rel=1e-9)
+    w.move_xy_path(-40e-9, -37e-9, speed_m_s=0.25e-9, trace=True)
+    i = w.last_move_trace["i"]
+    assert np.mean(i) == pytest.approx(status, rel=0.02) and np.std(i) < 0.01 * abs(status)
+
+
+def test_the_current_departs_from_the_setpoint_alike_either_side_of_the_gap_floor(tmp_path):
+    """The same fast move over an atom, which the loop lags (the gap leaves its target), just below and
+    just above the setpoint that the floor lets the junction carry at 10 mV (34.8 nA: 287 kohm): the
+    current dips by the same fraction of the setpoint, I = I_set exp(-2 kappa (gap - gap_eq)), and
+    the floored one never reads more than the setpoint (the gap does not close below the floor).
+    Without feedback the junction's own current is read, with no convention to follow."""
+    dips = {}
+    for setpoint in (34.4e-9, 35.2e-9):                               # 291 and 284 kohm: not floored, floored
+        w = _world(tmp_path / f"{setpoint:g}", bias=0.01, setpoint=setpoint)
+        reg, atom = _atom(w)
+        ax, ay = reg.site_xy(atom.i, atom.j)
+        w.move_xy(ax, ay)
+        floored = w.equilibrium_gap() <= 0.05e-9 * (1 + 1e-9)
+        assert floored is (setpoint > 34.8e-9)
+        w.move_xy_path(ax + 2e-9, ay, speed_m_s=300e-9, trace=True)
+        i = w.last_move_trace["i"]
+        dips[setpoint] = float(np.min(i) / setpoint)
+        if floored:
+            assert np.max(i) <= setpoint * (1 + 1e-3)
+    assert dips[34.4e-9] < 0.8 and dips[35.2e-9] < 0.8                # the loop does lag the bump
+    assert dips[35.2e-9] == pytest.approx(dips[34.4e-9], abs=0.003)
+    w = _world(tmp_path / "open", bias=0.01, setpoint=100e-9)
+    w.move_xy(-40e-9, -40e-9)
+    w.zctrl_set(False)                                                # held where it is: the gap stays at the floor
+    w.move_xy_path(-40e-9, -37e-9, speed_m_s=0.25e-9, trace=True)
+    assert np.mean(w.last_move_trace["i"]) == pytest.approx(34.78e-9, rel=0.01)    # what the junction carries there
 
 
 def test_a_pickup_takes_the_bump_off_the_surface_at_its_sample(tmp_path):

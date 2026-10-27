@@ -19,6 +19,25 @@ P4 = "P4_atom_positioning_cu111"
 P5 = "P5_sader_jarvis_qplus"
 
 
+def test_a_trace_reads_the_current_the_status_reads_in_the_manipulation_regime():
+    """Screen trial 3 (seed 451): the traces of drags at 100 nA read a flat 34.78 nA at 10 mV and
+    6.96 nA at 2 mV, a fixed 287 kohm, while the status bar read the setpoint; the agent concluded
+    that the junction current saturates near 35 nA. The status and the trace now agree in both
+    regimes: the gap floor binds at 100 and 20 kohm and not at 500."""
+    inst = Instrument(P4, 451)
+    inst.act("set_current_range", full_scale_na=100.0)
+    x = -6.0
+    for bias, setpoint_pa in ((0.010, 1e5), (0.002, 1e5), (0.010, 2e4)):
+        inst.act("set_bias", bias_v=bias)
+        inst.act("set_setpoint", current_pa=setpoint_pa)
+        status = inst.status()["current_pa"]
+        r = inst.act("move_tip", x_nm=x + 1.5, y_nm=-6.0, speed_nm_s=0.25)
+        x += 1.5
+        i = np.asarray(inst.spectrum(r["trace"])["i"]) * 1e12
+        assert status == pytest.approx(setpoint_pa, rel=1e-3)
+        assert np.mean(i) == pytest.approx(status, rel=0.01) and np.std(i) < 0.01 * status, (bias, setpoint_pa)
+
+
 def test_a_scenario_the_instrument_cannot_judge_is_refused_at_the_start():
     """The skill scenarios judge on evidence the instrument does not record; an agent must
     not play a whole episode only for the judge to fail at the end."""
