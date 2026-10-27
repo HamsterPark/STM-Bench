@@ -228,6 +228,12 @@ def _r(x: float, nd: int = 4) -> float:
     return float(round(float(x), nd))
 
 
+def _peak(a) -> float:
+    """The largest |value| of a curve, NaN-safe (0 for a curve with no finite point)."""
+    a = np.asarray(a, float)
+    return float(np.nanmax(np.abs(a))) if np.any(np.isfinite(a)) else 0.0
+
+
 def array_digest(a: np.ndarray) -> str:
     return hashlib.sha256(np.ascontiguousarray(np.asarray(a, dtype=np.float64)).tobytes()).hexdigest()
 
@@ -325,6 +331,15 @@ class Instrument:
     def _settle(self, at_least: float = 0.0) -> None:
         self._advance(max(float(at_least), self._transient_left_s()))
 
+    def _settle_tunnelling(self, at_least: float = 0.0, *, current_a: float | None = None,
+                           bias_v: float | None = None) -> None:
+        """:meth:`_settle` for an action that leaves the tip tunnelling: the time it takes also
+        counts for the tip's hazards outside scans (:meth:`World.tunnel_interval`; ``current_a``
+        and ``bias_v`` are the dose and field of a sweep, else the setpoint and the bias)."""
+        dt = max(float(at_least), self._transient_left_s())
+        self.world.tunnel_interval(dt, current_a=current_a, bias_v=bias_v)
+        self._advance(dt)
+
     # ── the one door that changes the instrument ──
     def act(self, name: str, **args) -> dict:
         """Run one action; returns what the instrument reports. :class:`ActionError` if refused."""
@@ -403,25 +418,23 @@ class Instrument:
 
     def _do_set_bias(self, bias_v) -> dict:
         self.world.set_bias(float(bias_v))
-        self._settle(0.05)
+        self._settle_tunnelling(0.05)
         return {"bias_v": _r(bias_v, 6)}
 
     def _do_set_setpoint(self, current_pa) -> dict:
         self.world.set_setpoint(float(current_pa) * 1e-12)
-        self._settle(0.05)
+        self._settle_tunnelling(0.05)
         return {"setpoint_pa": _r(current_pa, 6)}
 
     def _do_feedback(self, on) -> dict:
         self.world.zctrl_set(bool(on))
-        self._settle(0.05)
+        self._settle_tunnelling(0.05)
         return {"feedback": bool(on)}
 
     def _do_set_current_range(self, full_scale_na) -> dict:
         w = self.world
-        idx = _GAIN_FULL_SCALE_NA[float(full_scale_na)]
-        w.preamp.gain_index = idx
-        w.preamp.full_scale_a = 10.0 / (10.0 ** (6 + idx))
-        self._settle(0.05)
+        w.set_current_range(_GAIN_FULL_SCALE_NA[float(full_scale_na)])      # the world checks the setpoint against it
+        self._settle_tunnelling(0.05)
         return {"full_scale_na": float(full_scale_na)}
 
     def _do_move_tip(self, x_nm, y_nm, speed_nm_s) -> dict:
@@ -482,6 +495,9 @@ class Instrument:
                               "tip_nm": [_r(w.tip_x * 1e9), _r(w.tip_y * 1e9)],
                               "v": np.asarray(cur["v"], float), "i": np.asarray(cur["i"], float),
                               "didv": np.asarray(cur["didv"], float), "t_s": self.used_s}
+        # the sweep's hazards: its largest field and its largest current dose (the measurement
+        # above is the tip it started with; a change inside the sweep shows from the next one on)
+        w.tunnel_interval(duration, current_a=_peak(cur["i"]), bias_v=max(abs(float(v_start)), abs(float(v_end))))
         self._advance(duration)
         return {"spectrum": name, "points": int(points), "duration_s": _r(duration, 3)}
 
@@ -511,7 +527,7 @@ class Instrument:
                               # the loop's Z at every point (m), as the .dat file has it: what lines up
                               # a curve over an atom with one over the bare surface
                               "z_abs": np.asarray(cur["z_n"], float), "t_s": self.used_s}
-        self._settle(duration)
+        self._settle_tunnelling(duration, current_a=_peak(cur["i"]))
         return {"spectrum": name, "points": int(points), "duration_s": _r(duration, 3)}
 
     def _do_pll(self, on, amplitude_pm=None) -> dict:
@@ -525,7 +541,9 @@ class Instrument:
         if bool(on) and p.output_on:
             p.excitation_v = p.excitation_for(p.amp_setpoint_m)
         p.set_output(bool(on), w.clock.wall())
-        self._advance(5.0 * p.tau_s if on else 0.05)
+        ring = 5.0 * p.tau_s if on else 0.05
+        w.tunnel_interval(ring)                          # the tip tunnels while the oscillation rings up
+        self._advance(ring)
         # the frequency shift is re-zeroed where the tip is (PLL.FreqShiftAutoCenter)
         if on and not w.withdrawn:
             amp = p.amplitude_now(w.clock.wall())
@@ -539,13 +557,13 @@ class Instrument:
         w.lockin_amp_v = float(amplitude_mv) * 1e-3
         chans = [c for c in w.scan.channels if c != SIG_LI_X]
         w.scan.channels = chans + ([SIG_LI_X] if on else [])
-        self._settle(0.05)
+        self._settle_tunnelling(0.05)
         return {"lockin": bool(on), "amplitude_mv": _r(amplitude_mv, 6)}
 
     def _do_drift_comp(self, on, vx_nm_per_min, vy_nm_per_min, vz_pm_per_min) -> dict:
         self.world.set_drift_comp(bool(on), vx_nm_per_min * 1e-9 / 60.0, vy_nm_per_min * 1e-9 / 60.0,
                                   vz_pm_per_min * 1e-12 / 60.0)
-        self._settle(0.05)
+        self._settle_tunnelling(0.05)
         return {"on": bool(on), "v_nm_per_min": [_r(vx_nm_per_min), _r(vy_nm_per_min)],
                 "vz_pm_per_min": _r(vz_pm_per_min)}
 
@@ -575,6 +593,7 @@ class Instrument:
         return {"direction": direction, "steps": int(steps)}
 
     def _do_wait(self, seconds) -> dict:
+        self.world.tunnel_interval(float(seconds))
         self._advance(float(seconds))
         return {"waited_s": _r(seconds, 3)}
 

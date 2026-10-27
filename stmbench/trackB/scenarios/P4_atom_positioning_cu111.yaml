@@ -16,6 +16,8 @@ initial:
   surface: {contamination: 0.0, adsorbate_density_per_um2: 3.0, terrace_median_nm: 150.0}
   adatoms: {layout: single, species: Fe, target: any, target_dx_nm: 4.0, target_dy_nm: 0.0,
             isolation_nm: 3.0, bystander_nm: 10.0, field_per_100nm2: 0.4, field_half_nm: 150}
+  # the mechanisms that leave no safe place at the instrument (stmsim/physics/switches.py)
+  physics: {tip_changes_outside_scans: true, tip_recovery: true, tip_anisotropy: true, crash_over_range: true}
 faults: []
 task: |
   样品是 Cu(111)，表面稀疏地散落着 Fe 吸附原子（扫描坐标原点附近 30 nm 内就有孤立的），仪器已在隧穿态；
@@ -155,3 +157,45 @@ notes: |
   the fixes their failures led to: 149/150 (150–299) and 145/150 (300–449). In 296 of the
   300 development successes the moved atom had other atoms within ``bystander_nm``, so the
   bystander claim was tested.
+
+  **Tip physics with no safe place (2026-10-27, ``initial.physics``).** Two screen-only trials
+  found P4 too easy for the wrong reasons, and the simulator had gaps an agent could stand in:
+  the tip changed only inside scan rows and drags (so spectra, waits and moves were safe), never
+  improved by itself, showed no anisotropy in an image, and the Z loop settled on the true
+  current, so a setpoint above the preamplifier's range cost nothing. P4 now switches four
+  mechanisms on (``stmsim/physics/switches.py``; no other scenario does, and with all four off
+  the world is the one it was, draw for draw, which was checked against the commit this round
+  started from, 7604fc0, on P1, P2, P3, P3 repair, P5 and P4 with its switches off, seeds 0 and
+  1: replies, digest, truth, events, tip log and the end state of every random stream equal).
+  ``tip_changes_outside_scans``: the scan row's hazard λ·(1 + |I|/1 nA + (|V|/2 V)²) also runs
+  over the time spent tunnelling in spectra (their largest |V| and |I|), waits, moves and
+  settling, each change at its own time inside the interval; an acquisition is atomic (a
+  spectrum across a change shows the tip it started with). ``tip_recovery``: a metastable apex
+  settles, a spare apex is lost (faster at a high current), an adsorbate desorbs (faster at a
+  high bias), a crashed cluster stops flickering, on the order of an hour at the imaging dose
+  (assumed rates, written beside the constants in ``Tip``); a blunt tip never sharpens.
+  ``tip_anisotropy``: the blur of the smooth surface is an ellipse (short axis ``axis_ratio`` of
+  the long one, the long axis along ``angle`` in the sample frame, so a rotated scan frame sees
+  it rotated), so an atom looks stretched along it; a blunt arrival condition (ratio 0.80 down
+  to 0.35 with ``condition_scale``, the axis along ``condition_angle_deg``: no new hidden draw),
+  a crash, a pulse that ruins the apex, a ring-up and a deep poke leave a tip anisotropic, and
+  the existing restorations (a good pulse, a shallow poke) still restore it.
+  ``crash_over_range``: with the loop closed a setpoint above the range's full scale cannot be
+  reached by the saturating reading, so the loop's target is contact and the current reads the
+  clamp; entering that (a setpoint raised, a range lowered, the feedback switched on, a landing)
+  crashes the tip once, and a scan or a move made in it crashes it again; nothing is gripped
+  while it lasts. The reference's range-first manipulation (the range to 100 nA, then bias, then
+  setpoint, and back in reverse) never enters it. No tolerance, hidden range or rule changed.
+
+  Re-checked on this physics, nothing in the reference or the baseline changed. The reference,
+  seeds 0–19: 20/20, instrument time median 968 s, p90 1529 s (the same seeds on the old
+  physics: 955 s, 1331 s); 10 of the 20 runs are the same to 1 ms and four more to 35 ms, six
+  took between 41 s less and 906 s more (five of them had a tip change outside a scan or a drag,
+  one a recovery inside a scan; other runs had such changes and went on unchanged). The
+  baseline, held-out seeds 450–469: 20/20 (blunt 4/4, dirty 5/5, double 5/5, good 4/4, unstable
+  2/2), median 964 s and p90 1398 s as before, the longest run 2869 s (seed 465, a double tip,
+  was 2331 s); 19 of the 20 runs are the same to 15 ms. In those 40 sessions no setpoint went
+  over the range, 10 of them (8 reference, 2 baseline) saw a tip change outside a scan or a
+  drag, and 5 a recovery. A scripted run works in under half an hour with the tip mostly pinned
+  by pokes, so it barely meets the new physics; what the physics takes away is the safe corner
+  for an agent that waits, tunnels at a high setpoint on a low range, or leaves a bad tip alone.
