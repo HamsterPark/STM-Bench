@@ -348,18 +348,27 @@ class Tip:
         }
 
     # ── spontaneous evolution ──
+    @staticmethod
+    def hazard_boost(current_a: float = 0.0, bias_v: float = 0.0) -> float:
+        """How much faster than ``lambda_per_s`` the tip changes under a current dose and a
+        field: ``1 + |I| / 1 nA + (|V| / 2 V)²`` (the one law of every tip change)."""
+        return 1.0 + abs(current_a) / 1e-9 + (abs(bias_v) / 2.0) ** 2
+
     def maybe_change(self, dt_sim: float, sim_s: float, *, current_a: float = 0.0,
                      bias_v: float = 0.0) -> bool:
         """Poisson hazard over ``dt_sim``; boosted by current dose and high bias."""
-        boost = 1.0 + abs(current_a) / 1e-9 + (abs(bias_v) / 2.0) ** 2
+        boost = self.hazard_boost(current_a, bias_v)
         p = 1.0 - math.exp(-self.lambda_per_s * boost * dt_sim)
         if self.rng.random() < p:
             self.spontaneous_change(sim_s)
             return True
         return False
 
-    def spontaneous_change(self, sim_s: float) -> None:
-        r = self.rng
+    def spontaneous_change(self, sim_s: float, rng: np.random.Generator | None = None) -> None:
+        """One spontaneous change of the apex. ``rng`` is the generator its draws come from: the
+        tip's own by default, another one when a mechanism of its own triggers the change (the
+        tip's stream then gains no draw)."""
+        r = rng if rng is not None else self.rng
         a = self.apexes[0]
         dz = float(r.choice([-1, 1]) * r.uniform(20e-12, 150e-12))
         a.dz += dz

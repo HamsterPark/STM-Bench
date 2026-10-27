@@ -583,6 +583,65 @@ class World:
         i = current_metal(np.clip(z - h, 0.02e-9, None), self.bias_v, self.phi_junction())
         self.transients.append(Transient(self.clock.wall(), t, z, self.preamp.clamp(i), None, label))
 
+    # ── the tip's hazards outside scans ──
+    #: changes one interval can draw at most (a tip changing every second for an hour has
+    #: long since stopped being any tip in particular; the cap only bounds the work)
+    OUTSCAN_MAX_EVENTS = 200
+
+    def tunnelling_now(self) -> bool:
+        """The tip is in tunnelling range: it is not withdrawn and not approaching, and either
+        the loop holds it there or, with the loop off, it sits within 2 nm of the surface."""
+        if self.withdrawn or self.approach.running:
+            return False
+        if self.zctrl.on:
+            return True
+        return self.tip_height_m() - self.surface_height_here() < 2e-9
+
+    def tunnel_interval(self, dt_s: float, *, current_a: float | None = None,
+                        bias_v: float | None = None) -> list:
+        """Instrument time ``dt_s`` spent in tunnelling outside a scan or a drag: spectroscopy,
+        waiting, navigating, the settling after a setting. Returns the tip events it drew.
+
+        With ``tip_changes_outside_scans`` the tip's spontaneous-change hazard runs over the
+        interval — the same law as in a scan row (:meth:`Tip.hazard_boost`: λ·(1 + |I| / 1 nA +
+        (|V| / 2 V)²)) — so spectroscopy, waiting and moving are not safe places for the tip.
+        ``current_a`` and ``bias_v`` are the dose and the field of the interval; by default the
+        setpoint (the junction current with the loop off) and the bias. A sweep passes its
+        largest |I| and |V|.
+
+        The changes form a Poisson process: the first arrival after the interval's start is
+        drawn from the exponential law, then the next from there, up to the end, so a long wait
+        on an unstable tip changes it many times and each change is logged at its own time
+        inside the interval (a replay places it there). All draws are from ``rng_outscan``,
+        including the change itself, so no other stream gains one.
+
+        An acquisition is atomic with respect to this: a spectrum that straddles a change
+        returns the tip it started with, and the change is in the tip's log and in every
+        measurement after it. The interval lies ahead of the clock (the action advances it
+        afterwards), as the row times of a frame do."""
+        if dt_s <= 0.0 or not self.physics.tip_changes_outside_scans or not self.tunnelling_now():
+            return []
+        with self.lock:
+            i_a = abs(float(current_a)) if current_a is not None else (
+                abs(self.zctrl.setpoint_a) if self.zctrl.on else abs(self._dc_current()))
+            v = abs(float(bias_v)) if bias_v is not None else abs(self.bias_v)
+            first = len(self.tip.events)
+            t = self.clock.sim()
+            end = t + float(dt_s)
+            for _ in range(self.OUTSCAN_MAX_EVENTS):
+                rate = self.tip.lambda_per_s * self.tip.hazard_boost(i_a, v)
+                if rate <= 0.0:
+                    break
+                t += float(self.rng_outscan.exponential(1.0 / rate))
+                if t >= end:
+                    break
+                self.tip.spontaneous_change(t, rng=self.rng_outscan)
+            return self.tip.events[first:]
+
+    def navigation_interval(self, dt_s: float) -> list:
+        """The time a move that drags nothing takes: the tip tunnels, at the setpoint, all along."""
+        return self.tunnel_interval(dt_s)
+
     def move_xy(self, x: float, y: float) -> None:
         with self.lock:
             delta = np.array([x - self.tip_x, y - self.tip_y, 0.0])
@@ -647,6 +706,8 @@ class World:
                 dt = math.hypot(x - x0, y - y0) / max(speed_m_s, 1e-12)
                 self.tip.maybe_change(dt, self.clock.sim(), current_a=self.zctrl.setpoint_a,
                                       bias_v=self.bias_v)
+            if not active:
+                self.navigation_interval(math.hypot(x - x0, y - y0) / max(speed_m_s, 1e-12))
             self.move_xy(x, y)
             if events:
                 self.refresh_surface_state()
