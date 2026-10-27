@@ -27,8 +27,11 @@ apex's transfer, as in a frame).
 **What the controller does with it.** Feedback on: the Z loop follows the height towards the gap
 :meth:`World.equilibrium_gap` gives, starting at its first target as a scan does (the loop of a
 scan line, discretised exactly: see :func:`_track`); the current is what the junction carries
-across the gap that results, through the preamplifier clamp. Feedback off: Z is held and the current
-follows the height. Withdrawn: Z sits at the retract limit and nothing tunnels. While the loop
+across the gap that results, through the preamplifier clamp, except where the model's gap floor
+binds (a setpoint the junction cannot carry above the floor gap, below about 286 kohm at 4.2 eV):
+there the loop's target is the floor, the junction carries less than the setpoint, and the current
+reads the setpoint where the loop holds its target - as the status reading does - and departs from it
+as the gap departs from the target. Feedback off: Z is held and the current follows the height. Withdrawn: Z sits at the retract limit and nothing tunnels. While the loop
 presses the tip into the sample (:meth:`World.over_range`) the gap :meth:`World.equilibrium_gap`
 gives is contact and the current is what the world reads then (:meth:`World._dc_current`): the
 preamplifier's clamp.
@@ -480,9 +483,23 @@ def finish(world, start: MoveStart, rng: np.random.Generator) -> dict:
             # pinned at the preamplifier's clamp, as World._dc_current reads it
             i_dc = np.full(n, world.preamp.clamp_a * math.copysign(1.0, start.bias_v or 1.0))
         else:
-            # an oscillating qPlus tip carries the current its cycle averages to, which is what the
-            # loop holds at the setpoint (World.osc_factor; 1 without oscillation)
-            i_dc = current_metal(np.clip(z_tip - h, MIN_GAP_M, None), start.bias_v, start.phi_ev) * start.osc
+            gap = np.clip(z_tip - h, MIN_GAP_M, None)
+            if start.feedback and start.gap_m <= MIN_GAP_M * (1.0 + 1e-9):
+                # The model's gap floor binds (junction.gap_for_current never closes below 0.05 nm,
+                # so the setpoint is out of the junction's reach below about 286 kohm at 4.2 eV): the
+                # loop's target is the floor gap and the junction there carries less than the
+                # setpoint. The instrument reads the setpoint where the loop holds its target (the
+                # status reading, World._dc_current, and the panel resistance the drag runs on,
+                # World.junction_resistance_ohm, say the same), so the trace does too, and departs
+                # from it as the gap departs from the target: I = I_set · I(gap) / I(gap_eq), V
+                # cancelling. An oscillating tip's cycle average is what the setpoint is, so its
+                # factor cancels as well. (Without feedback the junction's own current is read.)
+                i_dc = (float(world.zctrl.setpoint_a) * math.copysign(1.0, start.bias_v or 1.0)
+                        * np.exp(-2.0 * start.kappa_m * (gap - start.gap_m)))
+            else:
+                # an oscillating qPlus tip carries the current its cycle averages to, which is what the
+                # loop holds at the setpoint (World.osc_factor; 1 without oscillation)
+                i_dc = current_metal(gap, start.bias_v, start.phi_ev) * start.osc
     if not (start.withdrawn or float(z_ctrl[0]) in (world.zctrl.limit_high_m, world.zctrl.limit_low_m)):
         # a reading at the rail is exactly the limit; elsewhere it carries the Z noise
         z_ctrl = z_ctrl + _z_noise(world.noise, noise, lam, rng)
