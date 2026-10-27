@@ -76,11 +76,12 @@ def _digest_mismatches(inst: Instrument, digests: list, records: list[dict]) -> 
     """Every digest line against what the replay saved, and every file the replay saved against its line."""
     tables = {"frame": (inst.frames, inst.frame_digest), "spectrum": (inst.spectra, inst.spectrum_digest)}
     made_at: dict[tuple[str, str], int] = {}              # which record saved a file, as the export says
+    named_by = (("frame", "frame"), ("spectrum", "spectrum"), ("spectrum", "trace"))   # table, key of the reply
     for rec in records:
         res = rec.get("result") if rec.get("kind") == "act" else None
-        for kind in tables:
-            if isinstance(res, dict) and isinstance(res.get(kind), str):
-                made_at[(kind, res[kind])] = rec["i"]
+        for kind, key in named_by:                        # a move's reply names its trace, kept as a spectrum
+            if isinstance(res, dict) and isinstance(res.get(key), str):
+                made_at[(kind, res[key])] = rec["i"]
     out: list[dict] = []
     seen: dict[str, set] = {kind: set() for kind in tables}
     for line in digests:

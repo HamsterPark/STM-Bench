@@ -249,7 +249,26 @@ const STATUS = {
 const CH = { z: 'Z 形貌 topography', current: '电流 current', didv: 'dI/dV 锁相 lock-in' };
 const CHV = { z: 'z', current: 'I', didv: 'dI/dV' };
 const DIR = { forward: '正向 forward', backward: '反向 backward' };
-const UNITS = { v: 'V', i: 'A', didv: 'A/V', z_rel: 'm', z_abs: 'm', df: 'Hz', amp: 'm' };
+// <pure> what a record or a reply shows, with no page needed (tests/test_console.py runs this block under node)
+const UNITS = { v: 'V', i: 'A', didv: 'A/V', z_rel: 'm', z_abs: 'm', df: 'Hz', amp: 'm', dist: 'm', t: 's' };
+function numericCols(sp) {
+  return Object.keys(sp).filter((k) => Array.isArray(sp[k]) && sp[k].length >= 8 && sp[k].every((x) => x === null || typeof x === 'number'));
+}
+// the file an action's reply saved, to be shown: a frame, a spectrum, or the trace of a move (kept as a spectrum)
+function savedBy(reply) {
+  if (!reply) return null;
+  if (reply.frame) return { kind: 'frame', name: reply.frame };
+  if (reply.spectrum) return { kind: 'spectrum', name: reply.spectrum };
+  if (reply.trace) return { kind: 'spectrum', name: reply.trace };
+  return null;
+}
+// the two columns a spectrum opens on: a sweep against its bias or its height, the trace of a move
+// as Z against the distance along it
+function defaultAxes(sp, cols) {
+  if (sp.kind === 'move' && cols.includes('dist') && cols.includes('z_abs')) return ['dist', 'z_abs'];
+  return [['v', 'z_rel'].find((c) => cols.includes(c)) || cols[0], ['didv', 'df', 'i'].find((c) => cols.includes(c)) || cols[1] || cols[0]];
+}
+// </pure>
 
 // ── start ──
 function renderStart() {
@@ -378,8 +397,9 @@ async function runAction(ev) {
   if (box) box.replaceChildren(h('div', { class: 'small muted', style: 'margin-top:8px' }, bi('仪器回复', 'instrument reply')),
     h('pre', { class: 'reply', id: 'act-reply-text' }, JSON.stringify(r.v, null, 1)));
   await refreshStatus();
-  if (r.v && r.v.frame) { await refreshData(); S.view = { ch: 'z', dir: 'forward' }; await select('frame', r.v.frame); }
-  else if (r.v && r.v.spectrum) { await refreshData(); await select('spectrum', r.v.spectrum); }
+  const saved = savedBy(r.v);                                       // a move saves its trace, which opens like a spectrum
+  if (saved && saved.kind === 'frame') { await refreshData(); S.view = { ch: 'z', dir: 'forward' }; await select('frame', saved.name); }
+  else if (saved) { await refreshData(); await select('spectrum', saved.name); }
 }
 
 // ── data ──
@@ -408,9 +428,7 @@ async function select(kind, name) {
     const sp = await observe(() => api('/api/spectrum?s=' + encodeURIComponent(name)));
     if (!sp) return;
     S.spec = sp;
-    const cols = numericCols(sp);
-    S.specX = ['v', 'z_rel'].find((c) => cols.includes(c)) || cols[0];
-    S.specY = ['didv', 'df', 'i'].find((c) => cols.includes(c)) || cols[1] || cols[0];
+    [S.specX, S.specY] = defaultAxes(sp, numericCols(sp));
     renderViewer();
   }
 }
@@ -521,9 +539,6 @@ function valueAt(p) {
   const k = V.block_px, r = Math.floor(p.py / k), c = Math.floor(p.px / k);
   if (r >= V.shape[0] || c >= V.shape[1]) return null;
   return `${V.values[r][c]} ${V.unit}（${k}×${k} 像素均值 px mean）`;
-}
-function numericCols(sp) {
-  return Object.keys(sp).filter((k) => Array.isArray(sp[k]) && sp[k].length >= 8 && sp[k].every((x) => x === null || typeof x === 'number'));
 }
 function renderSpectrumView(box, name) {
   const sp = S.spec;

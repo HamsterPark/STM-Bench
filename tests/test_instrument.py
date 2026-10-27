@@ -12,6 +12,8 @@ import pytest
 from stmbench.instrument import ACTIONS, API_VERSION, ActionError, Instrument, replay, verify
 from stmbench.instrument.core import Instrument as _I, validate
 from stmbench.trackB.rules import RULES_VERSION
+from stmsim.io.sxm_reader import read_dat
+from stmsim.physics.adatoms import path_points
 
 P4 = "P4_atom_positioning_cu111"
 P5 = "P5_sader_jarvis_qplus"
@@ -296,3 +298,100 @@ def test_status_reports_the_programmed_drift_compensation_and_reading_it_changes
         if look:
             inst_.status()
     assert quiet.digest() == curious.digest()
+
+
+# ── the trace of a move ─────────────────────────────────────────────────────
+def _session(inst: Instrument) -> str:
+    """A tip onto an atom, a move at the imaging setpoint and a drag below the pull threshold."""
+    w = inst.world
+    reg = w.surface.site.adatoms
+    atom = reg.atoms[reg.target["atom_id"]]
+    ax, ay = reg.site_xy(atom.i, atom.j)
+    ox, oy, _ = w.drift_offset(w.clock.sim())
+    x, y = (ax - ox) * 1e9, (ay - oy) * 1e9
+    inst.act("move_tip", x_nm=x, y_nm=y)
+    inst.act("set_current_range", full_scale_na=100.0)
+    inst.act("set_bias", bias_v=0.005)
+    inst.act("set_setpoint", current_pa=0.005 / 80e3 * 1e12)
+    return inst.act("move_tip", x_nm=x + 4.0, y_nm=y, speed_nm_s=0.25)["trace"]
+
+
+def test_a_move_replies_with_its_trace_and_keeps_it_like_a_spectrum(tmp_path):
+    inst = Instrument(P4, 24, tmp_path / "run")
+    r = inst.act("move_tip", x_nm=3.0, y_nm=1.0, speed_nm_s=100.0)
+    assert set(r) == {"tip_nm", "distance_nm", "trace", "duration_s", "instrument_time_s", "budget_s"}
+    assert r["tip_nm"] == [3.0, 1.0] and r["distance_nm"] == pytest.approx(math.hypot(3, 1), abs=1e-3)
+    assert r["duration_s"] == pytest.approx(math.hypot(3, 1) / 100.0, abs=1e-3)
+    assert inst.used_s == pytest.approx(math.hypot(3, 1) / 100.0 + 0.05, abs=1e-3)       # time spent as before
+    listed = inst.list_data()["spectra"]
+    assert listed == [{"spectrum": r["trace"], "kind": "move", "tip_nm": [3.0, 1.0],
+                       "points": path_points(math.hypot(3, 1) * 1e-9), "t_s": 0.0}]
+    s = inst.spectrum(r["trace"])
+    assert set(s) == {"name", "kind", "index", "tip_nm", "from_nm", "to_nm", "speed_nm_s", "bias_v", "setpoint_pa",
+                      "feedback", "t_s", "t", "dist", "z_abs", "i"}
+    assert s["kind"] == "move" and s["index"] == 1 and s["from_nm"] == [0.0, 0.0] and s["to_nm"] == [3.0, 1.0]
+    assert s["speed_nm_s"] == 100.0 and s["feedback"] is True and s["setpoint_pa"] == pytest.approx(200.0)
+    assert len(s["t"]) == len(s["dist"]) == len(s["z_abs"]) == len(s["i"]) >= 2
+    r2 = inst.act("move_tip", x_nm=0.0, y_nm=0.0, speed_nm_s=100.0)
+    assert inst.spectrum(r2["trace"])["index"] == 2 and r2["trace"] != r["trace"]
+    assert "current_spikes" not in r and "current_spikes" not in json.dumps(inst.log)
+    # the same file is in the session directory, with the arrays and their units
+    d = read_dat(Path(inst.world.dats_saved[0]))
+    assert d["header"]["Experiment"] == "move trace"
+    assert list(d["columns"]) == ["Distance (m)", "Time (s)", "Z (m)", "Current (A)"]
+    assert d["columns"]["Z (m)"] == pytest.approx(s["z_abs"], rel=1e-5, abs=1e-12)
+    ev = [e for e in inst.world.events if e["kind"] == "dat_saved"]
+    assert [e["experiment"] for e in ev] == ["move trace", "move trace"] and ev[0]["path"] == inst.world.dats_saved[0]
+
+
+def test_an_observation_of_a_trace_costs_nothing_and_changes_nothing(tmp_path):
+    quiet, curious = Instrument(P4, 24), Instrument(P4, 24)
+    for inst, look in ((quiet, False), (curious, True)):
+        t = _session(inst)
+        if look:
+            inst.list_data()
+            inst.spectrum(t)
+    assert quiet.digest() == curious.digest() and quiet.used_s == curious.used_s
+    assert set(quiet.digest()["spectra"]) and all(set(h) == {"t", "dist", "z_abs", "i"} for h in quiet.digest()["spectra"].values())
+
+
+def test_an_episode_with_moves_replays_to_the_same_traces(tmp_path):
+    """``stmbench verify``: the same seed and actions give the same arrays, byte for byte."""
+    inst = Instrument(P4, 24, tmp_path / "run")
+    _session(inst)
+    inst.act("scan", center_x_nm=0.0, center_y_nm=0.0, size_nm=8.0, pixels=48, line_time_s=0.2)
+    inst.act("move_tip", x_nm=-5.0, y_nm=5.0, speed_nm_s=300.0)
+    inst.finish()
+    assert any(s["kind"] == "move" for s in inst.spectra.values()) and len(inst.spectra) == 3
+    res = verify(tmp_path / "run")
+    assert res["ok"], res
+    again = replay(tmp_path / "run")
+    assert again.digest()["spectra"] == inst.digest()["spectra"]
+
+
+def test_a_trace_cited_as_evidence_is_not_a_frame_and_judging_goes_on(tmp_path):
+    """The name of a move's trace in a report's evidence is data the judge does not know as a frame,
+    an STS or a Z spectrum: it resolves to nothing, and the claim is judged on the rest."""
+    from stmbench.trackB import claims as C
+
+    inst = Instrument(P4, 24, tmp_path / "run")
+    t = _session(inst)
+    assert C.resolve_citation(inst.world.events, t) is None
+    inst.act("scan", center_x_nm=0.0, center_y_nm=0.0, size_nm=8.0, pixels=48, line_time_s=0.2)
+    frame = next(iter(inst.frames))
+    inst.report("target_site", 0.0, x_nm=0.0, y_nm=0.0, frame=frame, evidence=[frame, t])
+    out = inst.finish()
+    claim = inst.verdict.details["claims"]["target_site"]
+    assert claim["unresolved_citations"] == [t] and claim["cited"] == [frame, t, frame]
+    assert out["claims_total"] == 2 and claim["evidence"]["kind"] == "frame_covers_after"
+
+
+def test_the_trace_of_an_oscillating_tip_carries_the_setpoint_current():
+    """The loop holds the *averaged* current of a qPlus tip at the setpoint, so the current its
+    trace reads is the setpoint, not the junction's current at the mean height (a third of it
+    at 100 pm of amplitude)."""
+    inst = Instrument(P5, 0)
+    inst.act("pll", on=True, amplitude_pm=100.0)
+    s = inst.spectrum(inst.act("move_tip", x_nm=5.0, y_nm=0.0, speed_nm_s=50.0)["trace"])
+    assert inst.world.osc_factor() > 2.0
+    assert np.mean(s["i"]) == pytest.approx(s["setpoint_pa"] * 1e-12, rel=0.05)

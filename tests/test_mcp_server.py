@@ -45,6 +45,20 @@ def test_initialize_and_the_tool_table():
     assert srv.handle({"jsonrpc": "2.0", "id": 2, "method": "nope"})["error"]["code"] == -32601
 
 
+def test_get_spectrum_names_the_arrays_of_a_move_trace_and_returns_them():
+    srv = EpisodeServer(Instrument(P4, 0))
+    tools = {t["name"]: t for t in srv.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"})["result"]["tools"]}
+    text = tools["get_spectrum"]["description"]
+    assert all(name in text for name in ("move trace", "move_tip", "t (", "dist (", "z_abs (", "i (A)", "1000"))
+    reply = _json(_call(srv, "move_tip", {"x_nm": 3.0, "y_nm": 0.0, "speed_nm_s": 20.0}))
+    trace = _json(_call(srv, "get_spectrum", {"spectrum": reply["trace"]}))
+    assert trace["kind"] == "move" and {"t", "dist", "z_abs", "i"} <= set(trace)
+    n = len(trace["t"])
+    assert n >= 2 and all(len(trace[k]) == n for k in ("dist", "z_abs", "i")) and abs(trace["dist"][-1] - 3.0e-9) < 1e-12
+    listed = _json(_call(srv, "list_data"))["spectra"]
+    assert [s["points"] for s in listed if s["spectrum"] == reply["trace"]] == [n]
+
+
 def test_the_task_carries_the_rule_card_and_the_manual():
     text = _call(EpisodeServer(Instrument(P4, 0)), "get_task")["content"][0]["text"]
     assert "评分规则" in text and "Instrument API" in text and "move_tip" in text

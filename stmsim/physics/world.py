@@ -29,6 +29,7 @@ from .scanner import SIG_CURRENT, SIG_Z, Frame, Renderer, ScanSettings
 from .surface import Feature, Surface
 from .switches import TIP_ANISO_STREAM, TIP_OUTSCAN_STREAM, TIP_RECOVERY_STREAM, PhysicsSwitches
 from .tip import Tip
+from . import trace as movetrace
 
 ZCTRL_OFF, ZCTRL_ON, ZCTRL_HOLD, ZCTRL_SWITCHING_OFF, ZCTRL_SAFETIP, ZCTRL_WITHDRAWING = 1, 2, 3, 4, 5, 6
 
@@ -109,7 +110,18 @@ class World:
         self.noise = NoiseModel(np.random.default_rng(seed + 2), floor_a=self.rig.noise_floor_a,
                                 mains_amp_a=0.02e-12, pink_amp_a=0.02e-12,
                                 spectral_lines={787.6: 0.01e-12},
-                                z_floor_m=float(self.rig.get("z.noise_floor_m", 2e-12)))
+                                z_floor_m=float(self.rig.get("z.noise_floor_m", 2e-12)),
+                                # ASSUMED, not measured: the slow wander of Z (building and acoustic
+                                # vibration, thermal drift's fluctuation) that a mean over a long dwell
+                                # does not average away; only the trace of a move carries it (a scan
+                                # pixel's 2 pm is the figure at the pixel dwell). 0.3 pm is 15 % of that
+                                # figure: a sample of a slow drag (0.2 s) falls to ~0.2 pm of white noise
+                                # and this floor is what keeps it from reading as a noiseless line, while
+                                # it stays well below a good tip's 3-5 pm tooth. The reading of hops
+                                # (stmbench/analysis/trace.py) does not depend on it from 0 to 1 pm: 99.4 to
+                                # 99.1 % of the drags that hopped read as hopping and 0-1 of 151 that did
+                                # not, 560 drags at 0.25 nm/s for each of 0, 0.1, 0.3, 0.6 and 1 pm
+                                z_slow_m=float(self.rig.get("z.noise_slow_m", 0.3e-12)))
         self.zctrl = ZController(limit_high_m=self.rig.z_range_m, limit_low_m=-self.rig.z_range_m,
                                  setpoint_a=float(self.rig.get("feedback.imaging_setpoint_a", 50e-12)),
                                  p_m=float(self.rig.get("feedback.approach_p_m", 3e-12)),
@@ -206,6 +218,9 @@ class World:
         self.dats_saved: list[str] = []
         self._dat_counters: dict[str, int] = {}
         self.motion_log: list[dict] = []        # FolMe path segments (lateral manipulation)
+        self.move_counter = 0                   # traces of moves drawn (stmsim.physics.trace)
+        self.move_rng = movetrace.new_stream(seed)  # their own random stream: nothing else gains a draw
+        self.last_move_trace: dict | None = None
         self.force = None                       # ForceParams (P5) or None
         self.pll = None                         # PLLState when the rig loads the PLL module
         self.z_sweep_m = float(self.rig.get("spectroscopy.z_sweep_m", 0.2e-9))
@@ -786,12 +801,16 @@ class World:
     #: differ by a lognormal factor; beyond it no atom follows) — the rest is a direct move
     DRAG_CEILING = 5.0
 
-    def move_xy_path(self, x: float, y: float, speed_m_s: float = 293e-9) -> list[dict]:
+    def move_xy_path(self, x: float, y: float, speed_m_s: float = 293e-9, *, trace: bool = False) -> list[dict]:
         """A FolMe move, integrated along its path so the tip can carry an atom with it.
 
         Far above the pull threshold this uses a direct displacement with a distance record; that
         early exit is what keeps ordinary navigation free. Below it the move also doses the
-        tip with the manipulation current, which can change tip state."""
+        tip with the manipulation current, which can change tip state.
+
+        ``trace``: also draw what the controller records along the path (Z and the current,
+        :mod:`stmsim.physics.trace`) into ``last_move_trace``, whatever the move did. It only
+        reads the move: the same draws are made and the same things happen without it."""
         with self.lock:
             x0, y0 = self.tip_x, self.tip_y
             reg = self.surface.site.adatoms
@@ -799,17 +818,20 @@ class World:
             events: list[dict] = []
             active = (reg is not None and reg.n_on_surface and self.zctrl.on and not self.withdrawn
                       and r_ohm < self.DRAG_CEILING * reg.params.r_threshold_ohm)
+            rec = movetrace.begin(self, x, y, speed_m_s) if trace else None
             if active:
                 ox, oy, _ = self.drift_offset(self.clock.sim())
                 events = reg.drag((x0 + ox, y0 + oy), (x + ox, y + oy), r_ohm=r_ohm,
                                   v_m_s=speed_m_s, sim_s=self.clock.sim(),
                                   terrace=self.surface.terrace_level, grip=self.grip(),
-                                  blocked=self.site_blocked)
+                                  blocked=self.site_blocked, log=rec.drag_log if rec else None)
                 dt = math.hypot(x - x0, y - y0) / max(speed_m_s, 1e-12)
                 self.tip.maybe_change(dt, self.clock.sim(), current_a=self.zctrl.setpoint_a,
                                       bias_v=self.bias_v)
             if not active:
                 self.navigation_interval(math.hypot(x - x0, y - y0) / max(speed_m_s, 1e-12))
+            if rec:
+                movetrace.changed(rec, self)
             self.move_xy(x, y)
             if events:
                 self.refresh_surface_state()
@@ -830,6 +852,8 @@ class World:
                                         "r_kohm": r_ohm / 1e3, "n_events": len(events)})
                 if len(self.motion_log) > 2000:
                     del self.motion_log[:-2000]
+            if rec:
+                self.last_move_trace = movetrace.finish(self, rec, self.move_rng)
             return events
 
     def registry_scan_row(self, st, row: int, ox: float, oy: float, t_sim: float,

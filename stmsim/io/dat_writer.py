@@ -133,6 +133,30 @@ def save_bias_spectrum(world, basename: str, *, v, i, didv=None, i_bwd=None) -> 
     return str(path)
 
 
+def save_move_trace(world, basename: str, trace: dict) -> str:
+    """The record of a lateral move (``World.last_move_trace``): the Z controller's output and
+    the measured current at every sample along the path. The sweep axis is the distance along it."""
+    header = common_header(world, experiment="move trace")
+    dist = np.asarray(trace["dist"], float)
+    (x0, y0), (x1, y1) = trace["from_nm"], trace["to_nm"]
+    header.update({
+        "Move Trace>Start X (m)": float(x0) * 1e-9,
+        "Move Trace>Start Y (m)": float(y0) * 1e-9,
+        "Move Trace>End X (m)": float(x1) * 1e-9,
+        "Move Trace>End Y (m)": float(y1) * 1e-9,
+        "Move Trace>Speed (m/s)": float(trace["speed_nm_s"]) * 1e-9,
+        "Move Trace>Length (m)": float(dist[-1]),
+        "Move Trace>Num Pixel": int(dist.size),
+        "Move Trace>Z-controller": "ON" if trace["feedback"] else "OFF",
+        "Move Trace>Withdrawn": bool(trace["withdrawn"]),
+    })
+    names = ["Distance (m)", "Time (s)", "Z (m)", "Current (A)"]
+    cols = [dist, np.asarray(trace["t"], float), np.asarray(trace["z_abs"], float), np.asarray(trace["i"], float)]
+    path = next_path(world, basename, "Move-Trace")
+    write_dat(path, header=header, names=names, columns=cols)
+    return str(path)
+
+
 def save_z_spectrum(world, basename: str, *, z_rel, i, df=None, amp=None, z_abs=None) -> str:
     header = common_header(world, experiment="Z spectroscopy")
     header.update(oscillation_header(world))
