@@ -15,12 +15,15 @@ Three kinds of call:
 * **observations** (``status``, ``info``, ``list_data``, ``frame``, ``spectrum``) - read only:
   no instrument time and no random draw, so how often an agent looks cannot change what it
   later measures;
-* **reports** (``report``, ``report_tip_state``, ``finish``) - the result channel of
-  :mod:`stmbench.trackB.results`, judged by the version-1 rules shown on the rule card.
+* **reports** (``report``, ``finish``) - the result channel of :mod:`stmbench.trackB.results`,
+  judged by the rules the rule card shows (:data:`~stmbench.trackB.rules.RULES_VERSION`).
 
-What is deliberately absent: composite skills and a safety gate. An action does what
-the instrument would do, hard limits only (bias, piezo range, preamplifier range); a poke too
-deep, a pulse too high, a coarse step in tunnelling have their physical consequences.
+What is deliberately absent: composite skills, a safety gate, a default strength for tip
+conditioning (the width, depth and dwell of a pulse or poke are the operator's to choose), and
+any call that judges nothing, such as a statement about the tip: no scenario scores it, and
+offering it would only tell an agent to worry about its tip. An action does what the instrument
+would do, hard limits only (bias, piezo range, preamplifier range); a poke too deep, a pulse too
+high, a coarse step in tunnelling have their physical consequences.
 """
 from __future__ import annotations
 
@@ -265,7 +268,6 @@ class Instrument:
         self.max_actions = int(max_actions)
         self.log: list[dict] = []
         self.sink = ResultSink()
-        self.diagnosis: list[dict] = []
         self.frames: dict[str, FrameRecord] = {}
         self.spectra: dict[str, dict] = {}
         self.n_actions = 0
@@ -671,15 +673,9 @@ class Instrument:
         missing = [c for c in to_report if c not in self.sink.folded()["claims"]]
         return f"recorded {claim_id} = {value}; still to report: {', '.join(missing) or 'none'}"
 
-    def report_tip_state(self, tip_state: str, junction: str | None = None, note: str = "") -> str:
-        rec = {"tip_state": str(tip_state), "junction": junction, "note": note}
-        self.diagnosis.append(rec)
-        self.log.append({"i": len(self.log), "kind": "diagnosis", "args": rec, "t_s": _r(self.used_s, 6)})
-        return "recorded"
-
     # ── the end ──
     def finish(self) -> dict:
-        """Judge the episode (version-1 rules, budget overrun rule) and write the ledger."""
+        """Judge the episode (the rules of ``RULES_VERSION``, the budget overrun rule) and write the ledger."""
         if self.finished:
             return self._summary()
         from ..trackB.rules import apply_budget_overrun
@@ -735,7 +731,7 @@ class Instrument:
               "claims_total": det.get("n_total"), "claims_reported": det.get("n_reported"),
               "claims_verified": det.get("n_verified"), "instrument_time_s": self.used_s,
               "max_sim_s": self.max_sim_s, "actions": self.n_actions, "verdict": v.as_dict(),
-              "digest": self.digest(), "diagnosis": self.diagnosis, "sim_t0_s": self.t0,
+              "digest": self.digest(), "sim_t0_s": self.t0,
               "truth_before": self.truth_before, "truth_after": self.truth_after}
         (out / "episode.json").write_text(json.dumps(ep, default=_json_default, ensure_ascii=False, indent=1),
                                           encoding="utf-8")
@@ -762,8 +758,9 @@ def replay_records(scenario: Scenario | str | Path, seed: int, records: list[dic
                    raise_refused: bool = False) -> tuple[Instrument, list[dict]]:
     """Rebuild an episode from its log records: the same scenario and seed, the same calls in order.
 
-    ``act`` records are run again (their ``params``), ``report`` and ``diagnosis`` records sent
-    again (their ``args``); ``refused`` and ``observe`` records changed nothing and are skipped.
+    ``act`` records are run again (their ``params``), ``report`` records sent again (their
+    ``args``); ``refused`` and ``observe`` records changed nothing and are skipped. Any other kind
+    (a ``diagnosis`` record, say, which no instrument of this API version writes) is a mismatch.
     The records end at ``finish``, and the instrument is then finished: judged as it stands,
     which is also how an episode that never reached ``finish`` is judged. What the records say
     was measured or judged is never used, only what was done.
@@ -786,13 +783,13 @@ def replay_records(scenario: Scenario | str | Path, seed: int, records: list[dic
             over = True
         elif over:
             # after the end the instrument refuses actions and reports, and logs a refusal, not an
-            # act or a report; a diagnosis is the one record it still takes, and it judges nothing
+            # act or a report
             if kind in ("act", "report"):
                 mismatches.append({"i": i, "name": rec.get("name") if kind == "act" else kind,
                                    "error": "a call after finish"})
         elif kind == "act":
             _replay_act(inst, rec, mismatches, raise_refused)
-        elif kind in ("report", "diagnosis"):
+        elif kind == "report":
             _replay_report(inst, rec, mismatches, raise_refused)
         elif kind not in ("refused", "observe"):
             mismatches.append({"i": i, "name": str(kind), "error": "unknown record kind"})
@@ -825,23 +822,18 @@ def _replay_act(inst: Instrument, rec: dict, mismatches: list[dict], raise_refus
 
 
 def _replay_report(inst: Instrument, rec: dict, mismatches: list[dict], raise_refused: bool) -> None:
-    kind, args = rec["kind"], rec.get("args")
+    args = rec.get("args")
     try:
-        if not isinstance(args, dict):
-            raise ValueError(f"malformed {kind} record")
-        if kind == "diagnosis":
-            inst.report_tip_state(**args)
-        else:
-            a = dict(args)
-            if "claim_id" not in a or "value" not in a:
-                raise ValueError("malformed report record")
-            inst.report(a.pop("claim_id"), a.pop("value"), **a)
+        if not isinstance(args, dict) or "claim_id" not in args or "value" not in args:
+            raise ValueError("malformed report record")
+        a = dict(args)
+        inst.report(a.pop("claim_id"), a.pop("value"), **a)
     except ActionError as exc:
         if raise_refused:
             raise
-        mismatches.append({"i": rec.get("i"), "name": kind, "error": str(exc)})
+        mismatches.append({"i": rec.get("i"), "name": "report", "error": str(exc)})
     except (TypeError, ValueError) as exc:      # arguments the instrument cannot take at all
-        mismatches.append({"i": rec.get("i"), "name": kind, "error": str(exc)})
+        mismatches.append({"i": rec.get("i"), "name": "report", "error": str(exc)})
 
 
 def replay(run_dir: str | Path) -> Instrument:

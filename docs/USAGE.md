@@ -129,8 +129,9 @@ over bare surface).
 
 The MCP tools are the actions, the observations (`show_frame` returns a PNG rendered one fixed
 way — line-flattened, 0.5–99.5 % contrast, integer enlargement to ≥ 512 px — and
-`frame_values` the numbers), `get_task` (task, rule card, manual), `report_result`,
-`report_tip_state` and `finish`. The ledger is `episode.json` (verdict, hashes of every
+`frame_values` the numbers), `get_task` (task, rule card, manual), `report_result` and `finish`.
+There is no tool for stating a diagnosis of the tip: no scenario scores one, and offering it would
+only tell an agent to worry about its tip. The ledger is `episode.json` (verdict, hashes of every
 measurement), `actions.jsonl` (every call, refused ones included), `events.json`,
 `report.json` and `session/` (the saved `.sxm` / `.dat` files). A scenario whose success kind
 the instrument cannot judge (the skill scenarios below) is refused when the episode opens.
@@ -258,8 +259,7 @@ that has shown no frame leaves a note among the recent results instead of being 
 
 What it deliberately does not do: find atoms, estimate drift, suggest a value, explain a physical effect,
 offer a procedure, or show anything from the episode's truth, the seed, the tolerances beyond the rule
-card, or the verdict (finishing does not show the score; it stays in the private ledger). It has no
-control for `report_tip_state`, which no scenario judges.
+card, or the verdict (finishing does not show the score; it stays in the private ledger).
 
 *Dev mode* (the first command) writes the usual run directory, so `verify` and `replay` read it, and an
 export beside it at `<out>/export`; closing the window finishes the episode and judges it as it
@@ -528,8 +528,8 @@ the earlier held-out rounds: `docs/results/p4_baseline_seeds_*.json`, DESIGN §9
 ```
 <out>/                the directory given as --out (or Instrument(..., out_dir=...))
 ├── episode.json      ledger: verdict, claims reported / verified, instrument time and budget,
-│                     action count, hashes of every measurement, tip diagnoses, the truth
-│                     before and after (for the judge and the replay only)
+│                     action count, hashes of every measurement, the truth before and
+│                     after (for the judge and the replay only)
 ├── actions.jsonl     every call in order, refused ones included, with its instrument time
 ├── events.json       the world's events (frames, pulses, crashes, atoms moving), in sim time
 ├── report.json       the reports, folded: the last report for each claim

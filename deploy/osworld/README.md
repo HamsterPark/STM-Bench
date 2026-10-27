@@ -79,7 +79,7 @@ pandas, matplotlib or PySide6) worked once by hand.
 
 ## What "consistent" means
 
-The grader replays every `act`, `report` and `diagnosis` record with the scenario and seed in
+The grader replays every `act` and `report` record with the scenario and seed in
 `gt.json`, skips `refused` and `observe` records (they changed nothing), stops at `finish` or at
 the end of the log, and judges the replay as it stands: an agent that ran out of steps is graded
 like one that finished. The replay is *consistent* when

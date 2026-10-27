@@ -136,8 +136,6 @@
       <details><summary>仪器说明 <span class="en">Instrument manual</span></summary><pre id="manual-text"></pre></details>
       <h3>报告结果 <span class="en">Report a result</span></h3>
       <div id="report"></div>
-      <h3>针尖诊断 <span class="en">Tip diagnosis</span></h3>
-      <div id="tipdiag"></div>
       <h3>结束实验 <span class="en">Finish</span></h3>
       <div id="finish-box"></div>
     </div>
@@ -278,7 +276,7 @@ async function enter() {
   const task = await observe(() => api('/api/task'));
   if (task) { $('task-text').textContent = task.task; $('manual-text').textContent = task.manual; }
   S.actions = (await observe(() => api('/api/actions'))) || [];
-  renderActions(); renderReport(); renderTip(); renderFinish(); renderLog();
+  renderActions(); renderReport(); renderFinish(); renderLog();
   await refreshStatus();
   await refreshData();
   const last = S.data.frames[S.data.frames.length - 1];
@@ -615,19 +613,6 @@ async function submitReport(ev) {
   if (evid.length) body.evidence = evid;
   const r = await call('report_result', body, () => api('/api/report', body));
   $('rep-reply').replaceChildren(h('pre', { class: 'reply ' + (r.ok ? 'ok' : 'bad'), id: 'rep-reply-text' }, r.ok ? r.v.recorded : r.error));
-}
-function renderTip() {
-  $('tipdiag').replaceChildren(h('form', { id: 'tip-form', novalidate: true, onsubmit: submitTip },
-    simple('tip', 'tip_state', bi('针尖状态', 'tip_state'), true), simple('tip', 'junction', bi('结', 'junction')), simple('tip', 'note', bi('备注', 'note')),
-    h('div', { class: 'row' }, h('button', { class: 'run', type: 'submit', id: 'btn-tip' }, bi('提交诊断', 'Submit diagnosis'))),
-    h('div', { id: 'tip-reply' })));
-}
-async function submitTip(ev) {
-  ev.preventDefault();
-  const f = $('tip-form'), body = {};
-  for (const k of ['tip_state', 'junction', 'note']) { const v = String(f.elements.namedItem(k).value).trim(); if (v !== '') body[k] = v; }
-  const r = await call('report_tip_state', body, () => api('/api/tip_state', body));
-  $('tip-reply').replaceChildren(h('pre', { class: 'reply ' + (r.ok ? 'ok' : 'bad') }, r.ok ? r.v.recorded : r.error));
 }
 function renderFinish() {
   const box = $('finish-box');

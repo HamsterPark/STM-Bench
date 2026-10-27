@@ -351,19 +351,16 @@ def test_replay_records_runs_the_calls_and_skips_what_changed_nothing():
     recs = [_wait(0, 30.0, 0.0),
             {"i": 1, "kind": "observe", "what": "status", "args": {}, "t_s": 30.0},
             {"i": 2, "kind": "refused", "name": "scan", "args": {}, "error": "x", "t_s": 30.0},
-            {"i": 3, "kind": "diagnosis", "args": {"tip_state": "sharp", "junction": None, "note": ""}, "t_s": 30.0},
-            {"i": 4, "kind": "finish", "t_s": 30.0},
-            {"i": 5, "kind": "observe", "what": "status", "args": {}, "t_s": 30.0},
-            {"i": 6, "kind": "diagnosis", "args": {"tip_state": "blunt", "junction": None, "note": ""}, "t_s": 30.0},
-            _wait(7, 99.0, 30.0),                           # after finish the instrument takes no act:
-            {"i": 8, "kind": "report", "args": {"claim_id": "target_site", "value": 1.0}}]  # nor a report
+            {"i": 3, "kind": "finish", "t_s": 30.0},
+            {"i": 4, "kind": "observe", "what": "status", "args": {}, "t_s": 30.0},
+            _wait(5, 99.0, 30.0),                           # after finish the instrument takes no act:
+            {"i": 6, "kind": "report", "args": {"claim_id": "target_site", "value": 1.0}}]  # nor a report
     inst, mismatches = replay_records(P4, 0, recs)
-    assert mismatches == [{"i": 7, "name": "wait", "error": "a call after finish"},
-                          {"i": 8, "name": "report", "error": "a call after finish"}]
-    assert inst.finished and inst.n_actions == 1 and inst.used_s == pytest.approx(30.0)
-    assert [d["tip_state"] for d in inst.diagnosis] == ["sharp"]       # nothing after finish is run
+    assert mismatches == [{"i": 5, "name": "wait", "error": "a call after finish"},
+                          {"i": 6, "name": "report", "error": "a call after finish"}]
+    assert inst.finished and inst.n_actions == 1 and inst.used_s == pytest.approx(30.0)   # nothing after finish is run
     assert inst.verdict.success is False                    # judged as it stands: nothing reported
-    assert replay_records(P4, 0, recs[:5])[1] == []
+    assert replay_records(P4, 0, recs[:4])[1] == []
 
 
 def test_replay_records_names_the_reply_or_time_that_differs():
@@ -385,14 +382,14 @@ def test_a_call_the_replay_refuses_is_a_mismatch_not_a_crash():
             {"i": 3, "kind": "act"},
             {"i": 4, "kind": "report", "args": {"claim_id": "target_site"}},
             {"i": 5, "kind": "report", "args": {"claim_id": "target_site", "value": "abc"}},
-            {"i": 6, "kind": "diagnosis", "args": {"nonsense": 1}},
+            {"i": 6, "kind": "report", "args": {"claim_id": "target_site", "value": 1.0, "nonsense": 1}},
             {"i": 7, "kind": "mystery"},
             "junk",
             {"i": 9, "kind": "act", "name": "wait", "params": {"seconds": 1.0}, "result": {"waited_s": 1.0},
              "t0_s": 0.0, "t1_s": 1.0}]                     # the replay goes on after them
     inst, mismatches = replay_records(P4, 0, recs)
     assert [(m["i"], m.get("name")) for m in mismatches] == [
-        (0, "scan"), (1, "report"), (2, "wait"), (3, None), (4, "report"), (5, "report"), (6, "diagnosis"),
+        (0, "scan"), (1, "report"), (2, "wait"), (3, None), (4, "report"), (5, "report"), (6, "report"),
         (7, "mystery"), (None, None)]
     assert all("error" in m and "field" not in m for m in mismatches)
     assert "outside" in mismatches[0]["error"] and "unknown claim" in mismatches[1]["error"]

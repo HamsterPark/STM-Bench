@@ -21,13 +21,17 @@ from pathlib import Path
 import pytest
 
 from stmbench.console import Console, make_server
+from stmbench.console import server as console_server
 from stmbench.instrument import ACTIONS, ActionError, Instrument
+from stmbench.instrument.core import replay_records
 from stmbench.instrument.mcp_server import EpisodeServer
 
 ROOT = Path(__file__).resolve().parent.parent
 P4 = "P4_atom_positioning_cu111"
 #: the parameters version 2 requires, with the bounds they keep
 REQUIRED = {"pulse": {"width_ms": (0.1, 5000.0)}, "poke": {"depth_nm": (0.0, 20.0), "dwell_s": (0.0, 10.0)}}
+#: the only source files that still name ``report_tip_state``: they read the ledgers of earlier versions
+OLD_LEDGER_READERS = {"stmbench/replay/lay.py", "stmbench/replay/timeline.py"}
 
 
 def _mcp(srv: EpisodeServer, name: str, args: dict | None = None) -> dict:
@@ -48,14 +52,21 @@ def _serving(console: Console):
         srv.server_close()
 
 
-def _post(base: str, path: str, body: dict | None = None) -> tuple[int, dict]:
-    req = urllib.request.Request(base + path, data=json.dumps(body or {}).encode("utf-8"),
-                                 headers={"Content-Type": "application/json"}, method="POST")
+def _fetch(req: urllib.request.Request) -> tuple[int, dict]:
     try:
         with urllib.request.urlopen(req, timeout=300) as r:
             return r.status, json.loads(r.read().decode("utf-8"))
     except urllib.error.HTTPError as e:
         return e.code, json.loads(e.read().decode("utf-8"))
+
+
+def _get(base: str, path: str) -> tuple[int, dict]:
+    return _fetch(urllib.request.Request(base + path))
+
+
+def _post(base: str, path: str, body: dict | None = None) -> tuple[int, dict]:
+    return _fetch(urllib.request.Request(base + path, data=json.dumps(body or {}).encode("utf-8"),
+                                         headers={"Content-Type": "application/json"}, method="POST"))
 
 
 # ── no default to lean on ───────────────────────────────────────────────────
@@ -150,3 +161,83 @@ def test_no_caller_in_the_repository_leans_on_a_default_that_is_gone():
     for path, line, action, given, splat in callers:
         missing = set(REQUIRED[action]) - given
         assert splat or not missing, f"{path.relative_to(ROOT)}:{line} act({action!r}) does not pass {sorted(missing)}"
+
+
+# ── no tip diagnosis ────────────────────────────────────────────────────────
+def test_no_agent_facing_surface_offers_report_tip_state(tmp_path):
+    inst = Instrument(P4, 0, out_dir=tmp_path / "run")
+    assert not hasattr(inst, "report_tip_state") and not hasattr(inst, "diagnosis")
+    assert not any("tip_state" in name for name in ACTIONS)
+
+    # the MCP tool table, and a call to the tool that used to be there
+    srv = EpisodeServer(inst)
+    listed = srv.handle({"jsonrpc": "2.0", "id": 0, "method": "tools/list"})["result"]["tools"]
+    assert "report_tip_state" not in {t["name"] for t in listed}
+    gone = srv.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                       "params": {"name": "report_tip_state", "arguments": {"tip_state": "sharp"}}})
+    assert gone["error"]["code"] == -32602 and "unknown tool" in gone["error"]["message"]
+
+    # what an agent reads: the tools' own text, the task with its rule card (both languages) and the manual
+    for text in (json.dumps(listed), inst.task("zh"), inst.task("en"), inst.manual(), _mcp(srv, "get_task")["content"][0]["text"]):
+        assert "tip_state" not in text
+
+    # the web console: the page, its endpoints, its object
+    console = Console(tmp_path / "page", P4, 0)
+    assert not hasattr(console, "tip_state")
+    page = console_server.PAGE.read_text(encoding="utf-8")
+    assert "tip_state" not in page and "tipdiag" not in page and "诊断" not in page
+    with _serving(console) as base:
+        assert _post(base, "/api/tip_state", {"tip_state": "sharp"})[0] == 404
+        for path in ("/api/task", "/api/actions"):
+            code, body = _get(base, path)
+            assert code == 200 and "tip_state" not in json.dumps(body, ensure_ascii=False), path
+        _post(base, "/api/finish")
+
+
+def test_only_the_readers_of_older_ledgers_still_name_report_tip_state():
+    named = {p.relative_to(ROOT).as_posix() for p in (ROOT / "stmbench").rglob("*")
+             if p.suffix in {".py", ".html", ".js", ".json", ".yaml", ".md"} and p.is_file()
+             and "report_tip_state" in p.read_text(encoding="utf-8")}
+    assert named <= OLD_LEDGER_READERS, sorted(named - OLD_LEDGER_READERS)
+
+
+def test_a_ledger_holds_no_diagnosis_and_replay_takes_none(tmp_path):
+    run = tmp_path / "run"
+    inst = Instrument(P4, 0, out_dir=run)
+    inst.act("wait", seconds=5.0)
+    inst.status()
+    inst.finish()
+    ep = json.loads((run / "episode.json").read_text(encoding="utf-8"))
+    kinds = [json.loads(line)["kind"] for line in (run / "actions.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert "diagnosis" not in ep and kinds == ["act", "observe", "finish"]
+    # a record of that kind (an older instrument's) is not a call this one replays
+    rec = {"i": 0, "kind": "diagnosis", "args": {"tip_state": "sharp", "junction": None, "note": ""}, "t_s": 0.0}
+    replayed, mismatches = replay_records(P4, 0, [rec])
+    assert mismatches == [{"i": 0, "name": "diagnosis", "error": "unknown record kind"}]
+    assert replayed.n_actions == 0 and not hasattr(replayed, "diagnosis")
+
+
+def test_the_readers_of_older_ledgers_still_read_a_tip_diagnosis(tmp_path):
+    """A run directory of API version 1 holds ``diagnosis`` records and a ``diagnosis`` key. The
+    replay for an audience and the report tables read it as before: the step is retold, and a row
+    without the key is unknown, not a wrong answer."""
+    from stmbench.replay.timeline import Ledger, build_timeline
+    from stmbench.report.stats import diag_accuracy
+
+    run = tmp_path / "run"
+    inst = Instrument(P4, 0, out_dir=run)
+    inst.act("wait", seconds=5.0)
+    inst.finish()
+    old = {"i": 2, "kind": "diagnosis", "args": {"tip_state": "sharp", "junction": None, "note": ""}, "t_s": 5.0}
+    lines = (run / "actions.jsonl").read_text(encoding="utf-8").splitlines()
+    lines.insert(1, json.dumps(old))                                      # before `finish`
+    (run / "actions.jsonl").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    ep = json.loads((run / "episode.json").read_text(encoding="utf-8"))
+    ep.update(api_version=1, diagnosis=[old["args"]])
+    (run / "episode.json").write_text(json.dumps(ep), encoding="utf-8")
+
+    tl = build_timeline(Ledger.load(run))
+    assert [s["name"] for s in tl["steps"]] == ["wait", "report_tip_state", "finish"]
+    assert "sharp" in tl["steps"][1]["caption"]
+    assert diag_accuracy([{"success": True}, {"diag_correct": None}]) == \
+        {"diag_n": 0, "diag_correct_n": 0, "diag_abstain": 0, "diag_acc": None}
