@@ -41,6 +41,11 @@ A paper scenario also says its task in English: ``task_en`` beside ``task``, and
 beside each claim's ``say``. The rule card is generated in either language from the same fields
 (:func:`stmbench.trackB.rules.task_text`); the English words are plain text, outside
 :data:`HIDDEN_SCHEMA` and every random stream.
+
+**Physics switches.** ``initial.physics`` names the mechanisms the scenario switches on (tip
+changes outside scans, tip recovery, tip anisotropy, a crash when the setpoint exceeds the
+preamplifier range); see :mod:`stmsim.physics.switches`. A missing key is off, an unknown key
+raises, and a scenario without the block builds the world it always built.
 """
 from __future__ import annotations
 
@@ -55,6 +60,7 @@ import yaml
 
 from .faults import Fault, FaultScheduler
 from .physics.rig import RigProfile
+from .physics.switches import PhysicsSwitches
 from .physics.tip import Apex, Tip
 from .physics.clock import VirtualClock
 from .physics.world import World
@@ -190,6 +196,7 @@ class Scenario:
         if not self.id or not self.family:
             raise ValueError(f"scenario {self.path or self.id!r}: id and family are required")
         resolve_hidden(self.hidden, 0, self.id)          # raises on an unknown hidden key
+        self.physics_switches()                           # raises on an unknown physics switch
         if self.paper is not None:
             if self.success.get("kind") != "claims_verified":
                 raise ValueError(f"{self.id}: a paper scenario needs success.kind == 'claims_verified'")
@@ -228,6 +235,13 @@ class Scenario:
     def draw_hidden(self, seed: int) -> dict:
         return resolve_hidden(self.hidden, seed, self.id)
 
+    def physics_switches(self) -> PhysicsSwitches:
+        """The scenario's ``initial.physics`` block (every switch off when it has none)."""
+        try:
+            return PhysicsSwitches.from_config((self.initial or {}).get("physics"))
+        except ValueError as exc:
+            raise ValueError(f"{self.id}: {exc}") from None
+
     def build_world(self, seed: int, session_dir: str | Path, *, virtual_clock: bool = False) -> World:
         """The world this scenario describes, for ``seed``.
 
@@ -238,6 +252,7 @@ class Scenario:
         rig = RigProfile.load(self.rig)
         ini = self.initial or {}
         drawn = self.draw_hidden(seed)
+        physics = self.physics_switches()
         tip_cfg = {**dict(ini.get("tip", {})), **drawn.get("tip", {})}
         tip = Tip(material=str(tip_cfg.get("material", rig.get("tip.material", "W"))),
                   form=str(tip_cfg.get("form", rig.get("tip.form", "qplus"))),
@@ -254,6 +269,9 @@ class Scenario:
             tip.phi_ev = float(tip_cfg["phi_ev"])
         if "lambda_per_s" in tip_cfg:
             tip.lambda_per_s = float(tip_cfg["lambda_per_s"])
+        # the hazard the tip settles back to when it recovers (tip_recovery): what the scenario
+        # gave it, before the condition it arrives in (an unstable one) raises it
+        tip.lambda_rest_per_s = tip.lambda_per_s
         if "apexes" in tip_cfg:
             tip.apexes = [Apex(float(a[0]) * 1e-9, float(a[1]) * 1e-9, float(a[2]) * 1e-9, float(a[3]))
                           for a in tip_cfg["apexes"]]
@@ -264,8 +282,11 @@ class Scenario:
             tip.ldos.extra_peaks.append((float(e0), float(amp), float(wdt)))
             tip.ldos.name = "featured"
         if tip_cfg.get("condition"):
+            # with tip_anisotropy a blunt tip arrives elliptical: its ratio from the scale and its
+            # long axis along the angle the same hidden draws already give (HIDDEN_SCHEMA is unchanged)
             tip.apply_condition(str(tip_cfg["condition"]), float(tip_cfg.get("condition_scale", 0.5)),
-                                float(tip_cfg.get("condition_angle_deg", 0.0)))
+                                float(tip_cfg.get("condition_angle_deg", 0.0)),
+                                anisotropic=physics.tip_anisotropy)
         if "f0_hz" in drawn.get("qplus", {}):
             tip.qplus_f0_hz = float(drawn["qplus"]["f0_hz"])
         if "k_n_per_m" in drawn.get("qplus", {}):
@@ -286,6 +307,7 @@ class Scenario:
                   herringbone=herringbone, surface_state=surface_state,
                   terrace_median_m=(float(surf["terrace_median_nm"]) * 1e-9
                                     if surf.get("terrace_median_nm") else None))
+        w.set_physics(physics)
         if drawn:
             w.hidden = {"draws": flatten_draws(drawn),
                         "stream": [int(seed), HIDDEN_STREAM,
@@ -343,6 +365,9 @@ class Scenario:
                 w.pll.amp_setpoint_m = float(pll["amplitude_m"])
             if pll.get("output_on"):
                 w.pll.set_output(True, w.clock.wall())
+        if w.over_range():
+            raise ValueError(f"{self.id}: the scenario starts with a setpoint above the preamplifier range, "
+                             "which crash_over_range makes a crash before the first action")
         return w
 
     # ── optional physics blocks (present only when the scenario asks for them) ──

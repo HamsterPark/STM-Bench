@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from stmbench.instrument import ACTIONS, ActionError, Instrument, replay, verify
+from stmbench.instrument import ACTIONS, API_VERSION, ActionError, Instrument, replay, verify
 from stmbench.instrument.core import Instrument as _I, validate
 from stmbench.trackB.rules import RULES_VERSION
 from stmsim.io.sxm_reader import read_dat
@@ -84,7 +84,7 @@ def test_a_refusal_by_the_instruments_own_checks_is_on_the_record_and_costs_noth
     inst.act("withdraw")
     t_withdrawn = inst.used_s
     with pytest.raises(ActionError, match="withdrawn"):
-        inst.act("pulse", bias_v=3.0)
+        inst.act("pulse", bias_v=3.0, width_ms=50.0)
     assert inst.used_s == t_withdrawn > t and inst.n_actions == 1
     assert [r["kind"] for r in inst.log] == ["refused", "refused", "act", "refused"]
     assert inst.log[0]["error"] == "move_tip: outside the piezo range"
@@ -173,7 +173,7 @@ def test_an_episode_rechecks_by_replay(tmp_path):
     _script(inst, look=True)
     inst.finish()
     ep = json.loads((tmp_path / "run" / "episode.json").read_text(encoding="utf-8"))
-    assert ep["rules_version"] == RULES_VERSION and ep["api_version"] == 1
+    assert ep["rules_version"] == RULES_VERSION and ep["api_version"] == API_VERSION
     assert (tmp_path / "run" / "actions.jsonl").exists() and (tmp_path / "run" / "events.json").exists()
     assert verify(tmp_path / "run")["ok"]
     # a ledger whose measurements were edited no longer re-checks

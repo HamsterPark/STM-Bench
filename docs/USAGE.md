@@ -95,7 +95,7 @@ inst.act("move_tip", x_nm=1.2, y_nm=-0.4)
 r = inst.act("zspec", sweep_nm=0.5, z_offset_nm=0.3, points=256)
 inst.spectrum(r["spectrum"])            # read-only: no instrument time, no random draw
 inst.report("f_min_pn", -150.0, evidence=[r["spectrum"], "..."])
-inst.finish()                           # judged with the version-1 rules; ledger written
+inst.finish()                           # judged by the rules the card states; ledger written
 ```
 
 Actions (`stmbench.instrument.ACTIONS`, each with a JSON schema): `scan`, `set_bias`,
@@ -109,6 +109,19 @@ looks cannot change what it later measures. `status` reads the junction and the 
 feedback, Z, current, current range, tip position, withdrawn) and what was switched on: the lock-in, the
 qPlus oscillation (`null` without a sensor) and the drift compensation (`drift_comp`: on or off and the
 velocities it was programmed with, in the units of the action).
+
+`pulse` and `poke` have no default strength: `pulse.width_ms`, `poke.depth_nm` and `poke.dwell_s`
+are required (their bounds still apply), and a call without one is refused in the instrument's
+words (`pulse: width_ms is required`) before anything happens to the tip, costing no instrument
+time. How hard to condition a tip is the operator's call; a default would be the answer to it.
+
+The API version (`stmbench.instrument.API_VERSION`, now 2) is the first line of the manual and a
+field of `info()`, of the ledger (`episode.json`) and of an export (`session.json`). Calls,
+parameters and record kinds change with it (version 2 dropped the tip-diagnosis call and the
+defaults of `pulse` and `poke`), so `replay`, `verify` and `grade` refuse a ledger or an export of
+another version, saying that it needs the code of its own version, instead of replaying it into a
+mismatch or grading it as a zero. The replay for an audience and the report tables still read the
+records of earlier ledgers.
 
 Any MCP agent can take the instrument's seat:
 
@@ -137,8 +150,9 @@ frame, an STS or a Z spectrum.
 
 The MCP tools are the actions, the observations (`show_frame` returns a PNG rendered one fixed
 way — line-flattened, 0.5–99.5 % contrast, integer enlargement to ≥ 512 px — and
-`frame_values` the numbers), `get_task` (task, rule card, manual), `report_result`,
-`report_tip_state` and `finish`. The ledger is `episode.json` (verdict, hashes of every
+`frame_values` the numbers), `get_task` (task, rule card, manual), `report_result` and `finish`.
+There is no tool for stating a diagnosis of the tip: no scenario scores one, and offering it would
+only tell an agent to worry about its tip. The ledger is `episode.json` (verdict, hashes of every
 measurement), `actions.jsonl` (every call, refused ones included), `events.json`,
 `report.json` and `session/` (the saved `.sxm` / `.dat` files). A scenario whose success kind
 the instrument cannot judge (the skill scenarios below) is refused when the episode opens.
@@ -234,7 +248,8 @@ the fields named as `ReportResult` and the rule card name them - value, x_nm, y_
 sigma, note, the ones the picked claim needs starred as in the action panels, Enter in a field sending the
 report, and a "+ shown file" button that appends the name of the frame or spectrum the viewer shows to
 `evidence` (or says in the recent results that none is shown) - and Finish with an inline two-click
-confirmation), Data and Log; in the middle the viewer (a frame with nm
+confirmation), Data (the frames, the spectra and the move traces, each list under a heading of its own) and Log;
+in the middle the viewer (a frame with nm
 axes, a colour bar, a cursor readout, flatten modes, a contrast switch (auto: the 0.5-99.5 percentile
 scale of the image an MCP agent gets, the default; full: the frame's minimum to maximum, which keeps the
 top of an atom from saturating; visible: the minimum to maximum of the part of the frame in view, so that a
@@ -245,8 +260,13 @@ whole, another channel of the same frame keeps the view; the axes, the cursor, m
 same pixel mapping at every zoom, and nothing is found or snapped for the reader), numbered markers (six rows before the table
 scrolls) with their coordinates, the start time of the frame each was placed on and the distance to the
 previous one, a line profile, the last frames as thumbnails; or a spectrum with chosen
-columns; over a spectrum or a line profile a cursor reads out the data point nearest the pointer, its x
-and each curve's y, and a left click pins it); on the right the Operate tab (every action a P4 episode uses,
+columns; or the trace of a tip move, which every `move_tip` saves like a spectrum and the window shows when
+the move is done, as it shows an STS: its distance along the move (nm) or its time (s) against Z (nm) or the
+current (pA), open on Z against the distance, headed by the conditions the instrument recorded of the move
+(from where to where, how fast, the bias, the setpoint, the feedback) and nothing read off the curves - no
+mark, count or note on a step or a spike, which is for the reader to find; over a spectrum, a trace or a line
+profile a cursor reads out the data point nearest the pointer, its x and each curve's y, and a left click
+pins it); on the right the Operate tab (every action a P4 episode uses,
 without scrolling at 1920x1080 or 1920x1016) and the Spectroscopy tab, whose On / Off pairs and range row
 show the state the instrument reports as the selected button, and under them the last five results, newest
 first, in the instrument's words (a refusal stays among them until five calls have followed it). A click queues its job at once with the field values read at that moment and
@@ -258,7 +278,9 @@ buttons and looks at the screen once, and a drag after a refused Set setpoint wo
 resistance nobody chose; the Log and the recent results say "not run: an earlier call was refused" (they
 never reach the instrument or the export), the refusal stays on the strip's last line until a call is accepted,
 and reads (a frame, a spectrum) are not affected. An empty field sends nothing (the instrument's default
-applies, or it refuses); a field that is not a number is sent as typed; every click in a field selects all
+applies, or it refuses: a parameter the action table marks required has a red star, a hint "required" and no
+default, and an empty one is refused in the instrument's words, as the pulse's width and the poke's depth and dwell
+are in API version 2); a field that is not a number is sent as typed; every click in a field selects all
 of it, so click then type replaces the content. The three `← marker` buttons
 copy a marker's coordinates into the move-tip or scan fields or the report form, and Delete marker removes
 the selected one. While a scan runs or waits the viewer says so over what it shows, and a click on a viewer
@@ -266,8 +288,7 @@ that has shown no frame leaves a note among the recent results instead of being 
 
 What it deliberately does not do: find atoms, estimate drift, suggest a value, explain a physical effect,
 offer a procedure, or show anything from the episode's truth, the seed, the tolerances beyond the rule
-card, or the verdict (finishing does not show the score; it stays in the private ledger). It has no
-control for `report_tip_state`, which no scenario judges.
+card, or the verdict (finishing does not show the score; it stays in the private ledger).
 
 *Dev mode* (the first command) writes the usual run directory, so `verify` and `replay` read it, and an
 export beside it at `<out>/export`; closing the window finishes the episode and judges it as it
@@ -285,7 +306,11 @@ stands. `--lang en` shows English labels, the English task text with its rule ca
 `say_en`; `--lang zh` (the default) shows each Chinese label followed by its English, the Chinese task
 text and `say`. `--ui-scale` multiplies every font and
 size; it is an upper bound, because the window is measured with the fonts the machine has and every size
-is shrunk if it would not fit the screen (1.0 is tuned for 1920x1080).
+is shrunk if it would not fit the screen (1.0 is tuned for 1920x1080). The columns are 360, 824 and 704 px
+wide on that screen; a side column whose contents are wider than that with the machine's fonts (the right one,
+with a Chinese label in front of every English one, in a wider font than the window was tuned with) is given the
+width it needs from the centre column, which has 143 px or more to spare, before anything is shrunk: shrinking every size
+cannot mend a column that is too narrow for its contents, since the column shrinks with them.
 
 `python -m stmbench.gui.shots --out <dir>` renders the window offscreen in scripted states (just
 started; after a scan with markers and a profile; a spectrum; the report form; a refusal; the data,
@@ -323,6 +348,24 @@ every atom has its own threshold, and pokes, pulses and crashes take the atoms t
 In P4 the report says which atom was moved: `target_site` is matched to the moved atom nearest
 the reported position, and `bystander_max_shift_nm` (`of_claim: target_site`) is that atom's
 neighbourhood.
+
+**Physics switches.** A scenario's `initial.physics` block switches on mechanisms the other
+scenarios do not have (`stmsim.physics.switches`); a missing key is off, an unknown key or a value
+that is not true/false raises when the file is loaded, and with every switch off the world is the
+one it always was (same draws, same records). P4 switches all four on, so that the instrument has
+no safe place: `tip_changes_outside_scans` (the tip's change hazard, λ·(1 + |I|/1 nA + (|V|/2 V)²),
+also runs while the instrument tunnels outside scans and drags: spectroscopy, waiting, moving, the
+settling after a setting; a spectrum that straddles a change shows the tip it started with),
+`tip_recovery` (a tip also gets better on its own, slowly, in about an hour at the imaging dose:
+a metastable apex settles, a spare apex is lost faster at a high current, an adsorbate desorbs
+faster at a high bias, a crashed cluster stops flickering; a blunt tip never sharpens),
+`tip_anisotropy` (a blunt, crashed or damaged tip blurs more along one direction than the other, so
+an atom looks stretched along the tip's long axis, fixed in the sample frame, whatever the scan
+angle) and `crash_over_range` (a setpoint above the preamplifier's range is never reached by its
+saturating reading, so the loop drives the tip into the sample: entering the condition crashes the
+tip, and a scan or a move made in it crashes it again; select the range first, as the reference does).
+Each mechanism draws from its own random stream (`0x71D1`, `0x71D2`, `0x71D3`), so switching one on
+moves no other.
 
 ### Skill scenarios (B1–B9, simulator fixtures)
 
@@ -414,7 +457,7 @@ order), so the tolerances have to be re-derived; each scenario's `notes` says so
 | `angle` | the smallest difference modulo `tol.mod` is within `tol.abs`; a herringbone orientation also accepts either arm at ±α | `distinct_from: {claim, min_sep_deg}` compares the two claims' **truths** |
 | `peak_in_list` | the reported value matches one of the first `rank_max` true peaks | `distinct_from` (a different peak), `greater_than: <claim id>` |
 | `position` | the registry has the target atom **on** the designated lattice site, and the reported coordinates are within `tol.report_nm` of where the atom really is | needs `position: required` |
-| `constraint` | a pure threshold on the truth (`min:` / `max:`), nothing reported | |
+| `constraint` | a pure threshold on the truth (`min:` / `max:`), nothing reported | `of_claim` + `field`: a property of the atom another claim was matched to (P4's `bystander_max_shift_nm`; the card defines its bystanders from `initial.adatoms.bystander_nm`) |
 
 ### Evidence rules
 
@@ -426,12 +469,12 @@ order), so the tolerances have to be re-derived; each scenario's `notes` says so
 | `spectra_near_scatterer` | `min_n` spectra at `min_positions` distinct places within `near_nm` of a scatterer, each with `min_points` points covering `v_lo_max … v_hi_min` |
 | `sts_at_corral_centre` | as above, but within `max_centre_dist_nm` of the corral centre |
 | `zspec_pair` | one Δf curve on an adatom (close enough, no jump, no contact, enough span past the minimum) and one on clean surface |
-| `events` | at least `min_n` events of a kind, optionally with a `cause` |
+| `events` | at least `min_n` events of a kind, optionally with a `cause` (an atom hop made by a `move_tip` drag has cause `folme`, one made by imaging `scan`) |
 
-Under the version-1 rules (every episode run with the rule card) a reported claim's rule is
+Under the strict rules (every episode run with the rule card, rules version 1 on) a reported claim's rule is
 checked **within the data the report cites** (`evidence`), and `frame_covers` /
 `frame_covers_after` use the frame the report names (`frame`), which must satisfy the rule,
-contain the position and, where `after_event` is set, have been saved after the last such event.
+contain the position and, where `after_event` is set, have started scanning after the last such event.
 Constraints and `events` rules have nothing to cite and are checked against the whole episode.
 
 ### The result channel
@@ -459,9 +502,15 @@ checks: each claim's meaning (`say`), unit, tolerance, pairwise rules and eviden
 and coordinate conventions, the budget and the 5 % overrun rule. `task_text(scenario)` appends it
 to the task; `get_task` and the replay show that text. Tolerances are
 public; the values drawn for a seed are not. The ledger records `rules_version`, and the judge
-applies the version-1 rules (citations, the named frame) to episodes with `rules_version ≥ 1`;
-older ledgers re-judge with the rules they ran under. Never state a budget or an evidence rule
-by hand in a task: write it in the claim or the budget, and the card will say it.
+applies the strict rules (citations, the named frame) to episodes with `rules_version ≥ 1`;
+older ledgers re-judge with the rules they ran under. Version 2 changed no judging rule: it made
+P4's card say what the judge does (an atom hop is explained by what it is, not by what causes it;
+a tied lattice site counts "by at most" `site_tie_nm`; the bystanders and their displacement are
+defined as `AdatomRegistry.any_target` computes them; the hop the evidence needs is one made
+during a `move_tip` action) and dropped the controller-command limit (`budget.wire_cmds`, the
+controller TCP path's budget, which the benchmark instrument does not apply). `stmbench grade`
+refuses an export of another rules version. Never state a budget or an evidence rule by hand in a
+task: write it in the claim or the budget, and the card will say it.
 
 The text is Chinese unless asked otherwise: `task_text(scenario, lang="en")` and
 `Instrument.task("en")` give the English text, generated by the same code from the same fields,
@@ -536,8 +585,8 @@ the earlier held-out rounds: `docs/results/p4_baseline_seeds_*.json`, DESIGN §9
 ```
 <out>/                the directory given as --out (or Instrument(..., out_dir=...))
 ├── episode.json      ledger: verdict, claims reported / verified, instrument time and budget,
-│                     action count, hashes of every measurement, tip diagnoses, the truth
-│                     before and after (for the judge and the replay only)
+│                     action count, hashes of every measurement, the truth before and
+│                     after (for the judge and the replay only)
 ├── actions.jsonl     every call in order, refused ones included, with its instrument time
 ├── events.json       the world's events (frames, pulses, crashes, atoms moving), in sim time
 ├── report.json       the reports, folded: the last report for each claim
@@ -549,7 +598,9 @@ the earlier held-out rounds: `docs/results/p4_baseline_seeds_*.json`, DESIGN §9
 ```
 
 `stmbench.cli verify <out>` rebuilds the episode from `actions.jsonl` with the same scenario
-and seed and compares every measurement and the verdict.
+and seed and compares every measurement and the verdict. It exits 0 when everything matches, 1 when
+something differs, and 2 (the reason on stderr) when the ledger is of another API version: it needs
+the code of that version.
 
 ### Replays for an audience
 
@@ -607,7 +658,8 @@ the paper), `success`, `partial`, `claims_total`, `claims_verified`, `instrument
 `records`), `scenario_id`, `rules_version`, `export_version`, `note`. It carries no seed, truth or
 per-claim detail. The exit status is 0 when graded and 2 when the directory is not a gradable
 export of this scenario (not an export, another scenario, or another rules, API or export
-version; the reason is on stderr): a wrong pairing is an error, never a score.
+version; the reason is on stderr, and an export of another API version is told that it needs
+the code of its own version): a wrong pairing is an error, never a score.
 
 `deploy/osworld/` holds the adapter OSWorld-Science's `module_metric` calls on the host, the
 grader's Docker image and the notes on wiring them up (`deploy/osworld/README.md`).

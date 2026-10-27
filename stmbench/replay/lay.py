@@ -253,7 +253,10 @@ def tip_look(state: dict | None) -> dict:
 
 
 TIP_CAUSE = {"crash": "撞上了表面", "pulse": "被电压脉冲整形", "poke": "轻戳了一下表面",
-             "spontaneous_change": "自己变了", "pick_up": "捡起了一个原子", "drop": "把原子放了下来"}
+             "spontaneous_change": "自己变了", "pick_up": "捡起了一个原子", "drop": "把原子放了下来",
+             # the tip getting better by itself (tip_recovery)
+             "recovery_settle": "形状自己稳定了", "recovery_apex_lost": "多余的一个尖自己掉了",
+             "recovery_desorb": "吸附的杂质自己掉了", "recovery_flicker_stop": "松动的原子团自己固定了"}
 
 
 # ── tool calls ──────────────────────────────────────────────────────────────

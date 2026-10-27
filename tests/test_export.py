@@ -7,7 +7,7 @@ import json
 
 import pytest
 
-from stmbench.instrument import ActionError, Instrument
+from stmbench.instrument import API_VERSION, ActionError, Instrument
 from stmbench.instrument.export import ExportWriter, read_export
 
 P4 = "P4_atom_positioning_cu111"
@@ -56,6 +56,8 @@ def test_the_export_holds_the_ledgers_records_and_the_hashes_of_what_was_measure
     assert [r["kind"] for r in ledger] == ["act", "refused", "observe", "observe", "act", "report", "finish"]
     s = got["session"]
     assert s["finished"] and s["scenario_id"] == P4 and s["records"] == len(ledger)
+    ep = json.loads((tmp_path / "run" / "episode.json").read_text(encoding="utf-8"))
+    assert s["api_version"] == ep["api_version"] == API_VERSION and s["rules_version"] == ep["rules_version"]
     d = inst.digest()
     assert {x["frame"]: x["digest"] for x in got["digests"] if "frame" in x} == d["frames"]
     assert {x["spectrum"]: x["digest"] for x in got["digests"] if "spectrum" in x} == d["spectra"]

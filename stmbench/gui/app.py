@@ -20,6 +20,7 @@ import signal
 import sys
 import time
 from collections import OrderedDict
+from collections.abc import Iterable
 from pathlib import Path
 from typing import TextIO
 
@@ -38,11 +39,36 @@ from .sidebar import Sidebar
 from .status import StatusStrip
 from .worker import Job, Worker
 
+#: the side columns' widths at ui scale 1: the right one (the action tabs and the recent results) is 704 px wide on a
+#: 1920 px screen, which leaves the centre column 824 px; a column that its contents need more of gets it
+#: (:func:`column_widths`)
 LEFT_PX, RIGHT_PX = 360, 704
 #: what a window manager's title bar may take from a maximized window's height (GNOME: 37 px, so 1016 of a 1080 screen)
 FRAME_PX = 37
 #: frames kept for instant re-viewing (arrays of at most 1024 x 1024 doubles): a byte budget
 CACHE_BYTES = 256 * 1024 * 1024
+
+
+def column_needs(sidebar: QWidget, panels: Iterable[ActionPanel]) -> tuple[int, int]:
+    """The width the left and the right column need with the fonts this machine has: the narrowest the sidebar
+    can be, and the widest line of an action panel (the Operate tab's, or the Spectroscopy tab's) with the tab
+    pane's margins."""
+    right = max(p.widget().minimumSizeHint().width() for p in panels) + 2 * style.px(3)
+    return sidebar.minimumSizeHint().width(), right
+
+
+def column_widths(sidebar_need: int, right_need: int) -> tuple[int, int]:
+    """The left and the right column's widths in pixels: the set ones (:data:`LEFT_PX`, :data:`RIGHT_PX`), or what
+    their contents need when that is more. The centre column keeps the rest of the window, which at 1920 px has
+    143 px to give before it is at its own minimum (681 px in DejaVu; the window's own fonts leave more).
+
+    Why a column grows instead of the window shrinking. Every size of the window scales together, the column's
+    width as much as the line that does not fit it, so a shrink leaves the line as wide as the column. Measured
+    on 2026-10-27 on Windows, offscreen, with DejaVu in front of the system fonts: the Chinese labels (each one
+    Chinese, then English) needed 745 px of the right column's 704, and after fit_scale had shrunk every size
+    to 0.733 they needed 537 of 516; the English ones needed 642. Taking the width from the centre column
+    fits them at scale 1.0."""
+    return max(style.px(LEFT_PX), sidebar_need), max(style.px(RIGHT_PX), right_need)
 
 
 class MainWindow(QMainWindow):
@@ -80,17 +106,18 @@ class MainWindow(QMainWindow):
         col.addLayout(row, 1)
 
         self.sidebar = Sidebar(session.task_text(), session.manual(), session.claims(), lang)
-        self.sidebar.setFixedWidth(style.px(LEFT_PX))
         self.center = CenterColumn(lang)
         self.operate = ActionPanel(layout.OPERATE, self.run_action, lang)
         self.spectroscopy = ActionPanel(layout.SPECTROSCOPY, self.run_action, lang)
+        left_px, right_px = column_widths(*column_needs(self.sidebar, (self.operate, self.spectroscopy)))
+        self.sidebar.setFixedWidth(left_px)
         self.right = Tabs()
         self.right.setObjectName("right.tabs")
         self.right.addTab(self.operate, two_lines("tab_operate", lang).replace("\n", " "))
         self.right.addTab(self.spectroscopy, two_lines("tab_spectroscopy", lang).replace("\n", " "))
         self.right.tabBar().setObjectName("right.tabbar")
         self.right.tabBar().setExpanding(True)
-        self.right.setFixedWidth(style.px(RIGHT_PX))
+        self.right.setFixedWidth(right_px)
         self.recent = RecentList(lang)
         right_column = QWidget()                         # the tabs, and under them what the last calls answered
         rc = QVBoxLayout(right_column)
@@ -435,9 +462,11 @@ def fit_scale(app: QApplication, lang: str, requested: float, available: QSize, 
 
     Why. The layout is tuned with one family of fonts; another (a wider one on the virtual machine) makes
     a row of the Operate tab wider than its column, and a window never narrower than its contents either
-    grows past the screen or hides what overflows. Everything scales together, so the window is
-    measured - the three columns' narrowest widths, and the Operate tab's height - and every size is
-    shrunk by what is missing. With the fonts it was tuned for, the answer is ``requested``.
+    grows past the screen or hides what overflows. The window is measured - the three columns at the
+    widths they need (:func:`column_widths`: a side column wider than its set width takes the width from the
+    centre one, which a shrink of every size could not give it), and the Operate tab's height - and every size
+    is shrunk by what the screen cannot hold. With the fonts it was tuned for, and with Chinese beside English
+    in DejaVu on a 1920x1080 screen, the answer is ``requested``.
 
     ``frame_px`` is what a window manager's title bar takes from ``available``: :data:`FRAME_PX` for a
     maximized window, 0 for a full-screen one (which is all of the screen)."""
@@ -448,21 +477,20 @@ def fit_scale(app: QApplication, lang: str, requested: float, available: QSize, 
         center, strip, tabs, sidebar = CenterColumn(lang), StatusStrip("-", lang), Tabs(), Sidebar("", "", [], lang)
         tabs.addTab(QWidget(), "x")
         recent = RecentList(lang)
-        sidebar_need = sidebar.minimumSizeHint().width()
-        right_need = max(p.widget().minimumSizeHint().width() for p in panels) + 2 * style.px(3)
+        left_px, right_px = column_widths(*column_needs(sidebar, panels))
         height_need = max(p.widget().minimumSizeHint().height() for p in panels)
         # the window manager's title bar is not in `available` and takes about frame_px of the height
         height_have = (available.height() - frame_px - strip.minimumSizeHint().height()
                        - tabs.tabBar().sizeHint().height() - style.px(5 + 6 + 5) - 2 * style.px(2)
                        - recent.sizeHint().height() - style.px(6))
-        total = style.px(LEFT_PX) + style.px(RIGHT_PX) + center.minimumSizeHint().width() + 4 * style.px(8)
-        ratio = min(1.0, available.width() / total, style.px(RIGHT_PX) / right_need, height_have / height_need,
-                    style.px(LEFT_PX) / max(sidebar_need, 1))
+        total = left_px + right_px + center.minimumSizeHint().width() + 4 * style.px(8)
+        ratio = min(1.0, available.width() / total, height_have / height_need)
         for w in (*panels, center, strip, tabs, sidebar, recent):
             w.deleteLater()
         if ratio >= 1.0:
-            break
+            return scale
         scale *= max(0.7, ratio * 0.99)
+    style.apply(app, scale)                    # the loop's last shrink was not applied yet: leave the scale returned
     return scale
 
 

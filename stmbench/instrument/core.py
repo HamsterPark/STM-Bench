@@ -15,12 +15,15 @@ Three kinds of call:
 * **observations** (``status``, ``info``, ``list_data``, ``frame``, ``spectrum``) - read only:
   no instrument time and no random draw, so how often an agent looks cannot change what it
   later measures;
-* **reports** (``report``, ``report_tip_state``, ``finish``) - the result channel of
-  :mod:`stmbench.trackB.results`, judged by the version-1 rules shown on the rule card.
+* **reports** (``report``, ``finish``) - the result channel of :mod:`stmbench.trackB.results`,
+  judged by the rules the rule card shows (:data:`~stmbench.trackB.rules.RULES_VERSION`).
 
-What is deliberately absent: composite skills and a safety gate. An action does what
-the instrument would do, hard limits only (bias, piezo range, preamplifier range); a poke too
-deep, a pulse too high, a coarse step in tunnelling have their physical consequences.
+What is deliberately absent: composite skills, a safety gate, a default strength for tip
+conditioning (the width, depth and dwell of a pulse or poke are the operator's to choose), and
+any call that judges nothing, such as a statement about the tip: no scenario scores it, and
+offering it would only tell an agent to worry about its tip. An action does what the instrument
+would do, hard limits only (bias, piezo range, preamplifier range); a poke too deep, a pulse too
+high, a coarse step in tunnelling have their physical consequences.
 """
 from __future__ import annotations
 
@@ -40,8 +43,12 @@ from stmsim.scenario import Scenario
 from ..trackB.results import ResultSink, fold_results
 from ..trackB.rules import OVERRUN_TOLERANCE, RULES_VERSION, task_text
 
-#: version of the action set, the observations and the log format
-API_VERSION = 1
+#: version of the action set, the observations and the log format. 2: no tip-diagnosis call (so no
+#: ``diagnosis`` record or ledger key either), and ``pulse.width_ms``, ``poke.depth_nm`` and
+#: ``poke.dwell_s`` are required. A ledger or an export of another version is refused by
+#: :func:`replay`, :func:`verify` and the grader (:func:`require_api_version`): its calls and
+#: records are not this version's, so only the code of its own version can re-check it.
+API_VERSION = 2
 SCENARIO_DIR = Path(__file__).resolve().parents[1] / "trackB" / "scenarios"
 MAX_ACTIONS = 3000
 #: success kinds the instrument can judge from what it records: the paper scenarios'. The
@@ -53,6 +60,11 @@ _GAIN_FULL_SCALE_NA = {10000.0: 0, 1000.0: 1, 100.0: 2, 10.0: 3, 1.0: 4, 0.1: 5}
 
 class ActionError(ValueError):
     """A refused call: nothing happened on the instrument and no time passed."""
+
+
+class VersionError(ValueError):
+    """A ledger or an export written under another API version than this code's: it needs the code
+    of its own version (see :func:`require_api_version`)."""
 
 
 @dataclass(frozen=True)
@@ -96,6 +108,9 @@ def _P(*a, **k) -> Param:
     return Param(*a, **k)
 
 
+# pulse.width_ms, poke.depth_nm and poke.dwell_s are required, with no default: any default would be
+# the answer to how hard to condition the tip (in a screen-only trial one default poke mended a
+# double tip at the first try)
 ACTIONS: dict[str, ActionSpec] = {s.name: s for s in (
     ActionSpec("scan", "Image a square frame in constant-current mode and save it. Returns the frame's "
                        "file name, which reports cite. Takes pixels × 2 × line_time_s of instrument time.",
@@ -120,12 +135,12 @@ ACTIONS: dict[str, ActionSpec] = {s.name: s for s in (
                 _P("speed_nm_s", "number", "lateral speed (nm/s)", default=293.0, lo=0.01, hi=10000.0))),
     ActionSpec("pulse", "Apply a bias pulse at the tip's position (tip conditioning).",
                (_P("bias_v", "number", "pulse voltage (V, absolute)", True, lo=-10.0, hi=10.0),
-                _P("width_ms", "number", "pulse width (ms)", default=50.0, lo=0.1, hi=5000.0),
+                _P("width_ms", "number", "pulse width (ms)", True, lo=0.1, hi=5000.0),
                 _P("z_hold", "boolean", "hold Z during the pulse", default=True))),
     ActionSpec("poke", "Indent the tip into the surface and retract (tip conditioning by controlled contact).",
-               (_P("depth_nm", "number", "indentation depth below the tunnelling height (nm)", default=0.5, lo=0.0, hi=20.0),
+               (_P("depth_nm", "number", "indentation depth below the tunnelling height (nm)", True, lo=0.0, hi=20.0),
                 _P("bias_v", "number", "bias during the indentation (V); omit to keep the current bias", lo=-10.0, hi=10.0),
-                _P("dwell_s", "number", "time held at depth (s)", default=0.5, lo=0.0, hi=10.0))),
+                _P("dwell_s", "number", "time held at depth (s)", True, lo=0.0, hi=10.0))),
     ActionSpec("sts", "Take a bias-spectroscopy sweep (I(V) and dI/dV) at the tip's position and save it. "
                       "Returns the spectrum's file name, which reports cite.",
                (_P("v_start", "number", "sweep start (V)", True, lo=-10.0, hi=10.0),
@@ -213,6 +228,12 @@ def _r(x: float, nd: int = 4) -> float:
     return float(round(float(x), nd))
 
 
+def _peak(a) -> float:
+    """The largest |value| of a curve, NaN-safe (0 for a curve with no finite point)."""
+    a = np.asarray(a, float)
+    return float(np.nanmax(np.abs(a))) if np.any(np.isfinite(a)) else 0.0
+
+
 def array_digest(a: np.ndarray) -> str:
     return hashlib.sha256(np.ascontiguousarray(np.asarray(a, dtype=np.float64)).tobytes()).hexdigest()
 
@@ -263,7 +284,6 @@ class Instrument:
         self.max_actions = int(max_actions)
         self.log: list[dict] = []
         self.sink = ResultSink()
-        self.diagnosis: list[dict] = []
         self.frames: dict[str, FrameRecord] = {}
         self.spectra: dict[str, dict] = {}
         self.n_actions = 0
@@ -310,6 +330,15 @@ class Instrument:
 
     def _settle(self, at_least: float = 0.0) -> None:
         self._advance(max(float(at_least), self._transient_left_s()))
+
+    def _settle_tunnelling(self, at_least: float = 0.0, *, current_a: float | None = None,
+                           bias_v: float | None = None) -> None:
+        """:meth:`_settle` for an action that leaves the tip tunnelling: the time it takes also
+        counts for the tip's hazards outside scans (:meth:`World.tunnel_interval`; ``current_a``
+        and ``bias_v`` are the dose and field of a sweep, else the setpoint and the bias)."""
+        dt = max(float(at_least), self._transient_left_s())
+        self.world.tunnel_interval(dt, current_a=current_a, bias_v=bias_v)
+        self._advance(dt)
 
     # ── the one door that changes the instrument ──
     def act(self, name: str, **args) -> dict:
@@ -389,25 +418,23 @@ class Instrument:
 
     def _do_set_bias(self, bias_v) -> dict:
         self.world.set_bias(float(bias_v))
-        self._settle(0.05)
+        self._settle_tunnelling(0.05)
         return {"bias_v": _r(bias_v, 6)}
 
     def _do_set_setpoint(self, current_pa) -> dict:
         self.world.set_setpoint(float(current_pa) * 1e-12)
-        self._settle(0.05)
+        self._settle_tunnelling(0.05)
         return {"setpoint_pa": _r(current_pa, 6)}
 
     def _do_feedback(self, on) -> dict:
         self.world.zctrl_set(bool(on))
-        self._settle(0.05)
+        self._settle_tunnelling(0.05)
         return {"feedback": bool(on)}
 
     def _do_set_current_range(self, full_scale_na) -> dict:
         w = self.world
-        idx = _GAIN_FULL_SCALE_NA[float(full_scale_na)]
-        w.preamp.gain_index = idx
-        w.preamp.full_scale_a = 10.0 / (10.0 ** (6 + idx))
-        self._settle(0.05)
+        w.set_current_range(_GAIN_FULL_SCALE_NA[float(full_scale_na)])      # the world checks the setpoint against it
+        self._settle_tunnelling(0.05)
         return {"full_scale_na": float(full_scale_na)}
 
     def _do_move_tip(self, x_nm, y_nm, speed_nm_s) -> dict:
@@ -482,6 +509,9 @@ class Instrument:
                               "tip_nm": [_r(w.tip_x * 1e9), _r(w.tip_y * 1e9)],
                               "v": np.asarray(cur["v"], float), "i": np.asarray(cur["i"], float),
                               "didv": np.asarray(cur["didv"], float), "t_s": self.used_s}
+        # the sweep's hazards: its largest field and its largest current dose (the measurement
+        # above is the tip it started with; a change inside the sweep shows from the next one on)
+        w.tunnel_interval(duration, current_a=_peak(cur["i"]), bias_v=max(abs(float(v_start)), abs(float(v_end))))
         self._advance(duration)
         return {"spectrum": name, "points": int(points), "duration_s": _r(duration, 3)}
 
@@ -511,7 +541,7 @@ class Instrument:
                               # the loop's Z at every point (m), as the .dat file has it: what lines up
                               # a curve over an atom with one over the bare surface
                               "z_abs": np.asarray(cur["z_n"], float), "t_s": self.used_s}
-        self._settle(duration)
+        self._settle_tunnelling(duration, current_a=_peak(cur["i"]))
         return {"spectrum": name, "points": int(points), "duration_s": _r(duration, 3)}
 
     def _do_pll(self, on, amplitude_pm=None) -> dict:
@@ -525,7 +555,9 @@ class Instrument:
         if bool(on) and p.output_on:
             p.excitation_v = p.excitation_for(p.amp_setpoint_m)
         p.set_output(bool(on), w.clock.wall())
-        self._advance(5.0 * p.tau_s if on else 0.05)
+        ring = 5.0 * p.tau_s if on else 0.05
+        w.tunnel_interval(ring)                          # the tip tunnels while the oscillation rings up
+        self._advance(ring)
         # the frequency shift is re-zeroed where the tip is (PLL.FreqShiftAutoCenter)
         if on and not w.withdrawn:
             amp = p.amplitude_now(w.clock.wall())
@@ -539,13 +571,13 @@ class Instrument:
         w.lockin_amp_v = float(amplitude_mv) * 1e-3
         chans = [c for c in w.scan.channels if c != SIG_LI_X]
         w.scan.channels = chans + ([SIG_LI_X] if on else [])
-        self._settle(0.05)
+        self._settle_tunnelling(0.05)
         return {"lockin": bool(on), "amplitude_mv": _r(amplitude_mv, 6)}
 
     def _do_drift_comp(self, on, vx_nm_per_min, vy_nm_per_min, vz_pm_per_min) -> dict:
         self.world.set_drift_comp(bool(on), vx_nm_per_min * 1e-9 / 60.0, vy_nm_per_min * 1e-9 / 60.0,
                                   vz_pm_per_min * 1e-12 / 60.0)
-        self._settle(0.05)
+        self._settle_tunnelling(0.05)
         return {"on": bool(on), "v_nm_per_min": [_r(vx_nm_per_min), _r(vy_nm_per_min)],
                 "vz_pm_per_min": _r(vz_pm_per_min)}
 
@@ -575,6 +607,7 @@ class Instrument:
         return {"direction": direction, "steps": int(steps)}
 
     def _do_wait(self, seconds) -> dict:
+        self.world.tunnel_interval(float(seconds))
         self._advance(float(seconds))
         return {"waited_s": _r(seconds, 3)}
 
@@ -683,15 +716,9 @@ class Instrument:
         missing = [c for c in to_report if c not in self.sink.folded()["claims"]]
         return f"recorded {claim_id} = {value}; still to report: {', '.join(missing) or 'none'}"
 
-    def report_tip_state(self, tip_state: str, junction: str | None = None, note: str = "") -> str:
-        rec = {"tip_state": str(tip_state), "junction": junction, "note": note}
-        self.diagnosis.append(rec)
-        self.log.append({"i": len(self.log), "kind": "diagnosis", "args": rec, "t_s": _r(self.used_s, 6)})
-        return "recorded"
-
     # ── the end ──
     def finish(self) -> dict:
-        """Judge the episode (version-1 rules, budget overrun rule) and write the ledger."""
+        """Judge the episode (the rules of ``RULES_VERSION``, the budget overrun rule) and write the ledger."""
         if self.finished:
             return self._summary()
         from ..trackB.rules import apply_budget_overrun
@@ -747,7 +774,7 @@ class Instrument:
               "claims_total": det.get("n_total"), "claims_reported": det.get("n_reported"),
               "claims_verified": det.get("n_verified"), "instrument_time_s": self.used_s,
               "max_sim_s": self.max_sim_s, "actions": self.n_actions, "verdict": v.as_dict(),
-              "digest": self.digest(), "diagnosis": self.diagnosis, "sim_t0_s": self.t0,
+              "digest": self.digest(), "sim_t0_s": self.t0,
               "truth_before": self.truth_before, "truth_after": self.truth_after}
         (out / "episode.json").write_text(json.dumps(ep, default=_json_default, ensure_ascii=False, indent=1),
                                           encoding="utf-8")
@@ -769,13 +796,35 @@ class Instrument:
 _ABSENT = object()
 
 
+def _shown(value: Any, limit: int = 40) -> str:
+    """A value read out of a ledger or an export as a message quotes it: one line, printable, cut short."""
+    s = "".join(c if c.isprintable() else "?" for c in json.dumps(value, ensure_ascii=False, default=str))
+    return s if len(s) <= limit else s[:limit - 3] + "..."
+
+
+def require_api_version(found: Any, what: str) -> None:
+    """Pass when ``found``, the ``api_version`` a ledger or an export carries, is this code's
+    :data:`API_VERSION`; otherwise :class:`VersionError` naming ``what`` is refused.
+
+    The calls an agent can make, their parameters and the kinds of record in a log change with the
+    version, so a record of another one would replay into a confusing mismatch, or grade as a zero,
+    instead of into its own episode. It needs the code of its own version, and the message says so."""
+    if isinstance(found, int) and not isinstance(found, bool) and found == API_VERSION:
+        return
+    state = "carries no api_version" if found is None else f"is of api_version {_shown(found)}"
+    raise VersionError(f"{what} {state}; this code is api_version {API_VERSION}. A record replays only under "
+                       "the code of its own API version, so this one needs the code that wrote it "
+                       "(it cannot be replayed, verified or graded here)")
+
+
 def replay_records(scenario: Scenario | str | Path, seed: int, records: list[dict], *,
                    out_dir: str | Path | None = None,
                    raise_refused: bool = False) -> tuple[Instrument, list[dict]]:
     """Rebuild an episode from its log records: the same scenario and seed, the same calls in order.
 
-    ``act`` records are run again (their ``params``), ``report`` and ``diagnosis`` records sent
-    again (their ``args``); ``refused`` and ``observe`` records changed nothing and are skipped.
+    ``act`` records are run again (their ``params``), ``report`` records sent again (their
+    ``args``); ``refused`` and ``observe`` records changed nothing and are skipped. Any other kind
+    (a ``diagnosis`` record, say, which no instrument of this API version writes) is a mismatch.
     The records end at ``finish``, and the instrument is then finished: judged as it stands,
     which is also how an episode that never reached ``finish`` is judged. What the records say
     was measured or judged is never used, only what was done.
@@ -798,13 +847,13 @@ def replay_records(scenario: Scenario | str | Path, seed: int, records: list[dic
             over = True
         elif over:
             # after the end the instrument refuses actions and reports, and logs a refusal, not an
-            # act or a report; a diagnosis is the one record it still takes, and it judges nothing
+            # act or a report
             if kind in ("act", "report"):
                 mismatches.append({"i": i, "name": rec.get("name") if kind == "act" else kind,
                                    "error": "a call after finish"})
         elif kind == "act":
             _replay_act(inst, rec, mismatches, raise_refused)
-        elif kind in ("report", "diagnosis"):
+        elif kind == "report":
             _replay_report(inst, rec, mismatches, raise_refused)
         elif kind not in ("refused", "observe"):
             mismatches.append({"i": i, "name": str(kind), "error": "unknown record kind"})
@@ -837,35 +886,35 @@ def _replay_act(inst: Instrument, rec: dict, mismatches: list[dict], raise_refus
 
 
 def _replay_report(inst: Instrument, rec: dict, mismatches: list[dict], raise_refused: bool) -> None:
-    kind, args = rec["kind"], rec.get("args")
+    args = rec.get("args")
     try:
-        if not isinstance(args, dict):
-            raise ValueError(f"malformed {kind} record")
-        if kind == "diagnosis":
-            inst.report_tip_state(**args)
-        else:
-            a = dict(args)
-            if "claim_id" not in a or "value" not in a:
-                raise ValueError("malformed report record")
-            inst.report(a.pop("claim_id"), a.pop("value"), **a)
+        if not isinstance(args, dict) or "claim_id" not in args or "value" not in args:
+            raise ValueError("malformed report record")
+        a = dict(args)
+        inst.report(a.pop("claim_id"), a.pop("value"), **a)
     except ActionError as exc:
         if raise_refused:
             raise
-        mismatches.append({"i": rec.get("i"), "name": kind, "error": str(exc)})
+        mismatches.append({"i": rec.get("i"), "name": "report", "error": str(exc)})
     except (TypeError, ValueError) as exc:      # arguments the instrument cannot take at all
-        mismatches.append({"i": rec.get("i"), "name": kind, "error": str(exc)})
+        mismatches.append({"i": rec.get("i"), "name": "report", "error": str(exc)})
 
 
 def replay(run_dir: str | Path) -> Instrument:
-    """Rebuild an episode from its ledger: same scenario and seed, the same calls in order."""
+    """Rebuild an episode from its ledger: same scenario and seed, the same calls in order.
+
+    :class:`VersionError` for a ledger of another API version: only the code of its own version can
+    replay it."""
     run_dir = Path(run_dir)
     ep = json.loads((run_dir / "episode.json").read_text(encoding="utf-8"))
+    require_api_version(ep.get("api_version"), f"the ledger in {run_dir}")
     records = [json.loads(line) for line in (run_dir / "actions.jsonl").read_text(encoding="utf-8").splitlines()]
     return replay_records(ep["scenario_id"], int(ep["seed"]), records, raise_refused=True)[0]
 
 
 def verify(run_dir: str | Path) -> dict:
-    """Replay an episode and compare what was measured and how it was judged."""
+    """Replay an episode and compare what was measured and how it was judged. A ledger of another
+    API version is refused, as :func:`replay` refuses it (:class:`VersionError`)."""
     run_dir = Path(run_dir)
     ep = json.loads((run_dir / "episode.json").read_text(encoding="utf-8"))
     inst = replay(run_dir)
@@ -914,5 +963,5 @@ def _jsonable(obj):
     return json.loads(json.dumps(obj, default=_json_default))
 
 
-__all__ = ["ACTIONS", "API_VERSION", "ActionError", "ActionSpec", "Instrument", "Param", "replay",
-           "replay_records", "validate", "verify", "fold_results"]
+__all__ = ["ACTIONS", "API_VERSION", "ActionError", "ActionSpec", "Instrument", "Param", "VersionError", "replay",
+           "replay_records", "require_api_version", "validate", "verify", "fold_results"]
