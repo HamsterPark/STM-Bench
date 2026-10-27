@@ -419,9 +419,7 @@ class Instrument:
 
     def _do_set_current_range(self, full_scale_na) -> dict:
         w = self.world
-        idx = _GAIN_FULL_SCALE_NA[float(full_scale_na)]
-        w.preamp.gain_index = idx
-        w.preamp.full_scale_a = 10.0 / (10.0 ** (6 + idx))
+        w.set_current_range(_GAIN_FULL_SCALE_NA[float(full_scale_na)])      # the world checks the setpoint against it
         self._settle_tunnelling(0.05)
         return {"full_scale_na": float(full_scale_na)}
 

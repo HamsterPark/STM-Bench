@@ -91,8 +91,7 @@ def bind_current(d, w: World):
 
     @d.handles("Current_GainSet")
     def _gain(idx, filt):
-        w.preamp.gain_index = int(idx)
-        w.preamp.full_scale_a = 10.0 / (10.0 ** (6 + int(idx)))
+        w.set_current_range(int(idx))
 
     d.register("Current_CalibrGet", lambda idx: [10.0 ** (-(6 + int(idx))), 0.0])
 

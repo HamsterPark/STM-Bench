@@ -4,13 +4,27 @@ is over the preamplifier's range. Every mechanism is a switch (``initial.physics
 turn them on one by one on the P4 world, and test_physics_switches.py checks the switches."""
 from __future__ import annotations
 
+import math
+from pathlib import Path
+
 import numpy as np
 import pytest
+import yaml
+from scipy import ndimage
 
 from stmbench.instrument import Instrument
+from stmsim.physics.adatoms import AdatomParams
+from stmsim.physics.clock import VirtualClock
+from stmsim.physics.junction import gap_for_current
+from stmsim.physics.rig import RigProfile
+from stmsim.physics.scanner import SIG_Z, gaussian_blur_cov
 from stmsim.physics.switches import PhysicsSwitches
+from stmsim.physics.tip import Apex, Tip
+from stmsim.physics.world import World
+from stmsim.scenario import Scenario, resolve_hidden
 
 P4 = "P4_atom_positioning_cu111"
+SCEN = Path(__file__).resolve().parent.parent / "stmbench" / "trackB" / "scenarios"
 
 
 def _inst(tmp_path, seed=0, scenario=P4, **switches) -> Instrument:
@@ -222,8 +236,6 @@ def _recoveries(w, since=0):
 
 def _hurt(w, *, secondary=0, dirty=False, flicker=False, metastable=False, lam=None):
     """Put the tip of ``w`` in a state with something to recover from."""
-    from stmsim.physics.tip import Apex
-
     t = w.tip
     t.apexes = [Apex(0.0, 0.0, 0.0, 1.0)] + [Apex(2e-9 * (k + 1), 0.0, -0.1e-9, 0.7) for k in range(secondary)]
     if dirty:
@@ -421,28 +433,13 @@ def test_recoveries_in_a_drag_come_through_the_drags_own_hazard_call(tmp_path):
 
 
 def test_the_unstable_arrival_condition_keeps_the_rest_value_it_was_raised_from(tmp_path):
-    from pathlib import Path
-
-    from stmsim.scenario import Scenario, resolve_hidden
-
-    sc = Scenario.load(Path(__file__).resolve().parent.parent / "stmbench" / "trackB" / "scenarios" / f"{P4}.yaml")
+    sc = Scenario.load(SCEN / f"{P4}.yaml")
     seed = next(s for s in range(60) if resolve_hidden(sc.hidden, s, sc.id)["tip"]["condition"] == "unstable")
     w = sc.build_world(seed, tmp_path / "s", virtual_clock=True)
     assert w.tip.lambda_per_s >= 3e-3 and w.tip.lambda_rest_per_s == pytest.approx(1e-4)
 
 
 # ── tip_anisotropy ───────────────────────────────────────────────────────────
-import math  # noqa: E402
-
-from scipy import ndimage  # noqa: E402
-
-from stmsim.physics.adatoms import AdatomParams  # noqa: E402
-from stmsim.physics.clock import VirtualClock  # noqa: E402
-from stmsim.physics.rig import RigProfile  # noqa: E402
-from stmsim.physics.scanner import SIG_Z, gaussian_blur_cov  # noqa: E402
-from stmsim.physics.tip import Tip  # noqa: E402
-from stmsim.physics.world import World  # noqa: E402
-
 PARAMS = AdatomParams(r_threshold_ohm=200e3, r_pick_ohm=30e3, v_max_m_s=1e-9, p_slip=0.0)
 
 
@@ -558,13 +555,7 @@ def test_a_blunt_condition_arrives_elliptical_only_when_asked_and_without_a_draw
 
 
 def test_a_scenario_builds_its_blunt_tip_elliptical_along_the_angle_the_hidden_draw_gives(tmp_path):
-    import yaml
-    from pathlib import Path
-
-    from stmsim.scenario import Scenario, resolve_hidden
-
-    d = yaml.safe_load((Path(__file__).resolve().parent.parent / "stmbench" / "trackB" / "scenarios"
-                        / f"{P4}.yaml").read_text(encoding="utf-8"))
+    d = yaml.safe_load((SCEN / f"{P4}.yaml").read_text(encoding="utf-8"))
     d["initial"]["physics"] = {"tip_anisotropy": True}
     p = tmp_path / "p4.yaml"
     p.write_text(yaml.safe_dump(d, allow_unicode=True), encoding="utf-8")
@@ -679,3 +670,196 @@ def test_the_world_wires_its_anisotropy_stream_and_nothing_draws_it_when_off(tmp
     assert on.world.tip.aniso_rng is on.world.rng_aniso and "angle_deg" in on.world.tip.snapshot()
     on.world._crash("test")
     assert on.world.tip.axis_ratio < 1.0 and _states(on.world)["aniso"] != before["aniso"]
+
+
+# ── crash_over_range ─────────────────────────────────────────────────────────
+def _crashes(w, since=0):
+    return [e for e in w.events[since:] if e["kind"] == "crash"]
+
+
+def _reasons(w, since=0):
+    return [e["reason"] for e in _crashes(w, since)]
+
+
+def test_a_setpoint_inside_the_range_costs_nothing(tmp_path):
+    inst = _inst(tmp_path, crash_over_range=True)
+    w = inst.world
+    for pa in (5000.0, 10000.0):                  # 5 nA, and exactly the 10 nA range's full scale
+        inst.act("set_setpoint", current_pa=pa)
+        assert not w.over_range()
+    inst.act("set_current_range", full_scale_na=100.0)
+    inst.act("set_setpoint", current_pa=1.0e5)    # the top of the setpoint's range, on the 100 nA range
+    assert not w.over_range() and _crashes(w) == []
+    st = inst.status()
+    assert st["current_pa"] == pytest.approx(1.0e5)           # the loop holds it; the reading is the setpoint
+
+
+@pytest.mark.parametrize("route", ["setpoint", "range", "feedback"])
+def test_entering_the_condition_crashes_the_tip_once_by_each_route(tmp_path, route):
+    inst = _inst(tmp_path, crash_over_range=True)
+    w = inst.world
+    n_before = len(w.tip.events)
+    if route == "setpoint":
+        inst.act("set_setpoint", current_pa=20000.0)          # 20 nA on the 10 nA range
+    elif route == "range":
+        inst.act("set_current_range", full_scale_na=0.1)      # a 100 pA range under the 200 pA setpoint
+    else:
+        inst.act("feedback", on=False)
+        inst.act("set_setpoint", current_pa=20000.0)
+        assert _crashes(w) == [] and not w.over_range()       # not closed: the loop is not asking for it
+        inst.act("feedback", on=True)
+    assert w.over_range() and _reasons(w) == ["setpoint_over_range"]
+    assert [e.kind for e in w.tip.events[n_before:]].count("crash") == 1
+    inst.act("set_setpoint", current_pa=30000.0 if route != "range" else 400.0)   # still over: nothing more
+    inst.act("wait", seconds=100.0)
+    assert w.over_range() and _reasons(w) == ["setpoint_over_range"]
+
+
+def test_with_the_switch_off_the_loop_follows_a_setpoint_the_range_cannot_read(tmp_path):
+    inst = _inst(tmp_path)
+    w = inst.world
+    inst.act("set_setpoint", current_pa=20000.0)
+    assert not w.over_range() and _crashes(w) == []
+    assert w.equilibrium_gap() == pytest.approx(gap_for_current(20e-9, w.bias_v, w.phi_junction()))
+    assert w.equilibrium_gap() > 0.1e-9
+
+
+def test_the_loops_target_is_contact_and_the_current_reads_the_clamp(tmp_path):
+    inst = _inst(tmp_path, crash_over_range=True)
+    w = inst.world
+    inst.act("set_setpoint", current_pa=20000.0)
+    inst.act("wait", seconds=5.0)
+    assert w.equilibrium_gap() == 0.0
+    assert w.achievable_z_tip() - w.surface_height_here() == pytest.approx(0.0, abs=1e-12)
+    st = inst.status()
+    assert st["current_pa"] == pytest.approx(w.preamp.clamp_a * 1e12)         # 10004 pA, not 20000
+    assert st["current_pa"] < 20000.0
+    assert w._dc_current() == pytest.approx(w.preamp.clamp_a)
+    assert w.junction_resistance_ohm() == math.inf                             # no junction to grip an atom with
+
+
+@pytest.mark.parametrize("route", ["setpoint", "range", "feedback", "withdraw"])
+def test_leaving_the_condition_returns_the_loop_to_normal_and_rearms_the_crash(tmp_path, route):
+    inst = _inst(tmp_path, crash_over_range=True)
+    w = inst.world
+    inst.act("set_setpoint", current_pa=20000.0)
+    assert w.over_range() and len(_crashes(w)) == 1
+    if route == "setpoint":
+        inst.act("set_setpoint", current_pa=5000.0)
+    elif route == "range":
+        inst.act("set_current_range", full_scale_na=100.0)
+    elif route == "feedback":
+        inst.act("feedback", on=False)
+    else:
+        inst.act("withdraw")
+    assert not w.over_range() and len(_crashes(w)) == 1
+    assert w.equilibrium_gap() == pytest.approx(gap_for_current(w.zctrl.setpoint_a, w.bias_v, w.phi_junction()))
+    if route in ("setpoint", "range"):
+        inst.act("wait", seconds=3.0)
+        assert inst.status()["current_pa"] == pytest.approx(w.zctrl.setpoint_a * 1e12)    # back at the setpoint
+    # entering again is a new crash
+    if route == "setpoint":
+        inst.act("set_setpoint", current_pa=20000.0)
+    elif route == "range":
+        inst.act("set_current_range", full_scale_na=10.0)
+    elif route == "feedback":
+        inst.act("feedback", on=True)
+    else:
+        inst.act("feedback", on=True)
+    assert w.over_range() and _reasons(w) == ["setpoint_over_range"] * 2
+
+
+def test_a_scan_or_a_move_made_in_the_state_ploughs_and_other_actions_do_not(tmp_path):
+    inst = _inst(tmp_path, crash_over_range=True, tip_changes_outside_scans=True)
+    w = inst.world
+    w.tip.lambda_per_s = 0.05
+    inst.act("set_setpoint", current_pa=20000.0)
+    assert _reasons(w) == ["setpoint_over_range"]
+    before = _states(w)
+    n_ch = len(_changes(w))
+    inst.act("wait", seconds=600.0)                          # pressed into the sample is not tunnelling: no hazard
+    inst.act("sts", v_start=-0.1, v_end=0.1, points=16)
+    inst.act("move_tip", x_nm=w.tip_x * 1e9, y_nm=w.tip_y * 1e9)   # no distance: nothing is dragged
+    assert _reasons(w) == ["setpoint_over_range"] and len(_changes(w)) == n_ch
+    assert _states(w)["outscan"] == before["outscan"]
+    inst.act("scan", center_x_nm=0.0, center_y_nm=0.0, size_nm=10.0, pixels=32, line_time_s=0.05)
+    assert _reasons(w) == ["setpoint_over_range", "setpoint_over_range_plough"]
+    inst.act("move_tip", x_nm=6.0, y_nm=2.0, speed_nm_s=200.0)
+    assert _reasons(w) == ["setpoint_over_range", "setpoint_over_range_plough", "setpoint_over_range_plough"]
+    assert w.over_range()
+
+
+def test_nothing_is_dragged_or_picked_up_while_the_tip_is_pressed_into_the_sample(tmp_path):
+    def run(switch_on):
+        inst = _inst(tmp_path / str(switch_on), crash_over_range=switch_on)
+        w = inst.world
+        reg = w.surface.site.adatoms
+        pts = reg.positions() * 1e9
+        far = [p for p in pts if 14.0 < math.hypot(p[0], p[1]) < 60.0]
+        ax, ay = far[0]
+        inst.act("move_tip", x_nm=float(ax) - 9.0, y_nm=float(ay), speed_nm_s=300.0)
+        inst.act("set_bias", bias_v=0.001)
+        inst.act("set_setpoint", current_pa=20000.0)         # 20 nA on the 10 nA range: R = 50 kΩ, a dragging resistance
+        n = len(w.events)
+        inst.act("move_tip", x_nm=float(ax) + 9.0, y_nm=float(ay), speed_nm_s=0.3)
+        return [e["kind"] for e in w.events[n:] if e["kind"] in ("adatom_hop", "adatom_picked")], w.over_range()
+
+    free, over_free = run(False)
+    pressed, over = run(True)
+    assert free and not over_free                           # the control: without the switch the atom is moved
+    assert over and pressed == []
+
+
+def test_the_reference_manipulation_sequence_never_enters_the_condition(tmp_path):
+    from stmbench.reference._manip import (LADDER_FACTOR, LADDER_KOHM, LADDER_MIN_KOHM, MANIP_MAX_NA,
+                                           MANIP_V)
+
+    inst = _inst(tmp_path, crash_over_range=True)
+    w = inst.world
+    st = inst.status()
+    v_img, pa_img = st["bias_v"], st["setpoint_pa"]
+    r = LADDER_KOHM * 1e3
+    steps = 0
+    while r >= LADDER_MIN_KOHM * 1e3 * 0.999:
+        v = min(MANIP_V, r * MANIP_MAX_NA * 1e-9)             # Mover.manipulate: the range first
+        inst.act("set_current_range", full_scale_na=100.0)
+        inst.act("set_bias", bias_v=v)
+        inst.act("set_setpoint", current_pa=v / r * 1e12)
+        assert not w.over_range()
+        inst.act("set_setpoint", current_pa=pa_img)           # Mover.image: the setpoint down before the range
+        inst.act("set_bias", bias_v=v_img)
+        inst.act("set_current_range", full_scale_na=10.0)
+        assert not w.over_range()
+        r *= LADDER_FACTOR
+        steps += 1
+    assert steps > 10 and _crashes(w) == []
+
+
+def test_landing_with_the_setpoint_out_of_reach_goes_on_into_the_sample(tmp_path):
+    inst = _inst(tmp_path, crash_over_range=True)
+    w = inst.world
+    inst.act("withdraw")
+    inst.act("set_setpoint", current_pa=20000.0)              # withdrawn: nothing is pressed
+    assert _crashes(w) == []
+    r = inst.act("approach", timeout_s=300.0)
+    assert r["landed"] and _reasons(w) == ["setpoint_over_range"] and w.over_range()
+
+
+def test_the_crash_draws_what_a_crash_always_drew_and_no_new_stream(tmp_path):
+    inst = _inst(tmp_path, crash_over_range=True)
+    w = inst.world
+    before = _states(w)
+    inst.act("set_setpoint", current_pa=20000.0)
+    after = _states(w)
+    for k in ("outscan", "recovery", "aniso", "world", "noise", "df"):
+        assert after[k] == before[k]
+    assert after["tip"] != before["tip"]                      # Tip.crash draws from the tip's own stream, as ever
+
+
+@pytest.mark.parametrize("na,idx", [(10000.0, 0), (1000.0, 1), (100.0, 2), (10.0, 3), (1.0, 4), (0.1, 5)])
+def test_the_world_selects_the_range_by_its_panel_index_as_before(tmp_path, na, idx):
+    inst = _inst(tmp_path)
+    inst.act("set_current_range", full_scale_na=na)
+    assert inst.world.preamp.gain_index == idx
+    assert inst.world.preamp.full_scale_a == 10.0 / (10.0 ** (6 + idx))
+    assert inst.status()["current_full_scale_na"] == pytest.approx(na)

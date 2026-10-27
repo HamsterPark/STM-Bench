@@ -220,11 +220,13 @@ class World:
         self.rng_outscan = np.random.default_rng([seed, TIP_OUTSCAN_STREAM])
         self.rng_recovery = np.random.default_rng([seed, TIP_RECOVERY_STREAM])
         self.rng_aniso = np.random.default_rng([seed, TIP_ANISO_STREAM])
+        self._over_range_seen = False        # crash_over_range: the entry crash of the present condition is spent
 
     def set_physics(self, physics: PhysicsSwitches) -> None:
         """Switch scenario physics on or off (:class:`~stmsim.physics.switches.PhysicsSwitches`)."""
         with self.lock:
             self.physics = physics
+            self._over_range_seen = False
             self.tip.recovery_rng = self.rng_recovery if physics.tip_recovery else None
             self.tip.aniso_rng = self.rng_aniso if physics.tip_anisotropy else None
 
@@ -251,8 +253,76 @@ class World:
         return averaged_current_factor(self.kappa_m(), amp)
 
     def equilibrium_gap(self) -> float:
+        """Where the loop holds the tip above the surface (m): the gap at which the junction
+        carries the setpoint — or, while the setpoint is out of the preamplifier's reach
+        (:meth:`over_range`), contact. This is the one place that decides it: status readings,
+        scans, transients and moves all follow."""
+        if self.over_range():
+            return self.CONTACT_GAP_M
         return gap_for_current(self.zctrl.setpoint_a / self.osc_factor(), self.bias_v,
                                self.phi_junction())
+
+    # ── a setpoint above the preamplifier's range (crash_over_range) ──
+    #: the loop compares the *reading*, which saturates just above the range's full scale
+    #: (``Preamp.clamp_a``). A setpoint above the range is never reached by the reading, so the
+    #: loop keeps extending until the tip meets the sample: its target is contact
+    CONTACT_GAP_M = 0.0
+    #: the tip is driven into the sample at the loop's slew speed, not as a stepper motor
+    #: pushes the sample (3.0), and keeps being pressed until the piezo's range runs out
+    OVER_RANGE_ENTRY_SEVERITY = 2.0
+    #: each scan or move made with the tip pressed into the sample ploughs it once more
+    OVER_RANGE_PLOUGH_SEVERITY = 1.0
+
+    def over_range(self) -> bool:
+        """With ``crash_over_range`` on, the feedback is closed, the tip is not withdrawn and
+        not approaching, and the setpoint is above the preamplifier's full scale (the 1e-9 slack
+        is float rounding of a setpoint typed in pA, not a tolerance on the physics)."""
+        return bool(self.physics.crash_over_range and self.zctrl.on and not self.withdrawn
+                    and not self.approach.running
+                    and abs(self.zctrl.setpoint_a) > self.preamp.full_scale_a * (1.0 + 1e-9))
+
+    def _sync_over_range(self) -> None:
+        """Call after anything that can enter or leave the condition (a new setpoint, a new range,
+        the feedback switched on or off, a withdrawal, a landing). Entering it crashes the tip
+        once — the loop extends into the sample — if the sample is within the piezo's reach;
+        leaving it re-arms that crash. Staying in it costs nothing here (a scan or a move made
+        in it ploughs: :meth:`_plough`)."""
+        now = self.over_range()
+        if now and not self._over_range_seen and self._fine_range_ok(self._equilibrium_z_tip()):
+            self._over_range_seen = True
+            self._crash("setpoint_over_range", severity=self.OVER_RANGE_ENTRY_SEVERITY)
+        elif not now:
+            self._over_range_seen = False
+
+    def _plough_if_pressed(self) -> bool:
+        """Call as a scan or a move that moves the tip starts. Made while the loop presses the tip
+        into the sample, it drags the tip across the surface: one more crash where the action
+        starts (a fresh pit, the atoms around it gone, the tip blunter and more broken). The
+        images and the move trace show it too — the loop's target is contact, the current reads
+        the clamp. A condition entered by a route that called no verb (a fault changing the range)
+        is met here for the first time and costs its entry crash instead. Returns whether the
+        tip was pressed."""
+        if not self.over_range():
+            self._over_range_seen = False
+            return False
+        if self._over_range_seen:
+            self._crash("setpoint_over_range_plough", severity=self.OVER_RANGE_PLOUGH_SEVERITY)
+        else:
+            self._sync_over_range()
+        return True
+
+    def set_current_range(self, gain_index: int) -> None:
+        """Select the preamplifier range by its panel index (0 = 1E6 V/A = 10 µA … 5 = 1E11 V/A =
+        100 pA): the range's full scale follows. With the loop closed, a range below the setpoint
+        is entering the over-range condition; a range raised past it, leaving it (the loop
+        pulls back from contact)."""
+        with self.lock:
+            was = self.over_range()
+            self.preamp.gain_index = int(gain_index)
+            self.preamp.full_scale_a = 10.0 / (10.0 ** (6 + int(gain_index)))
+            if was and not self.over_range() and self.zctrl.on and not self.withdrawn:
+                self._schedule_step_transient("range")
+            self._sync_over_range()
 
     def hysteresis_px(self, st: ScanSettings) -> float:
         return self.hyst_frac * st.nx * (1.0 if st.w > 20e-9 else 0.5)
@@ -444,6 +514,9 @@ class World:
         if self.withdrawn:
             return 0.0
         if self.zctrl.on:
+            if self.over_range():
+                # the loop is pressing the tip into the sample and the reading is pinned at the clamp
+                return float(self.preamp.clamp_a * math.copysign(1.0, self.bias_v or 1.0))
             z_tip = self.achievable_z_tip()
             gap = z_tip - self.surface_height_here()
             want = self.equilibrium_gap()
@@ -469,6 +542,7 @@ class World:
             self.zctrl.setpoint_a = float(i)
             if self.zctrl.on and not self.withdrawn and old != i:
                 self._schedule_step_transient("setpoint")
+            self._sync_over_range()
 
     def zctrl_set(self, on: bool) -> None:
         with self.lock:
@@ -496,6 +570,7 @@ class World:
                 self.zctrl.z_n = float(self.z_now())
                 self.zctrl.on = False
                 self.zctrl.status = ZCTRL_OFF
+            self._sync_over_range()
 
     def withdraw(self) -> None:
         with self.lock:
@@ -507,6 +582,7 @@ class World:
             if self.frame is not None and not self.frame.finished:
                 self.frame.stopped = True
             self._event("withdraw")
+            self._sync_over_range()
 
     def home(self) -> None:
         with self.lock:
@@ -593,8 +669,8 @@ class World:
     def tunnelling_now(self) -> bool:
         """The tip is in tunnelling range: it is not withdrawn and not approaching, and either
         the loop holds it there or, with the loop off, it sits within 2 nm of the surface."""
-        if self.withdrawn or self.approach.running:
-            return False
+        if self.withdrawn or self.approach.running or self.over_range():
+            return False                       # pressed into the sample is contact, not tunnelling
         if self.zctrl.on:
             return True
         return self.tip_height_m() - self.surface_height_here() < 2e-9
@@ -656,7 +732,11 @@ class World:
             return tip.events[first:]
 
     def navigation_interval(self, dt_s: float) -> list:
-        """The time a move that drags nothing takes: the tip tunnels, at the setpoint, all along."""
+        """A move that drags nothing, ``dt_s`` long: the tip tunnels, at the setpoint, all along
+        (:meth:`tunnel_interval`) — unless the loop is pressing it into the sample, in which case
+        the move ploughs (:meth:`_plough_if_pressed`)."""
+        if dt_s > 0.0 and self._plough_if_pressed():
+            return []
         return self.tunnel_interval(dt_s)
 
     def move_xy(self, x: float, y: float) -> None:
@@ -670,7 +750,12 @@ class World:
     # ── lateral manipulation ──
     def junction_resistance_ohm(self) -> float:
         """The panel R = |V| / I is the control value used to select imaging or
-        atom-manipulation conditions; it is not the true junction resistance."""
+        atom-manipulation conditions; it is not the true junction resistance. While the loop
+        presses the tip into the sample (:meth:`over_range`) there is no junction to speak of:
+        the resistance is infinite for every purpose of manipulation, and nothing is gripped,
+        dragged or picked up."""
+        if self.over_range():
+            return math.inf
         return abs(self.bias_v) / max(self.zctrl.setpoint_a, 1e-15)
 
     def grip(self):
@@ -1006,6 +1091,7 @@ class World:
             if self.withdrawn or not self.zctrl.on:
                 # controller scans anyway (feedback off → flat Z at the held value)
                 pass
+            self._plough_if_pressed()        # a scan with the loop pressing the tip into the sample ploughs
             n_tip0 = len(self.tip.events)
             fr = self.renderer.render(st, self.clock.sim())
             # rendering is instantaneous in sim time: the frame starts when the call returns
@@ -1360,6 +1446,7 @@ class World:
                     self.zctrl.on = True
                     self._schedule_step_transient("landing", duration_s=1.0)
                     self._event("approach_landed", cycles=ap.cycles, coarse_gap_um=self.coarse.coarse_gap_m * 1e6)
+                    self._sync_over_range()        # landing with the setpoint out of reach: the loop goes on into the sample
                     break
                 # false landing: crosstalk spikes exceed the setpoint (scenario knob approach_noise)
                 spike = float(self.rng.uniform(82e-12, 375e-12)) * self.approach_noise

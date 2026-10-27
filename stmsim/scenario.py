@@ -365,6 +365,9 @@ class Scenario:
                 w.pll.amp_setpoint_m = float(pll["amplitude_m"])
             if pll.get("output_on"):
                 w.pll.set_output(True, w.clock.wall())
+        if w.over_range():
+            raise ValueError(f"{self.id}: the scenario starts with a setpoint above the preamplifier range, "
+                             "which crash_over_range makes a crash before the first action")
         return w
 
     # ── optional physics blocks (present only when the scenario asks for them) ──
