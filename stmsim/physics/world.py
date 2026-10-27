@@ -110,7 +110,18 @@ class World:
         self.noise = NoiseModel(np.random.default_rng(seed + 2), floor_a=self.rig.noise_floor_a,
                                 mains_amp_a=0.02e-12, pink_amp_a=0.02e-12,
                                 spectral_lines={787.6: 0.01e-12},
-                                z_floor_m=float(self.rig.get("z.noise_floor_m", 2e-12)))
+                                z_floor_m=float(self.rig.get("z.noise_floor_m", 2e-12)),
+                                # ASSUMED, not measured: the slow wander of Z (building and acoustic
+                                # vibration, thermal drift's fluctuation) that a mean over a long dwell
+                                # does not average away; only the trace of a move carries it (a scan
+                                # pixel's 2 pm is the figure at the pixel dwell). 0.3 pm is 15 % of that
+                                # figure: a sample of a slow drag (0.2 s) falls to ~0.2 pm of white noise
+                                # and this floor is what keeps it from reading as a noiseless line, while
+                                # it stays well below a good tip's 3-5 pm tooth. The reading of hops
+                                # (stmbench/analysis/trace.py) does not depend on it from 0 to 1 pm: 99.4 to
+                                # 99.1 % of the drags that hopped read as hopping and 0-1 of 151 that did
+                                # not, 560 drags at 0.25 nm/s for each of 0, 0.1, 0.3, 0.6 and 1 pm
+                                z_slow_m=float(self.rig.get("z.noise_slow_m", 0.3e-12)))
         self.zctrl = ZController(limit_high_m=self.rig.z_range_m, limit_low_m=-self.rig.z_range_m,
                                  setpoint_a=float(self.rig.get("feedback.imaging_setpoint_a", 50e-12)),
                                  p_m=float(self.rig.get("feedback.approach_p_m", 3e-12)),

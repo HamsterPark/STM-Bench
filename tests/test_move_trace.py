@@ -15,6 +15,7 @@ import pytest
 
 from stmbench.instrument.core import _json_default
 from stmsim.physics import trace as movetrace
+from stmsim.physics.noise import REF_DWELL_S, NoiseModel
 from stmsim.physics.adatoms import AdatomParams, AdatomRegistry, path_points
 from stmsim.physics.rig import RigProfile
 from stmsim.physics.scanner import SIG_Z, ScanSettings
@@ -49,6 +50,7 @@ def _world(tmp_path, *, seed: int = 4, bias: float = 0.01, setpoint: float = 200
     w.transients.clear()
     if quiet:
         w.noise.z_floor_m = 0.0
+        w.noise.z_slow_m = 0.0
         w.tip.apex_sigma_m = 0.3e-9
     return w
 
@@ -386,6 +388,110 @@ def test_the_change_a_drag_stamps_at_its_start_is_placed_by_the_traces_own_strea
         _drag(w)
         samples.append(w.last_move_trace["tip_change_samples"])
     assert samples[0] == samples[1] and len(samples[0]) == 1 and 0 < samples[0][0] < path_points(4e-9)
+
+
+# ── noise: a sample is the mean over its dwell ──────────────────────────────
+E_CHARGE = 1.602176634e-19
+
+
+def _noise_model(seed: int = 0, **kw) -> NoiseModel:
+    args = dict(floor_a=0.05e-12, bandwidth_hz=1000.0, mains_hz=50.0, mains_amp_a=0.02e-12, pink_amp_a=0.02e-12,
+                spectral_lines={787.6: 0.01e-12}, z_floor_m=2e-12, z_slow_m=0.3e-12)
+    return NoiseModel(np.random.default_rng(seed), **{**args, **kw})
+
+
+def test_the_dwell_the_white_noise_stands_for_is_the_default_scans_pixel_dwell(tmp_path):
+    """The scan keeps the white figures (2 pm, the preamplifier floor) whatever its pixel dwell, so the
+    default scan pixel is the one dwell they are tied to; the world carries the slow wander."""
+    st = ScanSettings()
+    assert REF_DWELL_S == pytest.approx(st.line_time_fwd_s / st.nx)
+    w = _world(tmp_path)
+    assert w.noise.ref_dwell_s == REF_DWELL_S and w.noise.z_slow_m == 0.3e-12 and w.noise.z_floor_m == 2e-12
+
+
+def test_a_mean_over_a_dwell_averages_the_white_parts_and_keeps_the_rest():
+    m = _noise_model()
+    same = m.averaged_over(REF_DWELL_S / 3.0)                       # a shorter dwell is not made noisier
+    for k in ("floor_a", "bandwidth_hz", "z_floor_m", "mains_amp_a", "pink_amp_a", "z_slow_m", "spectral_lines"):
+        assert getattr(same, k) == getattr(m, k), k
+    dwell = 0.2
+    a = math.sqrt(REF_DWELL_S / dwell)
+    mean = m.averaged_over(dwell)
+    assert mean.z_floor_m == pytest.approx(m.z_floor_m * a) and mean.floor_a == pytest.approx(m.floor_a * a)
+    assert mean.bandwidth_hz == pytest.approx(m.bandwidth_hz * a * a)         # the shot noise falls as a too
+    assert mean.pink_amp_a == m.pink_amp_a and mean.z_slow_m == m.z_slow_m    # 1/f and the slow wander stay
+    assert mean.mains_amp_a == pytest.approx(m.mains_amp_a * np.sinc(50.0 * dwell), abs=1e-30)   # a line averages as a sinusoid
+    assert mean.spectral_lines[787.6] == pytest.approx(m.spectral_lines[787.6] * np.sinc(787.6 * dwell), abs=1e-30)
+    odd = m.averaged_over(0.0233)                                              # not a whole number of mains periods: the sinc is not zero
+    assert odd.mains_amp_a == pytest.approx(m.mains_amp_a * np.sinc(50.0 * 0.0233), rel=1e-9) and odd.mains_amp_a != 0.0
+    assert m.z_floor_m == 2e-12 and m.floor_a == 0.05e-12                     # the model it came from is not changed
+    assert m.averaged_over(0.05).averaged_over(dwell).z_floor_m == pytest.approx(mean.z_floor_m)    # and they compose
+
+
+def test_the_white_noise_of_a_mean_over_a_dwell_falls_as_the_root_of_the_dwell():
+    dwell = 0.2
+    a = math.sqrt(REF_DWELL_S / dwell)
+    n = 40000
+    white = _noise_model(1, pink_amp_a=0.0, mains_amp_a=0.0, spectral_lines={}).averaged_over(dwell)
+    assert np.std(white.z_series(n)) == pytest.approx(2e-12 * a, rel=0.03)
+    i_dc = 50e-12                                                    # the setpoint: the shot noise is the larger part
+    cur = white.current_series(i_dc, np.arange(n) * dwell) - i_dc
+    shot = math.sqrt(2 * E_CHARGE * i_dc * 1000.0)
+    assert np.std(cur) == pytest.approx(math.hypot(0.05e-12, shot) * a, rel=0.03)
+
+
+def test_the_slow_z_wander_is_what_the_mean_leaves():
+    mean = _noise_model(2).averaged_over(0.2)
+    w = mean.z_slow_series(5000)
+    assert np.std(w) == pytest.approx(0.3e-12, rel=1e-6) and np.corrcoef(w[:-1], w[1:])[0, 1] > 0.5      # slow: neighbours agree
+    assert np.all(_noise_model(2, z_slow_m=0.0).z_slow_series(10) == 0.0)
+
+
+def test_what_a_tip_that_keeps_changing_adds_to_z_is_not_averaged():
+    """In a scan row that is 30 lambda times the floor on top of it; no mean over a dwell removes it."""
+    scan = _noise_model(3)
+    n, dwell = 20000, 0.2
+    a = math.sqrt(REF_DWELL_S / dwell)
+    mean = scan.averaged_over(dwell, np.random.default_rng(4))
+    base = math.hypot(2e-12 * a, 0.3e-12)
+    calm = movetrace._z_noise(scan, mean, np.zeros(n), np.random.default_rng(5))
+    assert np.std(calm) == pytest.approx(base, rel=0.03)
+    wild = movetrace._z_noise(scan, mean, np.full(n, 0.05), np.random.default_rng(6))       # 30 * 0.05 = 1.5 floors: 3 pm
+    assert np.std(wild) == pytest.approx(math.hypot(base, 3e-12), rel=0.03)
+
+
+def _noise_of_a_move(tmp_path, speed_nm_s: float, *, lam: float = 1e-4):
+    """The noise a trace carries: the same move over bare surface in two worlds of one seed, one with
+    the instrument noise and one with none; the difference of Z, of the current, and the sample interval."""
+    out = []
+    for k, on in enumerate((True, False)):
+        w = _world(tmp_path / f"w{k}", bias=0.05, setpoint=200e-12)
+        w.tip.lambda_per_s = lam
+        if not on:
+            w.noise.z_floor_m, w.noise.z_slow_m, w.noise.floor_a, w.noise.bandwidth_hz = 0.0, 0.0, 0.0, 0.0
+            w.noise.pink_amp_a, w.noise.mains_amp_a, w.noise.spectral_lines = 0.0, 0.0, {}
+        out.append(_long_move(w, length_nm=20.0, speed_nm_s=speed_nm_s)[0])
+    return out[0]["z_abs"] - out[1]["z_abs"], out[0]["i"] - out[1]["i"], float(out[0]["t"][1])
+
+
+def test_a_trace_carries_the_noise_of_a_mean_over_its_dwell(tmp_path):
+    """At 0.25 nm/s a sample is 0.2 s: white noise of 0.2 pm and 0.03 pA, the slow wander of Z on top. At
+    100 nm/s a sample is 0.5 ms, shorter than a scan pixel: the 2 pm and the 0.26 pA of a scan, not more."""
+    shot = math.sqrt(2 * E_CHARGE * 200e-12 * 1000.0)               # at the 200 pA setpoint
+    dz, di, dt = _noise_of_a_move(tmp_path / "slow", 0.25)
+    a = math.sqrt(REF_DWELL_S / dt)
+    assert dt == pytest.approx(0.2, rel=0.01)
+    assert np.std(dz) == pytest.approx(math.hypot(2e-12 * a, 0.3e-12), rel=0.15)
+    assert np.std(di) == pytest.approx(math.hypot(math.hypot(0.05e-12, shot) * a, 0.02e-12), rel=0.15)
+    dz, di, dt = _noise_of_a_move(tmp_path / "fast", 100.0)
+    assert dt < REF_DWELL_S
+    assert np.std(dz) == pytest.approx(math.hypot(2e-12, 0.3e-12), rel=0.1)
+    assert np.std(di) == pytest.approx(math.hypot(math.hypot(0.05e-12, shot), 0.02e-12), rel=0.1)
+    # a tip that keeps changing is as noisy in a slow sample as in a fast one: its 3 pm is not a white noise
+    slow, _, _ = _noise_of_a_move(tmp_path / "slow_wild", 0.25, lam=0.05)
+    fast, _, _ = _noise_of_a_move(tmp_path / "fast_wild", 100.0, lam=0.05)
+    assert np.std(slow) == pytest.approx(math.hypot(math.hypot(2e-12 * a, 0.3e-12), 3e-12), rel=0.15)
+    assert np.std(fast) == pytest.approx(math.hypot(math.hypot(2e-12, 0.3e-12), 3e-12), rel=0.1)
 
 
 # ── what the trace may not touch ────────────────────────────────────────────

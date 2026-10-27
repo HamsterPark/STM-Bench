@@ -48,7 +48,7 @@ def test_an_atom_left_where_it_was_reads_no_hop(tmp_path):
     assert hops == 0 and not picked
     r = T.read_drag(rec)
     assert r["hops"] == 0 and r["left_behind"] and not r["carried"] and r["steps"] == 0
-    assert 1.5 < r["noise_pm"] < 3.0                                  # the instrument's 2 pm, read off the trace
+    assert T.MIN_NOISE_PM <= r["noise_pm"] < 2.0                      # read off the trace, never under the floor
     assert T.count_hops(rec) == 0
 
 

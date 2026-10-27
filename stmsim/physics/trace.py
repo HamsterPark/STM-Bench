@@ -31,8 +31,17 @@ across the gap that results, through the preamplifier clamp. Feedback off: Z is 
 follows the height. Withdrawn: Z sits at the retract limit and nothing tunnels. While the loop
 presses the tip into the sample (:meth:`World.over_range`) the gap :meth:`World.equilibrium_gap`
 gives is contact and the current is what the world reads then (:meth:`World._dc_current`): the
-preamplifier's clamp. Z and the current carry the instrument's noise, drawn from the trace's own
-stream, and so does the flicker of a crashed tip.
+preamplifier's clamp.
+
+**Noise.** A sample is what the controller records while the tip crosses its step of the path: the
+mean over that dwell (0.2 s at 0.25 nm/s, the scripted baseline's drag speed), not one reading. The
+white parts of the noise average (:meth:`NoiseModel.averaged_over`): Z's floor and the
+preamplifier's floor and shot noise fall as ``1 / sqrt(dwell / 2.29 ms)``, 2.29 ms being the pixel
+dwell of the default scan, which the scan's 2 pm stands for; for a dwell shorter than that the scan's
+figure is kept. A mains or pump line averages as the sinusoid it is. What the mean does not
+remove stays: the 1/f current noise, a slow wander of Z (``NoiseModel.z_slow_m``, an assumption),
+what a tip that keeps changing adds to Z in a scan (not white noise: its own instability), and the
+flicker of a crashed tip. All of it is drawn from the trace's own stream.
 
 **What is simplified.** The path is the drag's, in sample coordinates fixed by the drift at the
 move's start (drift moves the sample under the tip during the move only along Z); a picked-up atom
@@ -450,11 +459,9 @@ def finish(world, start: MoveStart, rng: np.random.Generator) -> dict:
             h = h + np.where(which == j, v.flicker_series(n, dt, rng), 0.0)
     h = h + np.interp(t, [0.0, duration], [start.oz, start.oz_end])          # Z drift, linear in time
 
-    # what the controller makes of it
-    noise = NoiseModel(rng, floor_a=world.noise.floor_a, bandwidth_hz=world.noise.bandwidth_hz,
-                       mains_hz=world.noise.mains_hz, mains_amp_a=world.noise.mains_amp_a,
-                       pink_amp_a=world.noise.pink_amp_a, spectral_lines=world.noise.spectral_lines,
-                       z_floor_m=world.noise.z_floor_m)
+    # what the controller makes of it: each sample is the mean over its dwell, so the white parts
+    # of the noise are those of a mean (the trace's own stream draws them)
+    noise = world.noise.averaged_over(dt, rng)
     if start.withdrawn:
         z_ctrl = np.full(n, float(world.zctrl.z_n))
         i_dc = np.zeros(n)
@@ -477,9 +484,8 @@ def finish(world, start: MoveStart, rng: np.random.Generator) -> dict:
             # loop holds at the setpoint (World.osc_factor; 1 without oscillation)
             i_dc = current_metal(np.clip(z_tip - h, MIN_GAP_M, None), start.bias_v, start.phi_ev) * start.osc
     if not (start.withdrawn or float(z_ctrl[0]) in (world.zctrl.limit_high_m, world.zctrl.limit_low_m)):
-        # a reading at the rail is exactly the limit; elsewhere it carries the Z noise, more of it
-        # on a tip that keeps changing (as in a frame)
-        z_ctrl = z_ctrl + noise.z_series(n) * (1.0 + 0.3 * lam * 1e2)
+        # a reading at the rail is exactly the limit; elsewhere it carries the Z noise
+        z_ctrl = z_ctrl + _z_noise(world.noise, noise, lam, rng)
     i = np.asarray(world.preamp.clamp(noise.current_series(i_dc, start.wall_s + t)), float)
 
     world.move_counter += 1
@@ -491,6 +497,18 @@ def finish(world, start: MoveStart, rng: np.random.Generator) -> dict:
             "events": [{**e, "sample": _sample_of(e["sample"], n_fine, n)} for e in atoms.events],
             "tip_change_samples": first[1:],
             "tip_change_sample": first[1] if len(first) > 1 else None}
+
+
+def _z_noise(scan: NoiseModel, mean: NoiseModel, lam: np.ndarray, rng: np.random.Generator) -> np.ndarray:
+    """The noise of Z (m) in each of ``lam.size`` samples that are means over a dwell: the white
+    part of a mean and the slow wander the mean does not remove (``mean``, :meth:`NoiseModel.
+    averaged_over`), and what a tip that keeps changing adds. In a scan row that is ``(1 + 0.3 lam 100)``
+    times the floor (``lam``, the hazard of the tip at the sample, 1/s): the floor stays the white
+    noise, the ``30 lam`` times it is the tip's own instability and no mean over a dwell removes
+    it, so it is kept at its size in a scan (``scan``) and drawn on its own."""
+    n = lam.size
+    tip = scan.z_floor_m * 30.0 * lam * rng.normal(0.0, 1.0, n)
+    return mean.z_series(n) + mean.z_slow_series(n) + tip
 
 
 def _sample_of(fine_idx: int, n_fine: int, n: int) -> int:

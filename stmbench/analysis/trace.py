@@ -72,8 +72,14 @@ WIDTHS_M = (0.25e-9, 0.30e-9, 0.37e-9, 0.45e-9, 0.55e-9)
 #: how much better (chi-squared, noise 1) a hop count has to explain a trace than no hop for the
 #: trace to count as showing hops; of 411 traces of atoms that did not hop, 3 reached 16
 SIGNIFICANT = 16.0
-#: how much a falling bump has to explain of a trace for the atom to count as left behind
-FALL_CHI2 = 30.0
+#: how much a falling bump has to explain of a trace for the atom to count as left behind. Of
+#: the drags that left the atom behind (0-11 hops, 0.25 nm/s, no tip change) the weakest fall
+#: explained a trace by 2000 noises squared (the 1st percentile) and the median by 8000; of those
+#: that carried it to the end, the lattice and the teeth that the fit has no place for reached 8
+#: at the median, 46 at the 90th percentile and 129 at the 95th. Anything from 60 to 1000 reads
+#: both right; 100 is the one that keeps a short drag as it was read: so short a fall is still small,
+#: and an atom that stayed in a drag under a nanometre reads as moved, which a baseline can afford
+FALL_CHI2 = 100.0
 #: a step between two samples this many noises (of a difference) high, and at least this high
 #: (pm), is not a bump or a tooth: a tip that changed, an atom taken up, a step edge of the
 #: surface. It is taken out before the fit, or it would be read as a fall (or as the lack of one)
@@ -84,9 +90,11 @@ MAX_PATH_M = 40e-9
 #: drag of 0.2 nm, five samples, and it has to read as a hop (an atom that stayed reads as
 #: moved there too: with so little of the path the fall cannot be told from a drifting
 #: background, and a baseline can afford that error, not the other). And the least noise per
-#: sample (pm) a trace is read with, whatever so few samples say of it (the instrument's own is 2 pm)
+#: sample (pm) a trace is read with, whatever so few samples say of it: a sample of a slow drag has
+#: 0.2-0.9 pm of the instrument's noise (a mean over its dwell: stmsim.physics.noise), and the
+#: lattice and the teeth make the differences between samples spread by 0.5-1 pm even then
 MIN_SAMPLES = 3
-MIN_NOISE_PM = 1.5
+MIN_NOISE_PM = 1.0
 
 
 def _noise_pm(z_pm: np.ndarray) -> float:
