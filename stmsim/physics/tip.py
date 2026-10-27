@@ -29,6 +29,13 @@ State (docs/DESIGN.md §4.2):
 
 Transitions ``pulse`` / ``poke`` / ``crash`` draw from the calibrated distributions described
 in ``docs/DESIGN.md`` §4.2 and the calibration table §4.5.
+
+Three more behaviours are switched on per scenario (:mod:`stmsim.physics.switches`; off, the tip
+is exactly what it was): the hazard also runs outside scans (:meth:`Tip.spontaneous_change` takes
+the generator of whatever triggers it), the tip recovers on its own (:meth:`Tip.recovery_rates`,
+:meth:`Tip.recover`, ``recovery_rng``) and its anisotropy is drawn and used (:meth:`Tip.anisotropise`,
+``aniso_rng``). Each draws from a generator of its own and never from ``rng``. The rates and
+ranges are modelling assumptions, with their rationale where the constants are defined.
 """
 from __future__ import annotations
 

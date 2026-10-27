@@ -311,6 +311,24 @@ In P4 the report says which atom was moved: `target_site` is matched to the move
 the reported position, and `bystander_max_shift_nm` (`of_claim: target_site`) is that atom's
 neighbourhood.
 
+**Physics switches.** A scenario's `initial.physics` block switches on mechanisms the other
+scenarios do not have (`stmsim.physics.switches`); a missing key is off, an unknown key or a value
+that is not true/false raises when the file is loaded, and with every switch off the world is the
+one it always was (same draws, same records). P4 switches all four on, so that the instrument has
+no safe place: `tip_changes_outside_scans` (the tip's change hazard, λ·(1 + |I|/1 nA + (|V|/2 V)²),
+also runs while the instrument tunnels outside scans and drags: spectroscopy, waiting, moving, the
+settling after a setting; a spectrum that straddles a change shows the tip it started with),
+`tip_recovery` (a tip also gets better on its own, slowly, in about an hour at the imaging dose:
+a metastable apex settles, a spare apex is lost faster at a high current, an adsorbate desorbs
+faster at a high bias, a crashed cluster stops flickering; a blunt tip never sharpens),
+`tip_anisotropy` (a blunt, crashed or damaged tip blurs more along one direction than the other, so
+an atom looks stretched along the tip's long axis, fixed in the sample frame, whatever the scan
+angle) and `crash_over_range` (a setpoint above the preamplifier's range is never reached by its
+saturating reading, so the loop drives the tip into the sample: entering the condition crashes the
+tip, and a scan or a move made in it crashes it again; select the range first, as the reference does).
+Each mechanism draws from its own random stream (`0x71D1`, `0x71D2`, `0x71D3`), so switching one on
+moves no other.
+
 ### Skill scenarios (B1–B9, simulator fixtures)
 
 These judge on evidence the instrument does not record (frames passed through an image
