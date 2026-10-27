@@ -970,8 +970,10 @@ class TraceServer:
 
     def data(self):
         out = self._data()
-        out["spectra"] = [*out["spectra"], *({"spectrum": t["name"], "kind": "move", "tip_nm": t["tip_nm"],
-                                              "points": len(t["t"]), "t_s": t["t_s"]} for t in self.served)]
+        # the instrument records traces now: the ones it kept are replaced by the ones served here
+        out["spectra"] = [*(s for s in out["spectra"] if s.get("kind") != "move"),
+                          *({"spectrum": t["name"], "kind": "move", "tip_nm": t["tip_nm"],
+                             "points": len(t["t"]), "t_s": t["t_s"]} for t in self.served)]
         return out
 
     def spectrum(self, name):
