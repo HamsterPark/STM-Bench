@@ -625,16 +625,18 @@ class World:
         self._lose_adatoms(sx, sy, 3e-9 * severity, cause="crash")
         self._event("crash", reason=reason, **out)
 
-    def _bury_carried(self, x: float, y: float) -> None:
-        """A poke whose apex came back clean (:meth:`Tip.poke`) left the atom the tip had picked
-        up in the deposit: lost, and the tip can move atoms again."""
+    def _bury_carried(self, x: float, y: float, cause: str = "poke") -> None:
+        """An apex that came back clean no longer holds the atom the tip had picked up: a poke
+        (:meth:`Tip.poke`) leaves it in the deposit, a pulse that re-forms the apex clean
+        (:meth:`Tip.pulse`) takes it with the old apex. Lost, and the tip can move atoms again."""
         reg = self.surface.site.adatoms
         if reg is None or reg.carried is None or self.tip.carried is not None:
             return
         atom, reg.carried = reg.carried, None
         atom.status = "lost"
         reg.epoch += 1
-        self._event("adatom_lost", atom_ids=[atom.id], cause="poke", buried=True,
+        buried = {"buried": True} if cause == "poke" else {}
+        self._event("adatom_lost", atom_ids=[atom.id], cause=cause, **buried,
                     xy_nm=[x * 1e9, y * 1e9], radius_nm=0.0)
 
     def _lose_adatoms(self, x: float, y: float, radius: float, *, cause: str) -> None:
@@ -1318,6 +1320,7 @@ class World:
             outcome = self.tip.pulse(self.clock.sim(), vv, width_s, envelope_v=max(envelope, 10.0))
             # spatter / crater on the surface — and the adatoms they land on
             sx, sy = self.sample_xy()
+            self._bury_carried(sx, sy, cause="pulse")
             if outcome["outcome"] != "no_effect":
                 self._lose_adatoms(sx, sy, 1.5e-9, cause="pulse")        # the field under the apex
                 for _ in range(int(self.rng.integers(2, 7))):

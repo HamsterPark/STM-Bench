@@ -178,6 +178,41 @@ def test_a_shallow_poke_buries_a_picked_up_atom_and_the_tip_drags_again(tmp_path
     assert reg.site_xy(other.i, other.j)[0] - ox > 1.5e-9
 
 
+def test_a_pulse_that_reforms_the_apex_clean_takes_a_picked_up_atom_with_it(tmp_path):
+    """A pulse whose new apex comes out clean (flat LDOS) does not keep the atom the old apex
+    picked up: it is lost and the tip can move atoms again. A reshaping that leaves the apex
+    chemistry alone keeps it, for a poke to bury. (Screen trial 4, 2026-10-27: a 3 V pulse
+    cleaned the LDOS of a tip carrying an atom but kept the atom, the shallow poke that
+    should bury it then found a clean apex, and no later drag moved anything.)"""
+    w = _dragging_world(tmp_path, setpoint=2e-6)          # below R_pick: the atom goes onto the tip
+    reg = w.surface.site.adatoms
+    atom = _target(w)
+    other = reg.add(atom.i + 40, atom.j, role="field")    # ~10 nm away
+    start = reg.site_xy(atom.i, atom.j)
+    w.move_xy(start[0] - 1e-9, start[1])
+    w.move_xy_path(start[0] + 1e-9, start[1], speed_m_s=0.5e-9)
+    assert reg.carried is atom
+    w.move_xy(start[0], start[1] - 20e-9)                 # clean surface, away from both atoms
+    outcomes = []
+    for _ in range(10):
+        w.bias_pulse(0.1, 3.0, True, 1)
+        outcomes.append([e for e in w.events if e["kind"] == "pulse"][-1]["outcome"])
+        if outcomes[-1] == "reshaped_better":
+            break
+        assert reg.carried is atom and w.tip.snapshot()["carried"] == "Fe"
+    assert outcomes[-1] == "reshaped_better", outcomes
+    assert reg.carried is None and atom.status == "lost"
+    assert w.tip.snapshot()["carried"] is None
+    assert [e for e in w.events if e["kind"] == "adatom_lost" and e["cause"] == "pulse"
+            and e["atom_ids"] == [atom.id]]
+    assert other.status == "on_surface"
+    ox, oy = reg.site_xy(other.i, other.j)
+    w.zctrl.setpoint_a = 100e-9                           # 100 kΩ, under the pull threshold
+    w.move_xy(ox, oy)
+    w.move_xy_path(ox + 2e-9, oy, speed_m_s=0.5e-9)
+    assert reg.site_xy(other.i, other.j)[0] - ox > 1.5e-9
+
+
 def test_scanning_at_an_imaging_resistance_leaves_the_atoms_alone(tmp_path):
     w = _dragging_world(tmp_path, setpoint=1e-9)
     reg = w.surface.site.adatoms

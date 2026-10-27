@@ -566,6 +566,10 @@ class Tip:
                 self.axis_ratio = float(min(1.0, self.axis_ratio + r.uniform(0.1, 0.5)))
                 self.phi_ev = float(max(self.phi_ev, r.uniform(3.6, 4.4)))
                 self.ldos = LDOSTemplate("flat")
+                # the new apex is clean, so an atom the old one had picked up is gone with it
+                # (the world marks it lost; no draw, so the tip's random history is kept)
+                self._carry_backup = None
+                self.carried = None
                 out = {"outcome": "reshaped_better"}
             elif u < 0.85:
                 n = int(r.integers(2, 4))
