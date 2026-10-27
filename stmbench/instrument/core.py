@@ -108,6 +108,9 @@ def _P(*a, **k) -> Param:
     return Param(*a, **k)
 
 
+# pulse.width_ms, poke.depth_nm and poke.dwell_s are required, with no default: any default would be
+# the answer to how hard to condition the tip (in a screen-only trial one default poke mended a
+# double tip at the first try)
 ACTIONS: dict[str, ActionSpec] = {s.name: s for s in (
     ActionSpec("scan", "Image a square frame in constant-current mode and save it. Returns the frame's "
                        "file name, which reports cite. Takes pixels × 2 × line_time_s of instrument time.",
@@ -130,8 +133,6 @@ ACTIONS: dict[str, ActionSpec] = {s.name: s for s in (
                (_P("x_nm", "number", "target x (scan coordinates, nm)", True),
                 _P("y_nm", "number", "target y (scan coordinates, nm)", True),
                 _P("speed_nm_s", "number", "lateral speed (nm/s)", default=293.0, lo=0.01, hi=10000.0))),
-    # width, depth and dwell are required: any default would be the answer to how hard to condition
-    # the tip (in a screen-only trial one default poke mended a double tip at the first try)
     ActionSpec("pulse", "Apply a bias pulse at the tip's position (tip conditioning).",
                (_P("bias_v", "number", "pulse voltage (V, absolute)", True, lo=-10.0, hi=10.0),
                 _P("width_ms", "number", "pulse width (ms)", True, lo=0.1, hi=5000.0),
