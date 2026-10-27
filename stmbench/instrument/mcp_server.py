@@ -86,7 +86,10 @@ class EpisodeServer:
         self._add("frame_values", "A saved frame's values as numbers (z in pm, current in pA), "
                                   "down-sampled by means over blocks of block_px × block_px pixels (pixels past "
                                   "the last whole block are left out); row 0 = top.", values_schema, self._frame_values)
-        self._add("get_spectrum", "A saved spectrum's data (V, A, dI/dV in A/V; or z in m, A, Δf in Hz, m).",
+        self._add("get_spectrum", "A saved spectrum's data (V, A, dI/dV in A/V; or z in m, A, Δf in Hz, m). "
+                                  "A move trace, named in the reply of move_tip, holds up to 1000 samples of "
+                                  "t (s since the move began), dist (m along its path), z_abs (m, the Z "
+                                  "controller's output: a larger value is a higher tip) and i (A).",
                   {"type": "object", "properties": {"spectrum": {"type": "string"}}, "required": ["spectrum"],
                    "additionalProperties": False}, self._spectrum)
         ids = list(inst.scenario.claim_ids)
