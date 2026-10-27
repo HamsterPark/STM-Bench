@@ -26,7 +26,7 @@ from pathlib import Path
 from stmsim.scenario import Scenario
 
 from ..trackB.rules import RULES_VERSION
-from .core import API_VERSION, SCENARIO_DIR, Instrument, replay_records
+from .core import SCENARIO_DIR, Instrument, replay_records, require_api_version
 from .export import read_export
 
 #: longest piece of export-supplied text a result repeats
@@ -127,15 +127,19 @@ def grade_export(export_dir: str | Path, scenario: Scenario | str | Path, seed: 
 
     :class:`ValueError` when the directory is not a gradable export of this scenario: not an
     export at all, another scenario, another rules, API or export version, or a ``session.json``
-    that counts more records than the log holds (a log cut short)."""
+    that counts more records than the log holds (a log cut short). An export of another API
+    version is a :class:`~stmbench.instrument.core.VersionError`, whose message says that it needs
+    the code of its own version: its calls and records are not this version's, so a replay here
+    would only differ."""
     export = _read(export_dir)
     session, records = export["session"], export["records"]
     sc = _load_scenario(scenario)
     if session.get("scenario_id") != sc.id:
         raise ValueError(f"the export is of scenario {_clip(session.get('scenario_id'))!r}, not {sc.id!r}")
-    for key, ours in (("rules_version", RULES_VERSION), ("api_version", API_VERSION)):
-        if session.get(key) != ours:
-            raise ValueError(f"the export is of {key} {_clip(session.get(key))}; this grader is {key} {ours}")
+    require_api_version(session.get("api_version"), "the export")      # first: it says which code can replay it
+    if session.get("rules_version") != RULES_VERSION:
+        raise ValueError(f"the export is of rules_version {_clip(session.get('rules_version'))}; "
+                         f"this grader is rules_version {RULES_VERSION}")
     counted = session.get("records")
     if isinstance(counted, int) and not isinstance(counted, bool) and counted > len(records):
         raise ValueError(f"session.json counts {counted} records but the log holds {len(records)}")

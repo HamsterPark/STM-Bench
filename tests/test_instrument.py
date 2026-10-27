@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from stmbench.instrument import ACTIONS, ActionError, Instrument, replay, verify
+from stmbench.instrument import ACTIONS, API_VERSION, ActionError, Instrument, replay, verify
 from stmbench.instrument.core import Instrument as _I, validate
 from stmbench.trackB.rules import RULES_VERSION
 
@@ -171,7 +171,7 @@ def test_an_episode_rechecks_by_replay(tmp_path):
     _script(inst, look=True)
     inst.finish()
     ep = json.loads((tmp_path / "run" / "episode.json").read_text(encoding="utf-8"))
-    assert ep["rules_version"] == RULES_VERSION and ep["api_version"] == 1
+    assert ep["rules_version"] == RULES_VERSION and ep["api_version"] == API_VERSION
     assert (tmp_path / "run" / "actions.jsonl").exists() and (tmp_path / "run" / "events.json").exists()
     assert verify(tmp_path / "run")["ok"]
     # a ledger whose measurements were edited no longer re-checks

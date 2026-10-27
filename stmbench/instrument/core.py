@@ -43,8 +43,12 @@ from stmsim.scenario import Scenario
 from ..trackB.results import ResultSink, fold_results
 from ..trackB.rules import OVERRUN_TOLERANCE, RULES_VERSION, task_text
 
-#: version of the action set, the observations and the log format
-API_VERSION = 1
+#: version of the action set, the observations and the log format. 2: no tip-diagnosis call (so no
+#: ``diagnosis`` record or ledger key either), and ``pulse.width_ms``, ``poke.depth_nm`` and
+#: ``poke.dwell_s`` are required. A ledger or an export of another version is refused by
+#: :func:`replay`, :func:`verify` and the grader (:func:`require_api_version`): its calls and
+#: records are not this version's, so only the code of its own version can re-check it.
+API_VERSION = 2
 SCENARIO_DIR = Path(__file__).resolve().parents[1] / "trackB" / "scenarios"
 MAX_ACTIONS = 3000
 #: success kinds the instrument can judge from what it records: the paper scenarios'. The
@@ -56,6 +60,11 @@ _GAIN_FULL_SCALE_NA = {10000.0: 0, 1000.0: 1, 100.0: 2, 10.0: 3, 1.0: 4, 0.1: 5}
 
 class ActionError(ValueError):
     """A refused call: nothing happened on the instrument and no time passed."""
+
+
+class VersionError(ValueError):
+    """A ledger or an export written under another API version than this code's: it needs the code
+    of its own version (see :func:`require_api_version`)."""
 
 
 @dataclass(frozen=True)
@@ -753,6 +762,27 @@ class Instrument:
 _ABSENT = object()
 
 
+def _shown(value: Any, limit: int = 40) -> str:
+    """A value read out of a ledger or an export as a message quotes it: one line, printable, cut short."""
+    s = "".join(c if c.isprintable() else "?" for c in json.dumps(value, ensure_ascii=False, default=str))
+    return s if len(s) <= limit else s[:limit - 3] + "..."
+
+
+def require_api_version(found: Any, what: str) -> None:
+    """Pass when ``found``, the ``api_version`` a ledger or an export carries, is this code's
+    :data:`API_VERSION`; otherwise :class:`VersionError` naming ``what`` is refused.
+
+    The calls an agent can make, their parameters and the kinds of record in a log change with the
+    version, so a record of another one would replay into a confusing mismatch, or grade as a zero,
+    instead of into its own episode. It needs the code of its own version, and the message says so."""
+    if isinstance(found, int) and not isinstance(found, bool) and found == API_VERSION:
+        return
+    state = "carries no api_version" if found is None else f"is of api_version {_shown(found)}"
+    raise VersionError(f"{what} {state}; this code is api_version {API_VERSION}. A record replays only under "
+                       "the code of its own API version, so this one needs the code that wrote it "
+                       "(it cannot be replayed, verified or graded here)")
+
+
 def replay_records(scenario: Scenario | str | Path, seed: int, records: list[dict], *,
                    out_dir: str | Path | None = None,
                    raise_refused: bool = False) -> tuple[Instrument, list[dict]]:
@@ -837,15 +867,20 @@ def _replay_report(inst: Instrument, rec: dict, mismatches: list[dict], raise_re
 
 
 def replay(run_dir: str | Path) -> Instrument:
-    """Rebuild an episode from its ledger: same scenario and seed, the same calls in order."""
+    """Rebuild an episode from its ledger: same scenario and seed, the same calls in order.
+
+    :class:`VersionError` for a ledger of another API version: only the code of its own version can
+    replay it."""
     run_dir = Path(run_dir)
     ep = json.loads((run_dir / "episode.json").read_text(encoding="utf-8"))
+    require_api_version(ep.get("api_version"), f"the ledger in {run_dir}")
     records = [json.loads(line) for line in (run_dir / "actions.jsonl").read_text(encoding="utf-8").splitlines()]
     return replay_records(ep["scenario_id"], int(ep["seed"]), records, raise_refused=True)[0]
 
 
 def verify(run_dir: str | Path) -> dict:
-    """Replay an episode and compare what was measured and how it was judged."""
+    """Replay an episode and compare what was measured and how it was judged. A ledger of another
+    API version is refused, as :func:`replay` refuses it (:class:`VersionError`)."""
     run_dir = Path(run_dir)
     ep = json.loads((run_dir / "episode.json").read_text(encoding="utf-8"))
     inst = replay(run_dir)
@@ -894,5 +929,5 @@ def _jsonable(obj):
     return json.loads(json.dumps(obj, default=_json_default))
 
 
-__all__ = ["ACTIONS", "API_VERSION", "ActionError", "ActionSpec", "Instrument", "Param", "replay",
-           "replay_records", "validate", "verify", "fold_results"]
+__all__ = ["ACTIONS", "API_VERSION", "ActionError", "ActionSpec", "Instrument", "Param", "VersionError", "replay",
+           "replay_records", "require_api_version", "validate", "verify", "fold_results"]

@@ -60,7 +60,7 @@ This is an **alpha research prototype**. Keep these evidence boundaries explicit
 | Can a result be traced to its acquisition, coordinates and tip history? | [instrument/core.py](stmbench/instrument/core.py), [render.py](stmbench/render.py), [replay/](stmbench/replay/) | [test_instrument.py](tests/test_instrument.py), [test_render.py](tests/test_render.py), [test_replay.py](tests/test_replay.py) |
 | Do comparisons respect shared seeds and missing observations? | [stats.py](stmbench/report/stats.py) | [test_stats.py](tests/test_stats.py) |
 | Is every judged rule stated in the task, and can a fixed answer pass? | [rules.py](stmbench/trackB/rules.py), [audit.py](stmbench/trackB/audit.py) | [test_rule_card.py](tests/test_rule_card.py), [test_rules_v1.py](tests/test_rules_v1.py), [test_audit.py](tests/test_audit.py) |
-| Does an episode replay to the same measurements? | [clock.py](stmsim/physics/clock.py), [instrument/](stmbench/instrument/) | [test_instrument.py](tests/test_instrument.py), [test_mcp_server.py](tests/test_mcp_server.py), [test_determinism_probe.py](tests/test_determinism_probe.py) |
+| Does an episode replay to the same measurements? | [clock.py](stmsim/physics/clock.py), [instrument/](stmbench/instrument/) | [test_instrument.py](tests/test_instrument.py), [test_mcp_server.py](tests/test_mcp_server.py), [test_determinism_probe.py](tests/test_determinism_probe.py), [test_api_v2.py](tests/test_api_v2.py) (API version, the refusal of another one) |
 | Can a paper be reproduced by measurement, how precisely, in how much time? And without the truth? | [reference/](stmbench/reference/), [baselines/](stmbench/baselines/), [analysis/](stmbench/analysis/) | [test_reference_p5.py](tests/test_reference_p5.py), [test_reference_p3.py](tests/test_reference_p3.py), [test_reference_p4.py](tests/test_reference_p4.py), [test_baselines_p4.py](tests/test_baselines_p4.py), [test_analysis_tip.py](tests/test_analysis_tip.py), [test_analysis_force.py](tests/test_analysis_force.py), [test_analysis_drift.py](tests/test_analysis_drift.py), [test_analysis_spectra.py](tests/test_analysis_spectra.py), [test_analysis_adatoms.py](tests/test_analysis_adatoms.py), [test_analysis_corral_gap.py](tests/test_analysis_corral_gap.py) |
 
 Other useful boundaries:
@@ -212,7 +212,11 @@ These apply across the simulator, the instrument, the judge and the presentation
 8. **Preserve run records.** Use a new output directory for each episode. Do not overwrite
    completed runs or hand-edit them to improve a verdict. `episode.json`, `actions.jsonl`,
    `events.json`, `report.json` and `session/` feed later analysis, `verify` and replay. Schema changes must
-   account for existing readers; missing observations remain unknown, not zero or success.
+   account for existing readers; missing observations remain unknown, not zero or success. A ledger
+   and an export carry `api_version`: a change to what an agent can call, or to the record kinds, bumps
+   it, `verify`, `replay` and `grade` refuse another version (it needs the code of its own; they never
+   replay it into a mismatch), and the replay for an audience and the report tables keep reading the
+   older ledgers.
 9. **Preserve binary contracts and their provenance.** Command names, field widths, array
    counts and reply layouts are client contracts. Do not infer widths from unannotated Python
    handlers or rename commands. Check the bytes against the documented layout.

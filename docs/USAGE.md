@@ -115,6 +115,13 @@ are required (their bounds still apply), and a call without one is refused in th
 words (`pulse: width_ms is required`) before anything happens to the tip, costing no instrument
 time. How hard to condition a tip is the operator's call; a default would be the answer to it.
 
+The API version (`stmbench.instrument.API_VERSION`, 2: no tip-diagnosis call, no default strength
+for `pulse` and `poke`) is the first line of the manual and a field of `info()`, of the ledger
+(`episode.json`) and of an export (`session.json`). Calls, parameters and record kinds change with
+it, so `replay`, `verify` and `grade` refuse a ledger or an export of another version, saying that it
+needs the code of its own version, instead of replaying it into a mismatch or grading it as a zero.
+The replay for an audience and the report tables still read the records of earlier ledgers.
+
 Any MCP agent can take the instrument's seat:
 
 ```bash
@@ -541,7 +548,9 @@ the earlier held-out rounds: `docs/results/p4_baseline_seeds_*.json`, DESIGN §9
 ```
 
 `stmbench.cli verify <out>` rebuilds the episode from `actions.jsonl` with the same scenario
-and seed and compares every measurement and the verdict.
+and seed and compares every measurement and the verdict. It exits 0 when everything matches, 1 when
+something differs, and 2 (the reason on stderr) when the ledger is of another API version: it needs
+the code of that version.
 
 ### Replays for an audience
 
@@ -599,7 +608,8 @@ the paper), `success`, `partial`, `claims_total`, `claims_verified`, `instrument
 `records`), `scenario_id`, `rules_version`, `export_version`, `note`. It carries no seed, truth or
 per-claim detail. The exit status is 0 when graded and 2 when the directory is not a gradable
 export of this scenario (not an export, another scenario, or another rules, API or export
-version; the reason is on stderr): a wrong pairing is an error, never a score.
+version; the reason is on stderr, and an export of another API version is told that it needs
+the code of its own version): a wrong pairing is an error, never a score.
 
 `deploy/osworld/` holds the adapter OSWorld-Science's `module_metric` calls on the host, the
 grader's Docker image and the notes on wiring them up (`deploy/osworld/README.md`).

@@ -19,7 +19,7 @@ from pathlib import Path
 import pytest
 
 from stmbench.cli import main as cli_main
-from stmbench.instrument import ActionError, Instrument, replay
+from stmbench.instrument import API_VERSION, ActionError, Instrument, replay
 from stmbench.instrument.core import replay_records
 from stmbench.instrument.export import EXPORT_VERSION, ExportWriter, read_export
 from stmbench.instrument.grade import _digest_mismatches, grade_export
@@ -291,7 +291,7 @@ def test_a_wrong_pairing_or_version_is_an_error_not_a_score(tmp_path):
         shutil.copytree(base, p)
         _edit_session(p, **kw)
         return p
-    for kw, needle in (({"rules_version": 0}, "rules_version"), ({"api_version": 2}, "api_version"),
+    for kw, needle in (({"rules_version": 0}, "rules_version"), ({"api_version": API_VERSION - 1}, "api_version"),
                        ({"version": 2}, "version-1"), ({"format": "other"}, "version-1"),
                        ({"records": 5}, "counts 5 records")):
         with pytest.raises(ValueError, match=needle):
@@ -401,7 +401,8 @@ def test_replay_of_a_ledger_still_raises_a_call_the_replay_refuses(tmp_path):
     silently replayed to the end."""
     rec = {"i": 0, "kind": "act", "name": "scan",
            "params": {"center_x_nm": 0.0, "center_y_nm": 0.0, "size_nm": 10.0, "pixels": 7}, "result": {}}
-    (tmp_path / "episode.json").write_text(json.dumps({"scenario_id": P4, "seed": 0}), encoding="utf-8")
+    (tmp_path / "episode.json").write_text(json.dumps({"api_version": API_VERSION, "scenario_id": P4, "seed": 0}),
+                                           encoding="utf-8")
     (tmp_path / "actions.jsonl").write_text(json.dumps(rec) + "\n", encoding="utf-8")
     with pytest.raises(ActionError, match="outside"):
         replay(tmp_path)

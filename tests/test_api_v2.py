@@ -20,11 +20,15 @@ from pathlib import Path
 
 import pytest
 
+from stmbench.cli import main as cli_main
 from stmbench.console import Console, make_server
 from stmbench.console import server as console_server
-from stmbench.instrument import ACTIONS, ActionError, Instrument
+from stmbench.instrument import ACTIONS, API_VERSION, ActionError, Instrument, VersionError, replay, verify
 from stmbench.instrument.core import replay_records
+from stmbench.instrument.export import ExportWriter, read_export
+from stmbench.instrument.grade import grade_export
 from stmbench.instrument.mcp_server import EpisodeServer
+from stmbench.trackB.rules import RULES_VERSION
 
 ROOT = Path(__file__).resolve().parent.parent
 P4 = "P4_atom_positioning_cu111"
@@ -241,3 +245,137 @@ def test_the_readers_of_older_ledgers_still_read_a_tip_diagnosis(tmp_path):
     assert "sharp" in tl["steps"][1]["caption"]
     assert diag_accuracy([{"success": True}, {"diag_correct": None}]) == \
         {"diag_n": 0, "diag_correct_n": 0, "diag_abstain": 0, "diag_acc": None}
+
+
+# ── the version, and the refusal of another one ─────────────────────────────
+def _wait_run(tmp_path: Path) -> Path:
+    """A finished run directory of this code: one wait."""
+    run = tmp_path / "run"
+    inst = Instrument(P4, 0, out_dir=run)
+    inst.act("wait", seconds=5.0)
+    inst.finish()
+    return run
+
+
+def _wait_export(tmp_path: Path) -> Path:
+    """An export of this code with one wait in it (the episode never finishes: graded as it stands)."""
+    inst = Instrument(P4, 0)
+    exp = ExportWriter(inst, tmp_path / "export")
+    inst.act("wait", seconds=5.0)
+    exp.sync()
+    return tmp_path / "export"
+
+
+def _edit_json(path: Path, **keys) -> None:
+    """Set keys of a JSON file; a value of ``...`` removes the key."""
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    for k, v in keys.items():
+        if v is ...:
+            doc.pop(k, None)
+        else:
+            doc[k] = v
+    path.write_text(json.dumps(doc), encoding="utf-8")
+
+
+def test_the_api_version_is_2_wherever_it_is_stated(tmp_path):
+    assert API_VERSION == 2
+    inst = Instrument(P4, 0, out_dir=tmp_path / "run")
+    exp = ExportWriter(inst, tmp_path / "export")
+    assert Instrument.manual().startswith("Instrument API v2: ")
+    assert inst.task("en") and "Instrument API v2: " in _mcp(EpisodeServer(inst), "get_task")["content"][0]["text"]
+    assert inst.info()["api_version"] == 2
+    init = EpisodeServer(inst).handle({"jsonrpc": "2.0", "id": 0, "method": "initialize",
+                                      "params": {"protocolVersion": "2025-06-18"}})
+    assert init["result"]["serverInfo"]["version"] == "api-2"
+    inst.finish()
+    exp.sync()
+    ep = json.loads((tmp_path / "run" / "episode.json").read_text(encoding="utf-8"))
+    assert ep["api_version"] == 2 and ep["rules_version"] == RULES_VERSION
+    session = read_export(tmp_path / "export")["session"]
+    assert session["api_version"] == 2 and session["rules_version"] == RULES_VERSION
+
+
+def test_a_ledger_of_this_version_re_checks(tmp_path):
+    run = _wait_run(tmp_path)
+    assert verify(run)["ok"] and replay(run).n_actions == 1
+
+
+@pytest.mark.parametrize("tag,said", [(1, "is of api_version 1"), (3, "is of api_version 3"),
+                                      ("2", 'is of api_version "2"'), (True, "is of api_version true"),
+                                      (None, "carries no api_version"), (..., "carries no api_version")])
+def test_replay_and_verify_refuse_a_ledger_of_another_api_version(tmp_path, tag, said):
+    run = _wait_run(tmp_path)
+    _edit_json(run / "episode.json", api_version=tag)
+    for refuse in (replay, verify):
+        with pytest.raises(VersionError) as exc:
+            refuse(run)
+        msg = str(exc.value)
+        assert isinstance(exc.value, ValueError) and msg.startswith("the ledger in ") and said in msg
+        assert "this code is api_version 2" in msg and "the code of its own API version" in msg
+        assert "needs the code that wrote it" in msg
+
+
+def test_a_version_1_ledger_is_refused_before_anything_is_replayed(tmp_path):
+    """Its calls are not this version's: replayed anyway, a v1 poke without a dwell would only
+    be a refusal deep in the replay, a v1 diagnosis an unknown record."""
+    run = _wait_run(tmp_path)
+    _edit_json(run / "episode.json", api_version=1)
+    with (run / "actions.jsonl").open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps({"i": 3, "kind": "diagnosis", "args": {"tip_state": "sharp"}, "t_s": 5.0}) + "\n")
+        fh.write(json.dumps({"i": 4, "kind": "act", "name": "poke", "params": {}, "result": {}}) + "\n")
+    with pytest.raises(VersionError, match="api_version 1"):
+        replay(run)
+
+
+def test_the_verify_command_exits_2_with_the_reason_for_a_ledger_of_another_version(tmp_path, capsys):
+    run = _wait_run(tmp_path)
+    assert cli_main(["verify", str(run)]) == 0
+    assert json.loads(capsys.readouterr().out)["ok"] is True
+    _edit_json(run / "episode.json", api_version=1)
+    assert cli_main(["verify", str(run)]) == 2
+    cap = capsys.readouterr()
+    assert cap.out == "" and cap.err.startswith("verify: the ledger in ")
+    assert "api_version 1" in cap.err and "the code of its own API version" in cap.err
+
+
+def test_grade_refuses_an_export_of_version_1_in_the_same_words(tmp_path, capsys):
+    path = _wait_export(tmp_path)
+    assert grade_export(path, P4, 0)["replay"]["consistent"] is True            # this version grades
+    _edit_json(path / "session.json", api_version=1, rules_version=1)           # what a version-1 export says
+    with pytest.raises(VersionError) as exc:
+        grade_export(path, P4, 0)
+    msg = str(exc.value)
+    assert msg.startswith("the export is of api_version 1; this code is api_version 2.")
+    assert "the code of its own API version" in msg and "needs the code that wrote it" in msg
+    # the same words as the ledger's refusal after the part that names what was refused
+    run = _wait_run(tmp_path)
+    _edit_json(run / "episode.json", api_version=1)
+    with pytest.raises(VersionError) as ledger:
+        replay(run)
+    assert str(ledger.value).split("; this code", 1)[1] == msg.split("; this code", 1)[1]
+    # and the command, which exits 2 and says it on stderr
+    assert cli_main(["grade", str(path), "--scenario", P4, "--seed", "0"]) == 2
+    cap = capsys.readouterr()
+    assert cap.out == "" and cap.err.startswith("grade: the export is of api_version 1")
+    assert "the code of its own API version" in cap.err
+
+
+def test_grade_names_the_api_version_before_the_rules_version(tmp_path):
+    """A version-1 export is of both: the first thing it is told is which code can replay it."""
+    path = _wait_export(tmp_path)
+    _edit_json(path / "session.json", api_version=1, rules_version=RULES_VERSION - 1)
+    with pytest.raises(ValueError, match="api_version 1"):
+        grade_export(path, P4, 0)
+    _edit_json(path / "session.json", api_version=API_VERSION)                  # only the rules differ
+    with pytest.raises(ValueError, match="rules_version") as exc:
+        grade_export(path, P4, 0)
+    assert not isinstance(exc.value, VersionError)
+
+
+def test_text_out_of_an_export_is_clipped_before_the_refusal_repeats_it(tmp_path):
+    path = _wait_export(tmp_path)
+    _edit_json(path / "session.json", api_version="A" * 5000 + "\n\x1b[31m")
+    with pytest.raises(VersionError) as exc:
+        grade_export(path, P4, 0)
+    assert len(str(exc.value)) < 400 and "A" * 100 not in str(exc.value)
+    assert "\n" not in str(exc.value) and "\x1b" not in str(exc.value)
