@@ -9,6 +9,7 @@ P4's verification frame was a judge rule the task never mentioned, and P1's task
 
 :data:`RULES_VERSION` is recorded in every ledger the card was shown in and is passed to the
 judge, which applies the version-1 rules to such episodes (:mod:`stmbench.trackB.claims`).
+The grader refuses an export of another version (:mod:`stmbench.instrument.grade`).
 
 The card is written in Chinese (``lang="zh"``, the default: Chinese belongs in scenario task
 text, AGENTS.md) or in English (``lang="en"``). One code path states each rule and only its words
@@ -22,8 +23,16 @@ from __future__ import annotations
 
 import re
 
-#: version of the rule card and of the judging rules it announces
-RULES_VERSION = 1
+#: version of the rule card and of the judging rules it announces.
+#: 1: the card; a report names its ``frame`` and ``evidence`` (the judge takes ``rules_version >= 1``
+#: as these rules, so an older ledger keeps the rules it ran under).
+#: 2: the judge is unchanged. P4's card says what the judge does and nothing about how to operate: an
+#: atom hop is not explained by its causes, a tied lattice site counts "by at most" ``site_tie_nm``, the
+#: bystanders and their displacement are defined as ``AdatomRegistry.any_target`` computes them, and the
+#: hop the evidence rule needs is one made during a ``move_tip`` action. No card states the controller
+#: command limit of the TCP path (``budget.wire_cmds``) any more: the benchmark instrument does not
+#: enforce it.
+RULES_VERSION = 2
 
 #: the overrun rule (:func:`apply_budget_overrun`): beyond this factor of the scenario's budget
 #: an episode is not a reproduction (5 % over is still within budget)
@@ -40,11 +49,13 @@ _BUDGET_SENTENCE = re.compile(r"预算[:：][^。\n]*仪器时间[。]?")
 
 _UNIT = {"nm": "nm", "deg": "°", "meV": "meV", "m_e": "m_e", "pN": "pN", "pm": "pm", "fraction": ""}
 
-#: what an ``after_event`` is called on the card, with the causes its parenthesis names
+#: what an ``after_event`` is called on the card. The judge takes the last ``adatom_hop`` event, one
+#: lattice-site step of an atom whatever made it (a tip move or imaging), so the card says what a hop
+#: is and leaves the causes, which are operating knowledge, out.
 _AFTER = {
-    "zh": {"adatom_hop": "最后一次原子跳动（拖动原子、或在低结电阻下成像带动原子）"},
-    "en": {"adatom_hop": "the last atom hop (dragging an atom, or imaging at a low junction resistance "
-                         "that carries an atom along)"},
+    "zh": {"adatom_hop": "最后一次原子跳动（指任何原子从一个晶格位点跳到相邻位点，不论是什么使它动的）"},
+    "en": {"adatom_hop": "the last atom hop (the last time any atom hopped from one lattice site to a "
+                         "neighbouring one, whatever moved it)"},
 }
 
 
@@ -83,6 +94,16 @@ def _unit(c: dict) -> str:
     return _UNIT.get(str(c.get("unit", "")), str(c.get("unit", "")))
 
 
+def _atom_numbers(sc) -> tuple[str, str, str]:
+    """The shift an atom is to be moved by, as ``(dx, dy)``, the isolation radius and the bystander
+    radius (nm) of a single-atom layout, as the card writes them. They are read where the world is built
+    from (``initial.adatoms``, defaulted as ``Surface.configure_adatoms`` defaults them), so the card
+    cannot state another figure than the one ``AdatomRegistry.any_target`` judges with."""
+    ini = (sc.initial or {}).get("adatoms") or {}
+    shift = f"({_num(ini.get('target_dx_nm', 4.0))}, {_num(ini.get('target_dy_nm', 0.0))})"
+    return shift, _num(ini.get("isolation_nm", 3.0)), _num(ini.get("bystander_nm", 10.0))
+
+
 def _tolerance(c: dict, sc, lang: str) -> str:
     kind, tol, unit = c.get("kind"), c.get("tol") or {}, _unit(c)
     if kind == "angle":
@@ -101,24 +122,25 @@ def _tolerance(c: dict, sc, lang: str) -> str:
                   f"the reported value differs by at most {_amount(abs_tol, unit)} from at least one of the "
                   f"{rank} lowest-energy true resonance levels of the corral")
     if kind == "position":
-        ini = (sc.initial or {}).get("adatoms") or {}
-        d = (float(ini.get("target_dx_nm", 0.0)), float(ini.get("target_dy_nm", 0.0)))
-        report_nm, isolation_nm = _num(tol.get("report_nm", 0.5)), _num(ini.get("isolation_nm", 3.0))
-        shift = f"({_num(d[0])}, {_num(d[1])})"
+        shift, isolation_nm, _ = _atom_numbers(sc)
+        report_nm = _num(tol.get("report_nm", 0.5))
+        # the judge matches the report to the moved atom nearest to the reported place, and only then
+        # asks whether that one is within report_nm (AdatomRegistry.any_target, claims_verified)
         out = _t(lang,
-                 f"所报位置须在某个被你搬动过的原子 {report_nm} nm 以内（按 frame 指定的帧换算到样品上）；"
-                 f"这个原子出生时 {isolation_nm} nm 内没有别的原子，"
-                 f"并且现在正好占据'出生位置平移 {shift} nm 后最近的那个晶格位点'",
+                 f"所报位置须在离它最近的、被你搬动过的原子 {report_nm} nm 以内（按 frame 指定的帧换算到样品上）；"
+                 f"这个原子本局开始时 {isolation_nm} nm 内没有别的原子，"
+                 f"并且现在正好占据'它本局开始时的位置平移 {shift} nm 后最近的那个晶格位点'",
                  f"the reported position, converted to the sample using the frame named in the frame field, "
-                 f"must be within {report_nm} nm of an atom that you have moved; at the start of the episode "
-                 f"that atom had no other atom within {isolation_nm} nm, and it now sits exactly on 'the "
-                 f"lattice site nearest to the point obtained by shifting its position at the start of the "
-                 f"episode by {shift} nm'")
+                 f"must be within {report_nm} nm of the atom you have moved that lies nearest to it; at the "
+                 f"start of the episode that atom had no other atom within {isolation_nm} nm, and it now sits "
+                 f"exactly on 'the lattice site nearest to the point obtained by shifting its position at the "
+                 f"start of the episode by {shift} nm'")
         tie = float(tol.get("site_tie_nm", 0.0) or 0.0)
         if tie > 0:
-            out += _t(lang, f"（若另有格点离那一点只比最近的远不到 {_num(tie)} nm，占据它也算）",
-                      f" (if another lattice site is farther from that point than the nearest one by less "
-                      f"than {_num(tie)} nm, sitting on it counts too)")
+            # the judge accepts a site farther by <= site_tie_nm (claims_verified), so "at most"
+            out += _t(lang, f"（若另有格点离那一点比最近的格点至多远 {_num(tie)} nm，占据它也算）",
+                      f" (if another lattice site is farther from that point than the nearest one by at most "
+                      f"{_num(tie)} nm, sitting on it counts too)")
         return out
     if kind == "constraint":
         lo, hi = c.get("min"), c.get("max")
@@ -255,13 +277,48 @@ def _evidence(c: dict, lang: str) -> str:
                   + "; or ".join(f"({chr(0x61 + i)}) {a}" for i, a in enumerate(alts)))
     if kind == "events":
         n = int(rule.get("min_n", 1))
-        drag = rule.get("event") == "adatom_hop" and rule.get("cause") == "folme"
-        what = "由针尖拖动引起的原子跳动" if drag else str(rule.get("event"))
-        events = (_count(n, "atom hop caused by tip dragging", "atom hops caused by tip dragging") if drag
-                  else _count(n, f"{what} event", f"{what} events"))
-        return _t(lang, f"（不需要引用）本局至少发生过 {n} 次{what}",
-                  f"(no citation needed) this episode has had at least {events}")
+        event, cause = str(rule.get("event")), rule.get("cause")
+        if event == "adatom_hop" and cause == "folme":
+            # ``folme`` is the cause the instrument gives the hops of a move_tip action (the only
+            # action that drags: World.move_xy_path); imaging hops are ``scan``. The judge counts
+            # events, one per atom per action, each of at least one hop: for n > 1 that is not n hops
+            once = _t(lang, "（同一个原子在一次 move_tip 动作中的多次跳动只算一次）",
+                      " (the hops of one atom during one move_tip action count as one)") if n != 1 else ""
+            return _t(lang, f"（不需要引用）本局至少有 {n} 次原子跳动发生在 move_tip 动作中{once}",
+                      f"(no citation needed) this episode has had at least {_count(n, 'atom hop', 'atom hops')} "
+                      f"made during {'a move_tip action' if n == 1 else 'move_tip actions'}{once}")
+        # any other event, with the cause the judge requires of it (a rule never drops its cause)
+        by = _t(lang, f"（原因：{cause}）", f" with the cause {cause}") if cause else ""
+        events = _count(n, f"{event} event", f"{event} events")
+        return _t(lang, f"（不需要引用）本局至少发生过 {n} 次{event}{by}",
+                  f"(no citation needed) this episode has had at least {events}{by}")
     return _t(lang, f"（证据类型 {kind}）", f"(evidence type {kind})")
+
+
+def _bystander_lines(c: dict, sc, lang: str) -> list[str]:
+    """Which atoms a ``bystander_max_shift_nm`` constraint looks at and how it measures them, as
+    ``AdatomRegistry.any_target`` computes the quantity: every other atom, whatever its history, that
+    lay within ``bystander_nm`` of the moved atom's start or of its goal site *at the start of the
+    episode* (so an atom that has since moved into or out of that neighbourhood does not change who
+    counts); an atom's displacement is from its own start position, and a lost atom or one on the tip
+    counts as moved (``GONE_SHIFT_NM``)."""
+    if c.get("field") != "bystander_max_shift_nm":
+        return []
+    shift, _, radius = _atom_numbers(sc)
+    return [
+        _t(lang,
+           f"   - 计入的其他原子：本局开始时，离该原子本局开始时的位置不超过 {radius} nm、或离'该位置平移 {shift} nm "
+           f"后最近的那个晶格位点'不超过 {radius} nm 的每一个其他原子",
+           f"   - The other atoms counted: every other atom that, at the start of the episode, was within "
+           f"{radius} nm of that atom's position at the start of the episode, or within {radius} nm of 'the "
+           f"lattice site nearest to the point obtained by shifting that position by {shift} nm'"),
+        _t(lang,
+           "   - 位移的算法：每个计入的原子，取它本局开始时的位置到本局结束时所在位置的距离；丢失的、"
+           "或结束时还在针尖上的原子算移动；这个量取其中最大的（没有计入的原子则为 0）",
+           "   - How displacement is measured: for each atom counted, the distance from its position at the "
+           "start of the episode to where it is at the end of the episode; an atom that is lost, or is on "
+           "the tip at the end, counts as moved; the quantity is the largest of these (0 if no atom is "
+           "counted)")]
 
 
 def _claim_lines(c: dict, sc, n: int, lang: str) -> list[str]:
@@ -294,6 +351,7 @@ def _claim_lines(c: dict, sc, n: int, lang: str) -> list[str]:
     if c.get("of_claim"):
         lines.append(_t(lang, f"   - 针对的是 {c['of_claim']} 所匹配到的那个原子",
                         f"   - It concerns the atom that {c['of_claim']} was matched to"))
+        lines += _bystander_lines(c, sc, lang)
     evidence = _evidence(c, lang)
     lines.append(_t(lang, f"   - 证据：{evidence}", f"   - Evidence: {evidence}"))
     return lines

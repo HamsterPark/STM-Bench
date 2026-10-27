@@ -31,6 +31,7 @@ from stmbench.instrument import ACTIONS  # noqa: E402
 from stmbench.instrument.core import SCENARIO_DIR, validate  # noqa: E402
 from stmbench.instrument.export import read_export  # noqa: E402
 from stmbench.render import pixel_to_scan_nm  # noqa: E402
+from stmbench.trackB.rules import RULES_VERSION  # noqa: E402
 
 P4 = "P4_atom_positioning_cu111"
 P5 = "P5_sader_jarvis_qplus"
@@ -340,8 +341,9 @@ def test_the_task_the_manual_and_the_claims_are_what_every_agent_is_told(open_wi
     en, zh = open_window("en"), open_window("zh", name="run_zh")
     task, manual = en.session.task_text(), en.session.manual()
     assert shots.widget(en, "task.text").toPlainText() == task and manual == zh.session.manual()
-    assert "[Scoring rules v1]" in task and "ReportResult" in task and "评分规则" not in task       # the English card
-    assert "【评分规则 v1】" in shots.widget(zh, "task.text").toPlainText()                          # the Chinese one
+    assert f"[Scoring rules v{RULES_VERSION}]" in task and "ReportResult" in task        # the English card
+    assert "评分规则" not in task
+    assert f"【评分规则 v{RULES_VERSION}】" in shots.widget(zh, "task.text").toPlainText()  # the Chinese one
     assert shots.widget(en, "manual.text").toPlainText() == manual and "move_tip" in manual
     assert en.windowTitle() == f"STM-Bench console · {P4}"
     # the report form shows the rule card's line about the claim in the window's language

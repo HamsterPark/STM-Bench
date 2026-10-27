@@ -43,8 +43,8 @@ _IDENTIFIER = re.compile(r"\b[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+\b")
 _VERBATIM = ("ReportResult", ".sxm", ".dat", "frame:N", "sts:N", "zspec:N", "lockin", "evidence", "frame",
              "value", "x_nm", "y_nm")
 
-_AFTER_HOP = ("the last atom hop (dragging an atom, or imaging at a low junction resistance "
-              "that carries an atom along)")
+_AFTER_HOP = ("the last atom hop (the last time any atom hopped from one lattice site to a "
+              "neighbouring one, whatever moved it)")
 
 
 def _numbers(text: str) -> Counter:
@@ -172,19 +172,20 @@ def test_the_p4_verification_frame_is_on_the_english_card():
     assert f"have started scanning only after {_AFTER_HOP} — what counts is when the scan started, " \
            f"not when it was saved" in card
     assert "the frame named in the frame field" in card
-    assert f"by less than {_num(claim['tol']['site_tie_nm'])} nm" in card
+    # a site farther by the tie itself counts: the judge accepts <=, so "at most", not "less than"
+    assert f"by at most {_num(claim['tol']['site_tie_nm'])} nm" in card and "less than" not in card
     assert "(no report needed)" in card and "(no citation needed)" in card
     assert "It concerns the atom that target_site was matched to" in card
-    # 出生 is the position at the start of the episode, not "initial" (which can mean before the last move);
-    # the shift applies to that position first, and the site is the one nearest to the shifted point
+    # the start of the episode is the position before anything was done, not "initial" (which can mean
+    # before the last move); the shift applies to that position first, and the site is the one nearest to
+    # the shifted point
     assert "at the start of the episode that atom had no other atom within 3 nm" in card
     assert "it now sits exactly on 'the lattice site nearest to the point obtained by shifting its position " \
            "at the start of the episode by (4, 0) nm'" in card
-    assert "within 10 nm of the position the moved atom had when the episode began, or of its target " \
-           "position" in card
-    # the frame names the reported position's conversion, not the atom
+    # the frame names the reported position's conversion, not the atom; the atom is the moved one nearest
+    # to the place (the judge matches the report to it, then asks whether it is within report_nm)
     assert "the reported position, converted to the sample using the frame named in the frame field, must " \
-           "be within 0.6 nm of an atom that you have moved" in card
+           "be within 0.6 nm of the atom you have moved that lies nearest to it" in card
     assert "write the same x_nm in the value field" in card
 
 
@@ -239,6 +240,62 @@ def test_the_english_card_of_the_repair_asks_for_frame_and_spectra_after_the_las
     assert "this quantity is at least 0.97" in card
 
 
+def test_the_english_card_explains_a_hop_by_what_it_is_and_not_by_what_causes_it():
+    """Operating knowledge (what drags an atom, what carries it along when imaging) is not a scoring rule."""
+    for name in ("P4_atom_positioning_cu111.yaml", "P3_corral_repair_cu111.yaml"):
+        card = R.rule_card(Scenario.load(SCEN / name), "en")
+        assert _AFTER_HOP in card, name
+        for cause in ("drag", "junction resistance", "carries", "imaging"):
+            assert cause not in card.lower(), (name, cause)
+
+
+def test_the_english_card_does_not_use_the_simulators_word_for_the_start_of_the_episode():
+    for p in PAPERS:
+        text = R.task_text(Scenario.load(p), "en").lower()
+        assert "born" not in text and "birth" not in text, p.name
+
+
+def test_the_english_p4_card_defines_the_bystanders_from_the_fields_the_judge_reads():
+    sc = Scenario.load(P4)
+    block = R.rule_card(sc, "en").split("bystander_max_shift_nm", 1)[1]
+    assert "The other atoms counted: every other atom that, at the start of the episode, was within 10 nm of " \
+           "that atom's position at the start of the episode, or within 10 nm of 'the lattice site nearest to " \
+           "the point obtained by shifting that position by (4, 0) nm'" in block
+    assert "How displacement is measured: for each atom counted, the distance from its position at the start " \
+           "of the episode to where it is at the end of the episode; an atom that is lost, or is on the tip at " \
+           "the end, counts as moved; the quantity is the largest of these (0 if no atom is counted)" in block
+    moved = copy.deepcopy(sc)
+    moved.initial["adatoms"].update(bystander_nm=12.5, target_dx_nm=-3.0, target_dy_nm=1.25)
+    block = R.rule_card(moved, "en").split("bystander_max_shift_nm", 1)[1]
+    assert "within 12.5 nm of that atom's position" in block
+    assert "or within 12.5 nm of 'the lattice site nearest to the point obtained by shifting that position " \
+           "by (-3, 1.25) nm'" in block
+    assert "10 nm" not in block
+    # the same figures when the file leaves them out (Surface.configure_adatoms' defaults)
+    bare = copy.deepcopy(sc)
+    for key in ("target_dx_nm", "target_dy_nm", "isolation_nm", "bystander_nm"):
+        del bare.initial["adatoms"][key]
+    assert R.rule_card(bare, "en") == R.rule_card(sc, "en")
+
+
+def test_the_english_card_names_the_action_that_makes_the_hop_the_evidence_needs():
+    sc = Scenario.load(P4)
+    card = R.rule_card(sc, "en")
+    assert "(no citation needed) this episode has had at least 1 atom hop made during a move_tip action" in card
+    assert "dragging" not in card
+    three = copy.deepcopy(sc)
+    next(c for c in three.claims if c["id"] == "bystander_max_shift_nm")["evidence"]["min_n"] = 3
+    assert "this episode has had at least 3 atom hops made during move_tip actions (the hops of one atom " \
+           "during one move_tip action count as one)" in R.rule_card(three, "en")
+    # another event keeps the cause the judge requires of it
+    other = copy.deepcopy(sc)
+    other.claims[1]["evidence"] = {"kind": "events", "event": "zspec", "cause": "scan_x", "min_n": 2}
+    assert "this episode has had at least 2 zspec events with the cause scan_x" in R.rule_card(other, "en")
+    other.claims[1]["evidence"] = {"kind": "events", "event": "zspec"}
+    assert "this episode has had at least 1 zspec event" in R.rule_card(other, "en")
+    assert "cause" not in R.rule_card(other, "en")
+
+
 def test_the_english_card_never_states_a_hidden_value():
     """Tolerances are public; the values drawn for a seed are not."""
     for p in PAPERS:
@@ -270,14 +327,14 @@ def test_both_languages_follow_the_fields_the_judge_reads():
     target = next(c for c in sc.claims if c["id"] == "target_site")
     target["evidence"].update(max_nm_per_px=0.37, min_fov_nm=7.5, after_event=None)
     target["tol"].update(report_nm=0.71, site_tie_nm=0.031)
-    sc.initial["adatoms"].update(isolation_nm=4.5, target_dx_nm=-3.0, target_dy_nm=1.25)
+    sc.initial["adatoms"].update(isolation_nm=4.5, bystander_nm=12.5, target_dx_nm=-3.0, target_dy_nm=1.25)
     next(c for c in sc.claims if c["id"] == "bystander_max_shift_nm")["max"] = 0.43
     sc.budget.update(sim_hours=2.25, wire_cmds=123456)
     for lang in ("zh", "en"):
         card = R.rule_card(sc, lang)
-        for new in ("0.37", "7.5", "0.71", "0.031", "4.5", "(-3, 1.25)", "0.43", "2.25"):
+        for new in ("0.37", "7.5", "0.71", "0.031", "4.5", "12.5", "(-3, 1.25)", "0.43", "2.25"):
             assert new in card, (lang, new)
-        assert "123456" not in card, lang                                # a limit nothing applies
+        assert "10 nm" not in card and "123456" not in card, lang        # the old radius; a limit nothing applies
     assert _numbers(R.rule_card(sc, "en")) == _numbers(R.rule_card(sc))
     assert "之后才开始扫描" not in R.rule_card(sc) and "only after" not in R.rule_card(sc, "en"), \
         "no after_event, no clause about it"
