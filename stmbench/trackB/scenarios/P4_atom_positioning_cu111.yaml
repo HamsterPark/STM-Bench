@@ -199,3 +199,25 @@ notes: |
   drag, and 5 a recovery. A scripted run works in under half an hour with the tip mostly pinned
   by pokes, so it barely meets the new physics; what the physics takes away is the safe corner
   for an agent that waits, tunnels at a high setpoint on a low range, or leaves a bad tip alone.
+
+  **Move traces instead of a hop count; rules version 2 (2026-10-27).** The instrument no
+  longer counts hops for the agent: ``move_tip`` replies with the file name of a trace of Z and
+  the current along its path (``stmsim/physics/trace.py``, kept like a spectrum with
+  ``kind: "move"``), and its description no longer says that a low junction resistance drags.
+  A sample of a trace is the mean over its dwell, so a slow drag carries a few tenths of a
+  picometre of noise in Z. The scripted baseline reads the hops from the trace
+  (``stmbench/analysis/trace.py``; of 5040 drags on seeds 0–119, at 0.25 nm/s 99.6 % of those
+  in which an atom hopped read as hopping and 1.4 % of those in which none did); the reference
+  counts the world's events. The rule card (rules version 2) states the judge's rules as they
+  are, without the operating knowledge it used to give: the last hop is any atom's hop from one
+  lattice site to the next, whatever moved it; a tied site may be farther by at most
+  ``site_tie_nm``; the bystanders are those the judge takes, by their positions at the start of
+  the episode, with the numbers generated from ``initial.adatoms``; the bystander evidence is a
+  hop made during a move_tip action. No tolerance, hidden range or judged rule changed
+  (versions 1 and 2 give the same verdicts). Re-checked on the merged tree (84e8795): the
+  reference, seeds 0–19, 20/20 as above (|error| median 0.008 nm, p90 0.018 nm); the baseline,
+  held-out seeds 450–529, 80/80 (blunt 16/16, dirty 14/14, double 22/22, good 17/17, unstable
+  11/11), median 986 s, p90 1431 s, max 2869 s. 76 of the 80 runs are the same to 0.1 s as with
+  the hop count on the same physics; four were slower (seeds 464, 469, 484 and 519, by 56–361 s:
+  in 464 a short drag in which nothing hopped read as a hop, in 469 13 hops read as 14, and the
+  drags that followed differed; 484 and 519 were not looked into) and none failed.

@@ -118,7 +118,8 @@ time. How hard to condition a tip is the operator's call; a default would be the
 The API version (`stmbench.instrument.API_VERSION`, now 2) is the first line of the manual and a
 field of `info()`, of the ledger (`episode.json`) and of an export (`session.json`). Calls,
 parameters and record kinds change with it (version 2 dropped the tip-diagnosis call and the
-defaults of `pulse` and `poke`), so `replay`, `verify` and `grade` refuse a ledger or an export of
+defaults of `pulse` and `poke`, and `move_tip` replies with the file name of its trace instead of a
+count of current spikes), so `replay`, `verify` and `grade` refuse a ledger or an export of
 another version, saying that it needs the code of its own version, instead of replaying it into a
 mismatch or grading it as a zero. The replay for an audience and the report tables still read the
 records of earlier ledgers.
