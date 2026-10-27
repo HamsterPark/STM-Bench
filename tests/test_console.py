@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 import re
 import shutil
+import socket
 import subprocess
 import threading
 import urllib.error
@@ -187,6 +188,30 @@ def test_the_page_calls_only_endpoints_the_server_serves():
     with open(console_server.__file__, encoding="utf-8") as fh:
         served = set(re.findall(r'p == "(/api/[a-z_.]+)"', fh.read()))
     assert used and used <= served, used - served
+
+
+@pytest.mark.parametrize("path,status", [("/api/tip_state", 404), ("/api/finish", 200)])
+def test_the_server_answers_a_post_only_once_it_has_read_its_body(tmp_path, path, status):
+    """A reply sent while the body is still on its way (an unknown route, a route that takes no body)
+    makes the server close the connection with data in it, and the client may get a reset instead of the
+    answer: WinError 10053 or 10054 on Windows, about 1 request in 300 of such a POST. So the answer
+    to any POST waits for the whole body: nothing comes back while it is outstanding, and the answer
+    comes once it is in."""
+    body = b'{"tip_state": "sharp"}'
+    with serving(Console(tmp_path / "run", P4, 0)) as c:
+        host, port = c.base.removeprefix("http://").split(":")
+        with socket.create_connection((host, int(port)), timeout=30) as s:
+            s.sendall(f"POST {path} HTTP/1.0\r\nContent-Type: application/json\r\nContent-Length: {len(body)}\r\n\r\n".encode())
+            s.settimeout(0.5)
+            with pytest.raises(socket.timeout):
+                s.recv(4096)                                    # no answer yet: the body is outstanding
+            s.settimeout(30)
+            s.sendall(body)
+            reply = b""
+            while chunk := s.recv(4096):
+                reply += chunk
+    assert reply.startswith(f"HTTP/1.0 {status} ".encode()), reply[:60]
+    assert json.loads(reply.split(b"\r\n\r\n", 1)[1].decode("utf-8"))
 
 
 # ── the page's script, run under node (no browser) ──────────────────────────

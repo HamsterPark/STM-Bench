@@ -235,9 +235,16 @@ class _Handler(BaseHTTPRequestHandler):
         self._send(code, json.dumps(_jsonable(obj), ensure_ascii=False).encode("utf-8"),
                    "application/json; charset=utf-8")
 
-    def _body(self) -> dict:
+    def _read(self) -> bytes:
+        """The request's body, read whether or not the route asks for it. A reply sent with the body
+        still unread (an unknown route, a route that takes none) makes the server close the connection
+        with data in it, and the client may then get a reset instead of the answer: on Windows
+        WinError 10053 or 10054, in about 1 request in 300."""
         n = int(self.headers.get("Content-Length") or 0)
-        data = json.loads(self.rfile.read(n).decode("utf-8") or "{}") if n else {}
+        return self.rfile.read(n) if n else b""
+
+    def _body(self) -> dict:
+        data = json.loads(self._raw.decode("utf-8") or "{}") if self._raw else {}
         if not isinstance(data, dict):
             raise ValueError("the request body must be a JSON object")
         return data
@@ -248,6 +255,7 @@ class _Handler(BaseHTTPRequestHandler):
         q = {k: v[-1] for k, v in urllib.parse.parse_qs(url.query).items()}
         p = url.path
         try:
+            self._raw = self._read()
             if method == "GET" and p in ("/", "/index.html"):
                 self._send(200, PAGE.read_bytes(), "text/html; charset=utf-8")
             elif method == "GET" and p == "/api/session":
