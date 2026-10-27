@@ -356,10 +356,8 @@ def rule_card(sc, lang: str = "zh") -> str:
                  f"{'hour' if float(hours) == 1 else 'hours'} of instrument time (counted in simulated "
                  f"time; the instrument is paused while the model thinks). If the instrument time used "
                  f"exceeds the budget by more than {percent}%, this reproduction does not count as successful.")
-        if budget.get("wire_cmds"):
-            commands = int(budget["wire_cmds"])
-            txt += _t(lang, f"控制器命令上限 {commands} 条。",
-                      f" The controller command limit is {commands} commands.")
+        # the file's ``wire_cmds`` is a limit of the controller TCP path; the benchmark instrument
+        # counts no commands, so the card does not state it (it would be a rule nothing applies)
         lines.append(txt)
     return "\n".join(lines)
 

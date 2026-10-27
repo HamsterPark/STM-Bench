@@ -135,8 +135,11 @@ def test_the_english_card_states_the_budget_the_overrun_rule_uses(name):
     assert f"If the instrument time used exceeds the budget by more than " \
            f"{_num(round(100 * (R.OVERRUN_TOLERANCE - 1), 6))}%, this reproduction does not count as " \
            f"successful" in card
-    assert f"command limit is {int(sc.budget['wire_cmds'])} commands" in card
     assert "paused while the model thinks" in card
+    # the file's wire_cmds is a limit of the controller TCP path, which the benchmark instrument does not
+    # enforce: the card does not state it
+    assert "command" not in card.lower() and str(int(sc.budget["wire_cmds"])) not in card
+    assert card.rstrip().endswith("this reproduction does not count as successful.")
 
 
 @pytest.mark.parametrize("name", NAMES)
@@ -272,8 +275,9 @@ def test_both_languages_follow_the_fields_the_judge_reads():
     sc.budget.update(sim_hours=2.25, wire_cmds=123456)
     for lang in ("zh", "en"):
         card = R.rule_card(sc, lang)
-        for new in ("0.37", "7.5", "0.71", "0.031", "4.5", "(-3, 1.25)", "0.43", "2.25", "123456"):
+        for new in ("0.37", "7.5", "0.71", "0.031", "4.5", "(-3, 1.25)", "0.43", "2.25"):
             assert new in card, (lang, new)
+        assert "123456" not in card, lang                                # a limit nothing applies
     assert _numbers(R.rule_card(sc, "en")) == _numbers(R.rule_card(sc))
     assert "之后才开始扫描" not in R.rule_card(sc) and "only after" not in R.rule_card(sc, "en"), \
         "no after_event, no clause about it"

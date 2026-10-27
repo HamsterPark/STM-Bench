@@ -96,3 +96,15 @@ def test_the_judge_reads_the_version_the_card_announces():
     sc = Scenario.load(PAPERS[0])
     assert re.search(rf"评分规则 v{R.RULES_VERSION}", R.rule_card(sc))
     assert R.RULES_VERSION >= 1
+
+
+@pytest.mark.parametrize("name", NAMES)
+def test_the_card_states_no_controller_command_limit(name):
+    """``wire_cmds`` is a limit of the controller TCP path. The benchmark instrument counts no commands
+    (it enforces the instrument-time budget and an action limit), so a limit on the card would be a rule
+    nothing applies."""
+    sc = Scenario.load(SCEN / name)
+    assert sc.budget["wire_cmds"] > 0, "the file still holds the number: the card is what leaves it out"
+    card = R.task_text(sc)
+    assert "控制器" not in card and "命令" not in card and str(int(sc.budget["wire_cmds"])) not in card
+    assert card.rstrip().endswith("本次复现不算成功。")             # the budget sentence is the last line
