@@ -280,7 +280,11 @@ stands. `--lang en` shows English labels, the English task text with its rule ca
 `say_en`; `--lang zh` (the default) shows each Chinese label followed by its English, the Chinese task
 text and `say`. `--ui-scale` multiplies every font and
 size; it is an upper bound, because the window is measured with the fonts the machine has and every size
-is shrunk if it would not fit the screen (1.0 is tuned for 1920x1080).
+is shrunk if it would not fit the screen (1.0 is tuned for 1920x1080). The columns are 360, 824 and 704 px
+wide on that screen; a side column whose contents are wider than that with the machine's fonts (the right one,
+with a Chinese label in front of every English one, in a wider font than the window was tuned with) is given the
+width it needs from the centre column, which has 143 px or more to spare, before anything is shrunk: shrinking every size
+cannot mend a column that is too narrow for its contents, since the column shrinks with them.
 
 `python -m stmbench.gui.shots --out <dir>` renders the window offscreen in scripted states (just
 started; after a scan with markers and a profile; a spectrum; the report form; a refusal; the data,

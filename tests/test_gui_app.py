@@ -1606,15 +1606,24 @@ def test_a_switch_the_rig_does_not_have_shows_neither_state_and_a_refused_click_
 # ── the screens it opens on ──
 @pytest.mark.parametrize("height", [1080, 1016])
 @pytest.mark.parametrize("lang", ["en", "zh"])
-def test_the_window_fits_a_full_screen_and_a_maximized_window_under_a_title_bar(fonts, open_window, lang, height):
+def test_the_window_fits_a_full_screen_and_a_maximized_window_under_a_title_bar(app, fonts, open_window, lang, height):
     """1080: the sealed mode's window is the screen. 1016: a maximized dev window under GNOME's 27 px top bar
-    and its 37 px title bar. Nothing scrolls, nothing is hidden, in the window's fonts and in DejaVu."""
-    if lang == "zh" and fonts == "dejavu":
-        pytest.skip("both languages on every label, in the wider font, overflow the right column: fit_scale shrinks it")
+    and its 37 px title bar. Nothing scrolls, nothing is hidden, in the window's fonts and in DejaVu, in both
+    languages. With Chinese beside English on every label the Operate tab needs 745 px in DejaVu against the right
+    column's set 704: the column takes the width from the centre one, and the scale stays at 1.0 where it was
+    shrunk to 0.733 and the tabs still overflowed."""
+    from PySide6.QtCore import QSize
+
+    from stmbench.gui.app import fit_scale
+    screen = QSize(1920, 1080) if height == 1080 else QSize(1920, 1053)           # the dev window leaves the top bar
+    assert fit_scale(app, lang, 1.0, screen, 0 if height == 1080 else 37) == 1.0
     win = open_window(lang)
     win.resize(1920, height)
     shots.settle(win)
     QApplication.processEvents()
+    need = max(p.widget().minimumSizeHint().width() for p in (win.operate, win.spectroscopy)) + 2 * style.px(3)
+    assert win.right.width() == max(704, need) and win.sidebar.width() == 360          # a column is as wide as it needs
+    assert win.center.width() >= win.center.minimumSizeHint().width()                 # and the centre one is not squeezed
     for tab, panel in (("operate", win.operate), ("spectroscopy", win.spectroscopy)):
         open_right(win, tab)
         win.wait_idle()
@@ -1630,6 +1639,41 @@ def test_the_window_fits_a_full_screen_and_a_maximized_window_under_a_title_bar(
     open_left(win, "report")
     assert not win.sidebar.report_scroll.verticalScrollBar().isVisible()
     assert win.center.frame_view.height() >= 400                                                  # the image keeps its room
+
+
+def test_the_side_columns_are_360_and_704_px_wide_and_one_that_needs_more_takes_it_from_the_centre(
+        open_window, monkeypatch):
+    """The columns of a 1920 px window are 360, 824 and 704 px; a side column its contents need more of is given
+    that, and the centre column keeps the rest (whatever the fonts, so the needs are put in by hand here)."""
+    from stmbench.gui import app as gui_app
+    win = open_window("en")
+    assert (win.sidebar.width(), win.center.width(), win.right.width()) == (360, 824, 704)
+    monkeypatch.setattr(gui_app, "column_needs", lambda sidebar, panels: (330, 760))
+    wide = open_window("en", name="wide")
+    assert (wide.sidebar.width(), wide.center.width(), wide.right.width()) == (360, 768, 760)
+    monkeypatch.setattr(gui_app, "column_needs", lambda sidebar, panels: (400, 740))
+    both_sides = open_window("en", name="both")
+    assert (both_sides.sidebar.width(), both_sides.center.width(), both_sides.right.width()) == (400, 748, 740)
+    assert gui_app.column_widths(330, 704) == (360, 704) and gui_app.column_widths(361, 705) == (361, 705)
+
+
+def test_the_window_shrinks_by_what_the_screen_cannot_hold_and_not_by_what_a_wider_column_needs(app, monkeypatch):
+    """A column that is too narrow for its contents is not mended by shrinking every size (the column and its
+    contents shrink together): with the right column needing 960 px the three columns are 60 to 110 px wider than
+    the 1920 px screen, and the scale is 0.9 to 0.99 - what the screen lacks - not the shrink by 0.73 at every pass
+    that a ratio of the column to its contents asks for, which never fits."""
+    from PySide6.QtCore import QSize
+
+    from stmbench.gui import app as gui_app
+    try:
+        monkeypatch.setattr(gui_app, "column_needs",
+                            lambda sidebar, panels: (round(330 * style.SCALE), round(960 * style.SCALE)))
+        scale = gui_app.fit_scale(app, "en", 1.0, QSize(1920, 1080), 0)
+        assert 0.9 <= scale < 0.99 and style.SCALE == scale                          # left applied, as it says
+        assert gui_app.fit_scale(app, "en", scale, QSize(1920, 1080), 0) == scale    # and it fits
+        assert gui_app.fit_scale(app, "en", 1.0, QSize(2560, 1440), 0) == 1.0        # a screen with the room: no shrink
+    finally:
+        style.apply(app, 1.0)
 
 
 def test_a_sealed_window_opens_full_screen_and_a_dev_window_maximized(open_window, tmp_path):
