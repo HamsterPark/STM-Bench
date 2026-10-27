@@ -19,6 +19,7 @@ from stmbench.gui import fmt, jobs
 from stmbench.instrument import ActionError, Instrument
 from stmbench.instrument.export import read_export
 from stmbench.instrument.mcp_server import EpisodeServer
+from stmbench.trackB.rules import RULES_VERSION
 
 P4 = "P4_atom_positioning_cu111"
 #: a seed whose digits cannot turn up in a record by chance
@@ -352,8 +353,9 @@ def test_the_base_package_needs_no_qt_and_the_gui_command_says_which_extra_to_in
 def test_the_task_follows_the_sessions_language_and_the_claims_carry_both_wordings(tmp_path):
     zh = GuiSession(P4, 0, run_dir=tmp_path / "zh", export_dir=tmp_path / "zh_export", lang="zh")
     en = GuiSession(P4, 0, run_dir=tmp_path / "en", export_dir=tmp_path / "en_export", lang="en")
-    assert zh.task_text() == Instrument(P4, 0).task(lang="zh") and "【评分规则 v1】" in zh.task_text()
-    assert en.task_text() == Instrument(P4, 0).task(lang="en") and "[Scoring rules v1]" in en.task_text()
+    assert zh.task_text() == Instrument(P4, 0).task(lang="zh")
+    assert en.task_text() == Instrument(P4, 0).task(lang="en")
+    assert f"【评分规则 v{RULES_VERSION}】" in zh.task_text() and f"[Scoring rules v{RULES_VERSION}]" in en.task_text()
     assert en.claims()[0]["say_en"].startswith("The final position of the atom you moved") and zh.claims()[0]["say"]
     assert GuiSession(P4, 0, run_dir=tmp_path / "x", export_dir=tmp_path / "x_export", lang="fr").lang == "zh"
 
