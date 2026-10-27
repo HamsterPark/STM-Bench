@@ -527,7 +527,9 @@ class Instrument:
         if bool(on) and p.output_on:
             p.excitation_v = p.excitation_for(p.amp_setpoint_m)
         p.set_output(bool(on), w.clock.wall())
-        self._advance(5.0 * p.tau_s if on else 0.05)
+        ring = 5.0 * p.tau_s if on else 0.05
+        w.tunnel_interval(ring)                          # the tip tunnels while the oscillation rings up
+        self._advance(ring)
         # the frequency shift is re-zeroed where the tip is (PLL.FreqShiftAutoCenter)
         if on and not w.withdrawn:
             amp = p.amplitude_now(w.clock.wall())

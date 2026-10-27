@@ -28,11 +28,13 @@ SCEN = Path(__file__).resolve().parent.parent / "stmbench" / "trackB" / "scenari
 
 
 def _inst(tmp_path, seed=0, scenario=P4, **switches) -> Instrument:
-    """An episode on ``scenario`` with exactly the given switches on (the scenario's own are
-    replaced), and the tip made a good one so a test sees only what it set up."""
-    inst = Instrument(scenario, seed, tmp_path / f"run{seed}")
+    """An episode on ``scenario`` built with exactly the given switches on (the scenario's own are
+    replaced, so a blunt tip arrives elliptical only if asked), and the tip's hazard and
+    metastability reset so a test sees only what it sets up."""
+    sc = Scenario.load(SCEN / f"{scenario}.yaml")
+    sc.initial = {**(sc.initial or {}), "physics": dict(switches)}
+    inst = Instrument(sc, seed, tmp_path / f"run{seed}")
     w = inst.world
-    w.set_physics(PhysicsSwitches(**switches))
     w.tip.lambda_per_s = 1e-4
     w.tip.metastable = False
     return inst
@@ -190,6 +192,16 @@ def test_waiting_navigating_and_settling_count_and_the_rest_does_not(tmp_path):
     inst.act("coarse_move", direction="X+", steps=2)
     inst.act("approach", timeout_s=60.0)
     assert spy.calls == []
+
+
+def test_the_oscillations_ring_up_counts_as_tunnelling_time(tmp_path):
+    inst = _inst(tmp_path, scenario="P5_sader_jarvis_qplus", tip_changes_outside_scans=True)
+    w = inst.world
+    spy = _Spy(w)
+    inst.act("pll", on=True, amplitude_pm=50.0)
+    assert len(spy.calls) == 1 and spy.calls[0][0] == pytest.approx(5.0 * w.pll.tau_s) and spy.calls[0][0] > 0.05
+    inst.act("pll", on=False)
+    assert spy.calls[-1][0] == pytest.approx(0.05)
 
 
 def test_a_drag_keeps_its_own_hazard_and_does_not_count_twice(tmp_path):
@@ -430,6 +442,13 @@ def test_recoveries_in_a_drag_come_through_the_drags_own_hazard_call(tmp_path):
     for k in range(10):
         inst.act("move_tip", x_nm=2.0 + k, y_nm=1.0, speed_nm_s=0.3)       # 1 nm at 0.3 nm/s: 3.3 s each
     assert _recoveries(w, n0)
+
+
+def test_the_replay_names_every_recovery_it_can_be_shown():
+    from stmbench.replay import lay
+
+    for kind in Tip.RECOVERY_TAU_S:
+        assert f"recovery_{kind}" in lay.TIP_CAUSE and lay.TIP_CAUSE[f"recovery_{kind}"]
 
 
 def test_the_unstable_arrival_condition_keeps_the_rest_value_it_was_raised_from(tmp_path):
@@ -854,6 +873,20 @@ def test_the_crash_draws_what_a_crash_always_drew_and_no_new_stream(tmp_path):
     for k in ("outscan", "recovery", "aniso", "world", "noise", "df"):
         assert after[k] == before[k]
     assert after["tip"] != before["tip"]                      # Tip.crash draws from the tip's own stream, as ever
+
+
+def test_the_controllers_gain_command_goes_through_the_same_check(tmp_path):
+    from stmsim.modules import build_dispatcher
+
+    inst = _inst(tmp_path, crash_over_range=True)
+    w = inst.world
+    d = build_dispatcher(w)
+    inst.act("set_setpoint", current_pa=5000.0)
+    d.handler_for("Current.GainSet")(4, 0)                 # index 4 = the 1 nA range, under a 5 nA setpoint
+    assert w.preamp.full_scale_a == 10.0 / (10.0 ** 10) and w.preamp.gain_index == 4
+    assert w.over_range() and _reasons(w) == ["setpoint_over_range"]
+    d.handler_for("Current.GainSet")(2, 0)                 # the 100 nA range again
+    assert not w.over_range()
 
 
 @pytest.mark.parametrize("na,idx", [(10000.0, 0), (1000.0, 1), (100.0, 2), (10.0, 3), (1.0, 4), (0.1, 5)])

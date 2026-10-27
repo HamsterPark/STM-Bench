@@ -286,7 +286,7 @@ class World:
         the feedback switched on or off, a withdrawal, a landing). Entering it crashes the tip
         once — the loop extends into the sample — if the sample is within the piezo's reach;
         leaving it re-arms that crash. Staying in it costs nothing here (a scan or a move made
-        in it ploughs: :meth:`_plough`)."""
+        in it ploughs: :meth:`_plough_if_pressed`)."""
         now = self.over_range()
         if now and not self._over_range_seen and self._fine_range_ok(self._equilibrium_z_tip()):
             self._over_range_seen = True
