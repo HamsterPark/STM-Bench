@@ -6,6 +6,8 @@ from __future__ import annotations
 
 import json
 import re
+import shutil
+import subprocess
 import threading
 import urllib.error
 import urllib.request
@@ -185,3 +187,52 @@ def test_the_page_calls_only_endpoints_the_server_serves():
     with open(console_server.__file__, encoding="utf-8") as fh:
         served = set(re.findall(r'p == "(/api/[a-z_.]+)"', fh.read()))
     assert used and used <= served, used - served
+
+
+# ── the page's script, run under node (no browser) ──────────────────────────
+needs_node = pytest.mark.skipif(shutil.which("node") is None, reason="node is not installed")
+
+
+def _page_script() -> str:
+    return re.search(r"<script>(.*?)</script>", console_server.PAGE.read_text(encoding="utf-8"), re.S).group(1)
+
+
+@needs_node
+def test_the_pages_script_is_valid_javascript(tmp_path):
+    js = tmp_path / "page.js"
+    js.write_text(_page_script(), encoding="utf-8")
+    done = subprocess.run(["node", "--check", str(js)], capture_output=True, text=True)
+    assert done.returncode == 0, done.stderr
+
+
+@needs_node
+def test_a_move_trace_opens_on_z_against_distance_and_is_selected_after_the_move(tmp_path):
+    """What the page does with a move's reply and record, run on the real ones: the reply names the
+    trace (not a spectrum), which the page selects like a spectrum, and its record opens on Z against
+    the distance along the move; a sweep and a frame keep what they had. The units table knows
+    the trace's columns."""
+    with serving(Console(tmp_path / "run", P4, 0)) as c:
+        _, move = c.post("/api/act", {"name": "move_tip", "args": {"x_nm": 3.0, "y_nm": 0.0, "speed_nm_s": 20.0}})
+        _, trace = c.get("/api/spectrum?s=" + move["trace"])
+        _, scan = c.post("/api/act", {"name": "scan", "args": SCAN})
+    assert "spectrum" not in move and trace["kind"] == "move"
+    pure = re.search(r"// <pure>[^\n]*\n(.*?)// </pure>", console_server.PAGE.read_text(encoding="utf-8"), re.S).group(1)
+    sweep = {"kind": "bias sweep", "v": list(range(10)), "didv": [1.0] * 10, "i": [0.5] * 10}
+    js = tmp_path / "pure.js"
+    js.write_text(pure + """
+const x = JSON.parse(require('fs').readFileSync(0, 'utf8'));
+console.log(JSON.stringify({
+  move: savedBy(x.move), frame: savedBy(x.scan), sweep: savedBy({ spectrum: 's.dat' }), none: savedBy({ tip_nm: [1, 2] }),
+  trace_axes: defaultAxes(x.trace, numericCols(x.trace)), sweep_axes: defaultAxes(x.sweep, numericCols(x.sweep)),
+  cols: numericCols(x.trace), units: [UNITS.dist, UNITS.t, UNITS.z_abs, UNITS.i],
+}));
+""", encoding="utf-8")
+    done = subprocess.run(["node", str(js)], input=json.dumps({"move": move, "scan": scan, "trace": trace, "sweep": sweep}),
+                          capture_output=True, text=True)
+    assert done.returncode == 0, done.stderr
+    got = json.loads(done.stdout)
+    assert got["move"] == {"kind": "spectrum", "name": move["trace"]} and got["frame"] == {"kind": "frame", "name": scan["frame"]}
+    assert got["sweep"] == {"kind": "spectrum", "name": "s.dat"} and got["none"] is None
+    assert sorted(got["cols"]) == ["dist", "i", "t", "z_abs"] and got["trace_axes"] == ["dist", "z_abs"]
+    assert got["sweep_axes"] == ["v", "didv"]                              # a sweep opens as it did
+    assert got["units"] == ["m", "s", "m", "A"]
