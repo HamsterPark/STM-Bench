@@ -7,7 +7,10 @@ State (docs/DESIGN.md §4.2):
   material step so a double tip on a stepped surface produces integer-step ghost terraces
   (the stepped-surface ghost terraces used by the double-tip analysis);
 * ``radius_m`` — bluntness; images are blurred with ``sigma_eff = sqrt(R / 2κ)``;
-* ``axis_ratio``, ``angle`` — anisotropy;
+* ``axis_ratio``, ``angle`` — anisotropy: the minor over the major axis of the tip's blur of the
+  smooth surface (1 = round) and the direction of the major axis, counter-clockwise from +x in
+  the sample frame. Both only reach an image when a scenario switches ``tip_anisotropy`` on (see
+  :meth:`anisotropise` for what makes a tip anisotropic); otherwise they stay as they are;
 * ``phi_ev`` — the tip's contribution to the apparent barrier (contaminated tips lower it);
 * ``lambda_per_s`` — spontaneous change hazard; each change perturbs the apexes (a row
   DC jump ≥ tens of pm, what ``tip_change`` v2 looks for) — metastable after a pulse
@@ -89,6 +92,9 @@ class Tip:
     lambda_rest_per_s: float | None = None
     #: the generator of the tip's own recovery (``tip_recovery``); None = the tip never recovers
     recovery_rng: np.random.Generator | None = field(default=None, repr=False)
+    #: the generator of the anisotropy a crash, a pulse or a deep poke leaves (``tip_anisotropy``);
+    #: None = anisotropy is off: ``axis_ratio`` and ``angle`` stay as they are and are never drawn
+    aniso_rng: np.random.Generator | None = field(default=None, repr=False)
 
     # ── derived ──
     @property
@@ -253,13 +259,23 @@ class Tip:
     #: to be known in advance and is characterized during operation
     CONDITIONS = ("good", "blunt", "double", "unstable", "dirty")
 
-    def apply_condition(self, kind: str, scale: float = 0.5, angle_deg: float = 0.0) -> None:
+    #: how round a blunt tip arrives when ``anisotropic``: the axis ratio falls linearly from
+    #: ``BLUNT_AXIS_RATIO[0]`` (scale 0, the mildest, 3 nm) to ``[1]`` (scale 1, 8 nm) — ASSUMED
+    #: (no measurement): a worse tip is a longer ridge, and even the mildest is elongated by a
+    #: quarter, which an image of an atom shows
+    BLUNT_AXIS_RATIO = (0.80, 0.35)
+
+    def apply_condition(self, kind: str, scale: float = 0.5, angle_deg: float = 0.0,
+                        anisotropic: bool = False) -> None:
         """Put the tip in the state it arrived in. ``scale`` (0…1) is how bad within the kind;
-        ``angle_deg`` orients a second apex. Deterministic (no RNG draw), so the rest of the
-        tip's history is the one the seed gives.
+        ``angle_deg`` orients a second apex (or, for a blunt tip with ``anisotropic``, the
+        long axis of its blur). Deterministic (no RNG draw), so the rest of the tip's history
+        is the one the seed gives.
 
         * ``blunt`` — a 3–8 nm radius, and the apex smearing that goes with it: blurred
-          images, no atomic lattice, a weak grip on adatoms;
+          images, no atomic lattice, a weak grip on adatoms; with ``anisotropic`` also an
+          elliptical blur (:attr:`BLUNT_AXIS_RATIO` from ``scale``, the long axis along
+          ``angle_deg``);
         * ``double`` — a second apex 0.8–4 nm off, 20–80 pm shorter: every feature doubled,
           and a second place that can grab an adatom;
         * ``unstable`` — metastable with a 3e-3–3e-2 /s change hazard: row jumps, spectra
@@ -276,6 +292,10 @@ class Tip:
             mean = (0.06 + 0.04 * self.radius_m * 1e9) * 1e-9          # the radius map's centre
             self.apex_sigma_m = float(min(max(mean, self.APEX_SIGMA_FLOOR_M), self.APEX_SIGMA_CEIL_M))
             self.apex_radius_ref_m = self.radius_m
+            if anisotropic:
+                hi, lo = self.BLUNT_AXIS_RATIO
+                self.axis_ratio = float(hi + (lo - hi) * s)
+                self.angle = math.radians(float(angle_deg))
         elif kind == "double":
             d = (0.8 + 3.2 * s) * 1e-9
             th = math.radians(float(angle_deg))
@@ -337,7 +357,7 @@ class Tip:
         self.events.append(TipEvent(sim_s, kind, detail, self.snapshot()))
 
     def snapshot(self) -> dict:
-        return {
+        snap = {
             "material": self.material, "form": self.form,
             "apexes": [a.as_tuple() for a in self.apexes], "n_apex": self.n_apex,
             "multi": self.is_multi(), "radius_nm": self.radius_m * 1e9,
@@ -351,6 +371,36 @@ class Tip:
             "qplus_f0_hz": self.qplus_f0_hz, "qplus_k_n_per_m": self.qplus_k_n_per_m,
             "qplus_q": self.qplus_q,
         }
+        if self.aniso_rng is not None:
+            # the direction of the long axis only means something when anisotropy is on: a ledger
+            # of any other scenario keeps the snapshot it always had
+            snap["angle_deg"] = math.degrees(self.angle)
+        return snap
+
+    # ── anisotropy: what makes the tip's blur elliptical (``tip_anisotropy``) ──
+    #: (low, high) of the uniform axis ratio each damaging operation leaves — ASSUMED, nothing
+    #: measured. A crash flattens the apex one way (the picked-up cluster is lopsided); a pulse
+    #: that reshapes the apex into several or blunter ones leaves a ridge, the worse the pulse
+    #: the longer; a ring-up spatters it like a crash. The long axis is uniform in [0, π).
+    #: A deep poke takes its ratio from the cluster it leaves (``cluster_axis_ratio``: the same
+    #: depth law, 0.74 at 0.2 nm falling to 0.35 at 2 nm), the deposit mirroring the apex.
+    ANISO_RATIO = {"crash": (0.40, 0.85), "reshaped_multi": (0.65, 0.95),
+                   "reshaped_blunt": (0.45, 0.85), "destroyed": (0.30, 0.70),
+                   "ring_up": (0.40, 0.85)}
+
+    def anisotropise(self, source: str, ratio: float | None = None) -> None:
+        """Make the tip anisotropic as a damaging operation does (``source``: a key of
+        :attr:`ANISO_RATIO`, or ``"poke"`` with the deposit's own ``ratio``): a new axis ratio
+        and long-axis direction, replacing the old ones. Draws from ``aniso_rng`` only, so no
+        stream of the tip gains a draw; does nothing when anisotropy is off."""
+        r = self.aniso_rng
+        if r is None:
+            return
+        if ratio is None:
+            lo, hi = self.ANISO_RATIO[source]
+            ratio = float(r.uniform(lo, hi))
+        self.axis_ratio = float(min(max(ratio, 0.15), 1.0))
+        self.angle = float(r.uniform(0.0, math.pi))
 
     # ── spontaneous evolution ──
     @staticmethod
@@ -518,10 +568,12 @@ class Tip:
                     for _ in range(n - 1)]
                 self.radius_m = float(self.radius_m * r.uniform(0.8, 1.5))
                 out = {"outcome": "reshaped_multi"}
+                self.anisotropise("reshaped_multi")
             else:
                 self.apexes = [Apex(0.0, 0.0, 0.0, 1.0)]
                 self.radius_m = float(self.radius_m * r.uniform(1.5, 3.0))
                 out = {"outcome": "reshaped_blunt"}
+                self.anisotropise("reshaped_blunt")
             self.metastable = True
             self.lambda_per_s = max(self.lambda_per_s, 3e-3)
             self.flicker_dz_m = 0.0            # the apex was re-formed: whatever flickered is gone
@@ -534,6 +586,7 @@ class Tip:
             self.flicker_rate_hz = float(r.uniform(*self.CRASH_FLICKER_RATE_HZ))
             self.metastable = True
             out = {"outcome": "destroyed", "dz_m": float(r.uniform(30e-9, 80e-9))}
+            self.anisotropise("destroyed")
             if av > 1.6 * envelope_v:
                 self.dead = True
         self.last_persistent_dz_m = self.persist_frac * float(out.get("dz_m", 0.0))
@@ -558,6 +611,7 @@ class Tip:
                 for _ in range(int(r.integers(1, 3)))]
             out.update(outcome="ring_up", dz_m=float(r.uniform(5e-9, 30e-9)), n_clusters=int(r.integers(6, 15)))
             self._refresh_apex(r)
+            self.anisotropise("ring_up")
             self._log(sim_s, "poke", bias_v=bias_v, **out)
             return out
         if d < self.contact_depth_m * r.uniform(0.7, 1.0):
@@ -603,6 +657,7 @@ class Tip:
                 if r.random() < 0.25 * min(depth_nm / 2.0, 1.5) and self.n_apex < 4:
                     self.apexes.append(Apex(float(r.normal(0, 2e-9)), float(r.normal(0, 2e-9)), -step_m, float(r.uniform(0.3, 0.8))))
                 self.metastable = False
+                self.anisotropise("poke", ratio)           # the cluster it leaves is the apex's own shape
             self.contact_depth_m = float(max(0.1e-9, self.contact_depth_m * r.uniform(0.9, 1.1)))
         self.length_m += 0.3 * float(out.get("dz_m", 0.0))
         self._log(sim_s, "poke", bias_v=bias_v, **out)
@@ -638,6 +693,7 @@ class Tip:
         self.flicker_dz_m = float(r.uniform(*self.CRASH_FLICKER_DZ_M) * min(max(severity, 1.0), 2.0))
         self.flicker_rate_hz = float(r.uniform(*self.CRASH_FLICKER_RATE_HZ))
         self.phi_ev = float(min(self.phi_ev, r.uniform(1.0, 3.0)))
+        self.anisotropise("crash")
         out = {"outcome": "crashed", "severity": severity, "n_apex": self.n_apex,
                "flicker_dz_pm": self.flicker_dz_m * 1e12, "flicker_rate_hz": self.flicker_rate_hz}
         self._log(sim_s, "crash", **out)

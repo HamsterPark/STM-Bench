@@ -429,3 +429,253 @@ def test_the_unstable_arrival_condition_keeps_the_rest_value_it_was_raised_from(
     seed = next(s for s in range(60) if resolve_hidden(sc.hidden, s, sc.id)["tip"]["condition"] == "unstable")
     w = sc.build_world(seed, tmp_path / "s", virtual_clock=True)
     assert w.tip.lambda_per_s >= 3e-3 and w.tip.lambda_rest_per_s == pytest.approx(1e-4)
+
+
+# ── tip_anisotropy ───────────────────────────────────────────────────────────
+import math  # noqa: E402
+
+from scipy import ndimage  # noqa: E402
+
+from stmsim.physics.adatoms import AdatomParams  # noqa: E402
+from stmsim.physics.clock import VirtualClock  # noqa: E402
+from stmsim.physics.rig import RigProfile  # noqa: E402
+from stmsim.physics.scanner import SIG_Z, gaussian_blur_cov  # noqa: E402
+from stmsim.physics.tip import Tip  # noqa: E402
+from stmsim.physics.world import World  # noqa: E402
+
+PARAMS = AdatomParams(r_threshold_ohm=200e3, r_pick_ohm=30e3, v_max_m_s=1e-9, p_slip=0.0)
+
+
+def _atom_world(tmp_path, seed=4, **switches):
+    """A Cu(111) world with one atom and nothing else, no drift, in tunnelling."""
+    w = World(rig=RigProfile.load("reference-stm"), seed=seed, material="Cu(111)", time_scale=1.0,
+              clock=VirtualClock(), session_dir=tmp_path / "s", adsorbate_density_per_um2=0.0)
+    w.drift_v_m_per_s = np.zeros(3)
+    w.surface.configure_adatoms(PARAMS, {"layout": "single", "target_dx_nm": 4.0, "n_bystanders": 0})
+    w.coarse.coarse_gap_m = w.surface_height_here() + 0.6e-9
+    w.withdrawn = False
+    w.zctrl_set(True)
+    w.transients.clear()
+    w.bias_v, w.zctrl.setpoint_a = 0.05, 200e-12
+    w.set_physics(PhysicsSwitches(**switches))
+    reg = w.surface.site.adatoms
+    atom = reg.atoms[reg.target["atom_id"]]
+    return w, reg.site_xy(atom.i, atom.j)
+
+
+def _frame(w, cx, cy, size_nm=3.0, px=96, angle_deg=0.0, up=False):
+    """The Z channel of a frame in image orientation (row 0 = the high-v edge, column 0 = low u)."""
+    st = w.scan
+    st.cx, st.cy, st.w, st.h, st.angle_deg = cx, cy, size_nm * 1e-9, size_nm * 1e-9, float(angle_deg)
+    st.nx = st.ny = px
+    st.line_time_fwd_s = st.line_time_bwd_s = 0.5
+    st.autosave = st.continuous = st.bouncy = False
+    w.move_xy(cx, cy)
+    w.scan_start(direction_up=up)
+    z = np.asarray(w.frame.data[SIG_Z][0])
+    return z[::-1] if up else z
+
+
+def _long_axis(z, size_nm, angle_deg):
+    """(direction of the blob's long axis in the sample frame (deg, [0, 180)), minor/major width)
+    from the second moments of the part of the bump above 20 % of its height."""
+    ny, nx = z.shape
+    u = ((np.arange(nx) + 0.5) / nx - 0.5) * size_nm
+    v = (0.5 - (np.arange(ny) + 0.5) / ny) * size_nm
+    uu, vv = np.meshgrid(u, v)
+    base = np.median(np.concatenate([z[0], z[-1], z[:, 0], z[:, -1]]))
+    wgt = np.clip(z - base, 0.0, None)
+    wgt = np.where(wgt > 0.2 * wgt.max(), wgt, 0.0)
+    m = wgt.sum()
+    mu, mv = (wgt * uu).sum() / m, (wgt * vv).sum() / m
+    suu, svv = (wgt * (uu - mu) ** 2).sum() / m, (wgt * (vv - mv) ** 2).sum() / m
+    suv = (wgt * (uu - mu) * (vv - mv)).sum() / m
+    half_diff = math.hypot(suu - svv, 2.0 * suv)
+    psi = 0.5 * math.atan2(2.0 * suv, suu - svv)                  # the long axis in the scan frame
+    ratio = math.sqrt((suu + svv - half_diff) / (suu + svv + half_diff))
+    return (math.degrees(psi) + angle_deg) % 180.0, ratio
+
+
+def _angle_gap(a, b):
+    d = abs(a - b) % 180.0
+    return min(d, 180.0 - d)
+
+
+def test_the_blur_with_a_diagonal_covariance_is_the_separable_one():
+    rng = np.random.default_rng(0)
+    a = ndimage.gaussian_filter(rng.normal(size=(80, 90)), 3.0)         # smooth enough to compare
+    for sy, sx in ((1.0, 1.0), (2.0, 0.8), (0.5, 3.0)):
+        want = ndimage.gaussian_filter(a, (sy, sx), mode="nearest")
+        got = gaussian_blur_cov(a, np.diag([sy * sy, sx * sx]))
+        assert got.shape == a.shape
+        assert np.max(np.abs(got - want)) < 2e-3 * np.ptp(a)
+    assert gaussian_blur_cov(a, np.diag([0.05, 0.05])) is a              # no width the grid can show
+
+
+def test_a_round_tip_is_untouched_by_the_switch_and_an_elliptical_one_by_its_absence(tmp_path):
+    def frame_of(name, ratio, **switches):
+        w, (x, y) = _atom_world(tmp_path / name, **switches)         # a fresh world each: the noise is its own
+        w.tip.axis_ratio, w.tip.angle = ratio, 1.0
+        return _frame(w, x, y, angle_deg=30.0)
+
+    base = frame_of("a", 1.0)
+    assert np.array_equal(base, frame_of("b", 1.0, tip_anisotropy=True))     # round tip, switch on: the same frame
+    assert np.array_equal(base, frame_of("c", 0.3))                          # elliptical tip, switch off: ignored
+    assert not np.allclose(base, frame_of("d", 0.3, tip_anisotropy=True), atol=1e-12)
+
+
+@pytest.mark.parametrize("phi", [20.0, 100.0, 160.0])
+@pytest.mark.parametrize("theta", [0.0, 30.0, 90.0, -60.0])
+@pytest.mark.parametrize("up", [False, True])
+def test_an_elliptical_tip_elongates_an_atom_along_its_long_axis_in_any_scan_frame(tmp_path, phi, theta, up):
+    w, (x, y) = _atom_world(tmp_path, tip_anisotropy=True)
+    w.tip.radius_m, w.tip.axis_ratio, w.tip.angle = 6e-9, 0.3, math.radians(phi)
+    ang, ratio = _long_axis(_frame(w, x, y, angle_deg=theta, up=up), 3.0, theta)
+    assert _angle_gap(ang, phi) < 10.0, (ang, phi)               # fixed in the sample frame, however the frame is turned
+    assert ratio < 0.7                                            # visibly elongated (the atom alone is round)
+
+
+def test_a_round_tip_leaves_an_atom_round(tmp_path):
+    w, (x, y) = _atom_world(tmp_path, tip_anisotropy=True)
+    w.tip.radius_m = 6e-9
+    _, ratio = _long_axis(_frame(w, x, y), 3.0, 0.0)
+    assert ratio > 0.9
+
+
+def test_a_blunt_condition_arrives_elliptical_only_when_asked_and_without_a_draw():
+    for scale in (0.0, 0.5, 1.0):
+        t = Tip(rng=np.random.default_rng(3))
+        t.apply_condition("blunt", scale, 70.0)
+        assert t.axis_ratio == 1.0 and t.angle == 0.0                       # as it always was
+        a = Tip(rng=np.random.default_rng(3))
+        a.apply_condition("blunt", scale, 70.0, anisotropic=True)
+        assert a.axis_ratio == pytest.approx(0.80 - 0.45 * scale) and a.angle == pytest.approx(math.radians(70.0))
+        assert a.rng.bit_generator.state == t.rng.bit_generator.state     # deterministic: no tip draw
+    for kind in ("good", "double", "unstable", "dirty"):
+        t = Tip(rng=np.random.default_rng(3))
+        t.apply_condition(kind, 0.7, 70.0, anisotropic=True)
+        assert t.axis_ratio == 1.0 and t.angle == 0.0                       # only a blunt tip is elliptical
+
+
+def test_a_scenario_builds_its_blunt_tip_elliptical_along_the_angle_the_hidden_draw_gives(tmp_path):
+    import yaml
+    from pathlib import Path
+
+    from stmsim.scenario import Scenario, resolve_hidden
+
+    d = yaml.safe_load((Path(__file__).resolve().parent.parent / "stmbench" / "trackB" / "scenarios"
+                        / f"{P4}.yaml").read_text(encoding="utf-8"))
+    d["initial"]["physics"] = {"tip_anisotropy": True}
+    p = tmp_path / "p4.yaml"
+    p.write_text(yaml.safe_dump(d, allow_unicode=True), encoding="utf-8")
+    sc = Scenario.load(p)
+    seeds = [s for s in range(60) if resolve_hidden(sc.hidden, s, sc.id)["tip"]["condition"] == "blunt"][:3]
+    assert seeds
+    for s in seeds:
+        h = resolve_hidden(sc.hidden, s, sc.id)["tip"]
+        w = sc.build_world(s, tmp_path / f"s{s}", virtual_clock=True)
+        assert w.tip.axis_ratio == pytest.approx(0.80 - 0.45 * h["condition_scale"])
+        assert w.tip.angle == pytest.approx(math.radians(h["condition_angle_deg"]))
+        assert w.tip.snapshot()["angle_deg"] == pytest.approx(h["condition_angle_deg"])
+    other = next(s for s in range(60) if resolve_hidden(sc.hidden, s, sc.id)["tip"]["condition"] == "good")
+    assert sc.build_world(other, tmp_path / "g", virtual_clock=True).tip.axis_ratio == 1.0
+
+
+def _paired_tips(seed=5, **kw):
+    """Two tips with the same history seed, one anisotropic (own stream) and one not."""
+    off = Tip(rng=np.random.default_rng(seed), **kw)
+    on = Tip(rng=np.random.default_rng(seed), **kw)
+    on.aniso_rng = np.random.default_rng([seed, 0x71D3])
+    return off, on
+
+
+def _same_but_anisotropy(off, on):
+    a, b = off.snapshot(), on.snapshot()
+    b.pop("angle_deg")
+    assert {k: v for k, v in a.items() if k != "axis_ratio"} == {k: v for k, v in b.items() if k != "axis_ratio"}
+    assert off.rng.bit_generator.state == on.rng.bit_generator.state          # the tip's stream gained no draw
+
+
+def test_a_crash_leaves_the_tip_elliptical_and_draws_the_rest_as_before():
+    for sev in (1.0, 2.0):
+        off, on = _paired_tips()
+        off.crash(1.0, sev)
+        on.crash(1.0, sev)
+        assert off.axis_ratio == 1.0 and off.angle == 0.0
+        assert 0.40 <= on.axis_ratio <= 0.85 and 0.0 <= on.angle < math.pi
+        _same_but_anisotropy(off, on)
+
+
+def test_the_pulse_outcomes_that_ruin_the_apex_leave_it_elliptical_the_rest_do_not():
+    seen: dict[str, tuple[float, float]] = {}
+    lo_hi = {"reshaped_multi": (0.65, 0.95), "reshaped_blunt": (0.45, 0.85), "destroyed": (0.30, 0.70)}
+    for seed in range(200):
+        off, on = _paired_tips(seed)
+        v = 12.0 if seed % 7 == 0 else 5.0                    # 12 V is over the envelope: destroyed
+        a, b = off.pulse(1.0, v, 0.05), on.pulse(1.0, v, 0.05)
+        assert a["outcome"] == b["outcome"] and off.axis_ratio == 1.0 and off.angle == 0.0
+        _same_but_anisotropy(off, on)
+        if b["outcome"] in lo_hi:
+            lo, hi = lo_hi[b["outcome"]]
+            assert lo <= on.axis_ratio <= hi and 0.0 <= on.angle < math.pi
+            seen[b["outcome"]] = (on.axis_ratio, on.angle)
+        else:
+            assert on.axis_ratio == 1.0 and on.angle == 0.0   # reshaped_better keeps a round tip round
+    assert set(seen) == set(lo_hi)
+    off, on = _paired_tips()
+    on.pulse(1.0, 1.0, 0.05)                                   # no_effect (below the threshold)
+    assert on.axis_ratio == 1.0 and on.angle == 0.0
+
+
+def test_a_deep_poke_takes_the_deposits_shape_and_a_shallow_one_does_not():
+    off, on = _paired_tips(7)
+    out = on.poke(1.0, 1.5e-9, 0.05)
+    assert out["outcome"] in ("cluster", "pit") and on.axis_ratio == pytest.approx(out["cluster_axis_ratio"])
+    assert 0.0 <= on.angle < math.pi
+    off.poke(1.0, 1.5e-9, 0.05)
+    _same_but_anisotropy(off, on)
+    for seed in range(30):
+        off, on = _paired_tips(seed)
+        on.axis_ratio, on.angle = 0.5, 1.0
+        o = on.poke(1.0, 0.4e-9, 0.05)
+        assert o["outcome"] in ("no_change", "cluster", "pit")
+        assert on.axis_ratio in (0.5, 0.7) and on.angle == 1.0   # only the existing 25 % restoration (+0.2)
+    off, on = _paired_tips(11)
+    on.axis_ratio = 0.5
+    assert on.poke(1.0, 0.05e-9, 0.05)["outcome"] == "no_change" and on.axis_ratio == 0.5
+
+
+def test_the_restorations_that_were_always_there_still_restore():
+    restored = []
+    for seed in range(200):
+        _, on = _paired_tips(seed)
+        on.axis_ratio, on.angle = 0.4, 1.0
+        if on.pulse(1.0, 5.0, 0.05)["outcome"] == "reshaped_better":
+            restored.append(on.axis_ratio)
+    assert restored and all(0.5 <= r <= 0.9 for r in restored) and max(restored) > 0.5
+
+
+def test_a_ring_up_spatters_the_apex_into_an_ellipse_too():
+    for seed in range(40):
+        off, on = _paired_tips(seed, form="qplus")
+        a, b = off.poke(1.0, 0.1e-9, 0.2), on.poke(1.0, 0.1e-9, 0.2)
+        assert a["outcome"] == b["outcome"]
+        if b["outcome"] == "ring_up":
+            assert 0.40 <= on.axis_ratio <= 0.85 and off.axis_ratio == 1.0
+            _same_but_anisotropy(off, on)
+            return
+    pytest.fail("no ring-up in 40 tips")
+
+
+def test_the_world_wires_its_anisotropy_stream_and_nothing_draws_it_when_off(tmp_path):
+    inst = _inst(tmp_path / "off")
+    assert inst.world.tip.aniso_rng is None and "angle_deg" not in inst.world.tip.snapshot()
+    before = _states(inst.world)
+    inst.world._crash("test")
+    inst.world.bias_pulse(0.05, 12.0, True, 1)
+    assert inst.world.tip.axis_ratio == 1.0 and inst.world.tip.angle == 0.0
+    assert _states(inst.world)["aniso"] == before["aniso"]
+    on = _inst(tmp_path / "on", tip_anisotropy=True)
+    assert on.world.tip.aniso_rng is on.world.rng_aniso and "angle_deg" in on.world.tip.snapshot()
+    on.world._crash("test")
+    assert on.world.tip.axis_ratio < 1.0 and _states(on.world)["aniso"] != before["aniso"]

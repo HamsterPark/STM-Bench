@@ -252,6 +252,7 @@ class Scenario:
         rig = RigProfile.load(self.rig)
         ini = self.initial or {}
         drawn = self.draw_hidden(seed)
+        physics = self.physics_switches()
         tip_cfg = {**dict(ini.get("tip", {})), **drawn.get("tip", {})}
         tip = Tip(material=str(tip_cfg.get("material", rig.get("tip.material", "W"))),
                   form=str(tip_cfg.get("form", rig.get("tip.form", "qplus"))),
@@ -281,8 +282,11 @@ class Scenario:
             tip.ldos.extra_peaks.append((float(e0), float(amp), float(wdt)))
             tip.ldos.name = "featured"
         if tip_cfg.get("condition"):
+            # with tip_anisotropy a blunt tip arrives elliptical: its ratio from the scale and its
+            # long axis along the angle the same hidden draws already give (HIDDEN_SCHEMA is unchanged)
             tip.apply_condition(str(tip_cfg["condition"]), float(tip_cfg.get("condition_scale", 0.5)),
-                                float(tip_cfg.get("condition_angle_deg", 0.0)))
+                                float(tip_cfg.get("condition_angle_deg", 0.0)),
+                                anisotropic=physics.tip_anisotropy)
         if "f0_hz" in drawn.get("qplus", {}):
             tip.qplus_f0_hz = float(drawn["qplus"]["f0_hz"])
         if "k_n_per_m" in drawn.get("qplus", {}):
@@ -303,7 +307,7 @@ class Scenario:
                   herringbone=herringbone, surface_state=surface_state,
                   terrace_median_m=(float(surf["terrace_median_nm"]) * 1e-9
                                     if surf.get("terrace_median_nm") else None))
-        w.set_physics(self.physics_switches())
+        w.set_physics(physics)
         if drawn:
             w.hidden = {"draws": flatten_draws(drawn),
                         "stream": [int(seed), HIDDEN_STREAM,

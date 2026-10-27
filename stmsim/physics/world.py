@@ -226,6 +226,7 @@ class World:
         with self.lock:
             self.physics = physics
             self.tip.recovery_rng = self.rng_recovery if physics.tip_recovery else None
+            self.tip.aniso_rng = self.rng_aniso if physics.tip_anisotropy else None
 
     # ────────────────────────── derived physics ──────────────────────────
     def phi_junction(self) -> float:
