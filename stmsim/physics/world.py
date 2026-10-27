@@ -27,6 +27,7 @@ from .paths import default_session_dir
 from .rig import RigProfile
 from .scanner import SIG_CURRENT, SIG_Z, Frame, Renderer, ScanSettings
 from .surface import Feature, Surface
+from .switches import TIP_ANISO_STREAM, TIP_OUTSCAN_STREAM, TIP_RECOVERY_STREAM, PhysicsSwitches
 from .tip import Tip
 
 ZCTRL_OFF, ZCTRL_ON, ZCTRL_HOLD, ZCTRL_SWITCHING_OFF, ZCTRL_SAFETIP, ZCTRL_WITHDRAWING = 1, 2, 3, 4, 5, 6
@@ -212,6 +213,18 @@ class World:
             from .qplus import PLLState
             self.pll = PLLState.from_rig(self.rig, self.tip)
         self.df_rng = np.random.default_rng([seed, 0xDF])   # Δf noise: its own stream
+        # ── scenario physics (stmsim.physics.switches): off unless a scenario switches it on.
+        # Each mechanism draws from its own generator and never from another's, so a switch that
+        # is off leaves every draw of the world as it was; making a generator draws nothing.
+        self.physics = PhysicsSwitches()
+        self.rng_outscan = np.random.default_rng([seed, TIP_OUTSCAN_STREAM])
+        self.rng_recovery = np.random.default_rng([seed, TIP_RECOVERY_STREAM])
+        self.rng_aniso = np.random.default_rng([seed, TIP_ANISO_STREAM])
+
+    def set_physics(self, physics: PhysicsSwitches) -> None:
+        """Switch scenario physics on or off (:class:`~stmsim.physics.switches.PhysicsSwitches`)."""
+        with self.lock:
+            self.physics = physics
 
     # ────────────────────────── derived physics ──────────────────────────
     def phi_junction(self) -> float:
@@ -1346,6 +1359,9 @@ class World:
             # the physical sample tilt is reported alongside and never changes
             resid = self.surface.residual_tilt()
             tilt = self.surface.site.tilt
+            # the switches a scenario turned on are part of what the run was up against; a world
+            # without any records nothing, so ledgers of such scenarios read as they always did
+            physics = {"physics": self.physics.as_dict()} if self.physics.any() else {}
             return {
                 "sim_s": self.clock.sim(), "wall_s": self.clock.wall(),
                 "material": self.surface.material.name,
@@ -1386,6 +1402,7 @@ class World:
                 "n_zspec": len(self.zspec_records),
                 "n_dats": len(self.dats_saved),
                 **self._qplus_truth(),
+                **physics,
             }
 
     def _qplus_truth(self) -> dict:

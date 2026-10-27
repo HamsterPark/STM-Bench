@@ -41,6 +41,11 @@ A paper scenario also says its task in English: ``task_en`` beside ``task``, and
 beside each claim's ``say``. The rule card is generated in either language from the same fields
 (:func:`stmbench.trackB.rules.task_text`); the English words are plain text, outside
 :data:`HIDDEN_SCHEMA` and every random stream.
+
+**Physics switches.** ``initial.physics`` names the mechanisms the scenario switches on (tip
+changes outside scans, tip recovery, tip anisotropy, a crash when the setpoint exceeds the
+preamplifier range); see :mod:`stmsim.physics.switches`. A missing key is off, an unknown key
+raises, and a scenario without the block builds the world it always built.
 """
 from __future__ import annotations
 
@@ -55,6 +60,7 @@ import yaml
 
 from .faults import Fault, FaultScheduler
 from .physics.rig import RigProfile
+from .physics.switches import PhysicsSwitches
 from .physics.tip import Apex, Tip
 from .physics.clock import VirtualClock
 from .physics.world import World
@@ -190,6 +196,7 @@ class Scenario:
         if not self.id or not self.family:
             raise ValueError(f"scenario {self.path or self.id!r}: id and family are required")
         resolve_hidden(self.hidden, 0, self.id)          # raises on an unknown hidden key
+        self.physics_switches()                           # raises on an unknown physics switch
         if self.paper is not None:
             if self.success.get("kind") != "claims_verified":
                 raise ValueError(f"{self.id}: a paper scenario needs success.kind == 'claims_verified'")
@@ -227,6 +234,13 @@ class Scenario:
     # ── world construction ──
     def draw_hidden(self, seed: int) -> dict:
         return resolve_hidden(self.hidden, seed, self.id)
+
+    def physics_switches(self) -> PhysicsSwitches:
+        """The scenario's ``initial.physics`` block (every switch off when it has none)."""
+        try:
+            return PhysicsSwitches.from_config((self.initial or {}).get("physics"))
+        except ValueError as exc:
+            raise ValueError(f"{self.id}: {exc}") from None
 
     def build_world(self, seed: int, session_dir: str | Path, *, virtual_clock: bool = False) -> World:
         """The world this scenario describes, for ``seed``.
@@ -286,6 +300,7 @@ class Scenario:
                   herringbone=herringbone, surface_state=surface_state,
                   terrace_median_m=(float(surf["terrace_median_nm"]) * 1e-9
                                     if surf.get("terrace_median_nm") else None))
+        w.set_physics(self.physics_switches())
         if drawn:
             w.hidden = {"draws": flatten_draws(drawn),
                         "stream": [int(seed), HIDDEN_STREAM,
