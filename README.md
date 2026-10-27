@@ -52,7 +52,7 @@ The benchmark's central contract is simple: **a scientific result must be accomp
 3. **Report with provenance.** `report_result` names the claim, its value and units, and its supporting frames or spectra. Positional reports identify the frame in which the coordinates were measured.
 4. **Verify the experiment.** The judge checks values, acquisition conditions, spatial coverage, event ordering, and required sample-state constraints. Complete success requires all claims in the scenario to pass within the episode budget.
 
-Frame provenance matters at STM length scales. The evaluator maps reported coordinates using the drift recorded for the relevant acquisition row. A post-manipulation image must follow the atom's motion; a spectrum must cover the required energy range at the required location. The [version-1 rules](stmbench/trackB/rules.py) expose these conditions directly to the agent.
+Frame provenance matters at STM length scales. The evaluator maps reported coordinates using the drift recorded for the relevant acquisition row. A post-manipulation image must follow the atom's motion; a spectrum must cover the required energy range at the required location. The [rule card](stmbench/trackB/rules.py) exposes these conditions directly to the agent.
 
 Acquisition checks establish that the required measurements occurred and that the reported evidence satisfies the task. They do not inspect the agent's internal derivation. Material knowledge is explicitly allowed for selected claims, including P1's period and P2's material parameters; their acquisition requirements still apply. This makes the role of prior knowledge and the role of experimental evidence explicit.
 
