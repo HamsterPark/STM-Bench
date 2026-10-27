@@ -332,6 +332,8 @@ def changed(start: MoveStart, world) -> None:
         return
     steps, prev = [], _height_signature(start.tip)
     for ev in new:
+        if not ev.state:                           # an event that kept no snapshot: the tip as it is covers it
+            continue
         view = _tip_at(start.tip, ev.state)
         sig = _height_signature(view)
         if sig != prev:
