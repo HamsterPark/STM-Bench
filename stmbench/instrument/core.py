@@ -129,7 +129,7 @@ ACTIONS: dict[str, ActionSpec] = {s.name: s for s in (
     ActionSpec("set_current_range", "Select the preamplifier range (full-scale current).",
                (_P("full_scale_na", "number", "full scale (nA)", True, choices=tuple(_GAIN_FULL_SCALE_NA)),)),
     ActionSpec("move_tip", "Move the tip laterally in a straight line at a set speed, recording Z and the "
-                           "current along the path. Returns the trace's file name, which reports cite.",
+                           "current along the path. Returns the file name of the saved trace.",
                (_P("x_nm", "number", "target x (scan coordinates, nm)", True),
                 _P("y_nm", "number", "target y (scan coordinates, nm)", True),
                 _P("speed_nm_s", "number", "lateral speed (nm/s)", default=293.0, lo=0.01, hi=10000.0))),
