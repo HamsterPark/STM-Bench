@@ -90,7 +90,7 @@ def test_a_trace_that_cannot_be_read_reads_nothing():
     z = np.zeros(40)
     d = np.linspace(0.0, 2e-9, 40)
     for rec in ({"z_abs": z, "dist": d, "feedback": False},                 # no loop: Z shows nothing
-                {"z_abs": z[:5], "dist": d[:5], "feedback": True},          # too short
+                {"z_abs": z[:2], "dist": d[:2], "feedback": True},          # too short
                 {"z_abs": z, "dist": d * 50.0, "feedback": True},           # 100 nm: no drag of one atom
                 {"z_abs": z * np.nan, "dist": d, "feedback": True},
                 {"z_abs": z, "dist": d[:30], "feedback": True}):
@@ -143,3 +143,14 @@ def test_a_step_in_z_is_taken_out_before_it_can_be_read_as_a_fall():
     z[40:] -= 60e-12                                                # the same fall as an atom left behind, plus a step down
     r = T.read_drag({"z_abs": z, "dist": s, "feedback": True})
     assert r["steps"] == 1 and r["left_behind"] and r["hops"] == 0
+
+
+def test_the_last_hop_of_an_atom_nearly_home_reads_as_a_hop_and_a_hop_that_cannot_happen_does_not():
+    """A drag of 0.2 nm (five samples) is the last hop of an atom one site from its goal. It has to
+    read as moved: a baseline that took it for no hop would treat the atom's own step as drift. A
+    drag shorter than the lag a hop needs (0.15 nm) cannot hop."""
+    rng = np.random.default_rng(3)
+    for length, want in ((0.2e-9, 1), (0.1e-9, 0)):
+        n = int(round(length / 0.05e-9)) + 1
+        rec = {"z_abs": rng.normal(0.0, 2e-12, n), "dist": np.linspace(0.0, length, n), "feedback": True}
+        assert T.count_hops(rec) == want, length
