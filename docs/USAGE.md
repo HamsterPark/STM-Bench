@@ -143,8 +143,10 @@ preamplifier's limit when the range is too small for the current; with `crash_ov
 setpoint above the range, Z follows contact and `i` is the clamp), with the move's `from_nm`,
 `to_nm`, `speed_nm_s`, `bias_v`, `setpoint_pa` and `feedback`. The reply has no hop count, and
 nothing else says whether an atom moved: an atom pulled along gives a sawtooth in `z_abs` with the
-lattice period, one left behind makes it fall from the top of its bump; in a trace of a few
-nanometres the teeth are about two noises high, and the fall is what shows. A trace's file name
+lattice period, one left behind makes it fall from the top of its bump. A sample is the mean over
+its dwell (0.2 s at 0.25 nm/s), so its noise is a few tenths of a picometre in Z at that speed (and
+less than a scan pixel's 2 pm at any speed below about 20 nm/s); a tooth is a jump of a picometre or two,
+bigger when the atom lagged long before it hopped, and the fall is what shows most. A trace's file name
 cited in a report's `evidence` is passed over by the judge (it is listed as unresolved): it is not a
 frame, an STS or a Z spectrum.
 `stmbench.analysis.trace.count_hops` reads a drag's trace (what the scripted baseline does).
