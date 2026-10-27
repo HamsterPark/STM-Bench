@@ -10,21 +10,28 @@ hops after it. This module reads that from a trace record. It reads nothing but 
 arrays ``z_abs`` and ``dist`` and the flag ``feedback`` (a Z loop that is off holds Z, and Z
 shows nothing).
 
-**What the sawtooth is worth.** One tooth is a few picometres (the atom's apparent height after
-the tip's blur is 40-90 pm for a good tip, and the atom jumps when it lags the tip by 0.15 nm,
-where the bump has fallen by about a tenth), against a Z noise of about 2 pm per sample. A single
-hop is therefore hardly a signal, and a train of teeth is seen only as a faint ripple. What stands
-out is the *fall*: a tip that leaves the atom behind goes from the top of its bump to the bare
-surface, 20-90 pm over a stretch of the path as wide as the tip's blur, and *where* on the path that
-fall happens says how far the atom came along: with no hop it falls from the start, with n hops it
-holds its level for about n lattice spacings first. A trace that does not fall at all belongs to
-an atom that stayed under the tip, or to a tip that never had an atom.
+**What the sawtooth is worth.** One tooth is the drop of the bump between two hops: the atom's
+apparent height after the tip's blur is 40-90 pm for a good tip, and the atom jumps when it lags
+the tip by 0.15 nm, where the bump has fallen by about a tenth (3-5 pm). A sample of a slow
+drag is the mean over its dwell, with 0.4-0.9 pm of the instrument's noise at 0.25-4 nm/s, and
+the lattice makes the differences between samples spread by 0.5-1 pm even where the noise is less. The jump at a
+hop is 1-2 pm at the median (4-13 pm at the 90th percentile), so a single tooth is hardly a
+signal and a train of teeth is a faint ripple. What stands out is the *fall*: a tip that leaves
+the atom behind goes from the top of its bump to the bare surface, 20-90 pm over a stretch of
+the path as wide as the tip's blur, and *where* on the path that fall happens says how far the
+atom came along: with no hop it falls from the start, with n hops it holds its level for about n
+lattice spacings first. A trace that does not fall at all belongs to an atom that stayed under
+the tip, or to a tip that never had an atom. The other thing that stands out is the jump of a
+hop that came late: an atom that lagged a long way before the pull made it hop is put back under
+the tip in one step of 10-25 pm out of a fall, which the schedule that the fit assumes has no
+place for.
 
 So the reading fits the trace with the one thing that is known about a drag, a bump that the atom
 carries along for n hops and then leaves (:func:`fit`: a Gaussian of unknown width and height
 on a sloping background, the atom jumping at the lag the lattice allows), for every n, and
 asks which n the trace is best explained by and whether that beats the best no-hop explanation by
-more than noise could (:data:`SIGNIFICANT`). **It assumes the tip started over the atom it
+more than noise could (:data:`SIGNIFICANT`). Where the fit finds no hop but Z jumps up out of a
+fall (:func:`hop_steps`), the jump is read as a hop. **It assumes the tip started over the atom it
 drags** (a drag that begins on bare surface has no fall either); the baselines place the tip
 there by measuring the atom first.
 
@@ -32,21 +39,22 @@ there by measuring the atom first.
 events, read after each drag; seeds 0-119, which draw all five tips, the ladder 400 kohm x 0.8^k for
 14 rungs, 4 nm drags, the tip put 0.05 nm (rms) from the atom as a slow frame would; a small
 version is ``tests/test_analysis_trace.py``). At 0.25 nm/s, the scripted baseline's speed (1506
-drags in which the atom was not picked up): of the 1066 in which an atom hopped, 1021 (95.8 %)
-read as hopping - after 1 hop 66 %, 2-3 hops 94 %, 4 or more 100 % - and of the 440 in which it
-did not, 1 (0.2 %). The count is right to one hop in 91-100 % of the drags in which the atom was
-left behind (1-11 hops) and to three in 88 % of those in which it was carried the whole way
-(about 17 hops: 16 on a lattice row, more with a blunt tip's wandering hops). At 1 nm/s 89 % and
-0.4 %; at 4 nm/s, where an atom hops once or twice at most, 74 % and 0.3 %. An atom taken up by
-the tip reads as moved in 83-96 %. Drags under two nanometres leave too little of the fall to
-tell it from a drifting background: in drags of 0.2, 0.3, 0.6, 1.0 and 1.5 nm an atom that
-stayed reads as moved in 100, 100, 91, 58 and 9 %, and one that hopped as hopping in 100, 100,
-98, 96 and 96 % (2.5 nm: 0 % and 95 %; 60 seeds, 7 rungs of the ladder each), so the error is
-the one a baseline can afford. What it misses: a tall atom on a low barrier (a dirty tip) gives
-teeth of 15-25 pm that come at times the fitted schedule does not follow, and a drag of the kind
-can read as no hop (P4 seed 453, 2 drags of 11): the atom is looked for where it was, is not
-there, and the baseline surveys; counting the teeth instead does not help (3 clear jumps in 3 %
-of the trains), since most teeth are about as high as the noise.
+drags in which the atom was not picked up): of the 1066 in which an atom hopped, 1062 (99.6 %)
+read as hopping - after 1 hop 94 %, 2 or more 100 % - and of the 440 in which it did not, 6
+(1.4 %; 4 of them among the 34 drags in which the tip changed, where a jump of Z out of a fall
+is a hop to the reader whatever made it). Without the jump test the fit alone read 97.5 %, 93.8 %
+and 77.6 % of the hopped drags at 0.25, 1 and 4 nm/s, and 0.5 % of those that stayed. The count is right to one hop in 88-100 % of the
+drags in which the atom was left behind (1-11 hops) and to three in 95 % and 88 % of those that
+carried it 12-15 and 16 or more hops (the whole way: about 17 hops, 16 on a lattice row, more with
+a blunt tip's wandering hops). At 1 nm/s 99.2 % and 0.7 %; at 4 nm/s, where an atom hops once or
+twice at most, 97.0 % and 0.6 %. An atom taken up by the tip reads as moved in 96, 90 and 83 % at
+0.25, 1 and 4 nm/s. Drags under two nanometres leave too little of the fall to tell it from a
+drifting background: in drags of 0.2, 0.3, 0.6, 1.0, 1.5 and 2.5 nm an atom that stayed reads as
+moved in 100, 100, 92, 63, 4 and 3 %, and one that hopped as hopping in 100, 100, 100, 98, 98 and
+100 % (60 seeds, 7 rungs of the ladder each), so the error is the one a baseline can afford. What
+it misses: a hop whose jump is no higher than the lattice ripple and that comes where the fit
+has no place for it (4 of 1066 at 0.25 nm/s, 3 of them blunt tips); counting the teeth instead
+does not help, since most are 1-3 pm.
 """
 from __future__ import annotations
 
@@ -77,8 +85,9 @@ SIGNIFICANT = 16.0
 #: explained a trace by 2000 noises squared (the 1st percentile) and the median by 8000; of those
 #: that carried it to the end, the lattice and the teeth that the fit has no place for reached 8
 #: at the median, 46 at the 90th percentile and 129 at the 95th. Anything from 60 to 1000 reads
-#: both right; 100 is the one that keeps a short drag as it was read: so short a fall is still small,
-#: and an atom that stayed in a drag under a nanometre reads as moved, which a baseline can afford
+#: both right; 100 is the one that keeps a short drag as it was read: an atom that stayed in a
+#: 0.6 or 1.0 nm drag reads as moved (92 and 63 %, the same as with 2 pm of noise per sample) because
+#: so short a fall is still small, and a baseline can afford that error
 FALL_CHI2 = 100.0
 #: a step between two samples this many noises (of a difference) high, and at least this high
 #: (pm), is not a bump or a tooth: a tip that changed, an atom taken up, a step edge of the
@@ -90,11 +99,40 @@ MAX_PATH_M = 40e-9
 #: drag of 0.2 nm, five samples, and it has to read as a hop (an atom that stayed reads as
 #: moved there too: with so little of the path the fall cannot be told from a drifting
 #: background, and a baseline can afford that error, not the other). And the least noise per
-#: sample (pm) a trace is read with, whatever so few samples say of it: a sample of a slow drag has
-#: 0.2-0.9 pm of the instrument's noise (a mean over its dwell: stmsim.physics.noise), and the
+#: sample (pm) a trace is read with, whatever so few samples say of it: a sample of a drag at
+#: 0.25-4 nm/s has 0.4-0.9 pm of the instrument's noise (a mean over its dwell: stmsim.physics.noise), and the
 #: lattice and the teeth make the differences between samples spread by 0.5-1 pm even then
 MIN_SAMPLES = 3
 MIN_NOISE_PM = 1.0
+#: a hop that comes after the atom has lagged far behind the tip (the pull took a while to make it
+#: follow) puts the bump back under the tip in one step: Z jumps up out of a fall. Such a step is
+#: not a tooth of the schedule the fit assumes. It counts as a hop when it is this many noises (of
+#: a difference) high and at least this high (pm), stands out of the differences beside it (a ramp,
+#: a bump coming under the tip, does not), and Z had fallen by this much (pm) over the
+#: :data:`UP_STEP_LOOKBACK` samples before it (the tip was pulling away from the atom)
+UP_STEP_SIGMAS, UP_STEP_MIN_PM, UP_STEP_DECLINE_PM, UP_STEP_LOOKBACK = 6.0, 5.0, 3.0, 3
+#: the least noise (pm) a difference's spread is taken to have in that test
+MIN_STEP_NOISE_PM = 0.3
+
+
+def hop_steps(z_pm: np.ndarray) -> list[int]:
+    """The samples of ``z_pm`` (pm) at which Z has jumped up the way an atom's hop after a long lag
+    makes it (see :data:`UP_STEP_SIGMAS`): index ``k`` is a jump from sample ``k - 1`` to ``k``. A
+    step that is not preceded by a fall (a tip change that made the bump taller, a step edge) is not
+    one, nor is a step down (an atom taken up, a tip change). Needs a few more samples than the
+    look-back, else nothing."""
+    z_pm = np.asarray(z_pm, float)
+    d = np.diff(z_pm)
+    if d.size < UP_STEP_LOOKBACK + 2:
+        return []
+    sigma = max(1.4826 * float(np.median(np.abs(d - np.median(d)))), MIN_STEP_NOISE_PM)
+    beside = 0.5 * (np.concatenate([[0.0], d[:-1]]) + np.concatenate([d[1:], [0.0]]))
+    out: list[int] = []
+    for k in np.flatnonzero((d > UP_STEP_MIN_PM) & (d - beside > UP_STEP_MIN_PM) & (d - beside > UP_STEP_SIGMAS * sigma)):
+        if k >= UP_STEP_LOOKBACK and z_pm[k] - z_pm[k - UP_STEP_LOOKBACK] < -UP_STEP_DECLINE_PM \
+                and (not out or k + 1 - out[-1] > 1):
+            out.append(int(k) + 1)
+    return out
 
 
 def _noise_pm(z_pm: np.ndarray) -> float:
@@ -203,6 +241,9 @@ def read_drag(spectrum: dict, *, spacing_m: float = SPACING_M) -> dict:
     out["left_behind"] = True
     best = int(np.argmax(chi2[: n_behind + 1]))
     out["hops"] = best if best >= 1 and chi2[best] - chi2[0] > SIGNIFICANT else 0
+    if out["hops"] == 0:
+        # no fall a count of hops explains: a hop after a long lag shows as a jump, not as a late fall
+        out["hops"] = len(hop_steps(np.asarray(spectrum["z_abs"], float) * 1e12))
     return out
 
 

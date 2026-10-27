@@ -52,6 +52,52 @@ def test_an_atom_left_where_it_was_reads_no_hop(tmp_path):
     assert T.count_hops(rec) == 0
 
 
+@pytest.mark.parametrize("seed,rung", [(84, 1), (31, 0), (34, 1), (23, 2)])
+def test_a_hop_after_a_long_lag_is_read_from_its_jump(tmp_path, monkeypatch, seed, rung):
+    """One hop, late in the drag (0.35 nm or more along it): the atom lagged until the pull made
+    it hop, so the hop is a jump of 11-23 pm out of a fall, which the schedule the fit assumes has no
+    place for. The fit alone reads these as no hop (the last one's jump is even taken out as a
+    step); the jump is what says the atom moved."""
+    rec, hops, picked = _drag(tmp_path, seed, rung)
+    assert hops == 1 and not picked
+    assert len(T.hop_steps(np.asarray(rec["z_abs"]) * 1e12)) == 1
+    r = T.read_drag(rec)
+    assert r["hops"] == 1 and r["left_behind"] and not r["carried"]
+    monkeypatch.setattr(T, "hop_steps", lambda z: [])
+    assert T.read_drag(rec)["hops"] == 0
+
+
+def test_hop_steps_finds_a_jump_up_out_of_a_fall_and_nothing_else():
+    rng = np.random.default_rng(4)
+    k = np.arange(60)
+    fall = -1.5 * k + rng.normal(0.0, 0.5, 60)                       # pm: the tip pulling away from the atom
+    jump = fall.copy()
+    jump[20:] += 12.0
+    assert T.hop_steps(jump) == [20]
+    two = jump.copy()
+    two[40:] += 9.0
+    assert T.hop_steps(two) == [20, 40]
+    # not a hop: a bump coming under the tip (a ramp), a step with no fall before it (a tip that
+    # changed), a step down, a step too small, one before the fall can be seen, a trace too short
+    ramp = fall.copy()
+    ramp[20:25] += np.linspace(0.0, 14.0, 5)
+    ramp[25:] += 14.0
+    assert T.hop_steps(ramp) == []
+    flat = rng.normal(0.0, 0.5, 60)
+    flat[30:] += 14.0
+    assert T.hop_steps(flat) == []
+    down = fall.copy()
+    down[20:] -= 12.0
+    assert T.hop_steps(down) == []
+    small = fall.copy()
+    small[20:] += 3.0
+    assert T.hop_steps(small) == []
+    early = fall.copy()
+    early[2:] += 12.0
+    assert T.hop_steps(early) == []
+    assert T.hop_steps(jump[:5]) == []
+
+
 @pytest.mark.parametrize("seed,rung", [(24, 3), (28, 5), (7, 4), (22, 5)])
 def test_an_atom_carried_the_whole_way_is_one_the_bump_never_leaves(tmp_path, seed, rung):
     rec, hops, picked = _drag(tmp_path, seed, rung)
