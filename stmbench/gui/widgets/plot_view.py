@@ -11,8 +11,11 @@ the data point nearest the pointer in x, with a dot on every curve there and a b
 point's x and each series' y (fixed-pitch numbers; the digits come from each quantity's own range,
 a millivolt on a +-1 V sweep), so an energy is read off the spectrum, not estimated from the ticks.
 A left click pins the point (and emits ``point_picked``): off the axes the readout shows the pin,
-over them it follows the pointer; a later click moves the pin; new data removes it. There is no zoom,
-pan, wheel handling or context menu.
+over them it follows the pointer. A later click on another point pins that one too, up to :data:`MAX_PINS`
+(a screenshot is taken after the last event of a step, so several readings are read in one step only if they
+stay): with more than one pin each is numbered, and the readout lists them, one aligned line each, in the
+numbers the hover readout gives; ``clear_pins`` (the viewer's Clear readings button) and new data remove them.
+Nothing is found: the pins are where the reader clicked. There is no zoom, pan, wheel handling or context menu.
 """
 from __future__ import annotations
 
@@ -25,6 +28,8 @@ from PySide6.QtGui import QColor, QFont, QFontDatabase, QFontMetrics, QPainter, 
 from PySide6.QtWidgets import QSizePolicy, QWidget
 
 MIN_FONT_PX = 14
+#: most readings pinned at once; one more clicked drops the oldest (the list must fit the axes)
+MAX_PINS = 6
 #: Okabe-Ito colours (no yellow: it vanishes on white); more series than colours cycle
 SERIES_COLORS = ("#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00", "#56B4E9", "#000000")
 #: the readout's numbers are fixed-pitch so that digits line up; the first family the machine has wins
@@ -137,7 +142,8 @@ class PlotView(QWidget):
         self._x_decimals = 3
         self._y_decimals: list[int] = []
         self._hover: int | None = None
-        self._pin: int | None = None
+        self._pin: int | None = None                    # the last point pinned
+        self._pins: list[int] = []                      # every point pinned, in the order they were clicked
         self._pointer: QPointF | None = None            # where the pointer last was over the widget
         self.setMouseTracking(True)
         self.setCursor(Qt.CursorShape.CrossCursor)
@@ -189,6 +195,7 @@ class PlotView(QWidget):
         self._x_decimals = digits
         self._y_decimals = [reading_decimals(_finite_span(row)) for row in vals]
         self._hover = self._pin = self._pointer = None   # until the pointer moves again
+        self._pins = []
         self._layout_cache = None
 
     def _extent(self) -> tuple[float, float, float, float] | None:
@@ -261,7 +268,18 @@ class PlotView(QWidget):
         return None if i is None else self._payload(i)
 
     def pinned_point(self) -> dict | None:
+        """The last point pinned (None: none)."""
         return None if self._pin is None else self._payload(self._pin)
+
+    def pinned_points(self) -> list[dict]:
+        """Every point pinned, in the order they were clicked."""
+        return [self._payload(i) for i in self._pins]
+
+    def clear_pins(self) -> None:
+        """Remove every pinned reading."""
+        if self._pins:
+            self._pins, self._pin = [], None
+            self.update()
 
     def point_position(self, index: int, series: int = 0) -> QPointF | None:
         """Widget position of data point ``index`` of series ``series``; None when it is not drawn."""
@@ -289,6 +307,8 @@ class PlotView(QWidget):
         self._pointer = QPointF(ev.position())
         i = self._index_at(self._pointer) if ev.button() == Qt.MouseButton.LeftButton else None
         if i is not None:
+            if i not in self._pins:                      # a click on a pinned point changes nothing but the last one
+                self._pins = [*self._pins, i][-MAX_PINS:]
             self._pin = self._hover = i
             self.update()
             self.point_picked.emit(self._payload(i))
@@ -543,6 +563,9 @@ class PlotView(QWidget):
         return [fields[0][2]], 0                             # too narrow even for that: the number alone, never cut
 
     def _paint_cursor(self, p: QPainter, lay: SimpleNamespace, to_px) -> None:
+        if len(self._pins) >= 2:
+            self._paint_pins(p, lay, to_px)
+            return
         i = self._hover if self._hover is not None else self._pin
         if i is None or not 0 <= i < len(self._x):
             return
@@ -596,6 +619,121 @@ class PlotView(QWidget):
             p.drawText(row, int(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter), text)
             if swatch and fields[n][0] is not None:
                 p.fillRect(QRectF(box.left() + pad, row.center().y() - 2, 11, 4), fields[n][0])
+
+    # several pins: a line and dots each, a number on each line, one readout box that lists them
+    def _draw_reading(self, p: QPainter, lay: SimpleNamespace, to_px, i: int, pinned: bool) -> None:
+        """The cursor's line at point ``i`` and a dot on every curve there (a pinned point's drawn thicker)."""
+        plot = lay.plot
+        gx = round(to_px(float(self._x[i]), lay.y0).x())
+        if pinned:
+            p.setPen(QPen(_CURSOR_PIN, 2.0))
+            p.drawLine(QPointF(gx, plot.top()), QPointF(gx, plot.bottom()))
+        else:
+            p.setPen(QPen(_CURSOR_LIVE, 1.5))
+            p.drawLine(QPointF(gx + 0.5, plot.top()), QPointF(gx + 0.5, plot.bottom()))
+        r = 5.4 if pinned else 4.6
+        for k in range(len(self._series)):
+            yv = float(self._values[k, i])
+            if math.isfinite(yv):
+                p.setPen(QPen(QColor("#ffffff"), 1.6))
+                p.setBrush(QColor(SERIES_COLORS[k % len(SERIES_COLORS)]))
+                p.drawEllipse(to_px(float(self._x[i]), yv), r, r)
+
+    def _list_lines(self, entries: list[tuple[str, int]], mfm: QFontMetrics, plot: QRectF, pad: int) -> list[str]:
+        """One line per reading, ``tag  label = number ...``, the numbers of each column lined up: every field when
+        the axes are wide enough, else the cascade the single readout has (fewer labels, then the first two fields)."""
+        fields = [self._fields(i) for _tag, i in entries]
+        width = max(len(t) for t, _i in entries)
+
+        def build(names: list[str], count: int) -> list[str]:
+            cols = []
+            for f in range(count):
+                numbers = [fs[f][2] for fs in fields]
+                w = max(len(n) for n in numbers)
+                cols.append([f"{names[f]}{'' if not names[f] else ' = '}{n.rjust(w)}" for n in numbers])
+            return [f"{t.ljust(width)}  " + "  ".join(c[r] for c in cols) for r, (t, _i) in enumerate(entries)]
+
+        labels = [f[1] for f in fields[0]]
+        tags = ["x"] + (["y"] if len(labels) == 2 else [f"y{k}" for k in range(1, len(labels))])
+        n = len(labels)
+        for names, count in ((labels, n), (labels, min(2, n)), (tags, n), (tags, min(2, n)), (["x"], 1)):
+            lines = build(names, count)
+            if 2 * pad + max(mfm.horizontalAdvance(t) for t in lines) <= plot.width() - 12:
+                return lines
+        return build([""], 1)                                  # too narrow even for that: the x alone, never cut
+
+    def _paint_pins(self, p: QPainter, lay: SimpleNamespace, to_px) -> None:
+        plot = lay.plot
+        pins = [i for i in self._pins if 0 <= i < len(self._x)]
+        hover = self._hover if self._hover is not None and self._hover not in pins and 0 <= self._hover < len(self._x) else None
+        p.save()
+        p.setClipRect(plot.adjusted(-2, -2, 2, 2))
+        p.setRenderHint(QPainter.RenderHint.Antialiasing, True)
+        p.setBrush(Qt.BrushStyle.NoBrush)
+        if hover is not None:
+            self._draw_reading(p, lay, to_px, hover, pinned=False)
+        for i in pins:
+            self._draw_reading(p, lay, to_px, i, pinned=True)
+        p.restore()
+
+        mono = self._mono_font()
+        mfm = QFontMetrics(mono)
+        lh, pad, margin = mfm.height(), 6, 6
+        entries = [(str(k + 1), i) for k, i in enumerate(pins)] + ([(">", hover)] if hover is not None else [])
+        lines = self._list_lines(entries, mfm, plot, pad)
+        rows = max(0, int((0.85 * plot.height() - 2 * pad) // lh))
+        shown = lines[-rows:] if rows else []
+        top_box = False
+        if shown:
+            w = 2 * pad + max(mfm.horizontalAdvance(t) for t in shown)
+            h = 2 * pad + lh * len(shown)
+            spots = [QPointF(to_px(float(self._x[i]), float(self._values[k, i])))
+                     for _t, i in entries for k in range(len(self._series)) if math.isfinite(float(self._values[k, i]))]
+            corners = (QRectF(plot.left() + margin, plot.top() + margin, w, h),
+                       QRectF(plot.right() - margin - w, plot.top() + margin, w, h),
+                       QRectF(plot.left() + margin, plot.bottom() - margin - h, w, h),
+                       QRectF(plot.right() - margin - w, plot.bottom() - margin - h, w, h))
+            cost = [sum(r.adjusted(-8, -8, 8, 8).contains(q) for q in spots) for r in corners]
+            box = corners[cost.index(min(cost))]               # the corner that hides the fewest of the readings' dots
+            top_box = box.top() < plot.center().y()
+            p.setPen(QPen(_CURSOR_PIN, 2.0))
+            p.setBrush(READOUT_BG)
+            p.drawRoundedRect(box.adjusted(1.0, 1.0, -1.0, -1.0), 3, 3)
+            p.setFont(mono)
+            for n, text in enumerate(shown):
+                p.setPen(_TEXT)
+                p.drawText(QRectF(box.left() + pad, box.top() + pad + n * lh, w - 2 * pad, lh),
+                           int(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter), text)
+        # a number on each pinned line: at the edge of the axes the box is not on, else the other, else a little in; never
+        # over a dot, the box or another number
+        bold = self._fonts()[1]
+        bfm = QFontMetrics(bold)
+        th = bfm.height() + 2
+        dots = [to_px(float(self._x[i]), float(self._values[k, i])) for i in pins for k in range(len(self._series))
+                if math.isfinite(float(self._values[k, i]))]
+        placed: list[QRectF] = [box] if shown else []
+        p.setFont(bold)
+        up, down = plot.bottom() - 2 - th, plot.top() + 2
+        for k, i in enumerate(pins):
+            text = str(k + 1)
+            tw = max(th, bfm.horizontalAdvance(text) + 10)
+            cx = min(max(round(to_px(float(self._x[i]), lay.y0).x()), plot.left() + tw / 2 + 1), plot.right() - tw / 2 - 1)
+            first, other = (up, down) if top_box else (down, up)
+            ys = [first + (-j if first == up else j) * (th + 2) for j in range(4)] + \
+                 [other + (-j if other == up else j) * (th + 2) for j in range(4)]
+            rect = QRectF(cx - tw / 2, ys[0], tw, th)
+            for y in ys:
+                cand = QRectF(cx - tw / 2, y, tw, th)
+                grown = cand.adjusted(-7, -7, 7, 7)
+                if not any(cand.intersects(q) for q in placed) and not any(grown.contains(d) for d in dots):
+                    rect = cand
+                    break
+            placed.append(rect)
+            p.setPen(QPen(_CURSOR_PIN, 1.5))
+            p.setBrush(QColor(10, 12, 24, 232))
+            p.drawRoundedRect(rect, 3, 3)
+            p.setPen(QColor("#ffffff"))
+            p.drawText(rect, int(Qt.AlignmentFlag.AlignCenter), text)
 
     @staticmethod
     def _draw_series(p: QPainter, x: np.ndarray, y: np.ndarray, color: QColor, to_px) -> None:

@@ -197,7 +197,14 @@ def test_visible_contrast_follows_the_view_into_another_channel_and_ends_with_a_
     part = view._shown.values[r0:r1, c0:c1]
     assert view.zoom() == 4 and view.view_rect() == corner
     assert view._shown.lo == pytest.approx(part.min()) and view._shown.hi == pytest.approx(part.max())
-    view.set_frame(stepped_frame("sim002.sxm"))                                   # the next frame is shown whole, in full
+    view.set_frame(stepped_frame("sim002.sxm"))                                   # another scan of the same window: the view stays
+    r0, r1, c0, c1 = view._region()
+    part = view._shown.values[r0:r1, c0:c1]
+    assert view.zoom() == 4 and view.view_rect() == corner
+    assert view._shown.lo == pytest.approx(part.min()) and view._shown.hi == pytest.approx(part.max())     # the scale follows it
+    wider = stepped_frame("sim003.sxm")                                           # another window: shown whole, in full
+    wider["size_nm"] = 12.0
+    view.set_frame(wider)
     assert view.zoom() == 1 and view._region() is None
     assert view._shown.lo == pytest.approx(view._shown.values.min()) and view._shown.hi == pytest.approx(view._shown.values.max())
 

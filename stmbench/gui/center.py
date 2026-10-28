@@ -2,9 +2,11 @@
 
 Everything here is read off the data the instrument gave: the cursor's coordinates, a marker's value,
 a profile along a line. Nothing is found, fitted or suggested: no atom finder, no drift estimate. A
-marker is a point the reader chose, kept in scan coordinates, with the numbers instrument software
-shows for any point (position, value, distance to the previous one). The three ``← marker`` buttons copy
-a marker's coordinates into the fields of the action or report that takes them; they run nothing.
+marker is the pixel the reader clicked, kept in scan coordinates at that pixel's centre, with the numbers
+instrument software shows for any point (position, value, distance to the previous one): the position and
+the value belong to the same point, so a value read at a marker's coordinates is the value the instrument
+measured there. The three ``← marker`` buttons copy a marker's coordinates, as the table shows them, into the
+fields of the action or report that takes them; they run nothing.
 """
 from __future__ import annotations
 
@@ -12,8 +14,8 @@ import math
 import re
 
 import numpy as np
-from PySide6.QtCore import QEvent, QRect, Qt, Signal
-from PySide6.QtGui import QColor, QFontMetrics, QPainter, QPixmap
+from PySide6.QtCore import QEvent, QRect, QRectF, Qt, Signal
+from PySide6.QtGui import QColor, QFontMetrics, QPainter, QPen, QPixmap
 from PySide6.QtWidgets import (QAbstractItemView, QHBoxLayout, QHeaderView, QLabel, QPushButton, QSizePolicy,
                                QStackedWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
@@ -38,12 +40,19 @@ MOVE_X, MOVE_Y = ("dist", "t"), ("z_abs", "i")
 _COLUMN_WORDS = {"dist": "col_dist", "t": "col_t"}
 #: a spectrum has at least this many points (STS and Z sweeps take eight or more), a move trace two
 _SPECTRUM_MIN, _MOVE_MIN = 8, 2
-N_THUMBS = 6
+#: the thumbnails of the strip: at most this many at once, at least this many whatever the window's height (the strip
+#: shows as many as its height holds, whole)
+MAX_THUMBS = 8
+MIN_THUMBS = 3
 THUMB_PX = 64
+#: the paging buttons' least height (the style sheet's small button)
+NAV_PX = 28
 #: the marker table shows this many rows before it scrolls: its strip is exactly a header, the rows and the frame
 #: (a viewport that is not a whole number of rows leaves the first row cut off under the header when scrolled)
 MARKER_ROWS = 6
 ROW_PX, HEADER_PX = 26, 24
+#: the marker table's columns, by their place: the start time of the frame a marker was placed on is the sixth
+START_COLUMN = 5
 MARKER_STRIP_PX = HEADER_PX + MARKER_ROWS * ROW_PX + 2
 
 
@@ -99,6 +108,206 @@ def thumb_pixmap(frame: dict, size: int) -> QPixmap:
     return pm
 
 
+class MarkerTable(QTableWidget):
+    """The marker list. Every row is reachable: a notch of the wheel over it moves it exactly one row (an item
+    view's own wheel moves as many rows as the desktop's setting says, three by default, which an agent that counts
+    notches cannot know), finer wheels add up to whole rows, and Ctrl with the wheel does nothing. The scroll
+    steps are rows, whatever the style's default (a table that scrolls by pixel would leave the first row cut off
+    under the header, which the strip's height rule above is made to prevent)."""
+
+    NOTCH = 120                                   # a wheel's angle delta for one notch
+
+    def __init__(self, rows: int, cols: int, parent: QWidget | None = None):
+        super().__init__(rows, cols, parent)
+        self._wheel = 0
+        self.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerItem)
+        self.verticalScrollBar().setSingleStep(1)
+
+    def first_row(self) -> int:
+        """The row at the top of what is shown (-1 when there are no rows)."""
+        return self.rowAt(0)
+
+    def last_row(self) -> int:
+        """The last row that is shown whole (-1 when there are no rows)."""
+        return self.rowAt(self.viewport().height() - 1)
+
+    def wheelEvent(self, ev) -> None:
+        ev.accept()                               # taken whatever happens: a parent never scrolls
+        if ev.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            return
+        self._wheel += ev.angleDelta().y()
+        notches = int(self._wheel / self.NOTCH)   # toward zero: a partial notch waits for the rest of it
+        if not notches:
+            return
+        self._wheel -= notches * self.NOTCH
+        bar = self.verticalScrollBar()
+        before = bar.value()
+        bar.setValue(before - notches)
+        if bar.value() == before:                 # at an end: the turns beyond it are not saved up
+            self._wheel = 0
+
+
+class _MarkedThumb(ThumbButton):
+    """A thumbnail that says, in the window's accent colour, that its frame is the one on show (the toolkit's own
+    checked look is a slightly darker edge, which in a 1280x720 picture is not seen)."""
+
+    def paintEvent(self, ev) -> None:
+        super().paintEvent(ev)
+        if self.isChecked():
+            w = float(style.px(3))
+            pen = QPen(QColor(style.COLORS["accent"]), w)
+            pen.setJoinStyle(Qt.PenJoinStyle.MiterJoin)
+            p = QPainter(self)
+            p.setPen(pen)
+            p.setBrush(Qt.BrushStyle.NoBrush)
+            p.drawRect(QRectF(self.rect()).adjusted(w / 2, w / 2, -w / 2, -w / 2))
+            p.end()
+
+
+class FrameStrip(QWidget):
+    """The thumbnails beside the viewer: every frame of the episode, newest first, a window of them at a time.
+
+    The strip used to hold the newest six frames and nothing else; an older frame was reached from the Data tab
+    (screen trial 5, steps 42-45: "scrolling the wheel over it did nothing"). Now the window moves: a notch of the
+    wheel over the strip is one thumbnail (finer wheels add up, Ctrl does nothing), and when more frames exist than
+    the strip shows, two buttons move it a page and say how many frames lie beyond their end. How many thumbnails
+    show is what the strip's height holds, whole, between the two buttons (their room is kept when they are not
+    there, so that the thumbnails do not move when the seventh frame comes).
+
+    The frame on show is marked when it is in the window, and it is brought into it when it changes (a new scan, a
+    frame picked from the Data tab); a read of the data list leaves the reader's place where it is."""
+
+    picked = Signal(str)
+
+    def __init__(self, parent: QWidget | None = None):
+        super().__init__(parent)
+        self.setObjectName("view.strip")
+        self._thumb = style.px(THUMB_PX + 8)
+        self.setFixedWidth(self._thumb)                  # always as wide as a thumbnail: the image does not jump
+        self._items: list[tuple[str, QPixmap]] = []
+        self._first = 0                                  # index of the thumbnail at the top
+        self._current = ""                               # the frame on show
+        self._revealed = ""                              # the one that was last brought into the window
+        self._wheel = 0
+        col = QVBoxLayout(self)
+        col.setContentsMargins(0, 0, 0, 0)
+        col.setSpacing(style.px(3))
+        self.newer = self._nav("strip.newer", lambda: self.scroll_by(-self.capacity()))
+        self.older = self._nav("strip.older", lambda: self.scroll_by(self.capacity()))
+        self.thumbs = [_MarkedThumb() for _ in range(MAX_THUMBS)]
+        col.addWidget(self.newer)
+        for i, b in enumerate(self.thumbs):
+            b.setObjectName(f"thumb.{i}")
+            b.clicked.connect(lambda _=False, btn=b: self.picked.emit(btn.name))
+            b.hide()
+            col.addWidget(b)
+        col.addStretch(1)
+        col.addWidget(self.older)
+        for b in (self.newer, self.older, *self.thumbs):
+            b.installEventFilter(self)                   # a button does not pass the wheel on to the strip: take it from it
+        # the strip must not ask the column for the height of a full window of thumbnails: it shows as many as fit
+        self.setMinimumHeight(2 * style.px(NAV_PX) + MIN_THUMBS * (self._thumb + style.px(3)))
+
+    def _nav(self, name: str, fn) -> QPushButton:
+        b = QPushButton()
+        b.setObjectName(name)
+        b.setProperty("role", "small")
+        b.clicked.connect(lambda _=False: fn())
+        sp = b.sizePolicy()
+        sp.setRetainSizeWhenHidden(True)
+        b.setSizePolicy(sp)
+        b.hide()
+        return b
+
+    # ── what it shows ──
+    def capacity(self) -> int:
+        """How many thumbnails the strip's height holds, whole, between its two buttons."""
+        gap = self.layout().spacing()
+        room = self.height() - 2 * self._nav_height() - gap
+        return max(MIN_THUMBS, min(MAX_THUMBS, room // (self._thumb + gap)))
+
+    def _nav_height(self) -> int:
+        self.newer.ensurePolished()                      # the style sheet's minimum height is in the size hint only then
+        return max(self.newer.sizeHint().height(), style.px(NAV_PX))
+
+    def first_index(self) -> int:
+        """How many frames are newer than the one at the top."""
+        return self._first
+
+    def names(self) -> list[str]:
+        return [n for n, _ in self._items]
+
+    def set_items(self, items: list[tuple[str, QPixmap]], current: str = "") -> None:
+        """Every frame that has a thumbnail, newest first; ``current`` is the frame on show (or none)."""
+        anchor = self._items[self._first][0] if self._first < len(self._items) else ""
+        self._items = list(items)
+        names = self.names()
+        if self._first and anchor in names:              # the window stays on the same frames when new ones come first
+            self._first = names.index(anchor)
+        self._current = current
+        self._refresh()
+
+    def set_current(self, name: str) -> None:
+        self._current = name
+        self._refresh()
+
+    def scroll_by(self, k: int) -> None:
+        """Move the window ``k`` thumbnails toward the older frames (negative: toward the newer), as far as the ends."""
+        self._first += int(k)
+        self._refresh()
+
+    def _refresh(self) -> None:
+        n = self.capacity()
+        names = self.names()
+        if self._current and self._current != self._revealed and self._current in names:
+            idx = names.index(self._current)             # a frame that has just come on show: into the window
+            if idx < self._first:
+                self._first = idx
+            elif idx >= self._first + n:
+                self._first = idx - n + 1
+            self._revealed = self._current
+        elif not self._current:
+            self._revealed = ""
+        self._first = max(0, min(self._first, len(names) - n))
+        for i, b in enumerate(self.thumbs):
+            k = self._first + i
+            if i < n and k < len(names):
+                b.set_thumb(names[k], self._items[k][1], style.px(THUMB_PX))
+                b.setChecked(names[k] == self._current)
+            else:
+                b.setChecked(False)
+                b.set_thumb("", None, style.px(THUMB_PX))
+        newer, older = self._first, max(0, len(names) - self._first - n)
+        for b, count, glyph in ((self.newer, newer, "▲"), (self.older, older, "▼")):
+            b.setText(f"{glyph} {count}" if count else glyph)
+            b.setEnabled(count > 0)
+            b.setVisible(len(names) > n)
+
+    def resizeEvent(self, ev) -> None:
+        super().resizeEvent(ev)
+        self._refresh()
+
+    def eventFilter(self, obj, ev) -> bool:
+        if ev.type() == QEvent.Type.Wheel and obj is not self:
+            self.wheelEvent(ev)                          # over a thumbnail or a paging button it is the strip's wheel too
+            return True
+        return False
+
+    def wheelEvent(self, ev) -> None:
+        ev.accept()                                      # taken whatever happens: nothing behind it scrolls
+        if ev.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            return
+        self._wheel += ev.angleDelta().y()
+        notches = int(self._wheel / 120)
+        if not notches:
+            return
+        self._wheel -= notches * 120
+        before = self._first
+        self.scroll_by(-notches)                         # up: toward the newer frames, which are at the top
+        if self._first == before:                        # at an end: the turns beyond it are not saved up
+            self._wheel = 0
+
+
 class CenterColumn(QWidget):
     view_changed = Signal()                       # the reader toggled channel or direction
     thumb_clicked = Signal(str)
@@ -133,6 +342,7 @@ class CenterColumn(QWidget):
         self.toolbars.addWidget(self._frame_toolbar())
         self.toolbars.addWidget(self._spectrum_toolbar())
         v.addWidget(self.toolbars)
+        v.addWidget(self._tools_row())
 
         # ── the image (or the spectrum), with the last frames in a column beside it ──
         view = QHBoxLayout()
@@ -157,20 +367,10 @@ class CenterColumn(QWidget):
         self.stack.installEventFilter(self)
         self.frame_view.installEventFilter(self)
         view.addWidget(self.stack, 1)
-        column = QVBoxLayout()
-        column.setSpacing(style.px(3))
-        column.setContentsMargins(0, 0, 0, 0)
-        strip_w = QWidget()                              # always as wide as a thumbnail: the image does not jump
-        strip_w.setFixedWidth(style.px(THUMB_PX + 8))
-        strip_w.setLayout(column)
-        self.thumbs = [ThumbButton() for _ in range(N_THUMBS)]
-        for i, b in enumerate(self.thumbs):
-            b.setObjectName(f"thumb.{i}")
-            b.clicked.connect(lambda _=False, btn=b: self.thumb_clicked.emit(btn.name))
-            b.hide()
-            column.addWidget(b)
-        column.addStretch(1)
-        view.addWidget(strip_w)
+        self.strip = FrameStrip()
+        self.strip.picked.connect(self.thumb_clicked)
+        self.thumbs = self.strip.thumbs
+        view.addWidget(self.strip)
         v.addLayout(view, 1)
         self.readout = ElidedLabel()
         self.readout.setObjectName("view.readout")
@@ -262,24 +462,47 @@ class CenterColumn(QWidget):
                                    "forward")
         self.flatten = self._seg([("line", "flat_line"), ("plane", "flat_plane"), ("none", "flat_none")],
                                  "view.flatten", "line")
-        self.tool = self._seg([("marker", "tool_marker"), ("profile", "tool_profile"), ("pan", "tool_pan")],
-                              "view.tool", "marker")
         self.contrast = self._seg([("auto", "contrast_auto"), ("full", "contrast_full"), ("visible", "contrast_visible")],
                                   "view.contrast", "auto")
         self.zoom = self._seg([(1, "zoom_fit"), (2, "zoom_2"), (4, "zoom_4"), (8, "zoom_8")], "view.zoom", 1)
-        self.clear_markers = QPushButton(one("clear_markers", self.lang))
-        self.clear_markers.setObjectName("view.clear_markers")
-        # three rows: what is shown, how its grey scale and size are set, and what a drag on it does
+        # two rows: what is shown, and how its grey scale and size are set (the third row, what a drag on the image
+        # does and the markers, is outside this page: see _tools_row)
         col.addLayout(self._row(self.channel, self.direction, self._caption("lbl_flatten"), self.flatten))
         col.addLayout(self._row(self._caption("lbl_contrast"), self.contrast, self._caption("lbl_zoom"), self.zoom))
-        col.addLayout(self._row(self._caption("lbl_tool"), self.tool, self.clear_markers))
         self.channel.changed.connect(lambda _v: self.view_changed.emit())
         self.direction.changed.connect(lambda _v: self.view_changed.emit())
         self.flatten.changed.connect(lambda m: self.frame_view.set_flatten(m))
-        self.tool.changed.connect(lambda t: self.frame_view.set_tool(t))
         self.contrast.changed.connect(lambda m: self.frame_view.set_contrast(m))
-        self.zoom.changed.connect(lambda z: self.frame_view.set_zoom(z))
+        self.zoom.changed.connect(self._zoom_clicked)
+        return w
+
+    def _zoom_clicked(self, level: int) -> None:
+        """A zoom button: about the selected marker (the table's selection) when there is one, which the view is
+        then centred on (screen trial 4, step 84: it always centred on the frame, and the atom was cut at the
+        edge); else about the centre of the view as it is."""
+        m = self.frame_view.selected_marker()
+        self.frame_view.set_zoom(level, focus=(m["x_nm"], m["y_nm"]) if m is not None else None)
+
+    def _tools_row(self) -> QWidget:
+        """What a drag on the image does, and Clear markers: a row that stays whatever the viewer shows.
+
+        It is outside the pages of the toolbar stack because the markers are not the frame's: they are kept in
+        scan coordinates and come back on the next frame. In screen trial 5 (step 39) the agent clicked where Clear
+        markers had been while a move trace was on show, the frame toolbar was not there, the click reached empty
+        toolbar, and the old markers came back on the next frame. Here the button is in the same place in every view."""
+        w = QWidget()
+        w.setObjectName("view.tools")
+        self.tool = self._seg([("marker", "tool_marker"), ("profile", "tool_profile"), ("pan", "tool_pan")],
+                              "view.tool", "marker")
+        self.clear_markers = QPushButton(one("clear_markers", self.lang))
+        self.clear_markers.setObjectName("view.clear_markers")
+        # the readings pinned on a plot, which the plot's own toolbar (the axes) has no room for: the same place always
+        self.clear_readings = QPushButton(one("clear_readings", self.lang))
+        self.clear_readings.setObjectName("view.clear_readings")
+        w.setLayout(self._row(self._caption("lbl_tool"), self.tool, self.clear_markers, self.clear_readings))
+        self.tool.changed.connect(lambda t: self.frame_view.set_tool(t))
         self.clear_markers.clicked.connect(lambda: (self.frame_view.clear_markers(), self.frame_view.clear_profile()))
+        self.clear_readings.clicked.connect(lambda: (self.plot.clear_pins(), self.small_plot.clear_pins()))
         return w
 
     def _spectrum_toolbar(self) -> QWidget:
@@ -300,7 +523,7 @@ class CenterColumn(QWidget):
 
     def _marker_table(self, parent: QWidget) -> QTableWidget:
         cols = ["mk_num", "mk_x", "mk_y", "mk_value", "mk_frame", "mk_start", "mk_dist"]
-        t = QTableWidget(0, len(cols), parent)
+        t = MarkerTable(0, len(cols), parent)
         t.setObjectName("markers.table")
         # one line each, in one language: a header of two lines took a third of the strip in Chinese, and
         # the table holds five rows (30 px each under a 24 px header) in the strip's 176 px
@@ -358,8 +581,7 @@ class CenterColumn(QWidget):
             f"centre ({fmt.num(cx, 5)}, {fmt.num(cy, 5)}) nm · size {fmt.num(frame['size_nm'], 5)} nm · "
             f"{frame['pixels']} px · angle {fmt.num(frame['angle_deg'], 4)}°")
         self.readout.set_full_text("")
-        for b in self.thumbs:
-            b.setChecked(b.name == frame["frame"])
+        self.strip.set_current(frame["frame"])
 
     def show_spectrum(self, spec: dict, axes: tuple[str, str] | None = None) -> None:
         """Show a spectrum, or a move trace (``kind`` "move"), plotted against the columns the reader picks."""
@@ -374,8 +596,7 @@ class CenterColumn(QWidget):
         self._rebuild_axes(xcols, ycols, xk, yk)
         self.toolbars.setCurrentIndex(1)
         self.stack.setCurrentIndex(1)
-        for b in self.thumbs:
-            b.setChecked(False)
+        self.strip.set_current("")
         self.readout.set_full_text("")
         self.info.setText(self._spectrum_info(spec, int(np.size(spec[xcols[0]]))))
         self._draw_spectrum(xk, yk)
@@ -430,14 +651,8 @@ class CenterColumn(QWidget):
         return self.spec_x.value(), self.spec_y.value()
 
     def set_thumbs(self, items: list[tuple[str, QPixmap]], current: str = "") -> None:
-        """The last frames, newest first."""
-        size = style.px(THUMB_PX)
-        for i, b in enumerate(self.thumbs):
-            if i < len(items):
-                b.set_thumb(items[i][0], items[i][1], size)
-                b.setChecked(items[i][0] == current)
-            else:
-                b.set_thumb("", None, size)
+        """Every frame that has a thumbnail, newest first; ``current`` is the frame on show (none: ``""``)."""
+        self.strip.set_items(items, current)
 
     # ── readouts ──
     def _cursor(self, c: dict) -> None:
@@ -445,10 +660,11 @@ class CenterColumn(QWidget):
             self.readout.set_full_text("")
             return
         val = c.get("value")
-        text = f"x {c['x_nm']:.3f} nm   y {c['y_nm']:.3f} nm"
+        # the pixel under the pointer, then where its centre lies and what it holds: the numbers a click there marks
+        text = f"pixel col {c['col']}, row {c['row']}   centre x {c['x_nm']:.3f} nm   y {c['y_nm']:.3f} nm"
         if val is not None and math.isfinite(float(val)):
             text += f"   {float(val):.2f} {c.get('unit', '')}"
-        self.readout.set_full_text(text + f"   (col {c['col']}, row {c['row']})")
+        self.readout.set_full_text(text)
 
     def _marker_added(self, _m: dict) -> None:
         n = self.table.rowCount()
@@ -458,9 +674,17 @@ class CenterColumn(QWidget):
 
     def set_frame_starts(self, starts: dict[str, float]) -> None:
         """When each saved frame's scan began, for the table's start column: the frame a marker was placed on,
-        as the Data tab gives it."""
+        as the Data tab gives it. Only that column is written: the data list is read after every action, and a
+        table that scrolled back to its selection each time would undo the reader's own scrolling."""
         self._frame_start = dict(starts)
-        self._markers_changed(self.frame_view.markers())
+        for i, m in enumerate(self.frame_view.markers()):
+            item = self.table.item(i, START_COLUMN)
+            if item is not None:
+                item.setText(self._started(m))
+
+    def _started(self, m: dict) -> str:
+        started = self._frame_start.get(str(m.get("frame", "")))
+        return fmt.hms(started) if started is not None else "-"
 
     def _markers_changed(self, markers: list) -> None:
         t = self.table
@@ -470,10 +694,8 @@ class CenterColumn(QWidget):
             d = "" if prev is None else f"{math.hypot(m['x_nm'] - prev['x_nm'], m['y_nm'] - prev['y_nm']):.3f}"
             val = m.get("value")
             vtxt = f"{float(val):.2f} {m.get('unit', '')}" if val is not None and math.isfinite(float(val)) else "-"
-            started = self._frame_start.get(str(m.get("frame", "")))
-            stxt = fmt.hms(started) if started is not None else "-"
             for c, text in enumerate([str(i + 1), f"{m['x_nm']:.3f}", f"{m['y_nm']:.3f}", vtxt, str(m.get("frame", "")),
-                                      stxt, d]):
+                                      self._started(m), d]):
                 item = QTableWidgetItem(text)
                 item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | (Qt.AlignmentFlag.AlignLeft if c == 4
                                                                        else Qt.AlignmentFlag.AlignRight))

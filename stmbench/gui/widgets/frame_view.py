@@ -11,15 +11,25 @@ instead of its 0.5-99.5 percentiles (which saturate the top of an atom); the rea
 Coordinates. A point at fractional pixel ``(col, row)`` has pixel centres at integers, row 0 at
 the top, and maps to scan nm through :func:`stmbench.render.pixel_to_scan_nm`, the inverse of the
 judge's footprint mapping; a position a fraction ``fx`` of the image width from its left edge has
-``col = fx * nx - 0.5`` (the web console's rule). Markers live in scan coordinates and are drawn
-on every frame whose footprint holds them, so a marker placed in one frame shows where the same
-scan coordinates lie in the next.
+``col = fx * nx - 0.5`` (the web console's rule).
+
+What a reading is. The image is drawn pixel by pixel, so a position over it is read as the pixel it falls
+in: the cursor and a marker report that pixel's ``col`` and ``row``, its value, and the scan coordinates of
+its *centre* (``pixel_to_scan_nm`` at integer ``col``, ``row``), never the pointer's own position, which no
+value belongs to. A marker placed anywhere in a pixel is therefore the same marker, and its (x, y, value) is
+a point the instrument measured. Markers live in scan coordinates and are drawn on every frame whose
+footprint holds them, so a marker placed in one frame shows where the same scan coordinates lie in the next;
+its record (value, pixel, frame) stays that of the frame it was placed in. A profile line's ends are the
+exception: they keep the exact positions the drag gave.
 
 Zoom. The wheel (without Ctrl) steps the view through x1, x2, x4 and x8 about the pointer, ``set_zoom`` and
-``fit`` do the same from a control, and with the ``"pan"`` tool a drag moves the zoomed image. The axes, the
-cursor, the markers and the profile use the same pixel / scan mapping at every zoom (the view is a window
-of the frame in pixel edges, ``view_rect``), the grey scale and the colour bar do not change with it unless the
-contrast is ``"visible"``, and a new frame is shown whole. Nothing is found, fitted or snapped to a peak.
+``fit`` do the same from a control (about the centre of the view, or centred on a point: the selected marker),
+and with the ``"pan"`` tool a drag moves the zoomed image. The axes, the cursor, the markers and the profile use
+the same pixel / scan mapping at every zoom (the view is a window of the frame in pixel edges, ``view_rect``), and
+the grey scale and the colour bar do not change with it unless the contrast is ``"visible"``. A new frame is shown
+whole, except when it is another scan of the same window (the same size, pixels and angle: the next frame after a
+drag, a repeat for drift): then the zoom stays, and the view keeps its centre in scan coordinates, where the
+reader was looking, as far as the new frame reaches. Nothing is found, fitted or snapped to a peak.
 
 There is no context menu and no keyboard focus, and a wheel with Ctrl does nothing: the agent that works this
 widget has a mouse and a screenshot, and every extra gesture is one it can trigger by accident.
@@ -89,6 +99,19 @@ def scan_to_pixel(geom: dict, x_nm: float, y_nm: float) -> tuple[float, float]:
     dx, dy = x_nm - float(geom["cx_nm"]), y_nm - float(geom["cy_nm"])
     u, v = c * dx + s * dy, -s * dx + c * dy
     return (u + w / 2) * int(geom["nx"]) / w - 0.5, (h / 2 - v) * int(geom["ny"]) / h - 0.5
+
+
+def _same_window(a: "_Shown", b: "_Shown") -> bool:
+    """Are two frames scans of the same window: the same size, pixels and angle (their centres may differ)?"""
+    ga, gb = a.geom, b.geom
+    return ((a.nx, a.ny) == (b.nx, b.ny) and math.isclose(ga["w_nm"], gb["w_nm"], rel_tol=1e-9, abs_tol=1e-12)
+            and math.isclose(ga["angle_deg"], gb["angle_deg"], rel_tol=0.0, abs_tol=1e-9))
+
+
+def _same_place(a: "_Shown", b: "_Shown") -> bool:
+    """Do two frames of the same window have the same centre?"""
+    return (math.isclose(a.geom["cx_nm"], b.geom["cx_nm"], rel_tol=0.0, abs_tol=1e-9)
+            and math.isclose(a.geom["cy_nm"], b.geom["cy_nm"], rel_tol=0.0, abs_tol=1e-9))
 
 
 # ── numerics ───────────────────────────────────────────────────────────────────────────────
@@ -211,9 +234,16 @@ def frame_thumbnail(frame: dict, px: int = 96) -> QImage:
     return _gray_image(np.clip(np.round(g), 0, 255).astype(np.uint8))
 
 
+#: markers whose numbers are placed clear of each other and of the rings; more than this (a long list nobody has cleared)
+#: are put beside their rings in the first place, which costs nothing per paint
+MAX_AVOIDED = 80
+
+
 def marker_radius(fpx: int) -> float:
-    """Radius in px of a marker's ring for a base font of ``fpx`` px."""
-    return max(8.0, 0.6 * fpx)
+    """Radius in px of a marker's ring for a base font of ``fpx`` px. Small, and open: the markers of one atom
+    stand a few pixels apart (five of them, at 4.7 screen px a pixel, 14 px from one another), and a ring wider
+    than that, or one with a cross inside it, hid the pixel it marks and its neighbours (screen trial 4, step 85)."""
+    return max(6.0, 0.42 * fpx)
 
 
 class _Shown:
@@ -247,10 +277,10 @@ class FrameView(QWidget):
     """The image display of the console. See the module docstring for the conventions.
 
     Signals: ``cursor_moved`` (``x_nm y_nm col row value unit``; ``{}`` once the pointer leaves the
-    image), ``marker_added`` (those plus ``frame``, ``col_f``/``row_f`` the fractional pixel),
-    ``markers_changed`` (every marker, in order), ``profile_changed`` (``frame x0_nm y0_nm x1_nm
-    y1_nm s_nm values unit``; ``{}`` when the profile line is dropped). ``col``/``row`` are the
-    integer pixel the point falls in; ``value`` is NaN where the pixel holds no data.
+    image), ``marker_added`` (those plus ``frame``), ``markers_changed`` (every marker, in order),
+    ``profile_changed`` (``frame x0_nm y0_nm x1_nm y1_nm s_nm values unit``; ``{}`` when the profile
+    line is dropped). ``col``/``row`` are the pixel the position falls in, ``x_nm``/``y_nm`` the scan
+    position of that pixel's centre and ``value`` its value (NaN where the pixel holds no data).
     """
 
     cursor_moved = Signal(dict)
@@ -286,16 +316,25 @@ class FrameView(QWidget):
     def set_frame(self, frame: dict | None) -> None:
         """Show an ``Instrument.frame()`` dict (None: the empty view). Markers stay; a profile line
         stays only for the frame it was drawn on, and is measured again on this data. The view is the
-        whole frame again, unless this is the same frame in another channel or direction."""
+        whole frame again, unless this is the same frame in another channel or direction, or another scan of
+        the same window (:func:`_same_window`), which keeps the zoom and the place the reader was looking at."""
         new = None if frame is None else _Shown(frame, self._flatten, self._contrast)
-        same = (new is not None and self._shown is not None and new.name == self._shown.name
-                and (new.nx, new.ny) == (self._shown.nx, self._shown.ny))
+        old = self._shown
+        same = (new is not None and old is not None and new.name == old.name and (new.nx, new.ny) == (old.nx, old.ny))
+        origin = (self._c0, self._r0) if same else None
+        if origin is None and new is not None and old is not None and self._zoom > 1 and _same_window(old, new):
+            if _same_place(old, new):                      # a repeat of the very scan: the view is exactly where it was
+                origin = (self._c0, self._r0)
+            else:
+                origin = self._origin_for_centre(new, *self._view_centre_scan(old))
         was = self._zoom
         self._shown = new
-        if not same:
+        if origin is None:
             self._zoom, self._c0, self._r0 = 1, 0.0, 0.0
-        elif self._contrast == "visible":                  # the same frame in another channel: the part in view sets the scale
-            new.set_mode(self._flatten, "visible", self._region())
+        else:
+            self._c0, self._r0 = origin
+            if self._contrast == "visible":                # the part in view sets the scale
+                new.set_mode(self._flatten, "visible", self._region())
         self._pan_last = None
         self._invalidate()
         self._reconcile_profile()
@@ -356,15 +395,23 @@ class FrameView(QWidget):
         sh = self._shown
         return min(max(c0, 0.0), sh.nx - wv), min(max(r0, 0.0), sh.ny - hv)
 
-    def set_zoom(self, level: int, about: QPointF | None = None) -> None:
+    def set_zoom(self, level: int, about: QPointF | None = None, focus: tuple[float, float] | None = None) -> None:
         """Show ``1/level`` of the frame's width and height. ``about`` is a widget position that keeps what is
-        under it (the wheel's pointer); without it the view's centre stays. A level that is not one of
-        :data:`ZOOM_LEVELS` is refused; with no frame shown only :attr:`zoom_changed` answers, so that a
-        control that asked for another level goes back."""
+        under it (the wheel's pointer); ``focus`` a scan position the view is centred on (as far as the frame
+        goes: the selected marker, when a control zooms); without either the view's centre stays. A ``focus`` the
+        frame does not cover is not used. A level that is not one of :data:`ZOOM_LEVELS` is refused; with no frame
+        shown only :attr:`zoom_changed` answers, so that a control that asked for another level goes back."""
         if level not in ZOOM_LEVELS:
             raise ValueError(f"zoom {level!r}: one of {ZOOM_LEVELS}")
         sh = self._shown
-        if sh is None or level == self._zoom:
+        centre = None if sh is None or focus is None else self._edge_of(sh, *focus)
+        if sh is None or (level == self._zoom and centre is None):
+            self.zoom_changed.emit(self._zoom)
+            return
+        if centre is not None:                              # centred on the point; the same level re-centres on it
+            self._zoom = level
+            self._c0, self._r0 = self._clamp_origin(centre[0] - sh.nx / level / 2, centre[1] - sh.ny / level / 2)
+            self._view_changed()
             self.zoom_changed.emit(self._zoom)
             return
         img = self._layout().img
@@ -389,6 +436,31 @@ class FrameView(QWidget):
             self._c0, self._r0 = c, r
         self._view_changed()
         self.zoom_changed.emit(self._zoom)
+
+    @staticmethod
+    def _edge_of(sh: "_Shown", x_nm: float, y_nm: float) -> tuple[float, float] | None:
+        """A scan position as a point in the frame's pixel edges (the unit of the view's origin), or None where the
+        frame does not cover it."""
+        col, row = scan_to_pixel(sh.geom, x_nm, y_nm)
+        eps = 1e-9
+        if -0.5 - eps <= col <= sh.nx - 0.5 + eps and -0.5 - eps <= row <= sh.ny - 0.5 + eps:
+            return col + 0.5, row + 0.5
+        return None
+
+    def _view_centre_scan(self, sh: "_Shown") -> tuple[float, float]:
+        """The scan position at the centre of the view, on ``sh``."""
+        c0, r0, wv, hv = self._view_rect()
+        return pixel_to_scan_nm(sh.geom, c0 + wv / 2 - 0.5, r0 + hv / 2 - 0.5)
+
+    def _origin_for_centre(self, sh: "_Shown", x_nm: float, y_nm: float) -> tuple[float, float] | None:
+        """The origin of a view at the current zoom that is centred on a scan position of ``sh`` (kept inside the
+        frame), or None where ``sh`` does not cover it."""
+        edge = self._edge_of(sh, x_nm, y_nm)
+        if edge is None:
+            return None
+        z = float(self._zoom)
+        wv, hv = sh.nx / z, sh.ny / z
+        return min(max(edge[0] - wv / 2, 0.0), sh.nx - wv), min(max(edge[1] - hv / 2, 0.0), sh.ny - hv)
 
     def zoom_step(self, direction: int, about: QPointF | None = None) -> None:
         """One level in (``direction`` > 0) or out, as one notch of the wheel does."""
@@ -639,7 +711,11 @@ class FrameView(QWidget):
         return self.pixel_to_widget(col, row)
 
     def _point_at(self, pos: QPointF, clamp: bool = False) -> dict | None:
-        """What lies under a widget position; None outside the image (``clamp``: the nearest edge point)."""
+        """What lies under a widget position; None outside the image (``clamp``: the nearest edge point).
+
+        The point is the pixel the position falls in: ``col``/``row``, its ``value`` and the scan position of
+        its centre (``x_nm``/``y_nm``), so that a reading and the coordinates it is given at belong together.
+        ``at_x_nm``/``at_y_nm`` and ``col_f``/``row_f`` are the position itself (a profile's ends use them)."""
         sh = self._shown
         if sh is None:
             return None
@@ -651,11 +727,12 @@ class FrameView(QWidget):
             return None
         c0, r0, wv, hv = self._view_rect()
         col, row = c0 + fx * wv - 0.5, r0 + fy * hv - 0.5
-        x, y = pixel_to_scan_nm(sh.geom, col, row)
         ci = min(max(int(math.floor(col + 0.5)), 0), sh.nx - 1)
         ri = min(max(int(math.floor(row + 0.5)), 0), sh.ny - 1)
+        x, y = pixel_to_scan_nm(sh.geom, ci, ri)
+        ax, ay = pixel_to_scan_nm(sh.geom, col, row)
         return {"x_nm": x, "y_nm": y, "col": ci, "row": ri, "value": float(sh.values[ri, ci]), "unit": sh.unit,
-                "col_f": col, "row_f": row}
+                "at_x_nm": ax, "at_y_nm": ay, "col_f": col, "row_f": row}
 
     # ── mouse ──
     def mouseMoveEvent(self, ev) -> None:
@@ -698,7 +775,7 @@ class FrameView(QWidget):
             ev.accept()
             return
         if self._tool == "marker":
-            m = {**p, "frame": self._shown.name}
+            m = {**{k: p[k] for k in ("x_nm", "y_nm", "col", "row", "value", "unit")}, "frame": self._shown.name}
             self._markers.append(m)
             self._selected = len(self._markers) - 1
             self.update()
@@ -725,8 +802,8 @@ class FrameView(QWidget):
         self._drag = None
         if math.hypot(b.x() - a.x(), b.y() - a.y()) >= 3.0:         # shorter is a click, not a line
             pa, pb = self._point_at(a, clamp=True), self._point_at(b, clamp=True)
-            self._profile = {"frame": self._shown.name, "x0_nm": pa["x_nm"], "y0_nm": pa["y_nm"],
-                             "x1_nm": pb["x_nm"], "y1_nm": pb["y_nm"]}
+            self._profile = {"frame": self._shown.name, "x0_nm": pa["at_x_nm"], "y0_nm": pa["at_y_nm"],
+                             "x1_nm": pb["at_x_nm"], "y1_nm": pb["at_y_nm"]}
             self.profile_changed.emit(self._profile_payload())
         self.update()
         ev.accept()
@@ -787,10 +864,19 @@ class FrameView(QWidget):
         p.setRenderHint(QPainter.RenderHint.Antialiasing, True)
         p.setClipRect(img)
         self._paint_profile(p, lay)
+        items = []
         for i, m in enumerate(self._markers):
             pt = self.scan_to_widget(m["x_nm"], m["y_nm"])
             if pt is not None:
-                self._paint_marker(p, lay, pt, i + 1, i == self._selected)
+                items.append((i + 1, pt, i == self._selected, m))
+        items.sort(key=lambda it: it[2])                          # the selected marker last: it is on top of the others
+        rects = self._marker_label_rects(lay, items)
+        for (_number, pt, selected, m), (rect, leader) in zip(items, rects):
+            self._paint_marker(p, lay, pt, m, selected)
+            if leader:                                            # a number that had to stand off: a line to its ring
+                self._paint_leader(p, lay, pt, rect, selected)
+        for (number, _pt, selected, _m), (rect, _leader) in zip(items, rects):
+            self._label(p, lay, str(number), rect, MARKER_SELECTED_COLOR if selected else MARKER_COLOR)
         p.end()
 
     def _paint_axes(self, p: QPainter, lay: SimpleNamespace) -> None:
@@ -872,27 +958,89 @@ class FrameView(QWidget):
         w = QFontMetrics(lay.bold).horizontalAdvance(text) + 10
         return QRectF(x, y, max(w, lay.fh), lay.fh + 2)
 
-    def _paint_marker(self, p: QPainter, lay: SimpleNamespace, pt: QPointF, number: int, selected: bool) -> None:
+    def _paint_marker(self, p: QPainter, lay: SimpleNamespace, pt: QPointF, m: dict, selected: bool) -> None:
+        """An open ring on the marker's position, in a dark rim that reads on a white atom too; the pixel inside is
+        left as it is. Where one pixel is wider than two rings (zoomed in), the pixel the marker is on is outlined,
+        so that the pixel its row of the table speaks of is told from its neighbours."""
         r = marker_radius(lay.fpx)
         color = MARKER_SELECTED_COLOR if selected else MARKER_COLOR
         p.setBrush(Qt.BrushStyle.NoBrush)
-        p.setPen(QPen(QColor(0, 0, 0, 235), 5.0))             # a dark rim under the colour: reads on white atoms too
+        sh = self._shown
+        if m.get("frame") == sh.name and "col" in m:           # placed on this frame: it is at a pixel's centre
+            a = self.pixel_to_widget(m["col"] - 0.5, m["row"] - 0.5)
+            b = self.pixel_to_widget(m["col"] + 0.5, m["row"] + 0.5)
+            box = QRectF(a, b).adjusted(1.5, 1.5, -1.5, -1.5)
+            if box.width() >= 4.0 * r:
+                p.setPen(QPen(QColor(0, 0, 0, 235), 4.0))
+                p.drawRect(box)
+                p.setPen(QPen(color, 2.0))
+                p.drawRect(box)
+        p.setPen(QPen(QColor(0, 0, 0, 235), 4.5))
         p.drawEllipse(pt, r, r)
-        p.setPen(QPen(color, 2.5 if selected else 2.0))
+        p.setPen(QPen(color, 2.6 if selected else 2.0))
         p.drawEllipse(pt, r, r)
-        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):      # a small cross: the exact point
-            a, b = QPointF(pt.x() + dx * 2, pt.y() + dy * 2), QPointF(pt.x() + dx * 5, pt.y() + dy * 5)
-            p.setPen(QPen(QColor(0, 0, 0, 235), 3.5))
-            p.drawLine(a, b)
-            p.setPen(QPen(color, 1.5))
-            p.drawLine(a, b)
-        text = str(number)
-        rect = self._label_rect(lay, text, pt.x() + r + 3, pt.y() - r - 3 - (lay.fh + 2))
-        if rect.right() > lay.img.right() - 2:
-            rect.moveLeft(pt.x() - r - 3 - rect.width())
-        if rect.top() < lay.img.top() + 2:
-            rect.moveTop(pt.y() + r + 3)
-        self._label(p, lay, text, rect, color)
+
+    def _marker_label_rects(self, lay: SimpleNamespace, items: list) -> list[tuple[QRectF, bool]]:
+        """Where each marker's number goes, and whether it stands off from its ring (then a line joins them). The
+        markers of one atom stand a few pixels apart, and five numbers in boxes on top of their rings and of one
+        another cannot be read: a number goes beside its ring, in the first of eight places (upper right first, then
+        the other corners, the sides, above and below) that covers no other number and no other marker's ring; where
+        all eight are taken it stands one label further out, then two."""
+        r = marker_radius(lay.fpx)
+        bound = QRectF(lay.img).adjusted(2, 2, -2, -2)
+        discs = [(pt, r + 3.0) for _n, pt, _s, _m in items]
+        placed: list[QRectF] = []
+        out: list[tuple[QRectF, bool]] = []
+        if len(items) > MAX_AVOIDED:                      # the search is quadratic: a long list keeps the plain place
+            for number, pt, _selected, _m in items:
+                size = self._label_rect(lay, str(number), 0, 0)
+                out.append((QRectF(pt.x() + 0.72 * r + 3.0, pt.y() - 0.72 * r - 3.0 - size.height(), size.width(), size.height()),
+                            False))
+            return out
+        k45 = math.sqrt(0.5)
+        dirs = ((k45, -k45), (-k45, -k45), (k45, k45), (-k45, k45), (1.0, 0.0), (-1.0, 0.0), (0.0, -1.0), (0.0, 1.0))
+        for k, (number, pt, _selected, _m) in enumerate(items):
+            size = self._label_rect(lay, str(number), 0, 0)
+            w, h = size.width(), size.height()
+            g = 3.0
+            best, best_cost, far = None, None, False
+            for step in range(3):
+                extra = step * (h + 4.0)
+                for ux, uy in dirs:
+                    reach = r + g + extra
+                    cx = pt.x() + ux * reach + (w / 2 if ux > 0.1 else -w / 2 if ux < -0.1 else 0.0)
+                    cy = pt.y() + uy * reach + (h / 2 if uy > 0.1 else -h / 2 if uy < -0.1 else 0.0)
+                    rect = QRectF(cx - w / 2, cy - h / 2, w, h)
+                    cost = 0.0 if bound.contains(rect) else 500.0
+                    cost += 100.0 * sum(rect.intersects(q) for q in placed)
+                    for j, (c, rad) in enumerate(discs):
+                        if j != k:
+                            nx, ny = min(max(c.x(), rect.left()), rect.right()), min(max(c.y(), rect.top()), rect.bottom())
+                            cost += 60.0 if (nx - c.x()) ** 2 + (ny - c.y()) ** 2 < rad * rad else 0.0
+                    cost += 5.0 * step                              # the nearer place, unless it covers something
+                    if best_cost is None or cost < best_cost:
+                        best, best_cost, far = rect, cost, step > 0
+                    if cost == 0.0:
+                        break
+                if best_cost is not None and best_cost < 5.0:
+                    break
+            placed.append(best)
+            out.append((best, far))
+        return out
+
+    def _paint_leader(self, p: QPainter, lay: SimpleNamespace, pt: QPointF, rect: QRectF, selected: bool) -> None:
+        """A thin line from a ring to its number's box, which stands a little off."""
+        r = marker_radius(lay.fpx)
+        nx, ny = min(max(pt.x(), rect.left()), rect.right()), min(max(pt.y(), rect.top()), rect.bottom())
+        d = math.hypot(nx - pt.x(), ny - pt.y())
+        if d <= r + 2.0:
+            return
+        a = QPointF(pt.x() + (nx - pt.x()) / d * r, pt.y() + (ny - pt.y()) / d * r)
+        b = QPointF(nx, ny)
+        p.setPen(QPen(QColor(0, 0, 0, 235), 3.2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
+        p.drawLine(a, b)
+        p.setPen(QPen(MARKER_SELECTED_COLOR if selected else MARKER_COLOR, 1.4, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
+        p.drawLine(a, b)
 
     def _paint_profile(self, p: QPainter, lay: SimpleNamespace) -> None:
         ends = None

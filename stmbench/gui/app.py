@@ -344,7 +344,7 @@ class MainWindow(QMainWindow):
     def _refresh_thumbs(self) -> None:
         names = [f["frame"] for f in reversed(self._data["frames"]) if f["frame"] in self._thumbs]
         cur = self._viewed[1] if self._viewed and self._viewed[0] == "frame" else ""
-        self.center.set_thumbs([(n, self._thumbs[n]) for n in names[:6]], cur)
+        self.center.set_thumbs([(n, self._thumbs[n]) for n in names], cur)
 
     def _remember(self, frame: dict) -> None:
         key = (frame["frame"], frame["channel"], frame["direction"])
