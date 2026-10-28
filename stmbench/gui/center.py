@@ -14,8 +14,8 @@ import math
 import re
 
 import numpy as np
-from PySide6.QtCore import QEvent, QRect, Qt, Signal
-from PySide6.QtGui import QColor, QFontMetrics, QPainter, QPixmap
+from PySide6.QtCore import QEvent, QRect, QRectF, Qt, Signal
+from PySide6.QtGui import QColor, QFontMetrics, QPainter, QPen, QPixmap
 from PySide6.QtWidgets import (QAbstractItemView, QHBoxLayout, QHeaderView, QLabel, QPushButton, QSizePolicy,
                                QStackedWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
@@ -40,8 +40,13 @@ MOVE_X, MOVE_Y = ("dist", "t"), ("z_abs", "i")
 _COLUMN_WORDS = {"dist": "col_dist", "t": "col_t"}
 #: a spectrum has at least this many points (STS and Z sweeps take eight or more), a move trace two
 _SPECTRUM_MIN, _MOVE_MIN = 8, 2
-N_THUMBS = 6
+#: the thumbnails of the strip: at most this many at once, at least this many whatever the window's height (the strip
+#: shows as many as its height holds, whole)
+MAX_THUMBS = 8
+MIN_THUMBS = 3
 THUMB_PX = 64
+#: the paging buttons' least height (the style sheet's small button)
+NAV_PX = 28
 #: the marker table shows this many rows before it scrolls: its strip is exactly a header, the rows and the frame
 #: (a viewport that is not a whole number of rows leaves the first row cut off under the header when scrolled)
 MARKER_ROWS = 6
@@ -142,6 +147,167 @@ class MarkerTable(QTableWidget):
             self._wheel = 0
 
 
+class _MarkedThumb(ThumbButton):
+    """A thumbnail that says, in the window's accent colour, that its frame is the one on show (the toolkit's own
+    checked look is a slightly darker edge, which in a 1280x720 picture is not seen)."""
+
+    def paintEvent(self, ev) -> None:
+        super().paintEvent(ev)
+        if self.isChecked():
+            w = float(style.px(3))
+            pen = QPen(QColor(style.COLORS["accent"]), w)
+            pen.setJoinStyle(Qt.PenJoinStyle.MiterJoin)
+            p = QPainter(self)
+            p.setPen(pen)
+            p.setBrush(Qt.BrushStyle.NoBrush)
+            p.drawRect(QRectF(self.rect()).adjusted(w / 2, w / 2, -w / 2, -w / 2))
+            p.end()
+
+
+class FrameStrip(QWidget):
+    """The thumbnails beside the viewer: every frame of the episode, newest first, a window of them at a time.
+
+    The strip used to hold the newest six frames and nothing else; an older frame was reached from the Data tab
+    (screen trial 5, steps 42-45: "scrolling the wheel over it did nothing"). Now the window moves: a notch of the
+    wheel over the strip is one thumbnail (finer wheels add up, Ctrl does nothing), and when more frames exist than
+    the strip shows, two buttons move it a page and say how many frames lie beyond their end. How many thumbnails
+    show is what the strip's height holds, whole, between the two buttons (their room is kept when they are not
+    there, so that the thumbnails do not move when the seventh frame comes).
+
+    The frame on show is marked when it is in the window, and it is brought into it when it changes (a new scan, a
+    frame picked from the Data tab); a read of the data list leaves the reader's place where it is."""
+
+    picked = Signal(str)
+
+    def __init__(self, parent: QWidget | None = None):
+        super().__init__(parent)
+        self.setObjectName("view.strip")
+        self._thumb = style.px(THUMB_PX + 8)
+        self.setFixedWidth(self._thumb)                  # always as wide as a thumbnail: the image does not jump
+        self._items: list[tuple[str, QPixmap]] = []
+        self._first = 0                                  # index of the thumbnail at the top
+        self._current = ""                               # the frame on show
+        self._revealed = ""                              # the one that was last brought into the window
+        self._wheel = 0
+        col = QVBoxLayout(self)
+        col.setContentsMargins(0, 0, 0, 0)
+        col.setSpacing(style.px(3))
+        self.newer = self._nav("strip.newer", lambda: self.scroll_by(-self.capacity()))
+        self.older = self._nav("strip.older", lambda: self.scroll_by(self.capacity()))
+        self.thumbs = [_MarkedThumb() for _ in range(MAX_THUMBS)]
+        col.addWidget(self.newer)
+        for i, b in enumerate(self.thumbs):
+            b.setObjectName(f"thumb.{i}")
+            b.clicked.connect(lambda _=False, btn=b: self.picked.emit(btn.name))
+            b.hide()
+            col.addWidget(b)
+        col.addStretch(1)
+        col.addWidget(self.older)
+        for b in (self.newer, self.older, *self.thumbs):
+            b.installEventFilter(self)                   # a button does not pass the wheel on to the strip: take it from it
+        # the strip must not ask the column for the height of a full window of thumbnails: it shows as many as fit
+        self.setMinimumHeight(2 * style.px(NAV_PX) + MIN_THUMBS * (self._thumb + style.px(3)))
+
+    def _nav(self, name: str, fn) -> QPushButton:
+        b = QPushButton()
+        b.setObjectName(name)
+        b.setProperty("role", "small")
+        b.clicked.connect(lambda _=False: fn())
+        sp = b.sizePolicy()
+        sp.setRetainSizeWhenHidden(True)
+        b.setSizePolicy(sp)
+        b.hide()
+        return b
+
+    # ── what it shows ──
+    def capacity(self) -> int:
+        """How many thumbnails the strip's height holds, whole, between its two buttons."""
+        gap = self.layout().spacing()
+        room = self.height() - 2 * self._nav_height() - gap
+        return max(MIN_THUMBS, min(MAX_THUMBS, room // (self._thumb + gap)))
+
+    def _nav_height(self) -> int:
+        self.newer.ensurePolished()                      # the style sheet's minimum height is in the size hint only then
+        return max(self.newer.sizeHint().height(), style.px(NAV_PX))
+
+    def first_index(self) -> int:
+        """How many frames are newer than the one at the top."""
+        return self._first
+
+    def names(self) -> list[str]:
+        return [n for n, _ in self._items]
+
+    def set_items(self, items: list[tuple[str, QPixmap]], current: str = "") -> None:
+        """Every frame that has a thumbnail, newest first; ``current`` is the frame on show (or none)."""
+        anchor = self._items[self._first][0] if self._first < len(self._items) else ""
+        self._items = list(items)
+        names = self.names()
+        if self._first and anchor in names:              # the window stays on the same frames when new ones come first
+            self._first = names.index(anchor)
+        self._current = current
+        self._refresh()
+
+    def set_current(self, name: str) -> None:
+        self._current = name
+        self._refresh()
+
+    def scroll_by(self, k: int) -> None:
+        """Move the window ``k`` thumbnails toward the older frames (negative: toward the newer), as far as the ends."""
+        self._first += int(k)
+        self._refresh()
+
+    def _refresh(self) -> None:
+        n = self.capacity()
+        names = self.names()
+        if self._current and self._current != self._revealed and self._current in names:
+            idx = names.index(self._current)             # a frame that has just come on show: into the window
+            if idx < self._first:
+                self._first = idx
+            elif idx >= self._first + n:
+                self._first = idx - n + 1
+            self._revealed = self._current
+        elif not self._current:
+            self._revealed = ""
+        self._first = max(0, min(self._first, len(names) - n))
+        for i, b in enumerate(self.thumbs):
+            k = self._first + i
+            if i < n and k < len(names):
+                b.set_thumb(names[k], self._items[k][1], style.px(THUMB_PX))
+                b.setChecked(names[k] == self._current)
+            else:
+                b.setChecked(False)
+                b.set_thumb("", None, style.px(THUMB_PX))
+        newer, older = self._first, max(0, len(names) - self._first - n)
+        for b, count, glyph in ((self.newer, newer, "▲"), (self.older, older, "▼")):
+            b.setText(f"{glyph} {count}" if count else glyph)
+            b.setEnabled(count > 0)
+            b.setVisible(len(names) > n)
+
+    def resizeEvent(self, ev) -> None:
+        super().resizeEvent(ev)
+        self._refresh()
+
+    def eventFilter(self, obj, ev) -> bool:
+        if ev.type() == QEvent.Type.Wheel and obj is not self:
+            self.wheelEvent(ev)                          # over a thumbnail or a paging button it is the strip's wheel too
+            return True
+        return False
+
+    def wheelEvent(self, ev) -> None:
+        ev.accept()                                      # taken whatever happens: nothing behind it scrolls
+        if ev.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            return
+        self._wheel += ev.angleDelta().y()
+        notches = int(self._wheel / 120)
+        if not notches:
+            return
+        self._wheel -= notches * 120
+        before = self._first
+        self.scroll_by(-notches)                         # up: toward the newer frames, which are at the top
+        if self._first == before:                        # at an end: the turns beyond it are not saved up
+            self._wheel = 0
+
+
 class CenterColumn(QWidget):
     view_changed = Signal()                       # the reader toggled channel or direction
     thumb_clicked = Signal(str)
@@ -201,20 +367,10 @@ class CenterColumn(QWidget):
         self.stack.installEventFilter(self)
         self.frame_view.installEventFilter(self)
         view.addWidget(self.stack, 1)
-        column = QVBoxLayout()
-        column.setSpacing(style.px(3))
-        column.setContentsMargins(0, 0, 0, 0)
-        strip_w = QWidget()                              # always as wide as a thumbnail: the image does not jump
-        strip_w.setFixedWidth(style.px(THUMB_PX + 8))
-        strip_w.setLayout(column)
-        self.thumbs = [ThumbButton() for _ in range(N_THUMBS)]
-        for i, b in enumerate(self.thumbs):
-            b.setObjectName(f"thumb.{i}")
-            b.clicked.connect(lambda _=False, btn=b: self.thumb_clicked.emit(btn.name))
-            b.hide()
-            column.addWidget(b)
-        column.addStretch(1)
-        view.addWidget(strip_w)
+        self.strip = FrameStrip()
+        self.strip.picked.connect(self.thumb_clicked)
+        self.thumbs = self.strip.thumbs
+        view.addWidget(self.strip)
         v.addLayout(view, 1)
         self.readout = ElidedLabel()
         self.readout.setObjectName("view.readout")
@@ -414,8 +570,7 @@ class CenterColumn(QWidget):
             f"centre ({fmt.num(cx, 5)}, {fmt.num(cy, 5)}) nm · size {fmt.num(frame['size_nm'], 5)} nm · "
             f"{frame['pixels']} px · angle {fmt.num(frame['angle_deg'], 4)}°")
         self.readout.set_full_text("")
-        for b in self.thumbs:
-            b.setChecked(b.name == frame["frame"])
+        self.strip.set_current(frame["frame"])
 
     def show_spectrum(self, spec: dict, axes: tuple[str, str] | None = None) -> None:
         """Show a spectrum, or a move trace (``kind`` "move"), plotted against the columns the reader picks."""
@@ -430,8 +585,7 @@ class CenterColumn(QWidget):
         self._rebuild_axes(xcols, ycols, xk, yk)
         self.toolbars.setCurrentIndex(1)
         self.stack.setCurrentIndex(1)
-        for b in self.thumbs:
-            b.setChecked(False)
+        self.strip.set_current("")
         self.readout.set_full_text("")
         self.info.setText(self._spectrum_info(spec, int(np.size(spec[xcols[0]]))))
         self._draw_spectrum(xk, yk)
@@ -486,14 +640,8 @@ class CenterColumn(QWidget):
         return self.spec_x.value(), self.spec_y.value()
 
     def set_thumbs(self, items: list[tuple[str, QPixmap]], current: str = "") -> None:
-        """The last frames, newest first."""
-        size = style.px(THUMB_PX)
-        for i, b in enumerate(self.thumbs):
-            if i < len(items):
-                b.set_thumb(items[i][0], items[i][1], size)
-                b.setChecked(items[i][0] == current)
-            else:
-                b.set_thumb("", None, size)
+        """Every frame that has a thumbnail, newest first; ``current`` is the frame on show (none: ``""``)."""
+        self.strip.set_items(items, current)
 
     # ── readouts ──
     def _cursor(self, c: dict) -> None:
