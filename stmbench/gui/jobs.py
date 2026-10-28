@@ -19,6 +19,17 @@ REFUSALS = (ActionError, ValueError, TypeError, KeyError)
 
 
 @dataclass
+class Refusal:
+    """A refused operator call, as the band on the status strip shows it until the reader acknowledges it: the
+    call with the parameters it was clicked with, the instrument's words, and the calls that did not run because
+    of it (the ones that were waiting behind it, then every click turned away while the console held)."""
+    call: str
+    words: str
+    refused: bool = True            # False: a fault, not the instrument's refusal
+    not_run: list[str] = field(default_factory=list)
+
+
+@dataclass
 class Outcome:
     kind: str                       # act | report | finish | view_frame | view_spectrum | boot
     label: str                      # the action's name, or what the job was for

@@ -163,7 +163,6 @@ def render_states(out: Path, lang: str = "zh", scale: float = 1.0, scenario: str
     work = Path(work) if work else Path(tempfile.mkdtemp(prefix="stmbench_shots_"))
     sess = GuiSession(scenario, seed, run_dir=work / "run", export_dir=work / "run" / "export", lang=lang)
     win = MainWindow(sess, lang=lang)
-    win.worker.guard_s = 0.0          # this script clicks on after a refusal at once; (k) turns the guard on
     win.resize(*(FULLSCREEN if fullscreen else WINDOW))
     win.show()
     settle(win)
@@ -198,6 +197,7 @@ def render_states(out: Path, lang: str = "zh", scale: float = 1.0, scenario: str
     click(win, widget(win, "run.move_tip"))
     settle(win)
     snap(f"e_refusal_{lang}")
+    click(win, widget(win, "refusal.ack"))                       # the console holds until the refusal is acknowledged
 
     # (c) an STS spectrum, from the Spectroscopy tab
     click(win, win.right.tabBar(), win.right.tabBar().tabRect(1).center())
@@ -240,14 +240,13 @@ def render_states(out: Path, lang: str = "zh", scale: float = 1.0, scenario: str
     snap(f"j_contrast_markers_{lang}")
 
     # (k) one step: Set bias with a bad value (refused), then Set setpoint and Wait clicked straight after it. The
-    # refusal stays on the strip's last line and the two calls after it do not run
-    win.worker.guard_s = 3.0
+    # refusal stays on the strip, in its red band, and the two calls after it do not run
     fill(win, {"act.set_bias.bias_v": "abc", "act.set_setpoint.current_pa": "100", "act.wait.seconds": "1"})
     for name in ("run.set_bias", "run.set_setpoint", "run.wait"):
         click(win, widget(win, name))
     settle(win)
     snap(f"k_refused_step_{lang}")
-    win.worker.guard_s = 0.0
+    click(win, widget(win, "refusal.ack"))
 
     # (l) the wheel at the first atom (x8), the grey scale over the part in view, a marker on the zoomed image
     click(win, widget(win, "view.contrast.visible"))

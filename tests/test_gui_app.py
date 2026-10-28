@@ -20,7 +20,7 @@ import pytest
 pytest.importorskip("PySide6")
 os.environ["QT_QPA_PLATFORM"] = "offscreen"                 # never a visible window
 
-from PySide6.QtCore import QCoreApplication, QEvent, Qt  # noqa: E402
+from PySide6.QtCore import QCoreApplication, QEvent, QPoint, Qt  # noqa: E402
 from PySide6.QtGui import QCloseEvent, QImage  # noqa: E402
 from PySide6.QtTest import QTest  # noqa: E402
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QLabel, QLineEdit, QListWidget,  # noqa: E402
@@ -28,6 +28,7 @@ from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QLabel,
 
 from stmbench.gui import fmt, layout, shots, style  # noqa: E402
 from stmbench.gui.app import MainWindow  # noqa: E402
+from stmbench.gui.labels import one  # noqa: E402
 from stmbench.gui.panels import token  # noqa: E402
 from stmbench.gui.session import GuiSession, make_private_dir, read_spec  # noqa: E402
 from stmbench.instrument import ACTIONS  # noqa: E402
@@ -101,7 +102,6 @@ def open_window(app, tmp_path):
         else:
             sess = GuiSession(scenario, seed, run_dir=tmp_path / name, export_dir=tmp_path / name / "export", lang=lang)
         win = MainWindow(sess, lang=lang, sealed=sealed)
-        win.worker.guard_s = 0.0                          # the tests click one refusal after another; see the guard tests
         win.resize(*shots.WINDOW)
         win.show()
         made.append(win)
@@ -130,6 +130,25 @@ def open_left(win: MainWindow, key: str) -> None:
 
 def run_button(win: MainWindow, name: str) -> None:
     shots.click(win, shots.widget(win, name))
+
+
+def acknowledge(win: MainWindow) -> None:
+    """The reader's click on the button of the band that a refusal puts on the strip: operator calls are accepted
+    again. A test that clicks one refusal after another does this in between."""
+    assert win.worker.held and shots.widget(win, "refusal.band").isVisible()
+    run_button(win, "refusal.ack")
+    QApplication.processEvents()
+    assert not win.worker.held and not shots.widget(win, "refusal.band").isVisible()
+
+
+def pause(seconds: float) -> None:
+    """A wait inside a step, as the screen harness makes it: the event loop runs and the worker thread gets its turns
+    (``QTest.qWait`` does not release the interpreter lock, so the worker would stand still)."""
+    end = time.monotonic() + seconds
+    QApplication.processEvents()
+    while time.monotonic() < end:
+        QApplication.processEvents()
+        time.sleep(0.005)
 
 
 def scan_small(win: MainWindow) -> str:
@@ -276,10 +295,12 @@ def test_a_refusal_shows_the_instruments_words_everywhere(open_window, tmp_path)
     assert not acts(records(tmp_path))                          # nothing happened on the instrument
     # an empty required field sends nothing, a field that is not a number is sent as typed: both are refused,
     # and every refusal is on record, the instrument's own range check above included
+    acknowledge(win)                                            # a refusal holds the next call until it is acknowledged
     run_button(win, "run.scan")
     shots.settle(win)
     assert win.status.result.full_text() == "✗ refused: scan: center_x_nm is required"
     assert [r["kind"] for r in records(tmp_path) if r["kind"] != "observe"] == ["refused", "refused"]
+    acknowledge(win)
     shots.fill(win, {"act.set_bias.bias_v": "abc"})
     run_button(win, "run.set_bias")
     shots.settle(win)
@@ -371,11 +392,86 @@ def test_a_field_follows_the_action_table_when_it_changes_not_a_list_of_names(op
     run_button(win, "run.scan")                                  # the angle left empty
     shots.settle(win)
     assert win.status.result.full_text() == "✗ refused: scan: angle_deg is required"
+    acknowledge(win)
     shots.fill(win, {"act.scan.angle_deg": "0"})
     run_button(win, "run.scan")
     shots.settle(win)
     done = {r["name"]: r["params"] for r in records(tmp_path) if r["kind"] == "act"}
     assert done["wait"] == {"seconds": 1.5} and done["scan"]["angle_deg"] == 0.0
+
+
+# ── the ranges ──
+def numeric_fields():
+    """Every text field of the panels that takes a number: ``(tab, cell, parameter)``."""
+    for tab, groups in layout.TABS:
+        for g in groups:
+            for line in g.lines:
+                for c in line:
+                    if isinstance(c, layout.F):
+                        p = next(q for q in ACTIONS[c.action].params if q.name == c.param)
+                        if p.kind in ("number", "integer") and p.choices is None:
+                            yield tab, c, p
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_field_last_clicked_tells_its_range_from_the_action_table_beside_the_tabs(fonts, open_window, lang):
+    """The screen agent learnt the 100000 pA setpoint limit only from a refusal, in all three trials: the console showed the
+    range of no field. The line beside the tabs describes the field last clicked, in the field's own unit, with the table's
+    numbers, whole in the widest fonts, with no hover and no height of its own."""
+    win = open_window(lang)
+    line = shots.widget(win, "field.help")
+    assert line.text() == ""                                                  # no field clicked yet: nothing to say
+    where = {n: shots.widget(win, n).mapTo(win, shots.widget(win, n).rect().topLeft())
+             for n in ("run.set_setpoint", "recent.box", "right.tabs")}
+    ranged = 0
+    for tab, c, p in numeric_fields():
+        open_right(win, tab)
+        shots.click(win, shots.widget(win, f"act.{c.action}.{c.param}"))
+        shots.hit(win, line)                                                   # on screen, whichever tab is open
+        text = line.full_text()
+        assert text and line.text() == text, (c.action, c.param, text, line.text())            # whole, not elided
+        assert c.en in text and (f"({c.unit})" in text) == bool(c.unit), (c.action, c.param, text)
+        want = fmt.range_text(p.lo, p.hi)
+        if want:
+            ranged += 1
+            assert text.endswith(f"{one('field_range', lang)} {want}"), (c.action, c.param, text)
+        else:
+            assert one("field_range", lang) not in text, (c.action, c.param, text)
+        assert {n: shots.widget(win, n).mapTo(win, shots.widget(win, n).rect().topLeft()) for n in where} == where
+    assert ranged >= 25
+    open_right(win, "operate")
+    shots.click(win, shots.widget(win, "act.set_setpoint.current_pa"))
+    assert line.full_text().endswith("0.1 … 100000")
+    run_button(win, "run.set_bias")                                          # a click on a button leaves it: the field is the last clicked
+    assert line.full_text().endswith("0.1 … 100000")
+    shots.click(win, shots.widget(win, "act.move_tip.speed_nm_s"))
+    assert line.full_text().endswith("0.01 … 10000")
+
+
+def test_a_range_is_the_action_tables_and_the_field_still_sends_what_was_typed(open_window, monkeypatch, tmp_path):
+    reshape(monkeypatch, "set_setpoint", "current_pa", lo=2.5, hi=5000.0)
+    reshape(monkeypatch, "scan", "angle_deg", lo=None)
+    win = open_window("en")
+    shots.click(win, shots.widget(win, "act.set_setpoint.current_pa"))
+    assert shots.widget(win, "field.help").full_text() == "setpoint (pA): range 2.5 … 5000"
+    shots.click(win, shots.widget(win, "act.scan.angle_deg"))
+    assert shots.widget(win, "field.help").full_text() == "angle (°): range ≤ 180"        # one end open
+    shots.type_into(win, shots.widget(win, "act.set_setpoint.current_pa"), "9000")      # outside it: no clamping, no check here
+    run_button(win, "run.set_setpoint")
+    shots.settle(win)
+    assert win.status.result.full_text() == "✗ refused: set_setpoint: current_pa = 9000.0 is outside [2.5, 5000.0]"
+    sent = [r for r in records(tmp_path) if r["kind"] == "refused"][-1]
+    assert sent["args"] == {"current_pa": 9000}
+
+
+def test_the_trials_refusal_leaves_the_range_of_the_field_it_came_from_on_screen(open_window):
+    win = open_window("en")
+    shots.fill(win, {"act.set_setpoint.current_pa": "200000"})
+    run_button(win, "run.set_setpoint")
+    shots.settle(win)
+    acknowledge(win)
+    assert shots.widget(win, "field.help").full_text() == "setpoint (pA): range 0.1 … 100000"
+    assert "outside [0.1, 100000.0]" in win.status.result.full_text()
 
 
 def test_with_the_conditioning_parameters_required_an_empty_field_sends_nothing_and_the_instrument_refuses(
@@ -388,15 +484,18 @@ def test_with_the_conditioning_parameters_required_an_empty_field_sends_nothing_
     assert win.status.result.full_text() == "✗ refused: pulse: width_ms is required"
     refused = [r for r in records(tmp_path) if r["kind"] == "refused"]
     assert refused[-1]["name"] == "pulse" and refused[-1]["args"] == {"bias_v": 1.0, "z_hold": True}    # no 50 filled in
+    acknowledge(win)
     run_button(win, "run.poke")
     shots.settle(win)
     assert win.status.result.full_text() == "✗ refused: poke: depth_nm is required"
+    acknowledge(win)
     shots.fill(win, {"act.poke.depth_nm": "0.1"})
     run_button(win, "run.poke")
     shots.settle(win)
     assert win.status.result.full_text() == "✗ refused: poke: dwell_s is required"
     assert win.operate.collect("poke") == {"depth_nm": 0.1}
     assert not acts(records(tmp_path))                           # nothing reached the instrument but the refusals
+    acknowledge(win)
     shots.fill(win, {"act.pulse.width_ms": "20", "act.poke.dwell_s": "0.2"})
     run_button(win, "run.pulse")
     run_button(win, "run.poke")
@@ -481,6 +580,78 @@ def test_the_instruments_facts_head_the_manual_tab(open_window, tmp_path):
     assert "压电 XY 量程 Piezo XY range" in " ".join(zh.sidebar.facts.facts())
 
 
+def manual_lines(win: MainWindow) -> tuple[int, int]:
+    """``(visual lines in all, lines a page shows)`` of the Manual tab's text as it is laid out now."""
+    bar = shots.widget(win, "manual.text").verticalScrollBar()
+    return bar.maximum() + bar.pageStep(), bar.pageStep()
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_manuals_wide_view_reads_in_two_screens_and_gives_the_window_back_when_it_is_left(fonts, open_window, lang):
+    """Screen trials 4 and 5 spent five to seven steps scrolling the manual: a pane of 27 lines in a column of 360 px, where
+    most of its 64 lines wrap two or three times (about 100 lines in all). The Manual tab's wide view takes the whole
+    window under the status strip, puts the instrument's facts beside the text and shows the same text, byte for byte, in
+    two screens or fewer. Leaving the tab, or the button, gives the window back."""
+    win = open_window(lang)
+    manual = win.session.manual()
+    open_left(win, "manual")
+    for _ in range(3):                                                          # the layout settles in a few turns of the loop
+        QApplication.processEvents()
+    text = shots.widget(win, "manual.text")
+    toggle = shots.widget(win, "manual.wide")
+    narrow_lines, narrow_page = manual_lines(win)
+    assert narrow_lines > 3 * narrow_page                                       # in the column it is three screens and more
+    left_w, strip_h = win.sidebar.width(), win.status.height()
+    shots.hit(win, toggle)
+    assert toggle.text().endswith("Wide view") and toggle.width() >= 56 and toggle.height() >= 32
+    run_button(win, "manual.wide")
+    for _ in range(3):
+        QApplication.processEvents()
+    assert not win.center.isVisible() and not shots.widget(win, "recent.box").isVisible() and not win.right.isVisible()
+    assert win.sidebar.width() > 1800 and win.status.height() == strip_h and win.status.isVisible()      # the strip stays
+    assert win.width() == shots.WINDOW[0]                                        # and the window did not grow to make room
+    assert text.toPlainText() == manual                                          # the manual an MCP agent gets, byte for byte
+    total, page = manual_lines(win)
+    assert total <= 2 * page, (total, page)                                      # two screens or fewer, in these fonts too
+    table = shots.widget(win, "facts.table")
+    shots.hit(win, table)
+    shots.hit(win, text)
+    here = lambda w: w.mapTo(win, w.rect().topLeft())                           # noqa: E731
+    assert here(table).x() + table.width() <= here(text).x()                     # beside the text, not above it
+    assert here(text).y() <= here(table).y() < here(text).y() + text.height()
+    assert toggle.text().endswith("Narrow view")
+    # a wheel notch is three lines, in this view and in the narrow one
+    bar = text.verticalScrollBar()
+    shots.wheel(win, text, delta=-120)
+    assert bar.value() == 3
+    shots.wheel(win, text, delta=-120)
+    shots.wheel(win, text, delta=-120)
+    assert bar.value() == min(9, bar.maximum())
+    shots.wheel(win, text, delta=120 * 5)
+    assert bar.value() == 0
+    run_button(win, "manual.wide")                                               # the button gives the window back
+    for _ in range(3):
+        QApplication.processEvents()
+    assert win.center.isVisible() and win.right.isVisible() and win.sidebar.width() == left_w and toggle.text().endswith("Wide view")
+    assert win.width() == shots.WINDOW[0] and manual_lines(win) == (narrow_lines, narrow_page)
+    run_button(win, "manual.wide")                                               # and so does leaving the tab
+    open_left(win, "report")
+    for _ in range(3):
+        QApplication.processEvents()
+    assert win.center.isVisible() and win.right.isVisible() and win.sidebar.width() == left_w
+    assert win.width() == shots.WINDOW[0]
+    open_left(win, "manual")
+    for _ in range(3):
+        QApplication.processEvents()
+    assert toggle.text().endswith("Wide view") and win.sidebar.width() == left_w     # it opens narrow again
+    # in the column too, a notch is three lines
+    bar = text.verticalScrollBar()
+    shots.wheel(win, text, delta=-120)
+    assert bar.value() == 3
+    shots.wheel(win, text, delta=-120 * 4)
+    assert bar.value() == 15
+
+
 def test_a_qplus_rigs_sensor_constants_are_among_the_facts(open_window):
     win = open_window("en", scenario=P5)
     q = win.session.info()["qplus"]
@@ -504,10 +675,10 @@ def test_the_status_strip_reads_in_units_and_counts_instrument_time(open_window)
 
 # ── the report and the end ──
 def test_a_picked_claim_stays_picked_when_it_is_clicked_again_with_one_claim_or_several(open_window):
-    win = open_window("en")                                              # P4 has one reportable claim
+    win = open_window("en")                                              # P4 has one reportable claim: picked from the start
     open_left(win, "report")
     rep = win.sidebar.report
-    assert list(rep.radios) == ["target_site"] and rep.claim_id() == ""
+    assert list(rep.radios) == ["target_site"] and rep.claim_id() == "target_site"
     for click in ("radio", "radio", "its line", "its line", "radio"):       # the trial's second click took it back
         if click == "radio":
             run_button(win, "report.claim.target_site")
@@ -583,6 +754,7 @@ def test_the_report_form_marks_what_the_picked_claim_needs_and_enter_sends_it(op
     QTest.keyClick(shots.widget(win, "report.x_nm"), Qt.Key.Key_Return)        # no value: the instrument says so
     shots.settle(win)
     assert rep.reply.text() == "✗ refused: report: value is required"
+    acknowledge(win)
     shots.fill(win, {"report.value": "30", "report.y_nm": "2", "report.frame": "sim001.sxm", "report.evidence": "sim001.sxm"})
     QTest.keyClick(shots.widget(win, "report.evidence"), Qt.Key.Key_Enter)    # the keypad's Enter too
     shots.settle(win)
@@ -595,16 +767,14 @@ def test_a_report_and_the_end_through_the_report_tab(open_window, tmp_path):
     name = scan_small(win)
     open_left(win, "report")
     rep = win.sidebar.report
+    assert rep.claim_id() == "target_site" and rep.fields["unit"].text() == "nm"     # P4 has one claim to report: it is picked
+    assert not rep.fields["value"].text() and not rep.fields["evidence"].text()      # and nothing else is filled in for the reader
     run_button(win, "report.submit")                             # nothing filled in: the instrument says what is missing
     shots.settle(win)
     assert rep.reply.text() == "✗ refused: report: value is required" and rep.reply.property("tone") == "bad"
-    shots.fill(win, {"report.value": "1"})
-    run_button(win, "report.submit")                             # no claim chosen
-    shots.settle(win)
-    assert "unknown claim ''" in rep.reply.text()
-    assert not rep.fields["unit"].text()                         # nothing is pre-filled before a claim is chosen
-    shots.click(win, shots.widget(win, "report.claim.target_site"))
-    assert rep.fields["unit"].text() == "nm"                     # except the unit
+    acknowledge(win)
+    shots.click(win, shots.widget(win, "report.claim.target_site"))                # clicking the picked claim again keeps it
+    assert rep.claim_id() == "target_site" and rep.fields["unit"].text() == "nm"
     shots.fill(win, {"report.value": "1.5", "report.x_nm": "1.5", "report.y_nm": "-0.25", "report.frame": name})
     run_button(win, "report.viewed")                             # appends the name of what the viewer shows
     assert rep.fields["evidence"].text() == name
@@ -639,6 +809,50 @@ def test_a_report_and_the_end_through_the_report_tab(open_window, tmp_path):
     assert read_export(tmp_path / "run" / "export")["session"]["finished"]
     texts = _all_text(win, own_only=True)
     assert not any(w in texts.lower() for w in ("verdict", "success", "truth", "partial", "score"))
+
+
+def test_with_several_claims_to_report_none_is_picked_and_a_report_without_one_is_refused(open_window):
+    win = open_window("en", scenario="P1_barth1990_au111")
+    open_left(win, "report")
+    rep = win.sidebar.report
+    assert len(rep.radios) == 4 and rep.claim_id() == "" and not rep.fields["unit"].text()      # nothing is chosen for the reader
+    shots.fill(win, {"report.value": "1"})
+    run_button(win, "report.submit")
+    shots.settle(win)
+    assert "unknown claim ''" in rep.reply.text()
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_note_shows_its_whole_text_and_is_sent_whole_in_the_widest_fonts_too(fonts, open_window, lang, tmp_path):
+    """Screen trial 4: "the narrow note field cannot show its text": the note was a line edit a third of the form wide.
+    It now has the width of the form, wraps, and has the height of four lines."""
+    win = open_window(lang)
+    scan = scan_small(win)
+    open_left(win, "report")
+    rep = win.sidebar.report
+    note = shots.widget(win, "report.note")
+    assert note.width() >= 0.9 * shots.widget(win, "report.evidence").width()
+    notes = {"en": ("TARGET NOT REACHED: atom is within 0.2 nm of its start site; not moved +4 nm",    # the note of that trial
+                    "a longer one: " + "word " * 12 + "end"),
+             "zh": ("目标未到达：原子离出发的格点不到 0.2 nm，没有移动 +4 nm", "较长的一条：" + "说明" * 8)}[lang]
+    for text in notes:
+        if lang == "zh":                                                       # QTest cannot type Chinese: the harness sends key events by hand
+            shots.click(win, note)
+            note.setText(text)
+        else:
+            shots.type_into(win, note, text)
+        assert rep.fields["note"].text() == text
+        block = note.document().firstBlock()
+        assert note.document().documentLayout().blockBoundingRect(block).height() <= note.viewport().height()   # all of it in view
+        assert not note.verticalScrollBar().isVisible()
+        shots.hit(win, note)
+    shots.fill(win, {"report.value": "1.5", "report.x_nm": "1.5", "report.y_nm": "0", "report.frame": scan,
+                     "report.evidence": scan})
+    shots.click(win, note)
+    QTest.keyClick(note, Qt.Key.Key_Return)                                    # Enter in the note sends the report, as in every field
+    shots.settle(win)
+    sent = [r for r in records(tmp_path) if r["kind"] == "report"][-1]["args"]
+    assert sent["note"] == text and "\n" not in sent["note"]
 
 
 def test_closing_the_dev_window_finishes_the_episode(open_window, tmp_path):
@@ -1354,9 +1568,10 @@ def test_a_frame_taken_with_the_lock_in_on_offers_the_didv_channel(open_window):
 
 @pytest.mark.parametrize("lang", ["zh", "en"])
 @pytest.mark.parametrize("scenario", sorted(p.stem for p in SCENARIO_DIR.glob("P*.yaml")))
-def test_every_paper_scenario_opens_with_its_reportable_claims_and_a_report_form_that_fits(open_window, scenario, lang):
-    """In both languages: the longest claims (P1's four, in English) leave the form whole and on screen, none
-    of its controls over another, and no scroll bar to reach it."""
+def test_every_paper_scenario_opens_with_its_reportable_claims_and_a_report_form_that_fits(fonts, open_window, scenario, lang):
+    """In both languages, in the window's fonts and in DejaVu (what the virtual machine has): the longest claims (P1's four,
+    in English) leave the form whole and on screen, none of its controls over another, and no scroll bar to reach it. The
+    form is four rows tall, the note among them, because P1 in English leaves the page 23 px at 1920x1053 (1 in DejaVu)."""
     win = open_window(lang, scenario=scenario)
     claims = win.session.claims()
     assert claims and set(win.sidebar.report.radios) == {c["id"] for c in claims}
@@ -1400,8 +1615,10 @@ def test_the_last_five_results_stay_on_screen_and_a_refusal_is_not_pushed_out_by
     win = open_window("en")
     shots.fill(win, {"act.set_bias.bias_v": "abc", "act.set_setpoint.current_pa": "100", "act.wait.seconds": "1"})
     for name in ("run.set_bias", "run.set_setpoint", "run.wait"):          # three steps: a refusal, then two successes
-        run_button(win, name)                                               # (calls of one step after a refusal do not run)
+        run_button(win, name)                                               # (calls after a refusal do not run until it is acknowledged)
         shots.settle(win)
+        if win.worker.held:
+            acknowledge(win)
     rows = [shots.widget(win, f"recent.{i}") for i in range(3)]
     assert [r.text() for r in rows] == ["✓ wait → waited_s=1", "✓ set_setpoint → setpoint_pa=100",
                                         "✗ refused: set_bias: bias_v must be a number"]
@@ -1519,6 +1736,98 @@ def test_what_the_viewer_the_profile_and_the_data_tab_say_is_not_cut_off(fonts, 
     assert "centre (-12.534, -5.607) nm" in shots.widget(win, "data.frames").item(0).text()
 
 
+# ── the lists of the Data tab ──
+def small_scans(win: MainWindow, n: int) -> list[str]:
+    """``n`` small frames at different centres, in the order they were made (the list shows the newest first)."""
+    names = []
+    for i in range(n):
+        shots.fill(win, {**SMALL, "act.scan.pixels": "16", "act.scan.center_x_nm": str(i)})
+        run_button(win, "run.scan")
+        shots.settle(win)
+        names.append(win.viewed[1])
+    return names
+
+
+def first_in_view(lst: QListWidget) -> int:
+    """The row of the entry at the top edge of the list, cut or whole."""
+    return lst.indexAt(QPoint(6, 1)).row()
+
+
+def notches(win: MainWindow, lst: QListWidget, n: int) -> None:
+    """``n`` wheel notches over the list, down when positive (the harness's direction: a turn towards the reader)."""
+    for _ in range(abs(n)):
+        shots.wheel(win, lst, delta=-120 if n > 0 else 120)
+
+
+def test_a_wheel_notch_moves_the_frame_list_by_one_entry_and_the_clicked_entry_stays_in_view(open_window):
+    """Screen trial 5, steps 43-48: in the Data tab one wheel notch jumped several entries and eight notches landed at the
+    very end, so reaching sim005 among fifteen frames took three steps."""
+    win = open_window("en")
+    names = small_scans(win, 15)
+    open_left(win, "data")
+    lst = shots.widget(win, "data.frames")
+    assert lst.count() == 15 and lst.verticalScrollBar().maximum() > 3 * lst.visualItemRect(lst.item(0)).height()
+    assert first_in_view(lst) == 0 and lst.item(0).text().startswith(names[-1])             # the newest first
+    notches(win, lst, 1)
+    assert first_in_view(lst) == 1 and lst.visualItemRect(lst.item(1)).top() == 0           # one entry, its top at the edge
+    notches(win, lst, 3)
+    assert first_in_view(lst) == 4
+    notches(win, lst, -1)
+    assert first_in_view(lst) == 3
+    notches(win, lst, -10)
+    assert first_in_view(lst) == 0 and lst.verticalScrollBar().value() == 0                  # up to the first, no further
+    notches(win, lst, 8)                                                                     # the eight of the trial
+    assert first_in_view(lst) == 8
+    notches(win, lst, 60)                                                                    # far beyond the end: it stops there
+    end = lst.verticalScrollBar().value()
+    assert end == lst.verticalScrollBar().maximum()
+    seen = []
+    for _ in range(3):                                                                       # and from the end, one entry per notch
+        seen.append(first_in_view(lst))
+        notches(win, lst, -1)
+    assert seen[0] - seen[1] == seen[1] - seen[2] == 1 and first_in_view(lst) == seen[2] - 1
+    # a click on an entry that is cut by the bottom edge shows it whole, and shows its frame
+    notches(win, lst, -20)
+    vp = lst.viewport().rect()
+    cut = next(r for r in range(lst.count()) if lst.visualItemRect(lst.item(r)).top() < vp.height() < lst.visualItemRect(lst.item(r)).bottom())
+    rect = lst.visualItemRect(lst.item(cut))
+    shots.click(win, lst.viewport(), QPoint(rect.center().x(), (rect.top() + vp.height()) // 2))
+    shots.settle(win)
+    assert vp.contains(lst.visualItemRect(lst.item(cut))), (lst.visualItemRect(lst.item(cut)), vp)
+    assert win.viewed == ("frame", names[len(names) - 1 - cut])
+    # a control that is held down, or the wheel over the tab bar, does nothing to the list
+    before = lst.verticalScrollBar().value()
+    shots.wheel(win, win.sidebar.tabBar(), delta=-120)
+    assert lst.verticalScrollBar().value() == before
+
+
+def test_the_spectra_and_the_move_traces_lists_step_one_entry_per_notch_too(open_window):
+    win = open_window("en")
+    open_right(win, "spectroscopy")
+    for i in range(7):
+        shots.fill(win, {"act.sts.v_start": "-0.5", "act.sts.v_end": f"{0.5 + i / 10}", "act.sts.points": "8"})
+        run_button(win, "run.sts")
+        shots.settle(win)
+    open_right(win, "operate")
+    for i in range(7):
+        shots.fill(win, {"act.move_tip.x_nm": str(i + 1), "act.move_tip.y_nm": "0", "act.move_tip.speed_nm_s": "100"})
+        run_button(win, "run.move_tip")
+        shots.settle(win)
+    open_left(win, "data")
+    for name, n in (("data.spectra", 7), ("data.traces", 7)):
+        lst = shots.widget(win, name)
+        assert lst.count() == n
+        notches(win, lst, 50)
+        last_first = first_in_view(lst)                             # the furthest the list goes
+        notches(win, lst, -50)
+        assert first_in_view(lst) == 0 and last_first >= 1          # seven entries do not fit in the list
+        for k in range(1, min(3, last_first) + 1):
+            notches(win, lst, 1)
+            assert first_in_view(lst) == k, (name, k)
+        notches(win, lst, -10)
+        assert first_in_view(lst) == 0
+
+
 # ── text fields ──
 def press_release(win: MainWindow, w: QWidget, dx: int = 0, steps: int = 0) -> None:
     """A click on ``w`` the way the screen harness and a real pointer make it: through the window, the pointer
@@ -1569,6 +1878,26 @@ def test_every_click_in_a_field_selects_all_of_it_so_that_click_then_type_replac
     QTest.keyClick(w, Qt.Key.Key_Home)
     QTest.keyClicks(w, "1")
     assert w.text() == "125"
+
+
+def test_a_click_in_a_field_selects_all_of_it_and_the_selection_is_in_the_picture(open_window):
+    """Screen trial 4 said that clicking a field does not select its text, so that every edit needed ctrl+a first. Checked with
+    the harness's own sequence (the pointer arrives, then press and release through the window): it does, the field has the
+    focus, and the highlight is drawn in the picture the agent is shown, not only held by the field."""
+    from PySide6.QtGui import QColor
+    win = open_window("en")
+    f = shots.widget(win, "act.set_bias.bias_v")
+    f.setText("0.050")
+    press_release(win, f)
+    assert f.selectedText() == "0.050" and f.hasFocus()
+    img = win.grab().toImage()
+    r = f.rect().translated(f.mapTo(win, f.rect().topLeft()))
+    accent = QColor(style.COLORS["accent"])
+    hits = sum(1 for x in range(r.left() + 3, r.right() - 3) for y in range(r.top() + 3, r.bottom() - 3)
+               if img.pixelColor(x, y) == accent)
+    assert hits > 200, hits
+    QTest.keyClicks(f, "7")
+    assert f.text() == "7"                                                      # typing replaced it: no ctrl+a first
 
 
 # ── the state the buttons show ──
@@ -1656,6 +1985,7 @@ def test_the_window_fits_a_full_screen_and_a_maximized_window_under_a_title_bar(
     assert win.rect().contains(box.rect().translated(box.mapTo(win, box.rect().topLeft())))     # the list is on screen
     assert win.status.readings.height() < 2 * win.status.readings.fontMetrics().height()           # one line of readings
     open_left(win, "report")
+    QApplication.processEvents()                  # the first show: the bar of the construction-time size is hidden in the next turn
     assert not win.sidebar.report_scroll.verticalScrollBar().isVisible()
     assert win.center.frame_view.height() >= 400                                                  # the image keeps its room
 
@@ -1852,7 +2182,11 @@ def test_a_refused_call_takes_the_calls_of_its_step_that_were_waiting_with_it(op
     assert top == ("note", "not run: an earlier call was refused: set_setpoint, wait")
     assert second == ("bad", "refused: set_bias: bias_v must be a number")
     assert shots.widget(win, "recent.1").property("tone") == "bad"
-    run_button(win, "run.wait")                                         # the next step is not touched
+    band = win.status.plain_text()                                      # the band says what was refused and what did not run
+    assert "✗ REFUSED set_bias bias_v=abc — set_bias: bias_v must be a number" in band
+    assert "Not run: set_setpoint, wait" in band and "HELD" in band
+    acknowledge(win)                                                    # the next step is not touched
+    run_button(win, "run.wait")
     shots.settle(win)
     assert acts(records(tmp_path)) == ["wait"] and win.status.result.full_text().startswith("✓ wait")
 
@@ -1890,39 +2224,253 @@ def test_a_refused_report_stops_the_end_clicked_behind_it_and_the_button_comes_b
     assert shots.widget(win, "finish.begin").isVisible() and not shots.widget(win, "finish.confirm").isVisible()
 
 
-def test_clicks_that_follow_a_refusal_straight_away_are_not_run_but_a_click_after_a_pause_is(open_window, tmp_path):
-    win = open_window("en")
-    now = [100.0]
-    win.worker._clock = lambda: now[0]
-    win.worker.guard_s = 3.0                                              # what a window opens with
-    shots.fill(win, {"act.set_bias.bias_v": "abc", "act.set_setpoint.current_pa": "100"})
-    run_button(win, "run.set_bias")
-    shots.settle(win)                                                     # refused, and answered, before the next click
-    refusal = "✗ refused: set_bias: bias_v must be a number"
-    assert win.status.result.full_text() == refusal
-    now[0] = 101.5                                                        # 1.5 s on: the same step
-    run_button(win, "run.set_setpoint")
-    shots.settle(win)
-    assert acts(records(tmp_path)) == [] and win.is_idle()
-    assert win.status.result.full_text() == refusal                       # nothing that did not run replaces it
-    assert win.recent.entries()[0] == ("note", "not run: an earlier call was refused: set_setpoint")
-    assert "not run: an earlier call was refused" in shots.widget(win, "log.view").toPlainText()
-    now[0] = 103.0                                                        # turned away at 101.5: the guard runs to 104.5
-    run_button(win, "run.set_setpoint")
-    shots.settle(win)
-    assert acts(records(tmp_path)) == []
-    assert win.recent.entries()[0] == ("note", "not run: an earlier call was refused: set_setpoint, set_setpoint")
-    now[0] = 107.6                                                        # a pause: a new step
-    run_button(win, "run.set_setpoint")
-    shots.settle(win)
-    assert acts(records(tmp_path)) == ["set_setpoint"] and win.status.result.full_text().startswith("✓ set_setpoint")
-    # closing the window still ends the episode, whatever the guard says
-    now[0] = 108.0
+def refuse_set_bias(win: MainWindow) -> None:
+    """One refused call: Set bias with a field that is not a number."""
     shots.fill(win, {"act.set_bias.bias_v": "abc"})
     run_button(win, "run.set_bias")
     shots.settle(win)
+    assert win.worker.held
+
+
+def test_the_trials_sequence_set_setpoint_over_the_limit_a_wait_then_move_tip_moves_nothing(open_window, tmp_path):
+    """Screen trials 4 (step 17) and 5 (step 19): Set setpoint 200000 pA is refused (the limit is 100000), the agent's
+    own wait of four seconds follows, then Move tip. The three-second guard had run out during the wait and the drag
+    ran at the old setpoint, a wasted attempt each time. The console now holds until the refusal is acknowledged,
+    whatever the wait; there is no timer to run out."""
+    win = open_window("en")
+    shots.fill(win, {"act.set_setpoint.current_pa": "200000", "act.move_tip.x_nm": "4", "act.move_tip.y_nm": "0",
+                     "act.move_tip.speed_nm_s": "2"})
+    run_button(win, "run.set_setpoint")
+    pause(4.0)                                                        # the wait of the step: longer than the old guard
+    words = "set_setpoint: current_pa = 200000.0 is outside [0.1, 100000.0]"
+    assert win.worker.held and win.status.result.full_text() == "✗ refused: " + words
+    run_button(win, "run.move_tip")
+    shots.settle(win)
+    assert acts(records(tmp_path)) == []                              # the drag did not run, at any setpoint
+    assert "Tip (0.000, 0.000) nm" in win.status.plain_text()
+    # what the screenshot after the step shows: a red band with the words, the call and what did not run, the pill
+    # saying HELD, and the button that acknowledges it
+    plain = win.status.plain_text()
+    assert f"✗ REFUSED set_setpoint current_pa=200000 — {words}" in plain
+    assert "Not run: move_tip" in plain and "HELD" in plain and "held until this is acknowledged" in plain
+    for name in ("refusal.band", "refusal.text", "refusal.ack"):
+        shots.hit(win, shots.widget(win, name))
+    assert shots.widget(win, "status.state").property("tone") == "held"
+    assert win.recent.entries()[0] == ("note", "not run: the refusal is not acknowledged: move_tip")
+    assert win.recent.entries()[1] == ("bad", "refused: " + words)
+    log = shots.widget(win, "log.view").toPlainText()
+    assert "move_tip x_nm=4, y_nm=0, speed_nm_s=2" in log and "not run: the refusal is not acknowledged" in log
+    # every click turned away is listed, in the same growing note and on the band, and the refusal stays on the strip
+    pause(1.0)
+    run_button(win, "run.move_tip")
+    run_button(win, "run.wait")
+    shots.settle(win)
+    assert acts(records(tmp_path)) == []
+    assert win.recent.entries()[0] == ("note", "not run: the refusal is not acknowledged: move_tip, move_tip, wait")
+    assert "Not run: move_tip, move_tip, wait" in win.status.plain_text()
+    assert win.status.result.full_text() == "✗ refused: " + words and win.status.result.property("tone") == "bad"
+    # the reader's acknowledgement lifts the hold, and only that: the next click runs
+    acknowledge(win)
+    assert "HELD" not in win.status.plain_text() and "Not run" not in win.status.plain_text()
+    run_button(win, "run.move_tip")
+    shots.settle(win)
+    assert acts(records(tmp_path)) == ["move_tip"] and win.status.result.full_text().startswith("✓ move_tip")
+
+
+def test_the_hold_has_no_timer_in_it():
+    import inspect
+
+    from stmbench.gui import worker
+    assert not hasattr(worker, "GUARD_S") and not hasattr(worker.Worker, "guard_s")
+    assert list(inspect.signature(worker.Worker.__init__).parameters) == ["self", "session", "parent"]
+    assert "monotonic" not in inspect.getsource(worker) and not hasattr(worker, "time")
+
+
+def test_reads_tab_changes_and_the_viewers_tools_are_not_held_and_the_close_still_ends_the_episode(open_window, tmp_path):
+    win = open_window("en")
+    name = scan_small(win)
+    open_right(win, "spectroscopy")
+    shots.fill(win, {"act.sts.v_start": "-0.5", "act.sts.v_end": "0.5", "act.sts.points": "16"})
+    run_button(win, "run.sts")
+    shots.settle(win)
+    spectrum = win.viewed[1]
+    open_right(win, "operate")
+    refuse_set_bias(win)
+    # a read (the current channel of the frame is not in the cache: the instrument is asked), a spectrum, the tabs
+    # and the viewer's own tools all work while the console holds
+    win.request_frame(name)
+    shots.settle(win)
+    run_button(win, "view.channel.current")
+    shots.settle(win)
+    assert win.viewed == ("frame", name) and win.center.current_channel() == "current"
+    open_left(win, "data")
+    spectra = shots.widget(win, "data.spectra")
+    shots.click(win, spectra.viewport(), spectra.visualItemRect(spectra.item(0)).center())
+    shots.settle(win)
+    assert win.viewed == ("spectrum", spectrum)
+    win.request_frame(name)
+    shots.settle(win)
+    assert win.viewed == ("frame", name)
+    for tab in ("report", "log", "task", "manual"):
+        open_left(win, tab)
+    open_right(win, "spectroscopy")
+    for b in ("view.tool.profile", "view.flatten.plane", "view.zoom.2", "view.tool.marker", "view.clear_markers"):
+        run_button(win, b)
+    assert win.worker.held and shots.widget(win, "refusal.band").isVisible()        # nothing of this lifted it
+    # the end of the episode, when the window is closed, runs while the console holds
+    assert win.close()
+    assert win.session.finished and (tmp_path / "run" / "episode.json").is_file()
+    assert read_export(tmp_path / "run" / "export")["session"]["finished"]
+
+
+def test_nothing_turned_away_reaches_the_record_and_the_acknowledgement_is_in_no_record_but_the_log(open_window, tmp_path):
+    win = open_window("en")
+    shots.fill(win, {"act.set_setpoint.current_pa": "200000", "act.move_tip.x_nm": "4", "act.move_tip.y_nm": "0",
+                     "act.wait.seconds": "1"})
+    run_button(win, "run.set_setpoint")
+    shots.settle(win)
+    for name in ("run.move_tip", "run.wait", "run.scan"):
+        run_button(win, name)
+    shots.settle(win)
+    open_left(win, "report")
+    run_button(win, "report.submit")
+    shots.settle(win)
+    acknowledge(win)
+    run_button(win, "run.wait")
+    shots.settle(win)
+    assert "acknowledged the refusal of set_setpoint current_pa=200000" in shots.widget(win, "log.view").toPlainText()
     win.shutdown(finish=True)
+    recs = records(tmp_path)
+    assert [(r["kind"], r.get("name")) for r in recs if r["kind"] != "observe"] == [
+        ("refused", "set_setpoint"), ("act", "wait"), ("finish", None)]            # the four turned-away clicks are not here
+    assert [r["name"] for r in recs if r["kind"] == "act"] == ["wait"]
+    for folder in (tmp_path / "run" / "export", tmp_path / "run"):
+        for p in sorted(folder.rglob("*")):
+            if p.is_file() and p.suffix in (".json", ".jsonl", ".txt", ".log"):
+                text = p.read_text(encoding="utf-8").lower()
+                assert "acknowledg" not in text and "turned away" not in text and "not acknowledged" not in text, p.name
+    ledger = [json.loads(line) for line in (tmp_path / "run" / "actions.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert [r["name"] for r in ledger if r["kind"] == "act"] == ["wait"]
+
+
+def test_an_episode_with_a_refusal_held_in_it_replays_and_grades_as_the_calls_that_ran(open_window, tmp_path):
+    """Nothing turned away reaches the instrument, so an episode played through the window with a held refusal in it
+    replays to the same measurements: the grading host, which holds the seed, finds the export consistent and the
+    episode finished, and counts as actions the calls that ran."""
+    from stmbench.instrument.grade import grade_export
+    win = open_window("en", seed=3, name="held")
+    shots.fill(win, {"act.set_setpoint.current_pa": "200000", "act.move_tip.x_nm": "4", "act.move_tip.y_nm": "0"})
+    run_button(win, "run.set_setpoint")
+    shots.settle(win)
+    run_button(win, "run.move_tip")                                             # turned away: the setpoint was refused
+    shots.settle(win)
+    acknowledge(win)
+    scan_small(win)
+    win.shutdown(finish=True)
+    export = tmp_path / "held" / "export"
+    graded = grade_export(export, P4, 3)
+    assert graded["replay"]["consistent"] and graded["finished_in_episode"] is True
+    assert graded["actions"] == 1                                               # the scan: not the refusal, not the click turned away
+    assert not grade_export(export, P4, 4)["replay"]["consistent"]              # and it is this seed's world that it replays
+
+
+def test_the_band_takes_the_place_of_two_lines_so_nothing_moves_and_its_button_is_clear_of_cancel_queued(open_window):
+    win = open_window("en")
+    strip = win.status
+    h0 = strip.height()
+    corner = lambda n: shots.widget(win, n).mapTo(win, shots.widget(win, n).rect().topLeft())        # noqa: E731
+    where = {n: corner(n) for n in ("run.set_setpoint", "run.scan", "recent.box", "right.tabs", "sidebar")}
+    gate = Gate(win, "act", "wait", {"seconds": 5}, refuse=True)             # a refusal that comes when the test says
+    try:
+        shots.fill(win, {"act.wait.seconds": "1"})
+        run_button(win, "run.wait")                                         # queued behind it: Cancel queued is there
+        QApplication.processEvents()
+        cancel = shots.widget(win, "status.cancel")
+        shots.hit(win, cancel)
+        cancel_rect = cancel.rect().translated(cancel.mapTo(win, cancel.rect().topLeft()))
+    finally:
+        gate.open()
+    assert win.worker.held
+    ack = shots.widget(win, "refusal.ack")
+    ack_rect = ack.rect().translated(ack.mapTo(win, ack.rect().topLeft()))
+    assert not ack_rect.intersects(cancel_rect), (ack_rect, cancel_rect)       # a click aimed at Cancel queued is not an ack
+    assert ack.width() >= 56 and ack.height() >= 32
+    assert strip.height() == h0                                              # the band is as tall as the two lines it replaces
+    assert {n: corner(n) for n in where} == where
+    assert not shots.widget(win, "status.readings").isVisible() and not shots.widget(win, "status.result_row").isVisible()
+    for tab in ("spectroscopy", "operate"):                                  # on screen whichever tab is open
+        open_right(win, tab)
+        shots.hit(win, ack)
+    for tab in ("report", "data", "log", "manual", "task"):
+        open_left(win, tab)
+        shots.hit(win, ack)
+    # where the button is, no control is when nothing is refused: the readings are there
+    centre = ack.mapTo(win, ack.rect().center())
+    acknowledge(win)
+    node = win.childAt(centre)
+    while node is not None and not isinstance(node, (QPushButton, QLineEdit)):
+        node = node.parentWidget()
+    assert node is None, node and node.objectName()
+    assert strip.height() == h0 and shots.widget(win, "status.readings").isVisible()
+    assert {n: corner(n) for n in where} == where
+
+
+def test_a_report_and_the_end_clicked_while_the_console_holds_are_not_run_and_the_end_button_comes_back(open_window, tmp_path):
+    win = open_window("en")
+    name = scan_small(win)
+    refuse_set_bias(win)
+    open_left(win, "report")
+    run_button(win, "report.claim.target_site")
+    shots.fill(win, {"report.value": "1.5", "report.x_nm": "1.5", "report.y_nm": "0", "report.frame": name,
+                     "report.evidence": name})
+    run_button(win, "report.submit")
+    run_button(win, "finish.begin")
+    run_button(win, "finish.confirm")
+    shots.settle(win)
+    assert not win.session.finished and shots.widget(win, "finish.begin").isVisible()
+    assert win.sidebar.report.reply.text() == "✗ not run: the refusal is not acknowledged"
+    assert not [r for r in records(tmp_path) if r["kind"] in ("report", "finish")]
+    assert "Not run: report_result, finish" in win.status.plain_text()
+    acknowledge(win)
+    run_button(win, "report.submit")
+    shots.settle(win)
+    assert win.sidebar.report.reply.text().startswith("✓ recorded target_site")
+    run_button(win, "finish.begin")
+    run_button(win, "finish.confirm")
+    shots.settle(win)
     assert win.session.finished
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_band_shows_a_long_refusal_and_a_long_list_whole_in_the_widest_fonts_too(fonts, open_window, lang):
+    from stmbench.gui.jobs import Outcome
+    from stmbench.gui.worker import Job
+    win = open_window(lang)
+    h0 = win.status.height()
+    long = ("move_tip: the tip is in tunnelling and the coarse positioner would crash it; " * 2).strip()
+    args = {"x_nm": 1.0, "y_nm": 2.0, "speed_nm_s": 3.0}
+
+    def refuse(_s):
+        return Outcome("act", "move_tip", dict(args), ok=False, refused=True, text=long)
+    win._submit(Job("act", "move_tip", dict(args), refuse))
+    shots.settle(win)
+    for _ in range(3):                                                        # the layout settles in a few turns of the loop
+        QApplication.processEvents()
+    assert win.worker.held
+    text = shots.widget(win, "refusal.text")
+    assert long in win.status.plain_text()
+    assert text.heightForWidth(text.width()) <= text.height()                  # every line of it is shown
+    for n in range(12):                                                       # a long step: eight calls are named, then a count
+        run_button(win, "run.wait" if n % 2 else "run.set_bias")
+    shots.settle(win)
+    for _ in range(3):
+        QApplication.processEvents()
+    plain = win.status.plain_text()
+    assert ("Not run" in plain or "未执行" in plain) and "… +4" in plain
+    assert text.heightForWidth(text.width()) <= text.height()
+    assert win.recent.entries()[0][1].count(", ") == 11                       # the note in the recent results names all twelve
+    shots.hit(win, shots.widget(win, "refusal.ack"))
+    assert win.status.height() >= h0
 
 
 # ── a whole episode ──

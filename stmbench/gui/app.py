@@ -7,6 +7,16 @@ click that touches the instrument becomes a job on the worker thread (:mod:`stmb
 this thread only draws what the jobs bring back. The window adds no hint: it shows what the instrument
 said, in the instrument's words, and the instrument is the only validator.
 
+A refused call of the operator's holds the console: the calls queued behind it are dropped, and every operator
+call clicked afterwards is turned away, until the reader clicks the button of the red band that the refusal puts
+on the status strip (:mod:`stmbench.gui.worker`, :mod:`stmbench.gui.status`). The acknowledgement is a window
+event: it is in the Log and in no ledger or export.
+
+Two more things live in this module rather than in a column: the line beside the right tabs that tells the range
+of the numeric field entered last (:meth:`ActionPanel.field_help`), and the Manual tab's wide view, in which the left
+column takes the whole row under the strip and the viewer and the right column are hidden until the view is left
+(:meth:`MainWindow._set_wide`).
+
 Two ways to run it. *Dev*: a scenario and a seed on the command line, a run directory (the usual full
 ledger at the end) with the export beside it; closing the window finishes the episode, judged as it
 stands. *Sealed*: the seed arrives on stdin and appears nowhere else; the window opens full screen (a
@@ -30,7 +40,7 @@ from PySide6.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QVBoxLayou
 
 from . import fmt, jobs, layout, style
 from .center import THUMB_PX, CenterColumn, thumb_pixmap
-from .controls import Tabs
+from .controls import ElidedLabel, Tabs
 from .labels import two_lines, tr
 from .panels import ActionPanel
 from .recent import RecentList
@@ -83,6 +93,7 @@ class MainWindow(QMainWindow):
         self._open = 0                                   # jobs submitted whose outcome is not drawn yet
         self._running = ""
         self._running_job: Job | None = None
+        self._refusal: jobs.Refusal | None = None        # the refusal the band shows: the console holds while it is there
         self._state: dict | None = None                  # the last status(): what the On / Off buttons show
         self._finished = False
         self._t_s = 0.0                                  # the last instrument time the window was told
@@ -104,6 +115,7 @@ class MainWindow(QMainWindow):
         row = QHBoxLayout()
         row.setSpacing(style.px(8))
         col.addLayout(row, 1)
+        self._row = row
 
         self.sidebar = Sidebar(session.task_text(), session.manual(), session.claims(), lang)
         self.center = CenterColumn(lang)
@@ -111,6 +123,8 @@ class MainWindow(QMainWindow):
         self.spectroscopy = ActionPanel(layout.SPECTROSCOPY, self.run_action, lang)
         left_px, right_px = column_widths(*column_needs(self.sidebar, (self.operate, self.spectroscopy)))
         self.sidebar.setFixedWidth(left_px)
+        self._left_px = left_px
+        self._wide = False                               # the Manual tab's wide view: the left column has the whole row
         self.right = Tabs()
         self.right.setObjectName("right.tabs")
         self.right.addTab(self.operate, two_lines("tab_operate", lang).replace("\n", " "))
@@ -118,16 +132,32 @@ class MainWindow(QMainWindow):
         self.right.tabBar().setObjectName("right.tabbar")
         self.right.tabBar().setExpanding(True)
         self.right.setFixedWidth(right_px)
+        # the range of the numeric field entered last, in the part of the tab row the two tabs leave empty: no height
+        # of its own, so that nothing below it moves, and nothing to hover over
+        self.field_help = ElidedLabel()
+        self.field_help.setObjectName("field.help")
+        self.field_help.setProperty("role", "help")
+        self.field_help.setFont(style.sans_font(17, bold=True))          # bold: it is read in a picture of 1280 px
+        corner = QWidget()
+        corner_row = QHBoxLayout(corner)
+        corner_row.setContentsMargins(style.px(8), 0, 0, 0)
+        corner_row.addWidget(self.field_help)
+        # the tab widget gives a corner widget the size of its hint, which a layout takes from the label's own width
+        self.field_help.setFixedWidth(max(style.px(200), right_px - self.right.tabBar().sizeHint().width() - style.px(14)))
+        self.right.setCornerWidget(corner, Qt.Corner.TopRightCorner)
+        corner.show()                                    # setting the parent hid it
+        for panel in (self.operate, self.spectroscopy):
+            panel.field_entered.connect(lambda a, k, p=panel: self.field_help.set_full_text(p.field_help(a, k)))
         self.recent = RecentList(lang)
-        right_column = QWidget()                         # the tabs, and under them what the last calls answered
-        rc = QVBoxLayout(right_column)
+        self.right_column = QWidget()                    # the tabs, and under them what the last calls answered
+        rc = QVBoxLayout(self.right_column)
         rc.setContentsMargins(0, 0, 0, 0)
         rc.setSpacing(style.px(6))
         rc.addWidget(self.right, 1)
         rc.addWidget(self.recent)
         row.addWidget(self.sidebar)
         row.addWidget(self.center, 1)
-        row.addWidget(right_column)
+        row.addWidget(self.right_column)
 
         # the reader's gestures
         self.sidebar.report.submitted.connect(self._report)
@@ -142,13 +172,16 @@ class MainWindow(QMainWindow):
         self.center.report_from_marker.connect(self._report_from_marker)
         self.center.notice.connect(lambda text: self.recent.push("note", text))
         self.status.cancel_requested.connect(self._cancel_queued)
+        self.status.acknowledge_requested.connect(self._acknowledge)
+        self.sidebar.manual.wide_toggled.connect(self._set_wide)
+        self.sidebar.currentChanged.connect(self._tab_changed)
 
         self.worker = Worker(session, self)
         self.worker.started_job.connect(self._on_started)
         self.worker.finished_job.connect(self._on_finished)
         self.worker.queue_changed.connect(self._on_queue)
         self.worker.dropped.connect(self._on_dropped)
-        self._turned_away.connect(self._not_run, Qt.ConnectionType.QueuedConnection)
+        self._turned_away.connect(self._turned_away_now, Qt.ConnectionType.QueuedConnection)
         self.worker.start()
         self._submit(Job("boot", "start", {}, jobs.run_boot), log=False)
 
@@ -157,23 +190,50 @@ class MainWindow(QMainWindow):
         self._open += 1
         if log:
             self.sidebar.log.add(job.id, job.label, job.args, self._t_s)
-        if not self.worker.submit(job):                  # a click of the same step as a refusal: not run
+        if not self.worker.submit(job):                  # a click while a refusal is not acknowledged: not run
             self._open -= 1
             self._turned_away.emit([job])                # queued: after the refusal's own result has been drawn
         return job.id
 
-    def _not_run(self, jobs: list[Job]) -> None:
-        """Calls that were not run because an earlier call was refused: said in the log and in the recent
-        results; the refusal itself stays on the strip's last line, which nothing that did not run replaces."""
+    def _not_run(self, jobs: list[Job], held: bool = False) -> None:
+        """Calls that were not run because an earlier call was refused: said in the log, in the recent results
+        and on the band. ``held``: they were clicked after the refusal, while it was not acknowledged; else they
+        were waiting behind it. The refusal itself stays on the strip's last line, which nothing that did not run
+        replaces."""
+        why = tr("not_run_held" if held else "not_run", self.lang)
         for job in jobs:
-            self.sidebar.log.not_run(job.id)
+            self.sidebar.log.not_run(job.id, held)
             if job.kind == "finish":
                 self.sidebar.report.finish_not_run()
-        self.recent.not_run([j.label for j in jobs], tr("not_run", self.lang))
+            elif job.kind == "report":
+                self.sidebar.report.set_reply(False, why)
+        self.recent.not_run([j.label for j in jobs], why, key="not_run_held" if held else "not_run")
+        if self._refusal is not None:
+            self._refusal.not_run += [j.label for j in jobs]
+            self.status.show_refusal(self._refusal)
+
+    def _turned_away_now(self, jobs: list[Job]) -> None:
+        """Clicks the worker turned away, told after the refusal's own result was drawn."""
+        self._not_run(jobs, held=True)
 
     def _on_dropped(self, jobs: list[Job]) -> None:
         self._open -= len(jobs)
         self._not_run(jobs)
+        self._show_state()
+
+    def _hold(self, job: Job, out: jobs.Outcome) -> None:
+        """A call of the operator's failed: the worker holds, and the band says what was refused."""
+        self._refusal = jobs.Refusal(fmt.call_text(job.label, job.args), out.text, out.refused)
+        self.status.show_refusal(self._refusal)
+
+    def _acknowledge(self) -> None:
+        """The reader has read the refusal: operator calls are accepted again. A window event, not an instrument
+        call; the Log lists it, no ledger or export does."""
+        self.worker.acknowledge()
+        refusal, self._refusal = self._refusal, None
+        self.status.show_refusal(None)
+        if refusal is not None:
+            self.sidebar.log.note(f"{tr('acknowledged', self.lang)} {refusal.call}", self._t_s)
         self._show_state()
 
     def run_action(self, name: str, args: dict) -> int:
@@ -229,7 +289,8 @@ class MainWindow(QMainWindow):
         # arrive out of order
         queued = self.worker.queued()
         job = self._running_job if self._running else None
-        self.status.set_state(bool(self._running), self._running, len(queued), self._finished)
+        self.status.set_state(bool(self._running), self._running, len(queued), self._finished,
+                              held=self._refusal is not None)
         self.status.set_busy(fmt.describe_job(job.kind, job.label, job.args) if job else None, len(queued),
                              sum(1 for j in queued if j.kind != "boot"))
         scans = [job, *queued]
@@ -293,6 +354,7 @@ class MainWindow(QMainWindow):
                 self.sidebar.report.set_reply(False, text)
             elif out.kind == "finish":
                 self.sidebar.report.finish_not_run()
+            self._hold(job, out)                              # the worker holds from this refusal on: the band says so
             return
         if out.kind == "act":
             summary = fmt.reply_summary(job.label, out.reply)
@@ -372,6 +434,36 @@ class MainWindow(QMainWindow):
         self.sidebar.report.set_viewed(spec["name"])
         self.sidebar.data.select("spectrum", spec["name"])
         self._refresh_thumbs()
+
+    # ── the manual's wide view ──
+    def _set_wide(self, on: bool) -> None:
+        """The Manual tab's wide view: the left column takes the whole row under the status strip (the viewer and the
+        right column are hidden, not closed: nothing about them changes, and a job that finishes meanwhile is drawn
+        into them), or gives it back. Why it is a whole row: with the centre column too the text is 820 px wide and the
+        manual 2.1 to 2.3 screens (measured with Consolas and DejaVu Sans Mono), a third screenshot for its last few
+        lines; with the whole row it is 1.5."""
+        if on == self._wide:
+            return
+        if on:
+            self._wide_px = self._left_px + self._row.spacing() + self.center.width() + self._row.spacing() \
+                + self.right_column.width()
+        self._wide = on
+        # the order matters: a window grows to the minimum its layout asks for and never shrinks back, so the columns are
+        # hidden before the left one is widened, and it is narrowed before they are shown
+        if on:
+            self.center.hide()
+            self.right_column.hide()
+            self.sidebar.setFixedWidth(self._wide_px)
+        else:
+            self.sidebar.setFixedWidth(self._left_px)
+            self.center.show()
+            self.right_column.show()
+        self.sidebar.manual.set_wide(on)
+
+    def _tab_changed(self, _index: int) -> None:
+        """The wide view belongs to the Manual tab: any other tab of the left column has the window as it was."""
+        if self._wide and self.sidebar.tab_key() != "manual":
+            self._set_wide(False)
 
     # ── copying a marker into a form ──
     def _panel_for(self, action: str) -> ActionPanel:

@@ -12,12 +12,17 @@ Object names are the window's address book for tests and for anyone who scripts 
 ``run.<action>.on`` / ``.off`` for an On / Off pair, ``run.<action>.<value>`` for one of a row of
 value buttons. What an action answered is not shown here: every result goes to the list of recent
 results under the tabs (:mod:`stmbench.gui.recent`), where several calls of one step stay side by side.
+
+A numeric field's range (``Param.lo`` and ``hi``, the minimum and maximum an MCP agent's input schema carries) is
+told for the field the reader entered last, on the line beside the tabs (:meth:`ActionPanel.field_help`, shown by the
+window): never written by hand, in the field's own unit, and read without hovering. The panel still checks nothing:
+a value outside it is sent and refused by the instrument in its own words.
 """
 from __future__ import annotations
 
 from typing import Any, Callable
 
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QFontMetrics
 from PySide6.QtWidgets import (QFrame, QGroupBox, QHBoxLayout, QLabel, QPushButton, QScrollArea,
                                QVBoxLayout, QWidget)
@@ -25,7 +30,7 @@ from PySide6.QtWidgets import (QFrame, QGroupBox, QHBoxLayout, QLabel, QPushButt
 from ..instrument import ACTIONS
 from . import fmt, style
 from .controls import Segmented, SelectAllLineEdit, strong
-from .labels import both, tr
+from .labels import both, one, tr
 from .layout import Cell, Choices, F, Group, OnOff, Run
 
 
@@ -47,7 +52,10 @@ def _param(action: str, name: str):
 
 
 class ActionPanel(QScrollArea):
-    """The groups of one tab. ``submit(action, args)`` is called for every click."""
+    """The groups of one tab. ``submit(action, args)`` is called for every click; ``field_entered(action, param)`` is
+    emitted when the reader clicks into a text field."""
+
+    field_entered = Signal(str, str)
 
     def __init__(self, groups: tuple[Group, ...], submit: Callable[[str, dict], None], lang: str = "zh",
                  parent: QWidget | None = None):
@@ -55,6 +63,7 @@ class ActionPanel(QScrollArea):
         self.groups = groups
         self.lang = lang
         self._submit = submit
+        self._cells: dict[tuple[str, str], F] = {}
         self.controls: dict[tuple[str, str], QWidget] = {}
         self.run_buttons: dict[str, QPushButton] = {}
         self._group_of: dict[str, str] = {}
@@ -116,6 +125,7 @@ class ActionPanel(QScrollArea):
 
     def _field_cell(self, c: F) -> QWidget:
         p = _param(c.action, c.param)
+        self._cells[(c.action, c.param)] = c
         cell = QWidget()
         v = QVBoxLayout(cell)
         v.setContentsMargins(0, 0, 0, 0)
@@ -135,6 +145,7 @@ class ActionPanel(QScrollArea):
             w.setPlaceholderText(ph)
             w.setMinimumWidth(max(style.px(84), QFontMetrics(w.font()).horizontalAdvance(ph) + style.px(24)))
             w.returnPressed.connect(lambda a=c.action: self._enter(a))
+            w.entered.connect(lambda a=c.action, k=c.param: self.field_entered.emit(a, k))
         w.setObjectName(name)
         self.controls[(c.action, c.param)] = w
         v.addWidget(w)
@@ -220,6 +231,18 @@ class ActionPanel(QScrollArea):
             self._run(action, on=True)
         elif action in self._runs:
             self._run(action)
+
+    def field_help(self, action: str, param: str) -> str:
+        """One line about a text field, for the reader who just clicked it: its label as the panel shows it, with
+        its unit, and the range the action table gives it, ``setpoint (pA): range 0.1 … 100000``; the label alone
+        for a field with no range. The numbers are the table's, in the unit the label states."""
+        c = self._cells.get((action, param))
+        if c is None:
+            return ""
+        p = _param(action, param)
+        label = both(c.en, c.zh, self.lang) + (f" ({c.unit})" if c.unit else "")
+        rng = fmt.range_text(p.lo, p.hi)
+        return f"{label}: {one('field_range', self.lang)} {rng}" if rng else label
 
     # ── what the window tells the panel ──
     def has_action(self, action: str) -> bool:

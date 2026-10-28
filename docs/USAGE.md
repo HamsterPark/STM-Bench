@@ -249,12 +249,18 @@ many wait, and a Cancel queued button that drops the ones that have not started)
 a tick and the instrument's reply, or a cross and its refusal. On the left, tabs Task,
 Manual (the instrument's fixed facts, `Instrument.info()` read once when the window opens: the piezo,
 bias and current ranges, the budget, the temperature, the material and a qPlus sensor's f0, k and Q, above
-the manual), Report (one radio button per reportable claim, titled "Report a result (ReportResult)", with
+the manual; its Wide view button gives the tab the whole window under the status strip, the facts beside the
+text, so that the manual, the same text an MCP agent gets, is two screens or fewer instead of four in the
+column, and leaving the tab or a click on Narrow view gives the window back; a wheel notch moves a text view
+three lines), Report (one radio button per reportable claim, picked from the start where there is only one
+(P4), titled "Report a result (ReportResult)", with
 the fields named as `ReportResult` and the rule card name them - value, x_nm, y_nm, frame, evidence, unit,
-sigma, note, the ones the picked claim needs starred as in the action panels, Enter in a field sending the
-report, and a "+ shown file" button that appends the name of the frame or spectrum the viewer shows to
+sigma, note, the ones the picked claim needs starred as in the action panels, the note a wrapped field four lines
+tall that shows its whole text, nothing but the claim (where there is one) and the unit filled in for the reader,
+Enter in a field sending the report, and a "+ shown file" button that appends the name of the frame or spectrum the viewer shows to
 `evidence` (or says in the recent results that none is shown) - and Finish with an inline two-click
-confirmation), Data (the frames, the spectra and the move traces, each list under a heading of its own) and Log;
+confirmation), Data (the frames, the spectra and the move traces, each list under a heading of its own; a wheel
+notch moves a list by exactly one entry, and a click on an entry cut by an edge shows it whole) and Log;
 in the middle the viewer (a frame with nm
 axes, a colour bar, a cursor readout, flatten modes, a contrast switch (auto: the 0.5-99.5 percentile
 scale of the image an MCP agent gets, the default; full: the frame's minimum to maximum, which keeps the
@@ -277,17 +283,25 @@ without scrolling at 1920x1080 or 1920x1016) and the Spectroscopy tab, whose On 
 show the state the instrument reports as the selected button, and under them the last five results, newest
 first, in the instrument's words (a refusal stays among them until five calls have followed it). A click queues its job at once with the field values read at that moment and
 buttons stay enabled while the instrument works, because one agent step often clicks several in a row;
-jobs run in click order on one worker thread. A refused call ends its step: the actions, reports and
-end-of-episode clicks still waiting behind it do not run, and for 3 s after the refusal (renewed by every
-click turned away) a click that would start another is not run either, because an agent clicks a dozen
-buttons and looks at the screen once, and a drag after a refused Set setpoint would run at a junction
-resistance nobody chose; the Log and the recent results say "not run: an earlier call was refused" (they
-never reach the instrument or the export), the refusal stays on the strip's last line until a call is accepted,
-and reads (a frame, a spectrum) are not affected. An empty field sends nothing (the instrument's default
+jobs run in click order on one worker thread. A refused call ends its step and holds the console: the
+actions, reports and end-of-episode clicks still waiting behind it do not run, and every such click after it is
+turned away until the reader clicks the Acknowledge button of the red band that the refusal puts on the status
+strip (the instrument's words, the call with its parameters, and the calls that did not run; it takes the place
+of the readings and the last result, as tall as the two lines, so that nothing moves, and the pill says HELD).
+There is no timer: an agent clicks a dozen buttons and looks at the screen once, and a Set setpoint over the limit
+followed, after a wait of its own inside the same step, by a drag would run the drag at a junction resistance nobody
+chose (screen trials 4 and 5: a three-second guard had run out during the wait). The Log and the recent results say "not run" for each such click, with the reason (they never reach the
+instrument or the export), and the acknowledgement is a line of the Log only. Reads (a frame, a spectrum), tab
+changes, the viewer's tools and Cancel queued are never held, and closing the window still ends the episode. An
+empty field sends nothing (the instrument's default
 applies, or it refuses: a parameter the action table marks required has a red star, a hint "required" and no
 default, and an empty one is refused in the instrument's words, as the pulse's width and the poke's depth and dwell
 are in API version 2); a field that is not a number is sent as typed; every click in a field selects all
-of it, so click then type replaces the content. The three `← marker` buttons
+of it, so click then type replaces the content. The part of the right tabs' row that the two tabs leave empty
+tells the range of the numeric field entered last (its label with its unit, then `range` and the table's
+minimum and maximum, e.g. `setpoint (pA): range 0.1 … 100000`; the manual carries the same numbers in the
+bracket of each parameter's line, `min` and `max`, as an MCP agent's input schema does); nothing is clamped or
+checked in the window, so a value outside it is sent and refused in the instrument's words. The three `← marker` buttons
 copy a marker's coordinates into the move-tip or scan fields or the report form, and Delete marker removes
 the selected one. While a scan runs or waits the viewer says so over what it shows, and a click on a viewer
 that has shown no frame leaves a note among the recent results instead of being lost.

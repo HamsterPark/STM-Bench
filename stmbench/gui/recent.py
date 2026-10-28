@@ -4,7 +4,8 @@ Why. One agent step often runs several actions, and the screenshot comes after t
 refused Set bias followed by an accepted Set setpoint left only the success on screen. Every call's
 result lands here, in the instrument's words, a tick in green or a cross in red, and the five most
 recent stay visible whichever tab is open, so a refusal is never pushed out of sight by the successes
-after it. A note (a click on an empty viewer, queued jobs dropped) is a result too, in grey.
+after it. A note (a click on an empty viewer, queued jobs dropped, clicks turned away while a refusal is not
+acknowledged) is a result too, in grey.
 
 Rows wrap rather than elide: a long refusal is the one sentence the reader needs whole. The list has the
 height of six lines, so that a wrapped row does not hide the oldest; in the rare case of more, it scrolls
@@ -37,7 +38,7 @@ class RecentList(QGroupBox):
         self.setObjectName("recent.box")
         self.lang = lang
         self._items: deque[tuple[str, str, str | None]] = deque(maxlen=N_RECENT)     # (tone, text, key), oldest first
-        self._not_run: list[str] = []
+        self._not_run: dict[str, list[str]] = {}                 # the names a growing note lists, by its key
         v = QVBoxLayout(self)
         v.setContentsMargins(style.px(6), 0, style.px(2), style.px(2))
         v.setSpacing(0)
@@ -86,14 +87,16 @@ class RecentList(QGroupBox):
             self._items.append(entry)
         self._render()
 
-    def not_run(self, names: list[str], reason: str) -> None:
+    def not_run(self, names: list[str], reason: str, key: str = "not_run") -> None:
         """Calls that were not run: one note naming them, which grows while more are turned away straight after,
-        so that a long step cannot push the refusal itself out of the five."""
-        if self._items and self._items[-1][2] == "not_run":
-            self._not_run += names
+        so that a long step cannot push the refusal itself out of the five. The note says why in ``reason``;
+        the calls that were waiting behind a refusal and the clicks turned away after it have a note each (their
+        own ``key``), because their reasons differ."""
+        if self._items and self._items[-1][2] == key:
+            self._not_run.setdefault(key, []).extend(names)
         else:
-            self._not_run = list(names)
-        self.push("note", f"{reason}: {', '.join(self._not_run)}", key="not_run")
+            self._not_run[key] = list(names)
+        self.push("note", f"{reason}: {', '.join(self._not_run[key])}", key=key)
 
     def entries(self) -> list[tuple[str, str]]:
         """``(tone, text)`` of what is listed, newest first (the text without its mark)."""

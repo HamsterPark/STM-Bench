@@ -2,7 +2,8 @@
 
 The task text with its rule card and the manual are what every agent is told, shown unchanged. The
 report form is the result channel: one radio button per reportable claim, with the line the rule card
-says about it; nothing is chosen for the reader except the unit once a claim is picked. Data lists what
+says about it; nothing is chosen for the reader except the unit once a claim is picked, and the claim itself
+when there is only one to report (P4). The value, the position and the evidence are the reader's. Data lists what
 the instrument saved; Log keeps every call, newest first, queued ones marked until they run (and the
 ones dropped before they did, as cancelled).
 """
@@ -11,11 +12,11 @@ from __future__ import annotations
 from html import escape
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel, QListWidget,
-                               QListWidgetItem, QPushButton, QRadioButton, QScrollArea, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractItemView, QBoxLayout, QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel,
+                               QListWidget, QListWidgetItem, QPushButton, QRadioButton, QScrollArea, QVBoxLayout, QWidget)
 
 from . import fmt, style
-from .controls import QuietBrowser, QuietText, SelectAllLineEdit, Tabs, polish, strong
+from .controls import QuietBrowser, QuietText, SelectAllLineEdit, StepList, Tabs, WrapField, polish, strong
 from .labels import S, one, tr, two_lines
 
 
@@ -46,7 +47,7 @@ class _ClaimLabel(QLabel):
         self._radio = radio
         self.setWordWrap(True)
         self.setProperty("role", "claim")
-        self.setContentsMargins(style.px(26), 0, 0, style.px(2))
+        self.setContentsMargins(0, 0, 0, 0)
 
     def mousePressEvent(self, ev) -> None:
         self._radio.click()
@@ -66,7 +67,7 @@ class ReportTab(QWidget):
         self._viewed = ""
         v = QVBoxLayout(self)
         v.setContentsMargins(style.px(8), style.px(4), style.px(8), style.px(4))
-        v.setSpacing(style.px(3))
+        v.setSpacing(style.px(1))                        # the claims of P1 in English fill the page: see the form below
         self.title = self._title(f"{tr('report_title', lang)} (ReportResult)")
         self.title.setObjectName("report.title")
         v.addWidget(self.title)
@@ -90,50 +91,70 @@ class ReportTab(QWidget):
             self.claim_labels[c["id"]] = lab
             v.addWidget(lab)
 
-        grid = QGridLayout()
-        grid.setHorizontalSpacing(style.px(8))
-        grid.setVerticalSpacing(style.px(3))
-        self.fields: dict[str, SelectAllLineEdit] = {}
+        form = QVBoxLayout()
+        form.setSpacing(style.px(3))
+        self.fields: dict[str, SelectAllLineEdit | WrapField] = {}
 
         self.labels: dict[str, QLabel] = {}
 
-        def field(key: str, row: int, col: int, span: int = 1, beside: QWidget | None = None) -> None:
+        def cell(key: str, beside: QWidget | None = None, wrap: bool = False) -> QWidget:
+            """A field with its label above it (and a button at the end of its line, if ``beside``)."""
             lab = QLabel(_field_label(key, lang, key == "value"))
             lab.setObjectName(f"report.label.{key}")
             lab.setTextFormat(Qt.TextFormat.RichText)
             lab.setProperty("role", "label")
             self.labels[key] = lab
-            e = SelectAllLineEdit()
+            e = WrapField(4) if wrap else SelectAllLineEdit()   # the note wraps: a line edit a third of the form wide showed a few words
             e.setObjectName(f"report.{key}")
             e.setFont(style.mono_font(18))
+            if wrap:
+                e.fit_height()
             e.returnPressed.connect(self._submit)                # Enter in any field sends the report, like the button
             self.fields[key] = e
-            grid.addWidget(lab, row * 2, col, 1, span)
+            box = QWidget()
+            col = QVBoxLayout(box)
+            col.setContentsMargins(0, 0, 0, 0)
+            col.setSpacing(style.px(3))
+            col.addWidget(lab)
             if beside is None:
-                grid.addWidget(e, row * 2 + 1, col, 1, span)
-                return
-            line = QHBoxLayout()                             # a button at the end of the field's own line
-            line.setSpacing(style.px(8))
-            line.addWidget(e, 1)
-            line.addWidget(beside)
-            grid.addLayout(line, row * 2 + 1, col, 1, span)
+                col.addWidget(e)
+            else:
+                line = QHBoxLayout()                             # a button at the end of the field's own line
+                line.setSpacing(style.px(8))
+                line.addWidget(e, 1)
+                line.addWidget(beside)
+                col.addLayout(line)
+            return box
+
+        def row(*cells: tuple[QWidget, int]) -> None:
+            """Cells side by side, as wide as their stretch says."""
+            h = QHBoxLayout()
+            h.setSpacing(style.px(8))
+            for w, stretch in cells:
+                h.addWidget(w, stretch)
+            form.addLayout(h)
 
         # the button that appends the name of the file the viewer shows sits at the end of the evidence field's line;
         # its label says what it adds ("+ shown file"), and it is in one language: the line is not wide
         self.viewed_button = QPushButton("+ " + one("rep_viewed", lang))
         self.viewed_button.setObjectName("report.viewed")
         self.viewed_button.clicked.connect(self._append_viewed)
-        field("value", 0, 0)
-        field("x_nm", 0, 1)
-        field("y_nm", 0, 2)
-        field("frame", 1, 0, 3)
-        field("evidence", 2, 0, 3, beside=self.viewed_button)
-        field("unit", 3, 0)
-        field("sigma", 3, 1)
-        field("note", 3, 2)
-        for c in range(3):
-            grid.setColumnStretch(c, 1)
-        v.addLayout(grid)
+        # four rows, as before: P1's four claims in English leave the page 49 px at 1920x1053 (27 in DejaVu), so the note
+        # gets the last row to itself, as wide as the form allows (two thirds, wrapped, four lines tall), with the unit
+        # and the uncertainty stacked in the third that the narrow field it had was in
+        row((cell("value"), 1), (cell("x_nm"), 1), (cell("y_nm"), 1))
+        row((cell("frame"), 1))
+        row((cell("evidence", beside=self.viewed_button), 1))
+        small = QWidget()
+        stack = QVBoxLayout(small)
+        stack.setContentsMargins(0, 0, 0, 0)
+        stack.setSpacing(style.px(3))
+        stack.addWidget(cell("unit"))
+        stack.addWidget(cell("sigma"))
+        row((small, 1), (cell("note", wrap=True), 3))
+        v.addSpacing(style.px(4))
+        v.addLayout(form)
+        v.addSpacing(style.px(4))
 
         self.submit = QPushButton(tr("rep_submit", lang))
         self.submit.setObjectName("report.submit")
@@ -146,7 +167,7 @@ class ReportTab(QWidget):
         self.reply.setProperty("role", "label")
         v.addWidget(self.reply)
 
-        v.addSpacing(style.px(10))
+        v.addSpacing(style.px(4))
         self.finish_begin = QPushButton(tr("finish", lang))
         self.finish_begin.setObjectName("finish.begin")
         strong(self.finish_begin, "danger")
@@ -180,6 +201,8 @@ class ReportTab(QWidget):
         self.finish_message.hide()                       # nothing to say until the end
         v.addWidget(self.finish_message)
         v.addStretch(1)
+        if len(self.radios) == 1:                        # one claim to report (P4): there is nothing to choose between
+            next(iter(self.radios.values())).setChecked(True)
 
     @staticmethod
     def _title(text: str) -> QLabel:
@@ -264,7 +287,8 @@ class DataTab(QWidget):
     current recorded while the tip moved; the instrument keeps them with the spectra, and so does the viewer,
     but a list of their own says what they are). Each item is three short lines (its name, start time and
     channels; its size; where it is), which carry every column of a table in the width of this column without
-    cutting any of them off. A click shows the item in the viewer."""
+    cutting any of them off. A click shows the item in the viewer; a wheel notch moves a list by one item
+    (:class:`~stmbench.gui.controls.StepList`)."""
 
     frame_clicked = Signal(str)
     spectrum_clicked = Signal(str)
@@ -295,8 +319,8 @@ class DataTab(QWidget):
             w.itemClicked.connect(lambda it: self.spectrum_clicked.emit(it.data(Qt.ItemDataRole.UserRole)))
         self.set_data([], [])
 
-    def _list(self, name: str) -> QListWidget:
-        w = QListWidget()
+    def _list(self, name: str) -> StepList:
+        w = StepList()                                    # a wheel notch moves it by one entry
         w.setObjectName(name)
         w.setAlternatingRowColors(True)
         w.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
@@ -359,7 +383,9 @@ class DataTab(QWidget):
 
 class LogTab(QuietBrowser):
     """Every call, newest first: instrument time, the action with its parameters, the reply or the
-    refusal (red). A call that has not run yet says so until it does."""
+    refusal (red). A call that has not run yet says so until it does; one that was dropped or turned away
+    because of a refusal says that. The acknowledgement of a refusal is a line of its own, in grey: a window
+    event, not a call."""
 
     def __init__(self, lang: str, parent: QWidget | None = None):
         super().__init__(parent)
@@ -381,9 +407,16 @@ class LogTab(QuietBrowser):
         """A call dropped before it started: it stays in the log, said to be cancelled."""
         self._set(job_id, state="cancelled")
 
-    def not_run(self, job_id: int) -> None:
-        """A call that was not run because an earlier call of its step was refused."""
-        self._set(job_id, state="skipped")
+    def not_run(self, job_id: int, held: bool = False) -> None:
+        """A call that was not run because an earlier call was refused: it was waiting behind the refusal, or
+        (``held``) it was clicked afterwards, while the refusal was not acknowledged."""
+        self._set(job_id, state="held" if held else "skipped")
+
+    def note(self, text: str, t_s: float | None) -> None:
+        """A window event that is not a call (the acknowledgement of a refusal): it is in this log and in no
+        ledger or export."""
+        self._entries.append({"id": None, "label": "", "args": "", "state": "note", "t": t_s, "ok": None, "text": text})
+        self._render()
 
     def done(self, job_id: int, ok: bool, text: str, t_s: float | None) -> None:
         self._set(job_id, state="done", ok=ok, text=text, t=t_s)
@@ -406,6 +439,10 @@ class LogTab(QuietBrowser):
         out = []
         for e in reversed(self._entries):
             when = fmt.hms(e["t"]) if e["t"] is not None else "-"
+            if e["state"] == "note":                      # a window event: grey, on one line, no call behind it
+                out.append(f"<div style='margin-bottom:7px'><span style=\"font-family:'{mono}';color:{c['muted']}\">"
+                           f"{when}</span> <span style='color:{c['muted']}'>{escape(e['text'])}</span></div>")
+                continue
             head = (f"<span style=\"font-family:'{mono}';color:{c['muted']}\">{when}</span> "
                     f"<b style=\"font-family:'{mono}'\">{escape(e['label'])}</b> "
                     f"<span style=\"font-family:'{mono}'\">{escape(e['args'])}</span>")
@@ -417,6 +454,8 @@ class LogTab(QuietBrowser):
                 tail = f"<span style='color:{c['muted']}'>{escape(tr('cancelled', self.lang))}</span>"
             elif e["state"] == "skipped":
                 tail = f"<span style='color:{c['bad']}'>{escape(tr('not_run', self.lang))}</span>"
+            elif e["state"] == "held":
+                tail = f"<span style='color:{c['bad']}'>{escape(tr('not_run_held', self.lang))}</span>"
             else:
                 color = c["ok"] if e["ok"] else c["bad"]
                 tail = (f"<span style=\"color:{color};font-family:'{mono}'\">"
@@ -469,21 +508,67 @@ class FactsTable(QFrame):
 
 
 class ManualTab(QWidget):
-    """The instrument's facts above the manual: everything an agent is told about the instrument."""
+    """The instrument's facts above the manual: everything an agent is told about the instrument.
+
+    Why a wide view. In the 360 px column the manual's 64 lines wrap into about a hundred, and a page of the pane
+    shows 27 of them: screen trials 4 and 5 spent five to seven steps scrolling it. The button at the top of the tab
+    asks the window for the whole row under the status strip (:meth:`MainWindow._set_wide`): the facts then stand
+    beside the text instead of above it, and the same text, the one an MCP agent gets, is two screens or fewer. The
+    button only asks: the window hides the other columns and gives them back."""
+
+    wide_toggled = Signal(bool)
 
     def __init__(self, manual: str, lang: str, parent: QWidget | None = None):
         super().__init__(parent)
-        v = QVBoxLayout(self)
-        v.setContentsMargins(style.px(6), style.px(6), style.px(6), style.px(6))
-        v.setSpacing(style.px(4))
+        self.lang = lang
+        self._wide = False
+        self._box = QBoxLayout(QBoxLayout.Direction.TopToBottom, self)       # left to right in the wide view
+        self._box.setContentsMargins(style.px(6), style.px(6), style.px(6), style.px(6))
+        self._box.setSpacing(style.px(8))
+        self.side = QWidget()                            # the button and the facts
+        side = QVBoxLayout(self.side)
+        side.setContentsMargins(0, 0, 0, 0)
+        side.setSpacing(style.px(4))
+        self.toggle = QPushButton()
+        self.toggle.setObjectName("manual.wide")
+        self.toggle.setAutoDefault(False)
+        self.toggle.clicked.connect(self._clicked)
         title = QLabel(tr("facts_title", lang))
         strong(title)
-        v.addWidget(title)
         self.facts = FactsTable(lang)
-        v.addWidget(self.facts)
+        side.addWidget(self.toggle)
+        side.addWidget(title)
+        side.addWidget(self.facts)
+        side.addStretch(1)
         self.text = _text_view(manual, mono=True, size=17)
         self.text.setObjectName("manual.text")
-        v.addWidget(self.text, 1)
+        self._box.addWidget(self.side)
+        self._box.addWidget(self.text, 1)
+        self._label()
+
+    @property
+    def wide(self) -> bool:
+        return self._wide
+
+    def _label(self) -> None:
+        self.toggle.setText(tr("manual_narrow" if self._wide else "manual_wide", self.lang))
+
+    def _clicked(self) -> None:
+        self.set_wide(not self._wide)
+        self.wide_toggled.emit(self._wide)
+
+    def set_wide(self, on: bool) -> None:
+        """Lay the tab out for the wide view (the facts beside the text, as wide as the column was) or for the column."""
+        if on == self._wide:
+            return
+        if on:
+            self.side.setFixedWidth(self.side.width())
+        else:
+            self.side.setMinimumWidth(0)
+            self.side.setMaximumWidth(16777215)
+        self._wide = on
+        self._box.setDirection(QBoxLayout.Direction.LeftToRight if on else QBoxLayout.Direction.TopToBottom)
+        self._label()
 
 
 class Sidebar(Tabs):
