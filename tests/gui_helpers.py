@@ -44,6 +44,37 @@ def app():
     a.setFont(before[0])
 
 
+@pytest.fixture(params=["default", "dejavu"])
+def fonts(request, app):
+    """The window's text in the fonts it was tuned with, and again in DejaVu Sans / Sans Mono (what a Linux desktop
+    without anything else falls back to: wider, another line height). Requested before ``open_window``, so that the
+    window is made in these fonts; skipped where matplotlib's DejaVu files are not there."""
+    if request.param == "default":
+        yield "default"
+        return
+    mpl = pytest.importorskip("matplotlib")
+    from pathlib import Path
+
+    from PySide6.QtGui import QFontDatabase
+    folder = Path(mpl.get_data_path()) / "fonts" / "ttf"
+    names = ("DejaVuSans.ttf", "DejaVuSans-Bold.ttf", "DejaVuSansMono.ttf", "DejaVuSansMono-Bold.ttf")
+    if not all((folder / n).is_file() for n in names):
+        pytest.skip("no DejaVu fonts to test with")
+    ids = [QFontDatabase.addApplicationFont(str(folder / n)) for n in names]
+    sans, mono = list(style.SANS), list(style.MONO)
+    style.SANS[:] = ["DejaVu Sans", *sans]
+    style.MONO[:] = ["DejaVu Sans Mono", *mono]
+    style.apply(app, 1.0)
+    try:
+        yield "dejavu"
+    finally:
+        style.SANS[:] = sans
+        style.MONO[:] = mono
+        style.apply(app, 1.0)
+        for i in ids:
+            QFontDatabase.removeApplicationFont(i)
+
+
 @pytest.fixture
 def open_window(app, tmp_path):
     """A factory of windows on a full-screen 1920x1080 window, shut down afterwards (their threads must end)."""
@@ -129,5 +160,5 @@ def noise_free_atom_frame(n: int = 48, atoms=((0.3, 0.4), (0.7, 0.6))) -> np.nda
     return z
 
 
-__all__ = ["P4", "SMALL", "app", "open_window", "run_button", "scan", "pixel_point", "mark", "Hold", "hold_scan",
-           "noise_free_atom_frame"]
+__all__ = ["P4", "SMALL", "app", "fonts", "open_window", "run_button", "scan", "pixel_point", "mark", "Hold",
+           "hold_scan", "noise_free_atom_frame"]

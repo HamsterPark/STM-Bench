@@ -46,6 +46,8 @@ THUMB_PX = 64
 #: (a viewport that is not a whole number of rows leaves the first row cut off under the header when scrolled)
 MARKER_ROWS = 6
 ROW_PX, HEADER_PX = 26, 24
+#: the marker table's columns, by their place: the start time of the frame a marker was placed on is the sixth
+START_COLUMN = 5
 MARKER_STRIP_PX = HEADER_PX + MARKER_ROWS * ROW_PX + 2
 
 
@@ -99,6 +101,45 @@ def thumb_pixmap(frame: dict, size: int) -> QPixmap:
     p.drawText(QRect(0, pm.height() - h, w, h), Qt.AlignmentFlag.AlignCenter, text)
     p.end()
     return pm
+
+
+class MarkerTable(QTableWidget):
+    """The marker list. Every row is reachable: a notch of the wheel over it moves it exactly one row (an item
+    view's own wheel moves as many rows as the desktop's setting says, three by default, which an agent that counts
+    notches cannot know), finer wheels add up to whole rows, and Ctrl with the wheel does nothing. The scroll
+    steps are rows, whatever the style's default (a table that scrolls by pixel would leave the first row cut off
+    under the header, which the strip's height rule above is made to prevent)."""
+
+    NOTCH = 120                                   # a wheel's angle delta for one notch
+
+    def __init__(self, rows: int, cols: int, parent: QWidget | None = None):
+        super().__init__(rows, cols, parent)
+        self._wheel = 0
+        self.setVerticalScrollMode(QAbstractItemView.ScrollMode.ScrollPerItem)
+        self.verticalScrollBar().setSingleStep(1)
+
+    def first_row(self) -> int:
+        """The row at the top of what is shown (-1 when there are no rows)."""
+        return self.rowAt(0)
+
+    def last_row(self) -> int:
+        """The last row that is shown whole (-1 when there are no rows)."""
+        return self.rowAt(self.viewport().height() - 1)
+
+    def wheelEvent(self, ev) -> None:
+        ev.accept()                               # taken whatever happens: a parent never scrolls
+        if ev.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            return
+        self._wheel += ev.angleDelta().y()
+        notches = int(self._wheel / self.NOTCH)   # toward zero: a partial notch waits for the rest of it
+        if not notches:
+            return
+        self._wheel -= notches * self.NOTCH
+        bar = self.verticalScrollBar()
+        before = bar.value()
+        bar.setValue(before - notches)
+        if bar.value() == before:                 # at an end: the turns beyond it are not saved up
+            self._wheel = 0
 
 
 class CenterColumn(QWidget):
@@ -302,7 +343,7 @@ class CenterColumn(QWidget):
 
     def _marker_table(self, parent: QWidget) -> QTableWidget:
         cols = ["mk_num", "mk_x", "mk_y", "mk_value", "mk_frame", "mk_start", "mk_dist"]
-        t = QTableWidget(0, len(cols), parent)
+        t = MarkerTable(0, len(cols), parent)
         t.setObjectName("markers.table")
         # one line each, in one language: a header of two lines took a third of the strip in Chinese, and
         # the table holds five rows (30 px each under a 24 px header) in the strip's 176 px
@@ -461,9 +502,17 @@ class CenterColumn(QWidget):
 
     def set_frame_starts(self, starts: dict[str, float]) -> None:
         """When each saved frame's scan began, for the table's start column: the frame a marker was placed on,
-        as the Data tab gives it."""
+        as the Data tab gives it. Only that column is written: the data list is read after every action, and a
+        table that scrolled back to its selection each time would undo the reader's own scrolling."""
         self._frame_start = dict(starts)
-        self._markers_changed(self.frame_view.markers())
+        for i, m in enumerate(self.frame_view.markers()):
+            item = self.table.item(i, START_COLUMN)
+            if item is not None:
+                item.setText(self._started(m))
+
+    def _started(self, m: dict) -> str:
+        started = self._frame_start.get(str(m.get("frame", "")))
+        return fmt.hms(started) if started is not None else "-"
 
     def _markers_changed(self, markers: list) -> None:
         t = self.table
@@ -473,10 +522,8 @@ class CenterColumn(QWidget):
             d = "" if prev is None else f"{math.hypot(m['x_nm'] - prev['x_nm'], m['y_nm'] - prev['y_nm']):.3f}"
             val = m.get("value")
             vtxt = f"{float(val):.2f} {m.get('unit', '')}" if val is not None and math.isfinite(float(val)) else "-"
-            started = self._frame_start.get(str(m.get("frame", "")))
-            stxt = fmt.hms(started) if started is not None else "-"
             for c, text in enumerate([str(i + 1), f"{m['x_nm']:.3f}", f"{m['y_nm']:.3f}", vtxt, str(m.get("frame", "")),
-                                      stxt, d]):
+                                      self._started(m), d]):
                 item = QTableWidgetItem(text)
                 item.setTextAlignment(Qt.AlignmentFlag.AlignVCenter | (Qt.AlignmentFlag.AlignLeft if c == 4
                                                                        else Qt.AlignmentFlag.AlignRight))
