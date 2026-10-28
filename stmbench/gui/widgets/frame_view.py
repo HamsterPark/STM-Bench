@@ -235,8 +235,10 @@ def frame_thumbnail(frame: dict, px: int = 96) -> QImage:
 
 
 def marker_radius(fpx: int) -> float:
-    """Radius in px of a marker's ring for a base font of ``fpx`` px."""
-    return max(8.0, 0.6 * fpx)
+    """Radius in px of a marker's ring for a base font of ``fpx`` px. Small, and open: the markers of one atom
+    stand a few pixels apart (five of them, at 4.7 screen px a pixel, 14 px from one another), and a ring wider
+    than that, or one with a cross inside it, hid the pixel it marks and its neighbours (screen trial 4, step 85)."""
+    return max(6.0, 0.42 * fpx)
 
 
 class _Shown:
@@ -857,10 +859,19 @@ class FrameView(QWidget):
         p.setRenderHint(QPainter.RenderHint.Antialiasing, True)
         p.setClipRect(img)
         self._paint_profile(p, lay)
+        items = []
         for i, m in enumerate(self._markers):
             pt = self.scan_to_widget(m["x_nm"], m["y_nm"])
             if pt is not None:
-                self._paint_marker(p, lay, pt, i + 1, i == self._selected)
+                items.append((i + 1, pt, i == self._selected, m))
+        items.sort(key=lambda it: it[2])                          # the selected marker last: it is on top of the others
+        rects = self._marker_label_rects(lay, items)
+        for (_number, pt, selected, m), (rect, leader) in zip(items, rects):
+            self._paint_marker(p, lay, pt, m, selected)
+            if leader:                                            # a number that had to stand off: a line to its ring
+                self._paint_leader(p, lay, pt, rect, selected)
+        for (number, _pt, selected, _m), (rect, _leader) in zip(items, rects):
+            self._label(p, lay, str(number), rect, MARKER_SELECTED_COLOR if selected else MARKER_COLOR)
         p.end()
 
     def _paint_axes(self, p: QPainter, lay: SimpleNamespace) -> None:
@@ -942,27 +953,83 @@ class FrameView(QWidget):
         w = QFontMetrics(lay.bold).horizontalAdvance(text) + 10
         return QRectF(x, y, max(w, lay.fh), lay.fh + 2)
 
-    def _paint_marker(self, p: QPainter, lay: SimpleNamespace, pt: QPointF, number: int, selected: bool) -> None:
+    def _paint_marker(self, p: QPainter, lay: SimpleNamespace, pt: QPointF, m: dict, selected: bool) -> None:
+        """An open ring on the marker's position, in a dark rim that reads on a white atom too; the pixel inside is
+        left as it is. Where one pixel is wider than two rings (zoomed in), the pixel the marker is on is outlined,
+        so that the pixel its row of the table speaks of is told from its neighbours."""
         r = marker_radius(lay.fpx)
         color = MARKER_SELECTED_COLOR if selected else MARKER_COLOR
         p.setBrush(Qt.BrushStyle.NoBrush)
-        p.setPen(QPen(QColor(0, 0, 0, 235), 5.0))             # a dark rim under the colour: reads on white atoms too
+        sh = self._shown
+        if m.get("frame") == sh.name and "col" in m:           # placed on this frame: it is at a pixel's centre
+            a = self.pixel_to_widget(m["col"] - 0.5, m["row"] - 0.5)
+            b = self.pixel_to_widget(m["col"] + 0.5, m["row"] + 0.5)
+            box = QRectF(a, b).adjusted(1.5, 1.5, -1.5, -1.5)
+            if box.width() >= 4.0 * r:
+                p.setPen(QPen(QColor(0, 0, 0, 235), 4.0))
+                p.drawRect(box)
+                p.setPen(QPen(color, 2.0))
+                p.drawRect(box)
+        p.setPen(QPen(QColor(0, 0, 0, 235), 4.5))
         p.drawEllipse(pt, r, r)
-        p.setPen(QPen(color, 2.5 if selected else 2.0))
+        p.setPen(QPen(color, 2.6 if selected else 2.0))
         p.drawEllipse(pt, r, r)
-        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):      # a small cross: the exact point
-            a, b = QPointF(pt.x() + dx * 2, pt.y() + dy * 2), QPointF(pt.x() + dx * 5, pt.y() + dy * 5)
-            p.setPen(QPen(QColor(0, 0, 0, 235), 3.5))
-            p.drawLine(a, b)
-            p.setPen(QPen(color, 1.5))
-            p.drawLine(a, b)
-        text = str(number)
-        rect = self._label_rect(lay, text, pt.x() + r + 3, pt.y() - r - 3 - (lay.fh + 2))
-        if rect.right() > lay.img.right() - 2:
-            rect.moveLeft(pt.x() - r - 3 - rect.width())
-        if rect.top() < lay.img.top() + 2:
-            rect.moveTop(pt.y() + r + 3)
-        self._label(p, lay, text, rect, color)
+
+    def _marker_label_rects(self, lay: SimpleNamespace, items: list) -> list[tuple[QRectF, bool]]:
+        """Where each marker's number goes, and whether it stands off from its ring (then a line joins them). The
+        markers of one atom stand a few pixels apart, and five numbers in boxes on top of their rings and of one
+        another cannot be read: a number goes beside its ring, in the first of eight places (upper right first, then
+        the other corners, the sides, above and below) that covers no other number and no other marker's ring; where
+        all eight are taken it stands one label further out, then two."""
+        r = marker_radius(lay.fpx)
+        bound = QRectF(lay.img).adjusted(2, 2, -2, -2)
+        discs = [(pt, r + 3.0) for _n, pt, _s, _m in items]
+        placed: list[QRectF] = []
+        out: list[tuple[QRectF, bool]] = []
+        k45 = math.sqrt(0.5)
+        dirs = ((k45, -k45), (-k45, -k45), (k45, k45), (-k45, k45), (1.0, 0.0), (-1.0, 0.0), (0.0, -1.0), (0.0, 1.0))
+        for k, (number, pt, _selected, _m) in enumerate(items):
+            size = self._label_rect(lay, str(number), 0, 0)
+            w, h = size.width(), size.height()
+            g = 3.0
+            best, best_cost, far = None, None, False
+            for step in range(3):
+                extra = step * (h + 4.0)
+                for ux, uy in dirs:
+                    reach = r + g + extra
+                    cx = pt.x() + ux * reach + (w / 2 if ux > 0.1 else -w / 2 if ux < -0.1 else 0.0)
+                    cy = pt.y() + uy * reach + (h / 2 if uy > 0.1 else -h / 2 if uy < -0.1 else 0.0)
+                    rect = QRectF(cx - w / 2, cy - h / 2, w, h)
+                    cost = 0.0 if bound.contains(rect) else 500.0
+                    cost += 100.0 * sum(rect.intersects(q) for q in placed)
+                    for j, (c, rad) in enumerate(discs):
+                        if j != k:
+                            nx, ny = min(max(c.x(), rect.left()), rect.right()), min(max(c.y(), rect.top()), rect.bottom())
+                            cost += 60.0 if (nx - c.x()) ** 2 + (ny - c.y()) ** 2 < rad * rad else 0.0
+                    cost += 5.0 * step                              # the nearer place, unless it covers something
+                    if best_cost is None or cost < best_cost:
+                        best, best_cost, far = rect, cost, step > 0
+                    if cost == 0.0:
+                        break
+                if best_cost is not None and best_cost < 5.0:
+                    break
+            placed.append(best)
+            out.append((best, far))
+        return out
+
+    def _paint_leader(self, p: QPainter, lay: SimpleNamespace, pt: QPointF, rect: QRectF, selected: bool) -> None:
+        """A thin line from a ring to its number's box, which stands a little off."""
+        r = marker_radius(lay.fpx)
+        nx, ny = min(max(pt.x(), rect.left()), rect.right()), min(max(pt.y(), rect.top()), rect.bottom())
+        d = math.hypot(nx - pt.x(), ny - pt.y())
+        if d <= r + 2.0:
+            return
+        a = QPointF(pt.x() + (nx - pt.x()) / d * r, pt.y() + (ny - pt.y()) / d * r)
+        b = QPointF(nx, ny)
+        p.setPen(QPen(QColor(0, 0, 0, 235), 3.2, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
+        p.drawLine(a, b)
+        p.setPen(QPen(MARKER_SELECTED_COLOR if selected else MARKER_COLOR, 1.4, Qt.PenStyle.SolidLine, Qt.PenCapStyle.RoundCap))
+        p.drawLine(a, b)
 
     def _paint_profile(self, p: QPainter, lay: SimpleNamespace) -> None:
         ends = None
