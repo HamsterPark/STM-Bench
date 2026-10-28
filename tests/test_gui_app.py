@@ -2353,6 +2353,27 @@ def test_nothing_turned_away_reaches_the_record_and_the_acknowledgement_is_in_no
     assert [r["name"] for r in ledger if r["kind"] == "act"] == ["wait"]
 
 
+def test_an_episode_with_a_refusal_held_in_it_replays_and_grades_as_the_calls_that_ran(open_window, tmp_path):
+    """Nothing turned away reaches the instrument, so an episode played through the window with a held refusal in it
+    replays to the same measurements: the grading host, which holds the seed, finds the export consistent and the
+    episode finished, and counts as actions the calls that ran."""
+    from stmbench.instrument.grade import grade_export
+    win = open_window("en", seed=3, name="held")
+    shots.fill(win, {"act.set_setpoint.current_pa": "200000", "act.move_tip.x_nm": "4", "act.move_tip.y_nm": "0"})
+    run_button(win, "run.set_setpoint")
+    shots.settle(win)
+    run_button(win, "run.move_tip")                                             # turned away: the setpoint was refused
+    shots.settle(win)
+    acknowledge(win)
+    scan_small(win)
+    win.shutdown(finish=True)
+    export = tmp_path / "held" / "export"
+    graded = grade_export(export, P4, 3)
+    assert graded["replay"]["consistent"] and graded["finished_in_episode"] is True
+    assert graded["actions"] == 1                                               # the scan: not the refusal, not the click turned away
+    assert not grade_export(export, P4, 4)["replay"]["consistent"]              # and it is this seed's world that it replays
+
+
 def test_the_band_takes_the_place_of_two_lines_so_nothing_moves_and_its_button_is_clear_of_cancel_queued(open_window):
     win = open_window("en")
     strip = win.status
