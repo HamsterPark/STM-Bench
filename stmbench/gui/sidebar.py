@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QBoxLayout, QButtonGroup, QFra
                                QListWidget, QListWidgetItem, QPushButton, QRadioButton, QScrollArea, QVBoxLayout, QWidget)
 
 from . import fmt, style
-from .controls import QuietBrowser, QuietText, SelectAllLineEdit, Tabs, polish, strong
+from .controls import QuietBrowser, QuietText, SelectAllLineEdit, StepList, Tabs, polish, strong
 from .labels import S, one, tr, two_lines
 
 
@@ -264,7 +264,8 @@ class DataTab(QWidget):
     current recorded while the tip moved; the instrument keeps them with the spectra, and so does the viewer,
     but a list of their own says what they are). Each item is three short lines (its name, start time and
     channels; its size; where it is), which carry every column of a table in the width of this column without
-    cutting any of them off. A click shows the item in the viewer."""
+    cutting any of them off. A click shows the item in the viewer; a wheel notch moves a list by one item
+    (:class:`~stmbench.gui.controls.StepList`)."""
 
     frame_clicked = Signal(str)
     spectrum_clicked = Signal(str)
@@ -295,8 +296,8 @@ class DataTab(QWidget):
             w.itemClicked.connect(lambda it: self.spectrum_clicked.emit(it.data(Qt.ItemDataRole.UserRole)))
         self.set_data([], [])
 
-    def _list(self, name: str) -> QListWidget:
-        w = QListWidget()
+    def _list(self, name: str) -> StepList:
+        w = StepList()                                    # a wheel notch moves it by one entry
         w.setObjectName(name)
         w.setAlternatingRowColors(True)
         w.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)

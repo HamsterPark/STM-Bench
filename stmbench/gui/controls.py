@@ -9,10 +9,11 @@ from __future__ import annotations
 
 from typing import Any, Sequence
 
-from PySide6.QtCore import QSize, Qt, Signal
-from PySide6.QtGui import QIcon, QPixmap
-from PySide6.QtWidgets import (QButtonGroup, QHBoxLayout, QLabel, QLineEdit, QPlainTextEdit, QPushButton, QSizePolicy,
-                               QTabBar, QTabWidget, QTextBrowser, QToolButton, QWidget)
+from PySide6.QtCore import QPoint, QSize, Qt, Signal
+from PySide6.QtGui import QFontMetrics, QIcon, QPixmap
+from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QHBoxLayout, QLabel, QLineEdit, QListWidget,
+                               QPlainTextEdit, QPushButton, QSizePolicy, QTabBar, QTabWidget, QTextBrowser, QToolButton,
+                               QWidget)
 
 from . import style
 
@@ -201,6 +202,42 @@ class QuietBrowser(QTextBrowser):
             ev.ignore()
             return
         super().wheelEvent(ev)
+
+
+class StepList(QListWidget):
+    """A list that a wheel notch moves by one entry: the entry at the top edge changes by one, and the new one is put
+    at the edge. The platform's own amount (three entries, or a step in pixels) moved the Data tab's frame list by a
+    number of entries nobody could count on: in screen trial 5 a notch jumped several entries and eight notches landed
+    at the very end, so that reaching the fifth of fifteen frames took three steps. A click on an entry brings it into
+    view whole: the view's own scroll-to-current left an entry that the bottom edge cut where it was."""
+
+    def __init__(self, parent: QWidget | None = None):
+        super().__init__(parent)
+        self._notches = Notches()
+        self.itemClicked.connect(self.show_whole)
+
+    def show_whole(self, item) -> None:
+        """Scroll just far enough for ``item`` to be in view whole (a part of it was cut by the top or the bottom edge)."""
+        rect = self.visualItemRect(item)
+        bar = self.verticalScrollBar()
+        if rect.top() < 0:
+            bar.setValue(bar.value() + rect.top())
+        elif rect.bottom() >= self.viewport().height():
+            bar.setValue(bar.value() + rect.bottom() + 1 - self.viewport().height())
+
+    def first_in_view(self) -> int:
+        """The row at the top edge of the list, cut or whole (0 where the list is empty or the edge is bare)."""
+        return max(0, self.indexAt(QPoint(self.viewport().width() // 2, 1)).row())
+
+    def wheelEvent(self, ev) -> None:
+        if ev.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            ev.ignore()
+            return
+        n = self._notches.take(ev)                                       # positive: up, to earlier entries
+        if n and self.count():
+            row = min(max(self.first_in_view() - n, 0), self.count() - 1)
+            self.scrollToItem(self.item(row), QAbstractItemView.ScrollHint.PositionAtTop)
+        ev.accept()
 
 
 class _FixedTabBar(QTabBar):

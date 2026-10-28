@@ -20,7 +20,7 @@ import pytest
 pytest.importorskip("PySide6")
 os.environ["QT_QPA_PLATFORM"] = "offscreen"                 # never a visible window
 
-from PySide6.QtCore import QCoreApplication, QEvent, Qt  # noqa: E402
+from PySide6.QtCore import QCoreApplication, QEvent, QPoint, Qt  # noqa: E402
 from PySide6.QtGui import QCloseEvent, QImage  # noqa: E402
 from PySide6.QtTest import QTest  # noqa: E402
 from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QLabel, QLineEdit, QListWidget,  # noqa: E402
@@ -1693,6 +1693,98 @@ def test_what_the_viewer_the_profile_and_the_data_tab_say_is_not_cut_off(fonts, 
         assert len(text) == 3                                                           # three lines, each whole
         lines_fit(lst, text, lst.viewport().width() - 2 * style.px(6) - 2)
     assert "centre (-12.534, -5.607) nm" in shots.widget(win, "data.frames").item(0).text()
+
+
+# ── the lists of the Data tab ──
+def small_scans(win: MainWindow, n: int) -> list[str]:
+    """``n`` small frames at different centres, in the order they were made (the list shows the newest first)."""
+    names = []
+    for i in range(n):
+        shots.fill(win, {**SMALL, "act.scan.pixels": "16", "act.scan.center_x_nm": str(i)})
+        run_button(win, "run.scan")
+        shots.settle(win)
+        names.append(win.viewed[1])
+    return names
+
+
+def first_in_view(lst: QListWidget) -> int:
+    """The row of the entry at the top edge of the list, cut or whole."""
+    return lst.indexAt(QPoint(6, 1)).row()
+
+
+def notches(win: MainWindow, lst: QListWidget, n: int) -> None:
+    """``n`` wheel notches over the list, down when positive (the harness's direction: a turn towards the reader)."""
+    for _ in range(abs(n)):
+        shots.wheel(win, lst, delta=-120 if n > 0 else 120)
+
+
+def test_a_wheel_notch_moves_the_frame_list_by_one_entry_and_the_clicked_entry_stays_in_view(open_window):
+    """Screen trial 5, steps 43-48: in the Data tab one wheel notch jumped several entries and eight notches landed at the
+    very end, so reaching sim005 among fifteen frames took three steps."""
+    win = open_window("en")
+    names = small_scans(win, 15)
+    open_left(win, "data")
+    lst = shots.widget(win, "data.frames")
+    assert lst.count() == 15 and lst.verticalScrollBar().maximum() > 3 * lst.visualItemRect(lst.item(0)).height()
+    assert first_in_view(lst) == 0 and lst.item(0).text().startswith(names[-1])             # the newest first
+    notches(win, lst, 1)
+    assert first_in_view(lst) == 1 and lst.visualItemRect(lst.item(1)).top() == 0           # one entry, its top at the edge
+    notches(win, lst, 3)
+    assert first_in_view(lst) == 4
+    notches(win, lst, -1)
+    assert first_in_view(lst) == 3
+    notches(win, lst, -10)
+    assert first_in_view(lst) == 0 and lst.verticalScrollBar().value() == 0                  # up to the first, no further
+    notches(win, lst, 8)                                                                     # the eight of the trial
+    assert first_in_view(lst) == 8
+    notches(win, lst, 60)                                                                    # far beyond the end: it stops there
+    end = lst.verticalScrollBar().value()
+    assert end == lst.verticalScrollBar().maximum()
+    seen = []
+    for _ in range(3):                                                                       # and from the end, one entry per notch
+        seen.append(first_in_view(lst))
+        notches(win, lst, -1)
+    assert seen[0] - seen[1] == seen[1] - seen[2] == 1 and first_in_view(lst) == seen[2] - 1
+    # a click on an entry that is cut by the bottom edge shows it whole, and shows its frame
+    notches(win, lst, -20)
+    vp = lst.viewport().rect()
+    cut = next(r for r in range(lst.count()) if lst.visualItemRect(lst.item(r)).top() < vp.height() < lst.visualItemRect(lst.item(r)).bottom())
+    rect = lst.visualItemRect(lst.item(cut))
+    shots.click(win, lst.viewport(), QPoint(rect.center().x(), (rect.top() + vp.height()) // 2))
+    shots.settle(win)
+    assert vp.contains(lst.visualItemRect(lst.item(cut))), (lst.visualItemRect(lst.item(cut)), vp)
+    assert win.viewed == ("frame", names[len(names) - 1 - cut])
+    # a control that is held down, or the wheel over the tab bar, does nothing to the list
+    before = lst.verticalScrollBar().value()
+    shots.wheel(win, win.sidebar.tabBar(), delta=-120)
+    assert lst.verticalScrollBar().value() == before
+
+
+def test_the_spectra_and_the_move_traces_lists_step_one_entry_per_notch_too(open_window):
+    win = open_window("en")
+    open_right(win, "spectroscopy")
+    for i in range(7):
+        shots.fill(win, {"act.sts.v_start": "-0.5", "act.sts.v_end": f"{0.5 + i / 10}", "act.sts.points": "8"})
+        run_button(win, "run.sts")
+        shots.settle(win)
+    open_right(win, "operate")
+    for i in range(7):
+        shots.fill(win, {"act.move_tip.x_nm": str(i + 1), "act.move_tip.y_nm": "0", "act.move_tip.speed_nm_s": "100"})
+        run_button(win, "run.move_tip")
+        shots.settle(win)
+    open_left(win, "data")
+    for name, n in (("data.spectra", 7), ("data.traces", 7)):
+        lst = shots.widget(win, name)
+        assert lst.count() == n
+        notches(win, lst, 50)
+        last_first = first_in_view(lst)                             # the furthest the list goes
+        notches(win, lst, -50)
+        assert first_in_view(lst) == 0 and last_first >= 1          # seven entries do not fit in the list
+        for k in range(1, min(3, last_first) + 1):
+            notches(win, lst, 1)
+            assert first_in_view(lst) == k, (name, k)
+        notches(win, lst, -10)
+        assert first_in_view(lst) == 0
 
 
 # ── text fields ──
