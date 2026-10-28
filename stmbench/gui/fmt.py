@@ -164,6 +164,11 @@ def params_text(args: dict | None) -> str:
     return ", ".join(f"{k}={value_text(v)}" for k, v in (args or {}).items())
 
 
+def call_text(label: str, args: dict | None = None) -> str:
+    """A call as the instrument got it (or would have): its name and the parameters it was clicked with."""
+    return f"{label} {params_text(args)}".strip()
+
+
 def reply_summary(name: str, reply: Any) -> str:
     """One line for the status strip and the group's reply line; the Log keeps the whole reply."""
     if not isinstance(reply, dict):

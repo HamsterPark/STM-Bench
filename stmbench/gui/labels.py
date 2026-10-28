@@ -59,6 +59,16 @@ S: dict[str, Pair] = {
     "cancelled": ("cancelled", "已取消"),
     "cancelled_note": ("cancelled queued", "已取消排队"),
     "not_run": ("not run: an earlier call was refused", "未执行:前面的调用被拒绝了"),
+    # a refusal holds the operator's calls until the reader acknowledges it (the band on the status strip)
+    "held": ("HELD", "挂起"),
+    "not_run_held": ("not run: the refusal is not acknowledged", "未执行:拒绝尚未确认"),
+    "refused_head": ("REFUSED", "被拒绝"),
+    "error_head": ("ERROR", "出错"),
+    "held_note": ("Calls that change the instrument or the record are held until this is acknowledged.",
+                  "确认之前，会改变仪器或记录的调用都被挂起。"),
+    "band_not_run": ("Not run", "未执行"),
+    "ack": ("Acknowledge", "知道了"),
+    "acknowledged": ("acknowledged the refusal of", "已确认被拒绝的调用"),
     "recent_title": ("Recent results", "最近结果"),
     "stays_open": ("This program stays open; it is closed from outside.", "此程序保持打开，由外部关闭。"),
     # the instrument's facts (top of the Manual tab)

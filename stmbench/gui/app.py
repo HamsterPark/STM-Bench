@@ -7,6 +7,11 @@ click that touches the instrument becomes a job on the worker thread (:mod:`stmb
 this thread only draws what the jobs bring back. The window adds no hint: it shows what the instrument
 said, in the instrument's words, and the instrument is the only validator.
 
+A refused call of the operator's holds the console: the calls queued behind it are dropped, and every operator
+call clicked afterwards is turned away, until the reader clicks the button of the red band that the refusal puts
+on the status strip (:mod:`stmbench.gui.worker`, :mod:`stmbench.gui.status`). The acknowledgement is a window
+event: it is in the Log and in no ledger or export.
+
 Two ways to run it. *Dev*: a scenario and a seed on the command line, a run directory (the usual full
 ledger at the end) with the export beside it; closing the window finishes the episode, judged as it
 stands. *Sealed*: the seed arrives on stdin and appears nowhere else; the window opens full screen (a
@@ -83,6 +88,7 @@ class MainWindow(QMainWindow):
         self._open = 0                                   # jobs submitted whose outcome is not drawn yet
         self._running = ""
         self._running_job: Job | None = None
+        self._refusal: jobs.Refusal | None = None        # the refusal the band shows: the console holds while it is there
         self._state: dict | None = None                  # the last status(): what the On / Off buttons show
         self._finished = False
         self._t_s = 0.0                                  # the last instrument time the window was told
@@ -142,13 +148,14 @@ class MainWindow(QMainWindow):
         self.center.report_from_marker.connect(self._report_from_marker)
         self.center.notice.connect(lambda text: self.recent.push("note", text))
         self.status.cancel_requested.connect(self._cancel_queued)
+        self.status.acknowledge_requested.connect(self._acknowledge)
 
         self.worker = Worker(session, self)
         self.worker.started_job.connect(self._on_started)
         self.worker.finished_job.connect(self._on_finished)
         self.worker.queue_changed.connect(self._on_queue)
         self.worker.dropped.connect(self._on_dropped)
-        self._turned_away.connect(self._not_run, Qt.ConnectionType.QueuedConnection)
+        self._turned_away.connect(self._turned_away_now, Qt.ConnectionType.QueuedConnection)
         self.worker.start()
         self._submit(Job("boot", "start", {}, jobs.run_boot), log=False)
 
@@ -157,23 +164,50 @@ class MainWindow(QMainWindow):
         self._open += 1
         if log:
             self.sidebar.log.add(job.id, job.label, job.args, self._t_s)
-        if not self.worker.submit(job):                  # a click of the same step as a refusal: not run
+        if not self.worker.submit(job):                  # a click while a refusal is not acknowledged: not run
             self._open -= 1
             self._turned_away.emit([job])                # queued: after the refusal's own result has been drawn
         return job.id
 
-    def _not_run(self, jobs: list[Job]) -> None:
-        """Calls that were not run because an earlier call was refused: said in the log and in the recent
-        results; the refusal itself stays on the strip's last line, which nothing that did not run replaces."""
+    def _not_run(self, jobs: list[Job], held: bool = False) -> None:
+        """Calls that were not run because an earlier call was refused: said in the log, in the recent results
+        and on the band. ``held``: they were clicked after the refusal, while it was not acknowledged; else they
+        were waiting behind it. The refusal itself stays on the strip's last line, which nothing that did not run
+        replaces."""
+        why = tr("not_run_held" if held else "not_run", self.lang)
         for job in jobs:
-            self.sidebar.log.not_run(job.id)
+            self.sidebar.log.not_run(job.id, held)
             if job.kind == "finish":
                 self.sidebar.report.finish_not_run()
-        self.recent.not_run([j.label for j in jobs], tr("not_run", self.lang))
+            elif job.kind == "report":
+                self.sidebar.report.set_reply(False, why)
+        self.recent.not_run([j.label for j in jobs], why, key="not_run_held" if held else "not_run")
+        if self._refusal is not None:
+            self._refusal.not_run += [j.label for j in jobs]
+            self.status.show_refusal(self._refusal)
+
+    def _turned_away_now(self, jobs: list[Job]) -> None:
+        """Clicks the worker turned away, told after the refusal's own result was drawn."""
+        self._not_run(jobs, held=True)
 
     def _on_dropped(self, jobs: list[Job]) -> None:
         self._open -= len(jobs)
         self._not_run(jobs)
+        self._show_state()
+
+    def _hold(self, job: Job, out: jobs.Outcome) -> None:
+        """A call of the operator's failed: the worker holds, and the band says what was refused."""
+        self._refusal = jobs.Refusal(fmt.call_text(job.label, job.args), out.text, out.refused)
+        self.status.show_refusal(self._refusal)
+
+    def _acknowledge(self) -> None:
+        """The reader has read the refusal: operator calls are accepted again. A window event, not an instrument
+        call; the Log lists it, no ledger or export does."""
+        self.worker.acknowledge()
+        refusal, self._refusal = self._refusal, None
+        self.status.show_refusal(None)
+        if refusal is not None:
+            self.sidebar.log.note(f"{tr('acknowledged', self.lang)} {refusal.call}", self._t_s)
         self._show_state()
 
     def run_action(self, name: str, args: dict) -> int:
@@ -229,7 +263,8 @@ class MainWindow(QMainWindow):
         # arrive out of order
         queued = self.worker.queued()
         job = self._running_job if self._running else None
-        self.status.set_state(bool(self._running), self._running, len(queued), self._finished)
+        self.status.set_state(bool(self._running), self._running, len(queued), self._finished,
+                              held=self._refusal is not None)
         self.status.set_busy(fmt.describe_job(job.kind, job.label, job.args) if job else None, len(queued),
                              sum(1 for j in queued if j.kind != "boot"))
         scans = [job, *queued]
@@ -293,6 +328,7 @@ class MainWindow(QMainWindow):
                 self.sidebar.report.set_reply(False, text)
             elif out.kind == "finish":
                 self.sidebar.report.finish_not_run()
+            self._hold(job, out)                              # the worker holds from this refusal on: the band says so
             return
         if out.kind == "act":
             summary = fmt.reply_summary(job.label, out.reply)

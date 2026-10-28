@@ -126,7 +126,10 @@ QLabel[tone="busy"] {{ color: {c['warn']}; }}
 QLabel[role="pill"] {{ border-radius: {px(6)}px; padding: 1px {px(10)}px; background: {c['accent_soft']}; color: {c['accent_dark']}; }}
 QLabel[role="pill"][tone="busy"] {{ background: #ffe9c2; color: {c['warn']}; }}
 QLabel[role="pill"][tone="done"] {{ background: #d9f0df; color: {c['ok']}; }}
+QLabel[role="pill"][tone="held"] {{ background: {c['bad']}; color: #ffffff; }}
 QFrame#strip {{ background: {c['panel']}; border: 1px solid {c['line']}; border-radius: {px(8)}px; }}
+QFrame[role="band"] {{ background: {c['bad']}; border: 1px solid #7a1710; border-radius: {px(6)}px; }}
+QLabel[role="band"] {{ background: transparent; border: none; color: #ffffff; }}
 QFrame[role="panel"] {{ background: {c['panel']}; border: 1px solid {c['line']}; border-radius: {px(8)}px; }}
 QGroupBox {{ background: {c['panel']}; border: 1px solid {c['line_strong']}; border-radius: {px(8)}px;
             margin-top: {px(10)}px; padding: {px(11)}px {px(2)}px {px(2)}px {px(2)}px; font-weight: bold; }}
@@ -142,6 +145,10 @@ QPushButton[role="primary"]:pressed {{ background: {c['accent_dark']}; }}
 QPushButton[role="danger"] {{ background: #fdecea; color: {c['bad']}; border-color: #e0a29c; }}
 QPushButton[role="danger"]:hover {{ background: #fbd9d5; }}
 QPushButton[role="small"] {{ min-height: {px(28)}px; padding: 0 {px(10)}px; font-size: {px(16)}px; }}
+QPushButton[role="ack"] {{ background: #ffffff; color: {c['bad']}; border: 2px solid #7a1710; min-height: {px(32)}px;
+                          padding: 0 {px(14)}px; font-size: {px(18)}px; }}
+QPushButton[role="ack"]:hover {{ background: #ffe9e6; }}
+QPushButton[role="ack"]:pressed {{ background: #fbd0cb; }}
 QPushButton[seg] {{ border-radius: 0; padding: 0 {px(10)}px; margin: 0; }}
 QPushButton[seg="first"] {{ border-top-left-radius: {px(6)}px; border-bottom-left-radius: {px(6)}px; }}
 QPushButton[seg="last"] {{ border-top-right-radius: {px(6)}px; border-bottom-right-radius: {px(6)}px; }}

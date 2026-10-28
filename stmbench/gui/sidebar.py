@@ -359,7 +359,9 @@ class DataTab(QWidget):
 
 class LogTab(QuietBrowser):
     """Every call, newest first: instrument time, the action with its parameters, the reply or the
-    refusal (red). A call that has not run yet says so until it does."""
+    refusal (red). A call that has not run yet says so until it does; one that was dropped or turned away
+    because of a refusal says that. The acknowledgement of a refusal is a line of its own, in grey: a window
+    event, not a call."""
 
     def __init__(self, lang: str, parent: QWidget | None = None):
         super().__init__(parent)
@@ -381,9 +383,16 @@ class LogTab(QuietBrowser):
         """A call dropped before it started: it stays in the log, said to be cancelled."""
         self._set(job_id, state="cancelled")
 
-    def not_run(self, job_id: int) -> None:
-        """A call that was not run because an earlier call of its step was refused."""
-        self._set(job_id, state="skipped")
+    def not_run(self, job_id: int, held: bool = False) -> None:
+        """A call that was not run because an earlier call was refused: it was waiting behind the refusal, or
+        (``held``) it was clicked afterwards, while the refusal was not acknowledged."""
+        self._set(job_id, state="held" if held else "skipped")
+
+    def note(self, text: str, t_s: float | None) -> None:
+        """A window event that is not a call (the acknowledgement of a refusal): it is in this log and in no
+        ledger or export."""
+        self._entries.append({"id": None, "label": "", "args": "", "state": "note", "t": t_s, "ok": None, "text": text})
+        self._render()
 
     def done(self, job_id: int, ok: bool, text: str, t_s: float | None) -> None:
         self._set(job_id, state="done", ok=ok, text=text, t=t_s)
@@ -406,6 +415,10 @@ class LogTab(QuietBrowser):
         out = []
         for e in reversed(self._entries):
             when = fmt.hms(e["t"]) if e["t"] is not None else "-"
+            if e["state"] == "note":                      # a window event: grey, on one line, no call behind it
+                out.append(f"<div style='margin-bottom:7px'><span style=\"font-family:'{mono}';color:{c['muted']}\">"
+                           f"{when}</span> <span style='color:{c['muted']}'>{escape(e['text'])}</span></div>")
+                continue
             head = (f"<span style=\"font-family:'{mono}';color:{c['muted']}\">{when}</span> "
                     f"<b style=\"font-family:'{mono}'\">{escape(e['label'])}</b> "
                     f"<span style=\"font-family:'{mono}'\">{escape(e['args'])}</span>")
@@ -417,6 +430,8 @@ class LogTab(QuietBrowser):
                 tail = f"<span style='color:{c['muted']}'>{escape(tr('cancelled', self.lang))}</span>"
             elif e["state"] == "skipped":
                 tail = f"<span style='color:{c['bad']}'>{escape(tr('not_run', self.lang))}</span>"
+            elif e["state"] == "held":
+                tail = f"<span style='color:{c['bad']}'>{escape(tr('not_run_held', self.lang))}</span>"
             else:
                 color = c["ok"] if e["ok"] else c["bad"]
                 tail = (f"<span style=\"color:{color};font-family:'{mono}'\">"

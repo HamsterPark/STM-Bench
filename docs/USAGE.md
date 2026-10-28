@@ -277,13 +277,17 @@ without scrolling at 1920x1080 or 1920x1016) and the Spectroscopy tab, whose On 
 show the state the instrument reports as the selected button, and under them the last five results, newest
 first, in the instrument's words (a refusal stays among them until five calls have followed it). A click queues its job at once with the field values read at that moment and
 buttons stay enabled while the instrument works, because one agent step often clicks several in a row;
-jobs run in click order on one worker thread. A refused call ends its step: the actions, reports and
-end-of-episode clicks still waiting behind it do not run, and for 3 s after the refusal (renewed by every
-click turned away) a click that would start another is not run either, because an agent clicks a dozen
-buttons and looks at the screen once, and a drag after a refused Set setpoint would run at a junction
-resistance nobody chose; the Log and the recent results say "not run: an earlier call was refused" (they
-never reach the instrument or the export), the refusal stays on the strip's last line until a call is accepted,
-and reads (a frame, a spectrum) are not affected. An empty field sends nothing (the instrument's default
+jobs run in click order on one worker thread. A refused call ends its step and holds the console: the
+actions, reports and end-of-episode clicks still waiting behind it do not run, and every such click after it is
+turned away until the reader clicks the Acknowledge button of the red band that the refusal puts on the status
+strip (the instrument's words, the call with its parameters, and the calls that did not run; it takes the place
+of the readings and the last result, as tall as the two lines, so that nothing moves, and the pill says HELD).
+There is no timer: an agent clicks a dozen buttons and looks at the screen once, and a Set setpoint over the limit
+followed, after a wait of its own inside the same step, by a drag would run the drag at a junction resistance nobody
+chose (screen trials 4 and 5: a three-second guard had run out during the wait). The Log and the recent results say "not run" for each such click, with the reason (they never reach the
+instrument or the export), and the acknowledgement is a line of the Log only. Reads (a frame, a spectrum), tab
+changes, the viewer's tools and Cancel queued are never held, and closing the window still ends the episode. An
+empty field sends nothing (the instrument's default
 applies, or it refuses: a parameter the action table marks required has a red star, a hint "required" and no
 default, and an empty one is refused in the instrument's words, as the pulse's width and the poke's depth and dwell
 are in API version 2); a field that is not a number is sent as typed; every click in a field selects all
