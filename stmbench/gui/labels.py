@@ -158,4 +158,6 @@ S: dict[str, Pair] = {
     "off": ("Off", "关"),
     "yes": ("yes", "是"),
     "no": ("no", "否"),
+    # the viewer, added after the screen trials of 2026-10-27/28 (gui-viewer)
+    "clear_readings": ("Clear readings", "清除读数"),
 }

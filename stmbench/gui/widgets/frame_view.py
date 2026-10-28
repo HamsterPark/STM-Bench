@@ -234,6 +234,11 @@ def frame_thumbnail(frame: dict, px: int = 96) -> QImage:
     return _gray_image(np.clip(np.round(g), 0, 255).astype(np.uint8))
 
 
+#: markers whose numbers are placed clear of each other and of the rings; more than this (a long list nobody has cleared)
+#: are put beside their rings in the first place, which costs nothing per paint
+MAX_AVOIDED = 80
+
+
 def marker_radius(fpx: int) -> float:
     """Radius in px of a marker's ring for a base font of ``fpx`` px. Small, and open: the markers of one atom
     stand a few pixels apart (five of them, at 4.7 screen px a pixel, 14 px from one another), and a ring wider
@@ -986,6 +991,12 @@ class FrameView(QWidget):
         discs = [(pt, r + 3.0) for _n, pt, _s, _m in items]
         placed: list[QRectF] = []
         out: list[tuple[QRectF, bool]] = []
+        if len(items) > MAX_AVOIDED:                      # the search is quadratic: a long list keeps the plain place
+            for number, pt, _selected, _m in items:
+                size = self._label_rect(lay, str(number), 0, 0)
+                out.append((QRectF(pt.x() + 0.72 * r + 3.0, pt.y() - 0.72 * r - 3.0 - size.height(), size.width(), size.height()),
+                            False))
+            return out
         k45 = math.sqrt(0.5)
         dirs = ((k45, -k45), (-k45, -k45), (k45, k45), (-k45, k45), (1.0, 0.0), (-1.0, 0.0), (0.0, -1.0), (0.0, 1.0))
         for k, (number, pt, _selected, _m) in enumerate(items):

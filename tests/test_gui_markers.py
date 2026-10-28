@@ -289,3 +289,22 @@ def test_clear_markers_clicked_right_after_scan_while_the_scan_runs_clears_them_
     assert not shots.widget(win, "view.busy").isVisible()
     assert fv.markers() == [] and win.center.table.rowCount() == 0 and marker_pixels(win) == 0
     assert win.viewed[0] == "frame"
+
+
+# ── nothing is cut off ──
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_longest_cursor_readout_fits_the_viewer_whole(fonts, open_window, lang):
+    """The readout under the image names the pixel, its centre and its value; with the widest numbers a frame can
+    give (1024 px, -150 nm, a kilo-picometre) it still ends in no ellipsis, and the tools row (the tools, Clear
+    markers, Clear readings) stays on one line inside the column."""
+    win = open_window(lang)
+    scan(win)
+    c = win.center
+    c._cursor({"col": 1023, "row": 1023, "x_nm": -150.123, "y_nm": -150.123, "value": -1234.56, "unit": "pm"})
+    assert c.readout.text() == c.readout.full_text() and "…" not in c.readout.text()
+    assert c.readout.text().startswith("pixel col 1023, row 1023   centre x -150.123 nm")
+    row = shots.widget(win, "view.tools")
+    for name in ("view.tool.marker", "view.tool.profile", "view.tool.pan", "view.clear_markers"):
+        b = shots.widget(win, name)
+        assert row.rect().contains(b.geometry()) and b.width() >= 56
+        shots.hit(win, b)

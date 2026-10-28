@@ -7,12 +7,17 @@ from __future__ import annotations
 
 import math
 import os
+import sys
+from pathlib import Path
 
 import numpy as np
 import pytest
 
 pytest.importorskip("PySide6")
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+# Offscreen Qt on Windows has no fonts unless it is told where they are: every glyph becomes a box
+if sys.platform == "win32":
+    os.environ.setdefault("QT_QPA_FONTDIR", str(Path(os.environ.get("WINDIR", "")) / "Fonts"))
 
 from PySide6.QtCore import QEvent, QPointF, Qt  # noqa: E402
 from PySide6.QtGui import QFont, QImage, QMouseEvent  # noqa: E402
@@ -208,3 +213,17 @@ def test_markers_at_the_edge_keep_their_numbers_inside_the_image(app):
 
 def QRectF_contains(img, rect) -> bool:                                           # noqa: N802
     return img.x() <= rect.left() and rect.right() <= img.right() + 1 and img.y() <= rect.top() and rect.bottom() <= img.bottom() + 1
+
+
+def test_a_long_list_of_markers_keeps_the_plain_place_for_its_numbers_and_still_paints(app):
+    """The search for a clear place is quadratic in the number of markers; past ``MAX_AVOIDED`` every number is put
+    beside its ring and the view paints at once."""
+    view = make_view(atom_frame())
+    for i in range(fv.MAX_AVOIDED + 10):
+        click(view, view.pixel_to_widget(2 + (i * 7) % 90, 3 + (i * 5) % 88))
+    assert len(view.markers()) == fv.MAX_AVOIDED + 10
+    lay = view._layout()
+    items = [(i + 1, view.scan_to_widget(m["x_nm"], m["y_nm"]), False, m) for i, m in enumerate(view.markers())]
+    rects = view._marker_label_rects(lay, items)
+    assert len(rects) == len(items) and not any(far for _, far in rects)
+    assert rgb(view).shape == (640, 760, 3)

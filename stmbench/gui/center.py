@@ -496,9 +496,13 @@ class CenterColumn(QWidget):
                               "view.tool", "marker")
         self.clear_markers = QPushButton(one("clear_markers", self.lang))
         self.clear_markers.setObjectName("view.clear_markers")
-        w.setLayout(self._row(self._caption("lbl_tool"), self.tool, self.clear_markers))
+        # the readings pinned on a plot, which the plot's own toolbar (the axes) has no room for: the same place always
+        self.clear_readings = QPushButton(one("clear_readings", self.lang))
+        self.clear_readings.setObjectName("view.clear_readings")
+        w.setLayout(self._row(self._caption("lbl_tool"), self.tool, self.clear_markers, self.clear_readings))
         self.tool.changed.connect(lambda t: self.frame_view.set_tool(t))
         self.clear_markers.clicked.connect(lambda: (self.frame_view.clear_markers(), self.frame_view.clear_profile()))
+        self.clear_readings.clicked.connect(lambda: (self.plot.clear_pins(), self.small_plot.clear_pins()))
         return w
 
     def _spectrum_toolbar(self) -> QWidget:

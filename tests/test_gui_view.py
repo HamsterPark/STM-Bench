@@ -115,3 +115,35 @@ def test_a_scan_centred_elsewhere_keeps_where_the_reader_was_looking_when_it_rea
     assert zoom_in_force(win) == 2 and fv._view_centre_scan(fv._shown) == pytest.approx(here)
     scan(win, 30.0, 30.0, 8.0, 32)                                                # one that does not hold that place
     assert zoom_in_force(win) == 1 and fv.view_rect() == (0.0, 0.0, 32.0, 32.0)
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_readings_pinned_on_a_spectrum_stay_in_the_picture_and_clear_readings_and_new_data_remove_them(fonts, open_window, lang):
+    """Screen trial 3 step 44: the hover readout gives exact values, but only one per step. A click pins the point;
+    the pins stay in the screenshot taken after the step's last event."""
+    win = open_window(lang)
+    scan(win)
+    win.right.setCurrentWidget(win.spectroscopy)
+    shots.fill(win, {"act.sts.v_start": "-0.6", "act.sts.v_end": "0.6", "act.sts.points": "64"})
+    run_button(win, "run.sts")
+    shots.settle(win)
+    plot = win.center.plot
+    assert win.viewed[0] == "spectrum" and plot.pinned_points() == []
+    for i in (10, 30, 50):
+        shots.click(win, plot, plot.point_position(i).toPoint())
+    assert [p["index"] for p in plot.pinned_points()] == [10, 30, 50]
+    clear = shots.widget(win, "view.clear_readings")
+    assert clear.isVisible() and clear.width() >= 56
+    shots.hit(win, clear)
+    run_button(win, "view.clear_readings")
+    assert plot.pinned_points() == []
+    for i in (10, 30):
+        shots.click(win, plot, plot.point_position(i).toPoint())
+    run_button(win, "run.sts")                                                   # the next spectrum: new data
+    shots.settle(win)
+    assert win.center.plot.pinned_points() == []
+    # the button is in the same place with a frame on show, and clears nothing there
+    here = shots.widget(win, "view.clear_readings").mapTo(win, shots.widget(win, "view.clear_readings").rect().center())
+    win.request_frame(win._data["frames"][-1]["frame"])
+    shots.settle(win)
+    assert shots.widget(win, "view.clear_readings").mapTo(win, shots.widget(win, "view.clear_readings").rect().center()) == here
