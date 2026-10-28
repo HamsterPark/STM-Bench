@@ -834,13 +834,13 @@ def test_the_zoom_buttons_the_wheel_and_the_pan_tool_move_the_view_and_a_new_fra
         assert now["x_nm"] == pytest.approx(under["x_nm"], abs=1e-6) and now["y_nm"] == pytest.approx(under["y_nm"], abs=1e-6)
     shots.wheel(win, fv, spot, -120)
     assert fv.zoom() == 2 and checked(win, "view.zoom.2")
-    # a marker placed on the zoomed image is at the scan position of the pixel under the click
+    # a marker placed on the zoomed image is at the scan position of the centre of the pixel under the click
     geom = {"cx_nm": 0.0, "cy_nm": 0.0, "w_nm": 8.0, "h_nm": 8.0, "angle_deg": 0.0, "nx": 32, "ny": 32}
     click = QPoint(r.x() + r.width() * 3 // 5, r.y() + r.height() * 2 // 5)
     shots.click(win, fv, click)
     (m,) = fv.markers()
     p = fv._point_at(QPointF(click))
-    x, y = pixel_to_scan_nm(geom, p["col_f"], p["row_f"])
+    x, y = pixel_to_scan_nm(geom, p["col"], p["row"])
     assert m["x_nm"] == pytest.approx(x, abs=1e-6) and m["y_nm"] == pytest.approx(y, abs=1e-6)
     assert shots.widget(win, "markers.table").item(0, 1).text() == f"{x:.3f}"
     # the Pan tool carries the image; the marker tool is the one that places markers

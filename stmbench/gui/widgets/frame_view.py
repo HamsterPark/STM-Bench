@@ -11,9 +11,16 @@ instead of its 0.5-99.5 percentiles (which saturate the top of an atom); the rea
 Coordinates. A point at fractional pixel ``(col, row)`` has pixel centres at integers, row 0 at
 the top, and maps to scan nm through :func:`stmbench.render.pixel_to_scan_nm`, the inverse of the
 judge's footprint mapping; a position a fraction ``fx`` of the image width from its left edge has
-``col = fx * nx - 0.5`` (the web console's rule). Markers live in scan coordinates and are drawn
-on every frame whose footprint holds them, so a marker placed in one frame shows where the same
-scan coordinates lie in the next.
+``col = fx * nx - 0.5`` (the web console's rule).
+
+What a reading is. The image is drawn pixel by pixel, so a position over it is read as the pixel it falls
+in: the cursor and a marker report that pixel's ``col`` and ``row``, its value, and the scan coordinates of
+its *centre* (``pixel_to_scan_nm`` at integer ``col``, ``row``), never the pointer's own position, which no
+value belongs to. A marker placed anywhere in a pixel is therefore the same marker, and its (x, y, value) is
+a point the instrument measured. Markers live in scan coordinates and are drawn on every frame whose
+footprint holds them, so a marker placed in one frame shows where the same scan coordinates lie in the next;
+its record (value, pixel, frame) stays that of the frame it was placed in. A profile line's ends are the
+exception: they keep the exact positions the drag gave.
 
 Zoom. The wheel (without Ctrl) steps the view through x1, x2, x4 and x8 about the pointer, ``set_zoom`` and
 ``fit`` do the same from a control, and with the ``"pan"`` tool a drag moves the zoomed image. The axes, the
@@ -247,10 +254,10 @@ class FrameView(QWidget):
     """The image display of the console. See the module docstring for the conventions.
 
     Signals: ``cursor_moved`` (``x_nm y_nm col row value unit``; ``{}`` once the pointer leaves the
-    image), ``marker_added`` (those plus ``frame``, ``col_f``/``row_f`` the fractional pixel),
-    ``markers_changed`` (every marker, in order), ``profile_changed`` (``frame x0_nm y0_nm x1_nm
-    y1_nm s_nm values unit``; ``{}`` when the profile line is dropped). ``col``/``row`` are the
-    integer pixel the point falls in; ``value`` is NaN where the pixel holds no data.
+    image), ``marker_added`` (those plus ``frame``), ``markers_changed`` (every marker, in order),
+    ``profile_changed`` (``frame x0_nm y0_nm x1_nm y1_nm s_nm values unit``; ``{}`` when the profile
+    line is dropped). ``col``/``row`` are the pixel the position falls in, ``x_nm``/``y_nm`` the scan
+    position of that pixel's centre and ``value`` its value (NaN where the pixel holds no data).
     """
 
     cursor_moved = Signal(dict)
@@ -639,7 +646,11 @@ class FrameView(QWidget):
         return self.pixel_to_widget(col, row)
 
     def _point_at(self, pos: QPointF, clamp: bool = False) -> dict | None:
-        """What lies under a widget position; None outside the image (``clamp``: the nearest edge point)."""
+        """What lies under a widget position; None outside the image (``clamp``: the nearest edge point).
+
+        The point is the pixel the position falls in: ``col``/``row``, its ``value`` and the scan position of
+        its centre (``x_nm``/``y_nm``), so that a reading and the coordinates it is given at belong together.
+        ``at_x_nm``/``at_y_nm`` and ``col_f``/``row_f`` are the position itself (a profile's ends use them)."""
         sh = self._shown
         if sh is None:
             return None
@@ -651,11 +662,12 @@ class FrameView(QWidget):
             return None
         c0, r0, wv, hv = self._view_rect()
         col, row = c0 + fx * wv - 0.5, r0 + fy * hv - 0.5
-        x, y = pixel_to_scan_nm(sh.geom, col, row)
         ci = min(max(int(math.floor(col + 0.5)), 0), sh.nx - 1)
         ri = min(max(int(math.floor(row + 0.5)), 0), sh.ny - 1)
+        x, y = pixel_to_scan_nm(sh.geom, ci, ri)
+        ax, ay = pixel_to_scan_nm(sh.geom, col, row)
         return {"x_nm": x, "y_nm": y, "col": ci, "row": ri, "value": float(sh.values[ri, ci]), "unit": sh.unit,
-                "col_f": col, "row_f": row}
+                "at_x_nm": ax, "at_y_nm": ay, "col_f": col, "row_f": row}
 
     # ── mouse ──
     def mouseMoveEvent(self, ev) -> None:
@@ -698,7 +710,7 @@ class FrameView(QWidget):
             ev.accept()
             return
         if self._tool == "marker":
-            m = {**p, "frame": self._shown.name}
+            m = {**{k: p[k] for k in ("x_nm", "y_nm", "col", "row", "value", "unit")}, "frame": self._shown.name}
             self._markers.append(m)
             self._selected = len(self._markers) - 1
             self.update()
@@ -725,8 +737,8 @@ class FrameView(QWidget):
         self._drag = None
         if math.hypot(b.x() - a.x(), b.y() - a.y()) >= 3.0:         # shorter is a click, not a line
             pa, pb = self._point_at(a, clamp=True), self._point_at(b, clamp=True)
-            self._profile = {"frame": self._shown.name, "x0_nm": pa["x_nm"], "y0_nm": pa["y_nm"],
-                             "x1_nm": pb["x_nm"], "y1_nm": pb["y_nm"]}
+            self._profile = {"frame": self._shown.name, "x0_nm": pa["at_x_nm"], "y0_nm": pa["at_y_nm"],
+                             "x1_nm": pb["at_x_nm"], "y1_nm": pb["at_y_nm"]}
             self.profile_changed.emit(self._profile_payload())
         self.update()
         ev.accept()

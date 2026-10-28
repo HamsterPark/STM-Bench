@@ -115,12 +115,16 @@ def test_the_pixel_widget_and_scan_mappings_agree_at_every_zoom_and_pan(app, ang
             for fx, fy in ((0.02, 0.03), (0.5, 0.5), (0.97, 0.9), (0.31, 0.68)):
                 pos = inside(view, fx, fy)
                 p = view._point_at(pos)
-                x, y = pixel_to_scan_nm(geom, p["col_f"], p["row_f"])      # the judge's mapping, for the pixel under it
-                assert (p["x_nm"], p["y_nm"]) == (pytest.approx(x), pytest.approx(y))
+                x, y = pixel_to_scan_nm(geom, p["col_f"], p["row_f"])      # the judge's mapping, for the place under it
+                assert (p["at_x_nm"], p["at_y_nm"]) == (pytest.approx(x), pytest.approx(y))
                 back = view.pixel_to_widget(p["col_f"], p["row_f"])
                 assert back.x() == pytest.approx(pos.x(), abs=1e-6) and back.y() == pytest.approx(pos.y(), abs=1e-6)
-                again = view.scan_to_widget(p["x_nm"], p["y_nm"])
+                again = view.scan_to_widget(p["at_x_nm"], p["at_y_nm"])
                 assert again is not None and again.x() == pytest.approx(pos.x(), abs=1e-6)
+                # what is read there is the pixel it falls in, at that pixel's centre, at every zoom and pan
+                cx, cy = pixel_to_scan_nm(geom, p["col"], p["row"])
+                assert (p["x_nm"], p["y_nm"]) == (pytest.approx(cx), pytest.approx(cy))
+                assert (p["col"], p["row"]) == (math.floor(p["col_f"] + 0.5), math.floor(p["row_f"] + 0.5))
                 assert p["value"] == view._shown.values[p["row"], p["col"]]       # and its reading, untouched by the zoom
     # the whole frame is in view at zoom 1: every pixel of it has a position; zoomed, the ones out of view have none
     view.fit()
@@ -146,10 +150,10 @@ def test_the_axes_show_the_part_of_the_frame_in_view(app):
     r = view.image_rect()
     left = view._point_at(QPointF(r.x() + 1e-6, r.center().y()))          # the scan x at the image's left and right edges
     right = view._point_at(QPointF(r.right() + 1 - 1e-6, r.center().y()))
-    assert left["x_nm"] == pytest.approx(x0, abs=0.01) and right["x_nm"] == pytest.approx(x1, abs=0.01)
+    assert left["at_x_nm"] == pytest.approx(x0, abs=0.01) and right["at_x_nm"] == pytest.approx(x1, abs=0.01)
     top = view._point_at(QPointF(r.center().x(), r.y() + 1e-6))
     bottom = view._point_at(QPointF(r.center().x(), r.bottom() + 1 - 1e-6))
-    assert top["y_nm"] == pytest.approx(y1, abs=0.01) and bottom["y_nm"] == pytest.approx(y0, abs=0.01)
+    assert top["at_y_nm"] == pytest.approx(y1, abs=0.01) and bottom["at_y_nm"] == pytest.approx(y0, abs=0.01)
     rot = make_view(bump_frame(angle=30.0))
     rot.set_zoom(2)
     (u0, u1), (v0, v1), ut, vt = rot._axis_spec()
@@ -213,9 +217,9 @@ def test_the_pan_tool_moves_the_zoomed_image_with_the_pointer_and_stops_at_the_f
     QTest.mouseClick(view, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, click)
     (m,) = view.markers()
     p = view._point_at(QPointF(click))
-    x, y = pixel_to_scan_nm(geom_of(frame), p["col_f"], p["row_f"])
+    x, y = pixel_to_scan_nm(geom_of(frame), p["col"], p["row"])              # the centre of the pixel under the click
     assert (m["x_nm"], m["y_nm"]) == (pytest.approx(x), pytest.approx(y))
-    assert view.scan_to_widget(m["x_nm"], m["y_nm"]).x() == pytest.approx(click.x(), abs=1e-6)
+    assert view.scan_to_widget(m["x_nm"], m["y_nm"]).x() == pytest.approx(view.pixel_to_widget(p["col"], p["row"]).x(), abs=1e-6)
 
 
 def test_a_marker_out_of_view_is_kept_and_a_profile_reads_the_same_data_zoomed(app):
@@ -244,7 +248,8 @@ def test_a_marker_out_of_view_is_kept_and_a_profile_reads_the_same_data_zoomed(a
     # a profile that ends beyond the view stops at the edge of the part in view, not of the frame
     drag(view, inside(view, 0.5, 0.5), QPointF(2, 2))
     ends = payloads[-1]
-    ex, ey = view._point_at(inside(view, 0.0, 0.0), clamp=True)["x_nm"], view._point_at(inside(view, 0.0, 0.0), clamp=True)["y_nm"]
+    edge = view._point_at(inside(view, 0.0, 0.0), clamp=True)
+    ex, ey = edge["at_x_nm"], edge["at_y_nm"]                              # the profile's ends keep the drag's own positions
     assert (ends["x1_nm"], ends["y1_nm"]) == (pytest.approx(ex), pytest.approx(ey))
     view.fit()
     assert view.scan_to_widget(m_far["x_nm"], m_far["y_nm"]) is not None   # and out again, both are drawn

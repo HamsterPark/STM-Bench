@@ -188,27 +188,59 @@ def test_frame_geometry_is_what_the_web_console_maps_through():
 
 
 @pytest.mark.parametrize("angle", [0.0, 30.0])
-def test_a_click_maps_to_scan_nm_exactly_as_pixel_to_scan_nm(app, angle):
-    """A position a fraction fx of the image width from its left edge is col = fx * nx - 0.5; the
-    marker it adds has the scan coordinates of that fractional pixel, to 1e-6 nm."""
+def test_a_click_marks_the_centre_of_the_pixel_it_falls_in_and_reads_that_pixels_value(app, angle):
+    """A position a fraction fx of the image width from its left edge is col = fx * nx - 0.5; the marker it
+    adds is at the centre of the pixel floor(col + 0.5), in the judge's mapping, to 1e-6 nm, and its value is
+    that pixel's: the coordinates and the reading belong to the same point."""
     n = 64
     frame = make_frame(bumpy(n), center=(3.5, -2.0), size=12.0, angle=angle)
     geom = geometry(frame)
     view = make_view(app)
     view.set_frame(frame)
-    rect = view.image_rect()
     for col, row in [(-0.5, -0.5), (0.0, 0.0), (n - 1.0, 0.0), (0.0, n - 1.0), (n / 2 - 0.5, n / 2 - 0.5),
-                     (12.3, 40.7), (n - 0.5001, n - 0.5001)]:
+                     (12.3, 40.7), (n - 0.5001, n - 0.5001), (20.49, 7.51)]:
         pos = view.pixel_to_widget(col, row)
         got = Capture(view.marker_added)
         click(view, pos)
         (m,) = got.items
-        fx, fy = (pos.x() - rect.x()) / rect.width(), (pos.y() - rect.y()) / rect.height()
-        want = pixel_to_scan_nm(geom, fx * n - 0.5, fy * n - 0.5)
-        assert (m["x_nm"], m["y_nm"]) == pytest.approx(want, abs=1e-6)
-        assert (m["col_f"], m["row_f"]) == pytest.approx((col, row), abs=1e-9)
-        assert (m["col"], m["row"]) == tuple(min(max(int(math.floor(v + 0.5)), 0), n - 1) for v in (col, row))
-        assert xy(view.scan_to_widget(m["x_nm"], m["y_nm"])) == pytest.approx(xy(pos), abs=1e-6)
+        ci, ri = m["col"], m["row"]
+        assert (ci, ri) == tuple(min(max(int(math.floor(v + 0.5)), 0), n - 1) for v in (col, row)) or col % 1 == 0.5
+        assert (m["x_nm"], m["y_nm"]) == pytest.approx(pixel_to_scan_nm(geom, ci, ri), abs=1e-6)
+        assert fv.scan_to_pixel(geom, m["x_nm"], m["y_nm"]) == pytest.approx((ci, ri), abs=1e-9)
+        assert m["value"] == view._shown.values[ri, ci] and m["unit"] == "pm" and m["frame"] == "sim001.sxm"
+        assert set(m) == {"x_nm", "y_nm", "col", "row", "value", "unit", "frame"}
+        # drawn on the pixel's centre, which is where the ring is centred
+        assert xy(view.scan_to_widget(m["x_nm"], m["y_nm"])) == pytest.approx(xy(view.pixel_to_widget(ci, ri)), abs=1e-6)
+
+
+@pytest.mark.parametrize("angle", [0.0, -30.0])
+def test_a_marker_is_the_same_wherever_in_its_pixel_it_was_placed(app, angle):
+    """Anywhere inside one pixel the click makes the same marker, and the cursor reads the same point: (x, y, value)
+    is a measurement, not the place the pointer happened to be (trial 5 steps 40-45: coordinates 0.06 nm off the
+    pixel the value came from)."""
+    n = 40
+    frame = make_frame(bumpy(n), center=(-1.0, 2.5), size=10.0, angle=angle)
+    view = make_view(app)
+    view.set_frame(frame)
+    for zoom in (1, 4):
+        view.set_zoom(zoom)
+        view.set_tool("pan")
+        view.pan_by(40, 25)                                              # the view is not at the frame's corner
+        view.set_tool("marker")
+        c0, r0, wv, hv = view.view_rect()
+        ci, ri = int(c0 + wv / 2), int(r0 + hv / 2)
+        marks, cursors = [], []
+        for dc, dr in ((-0.45, -0.45), (0.0, 0.0), (0.45, -0.45), (-0.45, 0.45), (0.45, 0.45), (0.2, -0.1)):
+            pos = view.pixel_to_widget(ci + dc, ri + dr)
+            got, cur = Capture(view.marker_added), Capture(view.cursor_moved)
+            move(view, pos)
+            click(view, pos)
+            marks.append(got.items[-1])
+            cursors.append(cur.items[-1])
+        assert all(m == marks[0] for m in marks) and (marks[0]["col"], marks[0]["row"]) == (ci, ri)
+        assert all(c == cursors[0] for c in cursors)
+        assert cursors[0] == {k: marks[0][k] for k in cursors[0]}      # what the cursor read is what the click marked
+        view.clear_markers()
 
 
 @pytest.mark.parametrize("angle", [0.0, 30.0, -135.0])
@@ -252,16 +284,19 @@ def test_a_position_read_in_the_view_is_one_the_judge_finds_covered(app):
 
 
 def test_the_centre_pixel_of_an_unrotated_frame_is_the_scan_offset_and_row_0_is_high_y(app):
-    n = 32
+    n = 33                                                              # odd: one pixel is the middle of the frame
     view = make_view(app)
     view.set_frame(make_frame(bumpy(n), center=(5.0, 6.0), size=4.0))
     got = Capture(view.marker_added)
-    click(view, view.pixel_to_widget(n / 2 - 0.5, n / 2 - 0.5))
+    click(view, view.pixel_to_widget(n // 2, n // 2))
     assert (got.items[0]["x_nm"], got.items[0]["y_nm"]) == pytest.approx((5.0, 6.0), abs=1e-6)
     click(view, view.pixel_to_widget(0, 0))
     click(view, view.pixel_to_widget(n - 1, n - 1))
     first, last = got.items[1], got.items[2]
     assert first["x_nm"] < last["x_nm"] and first["y_nm"] > last["y_nm"]
+    # a pixel's centre is half a pixel inside the frame's edge: the corner pixels' centres are not at +-2 nm
+    assert first["x_nm"] == pytest.approx(5.0 - 2.0 + 0.5 * 4.0 / n, abs=1e-9)
+    assert first["y_nm"] == pytest.approx(6.0 + 2.0 - 0.5 * 4.0 / n, abs=1e-9)
 
 
 # ── the picture ────────────────────────────────────────────────────────────────────────────
@@ -1141,8 +1176,11 @@ def test_a_real_instrument_frame_round_trips_through_the_view(app):
     view.set_frame(frame)
     assert np.array_equal(drawn_grey(view, 32), display_array(frame["array"], "z"))
     got = Capture(view.marker_added)
-    click(view, view.pixel_to_widget(15.5, 15.5))                       # the middle of the frame: its centre
-    assert (got.items[0]["x_nm"], got.items[0]["y_nm"]) == pytest.approx((0.0, 0.0), abs=1e-6)
+    click(view, view.pixel_to_widget(15.5, 15.5))                       # the middle of the frame: the corner of four pixels
+    (m,) = got.items
+    geom = fv.frame_geometry(frame)
+    assert (m["x_nm"], m["y_nm"]) == pytest.approx(pixel_to_scan_nm(geom, m["col"], m["row"]), abs=1e-9)
+    assert abs(m["x_nm"]) <= 0.5 * 8.0 / 32 + 1e-9 and abs(m["y_nm"]) <= 0.5 * 8.0 / 32 + 1e-9    # within half a pixel of it
     thumb = frame_thumbnail(frame, 64)
     assert (thumb.width(), thumb.height()) == (64, 64)
 

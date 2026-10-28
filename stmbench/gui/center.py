@@ -2,9 +2,11 @@
 
 Everything here is read off the data the instrument gave: the cursor's coordinates, a marker's value,
 a profile along a line. Nothing is found, fitted or suggested: no atom finder, no drift estimate. A
-marker is a point the reader chose, kept in scan coordinates, with the numbers instrument software
-shows for any point (position, value, distance to the previous one). The three ``← marker`` buttons copy
-a marker's coordinates into the fields of the action or report that takes them; they run nothing.
+marker is the pixel the reader clicked, kept in scan coordinates at that pixel's centre, with the numbers
+instrument software shows for any point (position, value, distance to the previous one): the position and
+the value belong to the same point, so a value read at a marker's coordinates is the value the instrument
+measured there. The three ``← marker`` buttons copy a marker's coordinates, as the table shows them, into the
+fields of the action or report that takes them; they run nothing.
 """
 from __future__ import annotations
 
@@ -445,10 +447,11 @@ class CenterColumn(QWidget):
             self.readout.set_full_text("")
             return
         val = c.get("value")
-        text = f"x {c['x_nm']:.3f} nm   y {c['y_nm']:.3f} nm"
+        # the pixel under the pointer, then where its centre lies and what it holds: the numbers a click there marks
+        text = f"pixel col {c['col']}, row {c['row']}   centre x {c['x_nm']:.3f} nm   y {c['y_nm']:.3f} nm"
         if val is not None and math.isfinite(float(val)):
             text += f"   {float(val):.2f} {c.get('unit', '')}"
-        self.readout.set_full_text(text + f"   (col {c['col']}, row {c['row']})")
+        self.readout.set_full_text(text)
 
     def _marker_added(self, _m: dict) -> None:
         n = self.table.rowCount()
