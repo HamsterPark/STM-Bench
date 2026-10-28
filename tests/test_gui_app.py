@@ -1880,6 +1880,26 @@ def test_every_click_in_a_field_selects_all_of_it_so_that_click_then_type_replac
     assert w.text() == "125"
 
 
+def test_a_click_in_a_field_selects_all_of_it_and_the_selection_is_in_the_picture(open_window):
+    """Screen trial 4 said that clicking a field does not select its text, so that every edit needed ctrl+a first. Checked with
+    the harness's own sequence (the pointer arrives, then press and release through the window): it does, the field has the
+    focus, and the highlight is drawn in the picture the agent is shown, not only held by the field."""
+    from PySide6.QtGui import QColor
+    win = open_window("en")
+    f = shots.widget(win, "act.set_bias.bias_v")
+    f.setText("0.050")
+    press_release(win, f)
+    assert f.selectedText() == "0.050" and f.hasFocus()
+    img = win.grab().toImage()
+    r = f.rect().translated(f.mapTo(win, f.rect().topLeft()))
+    accent = QColor(style.COLORS["accent"])
+    hits = sum(1 for x in range(r.left() + 3, r.right() - 3) for y in range(r.top() + 3, r.bottom() - 3)
+               if img.pixelColor(x, y) == accent)
+    assert hits > 200, hits
+    QTest.keyClicks(f, "7")
+    assert f.text() == "7"                                                      # typing replaced it: no ctrl+a first
+
+
 # ── the state the buttons show ──
 def checked(win: MainWindow, name: str) -> bool:
     return shots.widget(win, name).isChecked()
