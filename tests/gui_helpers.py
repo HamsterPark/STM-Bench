@@ -83,7 +83,6 @@ def open_window(app, tmp_path):
     def make(lang: str = "en", seed: int = 0, name: str = "run", scenario: str = P4, height: int = 1080) -> MainWindow:
         sess = GuiSession(scenario, seed, run_dir=tmp_path / name, export_dir=tmp_path / name / "export", lang=lang)
         win = MainWindow(sess, lang=lang)
-        win.worker.guard_s = 0.0
         win.resize(1920, height)
         win.show()
         made.append(win)
