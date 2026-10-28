@@ -23,10 +23,13 @@ its record (value, pixel, frame) stays that of the frame it was placed in. A pro
 exception: they keep the exact positions the drag gave.
 
 Zoom. The wheel (without Ctrl) steps the view through x1, x2, x4 and x8 about the pointer, ``set_zoom`` and
-``fit`` do the same from a control, and with the ``"pan"`` tool a drag moves the zoomed image. The axes, the
-cursor, the markers and the profile use the same pixel / scan mapping at every zoom (the view is a window
-of the frame in pixel edges, ``view_rect``), the grey scale and the colour bar do not change with it unless the
-contrast is ``"visible"``, and a new frame is shown whole. Nothing is found, fitted or snapped to a peak.
+``fit`` do the same from a control (about the centre of the view, or centred on a point: the selected marker),
+and with the ``"pan"`` tool a drag moves the zoomed image. The axes, the cursor, the markers and the profile use
+the same pixel / scan mapping at every zoom (the view is a window of the frame in pixel edges, ``view_rect``), and
+the grey scale and the colour bar do not change with it unless the contrast is ``"visible"``. A new frame is shown
+whole, except when it is another scan of the same window (the same size, pixels and angle: the next frame after a
+drag, a repeat for drift): then the zoom stays, and the view keeps its centre in scan coordinates, where the
+reader was looking, as far as the new frame reaches. Nothing is found, fitted or snapped to a peak.
 
 There is no context menu and no keyboard focus, and a wheel with Ctrl does nothing: the agent that works this
 widget has a mouse and a screenshot, and every extra gesture is one it can trigger by accident.
@@ -96,6 +99,19 @@ def scan_to_pixel(geom: dict, x_nm: float, y_nm: float) -> tuple[float, float]:
     dx, dy = x_nm - float(geom["cx_nm"]), y_nm - float(geom["cy_nm"])
     u, v = c * dx + s * dy, -s * dx + c * dy
     return (u + w / 2) * int(geom["nx"]) / w - 0.5, (h / 2 - v) * int(geom["ny"]) / h - 0.5
+
+
+def _same_window(a: "_Shown", b: "_Shown") -> bool:
+    """Are two frames scans of the same window: the same size, pixels and angle (their centres may differ)?"""
+    ga, gb = a.geom, b.geom
+    return ((a.nx, a.ny) == (b.nx, b.ny) and math.isclose(ga["w_nm"], gb["w_nm"], rel_tol=1e-9, abs_tol=1e-12)
+            and math.isclose(ga["angle_deg"], gb["angle_deg"], rel_tol=0.0, abs_tol=1e-9))
+
+
+def _same_place(a: "_Shown", b: "_Shown") -> bool:
+    """Do two frames of the same window have the same centre?"""
+    return (math.isclose(a.geom["cx_nm"], b.geom["cx_nm"], rel_tol=0.0, abs_tol=1e-9)
+            and math.isclose(a.geom["cy_nm"], b.geom["cy_nm"], rel_tol=0.0, abs_tol=1e-9))
 
 
 # ── numerics ───────────────────────────────────────────────────────────────────────────────
@@ -293,16 +309,25 @@ class FrameView(QWidget):
     def set_frame(self, frame: dict | None) -> None:
         """Show an ``Instrument.frame()`` dict (None: the empty view). Markers stay; a profile line
         stays only for the frame it was drawn on, and is measured again on this data. The view is the
-        whole frame again, unless this is the same frame in another channel or direction."""
+        whole frame again, unless this is the same frame in another channel or direction, or another scan of
+        the same window (:func:`_same_window`), which keeps the zoom and the place the reader was looking at."""
         new = None if frame is None else _Shown(frame, self._flatten, self._contrast)
-        same = (new is not None and self._shown is not None and new.name == self._shown.name
-                and (new.nx, new.ny) == (self._shown.nx, self._shown.ny))
+        old = self._shown
+        same = (new is not None and old is not None and new.name == old.name and (new.nx, new.ny) == (old.nx, old.ny))
+        origin = (self._c0, self._r0) if same else None
+        if origin is None and new is not None and old is not None and self._zoom > 1 and _same_window(old, new):
+            if _same_place(old, new):                      # a repeat of the very scan: the view is exactly where it was
+                origin = (self._c0, self._r0)
+            else:
+                origin = self._origin_for_centre(new, *self._view_centre_scan(old))
         was = self._zoom
         self._shown = new
-        if not same:
+        if origin is None:
             self._zoom, self._c0, self._r0 = 1, 0.0, 0.0
-        elif self._contrast == "visible":                  # the same frame in another channel: the part in view sets the scale
-            new.set_mode(self._flatten, "visible", self._region())
+        else:
+            self._c0, self._r0 = origin
+            if self._contrast == "visible":                # the part in view sets the scale
+                new.set_mode(self._flatten, "visible", self._region())
         self._pan_last = None
         self._invalidate()
         self._reconcile_profile()
@@ -363,15 +388,23 @@ class FrameView(QWidget):
         sh = self._shown
         return min(max(c0, 0.0), sh.nx - wv), min(max(r0, 0.0), sh.ny - hv)
 
-    def set_zoom(self, level: int, about: QPointF | None = None) -> None:
+    def set_zoom(self, level: int, about: QPointF | None = None, focus: tuple[float, float] | None = None) -> None:
         """Show ``1/level`` of the frame's width and height. ``about`` is a widget position that keeps what is
-        under it (the wheel's pointer); without it the view's centre stays. A level that is not one of
-        :data:`ZOOM_LEVELS` is refused; with no frame shown only :attr:`zoom_changed` answers, so that a
-        control that asked for another level goes back."""
+        under it (the wheel's pointer); ``focus`` a scan position the view is centred on (as far as the frame
+        goes: the selected marker, when a control zooms); without either the view's centre stays. A ``focus`` the
+        frame does not cover is not used. A level that is not one of :data:`ZOOM_LEVELS` is refused; with no frame
+        shown only :attr:`zoom_changed` answers, so that a control that asked for another level goes back."""
         if level not in ZOOM_LEVELS:
             raise ValueError(f"zoom {level!r}: one of {ZOOM_LEVELS}")
         sh = self._shown
-        if sh is None or level == self._zoom:
+        centre = None if sh is None or focus is None else self._edge_of(sh, *focus)
+        if sh is None or (level == self._zoom and centre is None):
+            self.zoom_changed.emit(self._zoom)
+            return
+        if centre is not None:                              # centred on the point; the same level re-centres on it
+            self._zoom = level
+            self._c0, self._r0 = self._clamp_origin(centre[0] - sh.nx / level / 2, centre[1] - sh.ny / level / 2)
+            self._view_changed()
             self.zoom_changed.emit(self._zoom)
             return
         img = self._layout().img
@@ -396,6 +429,31 @@ class FrameView(QWidget):
             self._c0, self._r0 = c, r
         self._view_changed()
         self.zoom_changed.emit(self._zoom)
+
+    @staticmethod
+    def _edge_of(sh: "_Shown", x_nm: float, y_nm: float) -> tuple[float, float] | None:
+        """A scan position as a point in the frame's pixel edges (the unit of the view's origin), or None where the
+        frame does not cover it."""
+        col, row = scan_to_pixel(sh.geom, x_nm, y_nm)
+        eps = 1e-9
+        if -0.5 - eps <= col <= sh.nx - 0.5 + eps and -0.5 - eps <= row <= sh.ny - 0.5 + eps:
+            return col + 0.5, row + 0.5
+        return None
+
+    def _view_centre_scan(self, sh: "_Shown") -> tuple[float, float]:
+        """The scan position at the centre of the view, on ``sh``."""
+        c0, r0, wv, hv = self._view_rect()
+        return pixel_to_scan_nm(sh.geom, c0 + wv / 2 - 0.5, r0 + hv / 2 - 0.5)
+
+    def _origin_for_centre(self, sh: "_Shown", x_nm: float, y_nm: float) -> tuple[float, float] | None:
+        """The origin of a view at the current zoom that is centred on a scan position of ``sh`` (kept inside the
+        frame), or None where ``sh`` does not cover it."""
+        edge = self._edge_of(sh, x_nm, y_nm)
+        if edge is None:
+            return None
+        z = float(self._zoom)
+        wv, hv = sh.nx / z, sh.ny / z
+        return min(max(edge[0] - wv / 2, 0.0), sh.nx - wv), min(max(edge[1] - hv / 2, 0.0), sh.ny - hv)
 
     def zoom_step(self, direction: int, about: QPointF | None = None) -> None:
         """One level in (``direction`` > 0) or out, as one notch of the wheel does."""

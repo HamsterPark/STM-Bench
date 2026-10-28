@@ -255,7 +255,10 @@ def test_a_marker_out_of_view_is_kept_and_a_profile_reads_the_same_data_zoomed(a
     assert view.scan_to_widget(m_far["x_nm"], m_far["y_nm"]) is not None   # and out again, both are drawn
 
 
-def test_a_new_frame_is_shown_whole_and_another_channel_of_the_same_frame_keeps_the_view(app):
+def test_another_scan_of_the_same_window_keeps_the_zoom_and_the_place_and_any_other_frame_is_shown_whole(app):
+    """Trial 3 step 29: showing another frame reset the zoom to Fit and the next marker landed at the wrong scale.
+    A scan of the same window (the same size, pixels and angle: the next frame after a drag, a repeat for drift)
+    keeps the zoom and the place in view; a frame of another window is shown whole."""
     view = make_view(bump_frame("sim001.sxm"))
     got: list[int] = []
     view.zoom_changed.connect(got.append)
@@ -266,11 +269,102 @@ def test_a_new_frame_is_shown_whole_and_another_channel_of_the_same_frame_keeps_
     other = bump_frame("sim001.sxm", channel="current", seed=9)           # the same frame, its current channel
     view.set_frame(other)
     assert view.zoom() == 4 and view.view_rect() == corner
-    view.set_frame(bump_frame("sim002.sxm", seed=5))                      # the next frame
-    assert view.zoom() == 1 and view.view_rect() == (0.0, 0.0, 64.0, 64.0)
-    assert got == [4, 1]
+    view.set_frame(bump_frame("sim002.sxm", seed=5))                      # the next scan of the same window
+    assert view.zoom() == 4 and view.view_rect() == corner and got == [4]
+    for what, frame in (("size", bump_frame("sim003.sxm", size=12.0)), ("pixels", bump_frame("sim003.sxm", n=48)),
+                        ("angle", bump_frame("sim003.sxm", angle=30.0)),
+                        ("place", bump_frame("sim003.sxm", center=(40.0, 40.0)))):    # a window that does not hold the view's centre
+        view.set_zoom(4)
+        view.set_frame(frame)
+        assert view.zoom() == 1 and view.view_rect() == (0.0, 0.0, float(frame["pixels"]), float(frame["pixels"])), what
+        view.set_frame(bump_frame("sim004.sxm"))
+        view.set_zoom(4)
+        view.set_tool("pan")
+        view.pan_by(-30, -30)
+    assert got[-1] == 4
     view.set_frame(None)
     assert view.zoom() == 1
+
+
+def test_the_view_keeps_its_centre_in_scan_coordinates_when_the_next_scan_of_the_window_is_centred_elsewhere(app):
+    a = bump_frame("sim001.sxm", center=(2.0, -1.0))
+    view = make_view(a)
+    view.set_zoom(2)
+    assert view.view_rect() == (16.0, 16.0, 32.0, 32.0)                   # the middle of the frame, whose centre is (2, -1)
+    here = view._view_centre_scan(view._shown)
+    assert here == pytest.approx((2.0, -1.0))
+    b = bump_frame("sim002.sxm", center=(3.0, -1.0))                       # the same window, a nanometre to the right
+    view.set_frame(b)
+    assert view.zoom() == 2
+    assert view._view_centre_scan(view._shown) == pytest.approx(here)      # still looking at the same place of the sample
+    c0, r0, wv, hv = view.view_rect()
+    assert c0 == pytest.approx(25.6 - 16.0) and r0 == pytest.approx(16.0)
+    # the place near the edge of the first frame, and the second one reaches it only just: the view is kept inside it
+    view.set_frame(a)
+    view.set_tool("pan")
+    view.pan_by(-2000, -2000)                                              # the far corner: origin (32, 32)
+    assert view.view_rect()[:2] == (32.0, 32.0)
+    view.set_frame(bump_frame("sim003.sxm", center=(0.0, -1.0)))
+    c0, r0, wv, hv = view.view_rect()
+    assert view.zoom() == 2 and 0.0 <= c0 <= 64 - wv and 0.0 <= r0 <= 64 - hv
+
+
+def test_a_rotated_window_keeps_its_place_too_and_the_marker_stays_under_the_same_pixel_scan_position(app):
+    a = bump_frame("sim001.sxm", angle=30.0, center=(1.0, 2.0))
+    view = make_view(a)
+    view.set_zoom(4, focus=pixel_to_scan_nm(geom_of(a), 20, 40))
+    here = view._view_centre_scan(view._shown)
+    assert here == pytest.approx(pixel_to_scan_nm(geom_of(a), 20, 40))
+    view.set_frame(bump_frame("sim002.sxm", angle=30.0, center=(1.0, 2.0), seed=2))
+    assert view.zoom() == 4 and view._view_centre_scan(view._shown) == pytest.approx(here)
+    view.set_frame(bump_frame("sim003.sxm", angle=-30.0, center=(1.0, 2.0)))
+    assert view.zoom() == 1                                                # another orientation: another window
+
+
+# ── zoom about a point ──
+def test_a_zoom_button_centres_the_view_on_the_selected_marker_and_without_one_keeps_the_views_centre(app):
+    """Trial 4 step 84: Zoom x2 always centred on the frame, and the atom (at 30 % of the width) was cut at the
+    edge. About a point the view is centred on it, as far as the frame goes; the same level asked again re-centres."""
+    frame = bump_frame()
+    geom = geom_of(frame)
+    view = make_view(frame)
+    got: list[int] = []
+    view.zoom_changed.connect(got.append)
+    for col, row in ((20, 40), (45, 12), (31, 31), (32, 32)):
+        for level in (2, 4, 8, 2):
+            view.set_zoom(level, focus=pixel_to_scan_nm(geom, col, row))
+            c0, r0, wv, hv = view.view_rect()
+            assert view.zoom() == level and (wv, hv) == (64.0 / level, 64.0 / level)
+            want = (min(max(col + 0.5 - wv / 2, 0.0), 64.0 - wv), min(max(row + 0.5 - hv / 2, 0.0), 64.0 - hv))
+            assert (c0, r0) == pytest.approx(want)                                              # centred on that pixel, as far as the frame goes
+            pt = view.scan_to_widget(*pixel_to_scan_nm(geom, col, row))
+            assert pt is not None
+            if want == (col + 0.5 - wv / 2, row + 0.5 - hv / 2):                                # not held by an edge: the middle of the image
+                r = view.image_rect()
+                assert (pt.x(), pt.y()) == pytest.approx((r.x() + r.width() / 2, r.y() + r.height() / 2), abs=1.0)
+        assert got[-1] == 2
+    view.set_zoom(2)                                                                     # no focus: the view's centre stays
+    centre = (view.view_rect()[0] + view.view_rect()[2] / 2, view.view_rect()[1] + view.view_rect()[3] / 2)
+    view.set_zoom(4)
+    c0, r0, wv, hv = view.view_rect()
+    assert (c0 + wv / 2, r0 + hv / 2) == pytest.approx(centre)
+    # a marker near a corner: the view cannot go beyond the frame, and the marker is in it
+    view.set_zoom(8, focus=pixel_to_scan_nm(geom, 2, 3))
+    c0, r0, wv, hv = view.view_rect()
+    assert (c0, r0) == (0.0, 0.0) and view.scan_to_widget(*pixel_to_scan_nm(geom, 2, 3)) is not None
+    view.set_zoom(8, focus=pixel_to_scan_nm(geom, 62, 61))
+    c0, r0, wv, hv = view.view_rect()
+    assert (c0 + wv, r0 + hv) == (64.0, 64.0) and view.scan_to_widget(*pixel_to_scan_nm(geom, 62, 61)) is not None
+    # a point the frame does not cover is not used; Fit is the whole frame whatever the point
+    view.set_zoom(4, focus=(500.0, 500.0))
+    assert view.zoom() == 4
+    view.set_zoom(1, focus=pixel_to_scan_nm(geom, 20, 40))
+    assert view.view_rect() == (0.0, 0.0, 64.0, 64.0)
+    empty = make_view()
+    seen: list[int] = []
+    empty.zoom_changed.connect(seen.append)
+    empty.set_zoom(4, focus=(0.0, 0.0))                                                  # nothing shown: the control goes back
+    assert empty.zoom() == 1 and seen == [1]
 
 
 def test_a_level_that_is_not_one_is_refused_and_with_no_frame_the_control_is_answered_with_the_level_it_has(app):

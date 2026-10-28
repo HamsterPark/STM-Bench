@@ -858,8 +858,8 @@ def test_the_zoom_buttons_the_wheel_and_the_pan_tool_move_the_view_and_a_new_fra
     run_button(win, "view.channel.current")
     shots.settle(win)
     assert win.viewed == ("frame", first) and fv.zoom() == 4
-    shots.fill(win, {"act.scan.center_x_nm": "1", "act.scan.center_y_nm": "1"})
-    run_button(win, "run.scan")
+    shots.fill(win, {"act.scan.center_x_nm": "1", "act.scan.center_y_nm": "1", "act.scan.size_nm": "6"})
+    run_button(win, "run.scan")                                                 # another window (its size): shown whole
     shots.settle(win)
     assert win.viewed[1] != first and fv.zoom() == 1 and checked(win, "view.zoom.1")
 

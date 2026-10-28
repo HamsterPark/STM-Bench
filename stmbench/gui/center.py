@@ -473,8 +473,15 @@ class CenterColumn(QWidget):
         self.direction.changed.connect(lambda _v: self.view_changed.emit())
         self.flatten.changed.connect(lambda m: self.frame_view.set_flatten(m))
         self.contrast.changed.connect(lambda m: self.frame_view.set_contrast(m))
-        self.zoom.changed.connect(lambda z: self.frame_view.set_zoom(z))
+        self.zoom.changed.connect(self._zoom_clicked)
         return w
+
+    def _zoom_clicked(self, level: int) -> None:
+        """A zoom button: about the selected marker (the table's selection) when there is one, which the view is
+        then centred on (screen trial 4, step 84: it always centred on the frame, and the atom was cut at the
+        edge); else about the centre of the view as it is."""
+        m = self.frame_view.selected_marker()
+        self.frame_view.set_zoom(level, focus=(m["x_nm"], m["y_nm"]) if m is not None else None)
 
     def _tools_row(self) -> QWidget:
         """What a drag on the image does, and Clear markers: a row that stays whatever the viewer shows.
