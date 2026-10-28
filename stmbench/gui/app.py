@@ -12,6 +12,11 @@ call clicked afterwards is turned away, until the reader clicks the button of th
 on the status strip (:mod:`stmbench.gui.worker`, :mod:`stmbench.gui.status`). The acknowledgement is a window
 event: it is in the Log and in no ledger or export.
 
+Two more things live in this module rather than in a column: the line beside the right tabs that tells the range
+of the numeric field entered last (:meth:`ActionPanel.field_help`), and the Manual tab's wide view, in which the left
+column takes the whole row under the strip and the viewer and the right column are hidden until the view is left
+(:meth:`MainWindow._set_wide`).
+
 Two ways to run it. *Dev*: a scenario and a seed on the command line, a run directory (the usual full
 ledger at the end) with the export beside it; closing the window finishes the episode, judged as it
 stands. *Sealed*: the seed arrives on stdin and appears nowhere else; the window opens full screen (a
