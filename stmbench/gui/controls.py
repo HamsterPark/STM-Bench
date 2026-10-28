@@ -148,6 +148,73 @@ class SelectAllLineEdit(QLineEdit):
         self.selectAll()
 
 
+class WrapField(QPlainTextEdit):
+    """A field for one paragraph that wraps, so that it shows its whole text: the report's note, of which a line edit
+    a third of the form wide showed a few words (screen trial 4). It is as tall as ``lines`` lines and answers the
+    calls the form makes of a line edit (``text``, ``setText``, ``selectedText``, ``deselect``, ``setCursorPosition``).
+    Like every field of the form a click selects all of it and Enter sends the report: a note has no line break."""
+
+    returnPressed = Signal()
+
+    def __init__(self, lines: int = 4, parent: QWidget | None = None):
+        super().__init__(parent)
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
+        self.setAcceptDrops(False)
+        self.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
+        self.setTabChangesFocus(True)
+        self._lines = lines
+
+    def fit_height(self) -> None:
+        """Make the field as tall as its lines, in its font, with its frame, padding and margin (after the font is set)."""
+        fm = QFontMetrics(self.font())
+        self.setFixedHeight(self._lines * fm.lineSpacing() + 2 * int(self.document().documentMargin())
+                            + style.px(2 * 4 + 2) + 2 * self.frameWidth())
+
+    def text(self) -> str:
+        return self.toPlainText().replace("\n", " ")
+
+    def setText(self, text: str) -> None:
+        self.setPlainText(text)
+
+    def selectedText(self) -> str:
+        return self.textCursor().selectedText().replace(" ", " ")      # the cursor writes a line break as U+2029
+
+    def deselect(self) -> None:
+        c = self.textCursor()
+        c.clearSelection()
+        self.setTextCursor(c)
+
+    def setCursorPosition(self, pos: int) -> None:
+        c = self.textCursor()
+        c.setPosition(min(max(pos, 0), len(self.toPlainText())))
+        self.setTextCursor(c)
+
+    def insertFromMimeData(self, source) -> None:
+        self.insertPlainText(source.text().replace("\r", " ").replace("\n", " "))
+
+    def keyPressEvent(self, ev) -> None:
+        if ev.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+            self.returnPressed.emit()
+            ev.accept()
+            return
+        super().keyPressEvent(ev)
+
+    def mousePressEvent(self, ev) -> None:
+        super().mousePressEvent(ev)
+        self.selectAll()
+
+    def mouseMoveEvent(self, ev) -> None:
+        ev.accept()                           # as in SelectAllLineEdit: no partial selection by dragging
+
+    def mouseReleaseEvent(self, ev) -> None:
+        super().mouseReleaseEvent(ev)
+        self.selectAll()
+
+    def mouseDoubleClickEvent(self, ev) -> None:
+        super().mouseDoubleClickEvent(ev)
+        self.selectAll()
+
+
 #: what one notch of the wheel moves a text view (lines, as the view wraps them): the platform's own setting would make the
 #: amount depend on the machine, and a reader of screenshots counts on the same step every time
 LINES_PER_NOTCH = 3

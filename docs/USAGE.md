@@ -252,10 +252,12 @@ bias and current ranges, the budget, the temperature, the material and a qPlus s
 the manual; its Wide view button gives the tab the whole window under the status strip, the facts beside the
 text, so that the manual, the same text an MCP agent gets, is two screens or fewer instead of four in the
 column, and leaving the tab or a click on Narrow view gives the window back; a wheel notch moves a text view
-three lines), Report (one radio button per reportable claim, titled "Report a result (ReportResult)", with
+three lines), Report (one radio button per reportable claim, picked from the start where there is only one
+(P4), titled "Report a result (ReportResult)", with
 the fields named as `ReportResult` and the rule card name them - value, x_nm, y_nm, frame, evidence, unit,
-sigma, note, the ones the picked claim needs starred as in the action panels, Enter in a field sending the
-report, and a "+ shown file" button that appends the name of the frame or spectrum the viewer shows to
+sigma, note, the ones the picked claim needs starred as in the action panels, the note a wrapped field four lines
+tall that shows its whole text, nothing but the claim (where there is one) and the unit filled in for the reader,
+Enter in a field sending the report, and a "+ shown file" button that appends the name of the frame or spectrum the viewer shows to
 `evidence` (or says in the recent results that none is shown) - and Finish with an inline two-click
 confirmation), Data (the frames, the spectra and the move traces, each list under a heading of its own; a wheel
 notch moves a list by exactly one entry, and a click on an entry cut by an edge shows it whole) and Log;

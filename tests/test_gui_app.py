@@ -675,10 +675,10 @@ def test_the_status_strip_reads_in_units_and_counts_instrument_time(open_window)
 
 # ── the report and the end ──
 def test_a_picked_claim_stays_picked_when_it_is_clicked_again_with_one_claim_or_several(open_window):
-    win = open_window("en")                                              # P4 has one reportable claim
+    win = open_window("en")                                              # P4 has one reportable claim: picked from the start
     open_left(win, "report")
     rep = win.sidebar.report
-    assert list(rep.radios) == ["target_site"] and rep.claim_id() == ""
+    assert list(rep.radios) == ["target_site"] and rep.claim_id() == "target_site"
     for click in ("radio", "radio", "its line", "its line", "radio"):       # the trial's second click took it back
         if click == "radio":
             run_button(win, "report.claim.target_site")
@@ -767,18 +767,14 @@ def test_a_report_and_the_end_through_the_report_tab(open_window, tmp_path):
     name = scan_small(win)
     open_left(win, "report")
     rep = win.sidebar.report
+    assert rep.claim_id() == "target_site" and rep.fields["unit"].text() == "nm"     # P4 has one claim to report: it is picked
+    assert not rep.fields["value"].text() and not rep.fields["evidence"].text()      # and nothing else is filled in for the reader
     run_button(win, "report.submit")                             # nothing filled in: the instrument says what is missing
     shots.settle(win)
     assert rep.reply.text() == "✗ refused: report: value is required" and rep.reply.property("tone") == "bad"
     acknowledge(win)
-    shots.fill(win, {"report.value": "1"})
-    run_button(win, "report.submit")                             # no claim chosen
-    shots.settle(win)
-    assert "unknown claim ''" in rep.reply.text()
-    assert not rep.fields["unit"].text()                         # nothing is pre-filled before a claim is chosen
-    acknowledge(win)
-    shots.click(win, shots.widget(win, "report.claim.target_site"))
-    assert rep.fields["unit"].text() == "nm"                     # except the unit
+    shots.click(win, shots.widget(win, "report.claim.target_site"))                # clicking the picked claim again keeps it
+    assert rep.claim_id() == "target_site" and rep.fields["unit"].text() == "nm"
     shots.fill(win, {"report.value": "1.5", "report.x_nm": "1.5", "report.y_nm": "-0.25", "report.frame": name})
     run_button(win, "report.viewed")                             # appends the name of what the viewer shows
     assert rep.fields["evidence"].text() == name
@@ -813,6 +809,50 @@ def test_a_report_and_the_end_through_the_report_tab(open_window, tmp_path):
     assert read_export(tmp_path / "run" / "export")["session"]["finished"]
     texts = _all_text(win, own_only=True)
     assert not any(w in texts.lower() for w in ("verdict", "success", "truth", "partial", "score"))
+
+
+def test_with_several_claims_to_report_none_is_picked_and_a_report_without_one_is_refused(open_window):
+    win = open_window("en", scenario="P1_barth1990_au111")
+    open_left(win, "report")
+    rep = win.sidebar.report
+    assert len(rep.radios) == 4 and rep.claim_id() == "" and not rep.fields["unit"].text()      # nothing is chosen for the reader
+    shots.fill(win, {"report.value": "1"})
+    run_button(win, "report.submit")
+    shots.settle(win)
+    assert "unknown claim ''" in rep.reply.text()
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_note_shows_its_whole_text_and_is_sent_whole_in_the_widest_fonts_too(fonts, open_window, lang, tmp_path):
+    """Screen trial 4: "the narrow note field cannot show its text": the note was a line edit a third of the form wide.
+    It now has the width of the form, wraps, and has the height of four lines."""
+    win = open_window(lang)
+    scan = scan_small(win)
+    open_left(win, "report")
+    rep = win.sidebar.report
+    note = shots.widget(win, "report.note")
+    assert note.width() >= 0.9 * shots.widget(win, "report.evidence").width()
+    notes = {"en": ("TARGET NOT REACHED: atom is within 0.2 nm of its start site; not moved +4 nm",    # the note of that trial
+                    "a longer one: " + "word " * 12 + "end"),
+             "zh": ("目标未到达：原子离出发的格点不到 0.2 nm，没有移动 +4 nm", "较长的一条：" + "说明" * 8)}[lang]
+    for text in notes:
+        if lang == "zh":                                                       # QTest cannot type Chinese: the harness sends key events by hand
+            shots.click(win, note)
+            note.setText(text)
+        else:
+            shots.type_into(win, note, text)
+        assert rep.fields["note"].text() == text
+        block = note.document().firstBlock()
+        assert note.document().documentLayout().blockBoundingRect(block).height() <= note.viewport().height()   # all of it in view
+        assert not note.verticalScrollBar().isVisible()
+        shots.hit(win, note)
+    shots.fill(win, {"report.value": "1.5", "report.x_nm": "1.5", "report.y_nm": "0", "report.frame": scan,
+                     "report.evidence": scan})
+    shots.click(win, note)
+    QTest.keyClick(note, Qt.Key.Key_Return)                                    # Enter in the note sends the report, as in every field
+    shots.settle(win)
+    sent = [r for r in records(tmp_path) if r["kind"] == "report"][-1]["args"]
+    assert sent["note"] == text and "\n" not in sent["note"]
 
 
 def test_closing_the_dev_window_finishes_the_episode(open_window, tmp_path):
@@ -1528,9 +1568,10 @@ def test_a_frame_taken_with_the_lock_in_on_offers_the_didv_channel(open_window):
 
 @pytest.mark.parametrize("lang", ["zh", "en"])
 @pytest.mark.parametrize("scenario", sorted(p.stem for p in SCENARIO_DIR.glob("P*.yaml")))
-def test_every_paper_scenario_opens_with_its_reportable_claims_and_a_report_form_that_fits(open_window, scenario, lang):
-    """In both languages: the longest claims (P1's four, in English) leave the form whole and on screen, none
-    of its controls over another, and no scroll bar to reach it."""
+def test_every_paper_scenario_opens_with_its_reportable_claims_and_a_report_form_that_fits(fonts, open_window, scenario, lang):
+    """In both languages, in the window's fonts and in DejaVu (what the virtual machine has): the longest claims (P1's four,
+    in English) leave the form whole and on screen, none of its controls over another, and no scroll bar to reach it. The
+    form is four rows tall, the note among them, because P1 in English leaves the page 23 px at 1920x1053 (1 in DejaVu)."""
     win = open_window(lang, scenario=scenario)
     claims = win.session.claims()
     assert claims and set(win.sidebar.report.radios) == {c["id"] for c in claims}
@@ -1924,6 +1965,7 @@ def test_the_window_fits_a_full_screen_and_a_maximized_window_under_a_title_bar(
     assert win.rect().contains(box.rect().translated(box.mapTo(win, box.rect().topLeft())))     # the list is on screen
     assert win.status.readings.height() < 2 * win.status.readings.fontMetrics().height()           # one line of readings
     open_left(win, "report")
+    QApplication.processEvents()                  # the first show: the bar of the construction-time size is hidden in the next turn
     assert not win.sidebar.report_scroll.verticalScrollBar().isVisible()
     assert win.center.frame_view.height() >= 400                                                  # the image keeps its room
 

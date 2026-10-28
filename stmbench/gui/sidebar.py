@@ -2,7 +2,8 @@
 
 The task text with its rule card and the manual are what every agent is told, shown unchanged. The
 report form is the result channel: one radio button per reportable claim, with the line the rule card
-says about it; nothing is chosen for the reader except the unit once a claim is picked. Data lists what
+says about it; nothing is chosen for the reader except the unit once a claim is picked, and the claim itself
+when there is only one to report (P4). The value, the position and the evidence are the reader's. Data lists what
 the instrument saved; Log keeps every call, newest first, queued ones marked until they run (and the
 ones dropped before they did, as cancelled).
 """
@@ -15,7 +16,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QBoxLayout, QButtonGroup, QFra
                                QListWidget, QListWidgetItem, QPushButton, QRadioButton, QScrollArea, QVBoxLayout, QWidget)
 
 from . import fmt, style
-from .controls import QuietBrowser, QuietText, SelectAllLineEdit, StepList, Tabs, polish, strong
+from .controls import QuietBrowser, QuietText, SelectAllLineEdit, StepList, Tabs, WrapField, polish, strong
 from .labels import S, one, tr, two_lines
 
 
@@ -46,7 +47,7 @@ class _ClaimLabel(QLabel):
         self._radio = radio
         self.setWordWrap(True)
         self.setProperty("role", "claim")
-        self.setContentsMargins(style.px(26), 0, 0, style.px(2))
+        self.setContentsMargins(0, 0, 0, 0)
 
     def mousePressEvent(self, ev) -> None:
         self._radio.click()
@@ -66,7 +67,7 @@ class ReportTab(QWidget):
         self._viewed = ""
         v = QVBoxLayout(self)
         v.setContentsMargins(style.px(8), style.px(4), style.px(8), style.px(4))
-        v.setSpacing(style.px(3))
+        v.setSpacing(style.px(1))                        # the claims of P1 in English fill the page: see the form below
         self.title = self._title(f"{tr('report_title', lang)} (ReportResult)")
         self.title.setObjectName("report.title")
         v.addWidget(self.title)
@@ -90,50 +91,70 @@ class ReportTab(QWidget):
             self.claim_labels[c["id"]] = lab
             v.addWidget(lab)
 
-        grid = QGridLayout()
-        grid.setHorizontalSpacing(style.px(8))
-        grid.setVerticalSpacing(style.px(3))
-        self.fields: dict[str, SelectAllLineEdit] = {}
+        form = QVBoxLayout()
+        form.setSpacing(style.px(3))
+        self.fields: dict[str, SelectAllLineEdit | WrapField] = {}
 
         self.labels: dict[str, QLabel] = {}
 
-        def field(key: str, row: int, col: int, span: int = 1, beside: QWidget | None = None) -> None:
+        def cell(key: str, beside: QWidget | None = None, wrap: bool = False) -> QWidget:
+            """A field with its label above it (and a button at the end of its line, if ``beside``)."""
             lab = QLabel(_field_label(key, lang, key == "value"))
             lab.setObjectName(f"report.label.{key}")
             lab.setTextFormat(Qt.TextFormat.RichText)
             lab.setProperty("role", "label")
             self.labels[key] = lab
-            e = SelectAllLineEdit()
+            e = WrapField(4) if wrap else SelectAllLineEdit()   # the note wraps: a line edit a third of the form wide showed a few words
             e.setObjectName(f"report.{key}")
             e.setFont(style.mono_font(18))
+            if wrap:
+                e.fit_height()
             e.returnPressed.connect(self._submit)                # Enter in any field sends the report, like the button
             self.fields[key] = e
-            grid.addWidget(lab, row * 2, col, 1, span)
+            box = QWidget()
+            col = QVBoxLayout(box)
+            col.setContentsMargins(0, 0, 0, 0)
+            col.setSpacing(style.px(3))
+            col.addWidget(lab)
             if beside is None:
-                grid.addWidget(e, row * 2 + 1, col, 1, span)
-                return
-            line = QHBoxLayout()                             # a button at the end of the field's own line
-            line.setSpacing(style.px(8))
-            line.addWidget(e, 1)
-            line.addWidget(beside)
-            grid.addLayout(line, row * 2 + 1, col, 1, span)
+                col.addWidget(e)
+            else:
+                line = QHBoxLayout()                             # a button at the end of the field's own line
+                line.setSpacing(style.px(8))
+                line.addWidget(e, 1)
+                line.addWidget(beside)
+                col.addLayout(line)
+            return box
+
+        def row(*cells: tuple[QWidget, int]) -> None:
+            """Cells side by side, as wide as their stretch says."""
+            h = QHBoxLayout()
+            h.setSpacing(style.px(8))
+            for w, stretch in cells:
+                h.addWidget(w, stretch)
+            form.addLayout(h)
 
         # the button that appends the name of the file the viewer shows sits at the end of the evidence field's line;
         # its label says what it adds ("+ shown file"), and it is in one language: the line is not wide
         self.viewed_button = QPushButton("+ " + one("rep_viewed", lang))
         self.viewed_button.setObjectName("report.viewed")
         self.viewed_button.clicked.connect(self._append_viewed)
-        field("value", 0, 0)
-        field("x_nm", 0, 1)
-        field("y_nm", 0, 2)
-        field("frame", 1, 0, 3)
-        field("evidence", 2, 0, 3, beside=self.viewed_button)
-        field("unit", 3, 0)
-        field("sigma", 3, 1)
-        field("note", 3, 2)
-        for c in range(3):
-            grid.setColumnStretch(c, 1)
-        v.addLayout(grid)
+        # four rows, as before: P1's four claims in English leave the page 49 px at 1920x1053 (27 in DejaVu), so the note
+        # gets the last row to itself, as wide as the form allows (two thirds, wrapped, four lines tall), with the unit
+        # and the uncertainty stacked in the third that the narrow field it had was in
+        row((cell("value"), 1), (cell("x_nm"), 1), (cell("y_nm"), 1))
+        row((cell("frame"), 1))
+        row((cell("evidence", beside=self.viewed_button), 1))
+        small = QWidget()
+        stack = QVBoxLayout(small)
+        stack.setContentsMargins(0, 0, 0, 0)
+        stack.setSpacing(style.px(3))
+        stack.addWidget(cell("unit"))
+        stack.addWidget(cell("sigma"))
+        row((small, 1), (cell("note", wrap=True), 3))
+        v.addSpacing(style.px(4))
+        v.addLayout(form)
+        v.addSpacing(style.px(4))
 
         self.submit = QPushButton(tr("rep_submit", lang))
         self.submit.setObjectName("report.submit")
@@ -146,7 +167,7 @@ class ReportTab(QWidget):
         self.reply.setProperty("role", "label")
         v.addWidget(self.reply)
 
-        v.addSpacing(style.px(10))
+        v.addSpacing(style.px(4))
         self.finish_begin = QPushButton(tr("finish", lang))
         self.finish_begin.setObjectName("finish.begin")
         strong(self.finish_begin, "danger")
@@ -180,6 +201,8 @@ class ReportTab(QWidget):
         self.finish_message.hide()                       # nothing to say until the end
         v.addWidget(self.finish_message)
         v.addStretch(1)
+        if len(self.radios) == 1:                        # one claim to report (P4): there is nothing to choose between
+            next(iter(self.radios.values())).setChecked(True)
 
     @staticmethod
     def _title(text: str) -> QLabel:

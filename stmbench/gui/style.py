@@ -159,7 +159,7 @@ QPushButton[seg]:checked:disabled {{ background: #9db7e3; color: #ffffff; }}
 QLineEdit {{ background: {c['field']}; border: 1px solid {c['line_strong']}; border-radius: {px(5)}px;
             padding: 0 {px(6)}px; min-height: {px(30)}px; selection-background-color: {c['accent']}; selection-color: #ffffff; }}
 QLineEdit:focus {{ border: 2px solid {c['accent']}; padding: 0 {px(5)}px; }}
-QRadioButton {{ spacing: {px(8)}px; min-height: {px(32)}px; }}
+QRadioButton {{ spacing: {px(8)}px; min-height: {px(28)}px; }}
 QRadioButton::indicator {{ width: {px(18)}px; height: {px(18)}px; }}
 QTabWidget::pane {{ border: 1px solid {c['line']}; background: {c['panel']}; border-radius: {px(6)}px; top: -1px; }}
 QTabBar::tab {{ background: {c['head']}; border: 1px solid {c['line']}; border-bottom: none; padding: {px(4)}px {px(6)}px;
