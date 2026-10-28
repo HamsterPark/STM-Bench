@@ -28,6 +28,7 @@ from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QLabel,
 
 from stmbench.gui import fmt, layout, shots, style  # noqa: E402
 from stmbench.gui.app import MainWindow  # noqa: E402
+from stmbench.gui.labels import one  # noqa: E402
 from stmbench.gui.panels import token  # noqa: E402
 from stmbench.gui.session import GuiSession, make_private_dir, read_spec  # noqa: E402
 from stmbench.instrument import ACTIONS  # noqa: E402
@@ -397,6 +398,80 @@ def test_a_field_follows_the_action_table_when_it_changes_not_a_list_of_names(op
     shots.settle(win)
     done = {r["name"]: r["params"] for r in records(tmp_path) if r["kind"] == "act"}
     assert done["wait"] == {"seconds": 1.5} and done["scan"]["angle_deg"] == 0.0
+
+
+# ── the ranges ──
+def numeric_fields():
+    """Every text field of the panels that takes a number: ``(tab, cell, parameter)``."""
+    for tab, groups in layout.TABS:
+        for g in groups:
+            for line in g.lines:
+                for c in line:
+                    if isinstance(c, layout.F):
+                        p = next(q for q in ACTIONS[c.action].params if q.name == c.param)
+                        if p.kind in ("number", "integer") and p.choices is None:
+                            yield tab, c, p
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_field_last_clicked_tells_its_range_from_the_action_table_beside_the_tabs(fonts, open_window, lang):
+    """The screen agent learnt the 100000 pA setpoint limit only from a refusal, in all three trials: the console showed the
+    range of no field. The line beside the tabs describes the field last clicked, in the field's own unit, with the table's
+    numbers, whole in the widest fonts, with no hover and no height of its own."""
+    win = open_window(lang)
+    line = shots.widget(win, "field.help")
+    assert line.text() == ""                                                  # no field clicked yet: nothing to say
+    where = {n: shots.widget(win, n).mapTo(win, shots.widget(win, n).rect().topLeft())
+             for n in ("run.set_setpoint", "recent.box", "right.tabs")}
+    ranged = 0
+    for tab, c, p in numeric_fields():
+        open_right(win, tab)
+        shots.click(win, shots.widget(win, f"act.{c.action}.{c.param}"))
+        shots.hit(win, line)                                                   # on screen, whichever tab is open
+        text = line.full_text()
+        assert text and line.text() == text, (c.action, c.param, text, line.text())            # whole, not elided
+        assert c.en in text and (f"({c.unit})" in text) == bool(c.unit), (c.action, c.param, text)
+        want = fmt.range_text(p.lo, p.hi)
+        if want:
+            ranged += 1
+            assert text.endswith(f"{one('field_range', lang)} {want}"), (c.action, c.param, text)
+        else:
+            assert one("field_range", lang) not in text, (c.action, c.param, text)
+        assert {n: shots.widget(win, n).mapTo(win, shots.widget(win, n).rect().topLeft()) for n in where} == where
+    assert ranged >= 25
+    open_right(win, "operate")
+    shots.click(win, shots.widget(win, "act.set_setpoint.current_pa"))
+    assert line.full_text().endswith("0.1 … 100000")
+    run_button(win, "run.set_bias")                                          # a click on a button leaves it: the field is the last clicked
+    assert line.full_text().endswith("0.1 … 100000")
+    shots.click(win, shots.widget(win, "act.move_tip.speed_nm_s"))
+    assert line.full_text().endswith("0.01 … 10000")
+
+
+def test_a_range_is_the_action_tables_and_the_field_still_sends_what_was_typed(open_window, monkeypatch, tmp_path):
+    reshape(monkeypatch, "set_setpoint", "current_pa", lo=2.5, hi=5000.0)
+    reshape(monkeypatch, "scan", "angle_deg", lo=None)
+    win = open_window("en")
+    shots.click(win, shots.widget(win, "act.set_setpoint.current_pa"))
+    assert shots.widget(win, "field.help").full_text() == "setpoint (pA): range 2.5 … 5000"
+    shots.click(win, shots.widget(win, "act.scan.angle_deg"))
+    assert shots.widget(win, "field.help").full_text() == "angle (°): range ≤ 180"        # one end open
+    shots.type_into(win, shots.widget(win, "act.set_setpoint.current_pa"), "9000")      # outside it: no clamping, no check here
+    run_button(win, "run.set_setpoint")
+    shots.settle(win)
+    assert win.status.result.full_text() == "✗ refused: set_setpoint: current_pa = 9000.0 is outside [2.5, 5000.0]"
+    sent = [r for r in records(tmp_path) if r["kind"] == "refused"][-1]
+    assert sent["args"] == {"current_pa": 9000}
+
+
+def test_the_trials_refusal_leaves_the_range_of_the_field_it_came_from_on_screen(open_window):
+    win = open_window("en")
+    shots.fill(win, {"act.set_setpoint.current_pa": "200000"})
+    run_button(win, "run.set_setpoint")
+    shots.settle(win)
+    acknowledge(win)
+    assert shots.widget(win, "field.help").full_text() == "setpoint (pA): range 0.1 … 100000"
+    assert "outside [0.1, 100000.0]" in win.status.result.full_text()
 
 
 def test_with_the_conditioning_parameters_required_an_empty_field_sends_nothing_and_the_instrument_refuses(

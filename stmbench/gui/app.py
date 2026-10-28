@@ -35,7 +35,7 @@ from PySide6.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QVBoxLayou
 
 from . import fmt, jobs, layout, style
 from .center import THUMB_PX, CenterColumn, thumb_pixmap
-from .controls import Tabs
+from .controls import ElidedLabel, Tabs
 from .labels import two_lines, tr
 from .panels import ActionPanel
 from .recent import RecentList
@@ -124,6 +124,22 @@ class MainWindow(QMainWindow):
         self.right.tabBar().setObjectName("right.tabbar")
         self.right.tabBar().setExpanding(True)
         self.right.setFixedWidth(right_px)
+        # the range of the numeric field entered last, in the part of the tab row the two tabs leave empty: no height
+        # of its own, so that nothing below it moves, and nothing to hover over
+        self.field_help = ElidedLabel()
+        self.field_help.setObjectName("field.help")
+        self.field_help.setProperty("role", "help")
+        self.field_help.setFont(style.sans_font(17, bold=True))          # bold: it is read in a picture of 1280 px
+        corner = QWidget()
+        corner_row = QHBoxLayout(corner)
+        corner_row.setContentsMargins(style.px(8), 0, 0, 0)
+        corner_row.addWidget(self.field_help)
+        # the tab widget gives a corner widget the size of its hint, which a layout takes from the label's own width
+        self.field_help.setFixedWidth(max(style.px(200), right_px - self.right.tabBar().sizeHint().width() - style.px(14)))
+        self.right.setCornerWidget(corner, Qt.Corner.TopRightCorner)
+        corner.show()                                    # setting the parent hid it
+        for panel in (self.operate, self.spectroscopy):
+            panel.field_entered.connect(lambda a, k, p=panel: self.field_help.set_full_text(p.field_help(a, k)))
         self.recent = RecentList(lang)
         right_column = QWidget()                         # the tabs, and under them what the last calls answered
         rc = QVBoxLayout(right_column)

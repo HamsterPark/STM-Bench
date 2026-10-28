@@ -291,7 +291,11 @@ empty field sends nothing (the instrument's default
 applies, or it refuses: a parameter the action table marks required has a red star, a hint "required" and no
 default, and an empty one is refused in the instrument's words, as the pulse's width and the poke's depth and dwell
 are in API version 2); a field that is not a number is sent as typed; every click in a field selects all
-of it, so click then type replaces the content. The three `← marker` buttons
+of it, so click then type replaces the content. The part of the right tabs' row that the two tabs leave empty
+tells the range of the numeric field entered last (its label with its unit, then `range` and the table's
+minimum and maximum, e.g. `setpoint (pA): range 0.1 … 100000`; the manual carries the same numbers in the
+bracket of each parameter's line, `min` and `max`, as an MCP agent's input schema does); nothing is clamped or
+checked in the window, so a value outside it is sent and refused in the instrument's words. The three `← marker` buttons
 copy a marker's coordinates into the move-tip or scan fields or the report form, and Delete marker removes
 the selected one. While a scan runs or waits the viewer says so over what it shows, and a click on a viewer
 that has shown no frame leaves a note among the recent results instead of being lost.

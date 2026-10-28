@@ -69,6 +69,7 @@ S: dict[str, Pair] = {
     "band_not_run": ("Not run", "未执行"),
     "ack": ("Acknowledge", "知道了"),
     "acknowledged": ("acknowledged the refusal of", "已确认被拒绝的调用"),
+    "field_range": ("range", "范围"),
     "recent_title": ("Recent results", "最近结果"),
     "stays_open": ("This program stays open; it is closed from outside.", "此程序保持打开，由外部关闭。"),
     # the instrument's facts (top of the Manual tab)

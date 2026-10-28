@@ -86,12 +86,46 @@ def test_the_conditioning_parameters_are_required_with_no_default_and_keep_their
             assert name in schema["required"] and "default" not in prop, (action, name)
             assert (prop["minimum"], prop["maximum"]) == (lo, hi)
             line = next(x for x in manual if x.strip().startswith(f"{name} ("))
-            assert "[required]" in line and "default" not in line, line
+            assert "[required;" in line and "default" not in line, line
+            assert f"min {lo}" in line and f"max {hi}" in line, line                  # the range is in the manual too
     # what stays optional stays so: the pulse holds Z unless told otherwise, the poke keeps the bias
     pulse = {p.name: p for p in ACTIONS["pulse"].params}
     poke = {p.name: p for p in ACTIONS["poke"].params}
     assert pulse["bias_v"].required and pulse["z_hold"].default is True and not pulse["z_hold"].required
     assert not poke["bias_v"].required and poke["bias_v"].default is None
+
+
+def _manual_lines() -> dict[tuple[str, str], str]:
+    """The manual's parameter lines by ``(action, parameter)``: an action's lines follow its ``- name:`` line."""
+    out: dict[tuple[str, str], str] = {}
+    action = ""
+    for line in Instrument.manual().splitlines():
+        if line.startswith("- "):
+            action = line[2:].split(":", 1)[0]
+        elif line.startswith("    ") and action:
+            out[(action, line.split(" (", 1)[0].strip())] = line
+    return out
+
+
+def test_every_range_of_the_action_table_is_in_its_line_of_the_manual_and_no_other_is():
+    """The screen agent learnt the 100000 pA setpoint limit only from a refusal, in all three trials: the manual (the text
+    both kinds of agent read) said nothing of the ranges an MCP agent's input schema carries as minimum and maximum."""
+    lines = _manual_lines()
+    assert set(lines) == {(a, p.name) for a, s in ACTIONS.items() for p in s.params}      # a line for every parameter
+    ranged = 0
+    for (action, name), line in lines.items():
+        p = next(q for q in ACTIONS[action].params if q.name == name)
+        bracket = line[line.rindex(" [") + 2:-1].split("; ") if line.endswith("]") else []
+        assert (f"min {p.lo}" in bracket) == (p.lo is not None), line
+        assert (f"max {p.hi}" in bracket) == (p.hi is not None), line
+        schema = ACTIONS[action].schema()["properties"][name]
+        assert (schema.get("minimum"), schema.get("maximum")) == (p.lo, p.hi)             # what the schema says, the manual says
+        ranged += p.lo is not None or p.hi is not None
+    assert ranged > 20                                                                      # most numeric parameters have one
+    # the lines the trials needed, word for word
+    assert lines[("set_setpoint", "current_pa")].endswith("setpoint current (pA) [required; min 0.1; max 100000.0]")
+    assert lines[("scan", "pixels")].endswith("pixels per line = lines [default 256; min 16; max 1024]")
+    assert lines[("scan", "direction")].endswith("[default down; one of down, up]")          # a choice has no range
 
 
 @pytest.mark.parametrize("action,args,message", [

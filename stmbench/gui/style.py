@@ -119,6 +119,7 @@ QLabel[role="claim"] {{ color: {c['ink']}; font-size: {px(16)}px; }}
 QLabel[stripe="true"] {{ background: {c['stripe']}; }}
 QLabel[role="overlay"] {{ background: rgba(255, 255, 255, 205); color: {c['warn']}; }}
 QLabel[role="recent"] {{ color: {c['ink']}; font-size: {px(16)}px; }}
+QLabel[role="help"] {{ color: {c['ink']}; font-size: {px(17)}px; }}
 QLabel[tone="ok"] {{ color: {c['ok']}; }}
 QLabel[tone="bad"] {{ color: {c['bad']}; }}
 QLabel[tone="note"] {{ color: {c['muted']}; }}

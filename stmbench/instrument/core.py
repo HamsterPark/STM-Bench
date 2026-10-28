@@ -297,7 +297,8 @@ class Instrument:
 
     @staticmethod
     def manual() -> str:
-        """The action set, one line per parameter: what every agent is told the instrument does."""
+        """The action set, one line per parameter with its default, its choices and its range (min, max): what every
+        agent is told the instrument does."""
         lines = [f"Instrument API v{API_VERSION}: units are nm, V, pA, s; positions are scan coordinates "
                  "(x right, y up); actions spend instrument time, observations do not."]
         for s in ACTIONS.values():
@@ -310,6 +311,12 @@ class Instrument:
                     extra.append(f"default {p.default}")
                 if p.choices is not None:
                     extra.append("one of " + ", ".join(map(str, p.choices)))
+                # the range an MCP agent's input schema carries as minimum and maximum (the screen agent of the
+                # P4 trials learnt the 100000 pA setpoint limit only from a refusal)
+                if p.lo is not None:
+                    extra.append(f"min {p.lo}")
+                if p.hi is not None:
+                    extra.append(f"max {p.hi}")
                 lines.append(f"    {p.name} ({p.kind}): {p.doc}" + (f" [{'; '.join(extra)}]" if extra else ""))
         return "\n".join(lines)
 

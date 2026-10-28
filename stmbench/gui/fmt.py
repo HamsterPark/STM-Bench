@@ -38,6 +38,18 @@ def num(v: Any, digits: int = 6) -> str:
     return str(v)
 
 
+def range_text(lo: Any, hi: Any) -> str:
+    """A parameter's range as the action table gives it, for the line that describes the field last clicked: ``0.1 … 100000``,
+    ``≥ 1`` or ``≤ 5`` where one end is open, ``""`` where both are (the unit is the field's label's)."""
+    if lo is not None and hi is not None:
+        return f"{num(lo)} … {num(hi)}"
+    if lo is not None:
+        return f"≥ {num(lo)}"
+    if hi is not None:
+        return f"≤ {num(hi)}"
+    return ""
+
+
 def value_text(v: Any) -> str:
     """Any reply value on one line: lists as ``(a, b)``, mappings as ``{k: v}``."""
     if isinstance(v, (list, tuple)):

@@ -115,7 +115,10 @@ class SelectAllLineEdit(QLineEdit):
     """A field whose whole content is selected by every click, not only the one that gives it the focus: the
     next keystrokes replace it, whether the field was focused before, had a selection already, had its caret
     somewhere, or the pointer wobbled between press and release. No context menu, no dropped text, no dragged
-    selection: the only gestures are clicking and typing (the keyboard still moves the caret)."""
+    selection: the only gestures are clicking and typing (the keyboard still moves the caret). ``entered`` is
+    emitted when the reader clicks into the field or tabs to it: the window describes the field last entered."""
+
+    entered = Signal()
 
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
@@ -123,9 +126,14 @@ class SelectAllLineEdit(QLineEdit):
         self.setAcceptDrops(False)
         self.setDragEnabled(False)            # a press on selected text would wait for a drag and, released, drop the selection
 
+    def focusInEvent(self, ev) -> None:
+        super().focusInEvent(ev)
+        self.entered.emit()
+
     def mousePressEvent(self, ev) -> None:
         super().mousePressEvent(ev)
         self.selectAll()
+        self.entered.emit()
 
     def mouseMoveEvent(self, ev) -> None:
         ev.accept()                           # a pointer that moves with the button down must not drag a partial selection
