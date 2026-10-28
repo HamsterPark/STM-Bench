@@ -267,18 +267,22 @@ scale of the image an MCP agent gets, the default; full: the frame's minimum to 
 top of an atom from saturating; visible: the minimum to maximum of the part of the frame in view, so that a
 step elsewhere does not flatten the atoms in a zoomed view, and the same as full while the whole frame is in
 view; the readings are the same), a zoom (the wheel steps x1, x2, x4, x8 about the
-pointer, or the Fit, x2, x4 and x8 buttons; the Pan tool drags the zoomed image; a new frame is shown
-whole, another channel of the same frame keeps the view; the axes, the cursor, markers and profiles use the
-same pixel mapping at every zoom, and nothing is found or snapped for the reader), numbered markers (six rows before the table
-scrolls) with their coordinates, the start time of the frame each was placed on and the distance to the
-previous one, a line profile, the last frames as thumbnails; or a spectrum with chosen
+pointer, or the Fit, x2, x4 and x8 buttons, about the selected marker or else the centre of the view; the Pan
+tool drags the zoomed image; a new frame is shown whole, except another scan of the same window - the same size,
+pixels and angle, as after a drag - which keeps the zoom and the place in view, and another channel of the same
+frame keeps the view; the axes, the cursor, markers and profiles use the same pixel mapping at every zoom, and
+nothing is found for the reader), numbered markers, each on the centre of the pixel it was placed in, with that
+pixel's value (the cursor reads the same point; six rows before the table scrolls, one row a wheel notch), the
+start time of the frame each was placed on and the distance to the previous one, a line profile, every frame
+of the episode as a thumbnail, newest first (a wheel notch moves the strip one thumbnail; its ▲ and ▼ buttons
+page it and say how many frames lie beyond); or a spectrum with chosen
 columns; or the trace of a tip move, which every `move_tip` saves like a spectrum and the window shows when
 the move is done, as it shows an STS: its distance along the move (nm) or its time (s) against Z (nm) or the
 current (pA), open on Z against the distance, headed by the conditions the instrument recorded of the move
 (from where to where, how fast, the bias, the setpoint, the feedback) and nothing read off the curves - no
 mark, count or note on a step or a spike, which is for the reader to find; over a spectrum, a trace or a line
 profile a cursor reads out the data point nearest the pointer, its x and each curve's y, and a left click
-pins it); on the right the Operate tab (every action a P4 episode uses,
+pins it, up to six pins, which Clear readings or the next data removes); on the right the Operate tab (every action a P4 episode uses,
 without scrolling at 1920x1080 or 1920x1016) and the Spectroscopy tab, whose On / Off pairs and range row
 show the state the instrument reports as the selected button, and under them the last five results, newest
 first, in the instrument's words (a refusal stays among them until five calls have followed it). A click queues its job at once with the field values read at that moment and
