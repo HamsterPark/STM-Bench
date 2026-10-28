@@ -110,6 +110,7 @@ class MainWindow(QMainWindow):
         row = QHBoxLayout()
         row.setSpacing(style.px(8))
         col.addLayout(row, 1)
+        self._row = row
 
         self.sidebar = Sidebar(session.task_text(), session.manual(), session.claims(), lang)
         self.center = CenterColumn(lang)
@@ -117,6 +118,8 @@ class MainWindow(QMainWindow):
         self.spectroscopy = ActionPanel(layout.SPECTROSCOPY, self.run_action, lang)
         left_px, right_px = column_widths(*column_needs(self.sidebar, (self.operate, self.spectroscopy)))
         self.sidebar.setFixedWidth(left_px)
+        self._left_px = left_px
+        self._wide = False                               # the Manual tab's wide view: the left column has the whole row
         self.right = Tabs()
         self.right.setObjectName("right.tabs")
         self.right.addTab(self.operate, two_lines("tab_operate", lang).replace("\n", " "))
@@ -141,15 +144,15 @@ class MainWindow(QMainWindow):
         for panel in (self.operate, self.spectroscopy):
             panel.field_entered.connect(lambda a, k, p=panel: self.field_help.set_full_text(p.field_help(a, k)))
         self.recent = RecentList(lang)
-        right_column = QWidget()                         # the tabs, and under them what the last calls answered
-        rc = QVBoxLayout(right_column)
+        self.right_column = QWidget()                    # the tabs, and under them what the last calls answered
+        rc = QVBoxLayout(self.right_column)
         rc.setContentsMargins(0, 0, 0, 0)
         rc.setSpacing(style.px(6))
         rc.addWidget(self.right, 1)
         rc.addWidget(self.recent)
         row.addWidget(self.sidebar)
         row.addWidget(self.center, 1)
-        row.addWidget(right_column)
+        row.addWidget(self.right_column)
 
         # the reader's gestures
         self.sidebar.report.submitted.connect(self._report)
@@ -165,6 +168,8 @@ class MainWindow(QMainWindow):
         self.center.notice.connect(lambda text: self.recent.push("note", text))
         self.status.cancel_requested.connect(self._cancel_queued)
         self.status.acknowledge_requested.connect(self._acknowledge)
+        self.sidebar.manual.wide_toggled.connect(self._set_wide)
+        self.sidebar.currentChanged.connect(self._tab_changed)
 
         self.worker = Worker(session, self)
         self.worker.started_job.connect(self._on_started)
@@ -424,6 +429,36 @@ class MainWindow(QMainWindow):
         self.sidebar.report.set_viewed(spec["name"])
         self.sidebar.data.select("spectrum", spec["name"])
         self._refresh_thumbs()
+
+    # ── the manual's wide view ──
+    def _set_wide(self, on: bool) -> None:
+        """The Manual tab's wide view: the left column takes the whole row under the status strip (the viewer and the
+        right column are hidden, not closed: nothing about them changes, and a job that finishes meanwhile is drawn
+        into them), or gives it back. Why it is a whole row: with the centre column too the text is 820 px wide and the
+        manual 2.1 to 2.3 screens (measured with Consolas and DejaVu Sans Mono), a third screenshot for its last few
+        lines; with the whole row it is 1.5."""
+        if on == self._wide:
+            return
+        if on:
+            self._wide_px = self._left_px + self._row.spacing() + self.center.width() + self._row.spacing() \
+                + self.right_column.width()
+        self._wide = on
+        # the order matters: a window grows to the minimum its layout asks for and never shrinks back, so the columns are
+        # hidden before the left one is widened, and it is narrowed before they are shown
+        if on:
+            self.center.hide()
+            self.right_column.hide()
+            self.sidebar.setFixedWidth(self._wide_px)
+        else:
+            self.sidebar.setFixedWidth(self._left_px)
+            self.center.show()
+            self.right_column.show()
+        self.sidebar.manual.set_wide(on)
+
+    def _tab_changed(self, _index: int) -> None:
+        """The wide view belongs to the Manual tab: any other tab of the left column has the window as it was."""
+        if self._wide and self.sidebar.tab_key() != "manual":
+            self._set_wide(False)
 
     # ── copying a marker into a form ──
     def _panel_for(self, action: str) -> ActionPanel:

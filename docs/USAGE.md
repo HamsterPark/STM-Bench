@@ -249,7 +249,10 @@ many wait, and a Cancel queued button that drops the ones that have not started)
 a tick and the instrument's reply, or a cross and its refusal. On the left, tabs Task,
 Manual (the instrument's fixed facts, `Instrument.info()` read once when the window opens: the piezo,
 bias and current ranges, the budget, the temperature, the material and a qPlus sensor's f0, k and Q, above
-the manual), Report (one radio button per reportable claim, titled "Report a result (ReportResult)", with
+the manual; its Wide view button gives the tab the whole window under the status strip, the facts beside the
+text, so that the manual, the same text an MCP agent gets, is two screens or fewer instead of four in the
+column, and leaving the tab or a click on Narrow view gives the window back; a wheel notch moves a text view
+three lines), Report (one radio button per reportable claim, titled "Report a result (ReportResult)", with
 the fields named as `ReportResult` and the rule card name them - value, x_nm, y_nm, frame, evidence, unit,
 sigma, note, the ones the picked claim needs starred as in the action panels, Enter in a field sending the
 report, and a "+ shown file" button that appends the name of the frame or spectrum the viewer shows to

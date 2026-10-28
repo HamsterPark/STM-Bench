@@ -580,6 +580,78 @@ def test_the_instruments_facts_head_the_manual_tab(open_window, tmp_path):
     assert "压电 XY 量程 Piezo XY range" in " ".join(zh.sidebar.facts.facts())
 
 
+def manual_lines(win: MainWindow) -> tuple[int, int]:
+    """``(visual lines in all, lines a page shows)`` of the Manual tab's text as it is laid out now."""
+    bar = shots.widget(win, "manual.text").verticalScrollBar()
+    return bar.maximum() + bar.pageStep(), bar.pageStep()
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_manuals_wide_view_reads_in_two_screens_and_gives_the_window_back_when_it_is_left(fonts, open_window, lang):
+    """Screen trials 4 and 5 spent five to seven steps scrolling the manual: a pane of 27 lines in a column of 360 px, where
+    most of its 64 lines wrap two or three times (about 100 lines in all). The Manual tab's wide view takes the whole
+    window under the status strip, puts the instrument's facts beside the text and shows the same text, byte for byte, in
+    two screens or fewer. Leaving the tab, or the button, gives the window back."""
+    win = open_window(lang)
+    manual = win.session.manual()
+    open_left(win, "manual")
+    for _ in range(3):                                                          # the layout settles in a few turns of the loop
+        QApplication.processEvents()
+    text = shots.widget(win, "manual.text")
+    toggle = shots.widget(win, "manual.wide")
+    narrow_lines, narrow_page = manual_lines(win)
+    assert narrow_lines > 3 * narrow_page                                       # in the column it is three screens and more
+    left_w, strip_h = win.sidebar.width(), win.status.height()
+    shots.hit(win, toggle)
+    assert toggle.text().endswith("Wide view") and toggle.width() >= 56 and toggle.height() >= 32
+    run_button(win, "manual.wide")
+    for _ in range(3):
+        QApplication.processEvents()
+    assert not win.center.isVisible() and not shots.widget(win, "recent.box").isVisible() and not win.right.isVisible()
+    assert win.sidebar.width() > 1800 and win.status.height() == strip_h and win.status.isVisible()      # the strip stays
+    assert win.width() == shots.WINDOW[0]                                        # and the window did not grow to make room
+    assert text.toPlainText() == manual                                          # the manual an MCP agent gets, byte for byte
+    total, page = manual_lines(win)
+    assert total <= 2 * page, (total, page)                                      # two screens or fewer, in these fonts too
+    table = shots.widget(win, "facts.table")
+    shots.hit(win, table)
+    shots.hit(win, text)
+    here = lambda w: w.mapTo(win, w.rect().topLeft())                           # noqa: E731
+    assert here(table).x() + table.width() <= here(text).x()                     # beside the text, not above it
+    assert here(text).y() <= here(table).y() < here(text).y() + text.height()
+    assert toggle.text().endswith("Narrow view")
+    # a wheel notch is three lines, in this view and in the narrow one
+    bar = text.verticalScrollBar()
+    shots.wheel(win, text, delta=-120)
+    assert bar.value() == 3
+    shots.wheel(win, text, delta=-120)
+    shots.wheel(win, text, delta=-120)
+    assert bar.value() == min(9, bar.maximum())
+    shots.wheel(win, text, delta=120 * 5)
+    assert bar.value() == 0
+    run_button(win, "manual.wide")                                               # the button gives the window back
+    for _ in range(3):
+        QApplication.processEvents()
+    assert win.center.isVisible() and win.right.isVisible() and win.sidebar.width() == left_w and toggle.text().endswith("Wide view")
+    assert win.width() == shots.WINDOW[0] and manual_lines(win) == (narrow_lines, narrow_page)
+    run_button(win, "manual.wide")                                               # and so does leaving the tab
+    open_left(win, "report")
+    for _ in range(3):
+        QApplication.processEvents()
+    assert win.center.isVisible() and win.right.isVisible() and win.sidebar.width() == left_w
+    assert win.width() == shots.WINDOW[0]
+    open_left(win, "manual")
+    for _ in range(3):
+        QApplication.processEvents()
+    assert toggle.text().endswith("Wide view") and win.sidebar.width() == left_w     # it opens narrow again
+    # in the column too, a notch is three lines
+    bar = text.verticalScrollBar()
+    shots.wheel(win, text, delta=-120)
+    assert bar.value() == 3
+    shots.wheel(win, text, delta=-120 * 4)
+    assert bar.value() == 15
+
+
 def test_a_qplus_rigs_sensor_constants_are_among_the_facts(open_window):
     win = open_window("en", scenario=P5)
     q = win.session.info()["qplus"]

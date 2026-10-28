@@ -11,8 +11,8 @@ from __future__ import annotations
 from html import escape
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtWidgets import (QAbstractItemView, QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel, QListWidget,
-                               QListWidgetItem, QPushButton, QRadioButton, QScrollArea, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QAbstractItemView, QBoxLayout, QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel,
+                               QListWidget, QListWidgetItem, QPushButton, QRadioButton, QScrollArea, QVBoxLayout, QWidget)
 
 from . import fmt, style
 from .controls import QuietBrowser, QuietText, SelectAllLineEdit, Tabs, polish, strong
@@ -484,21 +484,67 @@ class FactsTable(QFrame):
 
 
 class ManualTab(QWidget):
-    """The instrument's facts above the manual: everything an agent is told about the instrument."""
+    """The instrument's facts above the manual: everything an agent is told about the instrument.
+
+    Why a wide view. In the 360 px column the manual's 64 lines wrap into about a hundred, and a page of the pane
+    shows 27 of them: screen trials 4 and 5 spent five to seven steps scrolling it. The button at the top of the tab
+    asks the window for the whole row under the status strip (:meth:`MainWindow._set_wide`): the facts then stand
+    beside the text instead of above it, and the same text, the one an MCP agent gets, is two screens or fewer. The
+    button only asks: the window hides the other columns and gives them back."""
+
+    wide_toggled = Signal(bool)
 
     def __init__(self, manual: str, lang: str, parent: QWidget | None = None):
         super().__init__(parent)
-        v = QVBoxLayout(self)
-        v.setContentsMargins(style.px(6), style.px(6), style.px(6), style.px(6))
-        v.setSpacing(style.px(4))
+        self.lang = lang
+        self._wide = False
+        self._box = QBoxLayout(QBoxLayout.Direction.TopToBottom, self)       # left to right in the wide view
+        self._box.setContentsMargins(style.px(6), style.px(6), style.px(6), style.px(6))
+        self._box.setSpacing(style.px(8))
+        self.side = QWidget()                            # the button and the facts
+        side = QVBoxLayout(self.side)
+        side.setContentsMargins(0, 0, 0, 0)
+        side.setSpacing(style.px(4))
+        self.toggle = QPushButton()
+        self.toggle.setObjectName("manual.wide")
+        self.toggle.setAutoDefault(False)
+        self.toggle.clicked.connect(self._clicked)
         title = QLabel(tr("facts_title", lang))
         strong(title)
-        v.addWidget(title)
         self.facts = FactsTable(lang)
-        v.addWidget(self.facts)
+        side.addWidget(self.toggle)
+        side.addWidget(title)
+        side.addWidget(self.facts)
+        side.addStretch(1)
         self.text = _text_view(manual, mono=True, size=17)
         self.text.setObjectName("manual.text")
-        v.addWidget(self.text, 1)
+        self._box.addWidget(self.side)
+        self._box.addWidget(self.text, 1)
+        self._label()
+
+    @property
+    def wide(self) -> bool:
+        return self._wide
+
+    def _label(self) -> None:
+        self.toggle.setText(tr("manual_narrow" if self._wide else "manual_wide", self.lang))
+
+    def _clicked(self) -> None:
+        self.set_wide(not self._wide)
+        self.wide_toggled.emit(self._wide)
+
+    def set_wide(self, on: bool) -> None:
+        """Lay the tab out for the wide view (the facts beside the text, as wide as the column was) or for the column."""
+        if on == self._wide:
+            return
+        if on:
+            self.side.setFixedWidth(self.side.width())
+        else:
+            self.side.setMinimumWidth(0)
+            self.side.setMaximumWidth(16777215)
+        self._wide = on
+        self._box.setDirection(QBoxLayout.Direction.LeftToRight if on else QBoxLayout.Direction.TopToBottom)
+        self._label()
 
 
 class Sidebar(Tabs):

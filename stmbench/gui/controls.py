@@ -147,20 +147,45 @@ class SelectAllLineEdit(QLineEdit):
         self.selectAll()
 
 
+#: what one notch of the wheel moves a text view (lines, as the view wraps them): the platform's own setting would make the
+#: amount depend on the machine, and a reader of screenshots counts on the same step every time
+LINES_PER_NOTCH = 3
+
+
+class Notches:
+    """Wheel turns as whole notches: a notch is 120 of a wheel event's angle delta, and what is left of a smaller turn
+    (a finer wheel, a touchpad) waits for the next event. Positive: the wheel turned away from the reader (up)."""
+
+    def __init__(self) -> None:
+        self._rest = 0
+
+    def take(self, ev) -> int:
+        self._rest += ev.angleDelta().y()
+        n = int(self._rest / 120)                                        # towards zero
+        self._rest -= 120 * n
+        return n
+
+
 class QuietText(QPlainTextEdit):
-    """Read-only text that scrolls with the wheel and does nothing else: no context menu, no zoom."""
+    """Read-only text that scrolls with the wheel and does nothing else: no context menu, no zoom. A notch moves it
+    :data:`LINES_PER_NOTCH` lines (visual lines, wrapped as shown), whatever the machine's own setting."""
 
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
         self.setReadOnly(True)
         self.setContextMenuPolicy(Qt.ContextMenuPolicy.NoContextMenu)
         self.setLineWrapMode(QPlainTextEdit.LineWrapMode.WidgetWidth)
+        self._notches = Notches()
 
     def wheelEvent(self, ev) -> None:
         if ev.modifiers() & Qt.KeyboardModifier.ControlModifier:         # Ctrl + wheel would zoom the text
             ev.ignore()
             return
-        super().wheelEvent(ev)
+        n = self._notches.take(ev)
+        if n:
+            bar = self.verticalScrollBar()
+            bar.setValue(bar.value() - n * LINES_PER_NOTCH)
+        ev.accept()
 
 
 class QuietBrowser(QTextBrowser):

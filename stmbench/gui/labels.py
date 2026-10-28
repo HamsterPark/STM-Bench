@@ -74,6 +74,8 @@ S: dict[str, Pair] = {
     "stays_open": ("This program stays open; it is closed from outside.", "此程序保持打开，由外部关闭。"),
     # the instrument's facts (top of the Manual tab)
     "facts_title": ("Instrument facts", "仪器参数"),
+    "manual_wide": ("Wide view", "宽屏阅读"),
+    "manual_narrow": ("Narrow view", "窄屏阅读"),
     "fact_material": ("Material", "材料"),
     "fact_temperature": ("Temperature", "温度"),
     "fact_piezo_xy": ("Piezo XY range", "压电 XY 量程"),
