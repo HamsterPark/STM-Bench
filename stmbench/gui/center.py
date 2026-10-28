@@ -176,6 +176,7 @@ class CenterColumn(QWidget):
         self.toolbars.addWidget(self._frame_toolbar())
         self.toolbars.addWidget(self._spectrum_toolbar())
         v.addWidget(self.toolbars)
+        v.addWidget(self._tools_row())
 
         # ── the image (or the spectrum), with the last frames in a column beside it ──
         view = QHBoxLayout()
@@ -305,23 +306,35 @@ class CenterColumn(QWidget):
                                    "forward")
         self.flatten = self._seg([("line", "flat_line"), ("plane", "flat_plane"), ("none", "flat_none")],
                                  "view.flatten", "line")
-        self.tool = self._seg([("marker", "tool_marker"), ("profile", "tool_profile"), ("pan", "tool_pan")],
-                              "view.tool", "marker")
         self.contrast = self._seg([("auto", "contrast_auto"), ("full", "contrast_full"), ("visible", "contrast_visible")],
                                   "view.contrast", "auto")
         self.zoom = self._seg([(1, "zoom_fit"), (2, "zoom_2"), (4, "zoom_4"), (8, "zoom_8")], "view.zoom", 1)
-        self.clear_markers = QPushButton(one("clear_markers", self.lang))
-        self.clear_markers.setObjectName("view.clear_markers")
-        # three rows: what is shown, how its grey scale and size are set, and what a drag on it does
+        # two rows: what is shown, and how its grey scale and size are set (the third row, what a drag on the image
+        # does and the markers, is outside this page: see _tools_row)
         col.addLayout(self._row(self.channel, self.direction, self._caption("lbl_flatten"), self.flatten))
         col.addLayout(self._row(self._caption("lbl_contrast"), self.contrast, self._caption("lbl_zoom"), self.zoom))
-        col.addLayout(self._row(self._caption("lbl_tool"), self.tool, self.clear_markers))
         self.channel.changed.connect(lambda _v: self.view_changed.emit())
         self.direction.changed.connect(lambda _v: self.view_changed.emit())
         self.flatten.changed.connect(lambda m: self.frame_view.set_flatten(m))
-        self.tool.changed.connect(lambda t: self.frame_view.set_tool(t))
         self.contrast.changed.connect(lambda m: self.frame_view.set_contrast(m))
         self.zoom.changed.connect(lambda z: self.frame_view.set_zoom(z))
+        return w
+
+    def _tools_row(self) -> QWidget:
+        """What a drag on the image does, and Clear markers: a row that stays whatever the viewer shows.
+
+        It is outside the pages of the toolbar stack because the markers are not the frame's: they are kept in
+        scan coordinates and come back on the next frame. In screen trial 5 (step 39) the agent clicked where Clear
+        markers had been while a move trace was on show, the frame toolbar was not there, the click reached empty
+        toolbar, and the old markers came back on the next frame. Here the button is in the same place in every view."""
+        w = QWidget()
+        w.setObjectName("view.tools")
+        self.tool = self._seg([("marker", "tool_marker"), ("profile", "tool_profile"), ("pan", "tool_pan")],
+                              "view.tool", "marker")
+        self.clear_markers = QPushButton(one("clear_markers", self.lang))
+        self.clear_markers.setObjectName("view.clear_markers")
+        w.setLayout(self._row(self._caption("lbl_tool"), self.tool, self.clear_markers))
+        self.tool.changed.connect(lambda t: self.frame_view.set_tool(t))
         self.clear_markers.clicked.connect(lambda: (self.frame_view.clear_markers(), self.frame_view.clear_profile()))
         return w
 

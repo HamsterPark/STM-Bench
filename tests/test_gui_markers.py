@@ -9,14 +9,20 @@ from __future__ import annotations
 
 import math
 
+import numpy as np
 import pytest
 
-from stmbench.gui import fmt, shots
-from stmbench.gui.widgets import frame_view as fvm
-from stmbench.render import pixel_to_scan_nm
-from tests.gui_helpers import app, fonts, mark, open_window, pixel_point, run_button, scan  # noqa: F401
+pytest.importorskip("PySide6")
 
+from PySide6.QtCore import QPoint, Qt  # noqa: E402
+from PySide6.QtGui import QImage  # noqa: E402
 from PySide6.QtTest import QTest  # noqa: E402
+
+from stmbench.gui import fmt, shots  # noqa: E402
+from stmbench.gui.widgets import frame_view as fvm  # noqa: E402
+from stmbench.render import pixel_to_scan_nm  # noqa: E402
+from tests.gui_helpers import (SMALL, app, fonts, hold_scan, mark, open_window, pixel_point, run_button,  # noqa: E402, F401
+                               scan)
 
 GEOM_8NM_32PX = {"cx_nm": 0.0, "cy_nm": 0.0, "w_nm": 8.0, "h_nm": 8.0, "angle_deg": 0.0, "nx": 32, "ny": 32}
 
@@ -197,3 +203,89 @@ def test_the_table_stays_where_the_reader_scrolled_it_until_a_marker_is_placed_o
     assert win.center.selected_row() == t.first_row() and win.center.frame_view.selected_marker()["frame"] == first
     run_button(win, "markers.delete")                                                  # a removal: the selection moves to the newest
     assert t.rowCount() == 14 and shown_rows(t)[-1] == 13 and win.center.selected_row() == 13
+
+
+# ── Clear markers, whatever the viewer shows ──
+def marker_pixels(win) -> int:
+    """How many pixels of the frame view, as rendered now, are in a marker's ring colour (cyan, or the selected one's
+    yellow)."""
+    img = win.center.frame_view.grab().toImage().convertToFormat(QImage.Format.Format_RGB32)
+    buf = np.frombuffer(img.constBits(), np.uint8).reshape(img.height(), img.bytesPerLine() // 4, 4)[:, :img.width(), [2, 1, 0]]
+    n = 0
+    for c in (fvm.MARKER_COLOR, fvm.MARKER_SELECTED_COLOR):
+        n += int((np.abs(buf.astype(int) - np.array([c.red(), c.green(), c.blue()])).sum(axis=2) < 60).sum())
+    return n
+
+
+def clear_position(win) -> QPoint:
+    """Where Clear markers is, as a click on the screen finds it (window coordinates)."""
+    b = shots.widget(win, "view.clear_markers")
+    return b.mapTo(win, b.rect().center())
+
+
+def trace_on_show(win) -> None:
+    """A tip move: the viewer shows its trace in the plot, under the plot's own toolbar."""
+    shots.fill(win, {"act.move_tip.x_nm": "1", "act.move_tip.y_nm": "0", "act.move_tip.speed_nm_s": "100"})
+    run_button(win, "run.move_tip")
+    shots.settle(win)
+    assert win.viewed[0] == "spectrum" and win.center.toolbars.currentIndex() == 1
+
+
+def click_at(win, pos: QPoint) -> None:
+    """A click at a window position the way the screen harness makes it: the pointer arrives, then press and release
+    reach whatever lies under it."""
+    qwin = win.windowHandle()
+    QTest.mouseMove(qwin, pos)
+    QTest.mouseClick(qwin, Qt.MouseButton.LeftButton, Qt.KeyboardModifier.NoModifier, pos)
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_clear_markers_is_at_the_same_place_and_works_with_a_trace_on_show(fonts, open_window, lang):
+    """Screen trial 5 step 39: Scan and Clear markers in one step left the old markers on the new frame. The click
+    on Clear markers was the step's first event and it went to empty toolbar: a move trace was on show, and the
+    frame toolbar (where the button was) is not there then. The button is now outside the toolbar pages."""
+    win = open_window(lang)
+    scan(win)
+    for col, row in ((10, 12), (20, 8), (14, 22)):
+        mark(win, col, row)
+    fv = win.center.frame_view
+    here = clear_position(win)
+    assert shots.widget(win, "view.clear_markers").isVisible() and len(fv.markers()) == 3
+    trace_on_show(win)
+    assert not shots.widget(win, "view.channel.z").isVisible()                   # the frame toolbar is away ...
+    assert shots.widget(win, "view.clear_markers").isVisible() and clear_position(win) == here    # ... Clear markers is not
+    assert win.childAt(here) is shots.widget(win, "view.clear_markers")
+    shots.hit(win, shots.widget(win, "view.tool.marker"))                        # the tools are there too
+    assert len(fv.markers()) == 3 and win.center.table.rowCount() == 3           # the markers outlive the view that drew them
+    click_at(win, here)
+    assert fv.markers() == [] and win.center.table.rowCount() == 0
+    # the step of the trial: with a trace on show, Clear markers (from where it was) and Scan, clicked one after the other
+    scan(win)
+    mark(win, 9, 9)
+    trace_on_show(win)
+    click_at(win, here)
+    shots.fill(win, SMALL)
+    run_button(win, "run.scan")
+    shots.settle(win)
+    assert win.viewed[0] == "frame" and fv.markers() == [] and marker_pixels(win) == 0
+
+
+def test_clear_markers_clicked_right_after_scan_while_the_scan_runs_clears_them_and_the_new_frame_has_none(open_window):
+    win = open_window("en")
+    scan(win)
+    for col, row in ((10, 12), (20, 8)):
+        mark(win, col, row)
+    fv = win.center.frame_view
+    assert marker_pixels(win) > 0
+    shots.fill(win, SMALL)
+    gate = hold_scan(win)                                                         # the instrument is busy: the scan waits
+    try:
+        run_button(win, "run.scan")
+        assert shots.widget(win, "view.busy").isVisible()                         # "scan running": over the viewer, not the toolbar
+        run_button(win, "view.clear_markers")                                     # the same step: Scan, then Clear markers
+        assert fv.markers() == [] and win.center.table.rowCount() == 0
+    finally:
+        gate.open()
+    assert not shots.widget(win, "view.busy").isVisible()
+    assert fv.markers() == [] and win.center.table.rowCount() == 0 and marker_pixels(win) == 0
+    assert win.viewed[0] == "frame"
