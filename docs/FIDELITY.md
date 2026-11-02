@@ -60,6 +60,7 @@ Design notes in Chinese: [DESIGN.md](DESIGN.md) §5 and §9.
 | Creep after a move (logarithmic, the creep of every move adding up), thermal drift (3-D, ~1 nm/min lateral on the cold rig), drift compensation that saturates | fit (983 glance intervals: Δz 94 → 26 pm, Δx 0.39 → 0.20 nm) | `test_drift_tracking.py` (incl. `::test_old_moves_keep_their_creep`), `test_drift_mapping.py` | Drift is linear in time between moves. Until 2026-10-14 only the last 20 moves crept, and an older one's creep vanished at once (±10 nm jumps after a long move and back) |
 | Good-tip trace/retrace correlation on 100 nm verify frames ≈ 0.95–0.98 (real frames 0.93–0.98), which sets the bandwidth blur | fit | measured 2026-08-28 with a tip-quality detector suite that is not part of this repository; not re-checked by the public tests | Unchanged by the 2026-10-13 blur fix (to 1e-3) |
 | Fast scanning with a fragile tip scratches the surface (above 450 nm/s with a tip radius over 1.5 nm, 2 % per line): a groove along the line | model | none dedicated | Threshold speeds are representative |
+| A positive scan angle turns the frame clockwise (stage x to the right, y up): the fast axis lies along (cos θ, −sin θ), and the groove a too-fast scan scratches follows it | model (taken to match the frame convention of real controllers; not measured on this simulator) | `test_scan_geometry.py` | Not compared with a controlled rotation on a real instrument or a vendor simulator. Ledgers recorded before this change hold the opposite sense for any non-zero angle |
 
 ## Coarse motion and approach
 

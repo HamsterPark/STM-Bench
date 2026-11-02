@@ -420,7 +420,7 @@ n | reproduced k/n | Wilson 95 % | 平均验证 claim 数 | sim 机时中位数 
 放 `builtins/` 与 `composite/` 而不是 `paper/`：IC 的单机发现路径与冻结构建 parity 测试都不含 `paper` 包。
 工具可见性全靠 `SkillMetadata.tags` 推导，不进 `CORE_NAMES`/`DEFERRED_NAMES`，所以提示词相关的全仓门零改动。
 
-## 8. 两个坐标约定（写错一次就再也发现不了）
+## 8. 三个坐标约定（写错一次就再也发现不了）
 
 1. **图像系 vs 台面系。** `AssessHerringbone` 的 `stripe_angle_deg`、`LocateStepEdge` 的 `edge_angle_deg`
    都是图像坐标（0° = 快扫轴，角度随行号增长的方向）。读取器把行 0 放在窗口的高 y 边，于是数组的慢轴沿 −y，
@@ -430,6 +430,15 @@ n | reproduced k/n | Wilson 95 % | 平均验证 claim 数 | sim 机时中位数 
    单位是 ±10 V DAC 的伏特。MAST 把可达半程算成 `标定 × min(10 V, |限位|)`；模拟器早先返回米，
    半程算出来约 1e-13 m，于是**每一次 `ConfigureScan` 都被判越界**。已修，
    `tests/test_world_smoke.py::test_piezo_limits_are_volts_so_the_scanner_has_travel` 钉住。
+3. **扫描角的正方向是顺时针。** `SCAN_ANGLE`（`angle_deg`）为正，表示扫描框相对台面坐标（x 向右、y 向上）顺时针转 θ：
+   帧内向右的单位矢量在台面系里是 (cosθ, −sinθ)，向上的是 (sinθ, cosθ)；帧内 (u, v) 到台面的换算是
+   `x = cx + u·cosθ + v·sinθ`、`y = cy − u·sinθ + v·cosθ`。这个换算以 `ScanSettings.pixel_xy` 为准；其余读 `angle_deg` 的地方
+   （判分的覆盖判断与行偏移、`render.pixel_to_scan_nm`、`analysis.adatoms.to_scan_nm`、回放的帧轮廓与真值图、快扫刮出的划痕方向）
+   各自按同一约定实现。`tests/test_scan_geometry.py` 用与实现无关的写法（复数乘 e^(−iθ)）钉住符号，再逐个核对这些读者与它一致；
+   `tests/test_render.py` 里“读帧换算与判分覆盖互为逆”的测试与符号无关，不能当这条的判据。
+   这是建模取舍（2026-11-02）：取与真实控制器软件的帧约定一致的方向，**不是在本模拟器上测出来的**。此前的版本按逆时针渲染，
+   所以旧账本里 `angle_deg` 不为 0 的帧，用现在的代码判分或回放会被镜像；参考解与脚本基线都不旋转扫描框，它们的结果不变，
+   θ = 0 时渲染与判分逐位不变。Track A 的 T2 标签（`trackA/manifests.py`）按同一方向取消扫描角。
 
 其余同类的量纲/嵌套约定见 §9.2。
 
