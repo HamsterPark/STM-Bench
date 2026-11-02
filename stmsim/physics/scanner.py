@@ -1,10 +1,10 @@
 """Raster scanner: frame geometry, rendering (both directions, all channels), row reveal.
 
 Geometry: pixel ``(i, j)`` (column, row) of an ``nx × ny`` frame with centre ``(cx, cy)``,
-size ``(w, h)`` and angle ``θ`` (deg, counter-clockwise) maps to stage coordinates::
+size ``(w, h)`` and angle ``θ`` (deg, clockwise positive: the frame is turned clockwise relative to the stage axes, x right and y up) maps to stage coordinates::
 
     u = (i + 0.5) / nx · w − w/2,   v = h/2 − (j + 0.5) / ny · h     (row 0 = top edge)
-    x = cx + u cosθ − v sinθ,       y = cy + u sinθ + v cosθ
+    x = cx + u cosθ + v sinθ,       y = cy − u sinθ + v cosθ
 
 Rows are stored in **acquisition order**: for ``scan_dir == "down"`` row 0 is the top edge,
 for ``"up"`` row 0 is the bottom edge (controller convention; the writer/reader flip).
@@ -80,14 +80,20 @@ class ScanSettings:
         return self.w / self.nx * 1e9
 
     def pixel_xy(self, i, j):
-        """Stage coordinates of pixel centres (arrays ok). Row ``j`` counts from the TOP."""
+        """Stage coordinates of pixel centres (arrays ok). Row ``j`` counts from the TOP.
+
+        A positive ``angle_deg`` turns the frame clockwise. The frame's rightward axis
+        lies along ``(cos θ, −sin θ)`` and its upward axis along ``(sin θ, cos θ)``.
+        Every other reader of a frame angle — the judge, frame rendering, analysis and
+        replay — follows this map.
+        """
         i = np.asarray(i, float)
         j = np.asarray(j, float)
         u = (i + 0.5) / self.nx * self.w - self.w / 2
         v = self.h / 2 - (j + 0.5) / self.ny * self.h
         th = math.radians(self.angle_deg)
         c, s = math.cos(th), math.sin(th)
-        return self.cx + u * c - v * s, self.cy + u * s + v * c
+        return self.cx + u * c + v * s, self.cy - u * s + v * c
 
     def row_index_for_acq(self, k: int) -> int:
         """Acquisition row k → geometric row (from top)."""

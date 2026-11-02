@@ -35,7 +35,7 @@ def to_scan_nm(frame: dict, col: float, row: float) -> tuple[float, float]:
     v = size / 2 - (row + 0.5) / n[0] * size
     th = math.radians(float(frame.get("angle_deg", 0.0) or 0.0))
     c, s = math.cos(th), math.sin(th)
-    return cx + u * c - v * s, cy + u * s + v * c
+    return cx + u * c + v * s, cy - u * s + v * c
 
 
 def row_jumps(z: np.ndarray, *, threshold_m: float = 15e-12) -> list[int]:

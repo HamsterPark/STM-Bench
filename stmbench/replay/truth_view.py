@@ -146,8 +146,8 @@ class TruthView:
         u = -w / 2 + (np.arange(nx) + 0.5) * w / nx
         v = h / 2 - (np.arange(ny) + 0.5) * h / ny
         U, V = np.meshgrid(u, v)
-        X = float(geom["cx_nm"]) + c * U - s * V
-        Y = float(geom["cy_nm"]) + s * U + c * V
+        X = float(geom["cx_nm"]) + c * U + s * V
+        Y = float(geom["cy_nm"]) - s * U + c * V
         per_row = float(fr.get("per_row_s") or 0.0)
         up = str(fr.get("scan_dir") or "down") == "up"
         acq = (ny - 1 - np.arange(ny)) if up else np.arange(ny)
@@ -259,5 +259,5 @@ def frame_extent_nm(fr: dict, geom: dict, view: TruthView | None) -> list[list[f
     dx, dy = view.drift_nm(float(fr["sim0"])) if view is not None else tuple(fr.get("drift_nm") or (0.0, 0.0))
     out = []
     for u, v in ((-w / 2, h / 2), (w / 2, h / 2), (w / 2, -h / 2), (-w / 2, -h / 2)):
-        out.append([float(geom["cx_nm"]) + c * u - s * v + dx, float(geom["cy_nm"]) + s * u + c * v + dy])
+        out.append([float(geom["cx_nm"]) + c * u + s * v + dx, float(geom["cy_nm"]) - s * u + c * v + dy])
     return out

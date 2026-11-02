@@ -1301,7 +1301,7 @@ class World:
             xs, ys = st.pixel_xy(np.array([st.nx / 2]), row)
             ox, oy, _ = self.drift_offset(t_sim)
             self.surface.add_feature(Feature(float(xs[0]) + ox, float(ys[0]) + oy, -0.15e-9, st.w / 2, 1.5e-9,
-                                             math.radians(st.angle_deg), kind="scratch", born_sim_s=t_sim))
+                                             0.0 - math.radians(st.angle_deg), kind="scratch", born_sim_s=t_sim))
             self.tip.lambda_per_s = min(0.05, self.tip.lambda_per_s * 1.5)
 
     # ── bookkeeping ──
