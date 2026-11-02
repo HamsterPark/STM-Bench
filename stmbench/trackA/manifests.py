@@ -305,11 +305,11 @@ def prepare_frames(index_df: pd.DataFrame, seq_df: pd.DataFrame, autosave_df: pd
     df["move_prev_frac"] = np.hypot(df["off_x_m"] - prv["off_x_m"], df["off_y_m"] - prv["off_y_m"]) / df["range_x_m"]
     df["prev_size_ratio"] = prv["range_x_m"] / df["range_x_m"]
     df["next_size_ratio"] = nxt["range_x_m"] / df["range_x_m"]
-    # next centre in THIS frame's coordinates: undo this frame's scan angle (controller
-    # SCAN_ANGLE = rotation of the frame axes, counter-clockwise positive), normalise by size
+    # next centre in THIS frame's coordinates: undo this frame's scan angle (a positive
+    # controller SCAN_ANGLE turns the frame clockwise), normalise by size
     th = np.deg2rad(df["angle_deg"])
-    df["next_u"] = (dx * np.cos(th) + dy * np.sin(th)) / df["range_x_m"]
-    df["next_v"] = (-dx * np.sin(th) + dy * np.cos(th)) / df["range_y_m"]
+    df["next_u"] = (dx * np.cos(th) - dy * np.sin(th)) / df["range_x_m"]
+    df["next_v"] = (dx * np.sin(th) + dy * np.cos(th)) / df["range_y_m"]
     df["next_w_rel"] = nxt["range_x_m"] / df["range_x_m"]
     df["next_h_rel"] = nxt["range_y_m"] / df["range_y_m"]
     df["next_angle_delta_deg"] = nxt["angle_deg"] - df["angle_deg"]
