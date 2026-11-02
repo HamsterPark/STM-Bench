@@ -126,8 +126,8 @@ class EpisodeServer:
         meta = {k2: v for k2, v in f.items() if k2 != "array"}
         meta["display_scale"] = k
         meta["pixel_to_nm"] = ("x_nm = center_x + (col + 0.5 - pixels/2) * nm_per_px, "
-                               "y_nm = center_y - (row + 0.5 - pixels/2) * nm_per_px (rotate by angle_deg about "
-                               "the centre); display pixels: divide by display_scale first")
+                               "y_nm = center_y - (row + 0.5 - pixels/2) * nm_per_px (then turn that offset from the centre clockwise by angle_deg); "
+                               "display pixels: divide by display_scale first")
         return [_text(meta), _image(png)]
 
     def _frame_values(self, a: dict) -> list[dict]:

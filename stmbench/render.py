@@ -62,14 +62,15 @@ def frame_geometry(header: dict) -> dict | None:
 def pixel_to_scan_nm(geom: dict, col: float, row: float) -> tuple[float, float]:
     """Oriented-array pixel (``col`` along the fast axis, ``row`` 0 = the frame's high-v
     edge) → scan-frame nm. Pixel centres sit at half-integers; ``col``/``row`` may be
-    fractional (a mouse position)."""
+    fractional (a mouse position). A positive ``angle_deg`` turns that offset clockwise
+    about the frame centre, the same sense as :meth:`stmsim.physics.scanner.ScanSettings.pixel_xy`."""
     w, h = float(geom["w_nm"]), float(geom["h_nm"])
     nx, ny = int(geom["nx"]), int(geom["ny"])
     u = -w / 2 + (float(col) + 0.5) * w / nx
     v = h / 2 - (float(row) + 0.5) * h / ny
     a = math.radians(float(geom.get("angle_deg", 0.0) or 0.0))
     c, s = math.cos(a), math.sin(a)
-    return float(geom["cx_nm"]) + c * u - s * v, float(geom["cy_nm"]) + s * u + c * v
+    return float(geom["cx_nm"]) + c * u + s * v, float(geom["cy_nm"]) - s * u + c * v
 
 
 # ── files ───────────────────────────────────────────────────────────────────

@@ -103,7 +103,7 @@ ACTIONS: dict[str, ActionSpec] = {s.name: s for s in (
                 _P("center_y_nm", "number", "frame centre y (scan coordinates, nm)", True),
                 _P("size_nm", "number", "side of the square frame (nm)", True, lo=0.5, hi=2000.0),
                 _P("pixels", "integer", "pixels per line = lines", default=256, lo=16, hi=1024),
-                _P("angle_deg", "number", "scan rotation, anticlockwise (deg)", default=0.0, lo=-180.0, hi=180.0),
+                _P("angle_deg", "number", "scan rotation, clockwise positive (deg)", default=0.0, lo=-180.0, hi=180.0),
                 _P("line_time_s", "number", "time per line, each way (s)", default=0.586, lo=0.02, hi=60.0),
                 _P("direction", "string", "slow-axis direction", default="down", choices=("down", "up")))),
     ActionSpec("set_bias", "Set the sample bias.", (_P("bias_v", "number", "bias (V)", True, lo=-10.0, hi=10.0),)),
