@@ -319,3 +319,43 @@ def test_a_replay_is_built_from_a_ledger_and_checks_its_truth(tmp_path):
     d2 = json.loads(js[len("window.REPLAY = "):-1].replace("<\\/", "</"))
     assert not d2["truth"]["available"] and "adatoms" in d2["truth"]["reason"]
     assert not (page2.parent / "overview.png").exists()
+
+
+# ── an instrument run's own ledger ────────────────────────────────────────────
+def test_an_instrument_run_replays_from_its_own_ledger(tmp_path):
+    """The benchmark instrument's run directory (actions.jsonl, no driver.json) replays: its
+    actions become the steps on the instrument clock, a drag at a low junction resistance
+    says so, the tip's story starts from the ledger's truth_before, and the true sample is
+    rebuilt and checks out."""
+    pytest.importorskip("matplotlib")
+    from stmbench.instrument import Instrument
+    from stmbench.replay.build import build_replay
+    from stmbench.replay.timeline import Ledger, build_timeline
+
+    run = tmp_path / "run"
+    inst = Instrument("P4_atom_positioning_cu111", 0, out_dir=run)
+    r = inst.act("scan", center_x_nm=0.0, center_y_nm=0.0, size_nm=20.0, pixels=64)
+    inst.act("set_bias", bias_v=0.005)
+    inst.act("set_setpoint", current_pa=100000.0)                 # 5 mV / 100 nA = 50 kΩ
+    inst.act("move_tip", x_nm=4.0, y_nm=0.0, speed_nm_s=1.0)
+    inst.act("set_setpoint", current_pa=200.0)
+    inst.report("target_site", 4.0, x_nm=4.0, y_nm=0.0, frame=r["frame"], evidence=[r["frame"]])
+    inst.finish()
+    assert (run / "tip_timeline.json").is_file()
+    ep = json.loads((run / "episode.json").read_text(encoding="utf-8"))
+    assert ep["truth_before"]["sim_s"] == pytest.approx(ep["sim_t0_s"])
+
+    led = Ledger.load(run)
+    assert led.driver and led.driver.get("source") == "actions"
+    tl = build_timeline(led)
+    names = [s["name"] for s in tl["steps"]]
+    assert names == ["scan", "set_bias", "set_setpoint", "move_tip", "set_setpoint", "report_result", "finish"]
+    assert all(a["sim0"] <= a["sim1"] <= b["sim0"] + 1e-9 for a, b in zip(tl["steps"], tl["steps"][1:]))
+    assert tl["steps"][0]["sim1"] > tl["steps"][0]["sim0"] and tl["steps"][0]["result"].startswith("存为 ")
+    assert "50 kΩ" in tl["steps"][3]["caption"] and "拖" in tl["steps"][3]["caption"]
+    assert tl["tip_source"] == "timeline" and tl["atoms"] is not None and tl["budget_s"] == 5400.0
+    assert any(m["kind"] == "report" for m in tl["moments"])
+
+    page = build_replay(run, tmp_path / "replay", single_file=True, log=lambda *a: None)
+    html = page.read_text(encoding="utf-8")
+    assert '"available":true' in html and '"actor":"智能体"' in html
