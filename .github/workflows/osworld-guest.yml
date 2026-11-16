@@ -94,7 +94,9 @@ jobs:
         run: |
           # no xhost of its own here: the autostart command above did it, like the desktop session
           time sudo -u user -H env DISPLAY=:0 STM_START_NO_XHOST=1 /usr/local/bin/stm-start stm_p4_atom_ci
-          sudo -u user -H env DISPLAY=:0 import -window root "$RUNNER_TEMP/console.png"
+          # the agent's account cannot write the runner's temporary directory: shoot to /tmp, then copy
+          sudo -u user -H env DISPLAY=:0 import -window root /tmp/console.png
+          cp /tmp/console.png "$RUNNER_TEMP/console.png"
           sudo -u user -H env DISPLAY=:0 xprop -root _NET_CLIENT_LIST
           for w in $(sudo -u user -H env DISPLAY=:0 xprop -root _NET_CLIENT_LIST | sed 's/.*# //;s/,//g'); do
             sudo -u user -H env DISPLAY=:0 xprop -id "$w" WM_CLASS _NET_WM_STATE
