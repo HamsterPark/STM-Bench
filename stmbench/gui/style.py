@@ -115,6 +115,7 @@ QMainWindow, QWidget#root {{ background: {c['bg']}; }}
 QLabel {{ background: transparent; }}
 QLabel[role="muted"] {{ color: {c['muted']}; }}
 QLabel[role="label"] {{ color: {c['ink']}; font-size: {px(17)}px; }}
+QLabel[role="label"]:disabled {{ color: #8b93a0; }}
 QLabel[role="claim"] {{ color: {c['ink']}; font-size: {px(16)}px; }}
 QLabel[stripe="true"] {{ background: {c['stripe']}; }}
 QLabel[role="overlay"] {{ background: rgba(255, 255, 255, 205); color: {c['warn']}; }}
@@ -146,6 +147,7 @@ QPushButton[role="primary"]:pressed {{ background: {c['accent_dark']}; }}
 QPushButton[role="danger"] {{ background: #fdecea; color: {c['bad']}; border-color: #e0a29c; }}
 QPushButton[role="danger"]:hover {{ background: #fbd9d5; }}
 QPushButton[role="small"] {{ min-height: {px(28)}px; padding: 0 {px(10)}px; font-size: {px(16)}px; }}
+QPushButton[role="tiny"] {{ min-height: {px(20)}px; padding: 0 {px(8)}px; font-size: {px(16)}px; }}
 QPushButton[role="ack"] {{ background: #ffffff; color: {c['bad']}; border: 2px solid #7a1710; min-height: {px(32)}px;
                           padding: 0 {px(14)}px; font-size: {px(18)}px; }}
 QPushButton[role="ack"]:hover {{ background: #ffe9e6; }}
@@ -158,6 +160,7 @@ QPushButton[seg]:checked {{ background: {c['accent']}; color: #ffffff; border-co
 QPushButton[seg]:checked:disabled {{ background: #9db7e3; color: #ffffff; }}
 QLineEdit {{ background: {c['field']}; border: 1px solid {c['line_strong']}; border-radius: {px(5)}px;
             padding: 0 {px(6)}px; min-height: {px(30)}px; selection-background-color: {c['accent']}; selection-color: #ffffff; }}
+QLineEdit:disabled {{ background: #eceef1; color: #8b93a0; border-color: {c['line']}; }}
 QLineEdit:focus {{ border: 2px solid {c['accent']}; padding: 0 {px(5)}px; }}
 QRadioButton {{ spacing: {px(8)}px; min-height: {px(28)}px; }}
 QRadioButton::indicator {{ width: {px(18)}px; height: {px(18)}px; }}

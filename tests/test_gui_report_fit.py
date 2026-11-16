@@ -27,9 +27,13 @@ def clipped(win) -> list[str]:
             if w.isVisible() and w.mapTo(rep, w.rect().bottomRight()).x() >= edge]
 
 
+@pytest.mark.parametrize("scenario", ["P4_atom_positioning_cu111", "P1_barth1990_au111", "P3_corral_cu111"])
 @pytest.mark.parametrize("lang", ["en", "zh"])
-def test_every_control_of_the_report_form_is_inside_the_left_column_before_and_after_finish(fonts, open_window, lang):
-    win = open_window(lang)
+def test_every_control_of_the_report_form_is_inside_the_left_column_before_and_after_finish(fonts, open_window, lang,
+                                                                                            scenario):
+    """P1 has the most claims (four, the tallest form), P3 three claims of which none takes a position (its position
+    fields are greyed), P4 one. The evidence field has a row of its own, with its button on the label's line (2026-11-16)."""
+    win = open_window(lang, scenario=scenario)
     win.resize(1920, 1080)
     win.sidebar.show_tab("report")
     shots.settle(win)
@@ -47,3 +51,4 @@ def test_every_control_of_the_report_form_is_inside_the_left_column_before_and_a
     assert rep.finish_message.mapTo(rep, rep.finish_message.rect().topLeft()).x() >= 0
     assert win.sidebar.width() >= win.sidebar.minimumSizeHint().width()
     assert win.center.width() >= win.center.minimumSizeHint().width()                # the image view keeps its room
+
