@@ -22,6 +22,9 @@ initial:
   spectroscopy:
     condition: {stab_bias_v: 0.1, stab_setpoint_a: 1.0e-9, start_v: -0.6, end_v: 0.4,
                 num_points: 220, label: "P3 corral centre"}
+  # the mechanisms that leave no safe place at the instrument (stmsim/physics/switches.py), as
+  # P4 has them: since 2026-11-16 the STM tasks run on one instrument (see the notes)
+  physics: {tip_changes_outside_scans: true, tip_recovery: true, tip_anisotropy: true, crash_over_range: true}
 faults: []
 task: |
   样品是 Cu(111)，扫描坐标原点附近 60 nm 内有一圈 Fe 原子排成的圆形围栏，仪器已在隧穿态；
@@ -125,3 +128,15 @@ notes: |
   Imaging is at 10 mV / 1 nA = 10 MΩ, three to four orders above the drawn pull threshold, so
   the ring survives being scanned. An agent that images at a manipulation resistance will take
   its own corral apart, and the truth will say so.
+
+  **Tip physics as P4's (2026-11-16, ``initial.physics``).** P4 switched four tip mechanisms on
+  on 2026-10-27 (see its notes) and no other scenario did, because only P4 then had a scripted
+  baseline to check them with. P3's two scenarios now switch the same four on: they become
+  OSWorld-Science tasks beside P4's (a ladder: one atom moved, a corral measured, a corral
+  repaired and measured), and the instrument should not change with the paper. For this paper the
+  switch that matters most is ``tip_changes_outside_scans``: with it off, an unstable tip could
+  change only inside scan rows and drags, so a spectrum was a safe place and the evidence rule
+  "no sudden jump along the sweep" was hardly ever tested. No hidden range, tolerance or rule
+  changed, and the switches draw from their own streams, so every hidden draw is the one it was.
+  The calibration above was measured with the switches off; the reference solution's re-run on
+  this physics is recorded with the P3 scripted baseline (docs/DESIGN.md, section 9.5).

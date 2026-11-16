@@ -22,6 +22,9 @@ initial:
   spectroscopy:
     condition: {stab_bias_v: 0.1, stab_setpoint_a: 1.0e-9, start_v: -0.6, end_v: 0.4,
                 num_points: 220, label: "P3 corral centre"}
+  # the mechanisms that leave no safe place at the instrument (stmsim/physics/switches.py), as
+  # P4 has them: since 2026-11-16 the STM tasks run on one instrument (see P3_corral_cu111's notes)
+  physics: {tip_changes_outside_scans: true, tip_recovery: true, tip_anisotropy: true, crash_over_range: true}
 faults: []
 task: |
   样品是 Cu(111)，扫描坐标原点附近 60 nm 内有一圈 Fe 原子排成的圆形围栏，环上缺了几个原子，
