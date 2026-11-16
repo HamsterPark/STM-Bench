@@ -713,7 +713,7 @@ n | reproduced k/n | Wilson 95 % | 平均验证 claim 数 | sim 机时中位数 
 3. **扫描角的正方向是顺时针。** `SCAN_ANGLE`（`angle_deg`）为正，表示扫描框相对台面坐标（x 向右、y 向上）顺时针转 θ：
    帧内向右的单位矢量在台面系里是 (cosθ, −sinθ)，向上的是 (sinθ, cosθ)；帧内 (u, v) 到台面的换算是
    `x = cx + u·cosθ + v·sinθ`、`y = cy − u·sinθ + v·cosθ`。这个换算以 `ScanSettings.pixel_xy` 为准；其余读 `angle_deg` 的地方
-   （判分的覆盖判断与行偏移、`render.pixel_to_scan_nm`、`analysis.adatoms.to_scan_nm`、回放的帧轮廓与真值图、快扫刮出的划痕方向）
+   （判分的覆盖判断与行偏移、`render.pixel_to_scan_nm`、`analysis.adatoms.to_scan_nm`、回放的帧轮廓与真值图、快扫刮出的划痕方向，以及桌面控制台的 `frame_view.scan_to_pixel`、网页控制台的 `pointFrom`）
    各自按同一约定实现。`tests/test_scan_geometry.py` 用与实现无关的写法（复数乘 e^(−iθ)）钉住符号，再逐个核对这些读者与它一致；
    `tests/test_render.py` 里“读帧换算与判分覆盖互为逆”的测试与符号无关，不能当这条的判据。
    这是建模取舍（2026-11-02）：取与真实控制器软件的帧约定一致的方向，**不是在本模拟器上测出来的**。此前的版本按逆时针渲染，
