@@ -69,6 +69,8 @@ GHOST_MIN = 0.085
 #: where the shallow pokes go and where a pulse is applied, from home (nm)
 POKE_AWAY_NM, PULSE_AWAY_NM = 130.0, 170.0
 MAX_ROUNDS = 12
+#: spectra taken at the centre at most, to have three without a jump
+MAX_SPECTRA = 6
 #: the bare spot lies at least this far beyond the ring (nm) and this far from anything else
 BARE_BEYOND_NM, BARE_CLEAR_NM = 8.0, 6.0
 #: a bare-terrace spectrum this far from flat above the band onset (relative) carries a tip feature
@@ -164,6 +166,23 @@ def ring_of(frame: dict) -> dict:
         return find_ring(frame["array"], float(frame["nm_per_px"]), search_nm=2.5)
     except ValueError:
         return corral_radius(frame["array"], float(frame["nm_per_px"]))
+
+
+def spectrum_outliers(curves: list[np.ndarray], *, floor: float = 0.06, factor: float = 3.0) -> set[int]:
+    """Spectra that differ from the others by more than noise: one in which the tip changed
+    mid-sweep steps from there on (a jump the judge's evidence rule rejects), and then departs
+    from the median of its repeats by a good part of the curve's range, where repeats differ by
+    noise alone (a few percent of the range after smoothing). Needs at least three spectra."""
+    from ..analysis.spectra import smooth
+
+    if len(curves) < 3:
+        return set()
+    sm = np.vstack([smooth(c, 15) for c in curves])
+    med = np.median(sm, axis=0)
+    span = float(np.ptp(med)) or 1.0
+    dev = np.sqrt(np.mean((sm - med) ** 2, axis=1)) / span
+    lim = max(floor, factor * float(np.median(dev)))
+    return {int(k) for k in np.flatnonzero(dev > lim)}
 
 
 def _levelled(frame: dict) -> np.ndarray:
@@ -364,12 +383,24 @@ class Corral:
         centre = _to_scan(f, res["centre_nm"])
         self.log["centre_shift_nm"] = [round(centre[0] - cx, 2), round(centre[1] - cy, 2)]
         _stabilise(v)
-        names, curves = [], []
-        for _ in range(3):
+        names, curves, sps = [], [], []
+        dropped = 0
+        for attempt in range(MAX_SPECTRA):
             ops.go(*centre)
             n, sp = _sts(v, ops)
             names.append(n)
             curves.append(sp["didv"])
+            sps.append(sp)
+            if len(curves) >= 3:
+                bad = spectrum_outliers(curves)
+                if len(curves) - len(bad) >= 3:
+                    break
+        keep = [k for k in range(len(curves)) if k not in spectrum_outliers(curves)]
+        dropped = len(curves) - len(keep)
+        if len(keep) < 3:
+            raise RuntimeError("the spectra at the centre keep jumping")
+        names, curves, sp = [names[k] for k in keep], [curves[k] for k in keep], sps[keep[-1]]
+        self.log["spectra_dropped"] = dropped
         peaks = resonance_peaks(sp["v"], np.median(np.vstack(curves), axis=0), e0)
         peaks_v = [p["v"] for p in peaks]
         labels = label_levels(peaks_v, e0, res["radius_nm"])

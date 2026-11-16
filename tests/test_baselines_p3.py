@@ -147,3 +147,13 @@ def test_a_ring_the_survey_misses_is_looked_for_in_a_wider_one():
     L = c.survey()
     assert "wide_survey" in log
     assert np.hypot(L["centre"][0] - 15.0, L["centre"][1] - 8.0) < 3.0 and abs(L["radius_nm"] - 8.9) < 0.3
+
+
+def test_a_spectrum_in_which_the_tip_changed_is_told_from_its_repeats():
+    v = np.linspace(-0.55, 0.15, 351)
+    rng = np.random.default_rng(2)
+    base = 1.0 + 0.5 * np.exp(-((v + 0.2) / 0.03) ** 2)
+    good = [base + rng.normal(0, 0.05, v.size) for _ in range(3)]
+    jumped = base * np.where(v > -0.1, 0.6, 1.0) + rng.normal(0, 0.05, v.size)
+    assert p3.spectrum_outliers(good) == set()
+    assert p3.spectrum_outliers(good + [jumped]) == {3}
