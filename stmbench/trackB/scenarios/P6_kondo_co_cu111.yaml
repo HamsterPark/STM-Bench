@@ -60,7 +60,10 @@ notes: |
   The tolerances (Γ 15 %, q 0.15, ε_K 1.0 meV) are PROVISIONAL until the privileged reference
   solution calibrates them (about 2x its p90, never widened to let a baseline pass).
 
-  Chance audit (best fixed sheet): see "Chance audit result" below, filled in from the audit run.
+  Chance audit (best fixed sheet, exact, seeds 0-299, 2026-11-16, provisional tolerances): Gamma 30.7 %
+  (best constant 4.49 meV), q 33.0 % (0.52), eps_K 29.7 % (0.08 meV), all three 5.0 % (design target
+  at most 5 %). The joint figure sits on the limit: the reference solution's calibration may tighten
+  a tolerance, which lowers it, but must not widen one.
 success: {kind: claims_verified}
 hidden:
   kondo:
