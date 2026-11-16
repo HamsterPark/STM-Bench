@@ -43,7 +43,7 @@ from pathlib import Path
 import numpy as np
 
 from ..analysis.adatoms import locate
-from ..analysis.corral import corral_radius, ghost_strength, label_levels, locate_corral, ring_width_nm
+from ..analysis.corral import corral_radius, find_ring, ghost_strength, label_levels, locate_corral, ring_width_nm
 from ..analysis.drift import frame_shift
 from ..analysis.spectra import band_edge, resonance_peaks
 from ..analysis.tip import diagnose
@@ -157,6 +157,17 @@ def tip_feature(v: np.ndarray, didv: np.ndarray, e0_v: float) -> float:
     return float(np.max(np.abs(y[sel] - med)) / med) if med > 0 else 0.0
 
 
+def ring_of(frame: dict) -> dict:
+    """Centre and radius of the ring in a frame centred on it within a nanometre or two: the
+    circle most bright pixels vote for (:func:`~stmbench.analysis.corral.find_ring`; spare atoms
+    and the standing-wave ring inside the corral drew a plain fit onto a smaller circle on
+    seed 32, 0.25 nm off), the plain fit when that finds none."""
+    try:
+        return find_ring(frame["array"], float(frame["nm_per_px"]), search_nm=2.5)
+    except ValueError:
+        return corral_radius(frame["array"], float(frame["nm_per_px"]))
+
+
 def _levelled(frame: dict) -> np.ndarray:
     """The topograph with the rows levelled against each other (a tip change steps every row after it)."""
     z = np.asarray(frame["array"], float)
@@ -257,6 +268,8 @@ class Corral:
         try:
             L = find_corral(f)
         except NoRing as exc:
+            if self.L is not None:                       # a ring was seen before: this tip no longer images it
+                raise
             self.log.setdefault("wide_survey", []).append(str(exc))
             f, _ = self.ops.frame(cx, cy, WIDE_NM, WIDE_PX, WIDE_NM / 400.0, retakes=1)
             L = find_corral(f)
@@ -268,8 +281,11 @@ class Corral:
         """Survey, judge the tip, and condition until it images well."""
         rounds = 0
         for k in range(MAX_ROUNDS + 1):
-            L = self.survey()
-            j = judge(self.frame, L)
+            try:
+                L = self.survey()
+                j = judge(self.frame, L)
+            except NoRing as exc:                        # after a pulse: too blunt to image the ring at all
+                j = {"verdict": "blunt", "no_ring": str(exc)}
             self.log.setdefault("judged", []).append({kk: (round(vv, 3) if isinstance(vv, float) else vv) for kk, vv in j.items()})
             if j["verdict"] == "ok" and not self.ops.unstable():
                 break
@@ -313,7 +329,7 @@ class Corral:
         dt_min = (frames[1]["t_start_s"] - frames[0]["t_start_s"]) / 60.0
         vx, vy = dx / dt_min, dy / dt_min
         self.v.act("drift_comp", on=True, vx_nm_per_min=vx, vy_nm_per_min=vy)
-        self.centre = _to_scan(frames[1], corral_radius(frames[1]["array"], frames[1]["nm_per_px"])["centre_nm"])
+        self.centre = _to_scan(frames[1], ring_of(frames[1])["centre_nm"])
         return vx, vy
 
     def bare_spectrum(self) -> tuple[float, float]:
@@ -346,7 +362,7 @@ class Corral:
         cx, cy = self.centre
         ops.go(cx, cy)
         f, _ = ops.frame(cx, cy, RADIUS_NM, RADIUS_PX, RADIUS_LINE_S)
-        res = corral_radius(f["array"], f["nm_per_px"])
+        res = ring_of(f)
         centre = _to_scan(f, res["centre_nm"])
         self.log["centre_shift_nm"] = [round(centre[0] - cx, 2), round(centre[1] - cy, 2)]
         _stabilise(v)
