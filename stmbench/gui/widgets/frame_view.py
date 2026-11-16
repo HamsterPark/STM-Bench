@@ -97,7 +97,8 @@ def scan_to_pixel(geom: dict, x_nm: float, y_nm: float) -> tuple[float, float]:
     a = math.radians(float(geom.get("angle_deg", 0.0) or 0.0))
     c, s = math.cos(a), math.sin(a)
     dx, dy = x_nm - float(geom["cx_nm"]), y_nm - float(geom["cy_nm"])
-    u, v = c * dx + s * dy, -s * dx + c * dy
+    # the inverse of the clockwise turn in pixel_to_scan_nm (x = cx + c*u + s*v, y = cy - s*u + c*v)
+    u, v = c * dx - s * dy, s * dx + c * dy
     return (u + w / 2) * int(geom["nx"]) / w - 0.5, (h / 2 - v) * int(geom["ny"]) / h - 0.5
 
 

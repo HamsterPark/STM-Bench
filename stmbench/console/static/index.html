@@ -481,7 +481,7 @@ function pointFrom(ev, img) {
   const u = -L / 2 + fx * L, v = L / 2 - fy * L;
   const a = ((f.angle_deg || 0) * Math.PI) / 180, c = Math.cos(a), s = Math.sin(a);
   return { fx, fy, col: fx * n - 0.5, row: fy * n - 0.5, px: Math.min(n - 1, Math.floor(fx * n)), py: Math.min(n - 1, Math.floor(fy * n)),
-           x: f.center_nm[0] + c * u - s * v, y: f.center_nm[1] + s * u + c * v };
+           x: f.center_nm[0] + c * u + s * v, y: f.center_nm[1] - s * u + c * v };  // positive angle_deg turns the frame clockwise, as render.pixel_to_scan_nm
 }
 function hover(ev) {
   const p = pointFrom(ev, ev.currentTarget); if (!p) return;
