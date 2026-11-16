@@ -7,8 +7,9 @@ from spectra (:mod:`stmbench.analysis.spectra`), the radius from a topograph
 
 Protocol:
 
-1. a tip that is unstable, carries an adsorbate (its own states put peaks into every
-   spectrum), or is blunt or multiple (it blurs or doubles the ring) is conditioned ~150 nm
+1. a tip that is unstable, carries an adsorbate (its own state puts a peak into the spectra
+   when it falls inside the sweep: ``Tip.apply_condition``), or is blunt or multiple (it blurs
+   or doubles the ring) is conditioned ~150 nm
    from the ring: a 4 V pulse sprays clusters ~40 nm around;
    back at the ring, five minutes for the creep of that long move to settle;
 2. lateral drift from two frames 30 s apart, compensated; then at once one 28 nm frame of the
