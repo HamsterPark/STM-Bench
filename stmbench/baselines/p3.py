@@ -36,13 +36,11 @@ What the baseline reaches is what a script reaches from the observations alone
 """
 from __future__ import annotations
 
-import math
 import re
 from pathlib import Path
 
 import numpy as np
 
-from ..analysis.adatoms import locate
 from ..analysis.corral import corral_radius, find_ring, ghost_strength, label_levels, locate_corral, ring_width_nm
 from ..analysis.drift import frame_shift
 from ..analysis.spectra import band_edge, resonance_peaks
