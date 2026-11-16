@@ -14,9 +14,9 @@ import statistics
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor
 
-from . import p4
+from . import p4, p6
 
-PAPERS = {"P4": p4.run}
+PAPERS = {"P4": p4.run, "P6": p6.run}
 
 
 def _one(args: tuple[str, int]) -> dict:
