@@ -1731,7 +1731,9 @@ def test_what_the_viewer_the_profile_and_the_data_tab_say_is_not_cut_off(fonts, 
     for lst in (shots.widget(win, "data.frames"), shots.widget(win, "data.spectra")):
         assert lst.count() == 1 and not lst.horizontalScrollBar().isVisible()
         text = lst.item(0).text().split(chr(10))
-        assert len(text) == 3                                                           # three lines, each whole
+        # each whole: a frame is three lines, a spectrum five (name; kind and time; the sweep; the bias and setpoint it
+        # started from; the tip and the points)
+        assert len(text) == (5 if lst.objectName() == "data.spectra" else 3)
         lines_fit(lst, text, lst.viewport().width() - 2 * style.px(6) - 2)
     assert "centre (-12.534, -5.607) nm" in shots.widget(win, "data.frames").item(0).text()
 

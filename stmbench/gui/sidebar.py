@@ -365,6 +365,7 @@ class DataTab(QWidget):
         self.frames.itemClicked.connect(lambda it: self.frame_clicked.emit(it.data(Qt.ItemDataRole.UserRole)))
         for w in (self.spectra, self.traces):                 # a trace is read from the instrument as a spectrum is
             w.itemClicked.connect(lambda it: self.spectrum_clicked.emit(it.data(Qt.ItemDataRole.UserRole)))
+        self._junction: dict[str, dict] = {}
         self.set_data([], [])
 
     def _list(self, name: str) -> StepList:
@@ -380,15 +381,18 @@ class DataTab(QWidget):
         w.setTextElideMode(Qt.TextElideMode.ElideNone)
         return w
 
-    def set_data(self, frames: list[dict], spectra: list[dict]) -> None:
-        """``spectra`` is the instrument's list: the move traces are in it, with ``kind`` "move"."""
+    def set_data(self, frames: list[dict], spectra: list[dict], junction: dict[str, dict] | None = None) -> None:
+        """``spectra`` is the instrument's list: the move traces are in it, with ``kind`` "move". ``junction`` is what
+        the window knows of how each spectrum was taken (:func:`~stmbench.gui.fmt.sweep_text` and
+        :func:`~stmbench.gui.fmt.junction_text` read it), by name."""
+        self._junction = junction or {}
         traces = [s for s in spectra if s.get("kind") == "move"]
         spectra = [s for s in spectra if s.get("kind") != "move"]
         self.frames_title.setText(f"{tr('frames', self.lang)} ({len(frames)})")
         self.spectra_title.setText(f"{tr('spectra', self.lang)} ({len(spectra)})")
         self.traces_title.setText(f"{tr('move_traces', self.lang)} ({len(traces)})")
         self._fill(self.frames, [self._frame_lines(f) for f in reversed(frames)])
-        self._fill(self.spectra, [self._spectrum_lines(s) for s in reversed(spectra)])
+        self._fill(self.spectra, [self._spectrum_lines(s, self._junction.get(s["spectrum"])) for s in reversed(spectra)])
         self._fill(self.traces, [self._trace_lines(s) for s in reversed(traces)])
 
     @staticmethod
@@ -401,8 +405,11 @@ class DataTab(QWidget):
                              f"centre ({fmt.num(cx, 5)}, {fmt.num(cy, 5)}) nm"])
 
     @staticmethod
-    def _spectrum_lines(s: dict) -> tuple[str, list[str]]:
-        return (s["spectrum"], [s["spectrum"], f"{s['kind']} · {fmt.hms(s['t_s'])}",
+    def _spectrum_lines(s: dict, junction: dict | None = None) -> tuple[str, list[str]]:
+        """Name; kind and time; the sweep and the junction it started from (when the window knows them); the tip and
+        the points."""
+        extra = [t for t in (fmt.sweep_text(junction), fmt.junction_text(junction)) if t]
+        return (s["spectrum"], [s["spectrum"], f"{s['kind']} · {fmt.hms(s['t_s'])}", *extra,
                                 f"tip ({s['tip_nm'][0]:.3f}, {s['tip_nm'][1]:.3f}) nm · {s['points']} points"])
 
     @staticmethod

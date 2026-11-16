@@ -585,8 +585,9 @@ class CenterColumn(QWidget):
         self._show_readout("")
         self.strip.set_current(frame["frame"])
 
-    def show_spectrum(self, spec: dict, axes: tuple[str, str] | None = None) -> None:
-        """Show a spectrum, or a move trace (``kind`` "move"), plotted against the columns the reader picks."""
+    def show_spectrum(self, spec: dict, axes: tuple[str, str] | None = None, junction: dict | None = None) -> None:
+        """Show a spectrum, or a move trace (``kind`` "move"), plotted against the columns the reader picks.
+        ``junction``: the sweep and the starting bias and setpoint the window noted for it (:func:`fmt.sweep_text`)."""
         self._spec = spec
         xcols, ycols = axis_columns(spec)
         if not xcols or not ycols:
@@ -601,18 +602,21 @@ class CenterColumn(QWidget):
         self.stack.setCurrentIndex(1)
         self.strip.set_current("")
         self._show_readout("")
-        self.info.setText(self._spectrum_info(spec, int(np.size(spec[xcols[0]]))))
+        self.info.setText(self._spectrum_info(spec, int(np.size(spec[xcols[0]])), junction))
         self._draw_spectrum(xk, yk)
 
     @staticmethod
-    def _spectrum_info(spec: dict, points: int) -> str:
+    def _spectrum_info(spec: dict, points: int, junction: dict | None = None) -> str:
         """Two lines: the record's name and when it was taken, then what it is. A move trace also says what the
         instrument recorded of the move (where from and to, how fast, at what bias and setpoint, feedback on or
         off), the file's own header, and nothing that was read off the curves."""
         first = f"{spec['name']}   at {fmt.hms(spec['t_s'])}"
         if spec.get("kind") != "move":
             x, y = spec["tip_nm"]
-            return f"{first}\n{spec['kind']} · tip ({x:.3f}, {y:.3f}) nm · {points} points"
+            # the sweep beside the name, the junction it started from beside the kind: two lines, as before
+            first = " · ".join(t for t in (first, fmt.sweep_text(junction)) if t)
+            kind = " · ".join(t for t in (spec["kind"], fmt.junction_text(junction)) if t)
+            return f"{first}\n{kind} · tip ({x:.3f}, {y:.3f}) nm · {points} points"
         junction = [fmt.volts(spec["bias_v"]) if "bias_v" in spec else "",
                     fmt.picoamps(spec["setpoint_pa"]) if "setpoint_pa" in spec else "",
                     f"feedback {fmt.on_off(spec['feedback'])}" if "feedback" in spec else ""]

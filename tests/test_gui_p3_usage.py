@@ -3,6 +3,7 @@ worked, but nothing on the screen said how. Each is about how the software is re
 
 1. The Report form greys out x_nm, y_nm and frame for a claim the rule card gives no position.
 2. The evidence field has the form's width, and the whole list of files is shown under it when it does not fit.
+3. A spectrum's sweep and the bias and setpoint it started from are on the viewer's title and the Data page.
 """
 from __future__ import annotations
 
@@ -10,10 +11,10 @@ import pytest
 
 pytest.importorskip("PySide6")
 
-from stmbench.gui import shots  # noqa: E402
+from stmbench.gui import fmt, shots  # noqa: E402
 from stmbench.gui.labels import one, tr  # noqa: E402
 from tests.gui_helpers import app, run_button  # noqa: E402, F401
-from tests.test_gui_app import fonts, open_left, open_window  # noqa: E402, F401
+from tests.test_gui_app import fonts, open_left, open_right, open_window  # noqa: E402, F401
 
 P3 = "P3_corral_cu111"
 P1 = "P1_barth1990_au111"
@@ -81,3 +82,47 @@ def test_the_evidence_field_has_the_form_width_and_the_whole_list_is_shown_when_
     assert full.mapTo(rep, full.rect().topLeft()).y() >= ev.mapTo(rep, ev.rect().bottomLeft()).y()   # under the field
     ev.setText("")
     assert not full.isVisible() and full.text() == ""
+
+
+def test_a_spectrum_says_its_sweep_and_where_the_junction_stood_when_it_began(open_window):
+    win = open_window("en")
+    start = win._status
+    assert start is not None
+    open_right(win, "spectroscopy")
+    shots.fill(win, {"act.sts.v_start": "-0.2", "act.sts.v_end": "0.15", "act.sts.points": "16"})
+    run_button(win, "run.sts")
+    shots.settle(win)
+    name = win.viewed[1]
+    sweep = "sweep -0.200 to 0.150 V"
+    junction = f"from {fmt.volts(start['bias_v'])} · {fmt.picoamps(start['setpoint_pa'])}"
+    title = win.center.info.text()
+    assert sweep in title and junction in title and f"{name}" in title and title.endswith("16 points")
+    assert len(title.splitlines()) == 2
+    open_left(win, "data")
+    item = win.sidebar.data.spectra.item(0).text()
+    assert sweep in item and junction in item and item.splitlines()[0] == name
+    # a second sweep from another bias: the junction is read before each call, not once
+    open_right(win, "operate")
+    shots.fill(win, {"act.set_bias.bias_v": "0.3"})
+    run_button(win, "run.set_bias")
+    shots.settle(win)
+    open_right(win, "spectroscopy")
+    run_button(win, "run.sts")
+    shots.settle(win)
+    assert f"from {fmt.volts(0.3)}" in win.center.info.text()
+    assert junction in win.sidebar.data.spectra.item(1).text()           # the first one, now second in the list, unchanged
+    win.request_spectrum(name)                                           # shown again by a click: still told
+    shots.settle(win)
+    assert sweep in win.center.info.text() and junction in win.center.info.text()
+
+
+def test_a_z_spectrum_says_its_sweep_too_and_a_trace_is_left_as_it_is(open_window):
+    win = open_window("en")
+    assert fmt.sweep_text({"sweep_nm": 0.5}) == "sweep 0.5 nm" and fmt.sweep_text(None) == ""
+    assert fmt.junction_text({"bias_v": 0.05}) == "" and fmt.junction_text({}) == ""
+    c = win.center
+    trace = {"name": "move_0001.dat", "kind": "move", "t_s": 3.0, "tip_nm": [1.0, 2.0], "bias_v": 0.1,
+             "setpoint_pa": 50.0, "feedback": True, "dist": [0.0, 1.0], "z": [0.0, 1.0], "i": [1.0, 1.0], "t": [0.0, 1.0],
+             "from_nm": [0.0, 0.0], "to_nm": [1.0, 2.0], "speed_nm_s": 1.0}
+    plain = c._spectrum_info(trace, 2)
+    assert c._spectrum_info(trace, 2, {"v_start": 0.0, "v_end": 1.0, "bias_v": 9.0, "setpoint_pa": 9.0}) == plain

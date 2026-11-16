@@ -95,6 +95,8 @@ class MainWindow(QMainWindow):
         self._running_job: Job | None = None
         self._refusal: jobs.Refusal | None = None        # the refusal the band shows: the console holds while it is there
         self._state: dict | None = None                  # the last status(): what the On / Off buttons show
+        self._status: dict | None = None                 # the last status() read: the junction the next call starts from
+        self._junction: dict[str, dict] = {}             # per spectrum: the sweep sent and the bias and setpoint it started at
         self._finished = False
         self._t_s = 0.0                                  # the last instrument time the window was told
         self._data: dict = {"frames": [], "spectra": []}
@@ -318,7 +320,9 @@ class MainWindow(QMainWindow):
             self._show_state()
 
     def _apply(self, job: Job, out: jobs.Outcome) -> None:
+        before = self._status                            # what the junction was when this call began
         if out.status:
+            self._status = out.status
             self._t_s = float(out.status["instrument_time_s"])
             self.status.set_status(out.status)
             self._state = fmt.instrument_state(out.status)
@@ -365,6 +369,7 @@ class MainWindow(QMainWindow):
                 self._want = ("frame", out.frame["frame"], "z", "forward")
                 self._display_frame(out.frame)
             elif out.spectrum is not None:
+                self._note_junction(out, before)
                 self._want = ("spectrum", out.spectrum["name"])
                 self._display_spectrum(out.spectrum)
             lists = fmt.numeric_lists(out.reply)
@@ -381,6 +386,19 @@ class MainWindow(QMainWindow):
             self.sidebar.report.set_finished()
             self._succeed(tr("over", self.lang))
             self.sidebar.log.done(job.id, True, str(out.reply), self._t_s)
+
+    def _note_junction(self, out: jobs.Outcome, before: dict | None) -> None:
+        """Remember how a spectrum was taken, from what this window sent (the sweep) and had read (the bias and setpoint
+        before the call), so that the viewer and the Data page can tell spectra apart without the Log (p3check1,
+        finding 4). Nothing is asked of the instrument: a move trace is shown as it is."""
+        keys = {"sts": ("v_start", "v_end"), "zspec": ("sweep_nm",)}.get(out.label)
+        if keys is None:
+            return
+        info = {k: out.args[k] for k in keys if k in out.args}
+        if before:
+            info.update(bias_v=before["bias_v"], setpoint_pa=before["setpoint_pa"])
+        self._junction[out.spectrum["name"]] = info
+        self.sidebar.data.set_data(self._data["frames"], self._data["spectra"], self._junction)
 
     def _show_instrument_state(self) -> None:
         if self._state is not None:
@@ -400,7 +418,7 @@ class MainWindow(QMainWindow):
     def _apply_data(self, data: dict) -> None:
         self._data = data
         self.center.set_frame_starts({f["frame"]: f["t_start_s"] for f in data["frames"]})
-        self.sidebar.data.set_data(data["frames"], data["spectra"])
+        self.sidebar.data.set_data(data["frames"], data["spectra"], self._junction)
         self._refresh_thumbs()
 
     def _refresh_thumbs(self) -> None:
@@ -430,7 +448,7 @@ class MainWindow(QMainWindow):
 
     def _display_spectrum(self, spec: dict) -> None:
         self._viewed = ("spectrum", spec["name"])
-        self.center.show_spectrum(spec)
+        self.center.show_spectrum(spec, junction=self._junction.get(spec["name"]))
         self.sidebar.report.set_viewed(spec["name"])
         self.sidebar.data.select("spectrum", spec["name"])
         self._refresh_thumbs()
