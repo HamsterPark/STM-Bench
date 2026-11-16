@@ -34,9 +34,9 @@ def test_a_reduced_reference_run_has_its_plumbing_in_order():
     assert set(r["values"]) == set(r["truth"]) == {"gamma_mev", "q_fano", "e_k_mev"}
     assert r["values"] != r["truth"]                       # measured, not copied
     assert r["sweeps"] == 2 and len(r["sweep_near"]) == 2
-    kinds = [k for k, _ in r["sweep_near"]]
-    assert kinds[0] == "adatom" and r["sweep_near"][0][1] <= 0.15     # the sweep on the atom
-    assert r["sweep_near"][1][1] >= 2.0 or kinds[1] != "adatom"       # the one on bare surface
+    on, off = r["sweep_near"]
+    assert on["near_kind_apex"] == "adatom" and on["near_nm_apex"] <= 0.15     # the sweep on the atom
+    assert off["near_kind_apex"] != "adatom" or off["near_nm_apex"] >= 2.0     # the one on bare surface
     assert r["instrument_s"] < 1.5 * 3600.0
     assert "attenuation" in r and 0.8 <= r["attenuation"] <= 1.0
     # every claim's evidence was found: the reports cite the two sweeps (sts_pair)

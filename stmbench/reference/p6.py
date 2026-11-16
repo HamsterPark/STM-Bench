@@ -145,7 +145,8 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str | Path = 
     truth = w.truth()["kondo"]
     t_of = {"gamma_mev": float(truth["gamma_mev"]), "q_fano": float(truth["q"]), "e_k_mev": float(truth["e_k_mev"])}
     lead_dx, lead_dy = _lead_offset(w)
-    near = [(r["near_kind"], float(r["near_nm"])) for r in w.sts_records]     # what the judge reads
+    near = [{k: r[k] for k in ("near_kind", "near_nm", "near_kind_apex", "near_nm_apex", "near_nm_apex_end", "apex_offset_nm") if k in r}
+            for r in w.sts_records]                       # what sts_pair reads
     return {"paper": "P6", "seed": int(seed), "success": bool(out["success"]),
             "partial": float(out.get("partial", 0.0)),
             "values": {k: float(v_) for k, v_ in got.items()}, "truth": t_of,
