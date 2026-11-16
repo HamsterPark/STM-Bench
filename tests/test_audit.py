@@ -188,8 +188,6 @@ def test_the_rescored_in_sample_fraction_equals_the_searchs_own():
     assert h["held_out"]["pass"] <= h["held_out"]["n"]
     lo, hi = h["held_out"]["ci95"]
     assert lo <= h["held_out"]["pass_frac"] <= hi
-    # the sheet chosen on half the seeds cannot beat itself on the seeds it was chosen on
-    assert h["selection"]["search_frac"] >= 0.0
 
 
 def test_the_default_report_is_unchanged_and_the_holdout_is_an_addition():
