@@ -1,0 +1,58 @@
+#!/bin/bash
+# stm-start <task_id>: ask the console's launcher (a service of the account `stm`) to open the instrument for a
+# task, and wait until its window is on the screen. This is the only thing the agent's account ever does to start
+# an episode: it writes a task id into a FIFO and handles nothing else. Exit status: 0 the console is up,
+# 1 the launcher refused or is not running (the reason is printed), 2 usage, 3 not up in time.
+#
+# Overrides, for tests: STM_BENCH_RUN_DIR (default /run/stm-bench), STM_START_WAIT_S (default 90),
+# STM_START_NO_XHOST=1 (do not open the display to the service account).
+set -u
+RUN=${STM_BENCH_RUN_DIR:-/run/stm-bench}
+WAIT=${STM_START_WAIT_S:-90}
+
+if [ $# -ne 1 ] || ! [[ $1 =~ ^[a-z][a-z0-9_]{0,47}$ ]]; then
+  echo "usage: stm-start <task_id>   (lower case letters, digits and underscores)" >&2
+  exit 2
+fi
+ID=$1
+
+if [ ! -p "$RUN/start" ]; then
+  echo "stm-start: the console launcher is not running ($RUN/start is missing)" >&2
+  exit 1
+fi
+
+# Already up for this very task (a second call): nothing to do.
+if [ -f "$RUN/ready" ] && [ "$(cat "$RUN/task" 2>/dev/null)" = "$ID" ]; then
+  echo "stm-start: the console is already up"
+  exit 0
+fi
+
+# Let the service account draw on this account's display (the desktop session also does it at login:
+# /etc/xdg/autostart/stm-bench-xhost.desktop). Best effort: without it the console cannot open its window,
+# and the launcher says so.
+if [ "${STM_START_NO_XHOST:-0}" != 1 ] && command -v xhost >/dev/null 2>&1; then
+  DISPLAY=${DISPLAY:-:0} xhost +SI:localuser:stm >/dev/null 2>&1 || true
+fi
+
+STAMP=$(mktemp) || exit 1
+trap 'rm -f "$STAMP"' EXIT
+sleep 0.01                                # the request is newer than the stamp, whatever the clock's grain
+if ! timeout 10 bash -c 'printf "%s\n" "$1" > "$2"' _ "$ID" "$RUN/start"; then
+  echo "stm-start: could not write the request into $RUN/start" >&2
+  exit 1
+fi
+
+END=$((SECONDS + WAIT))
+while [ "$SECONDS" -lt "$END" ]; do
+  if [ -f "$RUN/error" ] && [ "$RUN/error" -nt "$STAMP" ]; then
+    echo "stm-start: $(head -c 300 "$RUN/error" | head -1)" >&2
+    exit 1
+  fi
+  if [ -f "$RUN/ready" ] && [ "$RUN/ready" -nt "$STAMP" ] && [ "$(cat "$RUN/task" 2>/dev/null)" = "$ID" ]; then
+    echo "stm-start: the console is up"
+    exit 0
+  fi
+  sleep 0.2
+done
+echo "stm-start: the console did not come up within ${WAIT} s" >&2
+exit 3

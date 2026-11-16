@@ -1,0 +1,25 @@
+# The console's launcher, a service of the account `stm` (no password login) that starts at boot and waits for a task
+# id in /run/stm-bench/start. It holds the private task list; the agent's account only writes an id into the FIFO.
+# Installed to /etc/systemd/system/stm-bench.service by scripts/vm_prep/stm/guest_install.sh.
+[Unit]
+Description=STM-Bench console launcher
+After=local-fs.target
+
+[Service]
+Type=simple
+User=stm
+Group=stm
+UMask=0022
+# /run/stm-bench, owned by stm, readable by everyone (the ready/task/error files), writable by stm only
+RuntimeDirectory=stm-bench
+RuntimeDirectoryMode=0755
+RuntimeDirectoryPreserve=yes
+Environment=DISPLAY=:0 QT_QPA_PLATFORM=xcb LIBGL_ALWAYS_SOFTWARE=1 LANG=C.UTF-8
+ExecStart=/opt/stm-bench/venv/bin/python /opt/stm-bench/guest/stm_launcher.py
+Restart=on-failure
+RestartSec=2
+KillMode=control-group
+NoNewPrivileges=yes
+
+[Install]
+WantedBy=multi-user.target

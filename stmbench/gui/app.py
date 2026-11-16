@@ -595,10 +595,41 @@ def show_window(win: MainWindow) -> None:
         win.showMaximized()
 
 
+def announce_when_shown(win: MainWindow, path: str | Path, *, poll_ms: int = 50, give_up_s: float = 60.0) -> QTimer:
+    """Write ``path`` (one line ``ready``, mode 0644, atomically) as soon as the window is exposed, that is, drawn
+    on the screen: a launcher in the virtual machine waits for it before it tells the agent's account the console
+    is up. Nothing is written if the window is not exposed within ``give_up_s``; the file never names the seed
+    or the scenario. Returns the timer (parented to the window, so the caller need not keep it)."""
+    path = Path(path)
+    timer = QTimer(win)
+    started = time.monotonic()
+
+    def check() -> None:
+        handle = win.windowHandle()
+        if handle is not None and handle.isExposed():
+            timer.stop()
+            tmp = path.with_name(path.name + ".tmp")
+            tmp.write_text("ready
+", encoding="utf-8")
+            try:
+                tmp.chmod(0o644)
+            except OSError:
+                pass
+            tmp.replace(path)
+        elif time.monotonic() - started > give_up_s:
+            timer.stop()
+
+    timer.timeout.connect(check)
+    timer.start(poll_ms)
+    return timer
+
+
 def run(*, scenario: str | None = None, seed: int = 0, out: str | Path | None = None, lang: str = "zh",
         ui_scale: float = 1.0, sealed: bool = False, private_dir: str | Path | None = None,
-        export_dir: str | Path | None = None, stdin: TextIO | None = None) -> int:
-    """Open the window and run until it is closed (dev) or the process is killed (sealed)."""
+        export_dir: str | Path | None = None, stdin: TextIO | None = None,
+        ready_file: str | Path | None = None) -> int:
+    """Open the window and run until it is closed (dev) or the process is killed (sealed). With ``ready_file``
+    that file is written once the window is exposed (see :func:`announce_when_shown`)."""
     session = _open_session(scenario, seed, out, lang, sealed, private_dir, export_dir, stdin)
     if session is None:
         return 2
@@ -615,6 +646,8 @@ def run(*, scenario: str | None = None, seed: int = 0, out: str | Path | None = 
         ticker.start(250)
         ticker.timeout.connect(lambda: None)
     show_window(win)
+    if ready_file is not None:
+        announce_when_shown(win, ready_file)
     try:
         return int(app.exec())
     finally:
