@@ -154,13 +154,13 @@ def _tolerance(c: dict, sc, lang: str) -> str:
     abs_tol, rel_tol = tol.get("abs"), tol.get("rel")
     if abs_tol is not None and rel_tol is not None:
         percent = _num(100 * float(rel_tol))
-        return _t(lang, f"与真值相差不超过 {_num(abs_tol)} {unit}或真值的 {percent}%（取较大者）",
+        return _t(lang, f"与真值相差不超过 {_amount(abs_tol, unit)}或真值的 {percent}%（取较大者）",
                   f"the reported value differs from the true value by at most {_amount(abs_tol, unit)} or "
                   f"{percent}% of the true value (whichever is larger)")
     if rel_tol is not None:
         percent = _num(100 * float(rel_tol))
         return _t(lang, f"相对误差不超过 {percent}%", f"the relative error is at most {percent}%")
-    return _t(lang, f"与真值相差不超过 {_num(abs_tol or 0)} {unit}",
+    return _t(lang, f"与真值相差不超过 {_amount(abs_tol or 0, unit)}",
               f"the reported value differs from the true value by at most {_amount(abs_tol or 0, unit)}")
 
 
@@ -255,6 +255,24 @@ def _evidence(c: dict, lang: str) -> str:
                   f"least {span} pm closer after passing the Δf minimum, with no jump and no contact along "
                   f"the sweep; and at least {_count(b_n, 'curve', 'curves')} measured on the clean surface "
                   f"more than {far} nm from the adatom (no contact)")
+    if kind == "sts_pair":
+        a, b = rule.get("adatom") or {}, rule.get("background") or {}
+        a_n, b_n = int(a.get("min_n", 1)), int(b.get("min_n", 1))
+        lateral, far = _num(a.get("near_nm_max", 0.15)), _num(b.get("near_nm_min", 2.0))
+        points, v_lo, v_hi = int(rule.get("min_points", 0)), _num(rule.get("v_lo_max")), \
+            _num(rule.get("v_hi_min"))
+        return _t(lang,
+                  f"evidence 中至少引用 {a_n} 条在吸附原子正上方（起点横向偏离不超过 {lateral} nm）测的 "
+                  f"dI/dV 谱，以及至少 {b_n} 条在离最近的吸附原子至少 {far} nm 的干净表面上测的 dI/dV 谱；"
+                  f"每条谱至少 {points} 个点、偏压范围覆盖 {v_lo} V 到 {v_hi} V，谱中途没有突变"
+                  f"（针尖不稳造成的跳变）；以上距离从针尖实际隧穿的位置（最靠近样品的针尖尖端）量起",
+                  f"cite at least {_count(a_n, 'dI/dV spectrum', 'dI/dV spectra')} in the evidence field "
+                  f"measured directly above an adatom (the start point of the sweep at most {lateral} nm "
+                  f"from its centre), and at least {_count(b_n, 'dI/dV spectrum', 'dI/dV spectra')} "
+                  f"measured on the clean surface at least {far} nm from the nearest adatom; each spectrum "
+                  f"has at least {_count(points, 'point', 'points')}, a bias range covering {v_lo} V to "
+                  f"{v_hi} V, and shows no sudden jump along the sweep (a jump caused by an unstable tip); "
+                  f"the distances above are measured from where the tip tunnels (its leading apex)")
     if kind == "didv_maps":
         n, energies = int(rule.get("min_n", 1)), int(rule.get("min_energies", 1))
         v_lo, v_hi, near = _num(rule.get("v_lo_max")), _num(rule.get("v_hi_min")), \

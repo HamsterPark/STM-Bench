@@ -330,7 +330,7 @@ def check_evidence(rule: dict, *, events, report: dict, truth: dict,
         fr = cover(later, float(x), float(y), rule)
         return fr is not None, {"kind": kind, "frame_idx": (fr or {}).get("idx"),
                                 "after_sim_s": t_after, **tag}
-    if kind in ("spectra_near_scatterer", "sts_at_corral_centre", "zspec_pair"):
+    if kind in ("spectra_near_scatterer", "sts_at_corral_centre", "zspec_pair", "sts_pair"):
         ok, info = _check_spectra(kind, rule, events=events, truth=truth, pool=pool)
         return ok, {**info, **tag}
     if kind == "didv_maps":
@@ -386,6 +386,33 @@ def _check_spectra(kind: str, rule: dict, *, events, truth: dict,
     got = [e for e in got if not e.get("jump", False)
            and int(e.get("n", 0)) >= int(rule.get("min_points", 0))
            and _covers_window(e, rule.get("v_lo_max"), rule.get("v_hi_min"))]
+    if kind == "sts_pair":
+        # a bias sweep on top of an atom and one on the bare surface, both over the window: the
+        # resonance is only a feature of the atom if the surface beside it does not show it.
+        # near_kind/near_nm come from Surface.nearest_scatterer, which counts the adatom registry
+        # whether or not the surface state scatters, so a P6 atom is an "adatom" here.
+        atom_rule = rule.get("adatom") or {}
+        bg_rule = rule.get("background") or {}
+        # The resonance sits under the tip's leading apex, which a tip change can walk 0.5-0.8 nm
+        # off the tip centre, so an event that records the nearest scatterer at the apex
+        # (``near_kind_apex``/``near_nm_apex``) is judged by that; older events, and scenarios
+        # without sts_resolution, by the centre's.
+        def where(e):
+            if e.get("near_kind_apex") is not None and e.get("near_nm_apex") is not None:
+                return e["near_kind_apex"], float(e["near_nm_apex"])
+            nm = e.get("near_nm")
+            return e.get("near_kind"), (None if nm is None else float(nm))   # unknown: counts as neither
+
+        on_atom = [e for e in got
+                   if where(e)[0] == atom_rule.get("near_kind", "adatom")
+                   and where(e)[1] is not None
+                   and where(e)[1] <= float(atom_rule.get("near_nm_max", 0.15))]
+        # "none"/"step": no atom is the nearest thing; otherwise the nearest atom must be far
+        bg = [e for e in got
+              if where(e)[0] in ("none", "step")
+              or (where(e)[1] is not None and where(e)[1] >= float(bg_rule.get("near_nm_min", 2.0)))]
+        ok = len(on_atom) >= int(atom_rule.get("min_n", 1)) and len(bg) >= int(bg_rule.get("min_n", 1))
+        return ok, {"kind": kind, "n_on_atom": len(on_atom), "n_background": len(bg)}
     if kind == "spectra_near_scatterer":
         near = float(rule.get("near_nm", 8.0))
         got = [e for e in got if float(e.get("near_nm", 1e9)) <= near]
