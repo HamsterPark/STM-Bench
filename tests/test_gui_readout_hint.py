@@ -39,11 +39,11 @@ def colour(win) -> QColor:
 def test_the_hint_shows_at_start_gives_way_to_the_reading_and_returns_when_the_pointer_leaves(open_window, lang):
     win = open_window(lang)
     c = win.center
-    assert is_hint(win)
+    assert c.readout.full_text() == "" and not c.readout.property("tone")     # no frame yet: a click marks nothing
+    scan(win)
     assert c.readout.full_text() == ("悬停查看坐标和数值，点击放标记" if lang == "zh" else
                                      "Hover over the image to read position and value; click to place a marker")
-    scan(win)
-    assert is_hint(win)                                                  # a new frame: the line is empty again
+    assert is_hint(win)                                                  # with the first frame, and again with a new one
     height = c.readout.height()
     QTest.mouseMove(c.frame_view, pixel_point(win, 10, 12))
     assert c.readout.full_text().startswith("pixel col 10, row 12") and c.readout.property("tone") == ""
@@ -67,11 +67,13 @@ def test_the_hint_is_muted_and_the_reading_is_not(open_window, lang):
 @pytest.mark.parametrize("lang", ["en", "zh"])
 def test_the_hint_names_what_the_picked_tool_does(open_window, lang):
     win = open_window(lang)
+    run_button(win, "view.tool.profile")
+    assert win.center.readout.full_text() == ""                          # no frame yet
+    scan(win)
     for tool, key in TOOL_KEYS.items():
         run_button(win, f"view.tool.{tool}")
         assert is_hint(win, key), tool
     run_button(win, "view.tool.marker")
-    scan(win)
     run_button(win, "view.tool.pan")
     assert is_hint(win, "hint_image_pan")
     QTest.mouseMove(win.center.frame_view, pixel_point(win, 10, 12))
@@ -91,8 +93,11 @@ def test_a_spectrum_or_trace_has_the_plot_hint_and_a_new_frame_brings_the_image_
     assert is_hint(win)
 
 
-def test_the_sealed_mode_shows_the_hint_too(open_window):
-    assert is_hint(open_window("en", sealed=True))
+def test_the_sealed_mode_shows_the_hint_too_from_its_first_frame(open_window):
+    win = open_window("en", sealed=True)
+    assert win.center.readout.full_text() == ""
+    scan(win)
+    assert is_hint(win)
 
 
 @pytest.mark.parametrize("lang", ["en", "zh"])

@@ -675,14 +675,17 @@ class CenterColumn(QWidget):
         a single line of the width of the column, which both at once would not fit."""
         if self.stack.currentIndex() == 1:
             return one("hint_plot", self.lang)
+        if not self._has_frame:
+            return ""                      # a click marks nothing before the first frame: no hint rather than a false one
         tool = self.tool.value()
         return one({"profile": "hint_image_profile", "pan": "hint_image_pan"}.get(tool, "hint_image"), self.lang)
 
     def _show_readout(self, text: str) -> None:
         """The reading, or, with none, the usage hint in the muted colour (the line keeps its font and height, so
         nothing moves when the pointer enters or leaves)."""
-        self.readout.set_full_text(text or self._hint())
-        tone = "" if text else "note"
+        shown = text or self._hint()
+        self.readout.set_full_text(shown)
+        tone = "note" if shown and not text else ""
         if (self.readout.property("tone") or "") != tone:
             self.readout.setProperty("tone", tone)
             polish(self.readout)
