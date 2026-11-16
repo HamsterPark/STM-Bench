@@ -83,14 +83,16 @@ def test_the_switches_of_a_scenario_reach_its_world(tmp_path):
                                     "sts_resolution": False}
 
 
-def test_only_p4_switches_physics_on_and_it_switches_all_four():
+def test_only_p4_and_p6_switch_physics_on_p4_four_and_p6_those_four_and_sts_resolution():
     on = {}
     for p in sorted(SCEN.glob("*.yaml")):
         sw = Scenario.load(p).physics_switches()
         if sw.any():
             on[p.stem] = sw
-    assert on == {"P4_atom_positioning_cu111": PhysicsSwitches(
-        tip_changes_outside_scans=True, tip_recovery=True, tip_anisotropy=True, crash_over_range=True)}
+    four = dict(tip_changes_outside_scans=True, tip_recovery=True, tip_anisotropy=True,
+                crash_over_range=True)
+    assert on == {"P4_atom_positioning_cu111": PhysicsSwitches(**four),
+                  "P6_kondo_co_cu111": PhysicsSwitches(**four, sts_resolution=True)}
 
 
 def test_the_p4_world_has_its_mechanisms_wired(tmp_path):
