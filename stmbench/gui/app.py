@@ -609,8 +609,7 @@ def announce_when_shown(win: MainWindow, path: str | Path, *, poll_ms: int = 50,
         if handle is not None and handle.isExposed():
             timer.stop()
             tmp = path.with_name(path.name + ".tmp")
-            tmp.write_text("ready
-", encoding="utf-8")
+            tmp.write_text("ready\n", encoding="utf-8")
             try:
                 tmp.chmod(0o644)
             except OSError:

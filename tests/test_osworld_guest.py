@@ -152,7 +152,8 @@ def test_setup_makes_a_fifo_the_agent_account_can_write_and_nothing_else_writabl
         launcher.close()
 
 
-def test_a_request_starts_the_console_with_the_seed_on_stdin_only(running, tmp_path):
+def test_a_request_starts_the_console_with_the_seed_on_stdin_only(running, tmp_path, monkeypatch):
+    monkeypatch.delenv("QT_QPA_PLATFORM", raising=False)    # the service sets it; xcb is the default otherwise
     cfg = running.cfg
     write_request(cfg, (TASK + "\n").encode())
     assert wait_for(cfg.ready.exists)
