@@ -268,6 +268,8 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
         raise RuntimeError("no usable survey of the corral")
     plan = _plan(sv)
     pairs = _pair(s, sv, plan)
+    log["first_profile"] = {"deg": [round(float(np.degrees(x)), 1) for x in sv["angles"][::4]],
+                            "y": [round(float(x) * 1e12, 2) for x in sv["profile"][::4]]}
     log.update(spares_seen=len(plan["spares"]), sites=len(plan["sites"]),
                gap_width_nm=plan["gap_width_nm"], spacing_nm=plan["spacing_nm"],
                ring_radius_fit_nm=sv["R"])
