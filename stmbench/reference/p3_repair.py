@@ -211,23 +211,32 @@ def _clean_tip(s: Session, centre, radius_m: float, log: dict, *, spectroscopy: 
     return False
 
 
-def _diagnose(w, s: Session, ring: dict, plan: dict, pairs: list, centre) -> dict:
-    """After the episode (record only, never read during it): where the designed gap sites are
-    on the ring, where the plan put its sites, and the atoms the plan moved."""
+def _diagnose(w, ring: dict, plan: dict, pairs: list) -> dict:
+    """The record of how the repair came out, read from the truth after the last drag (never
+    read during the episode): the designed gap sites no atom is within half a site spacing of,
+    and for each atom the plan moved how far it is from the nearest designed gap site and how
+    far off the circle."""
     reg = w.surface.site.adatoms
-    cx, cy = (v * 1e9 for v in ring["centre_nm"])
-
-    def ang(x_m: float, y_m: float) -> float:
-        return round(math.degrees(math.atan2(y_m * 1e9 - cy, x_m * 1e9 - cx)) % 360.0, 2)
-
-    gap = [ang(*reg.site_xy(i, j)) for i, j in ring["gap_sites"]]
-    atoms = []
+    cx, cy = (v * 1e-9 for v in ring["centre_nm"])
+    R = float(ring["radius_nm"]) * 1e-9
+    spacing = 2 * math.pi * R / int(ring["n_sites"])
+    gap = [reg.site_xy(i, j) for i, j in ring["gap_sites"]]
+    pts = reg.positions()
+    unheld = []
+    for (i, j), (sx, sy) in zip(ring["gap_sites"], gap):
+        d = float(np.hypot(pts[:, 0] - sx, pts[:, 1] - sy).min()) if pts.shape[0] else float("inf")
+        if d > reg.RING_SITE_TOL * spacing:
+            unheld.append({"angle_deg": round(math.degrees(math.atan2(sy - cy, sx - cx)) % 360.0, 1),
+                           "nearest_atom_nm": round(d * 1e9, 2)})
+    moved = []
     for a, _theta in pairs:
         x, y = reg.site_xy(a.i, a.j, a.sub)
-        atoms.append({"angle_deg": ang(x, y), "dr_nm": round(math.hypot(x * 1e9 - cx, y * 1e9 - cy) - float(ring["radius_nm"]), 2),
-                      "status": a.status})
-    return {"gap_sites_deg": sorted(gap), "planned_deg": sorted(round(math.degrees(t) % 360.0, 2) for t in plan["sites"]),
-            "moved": atoms, "n_ring": int(ring["n_sites"]), "r_nm": float(ring["radius_nm"])}
+        moved.append({"to_nearest_gap_site_nm": round(min(math.hypot(x - gx, y - gy) for gx, gy in gap) * 1e9, 2),
+                      "off_circle_nm": round((math.hypot(x - cx, y - cy) - R) * 1e9, 2), "status": a.status})
+    return {"tol_nm": round(reg.RING_SITE_TOL * spacing * 1e9, 3), "unheld": unheld, "moved": moved,
+            "n_ring": int(ring["n_sites"]), "r_nm": float(ring["radius_nm"]),
+            "planned_deg": sorted(round(math.degrees(t) % 360.0, 1) for t in plan["sites"]),
+            "gap_deg": sorted(round(math.degrees(math.atan2(gy - cy, gx - cx)) % 360.0, 1) for gx, gy in gap)}
 
 
 def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARIO, repeats: int = 3,
@@ -296,10 +305,10 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
     _clean_tip(s, centre, radius_m, log, spectroscopy=True)
     m = p3.measure(s, centre, radius_m, integration_ms=integration_ms, repeats=repeats, compensated=True)
     got = m.pop("values")
+    log["diag"] = _diagnose(w, ring, plan, pairs)
     out = inst.finish()
     want, err = p3.truth_errors(inst, got, m.pop("radius_claims"))
     snap = w.truth()["corral"]
-    log["diag"] = _diagnose(w, s, ring, plan, pairs, centre)
     log.pop("r_resume", None)
     return {"paper": "P3-repair", "seed": int(seed), "success": bool(out["success"]),
             "partial": float(out.get("partial", 0.0)),
