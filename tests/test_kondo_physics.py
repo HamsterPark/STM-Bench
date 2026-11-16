@@ -141,3 +141,22 @@ def test_the_coefficients_sum_over_atoms_and_weight_the_apexes():
     # an apex 5 nm away sees nothing
     far = sr.kondo_coefficients(pts, np.array([[5e-9, 0.0]]), np.ones((1, 1)), atoms, **kw)
     assert max(abs(float(c[0])) for c in far) < 1e-12
+
+
+def test_the_background_is_convolved_with_the_lockin_kernel_only():
+    """A step in the background much sharper than k_B T: the lock-in's semicircle smooths it, the
+    thermal kernel must not (the sample LDOS may already carry its temperature)."""
+    vp = 3e-3
+    win = sr.Window.build(-0.02, 0.02, KT, vp, 5e-3)
+    nodes = np.linspace(-0.03, 0.03, 6001)
+    g = np.where(nodes < 0.0, 1.0, 2.0)
+    v = np.array([-0.002, 0.0, 0.002, 0.01])
+    off = sr.smoothed_background(win, v, nodes, g, None)
+    assert np.allclose(off, np.interp(v, nodes, g))                  # lock-in off: the background itself
+    on = sr.smoothed_background(win, v, nodes, g, vp)
+    # the semicircle's cumulative distribution gives the smoothed step in closed form
+    want = 1.0 + sr._lockin_cdf(v, vp)
+    assert np.allclose(on, want, atol=2e-3)
+    # with the thermal kernel as well the step at +-2 mV would be visibly different from the CDF
+    both = np.convolve(np.interp(win.grid, nodes, g), win.weights, mode="same")
+    assert abs(np.interp(0.002, win.grid, both) - want[2]) > 3e-3

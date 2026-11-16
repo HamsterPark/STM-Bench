@@ -192,12 +192,20 @@ def kondo_shapes(win: Window, v: np.ndarray, e_k: float, gamma: float, kt: float
     return out
 
 
-def smoothed_background(win: Window, v: np.ndarray, v_nodes: np.ndarray, g_nodes: np.ndarray) -> np.ndarray:
-    """``G_bg`` convolved with the kernel, at the sweep biases ``v``; beyond the window the
-    background itself (its curvature scale there is far above the kernel's width)."""
+def smoothed_background(win: Window, v: np.ndarray, v_nodes: np.ndarray, g_nodes: np.ndarray,
+                        vp: float | None) -> np.ndarray:
+    """``G_bg`` convolved with the LOCK-IN kernel only, at the sweep biases ``v`` (``G_bg`` itself
+    without the lock-in); beyond the window the background itself.
+
+    The thermal kernel is deliberately left out: the sample's LDOS may already carry its thermal
+    broadening (surface_state.band_edge uses gamma_eff = hypot(Γ, 3.5 k_B T)), so convolving the
+    background with -df/dE again would count the temperature twice. The Kondo shapes, which are
+    bare Fano parts, get both kernels."""
     v = np.asarray(v, float)
+    if not vp:
+        return np.interp(v, v_nodes, g_nodes)
     g_grid = np.interp(win.grid, v_nodes, g_nodes)
-    g_s = win.smooth(g_grid)
+    g_s = fftconvolve(g_grid, lockin_weights(win.h, vp), mode="same")
     return np.where(win.inside(v), np.interp(v, win.grid, g_s), np.interp(v, v_nodes, g_nodes))
 
 

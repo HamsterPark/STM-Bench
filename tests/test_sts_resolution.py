@@ -405,3 +405,25 @@ def test_the_switch_off_sweep_has_none_of_the_new_keys(tmp_path):
     r = _sweep(w, 1.0, n=40, integ=0.005)
     assert not {"settle_s", "integ_s", "near_nm_end", "drift_nm"} & set(r)
     assert not {"settle_s", "integ_s", "near_nm_end", "drift_nm"} & set(w.events[-1])
+
+
+def test_the_record_gives_the_leading_apex_and_its_distance_to_the_nearest_atom(tmp_path):
+    """A tip whose single apex sits 0.6 nm off the tip centre, centred so that the APEX is over the
+    atom: the apex fields read 0, the centre fields 0.6, and the resonance is seen."""
+    w = _build(tmp_path, kondo=FIXED)
+    x, y = _isolated_atom(w)
+    w.tip.apexes = [Apex(0.6e-9, 0.0, 0.0, 1.0)]
+    w.tip_x, w.tip_y = x - 0.6e-9, y
+    r = _sweep(w, 0.2)
+    rec, ev = w.sts_records[-1], [e for e in w.events if e["kind"] == "sts"][-1]
+    for d in (r, rec, ev):
+        assert d["apex_offset_nm"] == pytest.approx([0.6, 0.0])
+        assert d["near_kind_apex"] == "adatom" and d["near_nm_apex"] < 0.01 and d["near_nm_apex_end"] < 0.01
+        assert d["near_nm"] == pytest.approx(0.6, abs=0.01)
+    p = _fit(r["v"], r["didv"])
+    assert p[3] > 0.2 and p[1] == pytest.approx(0.3, abs=0.04)
+    # a single apex at the centre: offset [0, 0] and the apex fields equal the centre's
+    w2 = _build(tmp_path, kondo=FIXED, name="centred")
+    _on_atom(w2)
+    r2 = _sweep(w2, 0.2)
+    assert r2["apex_offset_nm"] == [0.0, 0.0] and r2["near_nm_apex"] == r2["near_nm"]

@@ -1523,6 +1523,17 @@ class World:
             c0, c1, c2 = sr.kondo_coefficients(
                 np.column_stack([px, py]), axy, aw, atoms, a0=kon.amplitude, q0=kon.q,
                 sigma_a=kon.sigma_m, sigma_q=kon.q_sigma_m, sigma_t=self.tip.apex_sigma_m)
+        # the leading apex (largest current weight at the first point): where the spectrum is made
+        apexes_all = self.tip.apexes or [Apex(0.0, 0.0, 0.0, 1.0)]
+        if len(apexes_all) == 1:
+            lead = apexes_all[0]
+        else:
+            hs0 = np.array([float(self.surface.height_smooth(px[:1] + a.dx, py[:1] + a.dy)[0]) + a.dz
+                            for a in apexes_all])
+            lead = apexes_all[int(np.argmax(np.array([a.w for a in apexes_all])
+                                            * np.exp(2.0 * kappa * (hs0 - hs0.max()))))]
+        near_kind_apex, near_apex_m = self.surface.nearest_scatterer(float(sx + lead.dx), float(sy + lead.dy))
+        _, near_apex_end_m = self.surface.nearest_scatterer(float(px[-1] + lead.dx), float(py[-1] + lead.dy))
         has_kondo = bool(np.any(c0) or np.any(c1) or np.any(c2))
         win = sr.Window.build(float(vs.min()), float(vs.max()), kt, vp, kon.gamma_ev if kon else None)
         if has_kondo:
@@ -1555,7 +1566,7 @@ class World:
         z = np.random.default_rng([self.seed, STS_LOCKIN_STREAM, idx]).standard_normal(2 * n)
         i = i + sigma_i * z[:n]
         if self.lockin_on:
-            didv = trans * sr.smoothed_background(win, vs, nodes, g_nodes) * k_lock
+            didv = trans * sr.smoothed_background(win, vs, nodes, g_nodes, vp) * k_lock
             didv[jump_k:] *= jump_f
             didv = didv + sigma_i / vp * z[n:]
         elif n > 2 and span > 1e-9:
@@ -1574,7 +1585,10 @@ class World:
                          "near_kind": near_kind, "near_nm": near_m * 1e9,
                          "corral_centre_dist_nm": centre_nm,
                          "settle_s": settle_s, "integ_s": integ_s,
-                         "near_nm_end": near_end_m * 1e9, "drift_nm": drift_nm}
+                         "near_nm_end": near_end_m * 1e9, "drift_nm": drift_nm,
+                         "apex_offset_nm": [lead.dx * 1e9, lead.dy * 1e9],
+                         "near_kind_apex": near_kind_apex, "near_nm_apex": near_apex_m * 1e9,
+                         "near_nm_apex_end": near_apex_end_m * 1e9}
         self.sts_records.append({k: v for k, v in self.sts_last.items()
                                  if k not in ("v", "i", "didv")} | {"v": vs, "i": i, "didv": didv})
         self._event("sts", n=n, v0=v_start, v1=v_end, z_off_m=z_offset_m, jump=jump,
@@ -1584,7 +1598,9 @@ class World:
                     corral_centre_dist_nm=centre_nm,
                     bias_v=self.bias_v, setpoint_a=self.zctrl.setpoint_a,
                     lockin_on=self.lockin_on, lockin_amp_v=self.lockin_amp_v,
-                    settle_s=settle_s, integ_s=integ_s, near_nm_end=near_end_m * 1e9, drift_nm=drift_nm)
+                    settle_s=settle_s, integ_s=integ_s, near_nm_end=near_end_m * 1e9, drift_nm=drift_nm,
+                    apex_offset_nm=[lead.dx * 1e9, lead.dy * 1e9], near_kind_apex=near_kind_apex,
+                    near_nm_apex=near_apex_m * 1e9, near_nm_apex_end=near_apex_end_m * 1e9)
         return self.sts_last
 
     # ── coarse motion / approach ──
