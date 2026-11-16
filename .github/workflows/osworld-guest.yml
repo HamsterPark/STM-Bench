@@ -36,6 +36,8 @@ jobs:
           sudo env STM_TASKS_JSON="$RUNNER_TEMP/tasks.json" STM_SRC_TARBALL="$RUNNER_TEMP/src.tar" \
             bash deploy/osworld/guest/install.sh
           systemctl is-active stm-bench.service
+          # the unit is active a moment before the launcher has made its FIFO: wait for it
+          for i in $(seq 1 100); do sudo test -p /run/stm-bench/start && break; sleep 0.2; done
           sudo test -p /run/stm-bench/start
           cat /opt/stm-bench/versions.txt
 
