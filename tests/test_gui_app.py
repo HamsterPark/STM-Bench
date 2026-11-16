@@ -831,7 +831,7 @@ def test_the_note_shows_its_whole_text_and_is_sent_whole_in_the_widest_fonts_too
     open_left(win, "report")
     rep = win.sidebar.report
     note = shots.widget(win, "report.note")
-    assert note.width() >= 0.9 * shots.widget(win, "report.evidence").width()
+    assert note.width() >= 0.5 * shots.widget(win, "report.evidence").width()        # more than a third of the form
     notes = {"en": ("TARGET NOT REACHED: atom is within 0.2 nm of its start site; not moved +4 nm",    # the note of that trial
                     "a longer one: " + "word " * 12 + "end"),
              "zh": ("目标未到达：原子离出发的格点不到 0.2 nm，没有移动 +4 nm", "较长的一条：" + "说明" * 8)}[lang]

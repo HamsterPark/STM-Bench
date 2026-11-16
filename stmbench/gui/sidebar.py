@@ -97,9 +97,18 @@ class ReportTab(QWidget):
         self.fields: dict[str, SelectAllLineEdit | WrapField] = {}
 
         self.labels: dict[str, QLabel] = {}
+        # the full list of cited files, in grey under the field, when the field is too narrow to show it: the one line
+        # showed only the end of "2.dat, sim004.sxm", so which spectrum was cited could not be read (p3check1, finding 2)
+        self._evidence_full = QLabel()
+        self._evidence_full.setObjectName("report.evidence_full")
+        self._evidence_full.setWordWrap(True)
+        self._evidence_full.setProperty("role", "label")
+        self._evidence_full.setProperty("tone", "note")
+        self._evidence_full.setFont(style.mono_font(16))
+        self._evidence_full.hide()
 
         def cell(key: str, beside: QWidget | None = None, wrap: bool = False) -> QWidget:
-            """A field with its label above it (and a button at the end of its line, if ``beside``)."""
+            """A field with its label above it (and a button at the end of the label's line, if ``beside``)."""
             lab = QLabel(_field_label(key, lang, key == "value"))
             lab.setObjectName(f"report.label.{key}")
             lab.setTextFormat(Qt.TextFormat.RichText)
@@ -116,15 +125,17 @@ class ReportTab(QWidget):
             col = QVBoxLayout(box)
             col.setContentsMargins(0, 0, 0, 0)
             col.setSpacing(style.px(3))
-            col.addWidget(lab)
             if beside is None:
-                col.addWidget(e)
+                col.addWidget(lab)
             else:
-                line = QHBoxLayout()                             # a button at the end of the field's own line
+                line = QHBoxLayout()                             # a button at the end of the label's line
                 line.setSpacing(style.px(8))
-                line.addWidget(e, 1)
+                line.addWidget(lab, 1)
                 line.addWidget(beside)
                 col.addLayout(line)
+            col.addWidget(e)
+            if key == "evidence":                                # the whole list, if the field cannot show it
+                col.addWidget(self._evidence_full)
             return box
 
         def row(*cells: tuple[QWidget, int]) -> None:
@@ -135,9 +146,11 @@ class ReportTab(QWidget):
                 h.addWidget(w, stretch)
             form.addLayout(h)
 
-        # the button that appends the name of the file the viewer shows sits at the end of the evidence field's line;
-        # its label says what it adds ("+ shown file"), and it is in one language: the line is not wide
+        # the button that appends the name of the file the viewer shows sits at the end of the evidence label's line, so
+        # that the field has the whole width of the form; its label says what it adds ("+ shown file"), and it is in one
+        # language: the line is not wide. The field's own description is its placeholder.
         self.viewed_button = QPushButton("+ " + one("rep_viewed", lang))
+        self.viewed_button.setProperty("role", "tiny")             # as tall as a label's line: the form is no taller for it
         self.viewed_button.setObjectName("report.viewed")
         self.viewed_button.clicked.connect(self._append_viewed)
         # four rows, as before: P1's four claims in English leave the page 49 px at 1920x1053 (27 in DejaVu), so the note
@@ -146,6 +159,9 @@ class ReportTab(QWidget):
         row((cell("value"), 1), (cell("x_nm"), 1), (cell("y_nm"), 1))
         row((cell("frame"), 1))
         row((cell("evidence", beside=self.viewed_button), 1))
+        ev = self.fields["evidence"]
+        ev.setPlaceholderText(one("rep_evidence_hint", lang))
+        ev.textChanged.connect(lambda _t: self._show_full_evidence())
         small = QWidget()
         stack = QVBoxLayout(small)
         stack.setContentsMargins(0, 0, 0, 0)
@@ -219,6 +235,20 @@ class ReportTab(QWidget):
     def _claim_picked(self, cid: str) -> None:
         self.fields["unit"].setText(self._claims[cid]["unit"])          # the one thing prefilled
         self._mark_required(cid)
+        self._enable_position(not self._takes_no_position(cid))
+
+    def _takes_no_position(self, cid: str) -> bool:
+        return bool(cid) and not self._claims[cid].get("position")
+
+    def _enable_position(self, on: bool) -> None:
+        """Grey out the position fields, and keep them empty, for a claim the rule card gives no position: they only
+        lost their asterisk before, and a reader of P3's form could not tell whether x_nm and y_nm were wanted
+        (p3check1, finding 3). Picking a claim that names a place enables them again."""
+        for key in ("x_nm", "y_nm", "frame"):
+            if not on:
+                self.fields[key].setText("")
+            self.fields[key].setEnabled(on)
+            self.labels[key].setEnabled(on)
 
     def required_fields(self) -> set[str]:
         """The fields the picked claim needs: the value always, and the position (x_nm, y_nm) and the frame it
@@ -249,7 +279,23 @@ class ReportTab(QWidget):
             have.append(self._viewed)
         self.fields["evidence"].setText(", ".join(have))
 
+    def _show_full_evidence(self) -> None:
+        """The cited files in full, in grey under the field, when the field cannot show them all."""
+        ev = self.fields["evidence"]
+        text = ev.text().strip()
+        room = ev.width() - 2 * style.px(8)
+        wide = bool(text) and ev.fontMetrics().horizontalAdvance(text) > room
+        self._evidence_full.setText(text if wide else "")
+        self._evidence_full.setVisible(wide)
+
+    def resizeEvent(self, ev) -> None:
+        super().resizeEvent(ev)
+        self._show_full_evidence()
+
     def fill_position(self, x_nm: float, y_nm: float, frame: str) -> None:
+        if self._takes_no_position(self.claim_id()):       # greyed and empty: say why nothing was copied
+            self.notice.emit(tr("rep_no_position", self.lang))
+            return
         self.fields["x_nm"].setText(f"{x_nm:.3f}")
         self.fields["y_nm"].setText(f"{y_nm:.3f}")
         self.fields["frame"].setText(frame)
