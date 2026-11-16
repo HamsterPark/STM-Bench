@@ -41,7 +41,7 @@ from pathlib import Path
 
 import numpy as np
 
-from ..analysis.corral import atom_spacing_nm, corral_radius, find_ring, ghost_strength, label_levels, locate_corral, ring_width_nm
+from ..analysis.corral import atom_spacing_nm, corral_radius, find_ring, ghost_strength, locate_corral, ring_width_nm
 from ..analysis.drift import frame_shift
 from ..analysis.spectra import band_edge, resonance_peaks
 from ..analysis.tip import DOUBLE_FRACTION_MANY, diagnose
@@ -71,6 +71,9 @@ POKE_AWAY_NM, PULSE_AWAY_NM = 130.0, 170.0
 MAX_ROUNDS = 20
 #: spectra taken at the centre at most, to have three without a jump
 MAX_SPECTRA = 6
+#: a peak is a resolvable resonance when it stands this far (of the spectrum's range above the band
+#: edge) above its surroundings: a shoulder of the band edge stands 0.1 (seed 81), the lowest levels 0.3+
+PEAK_PROMINENCE = 0.2
 #: whole measurements, each after the tip was judged again, at most
 MAX_ATTEMPTS = 4
 #: the bare spot lies at least this far beyond the ring (nm) and this far from anything else
@@ -476,8 +479,11 @@ class Corral:
             self.log.setdefault("tip_changed", []).append({"at": "after the spectra", **{k: v for k, v in jv.items() if k != "centre"}})
             return None
         peaks = resonance_peaks(sp["v"], np.median(np.vstack(curves), axis=0), e0)
+        strong = [p["v"] for p in peaks if p["prominence"] >= PEAK_PROMINENCE] or [p["v"] for p in peaks]
         peaks_v = [p["v"] for p in peaks]
-        labels = label_levels(peaks_v, e0, res["radius_nm"])
+        labels = {2 + k: v for k, v in enumerate(strong[:2])}     # the two lowest resolvable peaks
+        self.log["peaks_mev"] = [round(p["v"] * 1e3) for p in peaks]
+        self.log["peak_prominence"] = [round(p["prominence"], 2) for p in peaks]
         return {"radius_nm": float(res["radius_nm"]), "radius_frame": f["frame"], "spectra": names, "e0_mev": e0 * 1e3,
                 "peaks_v": peaks_v, "labels": labels, "drift_comp_nm_per_min": [float(vx), float(vy)],
                 "centre": centre}
