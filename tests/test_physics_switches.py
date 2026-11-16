@@ -79,7 +79,8 @@ def test_the_switches_of_a_scenario_reach_its_world(tmp_path):
     w = sc.build_world(0, tmp_path / "s", virtual_clock=True)
     assert w.physics == PhysicsSwitches(tip_changes_outside_scans=True, crash_over_range=True)
     assert w.truth()["physics"] == {"tip_changes_outside_scans": True, "tip_recovery": False,
-                                    "tip_anisotropy": False, "crash_over_range": True}
+                                    "tip_anisotropy": False, "crash_over_range": True,
+                                    "sts_resolution": False}
 
 
 def test_only_p4_switches_physics_on_and_it_switches_all_four():
