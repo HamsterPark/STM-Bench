@@ -101,7 +101,7 @@ class EpisodeServer:
                 "y_nm": {"type": "number", "description": "position results: y (scan coordinates, nm)"},
                 "frame": {"type": "string", "description": "the frame a position was read in"},
                 "evidence": {"type": "array", "items": {"type": "string"},
-                             "description": "file names of the frames and spectra the result came from"},
+                             "description": "file names of the frames, spectra and move traces the result came from"},
                 "unit": {"type": "string"}, "sigma": {"type": "number"}, "note": {"type": "string"}},
             "required": ["claim_id", "value"], "additionalProperties": False}, self._report)
         self._add("finish", "End the episode: no further actions or reports.", none, self._finish)

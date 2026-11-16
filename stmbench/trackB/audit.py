@@ -66,10 +66,23 @@ def _sample_seed(args) -> dict:
     w = sc.build_world(int(seed), session_dir=Path(work) / f"s{seed}")
     truth = w.truth()
     spots = _angle_spots(sc.claims)
+    # a pull threshold belongs to an atom: claim k of the scenario's drag_threshold claims is
+    # judged against the k-th isolated atom nearest the origin (the claims name different atoms)
+    pulls = [str(c["id"]) for c in sc.claims if c.get("truth") == "drag_threshold"]
+    examples: list = []
+    if pulls:
+        from stmsim.physics.drag_threshold import example_thresholds
+        proto = next(c for c in sc.claims if c.get("truth") == "drag_threshold").get("protocol") or {}
+        examples = example_thresholds(w, len(pulls), length_m=float(proto.get("length_nm", 1.0)) * 1e-9,
+                                      speed_m_s=float(proto.get("speed_nm_s", 0.1)) * 1e-9)
     out: dict = {}
     for c in sc.claims:
         cid = str(c["id"])
         if claim_policy(c) == "state":
+            continue
+        if c.get("truth") == "drag_threshold":
+            r = examples[pulls.index(cid)]
+            out[cid] = None if r is None else float(r) / 1e3         # kohm, as the claim's unit
             continue
         if c.get("truth") == "orientation_at":
             x, y = spots[cid]

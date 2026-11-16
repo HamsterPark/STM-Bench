@@ -252,6 +252,8 @@ def claims_verified(truth: dict, thr: dict | None = None, *, claims=(), report=N
         kind = str(claim.get("kind", "scalar"))
         tol = {**(claim.get("tol") or {}), **(tol_over.get(cid) or {})}
         rule = {**(claim.get("evidence") or {}), **(ev_over.get(cid) or {})}
+        if claim.get("protocol"):
+            rule.setdefault("protocol", claim["protocol"])      # what a drag series is a series of
         rep = folded.get(cid)
         info: dict = {"kind": kind, "tol": tol, "reported": rep is not None}
         needs_value = kind != "constraint"
@@ -266,6 +268,19 @@ def claims_verified(truth: dict, thr: dict | None = None, *, claims=(), report=N
             info["frame"] = rep.get("frame")
             if why:
                 info["frame_reason"] = why
+        # version 1: the evidence rule is checked within the data the report names. The cited data
+        # does not depend on the value, and a drag series' truth is read from it, so it is resolved first
+        cited = None
+        if strict and rep is not None:
+            refs = [str(r) for r in (rep.get("evidence") or [])]
+            if rep.get("frame"):
+                refs.append(str(rep["frame"]))
+            resolved = [(r, C.resolve_citation(events, r)) for r in refs]
+            cited = [ev for _, ev in resolved if ev is not None]
+            info["cited"] = refs
+            unresolved = [r for r, ev in resolved if ev is None]
+            if unresolved:
+                info["unresolved_citations"] = unresolved
         if kind == "constraint":
             truth_val = C.truth_at_path(truth, claim["truth"])
             if claim.get("of_claim"):
@@ -299,6 +314,13 @@ def claims_verified(truth: dict, thr: dict | None = None, *, claims=(), report=N
                         # direction between them, so all three are the same answer
                         info["accept_deg"] = [round(float(a), 3)
                                               for a in [float(truth_val), *accept]]
+            elif claim["truth"] == "drag_threshold":
+                # the geometric mean, over the cited drags that count, of the pull threshold of the
+                # atom each held under its own conditions (kohm); no such drag, no truth
+                truth_val, tinfo = C.drag_series_threshold(rule, truth, cited or [])
+                info["truth_drags"] = tinfo
+                if truth_val is None:
+                    info["truth_reason"] = tinfo.get("reason")
             else:
                 truth_val = C.truth_at_path(truth, claim["truth"])
             info["truth"] = truth_val
@@ -384,18 +406,12 @@ def claims_verified(truth: dict, thr: dict | None = None, *, claims=(), report=N
             if peer_v is None or float(rep["value"]) <= float(peer_v):
                 value_ok = False
                 info["greater_than_failed"] = True
-        cited = None
-        if strict and rep is not None:
-            # version 1: the evidence rule is checked within the data the report names
-            refs = [str(r) for r in (rep.get("evidence") or [])]
-            if rep.get("frame"):
-                refs.append(str(rep["frame"]))
-            cited = [ev for ev in (C.resolve_citation(events, r) for r in refs) if ev is not None]
-            info["cited"] = refs
-            unresolved = [r for r in refs if C.resolve_citation(events, r) is None]
-            if unresolved:
-                info["unresolved_citations"] = unresolved
-        ev_ok, ev_info = C.check_evidence(rule, events=events, report=rep or {}, truth=truth, cited=cited)
+        peer_atom = None
+        if rule.get("distinct_atom_from"):
+            peer_ev = (details.get(str(rule["distinct_atom_from"])) or {}).get("evidence") or {}
+            peer_atom = peer_ev.get("atom_id")
+        ev_ok, ev_info = C.check_evidence(rule, events=events, report=rep or {}, truth=truth, cited=cited,
+                                          peer_atom=peer_atom)
         info["evidence"] = ev_info
         info["value_ok"] = value_ok
         info["evidence_ok"] = ev_ok

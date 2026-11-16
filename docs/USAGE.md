@@ -515,8 +515,8 @@ are in the **scan coordinate system** (x right, y up, the frame of the scan offs
 names the saved frame they were read in (its `.sxm` file name, or `frame:N`), and the judge maps
 them onto the sample through the drift of the acquisition row they fall in — each saved frame
 records the offset its renderer added to every row (`row_offsets_nm` in `scan_saved`).
-`evidence` lists the frames and spectra the value came from (`.sxm` / `.dat` file names, or
-`frame:N`, `sts:N`, `zspec:N`). Nothing is parsed out of free text: a claim never reported is
+`evidence` lists the frames, spectra and move traces the value came from (`.sxm` / `.dat` file names, or
+`frame:N`, `sts:N`, `zspec:N`, `move:N`). Nothing is parsed out of free text: a claim never reported is
 never reproduced.
 
 ### The rule card

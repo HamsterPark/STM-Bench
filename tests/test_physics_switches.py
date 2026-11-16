@@ -81,14 +81,16 @@ def test_the_switches_of_a_scenario_reach_its_world(tmp_path):
                                     "tip_anisotropy": False, "crash_over_range": True}
 
 
-def test_only_p4_switches_physics_on_and_it_switches_all_four():
+def test_only_p4_and_p7_switch_physics_on_and_they_switch_all_four():
+    """P7 is P4's world with another claim (its scenario file says so), so it uses P4's four switches."""
     on = {}
     for p in sorted(SCEN.glob("*.yaml")):
         sw = Scenario.load(p).physics_switches()
         if sw.any():
             on[p.stem] = sw
-    assert on == {"P4_atom_positioning_cu111": PhysicsSwitches(
-        tip_changes_outside_scans=True, tip_recovery=True, tip_anisotropy=True, crash_over_range=True)}
+    all_four = PhysicsSwitches(
+        tip_changes_outside_scans=True, tip_recovery=True, tip_anisotropy=True, crash_over_range=True)
+    assert on == {"P4_atom_positioning_cu111": all_four, "P7_pull_threshold_cu111": all_four}
 
 
 def test_the_p4_world_has_its_mechanisms_wired(tmp_path):
