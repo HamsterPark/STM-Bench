@@ -68,9 +68,11 @@ BLUNT_FWHM_NM = 1.15
 GHOST_MIN = 0.085
 #: where the shallow pokes go and where a pulse is applied, from home (nm)
 POKE_AWAY_NM, PULSE_AWAY_NM = 130.0, 170.0
-MAX_ROUNDS = 12
+MAX_ROUNDS = 20
 #: spectra taken at the centre at most, to have three without a jump
 MAX_SPECTRA = 6
+#: whole measurements, each after the tip was judged again, at most
+MAX_ATTEMPTS = 4
 #: the bare spot lies at least this far beyond the ring (nm) and this far from anything else
 BARE_BEYOND_NM, BARE_CLEAR_NM = 8.0, 6.0
 #: a bare-terrace spectrum this far from flat above the band onset (relative) carries a tip feature
@@ -121,6 +123,19 @@ def find_corral(frame: dict) -> dict:
     L["centre_frame_nm"] = list(L["centre_nm"])
     L["centre"] = _to_scan(frame, L["centre_nm"])
     return L
+
+
+def ring_verdict(frame: dict) -> dict:
+    """The tip judged on the ring alone, in a frame that holds it: ``{"verdict": "ok" | "blunt" |
+    "double", ...}``; a ring that cannot be found is a blunt tip."""
+    try:
+        L = find_corral(frame)
+    except NoRing as exc:
+        return {"verdict": "blunt", "no_ring": str(exc)}
+    npx, c, r = float(frame["nm_per_px"]), L["centre_frame_nm"], L["radius_nm"]
+    width, (ghost, _) = ring_width_nm(frame["array"], npx, c, r), ghost_strength(frame["array"], npx, c, r)
+    verdict = "double" if ghost >= GHOST_MIN else "blunt" if width > BLUNT_FWHM_NM else "ok"
+    return {"verdict": verdict, "width_nm": width, "ghost": ghost, "centre": L["centre"]}
 
 
 def judge(frame: dict, L: dict) -> dict:
@@ -294,13 +309,28 @@ class Corral:
         self.centre = L["centre"]
         return L
 
+    def quick_judge(self) -> dict:
+        """After a pulse: the ring in a 36 nm frame (65 s instead of the survey's 180 s), judged
+        on the ring alone. A tip it passes is judged again on a full survey."""
+        cx, cy = self.centre
+        f, _ = self.ops.frame(cx, cy, 36.0, 360, 0.09)
+        j = ring_verdict(f)
+        j["quick"] = True
+        if "centre" in j:
+            self.centre = j.pop("centre")
+        return j
+
     def find_and_fix(self) -> None:
-        """Survey, judge the tip, and condition until it images well."""
-        rounds = 0
+        """Survey, judge the tip, and condition until it images well. What it judged and did is
+        in the log (``judged``, ``tip_actions``)."""
+        rounds, acts = 0, self.log.setdefault("tip_actions", [])
+        quick = False
         for k in range(MAX_ROUNDS + 1):
             try:
-                L = self.survey()
-                j = judge(self.frame, L)
+                j = self.quick_judge() if quick else None
+                if j is None or j["verdict"] == "ok":
+                    L = self.survey()
+                    j = judge(self.frame, L)
             except NoRing as exc:                        # after a pulse: too blunt to image the ring at all
                 j = {"verdict": "blunt", "no_ring": str(exc)}
             self.log.setdefault("judged", []).append({kk: (round(vv, 3) if isinstance(vv, float) else vv) for kk, vv in j.items()})
@@ -309,10 +339,13 @@ class Corral:
             if k == MAX_ROUNDS:
                 raise RuntimeError("the tip could not be conditioned")
             if j["verdict"] == "ok":                    # unstable
+                acts.append("poke")
                 self.ops.poke_near(3, away_nm=POKE_AWAY_NM)
                 self.ops.go(*self.centre)
             else:
+                acts.append("pulse")
                 self.pulse_round(k)
+            quick = True
             rounds += 1
         self.log["tip_rounds"] = rounds
         if rounds:
@@ -362,7 +395,7 @@ class Corral:
         e0 = band_edge(sp["v"], sp["didv"])
         return e0, tip_feature(sp["v"], sp["didv"], e0)
 
-    def measure(self) -> dict:
+    def measure(self) -> dict | None:
         v, ops = self.v, self.ops
         e0, dev = self.bare_spectrum()
         for _ in range(2):
@@ -379,6 +412,10 @@ class Corral:
         cx, cy = self.centre
         ops.go(cx, cy)
         f, _ = ops.frame(cx, cy, RADIUS_NM, RADIUS_PX, RADIUS_LINE_S)
+        jc = ring_verdict(f)
+        if jc["verdict"] != "ok":                        # the tip changed since it was judged
+            self.log.setdefault("tip_changed", []).append({"at": "radius frame", **{k: v for k, v in jc.items() if k != "centre"}})
+            return None
         res = ring_of(f)
         centre = _to_scan(f, res["centre_nm"])
         self.log["centre_shift_nm"] = [round(centre[0] - cx, 2), round(centre[1] - cy, 2)]
@@ -401,6 +438,12 @@ class Corral:
             raise RuntimeError("the spectra at the centre keep jumping")
         names, curves, sp = [names[k] for k in keep], [curves[k] for k in keep], sps[keep[-1]]
         self.log["spectra_dropped"] = dropped
+        _image(v, ops)
+        fv, _ = ops.frame(*centre, 36.0, 360, 0.09)
+        jv = ring_verdict(fv)
+        if jv["verdict"] != "ok" or ops.unstable():       # it changed while the spectra were taken
+            self.log.setdefault("tip_changed", []).append({"at": "after the spectra", **{k: v for k, v in jv.items() if k != "centre"}})
+            return None
         peaks = resonance_peaks(sp["v"], np.median(np.vstack(curves), axis=0), e0)
         peaks_v = [p["v"] for p in peaks]
         labels = label_levels(peaks_v, e0, res["radius_nm"])
@@ -419,8 +462,15 @@ def play(v: Blind, log: dict) -> dict:
     ids = claim_ids(v.task())
     c = Corral(v, log)
     c.poke()
-    c.find_and_fix()
-    m = c.measure()
+    m = None
+    for attempt in range(MAX_ATTEMPTS):
+        c.find_and_fix()
+        m = c.measure()
+        if m is not None:
+            break
+        log["attempts"] = attempt + 1
+    if m is None:
+        raise RuntimeError("the tip kept changing")
     log.update({k: m[k] for k in ("e0_mev", "drift_comp_nm_per_min", "radius_nm")})
     log["peaks_found"] = len(m["peaks_v"])
     claims = [{"id": i, "kind": "peak_in_list"} for i in ids if i.startswith("peak")]
