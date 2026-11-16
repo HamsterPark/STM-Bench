@@ -151,12 +151,14 @@ S: dict[str, Pair] = {
     "no_view": ("Nothing shown.", "没有显示的内容。"),
     "scan_running": ("scan running…", "扫描进行中…"),
     # the readout line's usage hints, shown while it has no reading: how the viewer works, never about the experiment
-    "hint_image": ("Hover over the image to read position and value; click to place a marker",
-                   "悬停查看坐标和数值，点击放标记"),
-    "hint_image_profile": ("Hover over the image to read position and value; drag to draw a profile line",
-                           "悬停查看坐标和数值，拖动画剖面线"),
-    "hint_image_pan": ("Hover over the image to read position and value; drag to pan",
-                       "悬停查看坐标和数值，拖动平移"),
+    # each says what the pointer does with the tool picked, and that the wheel zooms about the pointer (p3check1, finding 1:
+    # a sighted agent zoomed about the centre with the buttons and then had to pan to a ring at the edge)
+    "hint_image": ("Hover to read; click to place a marker; wheel to zoom about the pointer",
+                   "悬停读坐标和数值，点击放标记，滚轮以指针处为中心缩放"),
+    "hint_image_profile": ("Hover to read; drag a line to plot along it; wheel to zoom about the pointer",
+                           "悬停读坐标和数值，拖动画剖面线，滚轮以指针处为中心缩放"),
+    "hint_image_pan": ("Hover to read; drag to move the zoomed view; wheel to zoom about the pointer",
+                       "悬停读坐标和数值，拖动平移，滚轮以指针处为中心缩放"),
     "hint_plot": ("Hover over the plot to read a point; click to pin it", "悬停查看数值，点击固定读数"),
     "no_frame_click": ("no frame shown: nothing marked", "没有显示的帧：未标记"),
     "delete_marker": ("Delete marker", "删除标记"),

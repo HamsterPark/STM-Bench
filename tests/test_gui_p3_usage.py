@@ -2,8 +2,9 @@
 worked, but nothing on the screen said how. Each is about how the software is read, none about the experiment.
 
 1. The Report form greys out x_nm, y_nm and frame for a claim the rule card gives no position.
-2. The evidence field has the form's width, and the whole list of files is shown under it when it does not fit.
+2. The evidence field shows a list of files whole (it wraps) instead of the end of one narrow line.
 3. A spectrum's sweep and the bias and setpoint it started from are on the viewer's title and the Data page.
+4. The readout line's hint says that the wheel zooms about the pointer.
 """
 from __future__ import annotations
 
@@ -126,3 +127,10 @@ def test_a_z_spectrum_says_its_sweep_too_and_a_trace_is_left_as_it_is(open_windo
              "from_nm": [0.0, 0.0], "to_nm": [1.0, 2.0], "speed_nm_s": 1.0}
     plain = c._spectrum_info(trace, 2)
     assert c._spectrum_info(trace, 2, {"v_start": 0.0, "v_end": 1.0, "bias_v": 9.0, "setpoint_pa": 9.0}) == plain
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_every_hint_says_the_wheel_zooms_about_the_pointer(lang):
+    for key in ("hint_image", "hint_image_profile", "hint_image_pan"):
+        assert ("scroll" in one(key, lang) or "wheel" in one(key, lang) or "滚轮" in one(key, lang)), key
+    assert "zoom about the pointer" in one("hint_image", "en") and "滚轮以指针处为中心缩放" in one("hint_image", "zh")
