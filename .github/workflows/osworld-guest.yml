@@ -67,6 +67,11 @@ jobs:
           sudo visudo -c
           cat /etc/sudoers.d/zz-stm-lockdown
           must_fail sh -c "id -nG user | tr ' ' '\n' | grep -qx sudo"
+          # other roads to root: membership of these groups is refused as well
+          echo "groups of user: $(id -nG user)"
+          for g in lxd docker libvirt kvm; do
+            must_fail sh -c "id -nG user | tr ' ' '\n' | grep -qx $g"
+          done
           must_fail sudo -u user -H sudo -n true
           must_fail sudo -u user -H bash -c "echo password | sudo -S -p '' true"
           must_fail sudo -u user -H sudo -u root id
