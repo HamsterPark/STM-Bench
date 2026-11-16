@@ -11,9 +11,10 @@ from __future__ import annotations
 
 from html import escape
 
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtWidgets import (QAbstractItemView, QBoxLayout, QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel,
-                               QListWidget, QListWidgetItem, QPushButton, QRadioButton, QScrollArea, QVBoxLayout, QWidget)
+                               QListWidget, QListWidgetItem, QPushButton, QRadioButton, QScrollArea, QStyle, QVBoxLayout,
+                               QWidget)
 
 from . import fmt, style
 from .controls import QuietBrowser, QuietText, SelectAllLineEdit, StepList, Tabs, WrapField, polish, strong
@@ -207,6 +208,7 @@ class ReportTab(QWidget):
     @staticmethod
     def _title(text: str) -> QLabel:
         lab = QLabel(text)
+        lab.setWordWrap(True)                  # "报告结果 Report a result (ReportResult)" is wider than the column in DejaVu
         strong(lab)
         return lab
 
@@ -600,6 +602,18 @@ class Sidebar(Tabs):
         self.tabBar().setObjectName("sidebar.tabs")
         self.tabBar().setExpanding(True)
         self.tabBar().setUsesScrollButtons(False)
+
+    def minimumSizeHint(self) -> QSize:
+        """Wide enough for the report form too. The form sits in a scroll area (below), whose own minimum says
+        nothing of the form's, so the window sized the column by the other pages and the form was cut at the right
+        edge: on Linux (DejaVu), 392 px (English) and 403 px (Chinese) of form in 358 px of column; trials 9 and
+        10 lost the y_nm field, a label, the "+ shown file" button and the right of Submit and Finish. The form's
+        own lines are kept short enough to fit the set 360 px (the two field labels, the title); this is for a font
+        or a Qt version in which they do not, where the column grows instead of the form being cut. The pane's frame
+        is added on both sides."""
+        hint = super().minimumSizeHint()
+        frame = self.style().pixelMetric(QStyle.PixelMetric.PM_DefaultFrameWidth, None, self)
+        return QSize(max(hint.width(), self.report.minimumSizeHint().width() + 2 * frame), hint.height())
 
     @property
     def facts(self) -> FactsTable:
