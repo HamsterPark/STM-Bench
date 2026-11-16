@@ -163,10 +163,18 @@ def test_keeping_the_record_changes_nothing(tmp_path):
 
 
 def test_a_drag_that_carried_the_atom_is_recorded_as_followed(tmp_path):
+    """``followed`` says the atom ended with the apex. For a drag that started over the atom (the
+    judge counts no other) that is a full carry; a move that only ends over an atom it never
+    carried (the way back to an atom left behind) ends with it too, and starts far from it."""
     w = _p4_world(3, True, tmp_path)
     _drag_series(w)
     recs = [r for r in w.truth()["drags"]["records"] if r["atom_id"] is not None]
-    for r in recs:
+    started_on = [r for r in recs if r["start_dist_nm"] <= 0.3]
+    assert started_on
+    for r in started_on:
         if r["followed"]:
             assert r["n_hops"] >= 3 and not r["picked"]
+    for r in recs:
         assert (r["site_after"] is None) == r["picked"]
+        if r["followed"] and r["n_hops"] == 0:
+            assert r["start_dist_nm"] > 0.3

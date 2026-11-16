@@ -915,7 +915,10 @@ class World:
         """Close P7's record of the move whose trace is ``index``: the atom the move held first
         (the drag's first grab, else the one under the apex at the start), the conditions that
         decided its fate (:class:`~stmsim.physics.drag_threshold.DragConditions`) and the outcome:
-        hops, lifted onto the tip, and whether it ended with the apex (carried the whole way)."""
+        hops, lifted onto the tip, and whether it ended with the apex (``followed``). For a move
+        that started over the atom (``start_dist_nm`` small) ending with the apex is a full carry;
+        a move that only reaches an atom at its end (the way back to one left behind) ends with
+        it too, which is why the judge looks at the start as well."""
         from .drag_threshold import WITH_TIP_FRACTION
         reg = self.surface.site.adatoms
         grip = judged["grip"]
