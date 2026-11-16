@@ -328,6 +328,37 @@ def test_the_shell_script_is_valid_bash():
     assert subprocess.run(["bash", "-n", str(GUEST / "stm-start")], capture_output=True).returncode == 0
 
 
+def test_the_installer_scripts_are_valid_bash_and_the_package_list_is_plain():
+    import re
+    for name in ("install.sh", "stm-bench-reset", "pins.sh", "stm-start"):
+        assert subprocess.run(["bash", "-n", str(GUEST / name)], capture_output=True).returncode == 0, name
+    pkgs = [ln.strip() for ln in (GUEST / "apt-packages.txt").read_text().splitlines()
+            if ln.strip() and not ln.startswith("#")]
+    assert len(pkgs) == len(set(pkgs)) and all(re.fullmatch(r"[a-z0-9][a-z0-9+.-]+", p) for p in pkgs)
+    assert "libxcb-cursor0" in pkgs and "x11-xserver-utils" in pkgs      # Qt >= 6.5's xcb plugin, and xhost
+
+
+def test_the_pins_are_exact_and_the_defaults_are_the_cautious_ones():
+    out = subprocess.run(["bash", "-c", '. "$1"; printf "%s\n" "$PY_SHA256" "$PY_VERSION" "$PYSIDE_PIN" "$STM_COMMIT" '
+                          '"$STM_REVOKE_SUDO" "$STM_USER" "$AGENT_USER" "$PY_URL"', "_", str(GUEST / "pins.sh")],
+                         capture_output=True, text=True, check=True).stdout.splitlines()
+    sha, version, pyside, commit, revoke, stm, agent, url = out[:8]
+    assert len(sha) == 64 and set(sha) <= set("0123456789abcdef") and version.startswith("3.13.")
+    assert url.startswith("https://") and version in url and "x86_64-unknown-linux-gnu-install_only" in url
+    assert all("==" in part for part in pyside.split()) and "PySide6_Essentials" in pyside
+    assert set(commit) == {"0"}                          # the delivery commit is set by whoever delivers
+    assert (revoke, stm, agent) == ("0", "stm", "user")
+    reqs = (ROOT / "deploy" / "osworld" / "grader" / "requirements.txt").read_text()
+    assert all(f"{n}==" in reqs for n in ("numpy", "scipy", "PyYAML"))
+
+
+def test_the_workflow_runs_only_when_started_by_hand():
+    yaml = pytest.importorskip("yaml")
+    wf = yaml.safe_load((ROOT / ".github" / "workflows" / "osworld-guest.yml").read_text(encoding="utf-8"))
+    triggers = wf.get("on", wf.get(True))
+    assert set(triggers) == {"workflow_dispatch"}
+
+
 # ── the real console, offscreen ──
 def test_the_launcher_starts_the_real_sealed_console_and_the_export_appears(tmp_path):
     pytest.importorskip("PySide6")
