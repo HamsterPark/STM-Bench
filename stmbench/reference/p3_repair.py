@@ -50,6 +50,10 @@ STAGE_NM = 1.5
 #: height 0.7 nm out on the ring's side (the spares themselves are found with the usual 0.6)
 NEAR_COMPACT = 0.9
 STAGE_ON_GOAL_NM = 0.35
+#: the last approach stops within this of the site (nm); the lattice's nearest site to any point
+#: is within 0.15 nm of it, and a ring site is held by an atom within 0.29-0.37 nm
+FINE_NM = 0.2
+MAX_FINE = 5
 #: every drag starts this far behind the atom, so that the tip runs over it and carries it
 RUN_UP_NM = 0.5
 MAX_STEPS = 24
@@ -91,7 +95,7 @@ def _plan(sv: dict) -> dict:
     spares = [a for a in sv["atoms"]
               if SPARE_BAND_NM[0] < math.hypot(a[0] - rc[0], a[1] - rc[1]) - R < SPARE_BAND_NM[1]]
     g = ring_gap(sv["angles"], sv["profile"], R, missing=len(spares))
-    return {"spares": spares, "sites": list(g["sites_rad"]), "level": g["level"],
+    return {"spares": spares, "sites": list(g["sites_rad"]), "level": g["level"], "R": R,
             "gap_width_nm": g["gap_width_nm"], "spacing_nm": g["spacing_nm"]}
 
 
@@ -117,48 +121,47 @@ def _pair(s: Session, sv: dict, plan: dict) -> list:
 
 
 def _place(s: Session, mv: Mover, centre, atom, theta: float, plan: dict, log: dict, r_ohm: float):
-    """One spare to its site, a survey before every drag: the atom and its goal are read in the
-    same fast frame and the drag goes from the one to the other, first to the staging point
-    1.5 nm outside the site, then in. A rung lower whenever it did not move (no spikes).
+    """One spare to its site: first to a staging point 1.5 nm radially outside it, where it is
+    still an isolated bump, then in; a rung lower on the resistance ladder whenever a drag
+    moved nothing (no spikes; the threshold is not read).
 
-    The drag's vector comes from the survey (atom and goal in one frame, so the fast frame's
-    lag drops out) and it starts with the tip on the atom; drift between the survey and the
-    drag moves atom and goal alike. No drift tracking on the atom, unlike P4: beside the ring the bump
-    nearest where an atom should be can be a ring atom, and a still-atom shift read off the
-    wrong bump put the drift compensation off by nanometres a minute.
+    Where the atom is and where the ring is are navigation (privileged): the ring's centre
+    and the atom through the tip's apex (:meth:`Session.image_xy`), which puts both in one
+    frame of reference whatever the fast frames' lag and the drift. What is measured is the
+    ring's radius (the first survey) and the angles of its gap's sites. The atom comes to rest
+    on the lattice site nearest where the tip leaves it, a few tenths of a nanometre short of
+    the tip's end (the atom hops only once the apex is 0.6 site spacings past it), and a site
+    is held only if an atom is within half a spacing of it (as little as 0.3 nm), so the last
+    approach is closed-loop: the drag is repeated, from behind the atom, until it is within
+    ``FINE_NM`` of the site.
 
     Returns the resistance that moved it, or ``None`` when it went onto the tip."""
     reg = s.w.surface.site.adatoms
     attempts = log.setdefault("attempts", [])
-    staged = False
+    ring = s.w.surface.corral_snapshot()
+    rc_m = tuple(v * 1e-9 for v in ring["centre_nm"])
+    R = plan["R"]
+    staged, fine = False, 0
     for _ in range(MAX_STEPS):
         log["r_resume"] = r_ohm
         if r_ohm < LADDER_MIN_KOHM * 1e3:
             raise RuntimeError("the spare did not follow down to the lowest resistance")
-        sv = _survey(s, centre)
-        rc, R = sv["centre"], sv["R"]
-        # the spare is an isolated bump off the ring: a bump on the ring within reach of where
-        # it should be is the gap's edge, and a vector from it sent an atom past its site
-        off_ring = [a for a in sv["near"] if abs(math.hypot(a[0] - rc[0], a[1] - rc[1]) - R) > 0.6]
-        me = nearest(off_ring, *s.image_xy(*reg.site_xy(atom.i, atom.j, atom.sub)), 1.0)
-        if _filled(sv, theta, plan["level"]) and (me is None or math.hypot(*(np.array(me) - rc)) - R < 0.6):
-            return r_ohm
-        if me is None:
-            raise RuntimeError("the spare is not an isolated bump where it should be")
-        stage = rc + (R + STAGE_NM) * _unit(theta)
-        site = rc + R * _unit(theta)
-        out = math.hypot(me[0] - rc[0], me[1] - rc[1]) - R
-        if not staged and (math.hypot(me[0] - stage[0], me[1] - stage[1]) <= STAGE_ON_GOAL_NM
-                           or out < STAGE_NM):
-            staged = True                                    # there, or already past it
-        goal = site if staged else stage
-        vec = np.array([goal[0] - me[0], goal[1] - me[1]])   # within one frame: no lag
-        # the drag runs over the atom (navigation puts the tip on it) from RUN_UP_NM behind it
-        # to the goal: started on the atom, a drag of a few tenths of a nanometre hardly moved it
-        # (the atom hops only once the apex is 0.6 site spacings away), and one started where
-        # the fast frame shows it sat behind the atom by the lag, so the atom went back and forth
+        rc = np.array(s.image_xy(*rc_m))
         pos = np.array(s.image_xy(*reg.site_xy(atom.i, atom.j, atom.sub)))
+        site = rc + R * _unit(theta)
+        stage = rc + (R + STAGE_NM) * _unit(theta)
+        out = float(np.hypot(*(pos - rc))) - R
+        if not staged and (float(np.hypot(*(pos - stage))) <= STAGE_ON_GOAL_NM or out < STAGE_NM):
+            staged = True                                    # there, or already past it
+        if staged and float(np.hypot(*(pos - site))) <= FINE_NM:
+            return r_ohm
+        if fine >= MAX_FINE:
+            return r_ohm                                     # as close as the lattice lets it
+        vec = (site if staged else stage) - pos
         u = vec / max(float(np.hypot(*vec)), 1e-9)
+        # the drag runs over the atom from RUN_UP_NM behind it to the goal: started on the atom,
+        # a drag of a few tenths of a nanometre hardly moved it (the atom hops only once the
+        # apex is 0.6 site spacings away)
         start = pos - RUN_UP_NM * u
         spikes = mv.drag((float(start[0]), float(start[1])), (float(pos[0] + vec[0]), float(pos[1] + vec[1])), r_ohm)
         attempts.append({"r_kohm": round(r_ohm / 1e3, 1), "spikes": spikes, "in": staged})
@@ -168,6 +171,8 @@ def _place(s: Session, mv: Mover, centre, atom, theta: float, plan: dict, log: d
             raise LostTrack()
         if spikes == 0:
             r_ohm *= LADDER_FACTOR
+        elif staged:
+            fine += 1
     raise RuntimeError("the spare did not reach its site")
 
 
@@ -255,6 +260,14 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
                 log["placed"] += 1
                 r_next = min(LADDER_KOHM * 1e3, 1.6 * got)
             break
+    if _clean_tip(s, centre, radius_m, log):
+        mv.drift(*centre)
+    try:
+        # the ring as imaged once it is repaired: its cross-section at each site, relative to its level
+        sv = _survey(s, centre)
+        log["site_fill"] = [round(_cross_section(sv, th) / plan["level"], 2) for th in plan["sites"]]
+    except LostTrack:
+        pass
     _clean_tip(s, centre, radius_m, log, spectroscopy=True)
     m = p3.measure(s, centre, radius_m, integration_ms=integration_ms, repeats=repeats, compensated=True)
     got = m.pop("values")
