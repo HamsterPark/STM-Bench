@@ -28,11 +28,16 @@ from .widgets.plot_view import PlotView
 #: spectrum columns as the viewer plots them: (button text, factor from the stored unit, unit); a move trace's
 #: own are the distance along the move and the time since it began
 SPECTRUM_COLUMNS = {
-    "v": ("V", 1.0, "V"), "i": ("I", 1e12, "pA"), "didv": ("dI/dV", 1e9, "nS"), "z_rel": ("z rel", 1e12, "pm"),
+    "v": ("V", 1.0, "V"), "v_mv": ("V", 1e3, "mV"), "i": ("I", 1e12, "pA"), "didv": ("dI/dV", 1e9, "nS"),
+    "z_rel": ("z rel", 1e12, "pm"),
     "z_abs": ("z", 1e9, "nm"), "df": ("Δf", 1.0, "Hz"), "amp": ("amplitude", 1e12, "pm"),
     "dist": ("distance", 1e9, "nm"), "t": ("time", 1.0, "s"),
 }
-_X_FIRST = ("v", "z_rel", "z_abs")
+_X_FIRST = ("v_mv", "v", "z_rel", "z_abs")
+#: a bias sweep no wider than this (V) also offers its bias in mV, and opens on it: a feature a few mV wide is read
+#: against ticks and a cursor in mV, not in hundredths of a volt (P6 reads a resonance a few meV wide in a +-50 mV
+#: sweep and reports it in meV; a wider sweep, e.g. a surface-state band edge, stays in V)
+NARROW_SWEEP_V = 0.25
 _Y_FIRST = ("didv", "df", "i")
 #: a move trace is read along the move, or in time, against what the instrument recorded there: Z, then current
 MOVE_X, MOVE_Y = ("dist", "t"), ("z_abs", "i")
@@ -90,6 +95,17 @@ def default_axes(spec: dict) -> tuple[str, str]:
     varying = [c for c in _Y_FIRST if c in ys and np.ptp(np.nan_to_num(np.asarray(spec[c], float))) > 0]
     y = varying[0] if varying else (next((c for c in _Y_FIRST if c in ys), ys[0] if ys else x))
     return x, y
+
+
+def with_millivolts(spec: dict) -> dict:
+    """The record, with its bias also as the ``v_mv`` column when it is a narrow bias sweep (see
+    :data:`NARROW_SWEEP_V`); the record itself is returned otherwise. The column is the same numbers in the unit the
+    reader reports in, shown by the unit factor of :data:`SPECTRUM_COLUMNS`: nothing is computed from the curve."""
+    v = np.asarray(spec.get("v", []), float)
+    if spec.get("kind") == "move" or v.size < _SPECTRUM_MIN or not np.isfinite(v).all() \
+            or np.ptp(v) > NARROW_SWEEP_V:
+        return spec
+    return {**spec, "v_mv": v}
 
 
 def thumb_pixmap(frame: dict, size: int) -> QPixmap:
@@ -587,6 +603,7 @@ class CenterColumn(QWidget):
 
     def show_spectrum(self, spec: dict, axes: tuple[str, str] | None = None) -> None:
         """Show a spectrum, or a move trace (``kind`` "move"), plotted against the columns the reader picks."""
+        spec = with_millivolts(spec)
         self._spec = spec
         xcols, ycols = axis_columns(spec)
         if not xcols or not ycols:
