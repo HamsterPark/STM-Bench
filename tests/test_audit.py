@@ -172,7 +172,7 @@ def test_a_sheet_is_scored_by_the_judges_checks_on_hand_made_truths():
 
 def test_wilson_interval_matches_known_values():
     lo, hi = A.wilson(9, 1000)
-    assert (lo, hi) == pytest.approx((0.00474, 0.01699), abs=2e-5)
+    assert (lo, hi) == pytest.approx((0.0047421, 0.0170158), abs=1e-6)
     assert A.wilson(0, 0)[0] != A.wilson(0, 0)[0]             # nan
     assert A.wilson(0, 50)[0] == pytest.approx(0.0, abs=1e-12)
 
