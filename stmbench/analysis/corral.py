@@ -257,3 +257,94 @@ def label_levels(peaks_v: list[float], e0_v: float, radius_nm: float, *, m_star:
         out.setdefault(n, float(p))
     return out
 
+
+
+def locate_corral(array: np.ndarray, nm_per_px: float, *, radius_range_nm: tuple[float, float] = (3.0, 11.5),
+                  frac: float = 0.3, step_nm: float = 1.0) -> dict:
+    """The ring of a quantum corral anywhere in a survey topograph, with no prior on its
+    centre (:func:`find_ring` needs it within a few nm of the frame's centre).
+
+    Every bright pixel (:func:`bright_pixels`) votes for the circles through it, weighted by its
+    height, on a grid of candidate centres ``step_nm`` apart; the circle with the most height
+    within 0.1 nm of it wins, :func:`ring` refines it from the pixels within 0.6 nm. A ring cut
+    by the frame's edge or no ring at all shows as a small ``coverage``: the fraction of the
+    refined circle's length that has a bright pixel within 0.25 nm of it and lies in the frame.
+    Returns like :func:`corral_radius`, plus ``coverage`` and ``score``; the centre is in frame
+    coordinates (x from the left edge, y up from the bottom edge)."""
+    pts, h = bright_pixels(array, nm_per_px, frac=frac)
+    if len(pts) < 20:
+        raise ValueError("nothing bright enough to be a ring")
+    if len(pts) > 6000:
+        keep = np.random.default_rng(0).choice(len(pts), 6000, replace=False)   # fixed stream: a reproducible fit
+        pts, h = pts[keep], h[keep]
+    ny, nx = np.shape(array)
+    width, height = nx * nm_per_px, ny * nm_per_px
+    bins = np.arange(radius_range_nm[0], radius_range_nm[1] + 1e-9, 0.1)
+    best = (-1.0, np.zeros(2), 0.0)
+    for cx in np.arange(0.0, width + 1e-9, step_nm):
+        for cy in np.arange(0.0, height + 1e-9, step_nm):
+            hist = np.histogram(np.hypot(pts[:, 0] - cx, pts[:, 1] - cy), bins=bins, weights=h)[0]
+            pair = hist[:-1] + hist[1:]
+            k = int(np.argmax(pair))
+            if pair[k] > best[0]:
+                best = (float(pair[k]), np.array([cx, cy]), float(bins[k + 1]))
+    score, c, r = best
+    near = np.abs(np.hypot(pts[:, 0] - c[0], pts[:, 1] - c[1]) - r) <= 0.6
+    if near.sum() < 5:
+        raise ValueError("no ring found")
+    cx, cy, rr, n = ring(pts[near], h[near])
+    ang = np.linspace(0.0, 2 * np.pi, 180, endpoint=False)
+    on_frame = (cx + rr * np.cos(ang) >= 0) & (cx + rr * np.cos(ang) <= width) & (cy + rr * np.sin(ang) >= 0) & (cy + rr * np.sin(ang) <= height)
+    d = np.hypot(pts[:, 0, None] - (cx + rr * np.cos(ang))[None], pts[:, 1, None] - (cy + rr * np.sin(ang))[None])
+    lit = (d <= 0.25).any(axis=0)
+    return {"centre_nm": [cx, cy], "radius_nm": rr, "pixels": n, "score": score,
+            "coverage": float(lit.sum() / max(1, on_frame.sum())), "inside": float(on_frame.mean())}
+
+
+def ring_width_nm(array: np.ndarray, nm_per_px: float, centre_nm, radius_nm: float, *, half_nm: float = 2.5) -> float:
+    """Full width at half height (nm) of the ring's cross-section, averaged round the ring over
+    a running-median background (:data:`RING_BACKGROUND_NM`). Atoms imaged by a sharp tip
+    stand in a ring 0.8-1.0 nm wide (their own width plus the ring's thickness); a blunt tip
+    widens the cross-section to 1.2-1.6 nm and lowers it."""
+    z = _background_free(array, nm_per_px, RING_BACKGROUND_NM)
+    th = np.radians(np.arange(0.0, 360.0, 2.0))
+    rs = np.arange(max(0.3, radius_nm - half_nm), radius_nm + half_nm, 0.05)
+    xs = centre_nm[0] + rs[:, None] * np.cos(th)[None, :]
+    ys = centre_nm[1] + rs[:, None] * np.sin(th)[None, :]
+    prof = _sample(z, nm_per_px, xs, ys).mean(axis=1)
+    top = int(np.argmax(prof))
+    half = 0.5 * (prof[top] + float(np.median(prof)))
+    above = np.flatnonzero(prof > half)
+    return float((above.max() - above.min() + 1) * 0.05)
+
+
+def ghost_strength(array: np.ndarray, nm_per_px: float, centre_nm, radius_nm: float, *,
+                   annulus_nm: float = 2.5, lag_nm: tuple[float, float] = (0.8, 5.0)) -> tuple[float, tuple[float, float]]:
+    """How strongly the ring's image has a copy of itself at one displacement: a second apex
+    on the tip draws the whole ring twice, the copy weaker.
+
+    The autocorrelation of the ring's annulus (over a running-median background, mean removed,
+    normalised to its value at zero lag) has, besides its central lobe, a local maximum at
+    the displacement of the copy, as high as the copy is strong relative to the ring: 0.09-0.27
+    on 8 rendered double-tip rings of 4.5-10 nm radius (displacements 1.8-3 nm), against at most
+    0.08 on the structure a sharp or blunt tip's ring has by itself (30 rings). A copy closer
+    than ~1.5 nm merges into the central lobe and is not seen. Returns the height of the highest
+    local maximum between ``lag_nm`` and its displacement (nm, x right, y up)."""
+    from scipy.ndimage import maximum_filter
+
+    z = _background_free(array, nm_per_px, RING_BACKGROUND_NM)
+    ny, nx = z.shape
+    yy, xx = np.mgrid[0:ny, 0:nx]
+    x, y = (xx + 0.5) * nm_per_px, (ny - yy - 0.5) * nm_per_px
+    inside = np.abs(np.hypot(x - centre_nm[0], y - centre_nm[1]) - radius_nm) <= annulus_nm
+    a = np.where(inside, z - z[inside].mean(), 0.0)
+    f = np.fft.fft2(a, s=(2 * ny, 2 * nx))
+    c = np.fft.fftshift(np.real(np.fft.ifft2(f * np.conj(f))))
+    c = c / c[ny, nx]
+    gy, gx = np.mgrid[-ny:ny, -nx:nx]
+    lag = np.hypot(gx, gy) * nm_per_px
+    local = (c == maximum_filter(c, size=int(round(0.6 / nm_per_px)) | 1)) & (lag >= lag_nm[0]) & (lag <= lag_nm[1])
+    if not local.any():
+        return 0.0, (0.0, 0.0)
+    j, i = np.unravel_index(int(np.argmax(np.where(local, c, -np.inf))), c.shape)
+    return float(c[j, i]), (float(gx[j, i] * nm_per_px), float(-gy[j, i] * nm_per_px))
