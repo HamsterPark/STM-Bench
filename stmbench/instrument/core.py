@@ -1110,7 +1110,9 @@ def _portable_events(events: list[dict]) -> list[dict]:
     for e in events:
         d = dict(e)
         if d.get("path"):
-            d["path"] = Path(str(d["path"])).name
+            # either separator: a ledger written on Windows is read on Linux, where Path() would keep
+            # "D:\run\x.sxm" whole (the digest of its events was computed from the bare file name)
+            d["path"] = str(d["path"]).replace("\\", "/").rsplit("/", 1)[-1]
         out.append(d)
     return out
 

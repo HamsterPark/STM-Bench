@@ -469,3 +469,12 @@ def test_the_trace_of_an_oscillating_tip_carries_the_setpoint_current():
     s = inst.spectrum(inst.act("move_tip", x_nm=5.0, y_nm=0.0, speed_nm_s=50.0)["trace"])
     assert inst.world.osc_factor() > 2.0
     assert np.mean(s["i"]) == pytest.approx(s["setpoint_pa"] * 1e-12, rel=0.05)
+
+
+def test_event_paths_reduce_to_file_names_whatever_host_wrote_them():
+    """A ledger written on Windows is verified on Linux: its events carry ``D:\\run\\x.sxm`` there."""
+    from stmbench.instrument.core import _portable_events
+
+    got = _portable_events([{"path": "D:\\run\\private\\session\\sim001.sxm"}, {"path": "/a/b/Spec1.dat"},
+                            {"path": "plain.dat"}, {"kind": "x"}])
+    assert [e.get("path") for e in got] == ["sim001.sxm", "Spec1.dat", "plain.dat", None]
