@@ -118,7 +118,8 @@ def test_a_task_id_is_lower_case_letters_digits_and_underscores(raw):
 def test_anything_else_is_refused_without_repeating_it(raw):
     with pytest.raises(L.RequestError) as exc:
         L.parse_request(raw)
-    assert raw.strip().decode("ascii", "ignore") not in str(exc.value) or not raw.strip()
+    echoed = raw.strip().decode("ascii", "ignore")
+    assert not echoed or echoed not in str(exc.value)
 
 
 def test_load_task_gives_scenario_and_seed_and_refuses_the_rest(tmp_path):
