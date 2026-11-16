@@ -466,11 +466,13 @@ def rule_card(sc, lang: str = "zh") -> str:
     lines += ["",
               _t(lang,
                  "引用数据：每条报告用 evidence 列出你用到的扫描帧（.sxm 文件名）和谱（.dat 文件名），也可以写 frame:N、"
-                 "sts:N、zspec:N" + ("；移动轨迹用 move_tip 返回的 .dat 文件名或 move:N。" if moves else "。")
+                 "sts:N、zspec:N" + ("；移动轨迹用 move_tip 返回的 .dat 文件名，或 move:N（N 是该文件名里的编号）。"
+                                     if moves else "。")
                  + "判分只在你引用的数据里检查证据要求，没有引用的数据不算。",
                  "Citing data: in each report, list in the evidence field the scan frames (.sxm file names) "
                  "and spectra (.dat file names) you used; you may also write frame:N, sts:N or zspec:N"
-                 + ("; a move trace is named by the .dat file name move_tip returned, or move:N. " if moves else ". ")
+                 + ("; a move trace is named by the .dat file name move_tip returned, or move:N (N being the "
+                    "number in that file name). " if moves else ". ")
                  + "Scoring checks the evidence requirements only within the data you cite; data you do not "
                  "cite does not count."),
               _t(lang,

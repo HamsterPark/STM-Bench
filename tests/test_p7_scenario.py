@@ -450,3 +450,7 @@ def test_an_episode_on_the_instrument_ends_in_a_verdict_that_shows_the_drag_chec
         e = C.resolve_citation(w.events, name)
         assert e is not None and e["move_idx"] in have
         assert C.resolve_citation(w.events, f"move:{e['move_idx']}") is e
+        # the card tells the operator that N is the number in the trace's file name: the file counter
+        # (one per basename) and the move index advance together, one per move_tip
+        import re
+        assert int(re.search(r"(\d+)\.dat$", name).group(1)) == int(e["move_idx"]), name
