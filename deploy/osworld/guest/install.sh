@@ -85,7 +85,8 @@ rm -rf /opt/stm-bench/src
 mkdir -p /opt/stm-bench/src
 if [ -n "${STM_SRC_TARBALL:-}" ]; then
   tar -xf "$STM_SRC_TARBALL" --no-same-owner -C /opt/stm-bench/src
-  COMMIT_NOTE="tarball $(sha256sum "$STM_SRC_TARBALL" | cut -c1-16)${STM_COMMIT:+ (commit ${STM_COMMIT})}"
+  COMMIT_NOTE="tarball $(sha256sum "$STM_SRC_TARBALL" | cut -c1-16)"
+  if [ -n "${STM_COMMIT:-}" ] && [ "${STM_COMMIT//0/}" != "" ]; then COMMIT_NOTE="$COMMIT_NOTE (commit $STM_COMMIT)"; fi
 else
   T=$(mktemp -d)
   git -C "$T" init -q
@@ -113,7 +114,8 @@ B=$(mktemp -d)
 cp -r /opt/stm-bench/src/. "$B/"
 $PIP install --no-deps "$B"
 rm -rf "$B"
-{ echo "# $COMMIT_NOTE"; /opt/stm-bench/venv/bin/python -m pip freeze; } > /opt/stm-bench/versions.txt
+{ echo "# $COMMIT_NOTE"; /opt/stm-bench/venv/bin/python -m pip freeze | grep -v '^stm-bench'
+  /opt/stm-bench/venv/bin/python -m pip show stm-bench | sed -n 's/^Version: /stm-bench==/p'; } > /opt/stm-bench/versions.txt
 echo "$COMMIT_NOTE" > /opt/stm-bench/COMMIT
 find /opt/stm-bench -type d -exec chmod u+rwx,go+rx {} +
 find /opt/stm-bench -type f -exec chmod go+r {} +
