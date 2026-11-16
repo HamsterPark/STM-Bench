@@ -271,7 +271,7 @@ MCP 服务器（`stmbench episode`）把它交给任何支持 MCP 的智能体�
 判分器经 `module_metric` 适配器（`deploy/osworld/stm_metric.py`，只用标准库）在 Docker 镜像里运行；镜像尚未构建过。
 
 **导出版本 2：哈希之外的舍入容差（2026-11-16）。** 动机是实测：2026-11-12 把 Windows（i5-14400F）上录的屏幕试做 6 的导出
-拿到 khwu 集群（Linux、EPYC 9654，numpy 2.5.4、OpenBLAS 0.3.34 相同）判分，回复与仪器时间 0 处不符，但 44 个数组哈希
+拿到一台 Linux 集群节点（EPYC 9654，numpy 2.5.4、OpenBLAS 0.3.34 相同）判分，回复与仪器时间 0 处不符，但 44 个数组哈希
 全不同，诚实的一局得 0 分，而 Linux 自己重放得到的判决与记录一致（0.5）。数组只差最后几位（z 最大差 1.65e-23 m，量程
 3.48e-10 m；电流 5.6e-23 A），换 numpy 的 CPU 分发无效，换 OpenBLAS 内核会再变——怀疑来源是 libm（MSVC 与 glibc）。
 OSWorld 任务的录制与判分恰好在不同机器上，所以这会让诚实的一局被判 0。
