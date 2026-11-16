@@ -140,3 +140,11 @@ notes: |
   changed, and the switches draw from their own streams, so every hidden draw is the one it was.
   The calibration above was measured with the switches off; the reference solution's re-run on
   this physics is recorded with the P3 scripted baseline (docs/DESIGN.md, section 9.5).
+
+  **Chance on 2000 seeds, with a held-out estimate (2026-11-16/17, code 9716850, ``audit chance
+  --scenario P3_corral_cu111 --seeds 2000 --holdout``, khwu).** Per claim, best fixed answer on seeds
+  0-1999: each peak 37.0 %, radius 8.3 %. All claims, sheet chosen and scored on the same 2000
+  seeds: 2.30 % (Wilson 95 % 1.73-3.05 %), biased high because the sheet is fitted to the seeds it
+  is scored on. Sheet chosen on seeds 0-999 and scored on seeds 1000-1999: 9/1000 = 0.90 % (0.47-1.70 %).
+  Both are under the 5 % gate; the earlier 4.3 % above is 300 seeds, in-sample. The three tolerances
+  and the hidden ranges are as before.
