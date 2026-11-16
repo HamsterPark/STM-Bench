@@ -213,7 +213,8 @@ def cmd_gui(a) -> int:
             raise
         raise SystemExit('the desktop console needs Qt: pip install "stm-bench[gui]"') from exc
     return run(scenario=a.scenario, seed=0 if a.seed is None else a.seed, out=a.out, lang=a.lang,
-               ui_scale=a.ui_scale, sealed=a.sealed, private_dir=a.private_dir, export_dir=a.export_dir)
+               ui_scale=a.ui_scale, sealed=a.sealed, private_dir=a.private_dir, export_dir=a.export_dir,
+               ready_file=a.ready_file)
 
 
 # ── argparse ────────────────────────────────────────────────────────────────
@@ -340,6 +341,8 @@ def main(argv=None) -> int:
     gu.add_argument("--private-dir", default=None, help="with --sealed: the run directory, made readable by its owner "
                                                         "only (it holds the seed and, after the end, the truth)")
     gu.add_argument("--export-dir", default=None, help="with --sealed: where the agent-visible export is written")
+    gu.add_argument("--ready-file", default=None,
+                    help="write this file (one line, 0644) once the window is on screen: a launcher waits for it")
     gu.set_defaults(fn=cmd_gui)
     a = ap.parse_args(argv)
     return a.fn(a)

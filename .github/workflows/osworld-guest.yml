@@ -1,0 +1,139 @@
+# A full test of the OSWorld guest side on a real Ubuntu 22.04 machine (root, systemd, two accounts, Xvfb): install the
+# console with deploy/osworld/guest/install.sh, start it as the agent's account through stm-start, take a screenshot,
+# and check what that account can and cannot read. Run by hand only (workflow_dispatch). It tests the installer and the
+# launcher; it does not test the OSWorld image, its GNOME session or its control plane.
+name: osworld-guest
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  guest:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Accounts and a throwaway task list
+        run: |
+          # The OSWorld base image's agent account is `user`; the console's service account `stm` is made by install.sh.
+          sudo useradd --create-home --shell /bin/bash --uid 1100 user
+          # as in the OSWorld base image: in the sudo group, password `password`
+          echo 'user:password' | sudo chpasswd
+          sudo usermod -aG sudo user
+          SEED=$(python3 -c 'import secrets; print(secrets.randbelow(2**31))')
+          echo "::add-mask::$SEED"
+          printf '{"stm_p4_atom_ci": {"scenario": "P4_atom_positioning_cu111", "seed": %s}}\n' "$SEED" > "$RUNNER_TEMP/tasks.json"
+          chmod 600 "$RUNNER_TEMP/tasks.json"
+          echo "$SEED" > "$RUNNER_TEMP/seed.txt"; chmod 600 "$RUNNER_TEMP/seed.txt"
+          git archive --format=tar HEAD > "$RUNNER_TEMP/src.tar"
+
+      - name: Install (the provisioner's real steps, with systemd)
+        run: |
+          sudo env STM_TASKS_JSON="$RUNNER_TEMP/tasks.json" STM_SRC_TARBALL="$RUNNER_TEMP/src.tar" \
+            bash deploy/osworld/guest/install.sh
+          systemctl is-active stm-bench.service
+          sudo test -p /run/stm-bench/start
+          cat /opt/stm-bench/versions.txt
+
+      - name: Xvfb and a window manager as the agent's account, with the autostart entry's command
+        run: |
+          sudo apt-get install -y --no-install-recommends xvfb openbox imagemagick x11-utils xdotool
+          sudo -u user -H bash -c 'Xvfb :0 -screen 0 1920x1080x24 >/tmp/xvfb.log 2>&1 &'
+          sleep 3
+          sudo -u user -H bash -c 'DISPLAY=:0 openbox >/tmp/openbox.log 2>&1 &'
+          sleep 2
+          # what /etc/xdg/autostart/stm-bench-xhost.desktop runs at login
+          CMD=$(sed -n 's/^Exec=//p' /etc/xdg/autostart/stm-bench-xhost.desktop)
+          sudo -u user -H env DISPLAY=:0 bash -c "$CMD"
+          sudo -u user -H env DISPLAY=:0 xhost
+
+      - name: Lock the agent's account down, as a task's config does
+        run: |
+          must_fail() { if "$@" >/dev/null 2>&1; then echo "UNEXPECTEDLY ALLOWED: $*"; exit 1; fi; echo "refused, as it should be: $*"; }
+          sudo apt-get install -y --no-install-recommends policykit-1 || true
+          # before: the account has admin rights, and a shell opened now tries sudo only after the lockdown
+          sudo -u user -H bash -c 'echo password | sudo -S -p "" true'
+          rm -f /tmp/late.rc
+          sudo -u user -H bash -c 'sleep 25; echo password | sudo -S -p "" true >/dev/null 2>&1; echo $? > /tmp/late.rc' &
+          sleep 1
+          # the command of the task's config
+          sudo -u user -H bash -c "echo password | sudo -S -p '' /usr/local/sbin/stm-lockdown"
+          sudo -u user -H bash -c "echo password | sudo -S -p '' /usr/local/sbin/stm-lockdown" && echo "second call from user: allowed?" || echo "second call from user refused (it no longer has sudo)"
+          sudo /usr/local/sbin/stm-lockdown        # idempotent when run again as root
+          sudo visudo -c
+          cat /etc/sudoers.d/zz-stm-lockdown
+          must_fail sh -c "id -nG user | tr ' ' '\n' | grep -qx sudo"
+          must_fail sudo -u user -H sudo -n true
+          must_fail sudo -u user -H bash -c "echo password | sudo -S -p '' true"
+          must_fail sudo -u user -H sudo -u root id
+          must_fail sudo -u user -H pkexec true
+          # polkit: not authorized (pkcheck exit 1), not "challenge" (3) and not authorized (0)
+          set +e
+          sudo -u user -H pkcheck --action-id org.freedesktop.policykit.exec --process $$ ; rc=$?
+          set -e
+          echo "pkcheck exit $rc"; test "$rc" = 1
+          # the shell that was open before: its sudo is refused now
+          for i in $(seq 1 40); do test -f /tmp/late.rc && break; sleep 1; done
+          test "$(cat /tmp/late.rc)" != 0
+
+      - name: Start the console as the agent's account
+        run: |
+          # no xhost of its own here: the autostart command above did it, like the desktop session
+          time sudo -u user -H env DISPLAY=:0 STM_START_NO_XHOST=1 /usr/local/bin/stm-start stm_p4_atom_ci
+          sudo -u user -H env DISPLAY=:0 import -window root "$RUNNER_TEMP/console.png"
+          sudo -u user -H env DISPLAY=:0 xprop -root _NET_CLIENT_LIST
+          for w in $(sudo -u user -H env DISPLAY=:0 xprop -root _NET_CLIENT_LIST | sed 's/.*# //;s/,//g'); do
+            sudo -u user -H env DISPLAY=:0 xprop -id "$w" WM_CLASS _NET_WM_STATE
+          done
+          sudo -u user -H env DISPLAY=:0 xwininfo -root -tree | head -20
+
+      - name: What the agent's account can and cannot do
+        run: |
+          U="sudo -u user -H"
+          # `! cmd` does not stop a `bash -e` script when cmd succeeds, so a refusal is checked explicitly
+          must_fail() { if "$@" >/dev/null 2>&1; then echo "UNEXPECTEDLY ALLOWED: $*"; exit 1; fi; echo "refused, as it should be: $*"; }
+          SEED=$(cat "$RUNNER_TEMP/seed.txt")
+          must_fail $U ls /var/lib/stm-bench/private
+          must_fail $U cat /var/lib/stm-bench/private/tasks.json
+          must_fail $U ls /var/lib/stm-bench/private/run
+          must_fail $U cat /var/lib/stm-bench/private/console.log
+          $U ls -la /var/lib/stm-bench/export
+          $U test -r /var/lib/stm-bench/export/actions.jsonl
+          $U test -r /var/lib/stm-bench/export/session.json
+          must_fail $U touch /var/lib/stm-bench/export/forged
+          must_fail $U sh -c ': > /var/lib/stm-bench/export/actions.jsonl'
+          test "$(stat -c %a /var/lib/stm-bench/export)" = 755
+          for f in /var/lib/stm-bench/export/*; do test "$(stat -c %a "$f")" = 644; done
+          test "$(stat -c %U /var/lib/stm-bench/export/actions.jsonl)" = stm
+          # the FIFO is the only door; the seed is in no argument and in no file the agent's account can read
+          # (the pattern is the seed with every digit in brackets, so that this very command line does not contain it)
+          PAT=$(printf '%s' "$SEED" | sed 's/./[&]/g')
+          must_fail sh -c "ps -eo args | grep -q -- '$PAT'"
+          must_fail sh -c "grep -rq -- '$SEED' /var/lib/stm-bench/export /run/stm-bench"
+          must_fail $U sh -c "grep -rq -- '$SEED' /opt/stm-bench /usr/local/bin /etc/systemd/system /run/stm-bench /var/lib/stm-bench/export"
+          # another task id, a second start of the same one, a malformed id
+          must_fail $U env STM_START_NO_XHOST=1 /usr/local/bin/stm-start stm_p4_atom_other
+          $U env STM_START_NO_XHOST=1 /usr/local/bin/stm-start stm_p4_atom_ci
+          must_fail $U /usr/local/bin/stm-start 'bad id'
+
+      - name: Grade the export where the seed is held
+        run: |
+          sudo /opt/stm-bench/venv/bin/python -m stmbench.cli grade /var/lib/stm-bench/export \
+            --scenario P4_atom_positioning_cu111 --seed "$(cat "$RUNNER_TEMP/seed.txt")" | head -20
+
+      - name: Service log (no seed is ever logged)
+        if: always()
+        run: |
+          journalctl -u stm-bench.service --no-pager | tail -30
+          ls -la /run/stm-bench /var/lib/stm-bench || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: console-screenshot
+          path: ${{ runner.temp }}/console.png
+          if-no-files-found: warn

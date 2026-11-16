@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=STM-Bench display access
+Comment=Let the console's service account draw on this session's display
+Exec=xhost +SI:localuser:stm
+NoDisplay=true
+X-GNOME-Autostart-enabled=true

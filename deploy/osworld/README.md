@@ -51,8 +51,15 @@ Private tree, `data/<domain>/private/reference_private/<task_id>/` (never enters
 - `stm_metric.py`, a copy of `deploy/osworld/stm_metric.py`: standard library only, Python 3.11
   syntax, loaded by path. It runs the real grader as a separate process, because the runner
   requires only Python 3.11 and brings its own dependencies, while STM-Bench needs Python 3.13
-  and numpy 2. It never raises: any failure is
-  `(0.0, "grader failed: <why>")`, with a 30 minute limit (`docker kill` on a timeout).
+  and numpy 2. It never raises. A grade that was made is `(score, note)` (an inconsistent replay is a real
+  `0.0`). A fault on the grading side (no Docker or image, a start failure, a timeout of 30 minutes with
+  `docker kill`, a grader exit status other than 0, output that is not a result, no readable `gt.json`) says
+  nothing about the submission and returns `{"score": 0.0, "pending": <reason>, "note": <reason>}`: the runner's
+  scoring (`evaluators/score.py`) turns a `pending` detail into no score and no verdict instead of a zero.
+- The seed is visible on the host's command line while the grader runs (`--seed N`, also inside `docker run`),
+  and only there: the adapter replaces it by `<seed>` in everything it returns. A way to keep it off the command
+  line, not built: mount `gt.json` read-only into the container and give `grade` a `--gt` option that reads the
+  scenario and the seed from it.
 - `gt.json`: `{"scenario": "P4_atom_positioning_cu111", "seed": 17, "grader_image": "stmbench-grader:<tag>"}`.
 
 Without Docker (development), set `STMBENCH_GRADER_CMD` to a command prefix such as
@@ -124,8 +131,38 @@ writes. Keeping the export out of the agent's reach is the machine's side of thi
 - How the seed reaches the console's launcher in the machine without appearing in public task
   files. The task JSON's `config` steps and `public/assets` are public, and with the seed anyone
   can replay offline and read the hidden targets.
-- The deployment inside the machine: a separate account for the console, permissions on the
-  export directory (readable by the runner's file copy, not writable by the agent's account), and
-  the private ledger directory.
+- The deployment inside the machine is written (next section) and was run in a one-uid container
+  and offscreen, not in the OSWorld image: the separate account, the export directory (readable by
+  the runner's file copy, not writable by the agent's account) and the private directory are
+  checked there by modes only, and in `.github/workflows/osworld-guest.yml` (manual) on a real
+  Ubuntu 22.04 runner when someone starts it.
+- Whether the agent's account may lose sudo: with it, the agent can read the private directory
+  and the seed. The task's config runs `stm-lockdown` (root-only, idempotent: a sudoers drop-in, a polkit rule, no
+  sudo group) before `stm-start`; the guest is reverted per task.
+- A task list baked into an image file is readable by whoever holds the image (`STM_NO_TASKS=1`
+  bakes none; the list then has to arrive by another route).
 - Copy `session.json` first when collecting: it counts the log's records, and a count above what
   `actions.jsonl` holds is refused as a log cut short.
+
+## The machine's side (`deploy/osworld/guest/`)
+
+`install.sh` puts the console into an Ubuntu 22.04 guest (the OSWorld base image, or a container for a test);
+the runner-side provisioner (`scripts/vm_prep/stm/` of the runner, not in this repository) fetches the pinned commit and
+runs it. Pins are in `pins.sh`, packages in `apt-packages.txt`.
+
+- `stm_launcher.py`, the service of the account `stm` (`stm-bench.service`, enabled at boot): creates the FIFO
+  `/run/stm-bench/start` (mode 0622), reads a task id, looks it up in `/var/lib/stm-bench/private/tasks.json`
+  (`{task_id: {"scenario": ..., "seed": ...}}`, 0600), and starts `stmbench.cli gui --sealed --lang en` with the seed on
+  stdin only. The console writes `/run/stm-bench/ready` (`--ready-file`, once its window is exposed). One console per
+  boot; a console that dies before its window was shown is cleaned up and the request can be repeated.
+- `stm-lockdown`: see above; `echo password | sudo -S -p '' /usr/local/sbin/stm-lockdown`.
+- `stm-start <task_id>`, run by the agent's account (the task's `config` step): validates the id, writes it to the FIFO,
+  waits up to 90 s for the ready file (exit 0 up, 1 refused with the reason, 2 usage, 3 timeout).
+- `stm-bench-xhost.desktop` (`xhost +SI:localuser:stm` at login, so that `stm` may draw on the agent's display; `stm-start`
+  also runs it). `stm-bench-reset`: back to the state before any task (build and test only).
+- Modes: code and venv in `/opt/stm-bench` (root, world-readable); `/var/lib/stm-bench/private` 0700 `stm`;
+  `/var/lib/stm-bench/export` 0755 `stm`, files 0644.
+
+Tests: `tests/test_osworld_guest.py` (id parsing, the FIFO protocol, the seed's absence from arguments,
+environment, messages and files, `stm-start`'s exit statuses, the real console offscreen; POSIX only). Not covered by
+anything in this repository's CI: systemd, real ownership between two accounts, the GNOME session.
