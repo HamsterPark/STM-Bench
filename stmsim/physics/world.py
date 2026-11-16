@@ -27,7 +27,8 @@ from .paths import default_session_dir
 from .rig import RigProfile
 from .scanner import SIG_CURRENT, SIG_Z, Frame, Renderer, ScanSettings
 from .surface import Feature, Surface
-from .switches import TIP_ANISO_STREAM, TIP_OUTSCAN_STREAM, TIP_RECOVERY_STREAM, PhysicsSwitches
+from .switches import (STS_LOCKIN_STREAM, TIP_ANISO_STREAM, TIP_OUTSCAN_STREAM, TIP_RECOVERY_STREAM,
+                       PhysicsSwitches)
 from .tip import Tip
 from . import trace as movetrace
 
@@ -37,6 +38,10 @@ ZCTRL_OFF, ZCTRL_ON, ZCTRL_HOLD, ZCTRL_SWITCHING_OFF, ZCTRL_SAFETIP, ZCTRL_WITHD
 #: integration time per point (the controller's default), falling as 1/sqrt(integration)
 STS_NOISE_FRAC = 0.03
 STS_NOISE_REF_INTEG_S = 0.005
+#: the lock-in amplitude (V) at which that fraction is quoted: the controller's default modulation.
+#: With ``sts_resolution`` the same junction noise serves both detection schemes (see
+#: :meth:`World._sts_curve_resolved`), so a different modulation shifts the lock-in's noise as 1/V_p
+STS_NOISE_REF_AMP_V = 0.010
 
 #: qPlus frequency noise: a scenario's ``sigma_df_hz`` is the noise at this amplitude, the
 #: reference integration time per point and one sweep. Deflection and thermal frequency noise
@@ -1368,6 +1373,8 @@ class World:
     def sts_curve(self, v_start: float, v_end: float, n: int, z_offset_m: float = 0.0,
                   settle_s: float = 0.0, integ_s: float = 0.0) -> dict:
         with self.lock:
+            if self.physics.sts_resolution:
+                return self._sts_curve_resolved(v_start, v_end, n, z_offset_m, settle_s, integ_s)
             vs = np.linspace(v_start, v_end, n)
             h = self.surface_height_here()
             z_tip = self.achievable_z_tip()
@@ -1417,6 +1424,168 @@ class World:
                         bias_v=self.bias_v, setpoint_a=self.zctrl.setpoint_a,
                         lockin_on=self.lockin_on, lockin_amp_v=self.lockin_amp_v)
             return self.sts_last
+
+    def _drift_along(self, t_sim: np.ndarray) -> np.ndarray:
+        """Drift and creep offsets (n × 3, m) at the sim instants ``t_sim`` (ascending). Long sweeps
+        are evaluated at 129 instants and interpolated: the offset is a straight line plus
+        logarithmic creep, smooth on the scale of a sweep."""
+        t_sim = np.asarray(t_sim, float)
+        if t_sim.size == 0 or t_sim[-1] == t_sim[0]:
+            return np.tile(np.array(self.drift_offset(float(t_sim[0]) if t_sim.size else self.clock.sim())),
+                           (t_sim.size, 1))
+        if t_sim.size <= 129:
+            return np.array([self.drift_offset(float(t)) for t in t_sim])
+        nodes = np.linspace(t_sim[0], t_sim[-1], 129)
+        off = np.array([self.drift_offset(float(t)) for t in nodes])
+        return np.column_stack([np.interp(t_sim, nodes, off[:, c]) for c in range(3)])
+
+    def _magnetic_atoms_xy(self) -> np.ndarray:
+        """Sample-frame positions (N × 2, m) of the adatoms on the surface that carry the Kondo
+        resonance (the registry's species == ``kondo.species``)."""
+        reg = self.surface.site.adatoms
+        if self.kondo is None or reg is None:
+            return np.zeros((0, 2))
+        on, xy = reg._arrays()
+        keep = [k for k, a in enumerate(on) if a.species == self.kondo.species]
+        return xy[keep].reshape(-1, 2)
+
+    def _sts_curve_resolved(self, v_start: float, v_end: float, n: int, z_offset_m: float,
+                            settle_s: float, integ_s: float) -> dict:
+        """A bias sweep with the instrument's resolution (``physics.sts_resolution``): see
+        :mod:`stmsim.physics.sts_resolution` for the kernels and the Kondo shapes.
+
+        * every point is taken at its own time, ``t0 + k (settle + integ) + settle + integ / 2``,
+          where the sample has drifted by that time: the feedback is open, so the tip keeps the
+          height it had at ``t0`` and a tip drifting off an atom sees a larger gap (current
+          scaled by ``exp(-2κ Δgap)``) and the atom's resonance fading;
+        * the background is the junction model at the start (``iv_curve``); the Kondo factor is
+          summed over the magnetic atoms near each apex, the apexes weighted as the images weight
+          them, each apex blurred by the tip's lateral resolution;
+        * lock-in on: dI/dV is the lock-in's reading (thermal and modulation broadening, the
+          modulation that reaches the junction being the set amplitude times the hidden
+          ``lockin_attenuation``); lock-in off: the numerical derivative of the current. A DC
+          current carries only the thermal broadening;
+        * the junction noise ``σ_I`` is one current figure for both schemes: it is added to the
+          recorded current, lock-in noise is ``σ_I / V_p``, and the derivative of the current
+          inherits ``σ_I``. It comes from its own stream,
+          ``default_rng([seed, STS_LOCKIN_STREAM, sweep index])`` (the sweep's ``idx``, counting
+          from 1), so nothing else gains or loses a draw. Nothing about the attenuation or the
+          Kondo parameters is recorded.
+
+        The preamplifier noise is that of a mean over the integration time per point
+        (:meth:`NoiseModel.averaged_over`), as a controller's dwell would give."""
+        from . import sts_resolution as sr
+        from .tip import Apex
+        vs = np.linspace(v_start, v_end, n)
+        dt = settle_s + integ_s
+        t0 = self.clock.sim()
+        t_k = t0 + np.arange(n) * dt + settle_s + 0.5 * integ_s
+        # the junction at the start: what the old sweep used for the whole curve
+        h0 = self.surface_height_here()
+        z_tip = self.achievable_z_tip()
+        gap0 = max(z_tip + z_offset_m - h0, 0.02e-9)
+        sx, sy = self.sample_xy()
+        phi = self.phi_junction()
+        kappa = self.kappa_m()
+        rho_s = self.surface.ldos_at(sx, sy)
+        # where the sample is under the tip at each point, and the open-loop gap there
+        off = self._drift_along(t_k)
+        px, py = self.tip_x + off[:, 0], self.tip_y + off[:, 1]
+        h_k = self.tip.effective_height(self.surface, px, py, kappa, bias_v=self.bias_v) + off[:, 2]
+        gap_k = np.maximum(z_tip + z_offset_m - h_k, 0.02e-9)
+        trans = np.exp(-2.0 * kappa * (gap_k - gap0))
+        # background current and its conductance (a grid at most 1 mV apart, at most 1500 nodes)
+        i_bg = iv_curve(vs, gap0, phi, rho_s, self.tip.ldos)
+        span = float(abs(v_end - v_start))
+        d = max(1e-3, span / 1500.0)
+        nodes = vs.min() - 2 * d + d * np.arange(int(math.ceil((span + 4 * d) / d)) + 1)
+        g_nodes = np.gradient(iv_curve(nodes, gap0, phi, rho_s, self.tip.ldos), nodes)
+        g_bg = np.interp(vs, nodes, g_nodes)
+        # the Kondo factor's coefficients: C0, C1, C2 summed over atoms and apexes
+        kt = sr.KB_EV_PER_K * self.temperature_k
+        vp = self.lockin_amp_v * self.lockin_attenuation if self.lockin_on else None
+        c0 = c1 = c2 = np.zeros(n)
+        kon = self.kondo
+        atoms = self._magnetic_atoms_xy()
+        if kon is not None and atoms.size:
+            apexes = self.tip.apexes or [Apex(0.0, 0.0, 0.0, 1.0)]
+            axy = np.array([[a.dx, a.dy] for a in apexes], float)
+            if len(apexes) == 1:
+                aw = np.ones((1, n))
+            else:
+                hs = np.stack([self.surface.height_smooth(px + a.dx, py + a.dy) + a.dz for a in apexes])
+                aw = np.array([a.w for a in apexes])[:, None] * np.exp(2.0 * kappa * (hs - hs.max(axis=0)))
+                aw = aw / aw.sum(axis=0)
+            reach = sr.ATOM_REACH_M
+            lo = np.array([px.min(), py.min()]) + axy.min(axis=0) - reach
+            hi = np.array([px.max(), py.max()]) + axy.max(axis=0) + reach
+            atoms = atoms[np.all((atoms >= lo) & (atoms <= hi), axis=1)]
+            c0, c1, c2 = sr.kondo_coefficients(
+                np.column_stack([px, py]), axy, aw, atoms, a0=kon.amplitude, q0=kon.q,
+                sigma_a=kon.sigma_m, sigma_q=kon.q_sigma_m, sigma_t=self.tip.apex_sigma_m)
+        has_kondo = bool(np.any(c0) or np.any(c1) or np.any(c2))
+        win = sr.Window.build(float(vs.min()), float(vs.max()), kt, vp, kon.gamma_ev if kon else None)
+        if has_kondo:
+            sh = sr.kondo_shapes(win, vs, kon.e_k_ev, kon.gamma_ev, kt, vp)
+            i_clean = trans * (i_bg + g_bg * ((c2 - c0) * sh["lam_L"] + 2.0 * c1 * sh["lam_D"]))
+            k_th = 1.0 + (c2 - c0) * sh["L_th"] + 2.0 * c1 * sh["D_th"]
+            k_lock = 1.0 + (c2 - c0) * sh["L_k"] + 2.0 * c1 * sh["D_k"]
+        else:
+            i_clean = trans * i_bg
+            k_th = k_lock = np.ones(n)
+        # the preamplifier's noise and clamp, on the mean over each point's integration time
+        noise = self.noise.averaged_over(integ_s) if integ_s > 0 else self.noise
+        i = self.preamp.clamp(noise.current_series(i_clean, self.clock.wall() + np.arange(n) * dt))
+        if noise is not self.noise:
+            self.noise._rtn_level = noise._rtn_level          # the telegraph state carries on
+        # unstable tip: a jump somewhere in the sweep (the old sweep's draws, from the world's stream)
+        jump = False
+        jump_k, jump_f = n, 1.0
+        if self.tip.lambda_per_s > 2e-3 and self.rng.random() < 0.5:
+            jump_k = int(self.rng.integers(n // 4, 3 * n // 4))
+            jump_f = float(self.rng.uniform(0.5, 1.6))
+            i[jump_k:] *= jump_f
+            jump = True
+        # junction noise: one current figure for both detection schemes (see the docstring)
+        t_int = integ_s if integ_s > 0 else STS_NOISE_REF_INTEG_S
+        g_peak = float(np.max(np.abs(trans * g_bg * k_th)))
+        sigma_i = (STS_NOISE_FRAC * g_peak * STS_NOISE_REF_AMP_V
+                   * math.sqrt(STS_NOISE_REF_INTEG_S / max(t_int, 1e-5)))
+        idx = self.sts_counter + 1
+        z = np.random.default_rng([self.seed, STS_LOCKIN_STREAM, idx]).standard_normal(2 * n)
+        i = i + sigma_i * z[:n]
+        if self.lockin_on:
+            didv = trans * sr.smoothed_background(win, vs, nodes, g_nodes) * k_lock
+            didv[jump_k:] *= jump_f
+            didv = didv + sigma_i / vp * z[n:]
+        elif n > 2 and span > 1e-9:
+            didv = np.gradient(i, vs)
+        else:
+            didv = np.zeros_like(i)
+        self.sts_counter += 1
+        near_kind, near_m = self.surface.nearest_scatterer(sx, sy)
+        _, near_end_m = self.surface.nearest_scatterer(float(px[-1]), float(py[-1]))
+        drift_nm = float(math.hypot(px[-1] - px[0], py[-1] - py[0])) * 1e9
+        centre_nm = self.surface.corral_centre_distance_nm(sx, sy)
+        self.sts_last = {"v": vs, "i": i, "didv": didv, "gap_m": gap0, "jump": jump,
+                         "phi_ev": phi, "sim_s": self.clock.sim(), "idx": self.sts_counter,
+                         "x_nm": self.tip_x * 1e9, "y_nm": self.tip_y * 1e9,
+                         "sx_nm": sx * 1e9, "sy_nm": sy * 1e9,
+                         "near_kind": near_kind, "near_nm": near_m * 1e9,
+                         "corral_centre_dist_nm": centre_nm,
+                         "settle_s": settle_s, "integ_s": integ_s,
+                         "near_nm_end": near_end_m * 1e9, "drift_nm": drift_nm}
+        self.sts_records.append({k: v for k, v in self.sts_last.items()
+                                 if k not in ("v", "i", "didv")} | {"v": vs, "i": i, "didv": didv})
+        self._event("sts", n=n, v0=v_start, v1=v_end, z_off_m=z_offset_m, jump=jump,
+                    phi_ev=phi, idx=self.sts_counter,
+                    x_m=self.tip_x, y_m=self.tip_y, sx_m=sx, sy_m=sy,
+                    near_kind=near_kind, near_nm=near_m * 1e9,
+                    corral_centre_dist_nm=centre_nm,
+                    bias_v=self.bias_v, setpoint_a=self.zctrl.setpoint_a,
+                    lockin_on=self.lockin_on, lockin_amp_v=self.lockin_amp_v,
+                    settle_s=settle_s, integ_s=integ_s, near_nm_end=near_end_m * 1e9, drift_nm=drift_nm)
+        return self.sts_last
 
     # ── coarse motion / approach ──
     def motor_move(self, direction: str, steps: int) -> None:
