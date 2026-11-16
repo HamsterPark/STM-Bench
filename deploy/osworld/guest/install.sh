@@ -5,7 +5,9 @@
 #   STM_TASKS_JSON=<private tasks.json> bash install.sh
 #
 # Inputs (environment; defaults and pins are in pins.sh next to this file):
-#   STM_TASKS_JSON   required: {task_id: {"scenario": ..., "seed": ...}}; copied to the service account's private
+#   STM_NO_TASKS=1   bake no task list (a seed in an image file is readable by anyone who holds the image; the list then
+#                    has to reach the private directory by another route, see README)
+#   STM_TASKS_JSON   required unless STM_NO_TASKS=1: {task_id: {"scenario": ..., "seed": ...}}; copied to the service account's private
 #                    directory (0600). Not printed. Delete your copy afterwards.
 #   STM_SRC_TARBALL  `git archive` of the commit to install instead of fetching STM_COMMIT from STM_REPO_URL
 #   STM_PY_TARBALL   a local copy of the pinned Python tarball (still checked against PY_SHA256)
@@ -31,8 +33,10 @@ fi
 export DEBIAN_FRONTEND=noninteractive
 say() { echo "[stm-install $(date +%H:%M:%S)] $*"; }
 
-: "${STM_TASKS_JSON:?STM_TASKS_JSON must name the private task list}"
-[ -s "$STM_TASKS_JSON" ] || { echo "no task list at the given path"; exit 1; }
+if [ "${STM_NO_TASKS:-0}" != 1 ]; then
+  : "${STM_TASKS_JSON:?STM_TASKS_JSON must name the private task list (or set STM_NO_TASKS=1)}"
+  [ -s "$STM_TASKS_JSON" ] || { echo "no task list at the given path"; exit 1; }
+fi
 if [ -z "${STM_SRC_TARBALL:-}" ]; then
   case "$STM_COMMIT" in *[!0-9a-f]*|"") echo "STM_COMMIT is not a hex commit"; exit 1;; esac
   if [ "${STM_COMMIT//0/}" = "" ]; then echo "STM_COMMIT is still the placeholder (pins.sh)"; exit 1; fi
@@ -70,7 +74,7 @@ fi
 echo "$PY_SHA256  $PYTAR" | sha256sum -c - >/dev/null || { echo "the Python tarball does not match PY_SHA256"; exit 1; }
 rm -rf /opt/stm-bench/python
 mkdir -p /opt/stm-bench/python
-tar -xzf "$PYTAR" -C /opt/stm-bench/python --strip-components=1
+tar -xzf "$PYTAR" --no-same-owner -C /opt/stm-bench/python --strip-components=1
 [ -n "${STM_PY_TARBALL:-}" ] || rm -f "$PYTAR"
 GOT=$(/opt/stm-bench/python/bin/python3 -c 'import platform; print(platform.python_version())')
 [ "$GOT" = "$PY_VERSION" ] || { echo "python is $GOT, not $PY_VERSION"; exit 1; }
@@ -80,7 +84,7 @@ say "source tree"
 rm -rf /opt/stm-bench/src
 mkdir -p /opt/stm-bench/src
 if [ -n "${STM_SRC_TARBALL:-}" ]; then
-  tar -xf "$STM_SRC_TARBALL" -C /opt/stm-bench/src
+  tar -xf "$STM_SRC_TARBALL" --no-same-owner -C /opt/stm-bench/src
   COMMIT_NOTE="tarball $(sha256sum "$STM_SRC_TARBALL" | cut -c1-16)${STM_COMMIT:+ (commit ${STM_COMMIT})}"
 else
   T=$(mktemp -d)
@@ -88,7 +92,7 @@ else
   git -C "$T" fetch -q --depth 1 "$STM_REPO_URL" "$STM_COMMIT"
   HEAD=$(git -C "$T" rev-parse FETCH_HEAD)
   case "$HEAD" in "${STM_COMMIT}"*) ;; *) echo "fetched ${HEAD:0:12}, not ${STM_COMMIT:0:12}"; exit 1;; esac
-  git -C "$T" archive "$HEAD" | tar -x -C /opt/stm-bench/src
+  git -C "$T" archive "$HEAD" | tar -x --no-same-owner -C /opt/stm-bench/src
   rm -rf "$T"
   COMMIT_NOTE=$HEAD
 fi
@@ -124,6 +128,9 @@ install -d -m 0755 /etc/xdg/autostart
 install -m 0644 "$HERE/stm-bench-xhost.desktop" /etc/xdg/autostart/stm-bench-xhost.desktop
 
 # ── the private task list: shape checked, nothing printed ──
+if [ "${STM_NO_TASKS:-0}" = 1 ]; then
+  say "no task list baked (STM_NO_TASKS=1): the launcher refuses every task id until tasks.json is placed in the private directory"
+else
 say "task list"
 install -m 0600 "$STM_TASKS_JSON" /var/lib/stm-bench/private/tasks.json
 own "$STM_USER:$STM_USER" /var/lib/stm-bench/private/tasks.json
@@ -141,6 +148,7 @@ if not ok:
     sys.exit("the task list is not {task_id: {scenario, seed}} of known scenarios")
 print(f"{len(tasks)} tasks")
 PY
+fi
 
 # ── the service ──
 if [ "${STM_NO_SYSTEMD:-0}" != 1 ]; then
