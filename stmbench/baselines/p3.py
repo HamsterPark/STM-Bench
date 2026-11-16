@@ -138,8 +138,8 @@ def ring_verdict(frame: dict, ignore: frozenset = frozenset()) -> dict:
     npx, c, r = float(frame["nm_per_px"]), L["centre_frame_nm"], L["radius_nm"]
     width, (ghost, lag) = ring_width_nm(frame["array"], npx, c, r), ghost_strength(frame["array"], npx, c, r, skip_nm=atom_spacing_nm(frame["array"], npx, c, r))
     seen = ghost >= GHOST_MIN and "ring" not in ignore
-    verdict = "double" if seen else "blunt" if width > BLUNT_FWHM_NM else "ok"
-    return {"verdict": verdict, "width_nm": width, "ghost": ghost, "ghost_lag_nm": [round(v, 2) for v in lag],
+    state = "double" if seen else "blunt" if width > BLUNT_FWHM_NM else "ok"
+    return {"verdict": state, "width_nm": width, "ghost": ghost, "ghost_lag_nm": [round(v, 2) for v in lag],
             "centre": L["centre"]}
 
 
