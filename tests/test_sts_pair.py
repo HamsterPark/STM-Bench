@@ -93,6 +93,30 @@ def test_under_rules_v1_only_the_cited_sweeps_count():
     assert ok and info["cited"] == 2
 
 
+def _apex(e: dict, kind: str, nm: float) -> dict:
+    return {**e, "near_kind_apex": kind, "near_nm_apex": nm}
+
+
+def test_the_distance_is_the_leading_apexs_when_the_event_records_it():
+    # the tip centre is 0.6 nm off the atom but the apex tunnels on it: passes
+    assert _check([_apex(_sts(1, "adatom", 0.6), "adatom", 0.05), _sts(2, "none", 9.0)])[0]
+    # the centre is on the atom but the apex is 0.6 nm off: fails
+    ok, info = _check([_apex(_sts(1, "adatom", 0.02), "adatom", 0.6), _sts(2, "none", 9.0)])
+    assert not ok and info["n_on_atom"] == 0
+    # a "background" sweep whose centre is clear but whose apex is 1 nm from an atom: fails
+    ok, info = _check([_sts(1, "adatom", 0.05), _apex(_sts(2, "none", 9.0), "adatom", 1.0)])
+    assert not ok and info["n_background"] == 0
+    # and one whose centre is 1 nm from an atom but whose apex is clear: passes
+    assert _check([_sts(1, "adatom", 0.05), _apex(_sts(2, "adatom", 1.0), "none", 9.0)])[0]
+
+
+def test_an_event_without_apex_fields_falls_back_and_one_without_a_distance_counts_for_neither():
+    assert _check([_sts(1, "adatom", 0.05), _sts(2, "none", 9.0)])[0]
+    unknown = {k: v for k, v in _sts(1, "adatom", 0.05).items() if k != "near_nm"}
+    ok, info = _check([unknown, _sts(2, "adatom", 0.0)])
+    assert info["n_on_atom"] == 1 and info["n_background"] == 0 and not ok
+
+
 def test_the_claims_of_p6_read_the_same_rule_and_cite_it_by_name():
     """Cited by ``sts:N``, through the judge: values are the truth's, so only the evidence can fail."""
     sc = Scenario.load(P6)
@@ -121,6 +145,7 @@ def test_the_rule_card_states_the_pair_in_both_languages_and_no_hidden_value():
     assert "-0.02 V 到 0.02 V" in zh and "没有突变" in zh
     assert "directly above an adatom" in en and "0.15 nm" in en and "at least 2 nm" in en
     assert "at least 41 points" in en and "-0.02 V to 0.02 V" in en
+    assert "最靠近样品的针尖尖端" in zh and "leading apex" in en
     assert "{" not in zh and "{" not in en
     # a unitless claim's tolerance has no dangling unit
     assert "相差不超过 0.15\n" in zh and "by at most 0.15\n" in en
