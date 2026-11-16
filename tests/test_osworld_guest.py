@@ -289,8 +289,29 @@ def test_stm_start_prints_the_reason_of_a_refusal_and_never_the_seed(running):
 
 
 def test_stm_start_says_when_no_launcher_runs(box):
-    r = run_start(box, TASK)
-    assert r.returncode == 1 and "not running" in r.stderr
+    t0 = time.monotonic()
+    r = run_start(box, TASK, wait="2")
+    assert r.returncode == 1 and "not running" in r.stderr and time.monotonic() - t0 < 10
+
+
+def test_stm_start_waits_for_a_launcher_that_is_still_starting(box):
+    """Right after boot the service is active a moment before its FIFO exists (a race seen in CI)."""
+    launcher = L.Launcher(box)
+    stop = threading.Event()
+
+    def late():
+        time.sleep(1.0)
+        launcher.setup()
+        launcher.serve(stop, 0.02)
+    th = threading.Thread(target=late, daemon=True)
+    th.start()
+    try:
+        r = run_start(box, TASK, wait="20")
+        assert r.returncode == 0 and "up" in r.stdout, r.stderr
+    finally:
+        stop.set()
+        th.join(5)
+        launcher.close()
 
 
 def test_stm_start_gives_up_after_its_wait(running):

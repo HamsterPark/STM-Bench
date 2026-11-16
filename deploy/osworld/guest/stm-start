@@ -16,10 +16,15 @@ if [ $# -ne 1 ] || ! [[ $1 =~ ^[a-z][a-z0-9_]{0,47}$ ]]; then
 fi
 ID=$1
 
-if [ ! -p "$RUN/start" ]; then
-  echo "stm-start: the console launcher is not running ($RUN/start is missing)" >&2
-  exit 1
-fi
+# Right after boot the service may still be starting: wait for its FIFO within the same overall wait.
+END=$((SECONDS + WAIT))
+while [ ! -p "$RUN/start" ]; do
+  if [ "$SECONDS" -ge "$END" ]; then
+    echo "stm-start: the console launcher is not running ($RUN/start is missing)" >&2
+    exit 1
+  fi
+  sleep 0.2
+done
 
 # Already up for this very task (a second call): nothing to do.
 if [ -f "$RUN/ready" ] && [ "$(cat "$RUN/task" 2>/dev/null)" = "$ID" ]; then
@@ -42,7 +47,6 @@ if ! timeout 10 bash -c 'printf "%s\n" "$1" > "$2"' _ "$ID" "$RUN/start"; then
   exit 1
 fi
 
-END=$((SECONDS + WAIT))
 while [ "$SECONDS" -lt "$END" ]; do
   if [ -f "$RUN/error" ] && [ "$RUN/error" -nt "$STAMP" ]; then
     echo "stm-start: $(head -c 300 "$RUN/error" | head -1)" >&2
