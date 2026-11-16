@@ -52,7 +52,7 @@ Private tree, `data/<domain>/private/reference_private/<task_id>/` (never enters
   syntax, loaded by path. It runs the real grader as a separate process, because the runner
   requires only Python 3.11 and brings its own dependencies, while STM-Bench needs Python 3.13
   and numpy 2. It never raises. A grade that was made is `(score, note)` (an inconsistent replay is a real
-  `0.0`). A fault on the grading side (no Docker or image, a start failure, a timeout of 30 minutes with
+  `0.0`, and so is a damaged submission: the grader scores it 0 and exits 0). A fault on the grading side (no Docker or image, a start failure, a timeout of 30 minutes with
   `docker kill`, a grader exit status other than 0, output that is not a result, no readable `gt.json`) says
   nothing about the submission and returns `{"score": 0.0, "pending": <reason>, "note": <reason>}`: the runner's
   scoring (`evaluators/score.py`) turns a `pending` detail into no score and no verdict instead of a zero.
@@ -106,8 +106,11 @@ not the episode the agent saw. The result lists what differed in `replay.result_
 `replay.digest_mismatches` (record number and field or file name, or the instrument's refusal; no
 replayed values); `grade --no-strict` scores the replay as it stands and still lists them. A
 wrong seed shows as inconsistent as soon as the episode saved a frame or a spectrum (tested for
-P5). A wrong scenario, or another rules, API or export version, is an error (exit 2), not a
-score. The result carries no seed, truth or per-claim detail.
+P5). A wrong scenario, or another rules, API or export version, is a mismatch of setup: an error (exit
+2), not a score, which the adapter reports as pending. A damaged export (a file missing, not JSON, a record
+missing or out of order, `session.json` counting more records than the log holds) is the submission's
+fault: `grade` prints a result with score 0, `replay.consistent` false and `replay.damaged` naming the damage,
+and exits 0. Rule: damaged submission -> 0; mismatch of setup or grader fault -> pending. The result carries no seed, truth or per-claim detail.
 
 Bit-identity needs the same code and numerics on both sides: the same STM-Bench commit, Python
 3.13, and numpy, scipy and PyYAML at the versions in `grader/requirements.txt` (the machine's

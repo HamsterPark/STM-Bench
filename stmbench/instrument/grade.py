@@ -27,7 +27,7 @@ from stmsim.scenario import Scenario
 
 from ..trackB.rules import RULES_VERSION
 from .core import RTOL, SCENARIO_DIR, Instrument, compare_fingerprints, replay_records, require_api_version
-from .export import read_export
+from .export import ExportDamaged, read_export
 
 #: longest piece of export-supplied text a result repeats
 _CLIP = 120
@@ -60,16 +60,38 @@ def _load_scenario(scenario: Scenario | str | Path) -> Scenario:
 
 
 def _read(export_dir: str | Path) -> dict:
-    """:func:`read_export`, with everything that makes a directory not an export a :class:`ValueError`."""
+    """:func:`read_export`, with everything that makes a directory not an export an :class:`ExportDamaged`
+    (its ``reason`` names the damage without the path or the OS's text)."""
     d = Path(export_dir)
     try:
         return read_export(d)
     except OSError as exc:
-        raise ValueError(f"{d}: cannot read the export ({exc})") from None
+        raise ExportDamaged("an export file is missing or cannot be read", d) from None
     except (json.JSONDecodeError, UnicodeDecodeError) as exc:
-        raise ValueError(f"{d}: a file is not JSON in UTF-8 ({exc})") from None
+        raise ExportDamaged("an export file is not JSON in UTF-8", d) from None
     except (AttributeError, TypeError) as exc:                  # JSON, but not the shape an export has
-        raise ValueError(f"{d}: not an export directory ({type(exc).__name__}: {exc})") from None
+        raise ExportDamaged(f"not an export directory ({type(exc).__name__})", d) from None
+
+
+def _is_int(x) -> bool:
+    return isinstance(x, int) and not isinstance(x, bool)
+
+
+def damaged_result(reason: str, scenario: Scenario | str | Path | None = None) -> dict:
+    """The scored result of a damaged submission: score 0, no success, the numbers that describe the
+    replay ``None`` (there was none), ``replay.consistent`` false and ``replay.damaged`` naming the damage.
+    What the grade command prints for an :class:`ExportDamaged`."""
+    try:
+        scenario_id = _load_scenario(scenario).id if scenario is not None else None
+    except Exception:  # noqa: BLE001 - the id is only information
+        scenario_id = None
+    why = _clip(reason)
+    return {"score": 0.0, "success": False, "partial": None, "claims_total": None, "claims_verified": None,
+            "instrument_time_s": None, "actions": None, "finished_in_episode": None,
+            "replay": {"consistent": False, "damaged": why, "result_mismatches": [], "digest_mismatches": [],
+                       "hashes_equal": False, "rounding_differences": [], "torn": False, "records": None},
+            "scenario_id": scenario_id, "rules_version": RULES_VERSION, "export_version": None,
+            "note": f"the export is damaged: {why}; scored 0"}
 
 
 def _digest_check(inst: Instrument, digests: list, records: list[dict]) -> tuple[list[dict], list[dict]]:
@@ -166,7 +188,13 @@ def grade_export(export_dir: str | Path, scenario: Scenario | str | Path, seed: 
     saw, and they stay out of the result as unknown, not zero. Without it the replay's own grade
     stands and the divergence is reported beside it.
 
-    :class:`ValueError` when the directory is not a gradable export of this scenario: not an
+    Two kinds of input that cannot be graded. A **damaged submission** (a file missing, not JSON,
+    not the shape of an export, a record missing or out of order, a log shorter than ``session.json``
+    counts) raises :class:`~stmbench.instrument.export.ExportDamaged`, a :class:`ValueError` subclass:
+    an export that cannot be verified is not a reproduction, so the grade command scores it 0
+    (:func:`damaged_result`, exit 0). A **mismatch of setup** raises a plain :class:`ValueError`
+    (exit 2, the grader's or the deployment's problem, which the OSWorld adapter reports as pending). The
+    latter: the directory is not a gradable export of this scenario: not an
     export at all, another scenario, another rules, API or export version, or a ``session.json``
     that counts more records than the log holds (a log cut short). An export of another API
     version is a :class:`~stmbench.instrument.core.VersionError`, whose message says that it needs
@@ -175,6 +203,9 @@ def grade_export(export_dir: str | Path, scenario: Scenario | str | Path, seed: 
     export = _read(export_dir)
     session, records = export["session"], export["records"]
     sc = _load_scenario(scenario)
+    if not isinstance(session.get("scenario_id"), str) or not _is_int(session.get("api_version")) \
+            or not _is_int(session.get("rules_version")):
+        raise ExportDamaged("session.json lacks a scenario, API version or rules version")
     if session.get("scenario_id") != sc.id:
         raise ValueError(f"the export is of scenario {_clip(session.get('scenario_id'))!r}, not {sc.id!r}")
     require_api_version(session.get("api_version"), "the export")      # first: it says which code can replay it
@@ -182,8 +213,8 @@ def grade_export(export_dir: str | Path, scenario: Scenario | str | Path, seed: 
         raise ValueError(f"the export is of rules_version {_clip(session.get('rules_version'))}; "
                          f"this grader is rules_version {RULES_VERSION}")
     counted = session.get("records")
-    if isinstance(counted, int) and not isinstance(counted, bool) and counted > len(records):
-        raise ValueError(f"session.json counts {counted} records but the log holds {len(records)}")
+    if _is_int(counted) and counted > len(records):
+        raise ExportDamaged(f"session.json counts {counted} records but the log holds {len(records)}")
 
     inst, result_mismatches = replay_records(sc, seed, records)
     digest_mismatches, rounded = _digest_check(inst, export["digests"], records)
@@ -224,4 +255,4 @@ def grade_export(export_dir: str | Path, scenario: Scenario | str | Path, seed: 
             "note": "; ".join(parts)}
 
 
-__all__ = ["grade_export"]
+__all__ = ["damaged_result", "grade_export"]

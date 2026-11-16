@@ -14,7 +14,8 @@ network, the export mounted read-only) or, when ``STMBENCH_GRADER_CMD`` is set, 
 command prefix (``<python> -m stmbench.cli``, split like a shell would). Standard library only.
 
 Two kinds of outcome. A grade that was made returns ``(score, note)``; an inconsistent replay or
-a failed claim is a real ``0.0``. A fault on the grading side (no Docker, no image, a timeout, a
+a failed claim is a real ``0.0``, and so is a damaged submission (the grader scores it 0 and exits 0: an
+export that cannot be verified is not a reproduction). A fault on the grading side (no Docker, no image, a timeout, a
 crash, a grader exit status other than 0, output that is not a result, no readable ``gt.json``)
 says nothing about the submission, so it returns ``{"score": 0.0, "pending": <reason>, "note":
 ...}``: the runner's scoring turns a ``pending`` detail into "no score, no verdict" rather than a

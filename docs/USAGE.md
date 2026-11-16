@@ -688,10 +688,13 @@ the paper), `success`, `partial`, `claims_total`, `claims_verified`, `instrument
 `finished_in_episode`, `replay` (`consistent`, `result_mismatches`, `digest_mismatches`, `hashes_equal`,
 `rounding_differences`: the arrays that differed by rounding only, with their largest relative
 difference, `torn`, `records`), `scenario_id`, `rules_version`, `export_version`, `note`. It carries no seed, truth or
-per-claim detail. The exit status is 0 when graded and 2 when the directory is not a gradable
-export of this scenario (not an export, another scenario, or another rules, API or export
-version; the reason is on stderr, and an export of another API version is told that it needs
-the code of its own version): a wrong pairing is an error, never a score.
+per-claim detail. The exit status is 0 when graded and 2 when the setup does not match: another
+scenario, or another rules, API or export version (the reason is on stderr, and an export of another API
+version is told that it needs the code of its own version): a wrong pairing is an error, never a score.
+A **damaged submission** is graded too, and scores 0 with exit 0: `session.json` counting more records than
+the log holds, a record missing or out of order, a missing or unreadable file, a file that is not JSON, a
+directory that is not an export. The result then has `replay.consistent` false, `replay.damaged` naming the
+damage (no path), the describing numbers `null` and the note `the export is damaged: <why>; scored 0`.
 
 `deploy/osworld/` holds the adapter OSWorld-Science's `module_metric` calls on the host, the
 grader's Docker image and the notes on wiring them up (`deploy/osworld/README.md`).

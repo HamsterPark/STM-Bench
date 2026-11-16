@@ -21,7 +21,7 @@ import pytest
 from stmbench.cli import main as cli_main
 from stmbench.instrument import API_VERSION, ActionError, Instrument, replay
 from stmbench.instrument.core import replay_records
-from stmbench.instrument.export import EXPORT_VERSION, ExportWriter, read_export
+from stmbench.instrument.export import EXPORT_VERSION, ExportDamaged, ExportWriter, read_export
 from stmbench.instrument.grade import _digest_mismatches, grade_export
 from stmbench.trackB.rules import RULES_VERSION
 
@@ -402,28 +402,35 @@ def test_a_wrong_pairing_or_version_is_an_error_not_a_score(tmp_path):
         shutil.copytree(base, p)
         _edit_session(p, **kw)
         return p
+    # a mismatch of setup: a plain ValueError (exit 2), not a damaged export
     for kw, needle in (({"rules_version": 0}, "rules_version"), ({"api_version": API_VERSION - 1}, "api_version"),
-                       ({"version": 3}, "version-1 or 2"), ({"format": "other"}, "version-1 or 2"),
-                       ({"records": 5}, "counts 5 records")):
-        with pytest.raises(ValueError, match=needle):
+                       ({"version": 3}, "version-1 or 2")):
+        with pytest.raises(ValueError, match=needle) as err:
+            grade_export(broken(**kw), P4, 0)
+        assert not isinstance(err.value, ExportDamaged)
+    # a damaged submission: ExportDamaged (a ValueError), which the grade command scores 0
+    for kw, needle in (({"format": "other"}, "not that of a"), ({"records": 5}, "counts 5 records"),
+                       ({"scenario_id": None}, "lacks a scenario"), ({"api_version": None}, "lacks a scenario"),
+                       ({"rules_version": "2"}, "lacks a scenario"), ({"version": "2"}, "not that of a")):
+        with pytest.raises(ExportDamaged, match=needle):
             grade_export(broken(**kw), P4, 0)
     # not an export at all
     empty = tmp_path / "empty"
     empty.mkdir()
-    with pytest.raises(ValueError, match="cannot read the export"):
+    with pytest.raises(ExportDamaged, match="missing or cannot be read"):
         grade_export(empty, P4, 0)
-    with pytest.raises(ValueError, match="cannot read the export"):
+    with pytest.raises(ExportDamaged, match="missing or cannot be read"):
         grade_export(tmp_path / "missing", P4, 0)
     for junk in ("not json", "[]", '"x"'):
         p = tmp_path / ("junk%d" % len(junk))
         shutil.copytree(base, p)
         (p / "session.json").write_text(junk, encoding="utf-8")
-        with pytest.raises(ValueError):
+        with pytest.raises(ExportDamaged):
             grade_export(p, P4, 0)
     p = tmp_path / "lines"
     shutil.copytree(base, p)
     (p / "actions.jsonl").write_text("[1]\n", encoding="utf-8")
-    with pytest.raises(ValueError, match="not an export directory"):
+    with pytest.raises(ExportDamaged, match="a record is missing or out of order"):
         grade_export(p, P4, 0)
 
 
@@ -539,13 +546,72 @@ def test_the_grade_command_exits_2_when_the_input_is_not_a_gradable_export(tmp_p
     assert cli_main(["grade", str(base), "--scenario", P5, "--seed", "0"]) == 2
     cap = capsys.readouterr()
     assert cap.out == "" and cap.err.startswith("grade: ") and "scenario" in cap.err
-    assert cli_main(["grade", str(tmp_path / "missing"), "--scenario", P4, "--seed", "0"]) == 2
-    assert "cannot read the export" in capsys.readouterr().err
     assert cli_main(["grade", str(base), "--scenario", "nope", "--seed", "0"]) == 2
     assert "no scenario" in capsys.readouterr().err
     _edit_session(base, rules_version=0)
     assert cli_main(["grade", str(base), "--scenario", P4, "--seed", "0"]) == 2
     assert "rules_version" in capsys.readouterr().err
+    _edit_session(base, rules_version=RULES_VERSION, version=3)
+    assert cli_main(["grade", str(base), "--scenario", P4, "--seed", "0"]) == 2          # another export version
+    assert "version-1 or 2" in capsys.readouterr().err
+
+
+def _damage_cases(tmp_path):
+    """Exports damaged in the ways an agent's machine could leave them: name -> directory."""
+    base = tmp_path / "base"
+    _wait_export(base)
+
+    def copy(name):
+        p = tmp_path / name
+        shutil.copytree(base, p)
+        return p
+    out = {}
+    out["session counts more records than the log holds"] = copy("count")
+    _edit_session(out["session counts more records than the log holds"], records=9)
+    p = out["a record missing"] = copy("gap")
+    recs = [json.loads(x) for x in (p / "actions.jsonl").read_text(encoding="utf-8").splitlines()]
+    recs[0]["i"] = 5
+    (p / "actions.jsonl").write_text("\n".join(json.dumps(r) for r in recs) + "\n", encoding="utf-8")
+    p = out["actions.jsonl missing"] = copy("noactions")
+    (p / "actions.jsonl").unlink()
+    p = out["session.json missing"] = copy("nosession")
+    (p / "session.json").unlink()
+    p = out["a file that is not JSON"] = copy("notjson")
+    (p / "session.json").write_text("not json", encoding="utf-8")
+    p = out["a line of the log that is not JSON"] = copy("badline")
+    (p / "actions.jsonl").write_text("{broken\n{\"i\": 0}\n", encoding="utf-8")
+    out["not an export directory"] = tmp_path / "nothing-here"
+    return out
+
+
+def test_a_damaged_export_is_scored_0_with_exit_0(tmp_path, capsys):
+    """A submission that cannot be verified is not a reproduction: score 0, never exit 2 (the adapter's pending)."""
+    for why, path in _damage_cases(tmp_path).items():
+        assert cli_main(["grade", str(path), "--scenario", P4, "--seed", "0"]) == 0, why
+        cap = capsys.readouterr()
+        res = json.loads(cap.out)
+        assert res["score"] == 0.0 and res["success"] is False, why
+        assert all(res[k] is None for k in ("partial", "claims_verified", "instrument_time_s", "actions")), why
+        assert res["replay"]["consistent"] is False and res["replay"]["damaged"], why
+        assert res["note"].startswith("the export is damaged: ") and res["note"].endswith("; scored 0"), why
+        assert res["scenario_id"] == P4 and str(path) not in cap.out, why          # no directory in the result
+
+
+def test_a_damaged_export_scores_0_through_the_adapter_and_a_mismatch_is_pending(tmp_path, monkeypatch):
+    mod = _adapter()
+    monkeypatch.chdir(ROOT)
+    monkeypatch.setenv(mod.CMD_ENV, f"{shlex.quote(Path(sys.executable).as_posix())} -m stmbench.cli")
+    cases = _damage_cases(tmp_path)
+    for why in ("session counts more records than the log holds", "a record missing", "session.json missing",
+                "a file that is not JSON", "a line of the log that is not JSON"):
+        got = mod.grade_episode(str(cases[why] / "actions.jsonl"), _oracle(tmp_path, scenario=P4))
+        assert isinstance(got, tuple) and got[0] == 0.0 and got[1].startswith("the export is damaged"), (why, got)
+    # a mismatch of setup is still the grader's: pending
+    base = tmp_path / "setup"
+    _wait_export(base)
+    _edit_session(base, version=3)
+    assert _pending(mod.grade_episode(str(base / "actions.jsonl"), _oracle(tmp_path, scenario=P4))).startswith(
+        "grader fault: exit 2: grade: ")
 
 
 def test_no_strict_keeps_the_replays_score_and_the_difference(tmp_path, capsys):
