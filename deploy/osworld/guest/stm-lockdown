@@ -14,7 +14,11 @@ AGENT=${STM_AGENT_USER:-user}
 SUDOERS_DIR=${STM_SUDOERS_DIR:-/etc/sudoers.d}
 POLKIT_RULES=${STM_POLKIT_RULES_DIR:-/etc/polkit-1/rules.d}
 POLKIT_PKLA=${STM_POLKIT_PKLA_DIR:-/etc/polkit-1/localauthority/90-mandatory.d}
-if [ "$(id -u)" -ne 0 ]; then
+# STM_VISUDO and STM_LOCKDOWN_ALLOW_NONROOT exist for the tests (a fake visudo, no root, no root-owned files)
+VISUDO=${STM_VISUDO:-visudo}
+OWNER=(-o root -g root)
+if [ "${STM_LOCKDOWN_ALLOW_NONROOT:-0}" = 1 ]; then OWNER=(); fi
+if [ "${STM_LOCKDOWN_ALLOW_NONROOT:-0}" != 1 ] && [ "$(id -u)" -ne 0 ]; then
   echo "stm-lockdown: must run as root (sudo -S)" >&2
   exit 1
 fi
@@ -25,13 +29,28 @@ trap 'rm -f "$TMP"' EXIT
 
 # sudoers: the drop-in sorts after every other file ("zz"), and the last matching rule wins.
 printf '%s ALL=(ALL:ALL) !ALL\n' "$AGENT" > "$TMP"
-if command -v visudo >/dev/null 2>&1; then
-  visudo -cf "$TMP" >/dev/null || { echo "stm-lockdown: the sudoers drop-in does not parse" >&2; exit 1; }
+HAVE_VISUDO=0
+if command -v "$VISUDO" >/dev/null 2>&1; then HAVE_VISUDO=1; fi
+if [ "$HAVE_VISUDO" = 1 ]; then
+  "$VISUDO" -cf "$TMP" >/dev/null || { echo "stm-lockdown: the sudoers drop-in does not parse" >&2; exit 1; }
 fi
+# The whole configuration is compared before and after: an image we do not control may already have a sudoers file
+# that visudo flags (a wrong mode, say). That is not ours to fix and must not undo the lockdown.
+GLOBAL_CHECK=0
+if [ "$HAVE_VISUDO" = 1 ] && { [ "$SUDOERS_DIR" = /etc/sudoers.d ] || [ -n "${STM_VISUDO:-}" ]; }; then GLOBAL_CHECK=1; fi
+OK_BEFORE=1
+if [ "$GLOBAL_CHECK" = 1 ]; then "$VISUDO" -c >/dev/null 2>&1 || OK_BEFORE=0; fi
 mkdir -p "$SUDOERS_DIR"
-install -m 0440 -o root -g root "$TMP" "$SUDOERS_DIR/zz-stm-lockdown"
-if command -v visudo >/dev/null 2>&1 && [ "$SUDOERS_DIR" = /etc/sudoers.d ]; then
-  visudo -c >/dev/null || { rm -f "$SUDOERS_DIR/zz-stm-lockdown"; echo "stm-lockdown: sudoers no longer parses, drop-in removed" >&2; exit 1; }
+install -m 0440 "${OWNER[@]}" "$TMP" "$SUDOERS_DIR/zz-stm-lockdown"
+if [ "$GLOBAL_CHECK" = 1 ]; then
+  if ! "$VISUDO" -c >/dev/null 2>&1; then
+    if [ "$OK_BEFORE" = 1 ]; then
+      rm -f "$SUDOERS_DIR/zz-stm-lockdown"
+      echo "stm-lockdown: sudoers no longer parses, drop-in removed" >&2
+      exit 1
+    fi
+    echo "stm-lockdown: the existing sudoers configuration already has problems (visudo -c failed before this drop-in); kept the drop-in, whose own check passed" >&2
+  fi
 fi
 
 # polkit: every action is denied for the account (0.106+ reads rules.d; 0.105 reads localauthority)
@@ -41,7 +60,7 @@ polkit.addRule(function(action, subject) {
     if (subject.user == "$AGENT") { return polkit.Result.NO; }
 });
 EOF
-install -m 0644 -o root -g root "$TMP" "$POLKIT_RULES/00-stm-lockdown.rules"
+install -m 0644 "${OWNER[@]}" "$TMP" "$POLKIT_RULES/00-stm-lockdown.rules"
 mkdir -p "$POLKIT_PKLA"
 cat > "$TMP" <<EOF
 [stm-lockdown]
@@ -51,7 +70,7 @@ ResultAny=no
 ResultInactive=no
 ResultActive=no
 EOF
-install -m 0644 -o root -g root "$TMP" "$POLKIT_PKLA/00-stm-lockdown.pkla"
+install -m 0644 "${OWNER[@]}" "$TMP" "$POLKIT_PKLA/00-stm-lockdown.pkla"
 
 # groups, and sudo's cached credentials
 for g in sudo admin; do

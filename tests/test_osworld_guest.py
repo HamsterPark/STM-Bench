@@ -380,6 +380,46 @@ def test_the_workflow_runs_only_when_started_by_hand():
     assert set(triggers) == {"workflow_dispatch"}
 
 
+def _lockdown(tmp_path, fake_body, **extra):
+    """Run stm-lockdown as this user with a fake visudo (STM_VISUDO) over temporary directories."""
+    fake = tmp_path / "fake_visudo"
+    fake.write_text("#!/bin/bash\n" + fake_body, encoding="utf-8")
+    fake.chmod(0o755)
+    env = {**os.environ, "STM_SUDOERS_DIR": str(tmp_path / "sudoers.d"), "STM_POLKIT_RULES_DIR": str(tmp_path / "rules.d"),
+           "STM_POLKIT_PKLA_DIR": str(tmp_path / "pkla"), "STM_AGENT_USER": "nobody", "STM_VISUDO": str(fake),
+           "STM_LOCKDOWN_ALLOW_NONROOT": "1", **extra}
+    return subprocess.run(["bash", str(GUEST / "stm-lockdown")], capture_output=True, text=True, env=env)
+
+
+#: a visudo that passes a single file (-cf) and, for the whole configuration (-c), fails as the case wants
+_FAKE_PASS = 'if [ "$1" = -cf ]; then exit 0; fi\n'
+
+
+def test_stm_lockdown_undoes_its_dropin_when_it_is_what_breaks_sudoers(tmp_path):
+    r = _lockdown(tmp_path, _FAKE_PASS + f'[ -e {tmp_path}/sudoers.d/zz-stm-lockdown ] && exit 1\nexit 0\n')
+    assert r.returncode == 1 and "drop-in removed" in r.stderr
+    assert not (tmp_path / "sudoers.d" / "zz-stm-lockdown").exists()
+
+
+def test_stm_lockdown_keeps_its_dropin_when_sudoers_was_already_broken(tmp_path):
+    r = _lockdown(tmp_path, _FAKE_PASS + "echo '/etc/sudoers.d/runner: bad permissions' >&2\nexit 1\n")
+    assert r.returncode == 0, r.stderr
+    assert "already has problems" in r.stderr
+    assert (tmp_path / "sudoers.d" / "zz-stm-lockdown").read_text() == "nobody ALL=(ALL:ALL) !ALL\n"
+    assert (tmp_path / "rules.d" / "00-stm-lockdown.rules").exists()
+
+
+def test_stm_lockdown_refuses_a_dropin_that_does_not_parse(tmp_path):
+    r = _lockdown(tmp_path, "exit 1\n")
+    assert r.returncode == 1 and "does not parse" in r.stderr and not (tmp_path / "sudoers.d").exists()
+
+
+def test_stm_lockdown_with_a_sound_sudoers_says_nothing_and_keeps_the_dropin(tmp_path):
+    r = _lockdown(tmp_path, "exit 0\n")
+    assert r.returncode == 0 and "already has problems" not in r.stderr
+    assert (tmp_path / "sudoers.d" / "zz-stm-lockdown").exists()
+
+
 @pytest.mark.skipif(os.geteuid() == 0, reason="the refusal is for everyone but root")
 def test_stm_lockdown_refuses_to_run_without_root():
     r = subprocess.run(["bash", str(GUEST / "stm-lockdown")], capture_output=True, text=True)
