@@ -262,7 +262,7 @@ Enter in a field sending the report, and a "+ shown file" button that appends th
 confirmation), Data (the frames, the spectra and the move traces, each list under a heading of its own; a wheel
 notch moves a list by exactly one entry, and a click on an entry cut by an edge shows it whole) and Log;
 in the middle the viewer (a frame with nm
-axes, a colour bar, a cursor readout, flatten modes, a contrast switch (auto: the 0.5-99.5 percentile
+axes, a colour bar, a cursor readout (a grey usage hint, in one language, while it has no reading: hover reads the pixel, a click places a marker), flatten modes, a contrast switch (auto: the 0.5-99.5 percentile
 scale of the image an MCP agent gets, the default; full: the frame's minimum to maximum, which keeps the
 top of an atom from saturating; visible: the minimum to maximum of the part of the frame in view, so that a
 step elsewhere does not flatten the atoms in a zoomed view, and the same as full while the whole frame is in

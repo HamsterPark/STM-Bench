@@ -20,7 +20,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QHBoxLayout, QHeaderView, QLab
                                QStackedWidget, QTableWidget, QTableWidgetItem, QVBoxLayout, QWidget)
 
 from . import fmt, style
-from .controls import ElidedLabel, Segmented, ThumbButton
+from .controls import ElidedLabel, Segmented, ThumbButton, polish
 from .labels import S, one, tr
 from .widgets.frame_view import FrameView, frame_thumbnail
 from .widgets.plot_view import PlotView
@@ -414,6 +414,7 @@ class CenterColumn(QWidget):
         fv.markers_changed.connect(self._markers_changed)
         fv.marker_added.connect(self._marker_added)
         fv.profile_changed.connect(self._profile)
+        self._show_readout("")                             # the hint, until the pointer is over a frame
 
     def set_scan_pending(self, pending: bool) -> None:
         """Show or hide "scan running..." over the viewer."""
@@ -500,7 +501,8 @@ class CenterColumn(QWidget):
         self.clear_readings = QPushButton(one("clear_readings", self.lang))
         self.clear_readings.setObjectName("view.clear_readings")
         w.setLayout(self._row(self._caption("lbl_tool"), self.tool, self.clear_markers, self.clear_readings))
-        self.tool.changed.connect(lambda t: self.frame_view.set_tool(t))
+        self.tool.changed.connect(lambda t: (self.frame_view.set_tool(t),
+                                             self.readout.property("tone") == "note" and self._show_readout("")))
         self.clear_markers.clicked.connect(lambda: (self.frame_view.clear_markers(), self.frame_view.clear_profile()))
         self.clear_readings.clicked.connect(lambda: (self.plot.clear_pins(), self.small_plot.clear_pins()))
         return w
@@ -580,7 +582,7 @@ class CenterColumn(QWidget):
             f"{frame['frame']}   start {fmt.hms(t0) if t0 is not None else '-'}\n"
             f"centre ({fmt.num(cx, 5)}, {fmt.num(cy, 5)}) nm · size {fmt.num(frame['size_nm'], 5)} nm · "
             f"{frame['pixels']} px · angle {fmt.num(frame['angle_deg'], 4)}°")
-        self.readout.set_full_text("")
+        self._show_readout("")
         self.strip.set_current(frame["frame"])
 
     def show_spectrum(self, spec: dict, axes: tuple[str, str] | None = None) -> None:
@@ -591,13 +593,14 @@ class CenterColumn(QWidget):
             self.plot.clear(tr("no_view", self.lang))
             self.toolbars.setCurrentIndex(1)
             self.stack.setCurrentIndex(1)
+            self._show_readout("")
             return
         xk, yk = axes or default_axes(spec)
         self._rebuild_axes(xcols, ycols, xk, yk)
         self.toolbars.setCurrentIndex(1)
         self.stack.setCurrentIndex(1)
         self.strip.set_current("")
-        self.readout.set_full_text("")
+        self._show_readout("")
         self.info.setText(self._spectrum_info(spec, int(np.size(spec[xcols[0]]))))
         self._draw_spectrum(xk, yk)
 
@@ -657,14 +660,35 @@ class CenterColumn(QWidget):
     # ── readouts ──
     def _cursor(self, c: dict) -> None:
         if not c:
-            self.readout.set_full_text("")
+            self._show_readout("")
             return
         val = c.get("value")
         # the pixel under the pointer, then where its centre lies and what it holds: the numbers a click there marks
         text = f"pixel col {c['col']}, row {c['row']}   centre x {c['x_nm']:.3f} nm   y {c['y_nm']:.3f} nm"
         if val is not None and math.isfinite(float(val)):
             text += f"   {float(val):.2f} {c.get('unit', '')}"
-        self.readout.set_full_text(text)
+        self._show_readout(text)
+
+    def _hint(self) -> str:
+        """What the readout line says while it has no reading: how the viewer is used (what the pointer and a click
+        do in the view on show, and with the tool picked), nothing about the experiment. One language: the line is
+        a single line of the width of the column, which both at once would not fit."""
+        if self.stack.currentIndex() == 1:
+            return one("hint_plot", self.lang)
+        if not self._has_frame:
+            return ""                      # a click marks nothing before the first frame: no hint rather than a false one
+        tool = self.tool.value()
+        return one({"profile": "hint_image_profile", "pan": "hint_image_pan"}.get(tool, "hint_image"), self.lang)
+
+    def _show_readout(self, text: str) -> None:
+        """The reading, or, with none, the usage hint in the muted colour (the line keeps its font and height, so
+        nothing moves when the pointer enters or leaves)."""
+        shown = text or self._hint()
+        self.readout.set_full_text(shown)
+        tone = "note" if shown and not text else ""
+        if (self.readout.property("tone") or "") != tone:
+            self.readout.setProperty("tone", tone)
+            polish(self.readout)
 
     def _marker_added(self, _m: dict) -> None:
         n = self.table.rowCount()
