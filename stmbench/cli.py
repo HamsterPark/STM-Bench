@@ -93,11 +93,17 @@ def cmd_verify(a) -> int:
 
 def cmd_grade(a) -> int:
     """Grade an exported episode by replaying it with the scenario and seed this host holds
-    (stmbench.instrument.grade): 0 when graded, 2 when the input is not a gradable export."""
-    from .instrument.grade import grade_export
+    (stmbench.instrument.grade): 0 when graded, 2 when the setup does not match (another scenario,
+    rules, API or export version). A damaged export is graded too: it scores 0, exit 0."""
+    from .instrument.export import ExportDamaged
+    from .instrument.grade import damaged_result, grade_export
 
     try:
-        res = grade_export(a.export_dir, a.scenario, a.seed, strict=not a.no_strict)
+        try:
+            res = grade_export(a.export_dir, a.scenario, a.seed, strict=not a.no_strict)
+        except ExportDamaged as exc:
+            print(f"grade: {exc}", file=sys.stderr)
+            res = damaged_result(exc.reason, a.scenario)
     except ValueError as exc:
         print(f"grade: {exc}", file=sys.stderr)
         return 2

@@ -40,6 +40,19 @@ EXPORT_VERSION = 2
 READABLE_VERSIONS = (1, 2)
 
 
+class ExportDamaged(ValueError):
+    """The submission itself is damaged: a file missing or unreadable, not JSON, not the shape of an
+    export, a record missing or out of order, a log shorter than ``session.json`` counts. An export
+    that cannot be verified is not a reproduction, so the grade command scores it 0 (exit 0), unlike
+    a mismatch of setup (another scenario, rules, API or export version), which is a plain
+    :class:`ValueError` (exit 2: the grader's or the deployment's problem, not the agent's).
+    ``reason`` is the text without the directory, safe to repeat in a result."""
+
+    def __init__(self, reason: str, where=None):
+        self.reason = reason
+        super().__init__(f"{where}: {reason}" if where is not None else reason)
+
+
 def _chmod(path: Path, mode: int) -> None:
     """Readable by every account, writable only by the instrument's own (POSIX; elsewhere a no-op)."""
     if os.name == "posix":
@@ -125,7 +138,7 @@ class ExportWriter:
 
 def _read_jsonl(path: Path) -> tuple[list[dict], bool]:
     """The lines of a JSON-lines file, and whether its last line was cut off mid-write (then left
-    out). A damaged line anywhere else is not a cut-off write: :class:`ValueError`."""
+    out). A damaged line anywhere else is not a cut-off write: :class:`ExportDamaged`."""
     lines = path.read_text(encoding="utf-8").split("\n")
     out: list[dict] = []
     for k, line in enumerate(lines):
@@ -136,24 +149,30 @@ def _read_jsonl(path: Path) -> tuple[list[dict], bool]:
         except json.JSONDecodeError:
             if k == len(lines) - 1:               # no newline after it: the write was interrupted
                 return out, True
-            raise ValueError(f"{path.name}: line {k + 1} is not a JSON record") from None
+            raise ExportDamaged(f"{path.name}: line {k + 1} is not a JSON record") from None
     return out, False
 
 
 def read_export(export_dir: str | Path) -> dict:
     """An export directory as a grader reads it: ``session``, ``records`` (the instrument's log,
     in order), ``digests``, and ``torn`` - True when the log's last line was cut off mid-write
-    (it is left out). :class:`ValueError` for anything else that is not a complete export."""
+    (it is left out). :class:`ExportDamaged` for anything else that is not a complete export (a
+    missing or unreadable file raises the underlying :class:`OSError` or :class:`json.JSONDecodeError`,
+    which the grader turns into :class:`ExportDamaged`); a plain :class:`ValueError` for an export
+    of a version this code does not read, which is a mismatch of setup."""
     d = Path(export_dir)
     session = json.loads((d / "session.json").read_text(encoding="utf-8"))
-    if session.get("format") != EXPORT_FORMAT or session.get("version") not in READABLE_VERSIONS:
+    version = session.get("version")
+    if session.get("format") != EXPORT_FORMAT or not isinstance(version, int) or isinstance(version, bool):
+        raise ExportDamaged(f"session.json is not that of a {EXPORT_FORMAT} directory")
+    if version not in READABLE_VERSIONS:
         raise ValueError(f"{d} is not a version-{' or '.join(map(str, READABLE_VERSIONS))} {EXPORT_FORMAT} directory")
     records, torn = _read_jsonl(d / "actions.jsonl")
     for k, rec in enumerate(records):
-        if rec.get("i") != k:
-            raise ValueError(f"actions.jsonl: record {k} carries i = {rec.get('i')!r}: a record is missing or out of order")
+        if not isinstance(rec, dict) or rec.get("i") != k:
+            raise ExportDamaged(f"actions.jsonl: record {k} carries i = {rec.get('i') if isinstance(rec, dict) else rec!r}: a record is missing or out of order")
     digests, _ = _read_jsonl(d / "digests.jsonl") if (d / "digests.jsonl").exists() else ([], False)
     return {"session": session, "records": records, "digests": digests, "torn": torn}
 
 
-__all__ = ["EXPORT_FORMAT", "EXPORT_VERSION", "ExportWriter", "read_export"]
+__all__ = ["EXPORT_FORMAT", "EXPORT_VERSION", "ExportDamaged", "ExportWriter", "read_export"]
