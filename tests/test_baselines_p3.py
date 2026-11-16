@@ -134,3 +134,16 @@ def test_the_baseline_names_neither_the_simulator_nor_its_truth():
             names = {n.attr for n in ast.walk(node) if isinstance(n, ast.Attribute)}
             names |= {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}
             assert not names & forbidden, (mod.__name__, getattr(node, "name", None), names & forbidden)
+
+
+def test_a_ring_the_survey_misses_is_looked_for_in_a_wider_one():
+    """The task promises the ring within 60 nm of the origin, not within the first survey: with
+    the survey centred 45 nm off, seed 15's ring (15 nm out, 9 nm across) is cut by its edge, so
+    the wide survey finds it."""
+    inst = Instrument(P3, 15)
+    log: dict = {}
+    c = p3.Corral(Blind(_NoWorld(inst)), log)
+    c.centre = (45.0, 0.0)
+    L = c.survey()
+    assert "wide_survey" in log
+    assert np.hypot(L["centre"][0] - 15.0, L["centre"][1] - 8.0) < 3.0 and abs(L["radius_nm"] - 8.9) < 0.3
