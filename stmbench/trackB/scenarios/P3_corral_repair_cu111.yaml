@@ -28,20 +28,19 @@ initial:
 faults: []
 task: |
   样品是 Cu(111)，扫描坐标原点附近 60 nm 内有一圈 Fe 原子排成的圆形围栏，环上缺了几个原子，
-  缺口外侧散落着几个备用 Fe 原子（备用原子的个数与环上缺的个数相同，环上的原子相距太近、在形貌里连成一片，
-  数不出单个原子），仪器已在隧穿态；请复现 1993 年量子围栏的实验：先用横向操纵
-  把备用原子补进环上的空位使围栏闭合，再测出围栏中心的 dI/dV 谱，报告能量最低的两个可分辨
+  缺口外侧散落着几个备用 Fe 原子（备用原子的个数与环上缺的个数相同），仪器已在隧穿态；
+  请复现 1993 年量子围栏的实验：先用横向操纵把备用原子补进环上的空位使围栏闭合，再从修好的
+  围栏的形貌图量出围栏的半径（nm），测出围栏中心的 dI/dV 谱，报告半径和能量最低的两个可分辨
   共振峰的能量（meV，相对费米能级），用 ReportResult 报告。
 task_en: >-
   The sample is Cu(111). Within 60 nm of the origin of the scan coordinates there is a circular
   corral formed by a ring of Fe atoms, with a few atoms missing from the ring and a few spare Fe
-  atoms scattered outside the gap (there are as many spare atoms as atoms missing from the ring; the
-  ring's atoms are so close together that they merge into one ridge in a topograph, so they cannot be
-  counted one by one), and the instrument is already in the tunnelling state. Please
-  reproduce the 1993 quantum-corral experiment: first use lateral manipulation to fill the
-  vacancies in the ring with the spare atoms so that the corral closes, then measure the dI/dV
-  spectrum at the centre of the corral, and report the energies of the two lowest resolvable
-  resonance peaks (meV, relative to the Fermi level) with ReportResult.
+  atoms scattered outside the gap (there are as many spare atoms as atoms missing from the ring),
+  and the instrument is already in the tunnelling state. Please reproduce the 1993 quantum-corral
+  experiment: first use lateral manipulation to fill the vacancies in the ring with the spare
+  atoms so that the corral closes, then measure the radius of the repaired corral (nm) from a
+  topograph and the dI/dV spectrum at its centre, and report the radius and the energies of the
+  two lowest resolvable resonance peaks (meV, relative to the Fermi level) with ReportResult.
 budget: {sim_hours: 2.5, wire_cmds: 300000}
 hidden:
   adatoms:
@@ -164,8 +163,11 @@ notes: |
   range stays 5.5-9 nm.
 
   The task text says the spare atoms are as many as the missing ones: the ring's atoms, 0.6-1.4 nm
-  apart, merge into one ridge in a topograph and cannot be counted one by one, the spares can
-  (DESIGN 9.5).
+  apart, mostly merge into one ridge in a topograph and cannot be counted one by one, the spares can
+  (DESIGN 9.5). It says only the count, not why: a sentence on how the ring looks would be untrue
+  for the widest-spaced rings (1.3 nm apart they are separate bumps) and would tell the agent what
+  to expect to see. It also asks for the radius of the repaired corral, since the radius is now a
+  claim (2026-11-16).
 
   Privileged reference (stmbench/reference/p3_repair.py, ``reference --paper P3R``): the gap and
   its sites from a survey (the ring's cross-section falls to half at the gap), the spares

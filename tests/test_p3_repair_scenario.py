@@ -34,11 +34,15 @@ def test_both_cards_state_the_same_numbers_and_the_spares_as_many_as_the_gap(lan
     for number in ("10", "0.15", "22", "0.97"):
         assert number in text, (lang, number)
     # the ring's atoms cannot be counted one by one; the spares can, and the task says how many there are
+    # (only the count: how the ring looks is the agent's to see); it asks for the radius, now a claim
     if lang == "en":
         assert "as many spare atoms as atoms missing" in text
-        assert "cannot be counted one by one" in text
+        assert "measure the radius of the repaired corral" in text
+        assert "cannot be counted" not in text
     else:
         assert "备用原子的个数与环上缺的个数相同" in text
+        assert "量出围栏的半径" in text
+        assert "数不出" not in text
     assert "after" in text if lang == "en" else "之后" in text
 
 
