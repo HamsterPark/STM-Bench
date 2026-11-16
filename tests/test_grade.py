@@ -626,7 +626,7 @@ def test_the_adapter_runs_the_grader_image_without_network_on_a_read_only_export
         return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps({"score": 2.0, "note": "x"}), stderr="")
     monkeypatch.setattr(mod.subprocess, "run", out_of_range)
     assert _pending(mod.grade_episode(str(export / "actions.jsonl"), _oracle(tmp_path))) == \
-        "grader fault: the grader returned a score outside 0 to 1"
+        "grader fault: the grader returned a score outside the unit interval"
     for stdout in ("", "not json", '{"note": "no score"}', '{"score": "x", "note": "y"}', "[]"):
         monkeypatch.setattr(mod.subprocess, "run",
                             lambda cmd, _out=stdout, **kw: subprocess.CompletedProcess(cmd, 0, _out, ""))

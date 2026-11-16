@@ -120,5 +120,5 @@ def _grade(result_path: Path, gt: dict, seed: str) -> tuple[float, str]:
     except (ValueError, KeyError, TypeError):
         raise _Fault("the grader's output is not a result") from None
     if not math.isfinite(score) or not 0.0 <= score <= 1.0:
-        raise _Fault("the grader returned a score outside 0 to 1")
+        raise _Fault("the grader returned a score outside the unit interval")
     return score, _scrub(note, seed)
