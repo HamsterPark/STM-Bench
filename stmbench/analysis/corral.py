@@ -169,12 +169,18 @@ def atom_volume(array: np.ndarray, nm_per_px: float, centre_nm, *, radius_nm: fl
 
 
 def ring_gap(angles: np.ndarray, profile: np.ndarray, radius_nm: float, *,
-             missing: int | None = None, volume: float | None = None) -> dict:
+             missing: int | None = None, volume: float | None = None, smooth_nm: float = 0.15) -> dict:
     """The gap in a ring of atoms and the sites that would close it, from :func:`ring_profile`.
 
     The gap is where the ring's cross-section falls to half its level. A chain of atoms ``s``
     apart falls to half half a spacing past its last atom, so the gap is ``missing × s`` wide at
     half level, and the missing sites sit evenly in it, half a spacing in from either edge.
+
+    ``smooth_nm`` is the half-width of the box the profile is smoothed with before the half
+    level is looked for. A ring whose atoms are 1.3 nm apart (8 nm radius, 38 atoms) is a row
+    of separate bumps, and a noisy, blunt-tip image of it breaks the gap into pieces at the
+    default; 0.4 nm finds a 47-degree gap within 1 degree where 0.15 nm put its edge 12 degrees
+    in (seed 37, 2026-11-16).
 
     How many are missing is ``missing`` when it is known (P3's repair puts as many spare atoms
     by the gap). Otherwise it comes from the volume of one atom (:func:`atom_volume`): the
@@ -186,7 +192,7 @@ def ring_gap(angles: np.ndarray, profile: np.ndarray, radius_nm: float, *,
     y = np.asarray(profile, float)
     n = y.size
     step = float(th[1] - th[0])
-    k = max(1, int(round(0.15 / (radius_nm * step))))            # smooth over ~0.3 nm of arc
+    k = max(1, int(round(smooth_nm / (radius_nm * step))))      # smooth over ±smooth_nm of arc
     ys = np.convolve(np.concatenate([y[-k:], y, y[:k]]), np.ones(2 * k + 1) / (2 * k + 1), "same")[k:-k]
     level0 = float(np.median(ys))
     low = ys < 0.5 * level0

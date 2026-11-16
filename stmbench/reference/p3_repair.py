@@ -49,6 +49,8 @@ STAGE_NM = 1.5
 #: an atom looked for where the truth has it, beside the ring: its bump may fall to 0.9 of its
 #: height 0.7 nm out on the ring's side (the spares themselves are found with the usual 0.6)
 NEAR_COMPACT = 0.9
+#: the gap's edges are looked for in the ring's cross-section smoothed over this half-width (nm)
+GAP_SMOOTH_NM = 0.4
 STAGE_ON_GOAL_NM = 0.35
 #: the last approach stops within this of the site (nm); the lattice's nearest site to any point
 #: is within 0.15 nm of it, and a ring site is held by an atom within 0.29-0.37 nm
@@ -96,7 +98,7 @@ def _plan(sv: dict) -> dict:
     rc, R = sv["centre"], sv["R"]
     spares = [a for a in sv["atoms"]
               if SPARE_BAND_NM[0] < math.hypot(a[0] - rc[0], a[1] - rc[1]) - R < SPARE_BAND_NM[1]]
-    g = ring_gap(sv["angles"], sv["profile"], R, missing=len(spares))
+    g = ring_gap(sv["angles"], sv["profile"], R, missing=len(spares), smooth_nm=GAP_SMOOTH_NM)
     return {"spares": spares, "sites": list(g["sites_rad"]), "level": g["level"], "R": R,
             "gap_width_nm": g["gap_width_nm"], "spacing_nm": g["spacing_nm"]}
 
