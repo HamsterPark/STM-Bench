@@ -12,7 +12,6 @@
 #   STM_SRC_TARBALL  `git archive` of the commit to install instead of fetching STM_COMMIT from STM_REPO_URL
 #   STM_PY_TARBALL   a local copy of the pinned Python tarball (still checked against PY_SHA256)
 #   STM_NO_SYSTEMD=1 do not enable or start the service (a container without systemd)
-#   STM_REVOKE_SUDO=1 remove the agent's account from the sudo group at the end
 #   APT_OPTS         extra apt-get options (a rootless container needs -o APT::Sandbox::User=root)
 #   STM_SKIP_APT_UPDATE=1  do not run apt-get update (offline test with the package lists and archives in place)
 #   STM_NO_CHOWN=1   do not chown (a container whose user namespace maps a single uid; the files stay root's)
@@ -20,7 +19,9 @@
 #
 # Result (the shared contract of deploy/osworld/README.md): code and venv in /opt/stm-bench (root-owned, world-readable),
 # the service account `stm` (no password login), /var/lib/stm-bench/{private 0700, export 0755, home 0700} owned by stm,
-# the service /etc/systemd/system/stm-bench.service, /usr/local/bin/stm-start, /usr/local/sbin/stm-bench-reset.
+# the service /etc/systemd/system/stm-bench.service, /usr/local/bin/stm-start, /usr/local/sbin/stm-bench-reset and
+# stm-lockdown. Safe to run again on a machine that already has it (also on a shared image: it adds files of its
+# own and touches no other software's configuration, except that apt installs missing libraries).
 set -euo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
 
@@ -125,6 +126,7 @@ say "launcher, stm-start, unit, autostart entry"
 install -m 0644 "$HERE/stm_launcher.py" /opt/stm-bench/guest/stm_launcher.py
 install -m 0755 "$HERE/stm-start" /usr/local/bin/stm-start
 install -m 0750 "$HERE/stm-bench-reset" /usr/local/sbin/stm-bench-reset
+install -m 0750 "$HERE/stm-lockdown" /usr/local/sbin/stm-lockdown
 install -m 0644 "$HERE/stm-bench.service" /etc/systemd/system/stm-bench.service
 install -d -m 0755 /etc/xdg/autostart
 install -m 0644 "$HERE/stm-bench-xhost.desktop" /etc/xdg/autostart/stm-bench-xhost.desktop
@@ -162,11 +164,4 @@ if [ "${STM_NO_SYSTEMD:-0}" != 1 ]; then
   fi
 fi
 
-if [ "${STM_REVOKE_SUDO:-0}" = 1 ]; then
-  say "removing $AGENT_USER from the sudo group (STM_REVOKE_SUDO=1)"
-  gpasswd -d "$AGENT_USER" sudo || true
-  if grep -rlE "^\s*$AGENT_USER\s" /etc/sudoers.d 2>/dev/null; then
-    echo "WARNING: $AGENT_USER has a sudoers.d entry of its own; remove it as well"
-  fi
-fi
 say "done: $COMMIT_NOTE"

@@ -330,7 +330,7 @@ def test_the_shell_script_is_valid_bash():
 
 def test_the_installer_scripts_are_valid_bash_and_the_package_list_is_plain():
     import re
-    for name in ("install.sh", "stm-bench-reset", "pins.sh", "stm-start"):
+    for name in ("install.sh", "stm-bench-reset", "stm-lockdown", "pins.sh", "stm-start"):
         assert subprocess.run(["bash", "-n", str(GUEST / name)], capture_output=True).returncode == 0, name
     pkgs = [ln.strip() for ln in (GUEST / "apt-packages.txt").read_text().splitlines()
             if ln.strip() and not ln.startswith("#")]
@@ -340,14 +340,14 @@ def test_the_installer_scripts_are_valid_bash_and_the_package_list_is_plain():
 
 def test_the_pins_are_exact_and_the_defaults_are_the_cautious_ones():
     out = subprocess.run(["bash", "-c", '. "$1"; printf "%s\n" "$PY_SHA256" "$PY_VERSION" "$PYSIDE_PIN" "$STM_COMMIT" '
-                          '"$STM_REVOKE_SUDO" "$STM_USER" "$AGENT_USER" "$PY_URL"', "_", str(GUEST / "pins.sh")],
+                          '"$STM_USER" "$AGENT_USER" "$PY_URL"', "_", str(GUEST / "pins.sh")],
                          capture_output=True, text=True, check=True).stdout.splitlines()
-    sha, version, pyside, commit, revoke, stm, agent, url = out[:8]
+    sha, version, pyside, commit, stm, agent, url = out[:7]
     assert len(sha) == 64 and set(sha) <= set("0123456789abcdef") and version.startswith("3.13.")
     assert url.startswith("https://") and version in url and "x86_64-unknown-linux-gnu-install_only" in url
     assert all("==" in part for part in pyside.split()) and "PySide6_Essentials" in pyside
     assert set(commit) == {"0"}                          # the delivery commit is set by whoever delivers
-    assert (revoke, stm, agent) == ("0", "stm", "user")
+    assert (stm, agent) == ("stm", "user")
     reqs = (ROOT / "deploy" / "osworld" / "grader" / "requirements.txt").read_text()
     assert all(f"{n}==" in reqs for n in ("numpy", "scipy", "PyYAML"))
 
@@ -357,6 +357,28 @@ def test_the_workflow_runs_only_when_started_by_hand():
     wf = yaml.safe_load((ROOT / ".github" / "workflows" / "osworld-guest.yml").read_text(encoding="utf-8"))
     triggers = wf.get("on", wf.get(True))
     assert set(triggers) == {"workflow_dispatch"}
+
+
+@pytest.mark.skipif(os.geteuid() == 0, reason="the refusal is for everyone but root")
+def test_stm_lockdown_refuses_to_run_without_root():
+    r = subprocess.run(["bash", str(GUEST / "stm-lockdown")], capture_output=True, text=True)
+    assert r.returncode == 1 and "must run as root" in r.stderr
+
+
+@pytest.mark.skipif(os.geteuid() != 0, reason="writes sudoers and polkit files as root (run in the container test)")
+def test_stm_lockdown_writes_its_files_and_is_idempotent(tmp_path):
+    env = {**os.environ, "STM_SUDOERS_DIR": str(tmp_path / "sudoers.d"), "STM_POLKIT_RULES_DIR": str(tmp_path / "rules.d"),
+           "STM_POLKIT_PKLA_DIR": str(tmp_path / "pkla"), "STM_AGENT_USER": "nobody"}
+    for _ in range(2):
+        r = subprocess.run(["bash", str(GUEST / "stm-lockdown")], capture_output=True, text=True, env=env)
+        assert r.returncode == 0, r.stderr
+    assert (tmp_path / "sudoers.d" / "zz-stm-lockdown").read_text() == "nobody ALL=(ALL:ALL) !ALL\n"
+    assert stat.S_IMODE((tmp_path / "sudoers.d" / "zz-stm-lockdown").stat().st_mode) == 0o440
+    assert 'subject.user == "nobody"' in (tmp_path / "rules.d" / "00-stm-lockdown.rules").read_text()
+    assert "Identity=unix-user:nobody" in (tmp_path / "pkla" / "00-stm-lockdown.pkla").read_text()
+    bad = subprocess.run(["bash", str(GUEST / "stm-lockdown")], capture_output=True, text=True,
+                         env={**env, "STM_AGENT_USER": "bad name"})
+    assert bad.returncode == 1
 
 
 # ── the real console, offscreen ──

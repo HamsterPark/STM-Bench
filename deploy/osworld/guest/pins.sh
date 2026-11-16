@@ -22,5 +22,3 @@ PYSIDE_PIN=${PYSIDE_PIN:-PySide6_Essentials==6.12.0 shiboken6==6.12.0}
 # The account the agent works as in the OSWorld base image, and the console's service account.
 AGENT_USER=${AGENT_USER:-user}
 STM_USER=${STM_USER:-stm}
-# 0: leave `user` in sudo (the default until OSWorld answers whether the snapshot may drop it); 1: remove it at the end.
-STM_REVOKE_SUDO=${STM_REVOKE_SUDO:-0}

@@ -580,20 +580,26 @@ def _oracle(tmp_path: Path, **gt) -> dict:
     return {"type": "rule", "rules": {"oracle_dir": str(d)}}
 
 
+def _pending(got) -> str:
+    """The reason of a grader-side fault: a dict whose ``pending`` the runner's scoring reads (score null, not 0)."""
+    assert isinstance(got, dict) and got["score"] == 0.0 and got["pending"] and got["note"] == got["pending"], got
+    return got["pending"]
+
+
 def test_the_adapter_returns_the_score_of_the_grade_command(p5, graded, tmp_path, monkeypatch):
     mod = _adapter()
     monkeypatch.chdir(ROOT)                                   # the command imports the worktree's package
     monkeypatch.setenv(mod.CMD_ENV, f"{shlex.quote(Path(sys.executable).as_posix())} -m stmbench.cli")
     got = mod.grade_episode(str(p5[0] / "actions.jsonl"), _oracle(tmp_path))
     assert got == (graded["score"], graded["note"]) and got[0] == 1.0
-    # a failed grade is a score with its reason, never an exception
-    score, note = mod.grade_episode(str(p5[0] / "actions.jsonl"), _oracle(tmp_path, scenario=P4))
-    assert score == 0.0 and note.startswith("grader failed: exit 2: grade: the export is of scenario")
+    # a fault on the grading side is "pending" (no score, no verdict), never an exception and never a zero
+    got = mod.grade_episode(str(p5[0] / "actions.jsonl"), _oracle(tmp_path, scenario=P4))
+    assert _pending(got).startswith("grader fault: exit 2: grade: the export is of scenario")
     no_gt = {"type": "rule", "rules": {"oracle_dir": str(tmp_path)}}                # no gt.json in there
-    score, note = mod.grade_episode(str(p5[0] / "actions.jsonl"), no_gt)
-    assert score == 0.0 and note.startswith("grader failed: ") and "gt.json" in note
+    assert "gt.json" in _pending(mod.grade_episode(str(p5[0] / "actions.jsonl"), no_gt))
     monkeypatch.setenv(mod.CMD_ENV, "stmbench-no-such-program")
-    assert mod.grade_episode(str(p5[0] / "actions.jsonl"), _oracle(tmp_path))[0] == 0.0
+    assert _pending(mod.grade_episode(str(p5[0] / "actions.jsonl"), _oracle(tmp_path))).startswith(
+        "grader fault: the grader could not be started")
 
 
 def test_the_adapter_runs_the_grader_image_without_network_on_a_read_only_export(tmp_path, monkeypatch):
@@ -619,20 +625,28 @@ def test_the_adapter_runs_the_grader_image_without_network_on_a_read_only_export
     def out_of_range(cmd, **kw):
         return subprocess.CompletedProcess(cmd, 0, stdout=json.dumps({"score": 2.0, "note": "x"}), stderr="")
     monkeypatch.setattr(mod.subprocess, "run", out_of_range)
-    assert mod.grade_episode(str(export / "actions.jsonl"), _oracle(tmp_path))[1].startswith("grader failed: ")
-    for stdout in ("", "not json", '{"note": "no score"}'):
+    assert _pending(mod.grade_episode(str(export / "actions.jsonl"), _oracle(tmp_path))) == \
+        "grader fault: the grader returned a score outside 0 to 1"
+    for stdout in ("", "not json", '{"note": "no score"}', '{"score": "x", "note": "y"}', "[]"):
         monkeypatch.setattr(mod.subprocess, "run",
                             lambda cmd, _out=stdout, **kw: subprocess.CompletedProcess(cmd, 0, _out, ""))
-        assert mod.grade_episode(str(export / "actions.jsonl"), _oracle(tmp_path))[0] == 0.0
+        assert _pending(mod.grade_episode(str(export / "actions.jsonl"), _oracle(tmp_path))) == \
+            "grader fault: the grader's output is not a result"
 
     def failing(cmd, **kw):
         return subprocess.CompletedProcess(cmd, 125, stdout="", stderr="docker: Unable to find image\nsecond line")
     monkeypatch.setattr(mod.subprocess, "run", failing)
-    assert mod.grade_episode(str(export / "actions.jsonl"), _oracle(tmp_path)) == \
-        (0.0, "grader failed: exit 125: second line")
+    assert _pending(mod.grade_episode(str(export / "actions.jsonl"), _oracle(tmp_path))) == \
+        "grader fault: exit 125: second line"
+
+    def no_docker(cmd, **kw):
+        raise FileNotFoundError(2, "No such file or directory: 'docker'")
+    monkeypatch.setattr(mod.subprocess, "run", no_docker)
+    assert _pending(mod.grade_episode(str(export / "actions.jsonl"), _oracle(tmp_path))).startswith(
+        "grader fault: the grader could not be started")
 
 
-def test_a_grader_that_times_out_is_a_zero_and_its_container_is_killed(tmp_path, monkeypatch):
+def test_a_grader_that_times_out_is_pending_and_its_container_is_killed(tmp_path, monkeypatch):
     mod = _adapter()
     monkeypatch.delenv(mod.CMD_ENV, raising=False)
     (tmp_path / "actions.jsonl").write_text("", encoding="utf-8")
@@ -644,9 +658,47 @@ def test_a_grader_that_times_out_is_a_zero_and_its_container_is_killed(tmp_path,
             raise subprocess.TimeoutExpired(cmd, kw["timeout"])
         return subprocess.CompletedProcess(cmd, 0, "", "")
     monkeypatch.setattr(mod.subprocess, "run", hung)
-    assert mod.grade_episode(str(tmp_path / "actions.jsonl"), _oracle(tmp_path)) == \
-        (0.0, "grader failed: no result within 30 min")
+    assert _pending(mod.grade_episode(str(tmp_path / "actions.jsonl"), _oracle(tmp_path))) == \
+        "grader fault: no result within 30 min"
     assert calls[1] == ["docker", "kill", calls[0][calls[0].index("--name") + 1]]
+
+
+def _fake_grader(tmp_path: Path, body: str) -> str:
+    """A command prefix that stands in for ``python -m stmbench.cli``: a script run as ``<script> grade <dir> ...``."""
+    script = tmp_path / "fake_grader.py"
+    script.write_text("import sys\n" + body, encoding="utf-8")
+    return f"{shlex.quote(Path(sys.executable).as_posix())} {shlex.quote(script.as_posix())}"
+
+
+@pytest.mark.parametrize("seed", [913275, 7, 0])
+def test_no_seed_reaches_what_the_adapter_returns(tmp_path, monkeypatch, seed):
+    """The seed is on the grader's command line; whatever the grader prints about it must not come back."""
+    mod = _adapter()
+    (tmp_path / "actions.jsonl").write_text("", encoding="utf-8")
+    oracle = _oracle(tmp_path, seed=seed)
+    monkeypatch.setenv(mod.CMD_ENV, _fake_grader(tmp_path, "print('seed ' + sys.argv[-1] + ' is wrong', file=sys.stderr)\n"
+                                                           "sys.exit(1)\n"))
+    reason = _pending(mod.grade_episode(str(tmp_path / "actions.jsonl"), oracle))
+    assert reason == "grader fault: exit 1: seed <seed> is wrong"
+    # the whole command line, and a note of a successful grade, are scrubbed as well
+    monkeypatch.setenv(mod.CMD_ENV, _fake_grader(
+        tmp_path, "import json\nprint(json.dumps({'score': 0.5, 'note': 'argv ' + ' '.join(sys.argv[1:])}))\n"))
+    score, note = mod.grade_episode(str(tmp_path / "actions.jsonl"), oracle)
+    assert score == 0.5 and note.endswith("--seed <seed>") and f"--seed {seed}" not in note
+    monkeypatch.setenv(mod.CMD_ENV, _fake_grader(tmp_path, f"print('x{seed}y' * 100, file=sys.stderr)\nsys.exit(2)\n"))
+    reason = _pending(mod.grade_episode(str(tmp_path / "actions.jsonl"), oracle))
+    assert "<seed>" in reason
+    if seed > 1000:
+        assert str(seed) not in reason
+
+
+def test_an_inconsistent_replay_is_a_real_zero_not_a_pending(tmp_path, monkeypatch):
+    mod = _adapter()
+    (tmp_path / "actions.jsonl").write_text("", encoding="utf-8")
+    monkeypatch.setenv(mod.CMD_ENV, _fake_grader(
+        tmp_path, "import json\nprint(json.dumps({'score': 0.0, 'note': 'replay differs from the recorded episode'}))\n"))
+    assert mod.grade_episode(str(tmp_path / "actions.jsonl"), _oracle(tmp_path)) == \
+        (0.0, "replay differs from the recorded episode")
 
 
 def test_the_adapter_is_standard_library_only_and_python_3_11_syntax():

@@ -21,6 +21,9 @@ jobs:
         run: |
           # The OSWorld base image's agent account is `user`; the console's service account `stm` is made by install.sh.
           sudo useradd --create-home --shell /bin/bash --uid 1100 user
+          # as in the OSWorld base image: in the sudo group, password `password`
+          echo 'user:password' | sudo chpasswd
+          sudo usermod -aG sudo user
           SEED=$(python3 -c 'import secrets; print(secrets.randbelow(2**31))')
           echo "::add-mask::$SEED"
           printf '{"stm_p4_atom_ci": {"scenario": "P4_atom_positioning_cu111", "seed": %s}}\n' "$SEED" > "$RUNNER_TEMP/tasks.json"
@@ -47,6 +50,35 @@ jobs:
           CMD=$(sed -n 's/^Exec=//p' /etc/xdg/autostart/stm-bench-xhost.desktop)
           sudo -u user -H env DISPLAY=:0 bash -c "$CMD"
           sudo -u user -H env DISPLAY=:0 xhost
+
+      - name: Lock the agent's account down, as a task's config does
+        run: |
+          must_fail() { if "$@" >/dev/null 2>&1; then echo "UNEXPECTEDLY ALLOWED: $*"; exit 1; fi; echo "refused, as it should be: $*"; }
+          sudo apt-get install -y --no-install-recommends policykit-1 || true
+          # before: the account has admin rights, and a shell opened now tries sudo only after the lockdown
+          sudo -u user -H bash -c 'echo password | sudo -S -p "" true'
+          rm -f /tmp/late.rc
+          sudo -u user -H bash -c 'sleep 25; echo password | sudo -S -p "" true >/dev/null 2>&1; echo $? > /tmp/late.rc' &
+          sleep 1
+          # the command of the task's config
+          sudo -u user -H bash -c "echo password | sudo -S -p '' /usr/local/sbin/stm-lockdown"
+          sudo -u user -H bash -c "echo password | sudo -S -p '' /usr/local/sbin/stm-lockdown" && echo "second call from user: allowed?" || echo "second call from user refused (it no longer has sudo)"
+          sudo /usr/local/sbin/stm-lockdown        # idempotent when run again as root
+          sudo visudo -c
+          cat /etc/sudoers.d/zz-stm-lockdown
+          must_fail sh -c "id -nG user | tr ' ' '\n' | grep -qx sudo"
+          must_fail sudo -u user -H sudo -n true
+          must_fail sudo -u user -H bash -c "echo password | sudo -S -p '' true"
+          must_fail sudo -u user -H sudo -u root id
+          must_fail sudo -u user -H pkexec true
+          # polkit: not authorized (pkcheck exit 1), not "challenge" (3) and not authorized (0)
+          set +e
+          sudo -u user -H pkcheck --action-id org.freedesktop.policykit.exec --process $$ ; rc=$?
+          set -e
+          echo "pkcheck exit $rc"; test "$rc" = 1
+          # the shell that was open before: its sudo is refused now
+          for i in $(seq 1 40); do test -f /tmp/late.rc && break; sleep 1; done
+          test "$(cat /tmp/late.rc)" != 0
 
       - name: Start the console as the agent's account
         run: |

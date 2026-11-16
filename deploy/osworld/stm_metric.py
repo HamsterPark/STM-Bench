@@ -12,13 +12,24 @@ Python 3.13 and numpy 2. So this module only runs the real grader (``python -m s
 grade``) as a separate process and reads its JSON: in the Docker image ``grader_image`` names (no
 network, the export mounted read-only) or, when ``STMBENCH_GRADER_CMD`` is set, through that
 command prefix (``<python> -m stmbench.cli``, split like a shell would). Standard library only.
-It never raises: a grade that could not be made is ``(0.0, "grader failed: <why>")``.
+
+Two kinds of outcome. A grade that was made returns ``(score, note)``; an inconsistent replay or
+a failed claim is a real ``0.0``. A fault on the grading side (no Docker, no image, a timeout, a
+crash, a grader exit status other than 0, output that is not a result, no readable ``gt.json``)
+says nothing about the submission, so it returns ``{"score": 0.0, "pending": <reason>, "note":
+...}``: the runner's scoring turns a ``pending`` detail into "no score, no verdict" rather than a
+zero. The adapter never raises.
+
+The seed is on the host's command line while the grader runs (``--seed N``, also inside ``docker
+run``): anyone who can read the host's process list can see it, and only there. It is replaced by
+``<seed>`` in everything this module returns (notes, reasons, the grader's stderr).
 """
 from __future__ import annotations
 
 import json
 import math
 import os
+import re
 import shlex
 import subprocess
 import uuid
@@ -30,23 +41,54 @@ TIMEOUT_S = 30 * 60
 _CLIP = 300
 
 
-def _clip(x) -> str:
-    s = " ".join(str(x).split())
+def _scrub(text, seed: str | None) -> str:
+    """``text`` with the seed's digits replaced by ``<seed>``. A seed of fewer than four digits is replaced
+    only where it stands alone (it would otherwise mangle every number of the text)."""
+    s = str(text)
+    if seed:
+        s = s.replace(seed, "<seed>") if len(seed) >= 4 else re.sub(rf"(?<!\d){re.escape(seed)}(?!\d)", "<seed>", s)
+    return s
+
+
+def _clip(x, seed: str | None = None) -> str:
+    s = " ".join(_scrub(x, seed).split())
     return s if len(s) <= _CLIP else s[:_CLIP - 3] + "..."
 
 
-def grade_episode(result_path, expected) -> tuple[float, str]:
+class _Fault(Exception):
+    """A fault on the grading side; the text is the reason (already free of the seed)."""
+
+
+def grade_episode(result_path, expected):
+    seed = None
     try:
-        return _grade(Path(result_path), expected)
-    except Exception as exc:  # noqa: BLE001 - a failed grade is a score of 0 with its reason
-        return 0.0, f"grader failed: {_clip(exc) or type(exc).__name__}"
+        gt = _read_gt(expected)
+        seed = str(int(gt["seed"]))
+    except Exception as exc:  # noqa: BLE001 - no usable gt.json: the grading side is broken
+        return _pending(f"no usable gt.json: {_clip(exc) or type(exc).__name__}", None)
+    try:
+        return _grade(Path(result_path), gt, seed)
+    except _Fault as fault:
+        return _pending(str(fault), seed)
+    except Exception as exc:  # noqa: BLE001 - never raises: an unexpected failure is a grader fault
+        return _pending(_clip(exc, seed) or type(exc).__name__, seed)
 
 
-def _grade(result_path: Path, expected: dict) -> tuple[float, str]:
-    export_dir = result_path.resolve().parent
+def _pending(reason: str, seed: str | None) -> dict:
+    reason = _clip(reason, seed)
+    return {"score": 0.0, "pending": f"grader fault: {reason}", "note": f"grader fault: {reason}"}
+
+
+def _read_gt(expected: dict) -> dict:
     oracle_dir = Path(expected["rules"]["oracle_dir"])
     gt = json.loads((oracle_dir / "gt.json").read_text(encoding="utf-8"))
-    scenario, seed = str(gt["scenario"]), str(int(gt["seed"]))
+    str(gt["scenario"]), int(gt["seed"])
+    return gt
+
+
+def _grade(result_path: Path, gt: dict, seed: str) -> tuple[float, str]:
+    export_dir = result_path.resolve().parent
+    scenario = str(gt["scenario"])
     prefix = os.environ.get(CMD_ENV, "").strip()
     container = None
     if prefix:
@@ -65,12 +107,18 @@ def _grade(result_path: Path, expected: dict) -> tuple[float, str]:
                 subprocess.run(["docker", "kill", container], capture_output=True, timeout=60)
             except Exception:  # noqa: BLE001 - best effort
                 pass
-        return 0.0, f"grader failed: no result within {TIMEOUT_S // 60} min"
+        raise _Fault(f"no result within {TIMEOUT_S // 60} min") from None
+    except OSError as exc:
+        raise _Fault(f"the grader could not be started: {_clip(exc, seed)}") from None
     if proc.returncode != 0:
         lines = (proc.stderr or proc.stdout).strip().splitlines()
-        return 0.0, f"grader failed: exit {proc.returncode}: {_clip(lines[-1]) if lines else 'no output'}"
-    res = json.loads(proc.stdout)
-    score = float(res["score"])
+        raise _Fault(f"exit {proc.returncode}: {_clip(lines[-1], seed) if lines else 'no output'}")
+    try:
+        res = json.loads(proc.stdout)
+        score = float(res["score"])
+        note = str(res["note"])
+    except (ValueError, KeyError, TypeError):
+        raise _Fault("the grader's output is not a result") from None
     if not math.isfinite(score) or not 0.0 <= score <= 1.0:
-        raise ValueError(f"the grader returned the score {score}")
-    return score, str(res["note"])
+        raise _Fault("the grader returned a score outside 0 to 1")
+    return score, _scrub(note, seed)
