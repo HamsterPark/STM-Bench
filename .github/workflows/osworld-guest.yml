@@ -69,7 +69,7 @@ jobs:
           # our drop-in must parse; the whole configuration may carry the image's own faults (this runner's
           # /etc/sudoers.d/runner has a mode visudo -c flags), which stm-lockdown tells apart by comparing
           sudo visudo -cf /etc/sudoers.d/zz-stm-lockdown
-          cat /etc/sudoers.d/zz-stm-lockdown
+          sudo cat /etc/sudoers.d/zz-stm-lockdown     # root-only (0440)
           must_fail sh -c "id -nG user | tr ' ' '\n' | grep -qx sudo"
           # other roads to root: membership of these groups is refused as well
           echo "groups of user: $(id -nG user)"
@@ -82,7 +82,8 @@ jobs:
           must_fail sudo -u user -H pkexec true
           # polkit: not authorized (pkcheck exit 1), not "challenge" (3) and not authorized (0)
           set +e
-          sudo -u user -H pkcheck --action-id org.freedesktop.policykit.exec --process $$ ; rc=$?
+          # the subject is a process of the agent's account (its own shell), not this runner's shell
+          sudo -u user -H bash -c 'pkcheck --action-id org.freedesktop.policykit.exec --process $$'; rc=$?
           set -e
           echo "pkcheck exit $rc"; test "$rc" = 1
           # the shell that was open before: its sudo is refused now
@@ -131,8 +132,11 @@ jobs:
 
       - name: Grade the export where the seed is held
         run: |
-          sudo /opt/stm-bench/venv/bin/python -m stmbench.cli grade /var/lib/stm-bench/export \
-            --scenario P4_atom_positioning_cu111 --seed "$(cat "$RUNNER_TEMP/seed.txt")" | head -20
+          # the grade's own exit status and the replay's consistency are checked, not hidden behind a pipe
+          OUT=$(sudo /opt/stm-bench/venv/bin/python -m stmbench.cli grade /var/lib/stm-bench/export \
+            --scenario P4_atom_positioning_cu111 --seed "$(cat "$RUNNER_TEMP/seed.txt")")
+          printf '%s\n' "$OUT" | head -20
+          printf '%s' "$OUT" | python3 -c 'import json, sys; r = json.load(sys.stdin); assert r["replay"]["consistent"], r["note"]; print("replay consistent:", r["note"])'
 
       - name: Service log (no seed is ever logged)
         if: always()
