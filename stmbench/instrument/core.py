@@ -239,8 +239,17 @@ def array_digest(a: np.ndarray) -> str:
 
 
 #: Relative tolerance of a fingerprint comparison (scale: the larger of |min|, |max| of the recorded
-#: finite values). RTOL_NOTE: the measurements behind it are in docs/DESIGN.md ("Export version 2").
-RTOL = 1e-9
+#: finite values). Chosen from two measurements (docs/DESIGN.md, "Export version 2"):
+#:  - rounding: trial 6 and a P2 and a P5 episode recorded on Windows (i5-14400F) and replayed on
+#:    Linux (EPYC 9654), numpy 2.5.4 / OpenBLAS 0.3.34, 2026-11-16 (also under OPENBLAS_CORETYPE=Haswell
+#:    and without AVX-512): the largest relative fingerprint difference of any array is 4.2e-12;
+#:  - real divergence (same Windows host, 2026-11-16): trial-6 records with a drag end moved one lattice
+#:    site, a scan centre moved 0.1 nm (two scans), seed 10 instead of 9, and a 1 s pause inserted: in
+#:    each, the largest difference over the episode's arrays is >= 2.6e-3 (the first changed file, >= 1.5e-3).
+#: An episode is inconsistent when ANY array exceeds the tolerance, so the first must stay a factor
+#: >= 1e3 below RTOL (4.2e-12 -> 2400x) and the second a factor >= 1e3 above it (>= 1e5x). A single
+#: array that hardly responds to a change (the current at constant current) may be below RTOL.
+RTOL = 1e-8
 #: an event's float below this (in its own unit) is not told apart from 0: far below anything physical
 EVENT_ATOL = 1e-15
 

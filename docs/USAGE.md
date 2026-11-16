@@ -624,7 +624,9 @@ the earlier held-out rounds: `docs/results/p4_baseline_seeds_*.json`, DESIGN §9
 `stmbench.cli verify <out>` rebuilds the episode from `actions.jsonl` with the same scenario
 and seed and compares every measurement and the verdict. It exits 0 when everything matches, 1 when
 something differs, and 2 (the reason on stderr) when the ledger is of another API version: it needs
-the code of that version.
+the code of that version. An array whose hash differs is compared by its fingerprint, and events by
+value, with the grader's tolerance (`RTOL` = 1e-8); the arrays that differed by rounding only are
+listed under `rounding`. A ledger without fingerprints is checked exactly.
 
 ### Replays for an audience
 
@@ -661,7 +663,7 @@ python -m stmbench.cli grade <export dir> --scenario P4_atom_positioning_cu111 -
 An agent that works through a screen plays on a machine the instrument's private ledger (the
 seed, the truth, the verdict) never reaches; what leaves it is an **export directory**
 (`stmbench/instrument/export.py`: `session.json`, `actions.jsonl` — the instrument's log records,
-appended as they happen — `digests.jsonl`, the hashes of every saved frame and spectrum, and
+appended as they happen — `digests.jsonl`, the hashes and fingerprints of every saved frame, spectrum and move trace, and
 `report.json`). `grade` runs on a host that holds the seed, and trusts nothing in the export
 about what was measured or how it was judged: it **replays** the recorded actions and reports
 with the scenario and seed it is given (`stmbench.instrument.core.replay_records`) and judges the
@@ -674,12 +676,18 @@ have its hash line. Otherwise `replay.consistent` is false and, by default (stri
 0, the episode is no success, and the numbers that describe the replay are `null` (it was not the
 episode the agent saw); `--no-strict` keeps the replay's own score and still lists the
 differences. Hashes are bit-exact, so they agree only in the same numerical environment (the
-pinned versions in `deploy/osworld/grader/requirements.txt`).
+pinned versions in `deploy/osworld/grader/requirements.txt`). Export version 2 therefore also
+carries a fingerprint per array (shape, non-finite mask, min, max, mean, std, block means): when
+the hashes differ the grader compares the fingerprints, and values within `RTOL` = 1e-8 of the
+array's scale count as a rounding difference (another libm or BLAS kernel changes the last bits;
+measured Windows vs Linux: at most 4.2e-12), not a mismatch. Shape and non-finite values must be
+exactly equal, and a version-1 export (hashes only) is still graded exactly.
 
 The result: `score` (0-1: the fraction of claims verified, capped when over budget; 1.0 reproduces
 the paper), `success`, `partial`, `claims_total`, `claims_verified`, `instrument_time_s`, `actions`,
-`finished_in_episode`, `replay` (`consistent`, `result_mismatches`, `digest_mismatches`, `torn`,
-`records`), `scenario_id`, `rules_version`, `export_version`, `note`. It carries no seed, truth or
+`finished_in_episode`, `replay` (`consistent`, `result_mismatches`, `digest_mismatches`, `hashes_equal`,
+`rounding_differences`: the arrays that differed by rounding only, with their largest relative
+difference, `torn`, `records`), `scenario_id`, `rules_version`, `export_version`, `note`. It carries no seed, truth or
 per-claim detail. The exit status is 0 when graded and 2 when the directory is not a gradable
 export of this scenario (not an export, another scenario, or another rules, API or export
 version; the reason is on stderr, and an export of another API version is told that it needs
