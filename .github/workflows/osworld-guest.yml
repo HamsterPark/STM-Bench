@@ -66,7 +66,9 @@ jobs:
           sudo -u user -H bash -c "echo password | sudo -S -p '' /usr/local/sbin/stm-lockdown"
           sudo -u user -H bash -c "echo password | sudo -S -p '' /usr/local/sbin/stm-lockdown" && echo "second call from user: allowed?" || echo "second call from user refused (it no longer has sudo)"
           sudo /usr/local/sbin/stm-lockdown        # idempotent when run again as root
-          sudo visudo -c
+          # our drop-in must parse; the whole configuration may carry the image's own faults (this runner's
+          # /etc/sudoers.d/runner has a mode visudo -c flags), which stm-lockdown tells apart by comparing
+          sudo visudo -cf /etc/sudoers.d/zz-stm-lockdown
           cat /etc/sudoers.d/zz-stm-lockdown
           must_fail sh -c "id -nG user | tr ' ' '\n' | grep -qx sudo"
           # other roads to root: membership of these groups is refused as well
