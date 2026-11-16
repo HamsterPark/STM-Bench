@@ -184,6 +184,25 @@ def _clean_tip(s: Session, centre, radius_m: float, log: dict, *, spectroscopy: 
     return False
 
 
+def _diagnose(w, s: Session, ring: dict, plan: dict, pairs: list, centre) -> dict:
+    """After the episode (record only, never read during it): where the designed gap sites are
+    on the ring, where the plan put its sites, and the atoms the plan moved."""
+    reg = w.surface.site.adatoms
+    cx, cy = (v * 1e9 for v in ring["centre_nm"])
+
+    def ang(x_m: float, y_m: float) -> float:
+        return round(math.degrees(math.atan2(y_m * 1e9 - cy, x_m * 1e9 - cx)) % 360.0, 2)
+
+    gap = [ang(*reg.site_xy(i, j)) for i, j in ring["gap_sites"]]
+    atoms = []
+    for a, _theta in pairs:
+        x, y = reg.site_xy(a.i, a.j, a.sub)
+        atoms.append({"angle_deg": ang(x, y), "dr_nm": round(math.hypot(x * 1e9 - cx, y * 1e9 - cy) - float(ring["radius_nm"]), 2),
+                      "status": a.status})
+    return {"gap_sites_deg": sorted(gap), "planned_deg": sorted(round(math.degrees(t) % 360.0, 2) for t in plan["sites"]),
+            "moved": atoms, "n_ring": int(ring["n_sites"]), "r_nm": float(ring["radius_nm"])}
+
+
 def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARIO, repeats: int = 3,
         integration_ms: float = 20.0) -> dict:
     """One P3-repair episode by the reference protocol; returns what it reported and how it
@@ -197,9 +216,20 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
     mv = Mover(s, imaging_v=st["bias_v"], imaging_pa=st["setpoint_pa"], compact_frac=NEAR_COMPACT,
                apex_aware=True)
     log: dict = {"tip_rounds": 0, "track_lost": 0, "pickups": 0, "placed": 0}
-    _clean_tip(s, centre, radius_m, log)
-    mv.drift(*centre)
-    sv = _survey(s, centre)
+    for _ in range(8):
+        # the first survey can find the tip unfit as well (the unstable and dirty ones change at
+        # any time): condition it and look again
+        if _clean_tip(s, centre, radius_m, log):
+            mv.drift(*centre)
+        elif _ == 0:
+            mv.drift(*centre)
+        try:
+            sv = _survey(s, centre)
+            break
+        except LostTrack:
+            log["track_lost"] += 1
+    else:
+        raise RuntimeError("no usable survey of the corral")
     plan = _plan(sv)
     pairs = _pair(s, sv, plan)
     log.update(spares_seen=len(plan["spares"]), sites=len(plan["sites"]),
@@ -231,6 +261,7 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
     out = inst.finish()
     want, err = p3.truth_errors(inst, got, m.pop("radius_claims"))
     snap = w.truth()["corral"]
+    log["diag"] = _diagnose(w, s, ring, plan, pairs, centre)
     log.pop("r_resume", None)
     return {"paper": "P3-repair", "seed": int(seed), "success": bool(out["success"]),
             "partial": float(out.get("partial", 0.0)),
