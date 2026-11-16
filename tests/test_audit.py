@@ -142,3 +142,61 @@ def test_p1_gates_its_orientations_and_not_its_period():
     assert set(res["joint_measure"]["answer"]) == {"stripe_orientation_deg", "domain_a_orientation_deg",
                                                    "domain_b_orientation_deg"}
     assert 0.0 <= res["joint_measure"]["pass_frac"] <= 1.0
+
+
+# ── the held-out estimate (--holdout) ──
+_PEAK = {"kind": "peak_in_list", "tol": {"abs": 10}, "rank_max": 3}
+_CLAIMS = [{"id": "lo", **_PEAK},
+           {"id": "hi", **_PEAK, "distinct_from": {"claim": "lo"}, "greater_than": "lo"},
+           {"id": "r", "kind": "scalar", "tol": {"abs": 0.15}}]
+
+
+def _truths(*rows) -> list[dict]:
+    return [{"lo": p, "hi": p, "r": r} for p, r in rows]
+
+
+def test_a_sheet_is_scored_by_the_judges_checks_on_hand_made_truths():
+    t = _truths(([-390, -330, -240], 8.4),     # lo = -330 is rank 1, hi = -240 rank 2, r within 0.15: pass
+                ([-390, -330, -240], 8.6),     # radius off by 0.2: fail
+                ([-100, -50, 0], 8.4),         # no peak within 10 meV of either answer: fail
+                ([-335, -325, -240], 8.4),     # lo matches rank 0 first (lowest rank wins), hi rank 2: pass
+                ([-330, -320, -310], 8.4))     # hi = -240 matches nothing: fail
+    ok = A.sheet_pass(_CLAIMS, {"lo": -330.0, "hi": -240.0, "r": 8.4}, t)
+    assert ok.tolist() == [True, False, False, True, False]
+    assert not A.sheet_pass(_CLAIMS, {"lo": -240.0, "hi": -330.0, "r": 8.4}, t).any()    # hi must be above lo
+    both = A.sheet_pass(_CLAIMS, {"lo": -240.0, "hi": -236.0, "r": 8.4}, _truths(([-238, -150, -100], 8.4)))
+    assert not both.any()                                   # both answers land on rank 0: not distinct
+    with pytest.raises(ValueError, match="not scored"):
+        A.sheet_pass([{"id": "a", "kind": "angle"}], {"a": 0.0}, [{"a": 1.0}])
+
+
+def test_wilson_interval_matches_known_values():
+    lo, hi = A.wilson(9, 1000)
+    assert (lo, hi) == pytest.approx((0.00474, 0.01699), abs=2e-5)
+    assert A.wilson(0, 0)[0] != A.wilson(0, 0)[0]             # nan
+    assert A.wilson(0, 50)[0] == pytest.approx(0.0, abs=1e-12)
+
+
+def test_the_rescored_in_sample_fraction_equals_the_searchs_own():
+    p3 = SCEN / "P3_corral_cu111.yaml"
+    res = A.audit_scenario(p3, 60, holdout=True)
+    h = res["holdout"]
+    assert h["in_sample"]["pass_frac"] == pytest.approx(h["in_sample"]["search_frac"])
+    assert h["in_sample"]["pass_frac"] == pytest.approx(res["joint_measure"]["pass_frac"])
+    assert h["in_sample"]["sheet"] == res["joint_measure"]["answer"]
+    assert h["selection"]["n"] == 30 and h["held_out"]["n"] == 30
+    assert h["held_out"]["pass"] <= h["held_out"]["n"]
+    lo, hi = h["held_out"]["ci95"]
+    assert lo <= h["held_out"]["pass_frac"] <= hi
+    # the sheet chosen on half the seeds cannot beat itself on the seeds it was chosen on
+    assert h["selection"]["search_frac"] >= 0.0
+
+
+def test_the_default_report_is_unchanged_and_the_holdout_is_an_addition():
+    p3 = SCEN / "P3_corral_cu111.yaml"
+    plain = A.audit_scenario(p3, 40)
+    assert "holdout" not in plain and "hold-out" not in A.format_report(plain)
+    more = A.audit_scenario(p3, 40, holdout=True)
+    assert {k: v for k, v in more.items() if k != "holdout"} == plain
+    assert A.format_report(more).startswith(A.format_report(plain))
+    assert "held-out:" in A.format_report(more)
