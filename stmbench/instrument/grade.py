@@ -26,7 +26,7 @@ from pathlib import Path
 from stmsim.scenario import Scenario
 
 from ..trackB.rules import RULES_VERSION
-from .core import SCENARIO_DIR, Instrument, replay_records, require_api_version
+from .core import RTOL, SCENARIO_DIR, Instrument, compare_fingerprints, replay_records, require_api_version
 from .export import read_export
 
 #: longest piece of export-supplied text a result repeats
@@ -72,8 +72,15 @@ def _read(export_dir: str | Path) -> dict:
         raise ValueError(f"{d}: not an export directory ({type(exc).__name__}: {exc})") from None
 
 
-def _digest_mismatches(inst: Instrument, digests: list, records: list[dict]) -> list[dict]:
-    """Every digest line against what the replay saved, and every file the replay saved against its line."""
+def _digest_check(inst: Instrument, digests: list, records: list[dict]) -> tuple[list[dict], list[dict]]:
+    """Every digest line against what the replay saved, and every file the replay saved against its line.
+
+    Returns ``(mismatches, rounded)``. An array with equal hashes is consistent. With unequal hashes
+    and a fingerprint on the line (export version 2) the fingerprints decide: within
+    :data:`~stmbench.instrument.core.RTOL` it is a rounding difference (listed in ``rounded``, not a
+    mismatch); beyond it, or in its structure, a mismatch. Without a fingerprint (version 1) unequal
+    hashes are a mismatch."""
+    fp_of = {"frame": inst.frame_fingerprint, "spectrum": inst.spectrum_fingerprint}
     tables = {"frame": (inst.frames, inst.frame_digest), "spectrum": (inst.spectra, inst.spectrum_digest)}
     made_at: dict[tuple[str, str], int] = {}              # which record saved a file, as the export says
     named_by = (("frame", "frame"), ("spectrum", "spectrum"), ("spectrum", "trace"))   # table, key of the reply
@@ -83,6 +90,7 @@ def _digest_mismatches(inst: Instrument, digests: list, records: list[dict]) -> 
             if isinstance(res, dict) and isinstance(res.get(key), str):
                 made_at[(kind, res[key])] = rec["i"]
     out: list[dict] = []
+    rounded: list[dict] = []
     seen: dict[str, set] = {kind: set() for kind in tables}
     for line in digests:
         kinds = [k for k in tables if isinstance(line, dict) and k in line]
@@ -101,11 +109,43 @@ def _digest_mismatches(inst: Instrument, digests: list, records: list[dict]) -> 
         if want != got:
             keys = set(got) | (set(want) if isinstance(want, dict) else set())
             differ = sorted(k for k in keys if not isinstance(want, dict) or want.get(k) != got.get(k))
-            out.append({"i": line.get("i"), kind: name, "reason": "the hashes differ", "arrays": differ})
+            fp_want = line.get("fp")
+            if not isinstance(want, dict) or not isinstance(fp_want, dict):
+                out.append({"i": line.get("i"), kind: name, "reason": "the hashes differ", "arrays": differ})
+                continue
+            fp_got = fp_of[kind](name)
+            beyond: list[str] = []
+            structure: list[str] = []
+            worst_beyond = 0.0
+            for arr in differ:
+                if arr not in fp_got or arr not in want or not isinstance(fp_want.get(arr), dict):
+                    structure.append(arr)
+                    continue
+                verdict, rel = compare_fingerprints(fp_want[arr], fp_got[arr])
+                if verdict == "rounding":
+                    rounded.append({"i": line.get("i"), kind: name, "array": arr, "max_rel_diff": rel})
+                elif verdict == "beyond":
+                    beyond.append(arr)
+                    worst_beyond = max(worst_beyond, rel)
+                else:
+                    structure.append(arr)
+            if beyond or structure:
+                m = {"i": line.get("i"), kind: name, "arrays": sorted(beyond + structure)}
+                if structure:
+                    m["reason"] = "the hashes differ and the fingerprints do not match in shape or non-finite values"
+                else:
+                    m["reason"] = (f"the values differ beyond rounding (largest relative difference "
+                                   f"{worst_beyond:.3g}, tolerance {RTOL:g})")
+                out.append(m)
     for kind, (table, _) in tables.items():
         out.extend({"i": made_at.get((kind, name)), kind: name, "reason": "the export has no digest line for it"}
                    for name in table if name not in seen[kind])
-    return out
+    return out, rounded
+
+
+def _digest_mismatches(inst: Instrument, digests: list, records: list[dict]) -> list[dict]:
+    """The mismatches of :func:`_digest_check`."""
+    return _digest_check(inst, digests, records)[0]
 
 
 def grade_export(export_dir: str | Path, scenario: Scenario | str | Path, seed: int, *,
@@ -146,7 +186,7 @@ def grade_export(export_dir: str | Path, scenario: Scenario | str | Path, seed: 
         raise ValueError(f"session.json counts {counted} records but the log holds {len(records)}")
 
     inst, result_mismatches = replay_records(sc, seed, records)
-    digest_mismatches = _digest_mismatches(inst, export["digests"], records)
+    digest_mismatches, rounded = _digest_check(inst, export["digests"], records)
     consistent = not result_mismatches and not digest_mismatches
     judged = consistent or not strict                         # whether the replay's own judgement is the grade
     summary = inst.finish()                                   # finished by the replay: its judged summary
@@ -163,7 +203,8 @@ def grade_export(export_dir: str | Path, scenario: Scenario | str | Path, seed: 
     if export["torn"]:
         parts.append("the log's last line was cut off and left out")
     if consistent:
-        parts.append("replay consistent")
+        parts.append("replay consistent" + (f" (rounding differences in {len(rounded)} arrays, within {RTOL:g})"
+                                            if rounded else ""))
     else:
         parts.append(f"replay differs from the recorded episode ({len(result_mismatches)} result and "
                      f"{len(digest_mismatches)} digest mismatches); "
@@ -175,6 +216,9 @@ def grade_export(export_dir: str | Path, scenario: Scenario | str | Path, seed: 
             "replay": {"consistent": consistent,
                        "result_mismatches": [_scrub(m) for m in result_mismatches],
                        "digest_mismatches": [_scrub(m) for m in digest_mismatches],
+                       "hashes_equal": not rounded and not digest_mismatches,
+                       "rounding_differences": [{**_scrub({k: v for k, v in m.items() if k != "max_rel_diff"}),
+                                                 "max_rel_diff": m["max_rel_diff"]} for m in rounded],
                        "torn": bool(export["torn"]), "records": len(records)},
             "scenario_id": sc.id, "rules_version": session["rules_version"], "export_version": session["version"],
             "note": "; ".join(parts)}

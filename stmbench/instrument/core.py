@@ -238,6 +238,118 @@ def array_digest(a: np.ndarray) -> str:
     return hashlib.sha256(np.ascontiguousarray(np.asarray(a, dtype=np.float64)).tobytes()).hexdigest()
 
 
+#: Relative tolerance of a fingerprint comparison (scale: the larger of |min|, |max| of the recorded
+#: finite values). RTOL_NOTE: the measurements behind it are in docs/DESIGN.md ("Export version 2").
+RTOL = 1e-9
+#: an event's float below this (in its own unit) is not told apart from 0: far below anything physical
+EVENT_ATOL = 1e-15
+
+_BLOCKS_2D = 8          # block means of a frame: 8 x 8 blocks, whatever the shape
+_SEGMENTS_1D = 32       # block means of a curve: min(32, n) segments
+
+
+def _mean_or_none(x: np.ndarray) -> float | None:
+    f = x[np.isfinite(x)]
+    return float(f.mean()) if f.size else None
+
+
+def array_fingerprint(a: np.ndarray) -> dict:
+    """A coarse, comparable summary of one array, for telling a last-bits rounding difference
+    (another libm or BLAS kernel) from a different measurement: the shape, the count and hash of the
+    non-finite mask (exact), and over the finite values their min, max, mean, std and block means on
+    a fixed grid (2-D: 8 x 8 blocks, anything else flattened into min(32, n) segments; a block with
+    no finite value is None). Numbers are Python floats, so they survive JSON exactly."""
+    x = np.asarray(a, dtype=np.float64)
+    mask = np.isfinite(x)
+    fin = x[mask]
+    if x.ndim == 2:
+        blocks = [_mean_or_none(b) for rows in np.array_split(x, _BLOCKS_2D, axis=0)
+                  for b in np.array_split(rows, _BLOCKS_2D, axis=1)]
+    else:
+        flat = x.ravel()
+        blocks = [_mean_or_none(b) for b in np.array_split(flat, min(_SEGMENTS_1D, flat.size))] if flat.size else []
+    return {"shape": list(x.shape), "nonfinite": int(mask.size - fin.size),
+            "nonfinite_mask": hashlib.sha256(np.ascontiguousarray(mask).tobytes()).hexdigest(),
+            "min": float(fin.min()) if fin.size else None, "max": float(fin.max()) if fin.size else None,
+            "mean": float(fin.mean()) if fin.size else None, "std": float(fin.std()) if fin.size else None,
+            "blocks": blocks}
+
+
+def _num(v) -> bool:
+    return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+
+def compare_fingerprints(want, got) -> tuple[str, float | None]:
+    """The recorded fingerprint against the replay's: ``("rounding", r)`` when the structure is equal
+    and every number is within :data:`RTOL` of the recorded scale (``r`` the largest relative
+    difference), ``("beyond", r)`` when a number is further, ``("structure", None)`` when shape,
+    non-finite mask, which blocks are empty, or the form of the record differ. A recorded scale of 0
+    allows no difference at all."""
+    try:
+        if not isinstance(want, dict) or set(want) != set(got):
+            return "structure", None
+        for k in ("shape", "nonfinite", "nonfinite_mask"):
+            if want[k] != got[k]:
+                return "structure", None
+        wb, gb = want["blocks"], got["blocks"]
+        if not isinstance(wb, list) or len(wb) != len(gb):
+            return "structure", None
+        pairs = [(want[k], got[k]) for k in ("min", "max", "mean", "std")] + list(zip(wb, gb))
+        for w, g in pairs:
+            if (w is None) != (g is None) or not (w is None or _num(w)):
+                return "structure", None
+        lo, hi = want["min"], want["max"]
+        scale = max(abs(lo), abs(hi)) if lo is not None else 0.0
+        worst = 0.0
+        for w, g in pairs:
+            if w is None:
+                continue
+            d = abs(float(w) - float(g))
+            rel = d / scale if scale > 0 else (0.0 if d == 0 else float("inf"))
+            worst = max(worst, rel)
+        return ("rounding" if worst <= RTOL else "beyond"), worst
+    except (KeyError, TypeError, ValueError):
+        return "structure", None
+
+
+def events_differ(want, got) -> str | None:
+    """Why two event lists (JSON-shaped, paths already reduced) differ beyond rounding, or None.
+    Same length, keys, strings, booleans and integers exactly; floats within :data:`RTOL` relative
+    (to the larger magnitude of the two) or :data:`EVENT_ATOL` absolute."""
+    if not isinstance(want, list) or not isinstance(got, list) or len(want) != len(got):
+        return "the event count differs"
+    for k, (a, b) in enumerate(zip(want, got)):
+        why = _value_differs(a, b)
+        if why:
+            return f"event {k}: {why}"
+    return None
+
+
+def _value_differs(a, b) -> str | None:
+    if isinstance(a, dict):
+        if not isinstance(b, dict) or set(a) != set(b):
+            return "the keys differ"
+        for key in a:
+            why = _value_differs(a[key], b[key])
+            if why:
+                return f"{key}: {why}"
+        return None
+    if isinstance(a, list):
+        if not isinstance(b, list) or len(a) != len(b):
+            return "a list differs in length"
+        for x, y in zip(a, b):
+            why = _value_differs(x, y)
+            if why:
+                return why
+        return None
+    if isinstance(a, float) and isinstance(b, float):
+        if a == b or (a != a and b != b):
+            return None
+        d = abs(a - b)
+        return None if d <= max(EVENT_ATOL, RTOL * max(abs(a), abs(b))) else "a float differs beyond rounding"
+    return None if (a == b and type(a) is type(b)) else "a value differs"
+
+
 # ── the instrument ──────────────────────────────────────────────────────────
 @dataclass
 class FrameRecord:
@@ -764,6 +876,21 @@ class Instrument:
         """Hashes of one saved spectrum's arrays (the spectrum's entry in :meth:`digest`)."""
         return {k: array_digest(v) for k, v in self.spectra[name].items() if isinstance(v, np.ndarray)}
 
+    def frame_fingerprint(self, name: str) -> dict:
+        """Fingerprints (:func:`array_fingerprint`) of one saved frame's arrays."""
+        f = self.frames[name]
+        return {k: array_fingerprint(getattr(f, k)) for k in ("z_fwd", "z_bwd", "i_fwd", "i_bwd", "didv_fwd", "didv_bwd")
+                if getattr(f, k) is not None}
+
+    def spectrum_fingerprint(self, name: str) -> dict:
+        """Fingerprints of one saved spectrum's (or move trace's) arrays."""
+        return {k: array_fingerprint(v) for k, v in self.spectra[name].items() if isinstance(v, np.ndarray)}
+
+    def fingerprints(self) -> dict:
+        """Fingerprints of everything measured: the ledger's rounding-tolerant companion of :meth:`digest`."""
+        return {"frames": {n: self.frame_fingerprint(n) for n in self.frames},
+                "spectra": {n: self.spectrum_fingerprint(n) for n in self.spectra}}
+
     def digest(self) -> dict:
         """Hashes of everything measured, for re-checking an episode by replay."""
         return {"frames": {n: self.frame_digest(n) for n in self.frames},
@@ -781,7 +908,8 @@ class Instrument:
               "claims_total": det.get("n_total"), "claims_reported": det.get("n_reported"),
               "claims_verified": det.get("n_verified"), "instrument_time_s": self.used_s,
               "max_sim_s": self.max_sim_s, "actions": self.n_actions, "verdict": v.as_dict(),
-              "digest": self.digest(), "sim_t0_s": self.t0,
+              "digest": self.digest(), "fingerprints": self.fingerprints(),
+              "sim_t0_s": self.t0,
               "truth_before": self.truth_before, "truth_after": self.truth_after}
         (out / "episode.json").write_text(json.dumps(ep, default=_json_default, ensure_ascii=False, indent=1),
                                           encoding="utf-8")
@@ -921,25 +1049,58 @@ def replay(run_dir: str | Path) -> Instrument:
 
 def verify(run_dir: str | Path) -> dict:
     """Replay an episode and compare what was measured and how it was judged. A ledger of another
-    API version is refused, as :func:`replay` refuses it (:class:`VersionError`)."""
+    API version is refused, as :func:`replay` refuses it (:class:`VersionError`).
+
+    An array whose hash differs is compared by its fingerprint when the ledger has one (the grader's
+    rule: :func:`compare_fingerprints`), and events are compared by value (:func:`events_differ`),
+    so a last-bits difference between machines does not fail the check. A ledger without
+    fingerprints is checked exactly. ``rounding`` lists the arrays that differed by rounding only,
+    with their largest relative difference."""
     run_dir = Path(run_dir)
     ep = json.loads((run_dir / "episode.json").read_text(encoding="utf-8"))
     inst = replay(run_dir)
     again = inst.digest()
     want = ep.get("digest") or {}
-    diffs = []
+    fps_want = ep.get("fingerprints")
+    fps_got = inst.fingerprints() if isinstance(fps_want, dict) else None
+    diffs: list[str] = []
+    rounding: list[dict] = []
     for part in ("frames", "spectra"):
-        if again.get(part) != want.get(part):
+        bad = False
+        for name in sorted(set(again.get(part) or {}) | set(want.get(part) or {})):
+            w, g = (want.get(part) or {}).get(name), (again.get(part) or {}).get(name)
+            if w == g:
+                continue
+            if not isinstance(w, dict) or not isinstance(g, dict) or fps_got is None:
+                bad = True
+                continue
+            for arr in sorted(set(w) | set(g)):
+                if w.get(arr) == g.get(arr):
+                    continue
+                fw = ((fps_want.get(part) or {}).get(name) or {}).get(arr)
+                fg = (fps_got[part].get(name) or {}).get(arr)
+                kind, rel = compare_fingerprints(fw, fg) if fw is not None and fg is not None else ("structure", None)
+                if kind == "rounding":
+                    rounding.append({part[:-1]: name, "array": arr, "max_rel_diff": rel})
+                else:
+                    bad = True
+        if bad:
             diffs.append(part)
     if again.get("events") != want.get("events"):
-        diffs.append("events")
+        events_path = run_dir / "events.json"
+        if fps_got is None or not events_path.exists():
+            diffs.append("events")
+        else:
+            recorded = _jsonable(_portable_events(json.loads(events_path.read_text(encoding="utf-8"))))
+            if events_differ(recorded, _jsonable(_portable_events(inst.world.events))) is not None:
+                diffs.append("events")
     s = inst._summary()
     same_verdict = (bool(s["success"]) == bool(ep.get("success"))
                     and abs(float(s["partial"]) - float(ep.get("partial", -1))) < 1e-12)
     if not same_verdict:
         diffs.append("verdict")
-    return {"ok": not diffs, "differences": diffs, "success": s["success"], "partial": s["partial"],
-            "recorded": {"success": ep.get("success"), "partial": ep.get("partial")}}
+    return {"ok": not diffs, "differences": diffs, "rounding": rounding, "success": s["success"],
+            "partial": s["partial"], "recorded": {"success": ep.get("success"), "partial": ep.get("partial")}}
 
 
 # ── helpers ─────────────────────────────────────────────────────────────────
@@ -970,5 +1131,5 @@ def _jsonable(obj):
     return json.loads(json.dumps(obj, default=_json_default))
 
 
-__all__ = ["ACTIONS", "API_VERSION", "ActionError", "ActionSpec", "Instrument", "Param", "VersionError", "replay",
+__all__ = ["ACTIONS", "API_VERSION", "RTOL", "array_fingerprint", "compare_fingerprints", "events_differ", "ActionError", "ActionSpec", "Instrument", "Param", "VersionError", "replay",
            "replay_records", "require_api_version", "validate", "verify", "fold_results"]

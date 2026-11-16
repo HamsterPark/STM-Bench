@@ -195,12 +195,67 @@ def test_an_episode_rechecks_by_replay(tmp_path):
     assert ep["rules_version"] == RULES_VERSION and ep["api_version"] == API_VERSION
     assert (tmp_path / "run" / "actions.jsonl").exists() and (tmp_path / "run" / "events.json").exists()
     assert verify(tmp_path / "run")["ok"]
-    # a ledger whose measurements were edited no longer re-checks
+    # a ledger whose measurements were edited no longer re-checks. Without fingerprints (a ledger of
+    # an older run) the check is exact: another hash is a difference
+    fps = ep.pop("fingerprints")
     ep["digest"]["frames"]["sim001.sxm"]["z_fwd"] = "0" * 64
     (tmp_path / "run" / "episode.json").write_text(json.dumps(ep), encoding="utf-8")
     bad = verify(tmp_path / "run")
     assert not bad["ok"] and "frames" in bad["differences"]
     assert replay(tmp_path / "run").digest()["frames"]["sim001.sxm"]["z_fwd"] != "0" * 64
+    # with the fingerprints another hash alone is a rounding difference: the values are the same
+    ep["fingerprints"] = fps
+    (tmp_path / "run" / "episode.json").write_text(json.dumps(ep), encoding="utf-8")
+    again = verify(tmp_path / "run")
+    assert again["ok"] and again["rounding"] == [
+        {"frame": "sim001.sxm", "array": "z_fwd", "max_rel_diff": 0.0}]
+    # ...and a fingerprint that moved beyond rounding is a difference, whatever the hash says
+    ep["fingerprints"]["frames"]["sim001.sxm"]["z_fwd"]["max"] *= 1.0 + 1e-6
+    (tmp_path / "run" / "episode.json").write_text(json.dumps(ep), encoding="utf-8")
+    assert "frames" in verify(tmp_path / "run")["differences"]
+    # events are compared by value: a float off in its last bits passes, a changed integer does not
+    ev_path = tmp_path / "run" / "events.json"
+    events = json.loads(ev_path.read_text(encoding="utf-8"))
+    if events:
+        ep["fingerprints"]["frames"]["sim001.sxm"]["z_fwd"]["max"] /= 1.0 + 1e-6
+        ep["digest"]["events"] = "0" * 64
+        (tmp_path / "run" / "episode.json").write_text(json.dumps(ep), encoding="utf-8")
+        assert verify(tmp_path / "run")["ok"]                     # the replay's events equal events.json
+        events.pop()
+        ev_path.write_text(json.dumps(events), encoding="utf-8")
+        assert "events" in verify(tmp_path / "run")["differences"]
+
+
+def test_fingerprints_tell_rounding_from_a_different_measurement():
+    from stmbench.instrument.core import RTOL, array_fingerprint, compare_fingerprints, events_differ
+
+    rng = np.random.default_rng(0)
+    a = rng.normal(size=(20, 30)) * 1e-10
+    a[3, 4] = np.nan
+    fa = array_fingerprint(a)
+    assert fa["shape"] == [20, 30] and fa["nonfinite"] == 1 and len(fa["blocks"]) == 64
+    assert json.loads(json.dumps(fa)) == fa                      # exact round trip through JSON
+    assert compare_fingerprints(fa, array_fingerprint(a)) == ("rounding", 0.0)
+    kind, rel = compare_fingerprints(fa, array_fingerprint(a * (1 + 1e-13)))
+    assert kind == "rounding" and 0 < rel < RTOL
+    assert compare_fingerprints(fa, array_fingerprint(a * (1 + 1e-6)))[0] == "beyond"
+    b = a.copy()
+    b[3, 4] = 0.0
+    assert compare_fingerprints(fa, array_fingerprint(b))[0] == "structure"      # a non-finite value moved
+    assert compare_fingerprints(fa, array_fingerprint(a[:, :29]))[0] == "structure"
+    assert compare_fingerprints(None, fa)[0] == "structure"
+    # any shape: a curve, a tiny frame, an array with no finite value, an all-zero one (exact)
+    assert len(array_fingerprint(np.arange(5.0))["blocks"]) == 5
+    assert array_fingerprint(np.full((2, 2), np.nan))["min"] is None
+    z = array_fingerprint(np.zeros(4))
+    assert compare_fingerprints(z, array_fingerprint(np.full(4, 1e-300)))[0] == "beyond"
+    # events: floats within rounding, everything else exact
+    ev = [{"kind": "hop", "t": 12.5, "n": 3, "ok": True, "x": [1.0, 2.0]}]
+    assert events_differ(ev, [{"kind": "hop", "t": 12.5 * (1 + 1e-13), "n": 3, "ok": True, "x": [1.0, 2.0]}]) is None
+    assert events_differ(ev, [{"kind": "hop", "t": 12.5 * (1 + 1e-6), "n": 3, "ok": True, "x": [1.0, 2.0]}])
+    assert events_differ(ev, [{"kind": "hop", "t": 12.5, "n": 4, "ok": True, "x": [1.0, 2.0]}])
+    assert events_differ(ev, [{"kind": "hop", "t": 12.5, "n": 3, "ok": False, "x": [1.0, 2.0]}])
+    assert events_differ(ev, ev + ev)
 
 
 def test_force_spectroscopy_through_the_instrument_reproduces_p5():
