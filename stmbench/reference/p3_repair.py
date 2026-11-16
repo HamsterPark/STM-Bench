@@ -54,9 +54,11 @@ STAGE_ON_GOAL_NM = 0.35
 #: is within 0.15 nm of it, and a ring site is held by an atom within 0.29-0.37 nm
 FINE_NM = 0.2
 MAX_FINE = 5
+#: drags at one rung that moved the atom less than half the way before the rung comes down
+PARTIAL_MAX = 2
 #: every drag starts this far behind the atom, so that the tip runs over it and carries it
 RUN_UP_NM = 0.5
-MAX_STEPS = 24
+MAX_STEPS = 40
 
 
 def _unit(theta: float) -> np.ndarray:
@@ -120,6 +122,13 @@ def _pair(s: Session, sv: dict, plan: dict) -> list:
     return [(a, t) for (_, a), t in zip(atoms, sites)]
 
 
+def rc_goal(s: Session, rc_m, R: float, theta: float, staged: bool) -> np.ndarray:
+    """Where the current drag is going, in scan coordinates now: the site, or the staging point
+    1.5 nm radially outside it."""
+    rc = np.array(s.image_xy(*rc_m))
+    return rc + (R + (0.0 if staged else STAGE_NM)) * _unit(theta)
+
+
 def _place(s: Session, mv: Mover, centre, atom, theta: float, plan: dict, log: dict, r_ohm: float):
     """One spare to its site: first to a staging point 1.5 nm radially outside it, where it is
     still an isolated bump, then in; a rung lower on the resistance ladder whenever a drag
@@ -141,7 +150,7 @@ def _place(s: Session, mv: Mover, centre, atom, theta: float, plan: dict, log: d
     ring = s.w.surface.corral_snapshot()
     rc_m = tuple(v * 1e-9 for v in ring["centre_nm"])
     R = plan["R"]
-    staged, fine = False, 0
+    staged, fine, partial = False, 0, 0
     for _ in range(MAX_STEPS):
         log["r_resume"] = r_ohm
         if r_ohm < LADDER_MIN_KOHM * 1e3:
@@ -171,8 +180,21 @@ def _place(s: Session, mv: Mover, centre, atom, theta: float, plan: dict, log: d
             raise LostTrack()
         if spikes == 0:
             r_ohm *= LADDER_FACTOR
-        elif staged:
-            fine += 1
+            partial = 0
+            continue
+        after = np.array(s.image_xy(*reg.site_xy(atom.i, atom.j, atom.sub)))
+        d0, d1 = float(np.hypot(*vec)), float(np.hypot(*(rc_goal(s, rc_m, R, theta, staged) - after)))
+        if staged and d0 <= 1.0:
+            fine += 1                                        # the closing approach: counted apart
+        elif d1 > 0.5 * d0:
+            # the atom hopped, but it let go of the tip long before the goal: a few such drags
+            # at a rung say it is too high, as no hop at all does
+            partial += 1
+            if partial >= PARTIAL_MAX:
+                r_ohm *= LADDER_FACTOR
+                partial = 0
+        else:
+            partial = 0
     raise RuntimeError("the spare did not reach its site")
 
 
