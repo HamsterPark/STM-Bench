@@ -66,7 +66,7 @@ def _threshold_from_the_record(monkeypatch):
     monkeypatch.setattr(D, "record_threshold", patched)
 
 
-def verdict(records, reports, *, extra_events=(), rules_version=3, claims=None):
+def verdict(records, reports, *, extra_events=(), rules_version=2, claims=None):
     """``reports``: ``{claim id: (value, [cited move indexes or other citations])}``."""
     events = [event(r["index"]) for r in records] + list(extra_events)
     folded = {cid: {"value": v, "evidence": [f"move:{c}" if isinstance(c, int) else c for c in cites]}
@@ -368,6 +368,18 @@ def test_the_card_states_every_number_the_series_rule_reads(lang):
     for token in ("move:N", "move_tip", C1, C2):
         assert token in card, (lang, token)
     assert card.count("move:N") >= 2                              # the citing paragraph and the series rule
+
+
+@pytest.mark.parametrize("lang", ["zh", "en"])
+def test_only_a_card_that_cites_moves_names_move_traces(lang):
+    """P7's rules come with P7's card and change no other paper's (RULES_VERSION stays 2): the
+    sentence on citing a move trace is in the cards of scenarios with a drag series only."""
+    for path in sorted(SCEN.glob("P*.yaml")):
+        sc = Scenario.load(path)
+        card = R.rule_card(sc, lang)
+        cites = any((c.get("evidence") or {}).get("kind") == "drag_series" for c in sc.claims)
+        assert ("move:N" in card) == cites, (path.name, lang)
+    assert R.RULES_VERSION == 2
 
 
 def test_the_card_does_not_state_a_threshold_or_a_hidden_range():

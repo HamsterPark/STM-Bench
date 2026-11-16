@@ -32,10 +32,19 @@ import re
 #: hop the evidence rule needs is one made during a ``move_tip`` action. No card states the controller
 #: command limit of the TCP path (``budget.wire_cmds``) any more: the benchmark instrument does not
 #: enforce it.
-#: 3: P7's rules (``drag_series`` evidence, ``distinct_atom_from``, the true value of a pull threshold)
-#: and a move trace as citable data (``move_tip``'s file name or ``move:N``); the judge's rules for
-#: the other papers are unchanged, and the general "citing data" paragraph names move traces.
-RULES_VERSION = 3
+#: A new paper's rules come with its own card and do not change the version (no earlier ledger of that
+#: paper exists): P7's (``drag_series`` evidence, ``distinct_atom_from``, the true value of a pull
+#: threshold, a move trace cited by ``move_tip``'s file name or ``move:N``) are stated in P7's card only,
+#: and every other paper's card and judging are what version 2 says. A version stamps every ledger and
+#: export, and ``grade`` refuses another one, so a change that leaves every other card as it was does
+#: not bump it.
+RULES_VERSION = 2
+
+
+def _cites_moves(sc) -> bool:
+    """Does any claim of ``sc`` rest on cited move traces (a drag series)? Only then does the card's
+    general paragraph on citing data say how a move trace is named."""
+    return any(str((c.get("evidence") or {}).get("kind")) == "drag_series" for c in sc.claims)
 
 #: the overrun rule (:func:`apply_budget_overrun`): beyond this factor of the scenario's budget
 #: an episode is not a reproduction (5 % over is still within budget)
@@ -453,14 +462,16 @@ def rule_card(sc, lang: str = "zh") -> str:
     for c in sc.claims:
         n += 1
         lines += _claim_lines(c, sc, n, lang)
+    moves = _cites_moves(sc)
     lines += ["",
               _t(lang,
                  "引用数据：每条报告用 evidence 列出你用到的扫描帧（.sxm 文件名）和谱（.dat 文件名），也可以写 frame:N、"
-                 "sts:N、zspec:N；移动轨迹用 move_tip 返回的 .dat 文件名或 move:N。判分只在你引用的数据里检查证据要求，没有引用的数据不算。",
+                 "sts:N、zspec:N" + ("；移动轨迹用 move_tip 返回的 .dat 文件名或 move:N。" if moves else "。")
+                 + "判分只在你引用的数据里检查证据要求，没有引用的数据不算。",
                  "Citing data: in each report, list in the evidence field the scan frames (.sxm file names) "
-                 "and spectra (.dat file names) you used; you may also write frame:N, sts:N or zspec:N; a move trace is named by the "
-                 ".dat file name move_tip returned, or move:N. "
-                 "Scoring checks the evidence requirements only within the data you cite; data you do not "
+                 "and spectra (.dat file names) you used; you may also write frame:N, sts:N or zspec:N"
+                 + ("; a move trace is named by the .dat file name move_tip returned, or move:N. " if moves else ". ")
+                 + "Scoring checks the evidence requirements only within the data you cite; data you do not "
                  "cite does not count."),
               _t(lang,
                  "位置与角度：位置用扫描坐标（nm），x 向右、y 向上，与扫描框的中心坐标是同一套坐标；位置类结果还要用 "
