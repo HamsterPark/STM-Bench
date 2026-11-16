@@ -83,11 +83,18 @@ def _oracle(name: str, tmp_path):
                     "jump": False, "contact": False, "df_span_beyond_min_pm": 120.0}]
         for c in sc.claims:
             sink.report(c["id"], C.truth_at_path(truth, c["truth"]), evidence=["zspec:1", "zspec:2"])
+    elif sc.family == "P6":
+        events += [{"kind": "sts", "sim_s": 10.0, "idx": 1, "n": 81, "v0": -0.05, "v1": 0.05,
+                    "jump": False, "sx_m": 0.0, "sy_m": 0.0, "near_kind": "adatom", "near_nm": 0.05},
+                   {"kind": "sts", "sim_s": 20.0, "idx": 2, "n": 81, "v0": -0.05, "v1": 0.05,
+                    "jump": False, "sx_m": 9e-9, "sy_m": 0.0, "near_kind": "none", "near_nm": 9.0}]
+        for c in sc.claims:
+            sink.report(c["id"], C.truth_at_path(truth, c["truth"]), evidence=["sts:1", "sts:2"])
     return sc, truth, sink.folded(), events, orient
 
 
 ORACLE_PAPERS = ["P1_barth1990_au111.yaml", "P2_standing_waves_cu111.yaml", "P3_corral_cu111.yaml",
-                 "P5_sader_jarvis_qplus.yaml"]
+                 "P5_sader_jarvis_qplus.yaml", "P6_kondo_co_cu111.yaml"]
 
 
 @pytest.mark.parametrize("name", ORACLE_PAPERS)
@@ -121,7 +128,7 @@ def test_the_same_report_without_its_citations_fails_every_cited_claim(name, tmp
               orientation_at=orient, rules_version=RULES_VERSION)
     for c in sc.claims:
         if (c.get("evidence") or {}).get("kind") in ("frame", "spectra_near_scatterer",
-                                                      "sts_at_corral_centre", "zspec_pair"):
+                                                      "sts_at_corral_centre", "zspec_pair", "sts_pair"):
             assert not v.details["claims"][c["id"]]["evidence_ok"], c["id"]
 
 

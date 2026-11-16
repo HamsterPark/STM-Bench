@@ -12,6 +12,7 @@ from __future__ import annotations
 from html import escape
 
 from PySide6.QtCore import QSize, Qt, Signal
+from PySide6.QtGui import QFontMetrics
 from PySide6.QtWidgets import (QAbstractItemView, QBoxLayout, QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel,
                                QListWidget, QListWidgetItem, QPushButton, QRadioButton, QScrollArea, QStyle, QVBoxLayout,
                                QWidget)
@@ -145,7 +146,18 @@ class ReportTab(QWidget):
         # and the uncertainty stacked in the third that the narrow field it had was in
         row((cell("value"), 1), (cell("x_nm"), 1), (cell("y_nm"), 1))
         row((cell("frame"), 1))
-        row((cell("evidence", beside=self.viewed_button), 1))
+        evidence = cell("evidence", beside=self.viewed_button)
+        row((evidence, 1))
+        # the field is one line of a third of the form: two spectra cited (a spectrum's name is 26 characters) show their
+        # last few letters only. When the text does not fit the field, the whole of it is listed below, one file a line
+        # (nothing is added while it fits, so the pages of the other papers keep their height)
+        self.evidence_full = QLabel()
+        self.evidence_full.setObjectName("report.evidence_full")
+        self.evidence_full.setWordWrap(True)
+        self.evidence_full.setProperty("role", "claim")
+        self.evidence_full.hide()
+        evidence.layout().addWidget(self.evidence_full)
+        self.fields["evidence"].textChanged.connect(self._show_cited)
         small = QWidget()
         stack = QVBoxLayout(small)
         stack.setContentsMargins(0, 0, 0, 0)
@@ -239,6 +251,19 @@ class ReportTab(QWidget):
 
     def set_viewed(self, name: str) -> None:
         self._viewed = name
+
+    def _show_cited(self) -> None:
+        """List the files of the evidence field below it when its text is wider than the field shows."""
+        field = self.fields["evidence"]
+        names = [t.strip() for t in field.text().replace("，", ",").split(",") if t.strip()]
+        room = field.width() - 2 * style.px(10)
+        wide = QFontMetrics(field.font()).horizontalAdvance(field.text()) > room
+        self.evidence_full.setText("\n".join(names))
+        self.evidence_full.setVisible(bool(names) and wide)
+
+    def resizeEvent(self, ev) -> None:
+        super().resizeEvent(ev)
+        self._show_cited()
 
     def _append_viewed(self) -> None:
         if not self._viewed:                               # nothing in the viewer: say so rather than do nothing

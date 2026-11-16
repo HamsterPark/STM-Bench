@@ -13,7 +13,7 @@ PAPERS = sorted(p for p in SCEN.glob("P*.yaml"))
 PAPER_NAMES = [p.name for p in PAPERS]
 
 #: the paper ladder: one scenario family per paper the benchmark reproduces
-LADDER = {"P1", "P2", "P3", "P4", "P5"}
+LADDER = {"P1", "P2", "P3", "P4", "P5", "P6"}
 
 
 def test_there_is_a_scenario_for_every_paper_in_the_ladder():
@@ -66,7 +66,7 @@ def test_every_scalar_claim_has_a_truth_that_actually_varies(name):
     for c in sc.claims:
         if c["kind"] not in ("scalar", "angle") or not str(c["truth"]).startswith(("herringbone.",
                                                                                   "surface_state.",
-                                                                                  "force.")):
+                                                                                  "force.", "kondo.")):
             continue
         block, key = str(c["truth"]).split(".", 1)
         drawn = {round(float(sc.draw_hidden(s).get(block, {}).get(key, float("nan"))), 9)

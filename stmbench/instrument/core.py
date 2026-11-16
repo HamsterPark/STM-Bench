@@ -167,7 +167,7 @@ ACTIONS: dict[str, ActionSpec] = {s.name: s for s in (
                          "dI/dV map at the scan bias (channel 'didv') - the sample's local density of states at "
                          "that energy; bias sweeps give dI/dV either way.",
                (_P("on", "boolean", "true = modulating", True),
-                _P("amplitude_mv", "number", "modulation amplitude (mV)", default=10.0, lo=0.1, hi=200.0))),
+                _P("amplitude_mv", "number", "modulation amplitude, zero to peak (mV)", default=10.0, lo=0.1, hi=200.0))),
     ActionSpec("drift_comp", "Program the drift compensation: the piezo follows features moving at this velocity "
                              "in the scan frame (what a two-frame drift measurement reports).",
                (_P("on", "boolean", "true = compensating", True),
