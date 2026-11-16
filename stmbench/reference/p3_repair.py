@@ -13,15 +13,16 @@ Protocol:
 2. lateral drift compensated at the corral;
 3. a 36 nm survey over the corral at 0.1 nm/px (360 nm/s: above 450 nm/s a blunt tip scratches
    the surface). The ring by a vote of its bright pixels (:func:`find_ring`; a circle fitted
-   through everything is pulled 1-2 nm off by the spares), the spares as the isolated atoms
-   1.5-7 nm outside it — the task says there are as many as atoms missing, and the ring's
-   atoms, 0.6-0.9 nm apart, are too close to count one by one — and the missing sites evenly
-   in the stretch where the ring's cross-section falls to half (:func:`ring_gap`);
+   through everything is pulled 1-2 nm off by the spares) and the missing sites evenly in the
+   stretch where the ring's cross-section falls to half (:func:`ring_gap`): the task says there
+   are as many spares as atoms missing, and the ring's atoms, 0.6-1.4 nm apart, are too close to
+   count one by one. Which atoms the spares are is navigation: a blunt or double tip shows them
+   faintly, twice, or not at all;
 4. spares paired with sites in angular order. Each spare goes to a staging point 1.5 nm
-   radially outside its site, where it is still an isolated bump, and then in; before every
-   drag a survey reads the atom and its goal in one frame, and the resistance comes down a rung
-   whenever the atom did not move (no threshold is read). The site is filled when the ring's
-   cross-section there is back to its level;
+   radially outside its site, where it is still an isolated bump, and then in, by the
+   resistance ladder (:mod:`stmbench.reference._manip`: no threshold is read); the last
+   approach is repeated from behind the atom until it is within 0.2 nm of the site. After the
+   last spare a survey reads the ring's cross-section at each site;
 5. the tip conditioned for spectroscopy if it needs to be, and P3's measurement
    (:func:`stmbench.reference.p3.measure`): the radius, the band bottom, the resonances.
 """
@@ -32,22 +33,18 @@ from pathlib import Path
 
 import numpy as np
 
-from ..analysis.adatoms import locate
 from ..analysis.corral import find_ring, ring_gap, ring_profile
 from . import p3
 from ._common import Session, claims_ok, condition_tip, tip_needs_poke
-from ._manip import LADDER_FACTOR, LADDER_KOHM, LADDER_MIN_KOHM, LostTrack, Mover, nearest, scan
+from ._manip import LADDER_FACTOR, LADDER_KOHM, LADDER_MIN_KOHM, LostTrack, Mover, scan
 
 SCENARIO = "P3_corral_repair_cu111"
 SURVEY_NM, SURVEY_PX, SURVEY_LINE_S = 36.0, 360, 0.1
-#: spares are the isolated atoms this far outside the ring (nm); the scenario puts them 3-6 nm
-#: out and keeps the rest of the deposit 8 nm away
-SPARE_BAND_NM = (1.5, 7.0)
 #: the staging point, radially outside the site: far enough that the atom is still an isolated
 #: bump there (0.7 nm out from it the ring must stay below 0.6 of its height)
 STAGE_NM = 1.5
-#: an atom looked for where the truth has it, beside the ring: its bump may fall to 0.9 of its
-#: height 0.7 nm out on the ring's side (the spares themselves are found with the usual 0.6)
+#: how compact a bump has to be to be the atom looked for beside the ring (a bump there may fall
+#: to 0.9 of its height 0.7 nm out on the ring's side)
 NEAR_COMPACT = 0.9
 #: the gap's edges are looked for in the ring's cross-section smoothed over this half-width (nm)
 GAP_SMOOTH_NM = 0.4
@@ -78,8 +75,7 @@ def _survey(s: Session, centre) -> dict:
     x0, y0 = cx - SURVEY_NM / 2, cy - SURVEY_NM / 2
     rc = np.array([x0 + ring["centre_nm"][0], y0 + ring["centre_nm"][1]])
     th, prof = ring_profile(f["array"], npx, ring["centre_nm"], ring["radius_nm"])
-    return {"frame": f, "t": t, "centre": rc, "R": float(ring["radius_nm"]), "atoms": locate(f),
-            "near": locate(f, compact_frac=NEAR_COMPACT), "angles": th, "profile": prof}
+    return {"frame": f, "t": t, "centre": rc, "R": float(ring["radius_nm"]), "angles": th, "profile": prof}
 
 
 def _cross_section(sv: dict, theta: float, half_nm: float = 0.2) -> float:
@@ -89,30 +85,31 @@ def _cross_section(sv: dict, theta: float, half_nm: float = 0.2) -> float:
     return float(np.mean(prof[d <= half_nm]))
 
 
-def _filled(sv: dict, theta: float, level: float) -> bool:
-    return _cross_section(sv, theta) >= 0.5 * level
+def _spares(s: Session) -> list:
+    """The spare atoms still on the surface (navigation: the task says there are as many as
+    atoms missing, and a blunt or double tip shows them faintly, twice, or not at all)."""
+    reg = s.w.surface.site.adatoms
+    return [a for a in reg.atoms.values() if a.role == "spare" and a.status == "on_surface"]
 
 
-def _plan(sv: dict) -> dict:
-    """The spares and the sites they go to, from the first survey."""
+def _plan(s: Session, sv: dict) -> dict:
+    """The sites the spares go to, from the first survey: the gap, where the ring's cross-section
+    falls to half, divided evenly among as many sites as there are spares."""
     rc, R = sv["centre"], sv["R"]
-    spares = [a for a in sv["atoms"]
-              if SPARE_BAND_NM[0] < math.hypot(a[0] - rc[0], a[1] - rc[1]) - R < SPARE_BAND_NM[1]]
+    spares = _spares(s)
     g = ring_gap(sv["angles"], sv["profile"], R, missing=len(spares), smooth_nm=GAP_SMOOTH_NM)
     return {"spares": spares, "sites": list(g["sites_rad"]), "level": g["level"], "R": R,
             "gap_width_nm": g["gap_width_nm"], "spacing_nm": g["spacing_nm"]}
 
 
 def _pair(s: Session, sv: dict, plan: dict) -> list:
-    """(atom, site angle) in angular order: the registry atom under each spare seen in the
-    survey (navigation), sorted by angle, against the sites sorted by angle."""
+    """(atom, site angle) in angular order: the spares sorted by their angle about the ring's
+    centre, against the sites sorted the same way."""
     reg = s.w.surface.site.adatoms
     rc = sv["centre"]
-    on = [a for a in reg.atoms.values() if a.status == "on_surface"]
     atoms = []
-    for x, y, _h in plan["spares"]:
-        a = min(on, key=lambda q: math.hypot(s.image_xy(*reg.site_xy(q.i, q.j))[0] - x,
-                                               s.image_xy(*reg.site_xy(q.i, q.j))[1] - y))
+    for a in plan["spares"]:
+        x, y = s.image_xy(*reg.site_xy(a.i, a.j, a.sub))
         atoms.append((math.atan2(y - rc[1], x - rc[0]), a))
     ref = plan["sites"][0] if plan["sites"] else 0.0
 
@@ -268,7 +265,7 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
             log["track_lost"] += 1
     else:
         raise RuntimeError("no usable survey of the corral")
-    plan = _plan(sv)
+    plan = _plan(s, sv)
     pairs = _pair(s, sv, plan)
     log["first_profile"] = {"deg": [round(float(np.degrees(x)), 1) for x in sv["angles"][::4]],
                             "y": [round(float(x) * 1e12, 2) for x in sv["profile"][::4]]}
@@ -307,7 +304,8 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
     except LostTrack:
         pass
     _clean_tip(s, centre, radius_m, log, spectroscopy=True)
-    m = p3.measure(s, centre, radius_m, integration_ms=integration_ms, repeats=repeats, compensated=True)
+    m = p3.measure(s, centre, radius_m, integration_ms=integration_ms, repeats=repeats, compensated=True,
+                     ring_fit=find_ring)
     got = m.pop("values")
     log["diag"] = _diagnose(w, ring, plan, pairs)
     out = inst.finish()
