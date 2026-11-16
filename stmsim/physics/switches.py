@@ -16,7 +16,13 @@ nothing, which looks exactly like "the mechanism had no effect".
 * ``tip_anisotropy`` — the tip's ``axis_ratio`` and ``angle`` shape the images, and a blunt
   tip, a crash, a bad pulse or a deep poke make it anisotropic;
 * ``crash_over_range`` — a setpoint above the preamplifier's range cannot be reached, and the
-  loop drives the tip into the sample.
+  loop drives the tip into the sample;
+* ``sts_resolution`` — a bias sweep has the instrument's resolution: with the lock-in on, its
+  dI/dV is the lock-in's (broadened by the modulation that reaches the junction and by the
+  temperature, with a noise that falls with the modulation amplitude and the integration
+  time); with the lock-in off it is the numerical derivative of the measured current; the
+  sample keeps drifting under the tip along the sweep; and a resonance bound to an adatom
+  (:mod:`stmsim.physics.kondo`) is seen through every apex of the tip, blurred by its size.
 
 Each stochastic mechanism draws only from its own generator, seeded
 ``default_rng([seed, KEY])`` with the keys below, so that switching one on moves no other
@@ -32,6 +38,8 @@ TIP_OUTSCAN_STREAM = 0x71D1
 TIP_RECOVERY_STREAM = 0x71D2
 #: the anisotropy a crash, a pulse or a deep poke leaves on the tip
 TIP_ANISO_STREAM = 0x71D3
+#: sts_resolution: the lock-in's noise on a bias sweep, ``default_rng([seed, KEY, sweep index])``
+STS_LOCKIN_STREAM = 0x57A1
 
 
 @dataclass(frozen=True)
@@ -40,6 +48,7 @@ class PhysicsSwitches:
     tip_recovery: bool = False
     tip_anisotropy: bool = False
     crash_over_range: bool = False
+    sts_resolution: bool = False
 
     @classmethod
     def keys(cls) -> tuple[str, ...]:

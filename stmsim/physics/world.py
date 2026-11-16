@@ -222,6 +222,8 @@ class World:
         self.move_rng = movetrace.new_stream(seed)  # their own random stream: nothing else gains a draw
         self.last_move_trace: dict | None = None
         self.force = None                       # ForceParams (P5) or None
+        self.kondo = None                       # KondoParams (P6) or None: the magnetic adatoms' resonance
+        self.lockin_attenuation = 1.0           # the modulation's fraction that reaches the junction (sts_resolution)
         self.pll = None                         # PLLState when the rig loads the PLL module
         self.z_sweep_m = float(self.rig.get("spectroscopy.z_sweep_m", 0.2e-9))
         if "PLL" in (self.rig.modules_loaded or ()):
@@ -1594,8 +1596,16 @@ class World:
                 "n_zspec": len(self.zspec_records),
                 "n_dats": len(self.dats_saved),
                 **self._qplus_truth(),
+                **self._kondo_truth(),
                 **physics,
             }
+
+    def _kondo_truth(self) -> dict:
+        """The Kondo resonance and the lock-in's attenuation (P6). Empty for a world without one,
+        so other scenarios' truth reads as it always did."""
+        if self.kondo is None:
+            return {}
+        return {"kondo": self.kondo.truth(), "lockin": {"attenuation": float(self.lockin_attenuation)}}
 
     def _qplus_truth(self) -> dict:
         """qPlus / force-law truth (P5). Empty on a rig without the sensor."""

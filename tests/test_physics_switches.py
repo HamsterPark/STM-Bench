@@ -31,7 +31,8 @@ def test_every_switch_is_off_by_default():
     sw = PhysicsSwitches()
     assert not sw.any()
     assert sw.as_dict() == {"tip_changes_outside_scans": False, "tip_recovery": False,
-                            "tip_anisotropy": False, "crash_over_range": False}
+                            "tip_anisotropy": False, "crash_over_range": False,
+                            "sts_resolution": False}
     assert PhysicsSwitches.from_config(None) == sw
     assert PhysicsSwitches.from_config({}) == sw
 
@@ -93,7 +94,8 @@ def test_only_p4_switches_physics_on_and_it_switches_all_four():
 
 def test_the_p4_world_has_its_mechanisms_wired(tmp_path):
     w = Scenario.load(SCEN / "P4_atom_positioning_cu111.yaml").build_world(0, tmp_path / "s", virtual_clock=True)
-    assert w.physics.as_dict() == {k: True for k in PhysicsSwitches.keys()}
+    p4_four = ("tip_changes_outside_scans", "tip_recovery", "tip_anisotropy", "crash_over_range")
+    assert w.physics.as_dict() == {k: k in p4_four for k in PhysicsSwitches.keys()}
     assert w.tip.recovery_rng is w.rng_recovery and w.tip.aniso_rng is w.rng_aniso
     assert w.truth()["physics"] == w.physics.as_dict()
     assert w.tip.lambda_rest_per_s == pytest.approx(1e-4)

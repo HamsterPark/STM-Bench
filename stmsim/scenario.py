@@ -88,6 +88,11 @@ HIDDEN_SCHEMA: dict[str, frozenset[str]] = {
     "qplus": frozenset({"f0_hz", "k_n_per_m", "q"}),
     "force": frozenset({"D_e_mev", "a_per_nm", "z_e_nm", "hamaker_zj", "z0_nm", "bg_frac",
                         "sigma_df_hz"}),
+    # P6: the Kondo resonance of every magnetic adatom (stmsim.physics.kondo.KondoParams)
+    "kondo": frozenset({"gamma_mev", "q", "e_k_mev", "amplitude", "sigma_nm", "q_sigma_nm"}),
+    # the fraction of the lock-in's modulation that reaches the junction (the bias line's
+    # filters attenuate it); only the sts_resolution switch uses it
+    "lockin": frozenset({"attenuation"}),
 }
 
 HIDDEN_STREAM = 0x51D3          # keeps the hidden draws off the world / tip / noise / site streams
@@ -326,6 +331,7 @@ class Scenario:
             w.drift_v_m_per_s = v
         self._configure_adatoms(w, drawn, ini, seed)
         self._configure_force(w, drawn, ini)
+        self._configure_kondo(w, drawn, ini)
         if ini.get("approached", True):
             w.coarse.coarse_gap_m = w.surface_height_here() + 0.6e-9
             w.withdrawn = False
@@ -412,6 +418,21 @@ class Scenario:
             # one geometry: the force law's atom is as tall as the bump the gap is measured from
             force = replace(force, bump_m=reg.params.height_m)
         world.force = force
+
+    @staticmethod
+    def _configure_kondo(world: World, drawn: dict, ini: dict) -> None:
+        """P6: the magnetic adatoms' Kondo resonance and the lock-in's attenuation. A scenario
+        with neither block builds the world it always built (both stay at their inert defaults)."""
+        cfg = {**dict(ini.get("kondo") or {}), **drawn.get("kondo", {})}
+        if cfg:
+            from .physics.kondo import KondoParams
+            world.kondo = KondoParams.from_yaml(cfg)
+        lockin = {**dict(ini.get("lockin") or {}), **drawn.get("lockin", {})}
+        if "attenuation" in lockin:
+            att = float(lockin["attenuation"])
+            if not 0.0 < att <= 1.0:
+                raise ValueError(f"lockin.attenuation must be in (0, 1], got {att}")
+            world.lockin_attenuation = att
 
     def scheduler(self, world: World, server=None) -> FaultScheduler:
         return FaultScheduler(world, [Fault.from_dict(f) for f in self.faults], server=server)
