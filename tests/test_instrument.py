@@ -444,19 +444,21 @@ def test_an_episode_with_moves_replays_to_the_same_traces(tmp_path):
 
 
 def test_a_trace_cited_as_evidence_is_not_a_frame_and_judging_goes_on(tmp_path):
-    """The name of a move's trace in a report's evidence is data the judge does not know as a frame,
-    an STS or a Z spectrum: it resolves to nothing, and the claim is judged on the rest."""
+    """The name of a move's trace in a report's evidence resolves to its ``dat_saved`` event (P7's
+    drag series reads it), but is not a frame, an STS or a Z spectrum: P4's rules ignore it and the
+    claim is judged on the rest."""
     from stmbench.trackB import claims as C
 
     inst = Instrument(P4, 24, tmp_path / "run")
     t = _session(inst)
-    assert C.resolve_citation(inst.world.events, t) is None
+    ev = C.resolve_citation(inst.world.events, t)
+    assert ev is not None and ev["kind"] == "dat_saved" and ev["move_idx"] is not None
     inst.act("scan", center_x_nm=0.0, center_y_nm=0.0, size_nm=8.0, pixels=48, line_time_s=0.2)
     frame = next(iter(inst.frames))
     inst.report("target_site", 0.0, x_nm=0.0, y_nm=0.0, frame=frame, evidence=[frame, t])
     out = inst.finish()
     claim = inst.verdict.details["claims"]["target_site"]
-    assert claim["unresolved_citations"] == [t] and claim["cited"] == [frame, t, frame]
+    assert "unresolved_citations" not in claim and claim["cited"] == [frame, t, frame]
     assert out["claims_total"] == 2 and claim["evidence"]["kind"] == "frame_covers_after"
 
 

@@ -55,9 +55,15 @@ def _threshold_from_the_record(monkeypatch):
     """The truth of a record is ``conditions["th"]`` kohm here: what is under test is which drags count
     and how they are combined; the threshold function has its own tests (test_drag_threshold.py)."""
     from stmsim.physics import drag_threshold as D
-    monkeypatch.setattr(D, "record_threshold",
-                        lambda lat, r, **kw: None if r.get("conditions") is None
-                        else float(r["conditions"]["th"]) * 1e3)
+    real = D.record_threshold
+
+    def patched(lat, r, **kw):
+        cond = r.get("conditions")
+        if cond is not None and "th" not in cond:            # a record the instrument wrote: the real function
+            return real(lat, r, **kw)
+        return None if cond is None else float(cond["th"]) * 1e3
+
+    monkeypatch.setattr(D, "record_threshold", patched)
 
 
 def verdict(records, reports, *, extra_events=(), rules_version=3, claims=None):
