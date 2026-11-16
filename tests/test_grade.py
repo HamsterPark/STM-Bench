@@ -131,6 +131,7 @@ def test_an_export_grades_as_the_episode_it_came_from(p5, graded):
     records = read_export(path)["records"]
     assert {r["kind"] for r in records} >= {"act", "refused", "observe", "report", "finish"}
     assert graded["replay"] == {"consistent": True, "result_mismatches": [], "digest_mismatches": [],
+                                "hashes_equal": True, "rounding_differences": [],
                                 "torn": False, "records": len(records)}
     assert graded["note"] and "\n" not in graded["note"] and graded["note"].endswith("replay consistent")
 
@@ -237,6 +238,74 @@ def test_a_wrong_seed_is_not_the_recorded_episode(p5):
     assert res["score"] == 0.0 and res["success"] is False and res["partial"] is None
 
 
+def _without_fp(text: str) -> str:
+    """A digests.jsonl as a version-1 export wrote it: hashes only."""
+    out = []
+    for line in text.splitlines():
+        rec = json.loads(line)
+        rec.pop("fp", None)
+        out.append(json.dumps(rec))
+    return "\n".join(out) + "\n"
+
+
+def _digest_lines(path, edit):
+    p = path / "digests.jsonl"
+    recs = [json.loads(x) for x in p.read_text(encoding="utf-8").splitlines()]
+    edit(recs)
+    p.write_text("\n".join(json.dumps(r) for r in recs) + "\n", encoding="utf-8")
+
+
+def test_a_rounding_difference_is_consistent_and_a_real_one_is_not(p5, tmp_path):
+    """Version 2: equal hashes are the exact test; unequal hashes are decided by the fingerprints."""
+    path, _ = p5
+    assert read_export(path)["session"]["version"] == EXPORT_VERSION == 2
+    assert all("fp" in ln for ln in read_export(path)["digests"])
+    base = grade_export(path, P5, 0)
+    assert base["replay"]["hashes_equal"] is True and base["replay"]["rounding_differences"] == []
+
+    def hash_and(edit, name):
+        p = tmp_path / name
+        shutil.copytree(path, p)
+
+        def both(recs):
+            frame = next(r for r in recs if "frame" in r)
+            frame["digest"]["z_fwd"] = "0" * 64                     # another machine's last bits: other hash...
+            edit(frame["fp"]["z_fwd"])                              # ...and the fingerprint as that machine saw it
+        _digest_lines(p, both)
+        return grade_export(p, P5, 0)
+
+    # a difference of 1e-12 of the scale: rounding. Consistent, scored as replayed, and said so.
+    def nudge(fp):
+        fp["mean"] += 1e-12 * max(abs(fp["min"]), abs(fp["max"]))
+    ok = hash_and(nudge, "rounded")
+    assert ok["replay"]["consistent"] and ok["score"] == base["score"] and ok["replay"]["digest_mismatches"] == []
+    assert ok["replay"]["hashes_equal"] is False
+    (diff,) = ok["replay"]["rounding_differences"]
+    assert diff["array"] == "z_fwd" and 0 < diff["max_rel_diff"] <= 1e-9 and "rounding differences" in ok["note"]
+
+    # 1e-6 of the scale: a different measurement
+    def shift(fp):
+        fp["mean"] += 1e-6 * max(abs(fp["min"]), abs(fp["max"]))
+    bad = hash_and(shift, "real")
+    assert not bad["replay"]["consistent"] and bad["score"] == 0.0
+    (m,) = bad["replay"]["digest_mismatches"]
+    assert m["arrays"] == ["z_fwd"] and "beyond rounding" in m["reason"] and "1e-06" in m["reason"]
+
+    # shape and non-finite values are exact
+    def mask(fp):
+        fp["nonfinite"] += 1
+    assert not hash_and(mask, "mask")["replay"]["consistent"]
+
+    # a version-1 export (no fingerprints) with another hash: a mismatch, as before
+    p = tmp_path / "v1"
+    shutil.copytree(path, p)
+    _edit_session(p, version=1)
+    (p / "digests.jsonl").write_text(_without_fp((p / "digests.jsonl").read_text(encoding="utf-8")), encoding="utf-8")
+    assert grade_export(p, P5, 0)["replay"]["consistent"]
+    _digest_lines(p, lambda recs: next(r for r in recs if "frame" in r)["digest"].update(z_fwd="0" * 64))
+    assert grade_export(p, P5, 0)["replay"]["digest_mismatches"][0]["reason"] == "the hashes differ"
+
+
 def test_a_tampered_missing_or_extra_digest_is_caught(p5, tmp_path):
     path, _ = p5
     export = read_export(path)
@@ -247,6 +316,8 @@ def test_a_tampered_missing_or_extra_digest_is_caught(p5, tmp_path):
 
     def with_(edit):
         out = [json.loads(json.dumps(ln)) for ln in lines]
+        for ln in out:
+            ln.pop("fp", None)                   # no fingerprint: unequal hashes are a mismatch, as in version 1
         edit(out)
         return _digest_mismatches(inst, out, records)
 
@@ -268,7 +339,7 @@ def test_a_tampered_missing_or_extra_digest_is_caught(p5, tmp_path):
     p = tmp_path / "export"
     shutil.copytree(path, p)
     text = (p / "digests.jsonl").read_text(encoding="utf-8")
-    (p / "digests.jsonl").write_text(text.replace(frame["digest"]["z_fwd"], "0" * 64), encoding="utf-8")
+    (p / "digests.jsonl").write_text(_without_fp(text.replace(frame["digest"]["z_fwd"], "0" * 64)), encoding="utf-8")
     res = grade_export(p, P5, 0)
     assert res["replay"]["result_mismatches"] == [] and res["score"] == 0.0 and not res["success"]
     assert res["replay"]["digest_mismatches"] == [{"i": frame["i"], "frame": frame["frame"],
@@ -290,7 +361,8 @@ def test_an_export_with_moves_grades_with_no_mismatch_and_a_changed_trace_is_one
     lines = read_export(tmp_path / "e")["digests"]
     assert len(lines) == 3 and all(set(x["digest"]) == {"t", "dist", "z_abs", "i"} for x in lines)
     p = tmp_path / "e" / "digests.jsonl"
-    p.write_text(p.read_text(encoding="utf-8").replace(lines[1]["digest"]["z_abs"], "0" * 64), encoding="utf-8")
+    p.write_text(_without_fp(p.read_text(encoding="utf-8").replace(lines[1]["digest"]["z_abs"], "0" * 64)),
+                 encoding="utf-8")
     bad = grade_export(tmp_path / "e", P4, 0)
     assert bad["score"] == 0.0 and bad["replay"]["digest_mismatches"] == [
         {"i": lines[1]["i"], "spectrum": lines[1]["spectrum"], "reason": "the hashes differ", "arrays": ["z_abs"]}]
@@ -331,7 +403,7 @@ def test_a_wrong_pairing_or_version_is_an_error_not_a_score(tmp_path):
         _edit_session(p, **kw)
         return p
     for kw, needle in (({"rules_version": 0}, "rules_version"), ({"api_version": API_VERSION - 1}, "api_version"),
-                       ({"version": 2}, "version-1"), ({"format": "other"}, "version-1"),
+                       ({"version": 3}, "version-1 or 2"), ({"format": "other"}, "version-1 or 2"),
                        ({"records": 5}, "counts 5 records")):
         with pytest.raises(ValueError, match=needle):
             grade_export(broken(**kw), P4, 0)

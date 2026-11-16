@@ -86,10 +86,13 @@ like one that finished. The replay is *consistent* when
 
 1. each action the replay re-ran replied as recorded: every reply field and both instrument-time
    stamps (`t0_s`, `t1_s`) are equal, and the replay refused none of the recorded calls;
-2. every line of `digests.jsonl` equals the hash of the replay's frame or spectrum of that name, and
+2. every line of `digests.jsonl` equals the hash of the replay's frame or spectrum of that name (or, in an
+   export of version 2, its fingerprints agree within `RTOL` when the hashes differ), and
 3. every frame and spectrum the replay saved has such a line.
 
-The hashes are of the raw float64 arrays, so consistent means bit-identical measurements. If it
+The hashes are of the raw float64 arrays; where they differ, the fingerprints of a version-2 export
+tell a last-bits difference between machines (a rounding difference, listed in
+`replay.rounding_differences`) from a different measurement. If it
 is not, the episode scores 0 and is no success, and the numbers that describe the replay are
 withheld (`partial`, `claims_verified`, `instrument_time_s`, `actions` are `null`): the replay was
 not the episode the agent saw. The result lists what differed in `replay.result_mismatches` and

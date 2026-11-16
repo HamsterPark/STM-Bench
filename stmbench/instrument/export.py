@@ -5,13 +5,21 @@ ledger (``episode.json``: the seed, the truth, the verdict) are out of its reach
 machine to be graded is an export directory. It holds the calls in order - the records a run
 directory's ``actions.jsonl`` holds - appended as they happen, so an episode that never reaches
 ``finish`` (the machine was stopped, the agent ran out of steps) is graded as it stands; and the
-hashes of what was measured, so a replay elsewhere can show that it measured the same. It holds
+hashes and fingerprints of what was measured, so a replay elsewhere can show that it measured the same. It holds
 nothing the agent may not see: no seed (the grader holds it), no truth, no verdict.
+
+Version 2 adds ``"fp"`` to every digests line: per array, a coarse fingerprint
+(:func:`~stmbench.instrument.core.array_fingerprint`: shape, non-finite mask, min, max, mean, std
+and block means). Equal hashes remain the first, exact test; when they differ, the grader compares
+the fingerprints, so a replay on another machine whose arrays differ in the last bits (another libm
+or BLAS kernel: measured on trial 6, see docs/DESIGN.md) is not mistaken for a different
+measurement. A fingerprint summarises arrays the agent itself measured, so it shows it nothing new.
+Version 1 exports (hashes only) are still read, and graded exactly.
 
     <export>/
       session.json   format, versions, scenario id, finished, record count      (replaced)
       actions.jsonl  the instrument's log records, in order                      (appended)
-      digests.jsonl  one line per saved frame, spectrum or move trace: its hashes (appended)
+      digests.jsonl  one line per saved frame, spectrum or move trace: hashes, fingerprints (appended)
       report.json    the results reported so far, folded as the judge reads them (replaced)
 
 :class:`ExportWriter` writes it beside an :class:`~stmbench.instrument.core.Instrument`;
@@ -27,7 +35,9 @@ from ..trackB.rules import RULES_VERSION
 from .core import API_VERSION, Instrument, _json_default
 
 EXPORT_FORMAT = "stmbench-export"
-EXPORT_VERSION = 1
+EXPORT_VERSION = 2
+#: versions :func:`read_export` accepts: 1 has hashes only, 2 adds fingerprints beside them
+READABLE_VERSIONS = (1, 2)
 
 
 def _chmod(path: Path, mode: int) -> None:
@@ -85,14 +95,17 @@ class ExportWriter:
                 continue
             res = rec.get("result") or {}
             if res.get("frame") in inst.frames:
-                digests.append({"i": rec["i"], "frame": res["frame"], "digest": inst.frame_digest(res["frame"])})
+                digests.append({"i": rec["i"], "frame": res["frame"], "digest": inst.frame_digest(res["frame"]),
+                                "fp": inst.frame_fingerprint(res["frame"])})
             if res.get("spectrum") in inst.spectra:
                 digests.append({"i": rec["i"], "spectrum": res["spectrum"],
-                                "digest": inst.spectrum_digest(res["spectrum"])})
+                                "digest": inst.spectrum_digest(res["spectrum"]),
+                                "fp": inst.spectrum_fingerprint(res["spectrum"])})
             # a move's trace is kept like a spectrum, and the grader re-checks it like one
             if res.get("trace") in inst.spectra:
                 digests.append({"i": rec["i"], "spectrum": res["trace"],
-                                "digest": inst.spectrum_digest(res["trace"])})
+                                "digest": inst.spectrum_digest(res["trace"]),
+                                "fp": inst.spectrum_fingerprint(res["trace"])})
         _append(self.dir / "actions.jsonl", new)
         _append(self.dir / "digests.jsonl", digests)
         if any(r.get("kind") == "report" for r in new):
@@ -133,8 +146,8 @@ def read_export(export_dir: str | Path) -> dict:
     (it is left out). :class:`ValueError` for anything else that is not a complete export."""
     d = Path(export_dir)
     session = json.loads((d / "session.json").read_text(encoding="utf-8"))
-    if session.get("format") != EXPORT_FORMAT or session.get("version") != EXPORT_VERSION:
-        raise ValueError(f"{d} is not a version-{EXPORT_VERSION} {EXPORT_FORMAT} directory")
+    if session.get("format") != EXPORT_FORMAT or session.get("version") not in READABLE_VERSIONS:
+        raise ValueError(f"{d} is not a version-{' or '.join(map(str, READABLE_VERSIONS))} {EXPORT_FORMAT} directory")
     records, torn = _read_jsonl(d / "actions.jsonl")
     for k, rec in enumerate(records):
         if rec.get("i") != k:
