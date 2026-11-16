@@ -25,7 +25,7 @@ from stmbench.console import Console, make_server
 from stmbench.console import server as console_server
 from stmbench.instrument import ACTIONS, API_VERSION, ActionError, Instrument, VersionError, replay, verify
 from stmbench.instrument.core import replay_records
-from stmbench.instrument.export import ExportWriter, read_export
+from stmbench.instrument.export import ExportDamaged, ExportWriter, read_export
 from stmbench.instrument.grade import grade_export
 from stmbench.instrument.mcp_server import EpisodeServer
 from stmbench.trackB.rules import RULES_VERSION
@@ -406,10 +406,18 @@ def test_grade_names_the_api_version_before_the_rules_version(tmp_path):
     assert not isinstance(exc.value, VersionError)
 
 
-def test_text_out_of_an_export_is_clipped_before_the_refusal_repeats_it(tmp_path):
+def test_text_out_of_an_export_is_clipped_before_the_refusal_repeats_it(tmp_path, capsys):
     path = _wait_export(tmp_path)
+    # a non-integer api_version is a malformed export: damaged, scored 0, and the text is repeated nowhere
     _edit_json(path / "session.json", api_version="A" * 5000 + "\n\x1b[31m")
+    with pytest.raises(ExportDamaged):
+        grade_export(path, P4, 0)
+    assert cli_main(["grade", str(path), "--scenario", P4, "--seed", "0"]) == 0
+    cap = capsys.readouterr()
+    assert json.loads(cap.out)["score"] == 0.0 and "A" * 20 not in cap.out + cap.err and "\x1b" not in cap.out + cap.err
+    # an integer of another version is a mismatch of setup, and the refusal clips the number it echoes
+    _edit_json(path / "session.json", api_version=10 ** 1000)
     with pytest.raises(VersionError) as exc:
         grade_export(path, P4, 0)
-    assert len(str(exc.value)) < 400 and "A" * 100 not in str(exc.value)
+    assert len(str(exc.value)) < 400 and "0" * 100 not in str(exc.value)
     assert "\n" not in str(exc.value) and "\x1b" not in str(exc.value)
