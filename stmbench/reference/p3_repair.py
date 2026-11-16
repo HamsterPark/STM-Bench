@@ -254,6 +254,9 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
                 log["track_lost"] += 1
                 r_ohm = log.pop("r_resume", r_ohm)
                 continue
+            except RuntimeError as exc:                      # this spare is not going to its site:
+                log.setdefault("place_errors", []).append(str(exc))   # go on, and the judge says what is left
+                break
             if got is None:
                 log["pickups"] += 1
             else:
