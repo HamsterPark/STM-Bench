@@ -149,3 +149,33 @@ notes: |
   The confined levels are set by the ring the agent finishes, not by the one it was given:
   ``corral.peaks_mev`` is recomputed whenever an atom moves. Repairing the ring therefore
   moves the answer, which is the point.
+
+  Calibration (2026-11-16). Before: a fixed answer sheet passed 56.5 % of seeds 0-199 (each peak
+  86.5 %, peaks 25 meV, no radius claim). Now, as P3's measurement variant was calibrated
+  (2026-10-13): peaks 10 meV, and a ``radius_nm`` claim (0.15 nm) read on a complete frame of
+  the repaired corral at 0.15 nm/px or finer, 22 nm or wider, scanned after the last hop
+  (``frame_covers_after``, as ``ring_occupancy`` has it). The ring's radius is not changed by the
+  repair, but a frame of the broken ring is not a measurement of the closed corral the task asks
+  for. Chance (best fixed sheet, exact, seeds 0-399): each peak 40.2 %, radius 12.0 %, all
+  claims 4.8 % (seeds 0-199 alone: 7.0 %, the spread between two halves of 200 seeds is
+  about 2 points). The hidden ranges did not change; a log-uniform radius 4-10 nm as P3 has gave
+  4.5 % over the same 400 seeds, but an earlier version of the privileged reference (2026-11-16, before its
+  last two fixes) closed only 27 of 30 rings (seed 28: radius 4.3 nm, 58 atoms, 0.47 nm apart, a site held only within 0.23 nm), so the
+  range stays 5.5-9 nm.
+
+  The task text says the spare atoms are as many as the missing ones: the ring's atoms, 0.6-1.4 nm
+  apart, merge into one ridge in a topograph and cannot be counted one by one, the spares can
+  (DESIGN 9.5).
+
+  Privileged reference (stmbench/reference/p3_repair.py, ``reference --paper P3R``): the gap and
+  its sites from a survey (the ring's cross-section falls to half at the gap), the spares
+  dragged by the resistance ladder to a staging point 1.5 nm outside their site and in, the
+  last approach closed until the atom is within 0.2 nm of the site, then P3's measurement.
+  Seeds 0-29: 30/30. A hold-out of seeds 210-329 (never used while the protocol was written):
+  118/120; both failures were the radius read 0.23 nm off on a frame in which the tip changed.
+  Instrument time over the 148 successes: median 1371 s, p90 2496 s, longest 3405 s; the
+  budget of 2.5 h (9000 s) is 3.6 times the p90, as P4's 1.5 h is 3.8 times its p90. Reported
+  |error|: peaks median 1.1 meV, p90 about 3 meV; radius median 0.02 nm, p90 0.05 nm. A tip that
+  starts blunt, double or unstable is conditioned far from the corral first, and again whenever a
+  drag changes it (median 3 conditioning rounds per run over seeds 0-29 and 210-329; 26 of the 28
+  good-tip runs needed none), which is where the time goes.

@@ -1,0 +1,7840 @@
+{
+ "summary": {
+  "n": 30,
+  "errors": [],
+  "success_rate": 1.0,
+  "claims": {
+   "peak_hi_mev": {
+    "relative": false,
+    "pass_rate": 1.0,
+    "err_median": 1.3460302204390473,
+    "err_p90": 3.1329683113628963,
+    "err_max": 3.79627335755373,
+    "signed_median": 0.667823987814316
+   },
+   "peak_lo_mev": {
+    "relative": false,
+    "pass_rate": 1.0,
+    "err_median": 2.0516655505907124,
+    "err_p90": 3.1037829523383555,
+    "err_max": 3.7962733575538437,
+    "signed_median": 0.194952155566682
+   },
+   "radius_nm": {
+    "relative": false,
+    "pass_rate": 1.0,
+    "err_median": 0.0215669683894415,
+    "err_p90": 0.06070748741772614,
+    "err_max": 0.13007494623545046,
+    "signed_median": 0.013919196435640657
+   }
+  },
+  "instrument_s": {
+   "median": 1318.311879262591,
+   "p90": 2595.230632730178
+  }
+ },
+ "runs": [
+  {
+   "paper": "P3-repair",
+   "seed": 0,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -368.00000000000006,
+    "peak_hi_mev": -306.00000000000006,
+    "radius_nm": 8.89147825655683
+   },
+   "truth": {
+    "peak_lo_mev": -366.5972963566543,
+    "peak_hi_mev": -304.5972963566542,
+    "radius_nm": 8.950362412195725
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.4027036433457738,
+    "peak_hi_mev": -1.4027036433458306,
+    "radius_nm": -0.0588841556388946
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 6,
+   "radius_nm": 8.950362412195725,
+   "instrument_s": 3019.9723572763683,
+   "tip_rounds": 7,
+   "track_lost": 4,
+   "pickups": 0,
+   "placed": 6,
+   "spares_seen": 6,
+   "sites": 6,
+   "gap_width_nm": 5.34056677126913,
+   "spacing_nm": 0.8900944618781884,
+   "ring_radius_fit_nm": 8.848120573875374,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 16,
+     "in": false
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 85.9,
+     "spikes": 11,
+     "in": false
+    },
+    {
+     "r_kohm": 85.9,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 85.9,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 12,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 11,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 6,
+     "in": true
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 5,
+     "in": true
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 72.1,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 72.1,
+     "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 57.6,
+     "spikes": 9,
+     "in": false
+    },
+    {
+     "r_kohm": 57.6,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 57.6,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 92.2,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 92.2,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 73.8,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 73.8,
+     "spikes": 18,
+     "in": false
+    },
+    {
+     "r_kohm": 73.8,
+     "spikes": 12,
+     "in": true
+    },
+    {
+     "r_kohm": 118.1,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 118.1,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 118.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 94.4,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 94.4,
+     "spikes": 10,
+     "in": false
+    },
+    {
+     "r_kohm": 75.6,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 75.6,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 75.6,
+     "spikes": 9,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.37,
+    1.46,
+    1.22,
+    1.32,
+    1.35,
+    1.3
+   ],
+   "diag": {
+    "tol_nm": 0.469,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.04,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.02,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.05,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.03,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": -0.13,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": -0.14,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 60,
+    "r_nm": 8.950362412195725,
+    "planned_deg": [
+     4.7,
+     10.5,
+     16.2,
+     22.0,
+     27.8,
+     358.9
+    ],
+    "gap_deg": [
+     4.7,
+     9.6,
+     16.2,
+     22.6,
+     28.5,
+     358.9
+    ]
+   },
+   "e0_mev": -411.79526200022724,
+   "radius_measured_nm": 8.89147825655683,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.0003658938723908114,
+    0.3946478670259189
+   ],
+   "tip_condition": "double"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 1,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -380.0,
+    "peak_hi_mev": -266.0,
+    "radius_nm": 6.429728712366334
+   },
+   "truth": {
+    "peak_lo_mev": -381.12176465526807,
+    "peak_hi_mev": -269.121764655268,
+    "radius_nm": 6.417887407085326
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.1217646552680662,
+    "peak_hi_mev": 3.1217646552680094,
+    "radius_nm": 0.011841305281008019
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 4,
+   "radius_nm": 6.417887407085326,
+   "instrument_s": 1434.6662356850927,
+   "tip_rounds": 2,
+   "track_lost": 1,
+   "pickups": 0,
+   "placed": 4,
+   "spares_seen": 4,
+   "sites": 4,
+   "gap_width_nm": 2.950712313447536,
+   "spacing_nm": 0.737678078361884,
+   "ring_radius_fit_nm": 6.423357391064106,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 16,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 7,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 18,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 10,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 14,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 21,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 12,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 8,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.08,
+    1.09,
+    1.01,
+    1.08
+   ],
+   "diag": {
+    "tol_nm": 0.38,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.12,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.01,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.08,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.06,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 53,
+    "r_nm": 6.417887407085326,
+    "planned_deg": [
+     5.5,
+     345.7,
+     352.3,
+     358.9
+    ],
+    "gap_deg": [
+     6.2,
+     345.3,
+     351.3,
+     358.1
+    ]
+   },
+   "e0_mev": -460.0445124339528,
+   "radius_measured_nm": 6.429728712366334,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    1.0076904788548169,
+    0.08250959390773152
+   ],
+   "tip_condition": "double"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 2,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -318.00000000000006,
+    "peak_hi_mev": -176.00000000000006,
+    "radius_nm": 5.765227395710887
+   },
+   "truth": {
+    "peak_lo_mev": -317.4984825232144,
+    "peak_hi_mev": -175.4984825232143,
+    "radius_nm": 5.723880097627661
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.5015174767856365,
+    "peak_hi_mev": -0.5015174767857502,
+    "radius_nm": 0.04134729808322568
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 6,
+   "radius_nm": 5.723880097627661,
+   "instrument_s": 2612.862410938417,
+   "tip_rounds": 9,
+   "track_lost": 3,
+   "pickups": 0,
+   "placed": 6,
+   "spares_seen": 6,
+   "sites": 6,
+   "gap_width_nm": 4.747444329859147,
+   "spacing_nm": 0.7912407216431911,
+   "ring_radius_fit_nm": 5.751343271838387,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 6,
+     "in": true
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 16,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 7,
+     "in": true
+    },
+    {
+     "r_kohm": 274.9,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 274.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 219.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 16,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 225.2,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 225.2,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 180.1,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 180.1,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 144.1,
+     "spikes": 15,
+     "in": false
+    },
+    {
+     "r_kohm": 144.1,
+     "spikes": 9,
+     "in": false
+    },
+    {
+     "r_kohm": 144.1,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 144.1,
+     "spikes": 10,
+     "in": true
+    },
+    {
+     "r_kohm": 144.1,
+     "spikes": 0,
+     "in": true
+    },
+    {
+     "r_kohm": 115.3,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 115.3,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 184.5,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 184.5,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 147.6,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 147.6,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 118.1,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 118.1,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 94.4,
+     "spikes": 10,
+     "in": false
+    },
+    {
+     "r_kohm": 94.4,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 94.4,
+     "spikes": 8,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    0.91,
+    1.0,
+    0.99,
+    1.01,
+    0.99,
+    1.02
+   ],
+   "diag": {
+    "tol_nm": 0.375,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.15,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.03,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.15,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.01,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.06,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.17,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 48,
+    "r_nm": 5.723880097627661,
+    "planned_deg": [
+     303.3,
+     311.2,
+     319.0,
+     326.9,
+     334.8,
+     342.7
+    ],
+    "gap_deg": [
+     305.1,
+     311.8,
+     318.5,
+     327.3,
+     334.0,
+     341.6
+    ]
+   },
+   "e0_mev": -418.6996287315145,
+   "radius_measured_nm": 5.765227395710887,
+   "peaks_found": 4,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.037240333214330866,
+    -0.7052459965378431
+   ],
+   "tip_condition": "blunt"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 3,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -364.00000000000006,
+    "peak_hi_mev": -280.0,
+    "radius_nm": 7.839680501005479
+   },
+   "truth": {
+    "peak_lo_mev": -364.7861287003673,
+    "peak_hi_mev": -282.7861287003672,
+    "radius_nm": 7.84169267557571
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.7861287003672714,
+    "peak_hi_mev": 2.7861287003672146,
+    "radius_nm": -0.0020121745702308402
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 5,
+   "radius_nm": 7.84169267557571,
+   "instrument_s": 3404.9508455068562,
+   "tip_rounds": 7,
+   "track_lost": 5,
+   "pickups": 0,
+   "placed": 5,
+   "spares_seen": 5,
+   "sites": 5,
+   "gap_width_nm": 4.166864261284434,
+   "spacing_nm": 0.8333728522568868,
+   "ring_radius_fit_nm": 7.840608809863877,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 26,
+     "in": false
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 10,
+     "in": true
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 24,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 11,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 11,
+     "in": true
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 18,
+     "in": false
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 0,
+     "in": true
+    },
+    {
+     "r_kohm": 72.1,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 115.3,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 92.2,
+     "spikes": 17,
+     "in": false
+    },
+    {
+     "r_kohm": 92.2,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 92.2,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 92.2,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 92.2,
+     "spikes": 8,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.12,
+    1.01,
+    1.06,
+    1.19,
+    1.19
+   ],
+   "diag": {
+    "tol_nm": 0.411,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.03,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.06,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.03,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.01,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.01,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 60,
+    "r_nm": 7.84169267557571,
+    "planned_deg": [
+     306.0,
+     312.1,
+     318.2,
+     324.3,
+     330.4
+    ],
+    "gap_deg": [
+     305.6,
+     311.2,
+     317.9,
+     324.6,
+     329.5
+    ]
+   },
+   "e0_mev": -424.0022804287749,
+   "radius_measured_nm": 7.839680501005479,
+   "peaks_found": 4,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.2932912711929035,
+    -0.4939550558393332
+   ],
+   "tip_condition": "double"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 4,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -334.00000000000006,
+    "peak_hi_mev": -222.00000000000003,
+    "radius_nm": 6.684755390758642
+   },
+   "truth": {
+    "peak_lo_mev": -336.20535300148293,
+    "peak_hi_mev": -222.20535300148282,
+    "radius_nm": 6.674669292599783
+   },
+   "abs_err": {
+    "peak_lo_mev": 2.2053530014828766,
+    "peak_hi_mev": 0.20535300148279134,
+    "radius_nm": 0.01008609815885908
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 4,
+   "radius_nm": 6.674669292599783,
+   "instrument_s": 867.5808437718954,
+   "tip_rounds": 0,
+   "track_lost": 0,
+   "pickups": 0,
+   "placed": 4,
+   "spares_seen": 4,
+   "sites": 4,
+   "gap_width_nm": 3.6227057492584684,
+   "spacing_nm": 0.9056764373146171,
+   "ring_radius_fit_nm": 6.678956964067607,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 4,
+     "in": true
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 6,
+     "in": true
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 10,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 5,
+     "in": true
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 16,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 219.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 17,
+     "in": false
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 7,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    0.96,
+    0.89,
+    0.85,
+    1.03
+   ],
+   "diag": {
+    "tol_nm": 0.437,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.09,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.2,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.07,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.03,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 48,
+    "r_nm": 6.674669292599783,
+    "planned_deg": [
+     250.2,
+     258.0,
+     265.7,
+     273.5
+    ],
+    "gap_deg": [
+     250.5,
+     258.2,
+     266.2,
+     274.1
+    ]
+   },
+   "e0_mev": -417.13968305899283,
+   "radius_measured_nm": 6.684755390758642,
+   "peaks_found": 4,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.6669529065992742,
+    0.4741808566569509
+   ],
+   "tip_condition": "good"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 5,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -374.00000000000006,
+    "peak_hi_mev": -246.00000000000006,
+    "radius_nm": 5.848429993775432
+   },
+   "truth": {
+    "peak_lo_mev": -371.62679142022773,
+    "peak_hi_mev": -247.62679142022765,
+    "radius_nm": 5.831813811733345
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.3732085797723244,
+    "peak_hi_mev": 1.6267914202275904,
+    "radius_nm": 0.016616182042087146
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 5,
+   "radius_nm": 5.831813811733345,
+   "instrument_s": 2124.0507544652837,
+   "tip_rounds": 5,
+   "track_lost": 2,
+   "pickups": 0,
+   "placed": 5,
+   "spares_seen": 5,
+   "sites": 5,
+   "gap_width_nm": 4.551540823444712,
+   "spacing_nm": 0.9103081646889424,
+   "ring_radius_fit_nm": 5.839216358740654,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 16,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 7,
+     "in": true
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 11,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 6,
+     "in": true
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 9,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 10,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 15,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 180.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 144.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 115.3,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 92.2,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 92.2,
+     "spikes": 12,
+     "in": false
+    },
+    {
+     "r_kohm": 73.8,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 73.8,
+     "spikes": 14,
+     "in": false
+    },
+    {
+     "r_kohm": 73.8,
+     "spikes": 6,
+     "in": true
+    },
+    {
+     "r_kohm": 73.8,
+     "spikes": 2,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.35,
+    1.1,
+    1.22,
+    1.28,
+    1.22
+   ],
+   "diag": {
+    "tol_nm": 0.47,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.16,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.09,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.08,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.15,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.07,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 39,
+    "r_nm": 5.831813811733345,
+    "planned_deg": [
+     226.7,
+     235.6,
+     244.6,
+     253.5,
+     262.4
+    ],
+    "gap_deg": [
+     226.3,
+     237.2,
+     244.7,
+     254.8,
+     264.0
+    ]
+   },
+   "e0_mev": -462.75408247145424,
+   "radius_measured_nm": 5.848429993775432,
+   "peaks_found": 4,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.1106406406354918,
+    0.6843247453137562
+   ],
+   "tip_condition": "double"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 6,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -400.0,
+    "peak_hi_mev": -318.00000000000006,
+    "radius_nm": 7.659305069347807
+   },
+   "truth": {
+    "peak_lo_mev": -397.74078124357766,
+    "peak_hi_mev": -317.7407812435776,
+    "radius_nm": 7.637396022852299
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.2592187564223423,
+    "peak_hi_mev": -0.25921875642245595,
+    "radius_nm": 0.021909046495508733
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 4,
+   "radius_nm": 7.637396022852299,
+   "instrument_s": 1152.6913708551392,
+   "tip_rounds": 1,
+   "track_lost": 0,
+   "pickups": 0,
+   "placed": 4,
+   "spares_seen": 4,
+   "sites": 4,
+   "gap_width_nm": 3.942265000150178,
+   "spacing_nm": 0.9855662500375445,
+   "ring_radius_fit_nm": 7.647565653496279,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 14,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 6,
+     "in": true
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 22,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 11,
+     "in": true
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 21,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 219.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 20,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 8,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    0.84,
+    0.87,
+    0.79,
+    0.77
+   ],
+   "diag": {
+    "tol_nm": 0.47,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.12,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.12,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.01,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.09,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 51,
+    "r_nm": 7.637396022852299,
+    "planned_deg": [
+     65.0,
+     72.4,
+     79.8,
+     87.1
+    ],
+    "gap_deg": [
+     65.9,
+     72.6,
+     79.3,
+     86.2
+    ]
+   },
+   "e0_mev": -454.4285254084527,
+   "radius_measured_nm": 7.659305069347807,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    1.2343041506740173,
+    0.08582022555186758
+   ],
+   "tip_condition": "dirty"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 7,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -372.00000000000006,
+    "peak_hi_mev": -308.00000000000006,
+    "radius_nm": 8.577574702482055
+   },
+   "truth": {
+    "peak_lo_mev": -370.95324074156935,
+    "peak_hi_mev": -306.9532407415693,
+    "radius_nm": 8.608638347236436
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.0467592584307113,
+    "peak_hi_mev": -1.0467592584307681,
+    "radius_nm": -0.03106364475438106
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 6,
+   "radius_nm": 8.608638347236436,
+   "instrument_s": 2491.804240741633,
+   "tip_rounds": 8,
+   "track_lost": 3,
+   "pickups": 0,
+   "placed": 6,
+   "spares_seen": 6,
+   "sites": 6,
+   "gap_width_nm": 7.825003208784405,
+   "spacing_nm": 1.3041672014640675,
+   "ring_radius_fit_nm": 8.56155112678306,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 10,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 10,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 11,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 268.4,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 8,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 4,
+     "in": true
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 5,
+     "in": true
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 274.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 219.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 11,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 10,
+     "in": true
+    },
+    {
+     "r_kohm": 225.2,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 180.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 144.1,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 144.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 115.3,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 115.3,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 92.2,
+     "spikes": 8,
+     "in": false
+    },
+    {
+     "r_kohm": 92.2,
+     "spikes": 7,
+     "in": true
+    },
+    {
+     "r_kohm": 147.6,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 147.6,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 118.1,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 118.1,
+     "spikes": 10,
+     "in": false
+    },
+    {
+     "r_kohm": 94.4,
+     "spikes": 18,
+     "in": false
+    },
+    {
+     "r_kohm": 94.4,
+     "spikes": 8,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.6,
+    1.86,
+    1.89,
+    1.93,
+    1.91,
+    1.74
+   ],
+   "diag": {
+    "tol_nm": 0.676,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.44,
+      "off_circle_nm": -0.04,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.05,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.03,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.05,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": -0.1,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.08,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 40,
+    "r_nm": 8.608638347236436,
+    "planned_deg": [
+     1.1,
+     9.9,
+     18.6,
+     335.0,
+     343.7,
+     352.4
+    ],
+    "gap_deg": [
+     1.0,
+     8.8,
+     18.2,
+     332.8,
+     343.1,
+     351.9
+    ]
+   },
+   "e0_mev": -419.939886281837,
+   "radius_measured_nm": 8.577574702482055,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.4037453588971373,
+    0.3986049646821262
+   ],
+   "tip_condition": "blunt"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 8,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -422.00000000000006,
+    "peak_hi_mev": -376.0,
+    "radius_nm": 8.951305459523187
+   },
+   "truth": {
+    "peak_lo_mev": -424.7661987837832,
+    "peak_hi_mev": -372.7661987837831,
+    "radius_nm": 8.930080569239813
+   },
+   "abs_err": {
+    "peak_lo_mev": 2.766198783783125,
+    "peak_hi_mev": -3.233801216216875,
+    "radius_nm": 0.021224890283374265
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 6,
+   "radius_nm": 8.930080569239813,
+   "instrument_s": 1786.8571097164133,
+   "tip_rounds": 4,
+   "track_lost": 1,
+   "pickups": 0,
+   "placed": 6,
+   "spares_seen": 6,
+   "sites": 6,
+   "gap_width_nm": 9.49887642358566,
+   "spacing_nm": 1.58314607059761,
+   "ring_radius_fit_nm": 8.93118099473452,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 10,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 11,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 7,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 10,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 11,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 22,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 12,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 12,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 9,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 24,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 8,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.29,
+    1.54,
+    1.58,
+    1.61,
+    1.54,
+    1.52
+   ],
+   "diag": {
+    "tol_nm": 0.779,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.16,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.04,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.05,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.03,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.16,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.02,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 36,
+    "r_nm": 8.930080569239813,
+    "planned_deg": [
+     301.9,
+     312.1,
+     322.2,
+     332.4,
+     342.5,
+     352.7
+    ],
+    "gap_deg": [
+     302.3,
+     312.3,
+     322.5,
+     332.3,
+     341.5,
+     351.8
+    ]
+   },
+   "e0_mev": -465.14696605880744,
+   "radius_measured_nm": 8.951305459523187,
+   "peaks_found": 6,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.28693739448869326,
+    -0.48000866365249983
+   ],
+   "tip_condition": "double"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 9,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -382.0,
+    "peak_hi_mev": -284.00000000000006,
+    "radius_nm": 6.757020001100014
+   },
+   "truth": {
+    "peak_lo_mev": -383.5460899997046,
+    "peak_hi_mev": -285.54608999970446,
+    "radius_nm": 6.76205275604922
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.5460899997045772,
+    "peak_hi_mev": 1.5460899997044066,
+    "radius_nm": -0.005032754949206186
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 4,
+   "radius_nm": 6.76205275604922,
+   "instrument_s": 667.5656472559414,
+   "tip_rounds": 0,
+   "track_lost": 0,
+   "pickups": 0,
+   "placed": 4,
+   "spares_seen": 4,
+   "sites": 4,
+   "gap_width_nm": 3.5523963689564533,
+   "spacing_nm": 0.8880990922391133,
+   "ring_radius_fit_nm": 6.749631557032978,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 24,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 21,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 12,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 5,
+     "in": true
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 20,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 8,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.11,
+    1.11,
+    1.15,
+    1.15
+   ],
+   "diag": {
+    "tol_nm": 0.452,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.06,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.14,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.08,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.14,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 47,
+    "r_nm": 6.76205275604922,
+    "planned_deg": [
+     1.9,
+     9.4,
+     17.0,
+     24.5
+    ],
+    "gap_deg": [
+     2.1,
+     9.5,
+     17.1,
+     24.7
+    ]
+   },
+   "e0_mev": -453.79811129132224,
+   "radius_measured_nm": 6.757020001100014,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.5097678465667093,
+    0.28874299556519745
+   ],
+   "tip_condition": "good"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 10,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -352.00000000000006,
+    "peak_hi_mev": -262.0,
+    "radius_nm": 6.96204869307234
+   },
+   "truth": {
+    "peak_lo_mev": -353.92808143908263,
+    "peak_hi_mev": -261.9280814390825,
+    "radius_nm": 6.938059135752802
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.9280814390825753,
+    "peak_hi_mev": -0.0719185609174815,
+    "radius_nm": 0.023989557319538335
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 6,
+   "radius_nm": 6.938059135752802,
+   "instrument_s": 2593.271546262596,
+   "tip_rounds": 4,
+   "track_lost": 3,
+   "pickups": 0,
+   "placed": 6,
+   "spares_seen": 6,
+   "sites": 6,
+   "gap_width_nm": 6.313514128734859,
+   "spacing_nm": 1.0522523547891431,
+   "ring_radius_fit_nm": 6.964676483427202,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 14,
+     "in": false
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 14,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 88.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 88.0,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 70.4,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 70.4,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 72.1,
+     "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 72.1,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 115.3,
+     "spikes": 15,
+     "in": false
+    },
+    {
+     "r_kohm": 115.3,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 184.5,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 184.5,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 147.6,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 118.1,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 118.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 94.4,
+     "spikes": 19,
+     "in": false
+    },
+    {
+     "r_kohm": 94.4,
+     "spikes": 8,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.14,
+    1.43,
+    1.22,
+    1.19,
+    1.33,
+    1.37
+   ],
+   "diag": {
+    "tol_nm": 0.532,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.02,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.03,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.12,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.21,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.04,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.15,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 41,
+    "r_nm": 6.938059135752802,
+    "planned_deg": [
+     255.3,
+     264.0,
+     272.7,
+     281.3,
+     290.0,
+     298.6
+    ],
+    "gap_deg": [
+     254.7,
+     264.3,
+     273.5,
+     282.6,
+     290.1,
+     299.8
+    ]
+   },
+   "e0_mev": -420.2683830288119,
+   "radius_measured_nm": 6.96204869307234,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.2130500523578759,
+    0.15294429807846513
+   ],
+   "tip_condition": "double"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 11,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -382.0,
+    "peak_hi_mev": -296.00000000000006,
+    "radius_nm": 7.237551465452526
+   },
+   "truth": {
+    "peak_lo_mev": -384.99812677922745,
+    "peak_hi_mev": -294.9981267792274,
+    "radius_nm": 7.1959717441539075
+   },
+   "abs_err": {
+    "peak_lo_mev": 2.998126779227448,
+    "peak_hi_mev": -1.0018732207726657,
+    "radius_nm": 0.041579721298618644
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 5,
+   "radius_nm": 7.1959717441539075,
+   "instrument_s": 2025.4305005427877,
+   "tip_rounds": 5,
+   "track_lost": 2,
+   "pickups": 0,
+   "placed": 5,
+   "spares_seen": 5,
+   "sites": 5,
+   "gap_width_nm": 4.478976202554373,
+   "spacing_nm": 0.8957952405108746,
+   "ring_radius_fit_nm": 7.229368135243763,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 19,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 327.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 13,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 268.4,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 268.4,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 18,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 343.6,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 274.9,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 274.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 219.9,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 219.9,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 17,
+     "in": false
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 6,
+     "in": true
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 4,
+     "in": true
+    },
+    {
+     "r_kohm": 281.5,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 225.2,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 225.2,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 180.1,
+     "spikes": 15,
+     "in": false
+    },
+    {
+     "r_kohm": 180.1,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 180.1,
+     "spikes": 9,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.06,
+    1.03,
+    1.05,
+    1.0,
+    0.94
+   ],
+   "diag": {
+    "tol_nm": 0.443,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.02,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.04,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.17,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.18,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.08,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 51,
+    "r_nm": 7.1959717441539075,
+    "planned_deg": [
+     275.5,
+     282.6,
+     289.7,
+     296.8,
+     303.9
+    ],
+    "gap_deg": [
+     276.0,
+     283.3,
+     289.4,
+     297.6,
+     303.6
+    ]
+   },
+   "e0_mev": -448.0495967310187,
+   "radius_measured_nm": 7.237551465452526,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.7977246177369809,
+    -0.7999477151448604
+   ],
+   "tip_condition": "double"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 12,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -398.0,
+    "peak_hi_mev": -314.00000000000006,
+    "radius_nm": 7.890083846393651
+   },
+   "truth": {
+    "peak_lo_mev": -395.5148571640046,
+    "peak_hi_mev": -315.5148571640045,
+    "radius_nm": 7.8392032356893475
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.4851428359954184,
+    "peak_hi_mev": 1.514857164004468,
+    "radius_nm": 0.050880610704303386
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 4,
+   "radius_nm": 7.8392032356893475,
+   "instrument_s": 1195.0762097831487,
+   "tip_rounds": 5,
+   "track_lost": 0,
+   "pickups": 0,
+   "placed": 4,
+   "spares_seen": 4,
+   "sites": 4,
+   "gap_width_nm": 3.3377371789692463,
+   "spacing_nm": 0.8344342947423116,
+   "ring_radius_fit_nm": 7.878333192790939,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 13,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 10,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 14,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 6,
+     "in": true
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 4,
+     "in": true
+    },
+    {
+     "r_kohm": 335.5,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 268.4,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 10,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 274.9,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 274.9,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 219.9,
+     "spikes": 24,
+     "in": false
+    },
+    {
+     "r_kohm": 219.9,
+     "spikes": 9,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    0.89,
+    0.84,
+    0.89,
+    1.11
+   ],
+   "diag": {
+    "tol_nm": 0.41,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.07,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.13,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.05,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.11,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 60,
+    "r_nm": 7.8392032356893475,
+    "planned_deg": [
+     226.6,
+     232.7,
+     238.8,
+     244.8
+    ],
+    "gap_deg": [
+     226.5,
+     231.4,
+     237.7,
+     244.4
+    ]
+   },
+   "e0_mev": -454.949265461615,
+   "radius_measured_nm": 7.890083846393651,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.08415797691556297,
+    -0.8110719280464369
+   ],
+   "tip_condition": "blunt"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 13,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -398.0,
+    "peak_hi_mev": -292.00000000000006,
+    "radius_nm": 6.479990074880006
+   },
+   "truth": {
+    "peak_lo_mev": -394.42847340475134,
+    "peak_hi_mev": -292.42847340475123,
+    "radius_nm": 6.497066061609052
+   },
+   "abs_err": {
+    "peak_lo_mev": -3.571526595248656,
+    "peak_hi_mev": 0.42847340475117335,
+    "radius_nm": -0.0170759867290462
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 6,
+   "radius_nm": 6.497066061609052,
+   "instrument_s": 1289.9127293627314,
+   "tip_rounds": 1,
+   "track_lost": 0,
+   "pickups": 0,
+   "placed": 6,
+   "spares_seen": 6,
+   "sites": 6,
+   "gap_width_nm": 5.815550287919084,
+   "spacing_nm": 0.9692583813198473,
+   "ring_radius_fit_nm": 6.489083559538775,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 10,
+     "in": false
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 10,
+     "in": true
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 85.9,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 85.9,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 85.9,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 85.9,
+     "spikes": 10,
+     "in": true
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 88.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 70.4,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 56.3,
+     "spikes": 14,
+     "in": false
+    },
+    {
+     "r_kohm": 56.3,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 56.3,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 56.3,
+     "spikes": 7,
+     "in": true
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 72.1,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 72.1,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 115.3,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 115.3,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 92.2,
+     "spikes": 16,
+     "in": false
+    },
+    {
+     "r_kohm": 92.2,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 147.6,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 118.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 94.4,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 75.6,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 75.6,
+     "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 60.4,
+     "spikes": 16,
+     "in": false
+    },
+    {
+     "r_kohm": 60.4,
+     "spikes": 9,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    0.86,
+    0.9,
+    0.96,
+    1.13,
+    1.04,
+    1.04
+   ],
+   "diag": {
+    "tol_nm": 0.475,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.06,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.08,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.15,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.03,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.02,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.05,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 43,
+    "r_nm": 6.497066061609052,
+    "planned_deg": [
+     113.8,
+     122.3,
+     130.9,
+     139.5,
+     148.0,
+     156.6
+    ],
+    "gap_deg": [
+     114.8,
+     122.8,
+     131.0,
+     139.1,
+     146.9,
+     156.7
+    ]
+   },
+   "e0_mev": -469.291401472052,
+   "radius_measured_nm": 6.479990074880006,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.14331018981263313,
+    0.48738500523931555
+   ],
+   "tip_condition": "dirty"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 14,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -386.0,
+    "peak_hi_mev": -302.00000000000006,
+    "radius_nm": 7.449991942669684
+   },
+   "truth": {
+    "peak_lo_mev": -385.5419039821557,
+    "peak_hi_mev": -303.54190398215565,
+    "radius_nm": 7.485783779652931
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.4580960178442979,
+    "peak_hi_mev": 1.5419039821555884,
+    "radius_nm": -0.03579183698324684
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 6,
+   "radius_nm": 7.485783779652931,
+   "instrument_s": 1611.1221893664526,
+   "tip_rounds": 3,
+   "track_lost": 1,
+   "pickups": 0,
+   "placed": 6,
+   "spares_seen": 6,
+   "sites": 6,
+   "gap_width_nm": 6.131967537278401,
+   "spacing_nm": 1.0219945895464002,
+   "ring_radius_fit_nm": 7.438717500890819,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 18,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 327.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 10,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 335.5,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 335.5,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 335.5,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 335.5,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 268.4,
+     "spikes": 9,
+     "in": false
+    },
+    {
+     "r_kohm": 268.4,
+     "spikes": 7,
+     "in": true
+    },
+    {
+     "r_kohm": 268.4,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 10,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 327.7,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 327.7,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 11,
+     "in": false
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 6,
+     "in": true
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 4,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.15,
+    1.29,
+    1.19,
+    1.22,
+    1.09,
+    1.16
+   ],
+   "diag": {
+    "tol_nm": 0.5,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.01,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.05,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.07,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.05,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.08,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.08,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 47,
+    "r_nm": 7.485783779652931,
+    "planned_deg": [
+     139.0,
+     146.8,
+     154.7,
+     162.6,
+     170.5,
+     178.3
+    ],
+    "gap_deg": [
+     138.6,
+     145.7,
+     154.2,
+     162.7,
+     169.7,
+     176.8
+    ]
+   },
+   "e0_mev": -446.6854525190316,
+   "radius_measured_nm": 7.449991942669684,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.1778564166252928,
+    0.23281234391542416
+   ],
+   "tip_condition": "double"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 15,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -332.00000000000006,
+    "peak_hi_mev": -190.00000000000006,
+    "radius_nm": 6.081576182257524
+   },
+   "truth": {
+    "peak_lo_mev": -329.2355807156904,
+    "peak_hi_mev": -193.23558071569025,
+    "radius_nm": 6.071176752403414
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.7644192843096675,
+    "peak_hi_mev": 3.2355807156901903,
+    "radius_nm": 0.010399429854110132
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 3,
+   "radius_nm": 6.071176752403414,
+   "instrument_s": 1076.2343483879356,
+   "tip_rounds": 2,
+   "track_lost": 0,
+   "pickups": 0,
+   "placed": 3,
+   "spares_seen": 3,
+   "sites": 3,
+   "gap_width_nm": 2.786444267585863,
+   "spacing_nm": 0.9288147558619544,
+   "ring_radius_fit_nm": 6.0749767710021345,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 21,
+     "in": false
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 8,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 5,
+     "in": true
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 21,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 8,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.08,
+    1.06,
+    1.22
+   ],
+   "diag": {
+    "tol_nm": 0.433,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.01,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.15,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.2,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 44,
+    "r_nm": 6.071176752403414,
+    "planned_deg": [
+     124.1,
+     132.8,
+     141.6
+    ],
+    "gap_deg": [
+     123.9,
+     132.6,
+     141.3
+    ]
+   },
+   "e0_mev": -428.04634388771035,
+   "radius_measured_nm": 6.081576182257524,
+   "peaks_found": 4,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.3605406086884039,
+    0.5034146058978249
+   ],
+   "tip_condition": "unstable"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 16,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -360.00000000000006,
+    "peak_hi_mev": -264.0,
+    "radius_nm": 7.262668579073995
+   },
+   "truth": {
+    "peak_lo_mev": -357.89446039224833,
+    "peak_hi_mev": -263.8944603922482,
+    "radius_nm": 7.242237323442408
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.105539607751723,
+    "peak_hi_mev": -0.10553960775177984,
+    "radius_nm": 0.02043125563158643
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 6,
+   "radius_nm": 7.242237323442408,
+   "instrument_s": 2140.8471414865544,
+   "tip_rounds": 5,
+   "track_lost": 2,
+   "pickups": 0,
+   "placed": 6,
+   "spares_seen": 6,
+   "sites": 6,
+   "gap_width_nm": 7.217546294483056,
+   "spacing_nm": 1.2029243824138427,
+   "ring_radius_fit_nm": 7.224544203827064,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 10,
+     "in": true
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 85.9,
+     "spikes": 16,
+     "in": false
+    },
+    {
+     "r_kohm": 85.9,
+     "spikes": 10,
+     "in": true
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 9,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 4,
+     "in": true
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 22,
+     "in": false
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 5,
+     "in": true
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 144.1,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 144.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 115.3,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 115.3,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 92.2,
+     "spikes": 14,
+     "in": false
+    },
+    {
+     "r_kohm": 92.2,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 147.6,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 118.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 94.4,
+     "spikes": 20,
+     "in": false
+    },
+    {
+     "r_kohm": 94.4,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 94.4,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 94.4,
+     "spikes": 6,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.23,
+    1.2,
+    1.32,
+    1.29,
+    1.4,
+    1.46
+   ],
+   "diag": {
+    "tol_nm": 0.599,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.01,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.01,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.01,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.06,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": -0.08,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.03,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 38,
+    "r_nm": 7.242237323442408,
+    "planned_deg": [
+     104.7,
+     114.2,
+     123.7,
+     133.3,
+     142.8,
+     152.4
+    ],
+    "gap_deg": [
+     104.3,
+     112.4,
+     123.6,
+     132.4,
+     141.2,
+     151.9
+    ]
+   },
+   "e0_mev": -424.76037648883687,
+   "radius_measured_nm": 7.262668579073995,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.719118218747242,
+    0.604274385564839
+   ],
+   "tip_condition": "double"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 17,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -360.00000000000006,
+    "peak_hi_mev": -284.00000000000006,
+    "radius_nm": 7.541362470285838
+   },
+   "truth": {
+    "peak_lo_mev": -361.3404541501618,
+    "peak_hi_mev": -285.34045415016175,
+    "radius_nm": 7.58116757563368
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.3404541501617473,
+    "peak_hi_mev": 1.3404541501616904,
+    "radius_nm": -0.039805105347841874
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 6,
+   "radius_nm": 7.58116757563368,
+   "instrument_s": 1077.3362628726532,
+   "tip_rounds": 1,
+   "track_lost": 0,
+   "pickups": 0,
+   "placed": 6,
+   "spares_seen": 6,
+   "sites": 6,
+   "gap_width_nm": 6.039228040824567,
+   "spacing_nm": 1.0065380068040946,
+   "ring_radius_fit_nm": 7.565505159587057,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 21,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 12,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 6,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 8,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 6,
+     "in": true
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 5,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 17,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 19,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 8,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.09,
+    1.16,
+    1.08,
+    1.22,
+    1.2,
+    1.16
+   ],
+   "diag": {
+    "tol_nm": 0.507,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.01,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.02,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.08,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.12,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.04,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.07,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 47,
+    "r_nm": 7.58116757563368,
+    "planned_deg": [
+     311.6,
+     319.2,
+     326.9,
+     334.5,
+     342.1,
+     349.7
+    ],
+    "gap_deg": [
+     311.9,
+     318.8,
+     326.6,
+     334.4,
+     342.1,
+     349.0
+    ]
+   },
+   "e0_mev": -418.21545945998497,
+   "radius_measured_nm": 7.541362470285838,
+   "peaks_found": 4,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.48897637376235625,
+    0.41694299561273424
+   ],
+   "tip_condition": "dirty"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 18,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -400.0,
+    "peak_hi_mev": -340.00000000000006,
+    "radius_nm": 8.674820969936267
+   },
+   "truth": {
+    "peak_lo_mev": -399.4532910191726,
+    "peak_hi_mev": -341.4532910191725,
+    "radius_nm": 8.66220741249721
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.5467089808274181,
+    "peak_hi_mev": 1.4532910191724682,
+    "radius_nm": 0.012613557439056677
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 3,
+   "radius_nm": 8.66220741249721,
+   "instrument_s": 752.3807394659771,
+   "tip_rounds": 0,
+   "track_lost": 0,
+   "pickups": 0,
+   "placed": 3,
+   "spares_seen": 3,
+   "sites": 3,
+   "gap_width_nm": 2.9160472140914844,
+   "spacing_nm": 0.9720157380304948,
+   "ring_radius_fit_nm": 8.661101576299004,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 15,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 12,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 16,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 6,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 19,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 3,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    0.96,
+    0.92,
+    0.91
+   ],
+   "diag": {
+    "tol_nm": 0.454,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.01,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.16,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.03,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 60,
+    "r_nm": 8.66220741249721,
+    "planned_deg": [
+     237.1,
+     243.5,
+     250.0
+    ],
+    "gap_deg": [
+     237.4,
+     244.2,
+     249.2
+    ]
+   },
+   "e0_mev": -443.1222464859335,
+   "radius_measured_nm": 8.674820969936267,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.3540032211300449,
+    -0.5350594735656891
+   ],
+   "tip_condition": "good"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 19,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -372.00000000000006,
+    "peak_hi_mev": -270.0,
+    "radius_nm": 6.5356540568543515
+   },
+   "truth": {
+    "peak_lo_mev": -375.5644005081628,
+    "peak_hi_mev": -271.5644005081627,
+    "radius_nm": 6.479944013504997
+   },
+   "abs_err": {
+    "peak_lo_mev": 3.5644005081627483,
+    "peak_hi_mev": 1.5644005081626915,
+    "radius_nm": 0.0557100433493547
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 4,
+   "radius_nm": 6.479944013504997,
+   "instrument_s": 1135.1683587107075,
+   "tip_rounds": 2,
+   "track_lost": 0,
+   "pickups": 0,
+   "placed": 4,
+   "spares_seen": 4,
+   "sites": 4,
+   "gap_width_nm": 2.94042876949496,
+   "spacing_nm": 0.73510719237374,
+   "ring_radius_fit_nm": 6.506325837152199,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 16,
+     "in": false
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 4,
+     "in": true
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 85.9,
+     "spikes": 9,
+     "in": false
+    },
+    {
+     "r_kohm": 85.9,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 88.0,
+     "spikes": 11,
+     "in": false
+    },
+    {
+     "r_kohm": 88.0,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 14,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 6,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.05,
+    1.14,
+    0.98,
+    1.02
+   ],
+   "diag": {
+    "tol_nm": 0.364,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.04,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.13,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.13,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.07,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 56,
+    "r_nm": 6.479944013504997,
+    "planned_deg": [
+     5.0,
+     11.5,
+     352.0,
+     358.5
+    ],
+    "gap_deg": [
+     4.4,
+     10.1,
+     352.0,
+     358.0
+    ]
+   },
+   "e0_mev": -448.1192387705021,
+   "radius_measured_nm": 6.5356540568543515,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.5676421067448584,
+    -0.090707103075874
+   ],
+   "tip_condition": "blunt"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 20,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -336.00000000000006,
+    "peak_hi_mev": -216.00000000000003,
+    "radius_nm": 6.4997048946256415
+   },
+   "truth": {
+    "peak_lo_mev": -337.3516062907165,
+    "peak_hi_mev": -217.35160629071643,
+    "radius_nm": 6.369629948390191
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.351606290716461,
+    "peak_hi_mev": 1.3516062907164041,
+    "radius_nm": 0.13007494623545046
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 6,
+   "radius_nm": 6.369629948390191,
+   "instrument_s": 1063.642654867569,
+   "tip_rounds": 1,
+   "track_lost": 0,
+   "pickups": 0,
+   "placed": 6,
+   "spares_seen": 6,
+   "sites": 6,
+   "gap_width_nm": 6.035143924245745,
+   "spacing_nm": 1.0058573207076242,
+   "ring_radius_fit_nm": 6.477532930105762,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 8,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 10,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 8,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 13,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 6,
+     "in": true
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 4,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 16,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 7,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 11,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 18,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 8,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    0.88,
+    0.95,
+    0.94,
+    0.97,
+    0.98,
+    0.97
+   ],
+   "diag": {
+    "tol_nm": 0.476,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.13,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.09,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.16,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.23,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.07,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.23,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 42,
+    "r_nm": 6.369629948390191,
+    "planned_deg": [
+     309.9,
+     318.8,
+     327.6,
+     336.5,
+     345.4,
+     354.3
+    ],
+    "gap_deg": [
+     310.4,
+     319.5,
+     327.2,
+     337.3,
+     345.2,
+     353.4
+    ]
+   },
+   "e0_mev": -422.1429166127044,
+   "radius_measured_nm": 6.4997048946256415,
+   "peaks_found": 4,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.11633145754733944,
+    -0.40942277366903945
+   ],
+   "tip_condition": "dirty"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 21,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -396.0,
+    "peak_hi_mev": -334.00000000000006,
+    "radius_nm": 8.558225485326513
+   },
+   "truth": {
+    "peak_lo_mev": -398.948636816621,
+    "peak_hi_mev": -332.94863681662093,
+    "radius_nm": 8.518075223741755
+   },
+   "abs_err": {
+    "peak_lo_mev": 2.94863681662099,
+    "peak_hi_mev": -1.0513631833791237,
+    "radius_nm": 0.040150261584757985
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 4,
+   "radius_nm": 8.518075223741755,
+   "instrument_s": 1517.0626085989065,
+   "tip_rounds": 3,
+   "track_lost": 1,
+   "pickups": 0,
+   "placed": 4,
+   "spares_seen": 4,
+   "sites": 4,
+   "gap_width_nm": 6.153649048285685,
+   "spacing_nm": 1.5384122620714213,
+   "ring_radius_fit_nm": 8.551911120786723,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 14,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 11,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 7,
+     "in": true
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 4,
+     "in": true
+    },
+    {
+     "r_kohm": 335.5,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 335.5,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 268.4,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 268.4,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 20,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 343.6,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 274.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 219.9,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 219.9,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 21,
+     "in": false
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 8,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.57,
+    1.47,
+    1.32,
+    1.25
+   ],
+   "diag": {
+    "tol_nm": 0.743,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": -0.01,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.03,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": -0.02,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.06,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 36,
+    "r_nm": 8.518075223741755,
+    "planned_deg": [
+     37.3,
+     47.6,
+     57.9,
+     68.2
+    ],
+    "gap_deg": [
+     39.0,
+     47.6,
+     58.9,
+     67.9
+    ]
+   },
+   "e0_mev": -448.45906192848855,
+   "radius_measured_nm": 8.558225485326513,
+   "peaks_found": 6,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.014754519125487718,
+    0.5065293302021022
+   ],
+   "tip_condition": "unstable"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 22,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -392.0,
+    "peak_hi_mev": -328.00000000000006,
+    "radius_nm": 8.291774368558194
+   },
+   "truth": {
+    "peak_lo_mev": -388.9473967760866,
+    "peak_hi_mev": -326.9473967760865,
+    "radius_nm": 8.275814332344172
+   },
+   "abs_err": {
+    "peak_lo_mev": -3.0526032239134224,
+    "peak_hi_mev": -1.0526032239135361,
+    "radius_nm": 0.015960036214021756
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 6,
+   "radius_nm": 8.275814332344172,
+   "instrument_s": 1346.7110291624506,
+   "tip_rounds": 1,
+   "track_lost": 0,
+   "pickups": 0,
+   "placed": 6,
+   "spares_seen": 6,
+   "sites": 6,
+   "gap_width_nm": 5.4273041351454205,
+   "spacing_nm": 0.9045506891909034,
+   "ring_radius_fit_nm": 8.290172847452773,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 16,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 12,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 268.4,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 19,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 343.6,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 343.6,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 274.9,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 274.9,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 219.9,
+     "spikes": 23,
+     "in": false
+    },
+    {
+     "r_kohm": 219.9,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 219.9,
+     "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 219.9,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 351.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 281.5,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 225.2,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 225.2,
+     "spikes": 24,
+     "in": false
+    },
+    {
+     "r_kohm": 225.2,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 225.2,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 225.2,
+     "spikes": 5,
+     "in": true
+    },
+    {
+     "r_kohm": 360.3,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 288.2,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 230.6,
+     "spikes": 8,
+     "in": false
+    },
+    {
+     "r_kohm": 230.6,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 184.5,
+     "spikes": 20,
+     "in": false
+    },
+    {
+     "r_kohm": 184.5,
+     "spikes": 8,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.08,
+    1.01,
+    1.08,
+    1.06,
+    1.07,
+    1.09
+   ],
+   "diag": {
+    "tol_nm": 0.441,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.11,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.02,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.2,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.07,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.04,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.11,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 59,
+    "r_nm": 8.275814332344172,
+    "planned_deg": [
+     126.4,
+     132.6,
+     138.9,
+     145.1,
+     151.4,
+     157.6
+    ],
+    "gap_deg": [
+     127.8,
+     133.0,
+     140.1,
+     145.3,
+     151.7,
+     158.0
+    ]
+   },
+   "e0_mev": -434.68295549388324,
+   "radius_measured_nm": 8.291774368558194,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.4689893395968597,
+    -0.46310307950299107
+   ],
+   "tip_condition": "dirty"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 23,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -390.0,
+    "peak_hi_mev": -322.00000000000006,
+    "radius_nm": 7.758093238226313
+   },
+   "truth": {
+    "peak_lo_mev": -390.31618710124025,
+    "peak_hi_mev": -322.31618710124013,
+    "radius_nm": 7.871398775167654
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.31618710124024574,
+    "peak_hi_mev": 0.3161871012400752,
+    "radius_nm": -0.11330553694134071
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 3,
+   "radius_nm": 7.871398775167654,
+   "instrument_s": 1234.2455225086142,
+   "tip_rounds": 1,
+   "track_lost": 0,
+   "pickups": 0,
+   "placed": 3,
+   "spares_seen": 3,
+   "sites": 3,
+   "gap_width_nm": 3.6483350230335514,
+   "spacing_nm": 1.216111674344517,
+   "ring_radius_fit_nm": 7.796627173391373,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 21,
+     "in": false
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 20,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 268.4,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 15,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 8,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.15,
+    1.18,
+    1.11
+   ],
+   "diag": {
+    "tol_nm": 0.603,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": -0.04,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": -0.19,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.03,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 41,
+    "r_nm": 7.871398775167654,
+    "planned_deg": [
+     77.9,
+     86.8,
+     95.8
+    ],
+    "gap_deg": [
+     76.4,
+     86.2,
+     94.6
+    ]
+   },
+   "e0_mev": -438.8659174657035,
+   "radius_measured_nm": 7.758093238226313,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.0008709846889636577,
+    0.10039250456561999
+   ],
+   "tip_condition": "double"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 24,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -362.00000000000006,
+    "peak_hi_mev": -266.0,
+    "radius_nm": 6.95950193050066
+   },
+   "truth": {
+    "peak_lo_mev": -359.2810450167411,
+    "peak_hi_mev": -265.281045016741,
+    "radius_nm": 6.88238445707345
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.718954983258982,
+    "peak_hi_mev": -0.7189549832589819,
+    "radius_nm": 0.07711747342720976
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 0.9811320754716981,
+   "gap_sites": 6,
+   "radius_nm": 6.88238445707345,
+   "instrument_s": 1609.9361924726927,
+   "tip_rounds": 6,
+   "track_lost": 1,
+   "pickups": 0,
+   "placed": 6,
+   "spares_seen": 6,
+   "sites": 6,
+   "gap_width_nm": 5.0561124856476125,
+   "spacing_nm": 0.8426854142746021,
+   "ring_radius_fit_nm": 6.923638764682632,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 12,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 14,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 10,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 4,
+     "in": true
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 7,
+     "in": true
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 6,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 7,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 4,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 5,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 30,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 327.7,
+     "spikes": 11,
+     "in": false
+    },
+    {
+     "r_kohm": 327.7,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 327.7,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 327.7,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 327.7,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 327.7,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 327.7,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 327.7,
+     "spikes": 0,
+     "in": true
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 3,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.05,
+    0.94,
+    0.63,
+    0.99,
+    0.89,
+    0.93
+   ],
+   "diag": {
+    "tol_nm": 0.408,
+    "unheld": [
+     {
+      "angle_deg": 147.5,
+      "nearest_atom_nm": 0.51
+     }
+    ],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": -0.01,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.04,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.51,
+      "off_circle_nm": 0.52,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.04,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.11,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.08,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 53,
+    "r_nm": 6.88238445707345,
+    "planned_deg": [
+     132.8,
+     139.8,
+     146.7,
+     153.7,
+     160.7,
+     167.7
+    ],
+    "gap_deg": [
+     134.3,
+     139.9,
+     147.5,
+     153.9,
+     161.5,
+     167.7
+    ]
+   },
+   "e0_mev": -428.8189837113831,
+   "radius_measured_nm": 6.95950193050066,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.19215343288500894,
+    -0.10349544928620731
+   ],
+   "tip_condition": "unstable"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 25,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -372.00000000000006,
+    "peak_hi_mev": -244.00000000000006,
+    "radius_nm": 5.811190700867975
+   },
+   "truth": {
+    "peak_lo_mev": -372.90717457087766,
+    "peak_hi_mev": -244.90717457087752,
+    "radius_nm": 5.770769151078532
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.9071745708776007,
+    "peak_hi_mev": 0.9071745708774586,
+    "radius_nm": 0.04042154978944268
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 3,
+   "radius_nm": 5.770769151078532,
+   "instrument_s": 1475.941359909654,
+   "tip_rounds": 4,
+   "track_lost": 1,
+   "pickups": 0,
+   "placed": 3,
+   "spares_seen": 3,
+   "sites": 3,
+   "gap_width_nm": 2.178806400804205,
+   "spacing_nm": 0.7262688002680684,
+   "ring_radius_fit_nm": 5.808412059709199,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 18,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 10,
+     "in": true
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 17,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 335.5,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 335.5,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 268.4,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 268.4,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 12,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 6,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.09,
+    1.03,
+    1.07
+   ],
+   "diag": {
+    "tol_nm": 0.349,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.17,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.12,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.17,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 52,
+    "r_nm": 5.770769151078532,
+    "planned_deg": [
+     205.5,
+     212.7,
+     219.8
+    ],
+    "gap_deg": [
+     206.1,
+     212.6,
+     219.0
+    ]
+   },
+   "e0_mev": -463.07040705036576,
+   "radius_measured_nm": 5.811190700867975,
+   "peaks_found": 4,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.3405980314110154,
+    -0.42487207738878524
+   ],
+   "tip_condition": "unstable"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 26,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -374.00000000000006,
+    "peak_hi_mev": -282.0,
+    "radius_nm": 7.086890816185085
+   },
+   "truth": {
+    "peak_lo_mev": -371.9656454518967,
+    "peak_hi_mev": -281.9656454518966,
+    "radius_nm": 7.071665980752861
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.0343545481033516,
+    "peak_hi_mev": -0.03435454810340843,
+    "radius_nm": 0.015224835432224637
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 4,
+   "radius_nm": 7.071665980752861,
+   "instrument_s": 880.7591782418784,
+   "tip_rounds": 0,
+   "track_lost": 0,
+   "pickups": 0,
+   "placed": 4,
+   "spares_seen": 4,
+   "sites": 4,
+   "gap_width_nm": 5.107478847325848,
+   "spacing_nm": 1.276869711831462,
+   "ring_radius_fit_nm": 7.083966899107574,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 18,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 7,
+     "in": true
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 5,
+     "in": true
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 9,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 8,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 85.9,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 9,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 11,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 21,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 3,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.65,
+    0.78,
+    1.22,
+    1.5
+   ],
+   "diag": {
+    "tol_nm": 0.617,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.02,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.11,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.19,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.02,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 36,
+    "r_nm": 7.071665980752861,
+    "planned_deg": [
+     117.0,
+     127.3,
+     137.6,
+     147.9
+    ],
+    "gap_deg": [
+     117.8,
+     126.7,
+     137.6,
+     146.5
+    ]
+   },
+   "e0_mev": -437.3761480736753,
+   "radius_measured_nm": 7.086890816185085,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.16975450485240579,
+    -0.057248119769021805
+   ],
+   "tip_condition": "good"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 27,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -390.0,
+    "peak_hi_mev": -296.00000000000006,
+    "radius_nm": 6.824009536488113
+   },
+   "truth": {
+    "peak_lo_mev": -390.0737172098931,
+    "peak_hi_mev": -298.07371720989306,
+    "radius_nm": 6.814077227658927
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.07371720989311825,
+    "peak_hi_mev": 2.0737172098930046,
+    "radius_nm": 0.009932308829185388
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 4,
+   "radius_nm": 6.814077227658927,
+   "instrument_s": 932.9305163758771,
+   "tip_rounds": 0,
+   "track_lost": 0,
+   "pickups": 0,
+   "placed": 4,
+   "spares_seen": 4,
+   "sites": 4,
+   "gap_width_nm": 3.251599393648762,
+   "spacing_nm": 0.8128998484121905,
+   "ring_radius_fit_nm": 6.806663408468217,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 83.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 67.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 53.7,
+     "spikes": 15,
+     "in": false
+    },
+    {
+     "r_kohm": 53.7,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 53.7,
+     "spikes": 12,
+     "in": false
+    },
+    {
+     "r_kohm": 53.7,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 85.9,
+     "spikes": 14,
+     "in": false
+    },
+    {
+     "r_kohm": 85.9,
+     "spikes": 0,
+     "in": true
+    },
+    {
+     "r_kohm": 68.7,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 88.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 88.0,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 70.4,
+     "spikes": 21,
+     "in": false
+    },
+    {
+     "r_kohm": 70.4,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 72.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 57.6,
+     "spikes": 23,
+     "in": false
+    },
+    {
+     "r_kohm": 57.6,
+     "spikes": 8,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    0.92,
+    0.94,
+    0.95,
+    0.91
+   ],
+   "diag": {
+    "tol_nm": 0.382,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.0,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.04,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.0,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.13,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 56,
+    "r_nm": 6.814077227658927,
+    "planned_deg": [
+     66.9,
+     73.7,
+     80.6,
+     87.4
+    ],
+    "gap_deg": [
+     68.0,
+     74.4,
+     80.8,
+     87.1
+    ]
+   },
+   "e0_mev": -458.062332337602,
+   "radius_measured_nm": 6.824009536488113,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    0.3111083392875164,
+    0.9645185698635352
+   ],
+   "tip_condition": "good"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 28,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -356.00000000000006,
+    "peak_hi_mev": -218.00000000000003,
+    "radius_nm": 5.793448149514228
+   },
+   "truth": {
+    "peak_lo_mev": -358.06897655307813,
+    "peak_hi_mev": -220.068976553078,
+    "radius_nm": 5.795941746778174
+   },
+   "abs_err": {
+    "peak_lo_mev": 2.0689765530780733,
+    "peak_hi_mev": 2.0689765530779596,
+    "radius_nm": -0.0024935972639461568
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 4,
+   "radius_nm": 5.795941746778174,
+   "instrument_s": 848.9461220245015,
+   "tip_rounds": 0,
+   "track_lost": 0,
+   "pickups": 0,
+   "placed": 4,
+   "spares_seen": 4,
+   "sites": 4,
+   "gap_width_nm": 2.6951840032514642,
+   "spacing_nm": 0.6737960008128661,
+   "ring_radius_fit_nm": 5.794205975300817,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 15,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 12,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 7,
+     "in": true
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 16,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 219.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 18,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 7,
+     "in": true
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 1,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    1.14,
+    0.84,
+    0.7,
+    0.89
+   ],
+   "diag": {
+    "tol_nm": 0.314,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": 0.08,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.1,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.06,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.02,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 58,
+    "r_nm": 5.795941746778174,
+    "planned_deg": [
+     48.9,
+     55.6,
+     62.2,
+     68.9
+    ],
+    "gap_deg": [
+     50.4,
+     57.2,
+     61.6,
+     68.0
+    ]
+   },
+   "e0_mev": -454.2414784066793,
+   "radius_measured_nm": 5.793448149514228,
+   "peaks_found": 4,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.4142812993823196,
+    0.5331702988612009
+   ],
+   "tip_condition": "good"
+  },
+  {
+   "paper": "P3-repair",
+   "seed": 29,
+   "success": true,
+   "partial": 1.0,
+   "values": {
+    "peak_lo_mev": -404.0,
+    "peak_hi_mev": -340.00000000000006,
+    "radius_nm": 8.655994450376546
+   },
+   "truth": {
+    "peak_lo_mev": -407.79627335755384,
+    "peak_hi_mev": -343.7962733575538,
+    "radius_nm": 8.649795348889105
+   },
+   "abs_err": {
+    "peak_lo_mev": 3.7962733575538437,
+    "peak_hi_mev": 3.79627335755373,
+    "radius_nm": 0.006199101487441183
+   },
+   "claims_ok": {
+    "ring_occupancy": true,
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "ring_occupancy": 1.0,
+   "gap_sites": 3,
+   "radius_nm": 8.649795348889105,
+   "instrument_s": 1116.7226983293401,
+   "tip_rounds": 1,
+   "track_lost": 0,
+   "pickups": 0,
+   "placed": 3,
+   "spares_seen": 3,
+   "sites": 3,
+   "gap_width_nm": 2.941090425668966,
+   "spacing_nm": 0.9803634752229886,
+   "ring_radius_fit_nm": 8.65980182463341,
+   "attempts": [
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 8,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 15,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 25,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 335.5,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 268.4,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 23,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 9,
+     "in": true
+    }
+   ],
+   "site_fill": [
+    0.97,
+    1.14,
+    1.13
+   ],
+   "diag": {
+    "tol_nm": 0.477,
+    "unheld": [],
+    "moved": [
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.01,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.16,
+      "status": "on_surface"
+     },
+     {
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.08,
+      "status": "on_surface"
+     }
+    ],
+    "n_ring": 57,
+    "r_nm": 8.649795348889105,
+    "planned_deg": [
+     307.3,
+     313.8,
+     320.3
+    ],
+    "gap_deg": [
+     308.1,
+     314.2,
+     320.3
+    ]
+   },
+   "e0_mev": -455.63378226795777,
+   "radius_measured_nm": 8.655994450376546,
+   "peaks_found": 5,
+   "spectra": 4,
+   "drift_comp_nm_per_min": [
+    -0.818000566454765,
+    -0.2984973493068911
+   ],
+   "tip_condition": "dirty"
+  }
+ ]
+}
