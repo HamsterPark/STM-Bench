@@ -35,7 +35,7 @@ def sweep(win, lo: str, hi: str, points: str = "41") -> dict:
 
 def test_with_millivolts_changes_only_a_narrow_bias_sweep():
     v = np.linspace(-0.05, 0.05, 41)
-    narrow = {"name": "s.dat", "kind": "sts", "v": v, "i": v * 1e-9, "didv": np.ones(41) * 1e-9}
+    narrow = {"name": "s.dat", "kind": "sts", "v": v, "i": v * 1e-9, "didv": (1.0 + v ** 2) * 1e-9}
     out = center.with_millivolts(narrow)
     assert np.array_equal(out["v_mv"], v) and "v_mv" not in narrow                     # the record itself is untouched
     assert center.axis_columns(out)[0] == ["v", "v_mv", "i", "didv"] and center.default_axes(out) == ("v_mv", "didv")
