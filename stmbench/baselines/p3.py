@@ -41,10 +41,10 @@ from pathlib import Path
 
 import numpy as np
 
-from ..analysis.corral import corral_radius, find_ring, ghost_strength, label_levels, locate_corral, ring_width_nm
+from ..analysis.corral import atom_spacing_nm, corral_radius, find_ring, ghost_strength, label_levels, locate_corral, ring_width_nm
 from ..analysis.drift import frame_shift
 from ..analysis.spectra import band_edge, resonance_peaks
-from ..analysis.tip import diagnose
+from ..analysis.tip import DOUBLE_FRACTION_MANY, diagnose
 from ..instrument import Instrument
 from ..reference.p3 import _peak_values, truth_errors
 from ._common import Blind, Ops
@@ -125,7 +125,7 @@ def find_corral(frame: dict) -> dict:
     return L
 
 
-def ring_verdict(frame: dict) -> dict:
+def ring_verdict(frame: dict, ignore: frozenset = frozenset()) -> dict:
     """The tip judged on the ring alone, in a frame that holds it: ``{"verdict": "ok" | "blunt" |
     "double", ...}``; a ring that cannot be found is a blunt tip."""
     try:
@@ -133,21 +133,26 @@ def ring_verdict(frame: dict) -> dict:
     except NoRing as exc:
         return {"verdict": "blunt", "no_ring": str(exc)}
     npx, c, r = float(frame["nm_per_px"]), L["centre_frame_nm"], L["radius_nm"]
-    width, (ghost, _) = ring_width_nm(frame["array"], npx, c, r), ghost_strength(frame["array"], npx, c, r)
-    verdict = "double" if ghost >= GHOST_MIN else "blunt" if width > BLUNT_FWHM_NM else "ok"
-    return {"verdict": verdict, "width_nm": width, "ghost": ghost, "centre": L["centre"]}
+    width, (ghost, lag) = ring_width_nm(frame["array"], npx, c, r), ghost_strength(frame["array"], npx, c, r, skip_nm=atom_spacing_nm(frame["array"], npx, c, r))
+    seen = ghost >= GHOST_MIN and "ring" not in ignore
+    verdict = "double" if seen else "blunt" if width > BLUNT_FWHM_NM else "ok"
+    return {"verdict": verdict, "width_nm": width, "ghost": ghost, "ghost_lag_nm": [round(v, 2) for v in lag],
+            "centre": L["centre"]}
 
 
-def judge(frame: dict, L: dict) -> dict:
+def judge(frame: dict, L: dict, ignore: frozenset = frozenset()) -> dict:
     """The tip as the survey shows it: ``{"verdict": "ok" | "blunt" | "double", ...}``."""
     c, r, npx = L["centre_frame_nm"], L["radius_nm"], float(frame["nm_per_px"])
     z = frame["array"]
     width = ring_width_nm(z, npx, c, r)
-    ghost, lag = ghost_strength(z, npx, c, r)
+    ghost, lag = ghost_strength(z, npx, c, r, skip_nm=atom_spacing_nm(z, npx, c, r))
     field = diagnose(_blank(frame, L["centre"], r))
     out = {"width_nm": width, "ghost": ghost, "ghost_lag_nm": [round(v, 2) for v in lag], "field": field["verdict"],
-           "field_atoms": field["isolated"], "ghost_fraction": field["ghost_fraction"]}
-    if ghost >= GHOST_MIN or field["verdict"] == "double":
+           "field_atoms": field["isolated"], "ghost_fraction": field["ghost_fraction"], "field_ghost": field["ghost"]}
+    # the field's own "double" also fires on atoms stretched one way (a very sharp tip's, seed 57):
+    # only partners at one displacement count here
+    field_double = field["verdict"] == "double" and field["ghost_fraction"] >= DOUBLE_FRACTION_MANY
+    if (ghost >= GHOST_MIN and "ring" not in ignore) or (field_double and "field" not in ignore):
         out["verdict"] = "double"
     elif width > BLUNT_FWHM_NM or field["verdict"] in ("blunt", "unknown"):
         out["verdict"] = "blunt"
@@ -271,6 +276,8 @@ class Corral:
         self.L = None
         self.frame = None
         self.tip: dict = {}
+        self.ignore: set[str] = set()                    # tests of a second apex that proved to be the surface's own
+        self._ghosts: list[tuple[str, tuple[float, float], float]] = []
 
     # ── the tip ──
     def poke(self, n: int = 3) -> None:
@@ -314,11 +321,32 @@ class Corral:
         on the ring alone. A tip it passes is judged again on a full survey."""
         cx, cy = self.centre
         f, _ = self.ops.frame(cx, cy, 36.0, 360, 0.09)
-        j = ring_verdict(f)
+        j = ring_verdict(f, frozenset(self.ignore))
         j["quick"] = True
         if "centre" in j:
             self.centre = j.pop("centre")
         return j
+
+    def note_ghost(self, j: dict) -> None:
+        """A tip that was pulsed and still shows a copy of the very same displacement and
+        strength three judgements running has no second apex: the copy is the surface's (a ring
+        has structure of its own at some sizes: seed 42's autocorrelation showed 0.13 at one
+        lag through 20 pulses; seed 57's spare atoms had a chance pair). That test is set aside.
+        A real second apex is changed by a pulse, or is gone."""
+        if j.get("ghost", 0.0) >= GHOST_MIN and "ring" not in self.ignore:
+            sig = ("ring", tuple(j["ghost_lag_nm"]), float(j["ghost"]))
+        elif j.get("field") == "double" and j.get("field_ghost") and j.get("ghost_fraction", 0.0) >= DOUBLE_FRACTION_MANY:
+            sig = ("field", tuple(j["field_ghost"][:2]), float(j.get("ghost_fraction", 0.0)))
+        else:
+            return
+        self._ghosts.append(sig)
+        last = self._ghosts[-3:]
+        if len(last) == 3 and all(g[0] == sig[0] for g in last):
+            def close(a, b):
+                return min(np.hypot(a[0] - b[0], a[1] - b[1]), np.hypot(a[0] + b[0], a[1] + b[1])) < 0.5
+            if all(close(g[1], sig[1]) and abs(g[2] - sig[2]) <= 0.3 * max(g[2], sig[2]) for g in last[:-1]):
+                self.ignore.add(sig[0])
+                self.log.setdefault("ghost_ignored", []).append(sig[0])
 
     def find_and_fix(self) -> None:
         """Survey, judge the tip, and condition until it images well. What it judged and did is
@@ -330,10 +358,13 @@ class Corral:
                 j = self.quick_judge() if quick else None
                 if j is None or j["verdict"] == "ok":
                     L = self.survey()
-                    j = judge(self.frame, L)
+                    j = judge(self.frame, L, frozenset(self.ignore))
             except NoRing as exc:                        # after a pulse: too blunt to image the ring at all
                 j = {"verdict": "blunt", "no_ring": str(exc)}
-            self.log.setdefault("judged", []).append({kk: (round(vv, 3) if isinstance(vv, float) else vv) for kk, vv in j.items()})
+            self.log.setdefault("judged", []).append({kk: (round(vv, 3) if isinstance(vv, float) else vv) for kk, vv in j.items()
+                                                      if kk != "centre"})
+            if j["verdict"] == "double":
+                self.note_ghost(j)
             if j["verdict"] == "ok" and not self.ops.unstable():
                 break
             if k == MAX_ROUNDS:
@@ -412,7 +443,7 @@ class Corral:
         cx, cy = self.centre
         ops.go(cx, cy)
         f, _ = ops.frame(cx, cy, RADIUS_NM, RADIUS_PX, RADIUS_LINE_S)
-        jc = ring_verdict(f)
+        jc = ring_verdict(f, frozenset(self.ignore))
         if jc["verdict"] != "ok":                        # the tip changed since it was judged
             self.log.setdefault("tip_changed", []).append({"at": "radius frame", **{k: v for k, v in jc.items() if k != "centre"}})
             return None
@@ -440,7 +471,7 @@ class Corral:
         self.log["spectra_dropped"] = dropped
         _image(v, ops)
         fv, _ = ops.frame(*centre, 36.0, 360, 0.09)
-        jv = ring_verdict(fv)
+        jv = ring_verdict(fv, frozenset(self.ignore))
         if jv["verdict"] != "ok" or ops.unstable():       # it changed while the spectra were taken
             self.log.setdefault("tip_changed", []).append({"at": "after the spectra", **{k: v for k, v in jv.items() if k != "centre"}})
             return None
