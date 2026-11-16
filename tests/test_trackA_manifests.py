@@ -200,8 +200,8 @@ def test_t2_box_in_current_frame_coordinates(frames):
     a = _row(t2, "Ag0001.sxm")                                           # 100 nm → 20 nm at (+10, −20) nm
     assert a["next_u"] == pytest.approx(0.10) and a["next_v"] == pytest.approx(-0.20)
     assert a["next_w_rel"] == pytest.approx(0.2) and bool(a["zoom_in"])
-    b = _row(t2, "Ag0007.sxm")                                           # frame rotated 90°: +x lab → −v frame
-    assert b["next_u"] == pytest.approx(0.0, abs=1e-9) and b["next_v"] == pytest.approx(-0.25)
+    b = _row(t2, "Ag0007.sxm")                                           # frame rotated 90°: +x stage → +v frame
+    assert b["next_u"] == pytest.approx(0.0, abs=1e-9) and b["next_v"] == pytest.approx(0.25)
     assert b["next_w_rel"] == pytest.approx(0.25) and b["next_angle_delta_deg"] == 0.0
     assert json.loads(b["context_paths_json"])[-1].endswith("Ag0006.sxm")
     assert all(not p.startswith(RAW) for p in json.loads(b["context_paths_json"]))   # relative

@@ -97,7 +97,7 @@ def frame_covering(events, x_nm: float, y_nm: float, rule: dict) -> dict | None:
         w, h = float(fr.get("w_m", 0.0)) * 1e9, float(fr.get("h_m", 0.0)) * 1e9
         ang = math.radians(float(fr.get("angle_deg", 0.0) or 0.0))
         dx, dy = x_nm - cx, y_nm - cy
-        c, s = math.cos(-ang), math.sin(-ang)
+        c, s = math.cos(ang), math.sin(ang)
         u, v = c * dx - s * dy, s * dx + c * dy
         if abs(u) <= w / 2 and abs(v) <= h / 2:
             best = fr
@@ -135,7 +135,7 @@ def _row_offset_nm(frame: dict, x_nm: float, y_nm: float) -> tuple[float, float]
     h = float(frame.get("h_m", 0.0)) * 1e9
     th = math.radians(float(frame.get("angle_deg", 0.0) or 0.0))
     ny = len(rows)
-    v = -math.sin(th) * (x_nm - cx) + math.cos(th) * (y_nm - cy)
+    v = math.sin(th) * (x_nm - cx) + math.cos(th) * (y_nm - cy)
     j = (h / 2 - v) / h * ny - 0.5 if h > 0 else 0.0         # geometric row, 0 = top (high v)
     k = (ny - 1 - j) if frame.get("scan_dir") == "up" else j   # acquisition row
     k = min(max(k, 0.0), ny - 1.0)
