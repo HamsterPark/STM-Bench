@@ -1,0 +1,112 @@
+id: P6_kondo_co_cu111
+family: P6
+variant: co_on_cu111
+paper:
+  id: P6
+  title: "Madhavan et al. 1998 — tunnelling into a single magnetic atom: the Kondo resonance (Co/Cu(111), Knorr et al. 2002)"
+  ref: "Science 280, 567 (1998); Phys. Rev. Lett. 88, 096804 (2002)"
+rig: reference-stm
+material: Cu(111)
+time_scale: 20
+initial:
+  approached: true
+  bias_v: 0.1
+  setpoint_a: 100.0e-12
+  tip: {radius_nm: 1.0, apex_sigma_nm: 0.08, lambda_per_s: 1.0e-4}
+  surface: {contamination: 0.0, adsorbate_density_per_um2: 3.0, terrace_median_nm: 150.0}
+  adatoms: {layout: single, species: Co, target_dx_nm: 4.0, field_per_100nm2: 0.3, field_half_nm: 150}
+  kondo: {species: Co}
+  physics: {sts_resolution: true, tip_changes_outside_scans: true, tip_recovery: true,
+            tip_anisotropy: true, crash_over_range: true}
+faults: []
+task: |
+  样品是 Cu(111)，表面稀疏地散落着单个 Co 吸附原子（扫描坐标原点附近 30 nm 内就有孤立的），仪器已在隧穿态；
+  请复现 Madhavan 等 1998 年对单个磁性原子近藤共振的测量（Co/Cu(111) 体系见 Knorr 等 2002 年）：
+  在一个孤立 Co 原子正上方采集费米能级附近的 dI/dV 谱，并在附近干净的 Cu(111) 表面上采集对照谱；
+  用 Fano 线形 dI/dV ∝ (q + ε)²/(1 + ε²)、ε = (eV − ε_K)/Γ 拟合原子上的共振，
+  报告共振半宽 Γ（meV）、不对称因子 q 与共振位置 ε_K（meV，相对费米能级）。用 ReportResult 报告。
+task_en: >-
+  The sample is Cu(111) with single Co adatoms sparsely scattered over the surface (isolated ones
+  can be found within 30 nm of the origin of the scan coordinates), and the instrument is already
+  in the tunnelling state. Please reproduce the 1998 measurement of the Kondo resonance of a single
+  magnetic atom by Madhavan et al. (for Co/Cu(111) see Knorr et al. 2002): record dI/dV spectra
+  around the Fermi level directly above an isolated Co atom, and reference spectra on clean Cu(111)
+  nearby; fit the resonance on the atom with the Fano line shape dI/dV ∝ (q + ε)²/(1 + ε²),
+  ε = (eV − ε_K)/Γ, and report the half width Γ (meV), the asymmetry factor q and the resonance
+  position ε_K (meV, relative to the Fermi level). Report them with ReportResult.
+budget: {sim_hours: 1.5, wire_cmds: 200000}
+notes: |
+  What is measured: the Kondo resonance of a single Co adatom, as the Fano line shape
+  (q + ε)²/(1 + ε²), ε = (eV − ε_K)/Γ, of a dI/dV sweep taken on top of the atom against a
+  reference sweep on bare Cu(111). Three numbers, all of which need the fit: the half width Γ, the
+  asymmetry q and the position ε_K. The physics is stmsim/physics/kondo.py plus the
+  ``sts_resolution`` switch (thermal and lock-in broadening, the apex blur, the drift along the
+  sweep); what the sweep sees depends on how the instrument is operated, which the task does not say.
+
+  Hidden ranges (hidden.kondo, one draw per seed; sources in stmsim/physics/kondo.py and the design
+  notes). Γ 3-10 meV, log-uniform (T_K ≈ 35-116 K; published Co fits on noble metals span about
+  50-100 K, Γ ≈ 4-9 meV); q 0-1.2 (Knorr 2002: 0.18 on Cu(111), up to ~1 elsewhere); ε_K -2…+6 meV
+  (within a few meV of E_F); a0 0.12-0.30 (the fraction of the conductance through the resonance);
+  σ_a 0.30-0.45 nm and σ_q 0.45-0.70 nm (lateral extents, a modelling assumption: Madhavan 1998
+  has the resonance gone by ~1 nm). hidden.lockin.attenuation 0.80-1.00 is the fraction of the
+  lock-in modulation that reaches the junction (a modelling assumption: bias-line filtering). The
+  tip condition draws are those of P4 and P5.
+
+  Evidence (sts_pair): among the cited sweeps, at least one directly on an atom (start point within
+  0.15 nm of its centre) and one on the clean surface (the nearest atom at least 2 nm away), each
+  with at least 41 points, covering -20…+20 mV, no jump. The evidence says the two measurements
+  took place; it does not say the numbers were fitted from them.
+
+  The tolerances (Γ 15 %, q 0.15, ε_K 1.0 meV) are PROVISIONAL until the privileged reference
+  solution calibrates them (about 2x its p90, never widened to let a baseline pass).
+
+  Chance audit (best fixed sheet, exact, seeds 0-299, 2026-11-16, provisional tolerances): Gamma 30.7 %
+  (best constant 4.49 meV), q 33.0 % (0.52), eps_K 29.7 % (0.08 meV), all three 5.0 % (design target
+  at most 5 %). The joint figure sits on the limit: the reference solution's calibration may tighten
+  a tolerance, which lowers it, but must not widen one.
+success: {kind: claims_verified}
+hidden:
+  kondo:
+    gamma_mev: {range: [3.0, 10.0], log: true}
+    q: [0.0, 1.2]
+    e_k_mev: [-2.0, 6.0]
+    amplitude: [0.12, 0.30]
+    sigma_nm: [0.30, 0.45]
+    q_sigma_nm: [0.45, 0.70]
+  lockin:
+    attenuation: [0.80, 1.00]
+  tip:
+    condition: {choice: [good, blunt, double, unstable, dirty], weights: [0.2, 0.25, 0.25, 0.15, 0.15]}
+    condition_scale: [0.0, 1.0]
+    condition_angle_deg: [0.0, 360.0]
+claims:
+  - id: gamma_mev
+    say: "原子上近藤共振的半宽 Γ（Fano 线形 ε = (eV − ε_K)/Γ 中的 Γ）"
+    say_en: "The half width Γ of the Kondo resonance on the atom (the Γ in ε = (eV − ε_K)/Γ of the Fano line shape)"
+    kind: scalar
+    unit: meV
+    tol: {rel: 0.15}
+    truth: kondo.gamma_mev
+    evidence: &kondo_pair
+      kind: sts_pair
+      min_points: 41
+      v_lo_max: -0.02
+      v_hi_min: 0.02
+      adatom: {near_nm_max: 0.15, min_n: 1}
+      background: {near_nm_min: 2.0, min_n: 1}
+  - id: q_fano
+    say: "针尖在原子正上方时 Fano 线形的不对称因子 q"
+    say_en: "The asymmetry factor q of the Fano line shape with the tip directly above the atom"
+    kind: scalar
+    unit: ""
+    tol: {abs: 0.15}
+    truth: kondo.q
+    evidence: *kondo_pair
+  - id: e_k_mev
+    say: "共振位置 ε_K（相对费米能级）"
+    say_en: "The resonance position ε_K (relative to the Fermi level)"
+    kind: scalar
+    unit: meV
+    tol: {abs: 1.0}
+    truth: kondo.e_k_mev
+    evidence: *kondo_pair
