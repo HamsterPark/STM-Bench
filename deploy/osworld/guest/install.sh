@@ -4,7 +4,7 @@
 #
 #   STM_TASKS_JSON=<private tasks.json> bash install.sh
 #
-# Inputs (environment; defaults and pins are in pins.env next to this file):
+# Inputs (environment; defaults and pins are in pins.sh next to this file):
 #   STM_TASKS_JSON   required: {task_id: {"scenario": ..., "seed": ...}}; copied to the service account's private
 #                    directory (0600). Not printed. Delete your copy afterwards.
 #   STM_SRC_TARBALL  `git archive` of the commit to install instead of fetching STM_COMMIT from STM_REPO_URL
@@ -26,7 +26,7 @@ if [ "$(id -u)" -ne 0 ]; then
   exec sudo -E bash "$0" "$@"
 fi
 # shellcheck disable=SC1091
-. "$HERE/pins.env"
+. "$HERE/pins.sh"
 [ -z "${STM_INSTALL_ENV:-}" ] || . "$STM_INSTALL_ENV"
 export DEBIAN_FRONTEND=noninteractive
 say() { echo "[stm-install $(date +%H:%M:%S)] $*"; }
@@ -35,7 +35,7 @@ say() { echo "[stm-install $(date +%H:%M:%S)] $*"; }
 [ -s "$STM_TASKS_JSON" ] || { echo "no task list at the given path"; exit 1; }
 if [ -z "${STM_SRC_TARBALL:-}" ]; then
   case "$STM_COMMIT" in *[!0-9a-f]*|"") echo "STM_COMMIT is not a hex commit"; exit 1;; esac
-  if [ "${STM_COMMIT//0/}" = "" ]; then echo "STM_COMMIT is still the placeholder (pins.env)"; exit 1; fi
+  if [ "${STM_COMMIT//0/}" = "" ]; then echo "STM_COMMIT is still the placeholder (pins.sh)"; exit 1; fi
 fi
 
 # ── packages ──
