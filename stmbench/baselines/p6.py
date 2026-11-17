@@ -97,7 +97,9 @@ def spectral_flaw(v, didv, *, edge_v: float = -0.44) -> dict:
     (an error function at ``edge_v``, free to move ±60 mV and to be 2-50 mV wide) on a
     quadratic background is fitted, and the largest smoothed residual, as a fraction of the
     fitted level, is the flaw. Returns ``{"flaw", "clean", "v_peak"}``; a sweep that cannot be
-    fitted is not clean."""
+    fitted is not clean. Limits: the residual within ``EDGE_MASK_V`` of the edge is not read,
+    and a peak at the window's end is partly absorbed by the quadratic background (a 0.5 peak
+    at +0.25 V leaves 0.075, under ``FLAW_FRACTION``)."""
     from scipy.optimize import curve_fit
     from scipy.special import erf
 

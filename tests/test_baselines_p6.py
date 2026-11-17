@@ -45,14 +45,24 @@ def _cu_didv(v, *, peak=None, noise=0.015, seed=0):
 
 def test_a_bare_cu_sweep_is_clean_and_a_tip_peak_is_not():
     """The step alone passes for every noise draw; the tip's peak (50 mV wide, 0.5-0.8 of the
-    density of states, anywhere in −0.45…+0.25 V) is found at each energy, even on the band edge."""
+    density of states) is found wherever it sits clear of the band edge and of the window's end."""
     v = np.linspace(-0.6, 0.3, 150)
     for seed in range(5):
         assert p6.spectral_flaw(v, _cu_didv(v, seed=seed))["clean"]
-    for e0 in (-0.3, -0.15, 0.0, 0.1, 0.25):                   # the edge's own ±70 mV is not read
-        for a in (0.65, 0.8):
+    for e0 in (-0.3, -0.15, 0.0, 0.1):                         # the edge's own ±70 mV is not read
+        for a in (0.5, 0.8):
             r = p6.spectral_flaw(v, _cu_didv(v, peak=(e0, a, 0.05), seed=1))
             assert not r["clean"], (e0, a, r)
+    assert not p6.spectral_flaw(v, _cu_didv(v, peak=(0.25, 0.8, 0.05), seed=1))["clean"]
+
+
+def test_a_weak_peak_at_the_window_end_is_a_known_miss():
+    """A limit of the check, kept visible: a 0.5 peak at +0.25 V, at the window's end, is partly
+    absorbed by the quadratic background, and its residual (0.075) stays under the threshold
+    (0.08). A tip like that goes on to the atom (the poke before the check mostly buries it)."""
+    v = np.linspace(-0.6, 0.3, 150)
+    r = p6.spectral_flaw(v, _cu_didv(v, peak=(0.25, 0.5, 0.05), seed=1))
+    assert r["clean"] and 0.06 < r["flaw"] < p6.FLAW_FRACTION, r
 
 
 def test_a_sweep_that_cannot_be_read_is_not_clean():
