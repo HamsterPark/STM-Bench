@@ -109,6 +109,11 @@
      "field": "ok",
      "field_atoms": 9,
      "ghost_fraction": 0.135,
+     "field_ghost": [
+      0.6,
+      -1.1,
+      0.974
+     ],
      "verdict": "ok"
     }
    ],
@@ -438,6 +443,20 @@
     0.23
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -366,
+    -306,
+    -214,
+    -100,
+    40
+   ],
+   "peak_prominence": [
+    0.24,
+    0.46,
+    0.75,
+    0.97,
+    0.99
+   ],
    "e0_mev": -411.30560326083963,
    "drift_comp_nm_per_min": [
     0.4575579120780208,
@@ -451,18 +470,18 @@
    "partial": 1.0,
    "error": null,
    "values": {
-    "peak_lo_mev": -380.0,
-    "peak_hi_mev": -268.0,
+    "peak_lo_mev": -444.00000000000006,
+    "peak_hi_mev": -380.0,
     "radius_nm": 6.428686274384637
    },
    "truth": {
-    "peak_lo_mev": -381.12176465526807,
-    "peak_hi_mev": -269.121764655268,
+    "peak_lo_mev": -443.1217646552681,
+    "peak_hi_mev": -381.12176465526807,
     "radius_nm": 6.417887407085326
    },
    "abs_err": {
-    "peak_lo_mev": 1.1217646552680662,
-    "peak_hi_mev": 1.1217646552680094,
+    "peak_lo_mev": -0.8782353447319338,
+    "peak_hi_mev": 1.1217646552680662,
     "radius_nm": 0.0107988672993109
    },
    "claims_ok": {
@@ -533,6 +552,11 @@
      "field": "ok",
      "field_atoms": 10,
      "ghost_fraction": 0.083,
+     "field_ghost": [
+      4.2,
+      -0.6,
+      0.982
+     ],
      "verdict": "ok"
     }
    ],
@@ -718,6 +742,20 @@
     0.02
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -444,
+    -380,
+    -268,
+    -108,
+    98
+   ],
+   "peak_prominence": [
+    0.23,
+    0.7,
+    0.94,
+    0.91,
+    0.7
+   ],
    "e0_mev": -459.7431558874381,
    "drift_comp_nm_per_min": [
     1.0712240116890528,
@@ -731,18 +769,18 @@
    "partial": 0.75,
    "error": null,
    "values": {
-    "peak_lo_mev": -320.00000000000006,
-    "peak_hi_mev": -176.00000000000006,
+    "peak_lo_mev": -398.0,
+    "peak_hi_mev": -320.00000000000006,
     "radius_nm": 5.746952812366746
    },
    "truth": {
-    "peak_lo_mev": -319.4984825232144,
-    "peak_hi_mev": -175.4984825232143,
+    "peak_lo_mev": -397.49848252321453,
+    "peak_hi_mev": -319.4984825232144,
     "radius_nm": 5.723880097627661
    },
    "abs_err": {
-    "peak_lo_mev": -0.5015174767856365,
-    "peak_hi_mev": -0.5015174767857502,
+    "peak_lo_mev": -0.501517476785466,
+    "peak_hi_mev": -0.5015174767856365,
     "radius_nm": 0.023072714739084788
    },
    "claims_ok": {
@@ -857,12 +895,21 @@
      "field": "blunt",
      "field_atoms": 7,
      "ghost_fraction": 0.111,
+     "field_ghost": [
+      -0.8,
+      -3.9,
+      0.998
+     ],
      "verdict": "blunt"
     },
     {
      "verdict": "double",
      "width_nm": 1.1,
      "ghost": 0.134,
+     "ghost_lag_nm": [
+      4.8,
+      -0.9
+     ],
      "quick": true
     },
     {
@@ -875,6 +922,11 @@
      "field": "ok",
      "field_atoms": 7,
      "ghost_fraction": 0.111,
+     "field_ghost": [
+      1.0,
+      3.9,
+      0.907
+     ],
      "verdict": "ok"
     }
    ],
@@ -1025,6 +1077,18 @@
     -0.19
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -398,
+    -320,
+    -176,
+    26
+   ],
+   "peak_prominence": [
+    0.38,
+    0.79,
+    0.96,
+    0.87
+   ],
    "e0_mev": -419.3038695025257,
    "drift_comp_nm_per_min": [
     0.0804434983891339,
@@ -1040,7 +1104,7 @@
    "values": {
     "peak_lo_mev": -364.00000000000006,
     "peak_hi_mev": -282.0,
-    "radius_nm": 7.840062045346949
+    "radius_nm": 7.844517720357004
    },
    "truth": {
     "peak_lo_mev": -364.7861287003673,
@@ -1050,7 +1114,7 @@
    "abs_err": {
     "peak_lo_mev": 0.7861287003672714,
     "peak_hi_mev": 0.7861287003672146,
-    "radius_nm": -0.0016306302287611985
+    "radius_nm": 0.0028250447812938617
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -1058,16 +1122,11 @@
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 7462.632197374292,
+   "instrument_s": 7474.780154504612,
    "tip_condition": "double",
    "diag": {
     "tol_nm": 0.411,
-    "unheld": [
-     {
-      "angle_deg": 305.6,
-      "nearest_atom_nm": 0.51
-     }
-    ],
+    "unheld": [],
     "moved": [],
     "n_ring": 60,
     "r_nm": 7.84169267557571,
@@ -1079,12 +1138,12 @@
      324.6,
      329.5
     ],
-    "occupancy": 0.9833333333333333,
+    "occupancy": 1.0,
     "site_offsets": [
      {
       "deg": 305.6,
-      "radial_nm": 0.01,
-      "tangential_nm": -0.51
+      "radial_nm": 0.22,
+      "tangential_nm": 0.13
      },
      {
       "deg": 311.2,
@@ -1093,13 +1152,13 @@
      },
      {
       "deg": 317.9,
-      "radial_nm": 0.05,
-      "tangential_nm": 0.25
+      "radial_nm": 0.19,
+      "tangential_nm": -0.17
      },
      {
       "deg": 324.6,
-      "radial_nm": 0.17,
-      "tangential_nm": -0.19
+      "radial_nm": 0.0,
+      "tangential_nm": 0.0
      },
      {
       "deg": 329.5,
@@ -1141,86 +1200,43 @@
     "double",
     {
      "width_nm": 0.7,
-     "ghost": 0.037,
+     "ghost": 0.024,
      "ghost_lag_nm": [
-      3.4,
-      2.3
-     ],
-     "field": "double",
-     "field_atoms": 5,
-     "ghost_fraction": 0.2,
-     "verdict": "double"
-    },
-    {
-     "width_nm": 0.7,
-     "ghost": 0.036,
-     "ghost_lag_nm": [
-      3.4,
-      2.3
-     ],
-     "field": "double",
-     "field_atoms": 5,
-     "ghost_fraction": 0.2,
-     "verdict": "double"
-    },
-    {
-     "width_nm": 0.7,
-     "ghost": 0.036,
-     "ghost_lag_nm": [
-      3.4,
-      2.3
-     ],
-     "field": "double",
-     "field_atoms": 5,
-     "ghost_fraction": 0.2,
-     "verdict": "double"
-    },
-    {
-     "width_nm": 0.7,
-     "ghost": 0.037,
-     "ghost_lag_nm": [
-      3.5,
-      2.3
-     ],
-     "field": "double",
-     "field_atoms": 5,
-     "ghost_fraction": 0.167,
-     "verdict": "double"
-    },
-    {
-     "width_nm": 0.7,
-     "ghost": 0.032,
-     "ghost_lag_nm": [
-      -3.4,
-      -2.3
+      -2.1,
+      3.6
      ],
      "field": "ok",
      "field_atoms": 5,
      "ghost_fraction": 0.2,
+     "field_ghost": [
+      2.0,
+      3.7,
+      0.999
+     ],
      "verdict": "ok"
     }
    ],
    "tip_actions": [
     "ok",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse"
+    "ok",
+    "ok"
    ],
-   "tip_rounds": 4,
+   "tip_rounds": 0,
    "drift_atoms": [
-    7
+    8,
+    9,
+    8
    ],
    "spares_seen": 5,
-   "gap_width_nm": 4.157937894044791,
-   "spacing_nm": 0.8315875788089582,
-   "ring_radius_fit_nm": 7.846607601999035,
+   "gap_width_nm": 4.156181082098775,
+   "spacing_nm": 0.831236216419755,
+   "ring_radius_fit_nm": 7.846484033793242,
    "planned_deg": [
     306.2,
     312.2,
     318.3,
     324.4,
-    330.5
+    330.4
    ],
    "attempts": [
     {
@@ -1255,268 +1271,274 @@
     },
     {
      "r_kohm": 131.1,
-     "hops": 2,
-     "in": false,
-     "again": true
-    },
-    {
-     "r_kohm": 131.1,
-     "hops": 3,
-     "in": false,
-     "left_nm": 5.08
-    },
-    {
-     "r_kohm": 131.1,
-     "hops": 1,
-     "in": false,
-     "left_nm": 3.98
-    },
-    {
-     "r_kohm": 131.1,
-     "hops": 10,
-     "in": false,
-     "left_nm": 3.76
-    },
-    {
-     "r_kohm": 131.1,
-     "hops": 6,
-     "in": false,
-     "left_nm": 1.32
-    },
-    {
-     "r_kohm": 131.1,
      "hops": 0,
      "in": false,
-     "left_nm": 0.89
+     "again": true
     },
     {
      "r_kohm": 104.9,
-     "hops": 0,
+     "hops": 18,
      "in": false,
      "again": true
     },
     {
-     "r_kohm": 83.9,
-     "hops": 4,
-     "in": false,
-     "again": true
-    },
-    {
-     "r_kohm": 83.9,
+     "r_kohm": 104.9,
      "hops": 6,
-     "in": true,
-     "fine": 0,
-     "off_nm": 0.95
-    },
-    {
-     "r_kohm": 83.9,
-     "hops": 1,
-     "in": true,
-     "fine": 1,
-     "off_nm": 1.4
-    },
-    {
-     "r_kohm": 67.1,
-     "hops": 1,
-     "in": true,
-     "fine": 2,
-     "off_nm": 0.99
-    },
-    {
-     "r_kohm": 67.1,
-     "hops": 0,
-     "in": true,
-     "fine": 3,
-     "off_nm": 1.44
-    },
-    {
-     "r_kohm": 85.9,
-     "hops": 22,
      "in": false,
-     "left_nm": 5.39
+     "left_nm": 1.52
     },
     {
-     "r_kohm": 85.9,
+     "r_kohm": 104.9,
      "hops": 7,
      "in": true,
      "fine": 0,
-     "off_nm": 0.16
+     "off_nm": 0.23
+    },
+    {
+     "r_kohm": 104.9,
+     "hops": 1,
+     "in": true,
+     "fine": 1,
+     "off_nm": 0.22
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 1,
+     "in": true,
+     "fine": 2,
+     "off_nm": 0.24
+    },
+    {
+     "r_kohm": 67.1,
+     "hops": 1,
+     "in": true,
+     "fine": 3,
+     "off_nm": 0.23
+    },
+    {
+     "r_kohm": 85.9,
+     "hops": 4,
+     "in": false,
+     "left_nm": 5.37
+    },
+    {
+     "r_kohm": 85.9,
+     "hops": 1,
+     "in": true,
+     "fine": 0,
+     "off_nm": 0.08
     },
     {
      "r_kohm": 137.4,
      "hops": 0,
      "in": false,
-     "left_nm": 3.43
+     "left_nm": 3.4
     },
     {
      "r_kohm": 110.0,
-     "hops": 7,
+     "hops": 10,
      "in": false,
      "again": true
     },
     {
-     "r_kohm": 110.0,
-     "hops": 3,
+     "r_kohm": 137.4,
+     "hops": 2,
      "in": false,
-     "left_nm": 1.64
+     "left_nm": 0.46
+    },
+    {
+     "r_kohm": 137.4,
+     "hops": 2,
+     "in": false,
+     "left_nm": 0.46
+    },
+    {
+     "r_kohm": 137.4,
+     "hops": 2,
+     "in": false,
+     "left_nm": 0.46
+    },
+    {
+     "r_kohm": 110.0,
+     "hops": 2,
+     "in": false,
+     "left_nm": 0.46
     },
     {
      "r_kohm": 110.0,
      "hops": 6,
      "in": true,
      "fine": 0,
-     "off_nm": 0.38
+     "off_nm": 0.34
     },
     {
      "r_kohm": 110.0,
-     "hops": 2,
+     "hops": 1,
      "in": true,
      "fine": 1,
-     "off_nm": 3.47
+     "off_nm": 0.31
     },
     {
-     "r_kohm": 110.0,
+     "r_kohm": 88.0,
      "hops": 1,
      "in": true,
      "fine": 2,
-     "off_nm": 0.02
+     "off_nm": 3.69
     },
     {
-     "r_kohm": 175.9,
-     "hops": 0,
-     "in": false,
-     "left_nm": 3.62
-    },
-    {
-     "r_kohm": 140.7,
+     "r_kohm": 88.0,
      "hops": 1,
-     "in": false,
-     "again": true
+     "in": true,
+     "fine": 3,
+     "off_nm": 3.76
     },
     {
      "r_kohm": 140.7,
      "hops": 0,
      "in": false,
-     "left_nm": 3.4
+     "left_nm": 3.59
     },
     {
      "r_kohm": 112.6,
      "hops": 1,
      "in": false,
      "again": true
+    },
+    {
+     "r_kohm": 112.6,
+     "hops": 9,
+     "in": false,
+     "left_nm": 2.93
     },
     {
      "r_kohm": 112.6,
      "hops": 4,
      "in": false,
-     "left_nm": 3.18
+     "left_nm": 0.94
     },
     {
      "r_kohm": 112.6,
-     "hops": 1,
+     "hops": 3,
      "in": false,
-     "left_nm": 1.85
-    },
-    {
-     "r_kohm": 112.6,
-     "hops": 1,
-     "in": false,
-     "left_nm": 1.62
-    },
-    {
-     "r_kohm": 112.6,
-     "hops": 5,
-     "in": false,
-     "left_nm": 1.17
-    },
-    {
-     "r_kohm": 112.6,
-     "hops": 8,
-     "in": true,
-     "fine": 0,
-     "off_nm": 0.36
+     "left_nm": 0.71
     },
     {
      "r_kohm": 112.6,
      "hops": 2,
+     "in": false,
+     "left_nm": 0.5
+    },
+    {
+     "r_kohm": 90.1,
+     "hops": 7,
      "in": true,
-     "fine": 1,
-     "off_nm": 0.35
+     "fine": 0,
+     "off_nm": 0.23
     },
     {
      "r_kohm": 90.1,
      "hops": 1,
      "in": true,
-     "fine": 2,
-     "off_nm": 0.39
+     "fine": 1,
+     "off_nm": 0.06
     },
     {
-     "r_kohm": 72.1,
-     "hops": 2,
-     "in": true,
-     "fine": 3,
-     "off_nm": 0.38
-    },
-    {
-     "r_kohm": 92.2,
-     "hops": 1,
+     "r_kohm": 144.1,
+     "hops": 0,
      "in": false,
      "left_nm": 3.73
     },
     {
-     "r_kohm": 92.2,
-     "hops": 2,
+     "r_kohm": 115.3,
+     "hops": 1,
+     "in": false,
+     "again": true
+    },
+    {
+     "r_kohm": 115.3,
+     "hops": 1,
+     "in": false,
+     "left_nm": 3.46
+    },
+    {
+     "r_kohm": 115.3,
+     "hops": 5,
      "in": false,
      "left_nm": 2.95
+    },
+    {
+     "r_kohm": 115.3,
+     "hops": 0,
+     "in": false,
+     "left_nm": 1.93
+    },
+    {
+     "r_kohm": 92.2,
+     "hops": 8,
+     "in": false,
+     "again": true
+    },
+    {
+     "r_kohm": 92.2,
+     "hops": 2,
+     "in": true,
+     "fine": 0,
+     "off_nm": 0.34
     },
     {
      "r_kohm": 92.2,
      "hops": 1,
      "in": true,
-     "fine": 0,
-     "off_nm": 0.4
-    },
-    {
-     "r_kohm": 92.2,
-     "hops": 2,
-     "in": true,
      "fine": 1,
-     "off_nm": 0.4
+     "off_nm": 0.27
     },
     {
      "r_kohm": 73.8,
-     "hops": 2,
+     "hops": 1,
      "in": true,
      "fine": 2,
-     "off_nm": 0.41
+     "off_nm": 0.27
     },
     {
      "r_kohm": 59.0,
-     "hops": 2,
+     "hops": 1,
      "in": true,
      "fine": 3,
-     "off_nm": 0.45
+     "off_nm": 0.26
     }
    ],
    "placed": 5,
+   "bad_tip": 2,
    "site_fill": [
-    -0.0,
-    0.88,
-    1.16,
-    1.1,
-    1.03
+    0.94,
+    1.23,
+    0.89,
+    1.03,
+    1.07
    ],
-   "bare_clear_nm": 6.7,
+   "bare_clear_nm": 6.6,
    "bare_feature": 0.028,
    "centre_shift_nm": [
     -0.13,
-    -0.11
+    -0.12
    ],
    "spectra_dropped": 0,
-   "e0_mev": -424.61431168276425,
+   "peaks_mev": [
+    -364,
+    -282,
+    -166,
+    -16
+   ],
+   "peak_prominence": [
+    0.46,
+    0.75,
+    0.96,
+    0.88
+   ],
+   "e0_mev": -423.1019032109304,
    "drift_comp_nm_per_min": [
-    -0.2505919334444929,
-    -0.4802740832229666
+    -0.2913941050672634,
+    -0.5121261411026707
    ]
   },
   {
@@ -1603,6 +1625,7 @@
      "field": "ok",
      "field_atoms": 7,
      "ghost_fraction": 0.0,
+     "field_ghost": null,
      "verdict": "ok"
     }
    ],
@@ -1833,6 +1856,18 @@
     0.12
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -398,
+    -334,
+    -222,
+    -58
+   ],
+   "peak_prominence": [
+    0.11,
+    0.45,
+    0.82,
+    0.98
+   ],
    "e0_mev": -416.23414530577674,
    "drift_comp_nm_per_min": [
     -0.8013085774040323,
@@ -1846,18 +1881,18 @@
    "partial": 1.0,
    "error": null,
    "values": {
-    "peak_lo_mev": -372.00000000000006,
-    "peak_hi_mev": -248.00000000000006,
+    "peak_lo_mev": -444.00000000000006,
+    "peak_hi_mev": -372.00000000000006,
     "radius_nm": 5.860494352301677
    },
    "truth": {
-    "peak_lo_mev": -371.62679142022773,
-    "peak_hi_mev": -247.62679142022765,
+    "peak_lo_mev": -443.6267914202278,
+    "peak_hi_mev": -371.62679142022773,
     "radius_nm": 5.831813811733345
    },
    "abs_err": {
-    "peak_lo_mev": -0.37320857977232436,
-    "peak_hi_mev": -0.3732085797724096,
+    "peak_lo_mev": -0.3732085797722675,
+    "peak_hi_mev": -0.37320857977232436,
     "radius_nm": 0.028680540568331914
    },
    "claims_ok": {
@@ -1945,6 +1980,11 @@
      "field": "ok",
      "field_atoms": 3,
      "ghost_fraction": 0.333,
+     "field_ghost": [
+      2.4,
+      1.4,
+      0.165
+     ],
      "verdict": "ok"
     }
    ],
@@ -2226,6 +2266,18 @@
     0.24
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -444,
+    -372,
+    -248,
+    -70
+   ],
+   "peak_prominence": [
+    0.32,
+    0.83,
+    0.94,
+    0.94
+   ],
    "e0_mev": -463.4179038915817,
    "drift_comp_nm_per_min": [
     -0.1866696636118012,
@@ -2377,6 +2429,11 @@
      "field": "ok",
      "field_atoms": 8,
      "ghost_fraction": 0.121,
+     "field_ghost": [
+      0.6,
+      -1.1,
+      0.87
+     ],
      "verdict": "ok"
     },
     {
@@ -2389,6 +2446,11 @@
      "field": "ok",
      "field_atoms": 7,
      "ghost_fraction": 0.114,
+     "field_ghost": [
+      0.8,
+      -0.1,
+      0.962
+     ],
      "verdict": "ok"
     }
    ],
@@ -2422,10 +2484,28 @@
      "at": "after the spectra",
      "verdict": "blunt",
      "width_nm": 1.2000000000000002,
-     "ghost": 0.05831501003132101
+     "ghost": 0.05831501003132101,
+     "ghost_lag_nm": [
+      -3.6,
+      -2.1
+     ]
     }
    ],
    "attempts_measure": 1,
+   "peaks_mev": [
+    -398,
+    -318,
+    -206,
+    -60,
+    124
+   ],
+   "peak_prominence": [
+    0.42,
+    0.72,
+    0.92,
+    0.95,
+    0.54
+   ],
    "e0_mev": -454.641767987345,
    "drift_comp_nm_per_min": [
     1.25096231503909,
@@ -2439,9 +2519,9 @@
    "partial": 1.0,
    "error": null,
    "values": {
-    "peak_lo_mev": -370.00000000000006,
+    "peak_lo_mev": -372.00000000000006,
     "peak_hi_mev": -308.00000000000006,
-    "radius_nm": 8.60930997937998
+    "radius_nm": 8.606084996869466
    },
    "truth": {
     "peak_lo_mev": -370.95324074156935,
@@ -2449,9 +2529,9 @@
     "radius_nm": 8.608638347236436
    },
    "abs_err": {
-    "peak_lo_mev": 0.9532407415692887,
+    "peak_lo_mev": -1.0467592584307113,
     "peak_hi_mev": -1.0467592584307681,
-    "radius_nm": 0.000671632143543377
+    "radius_nm": -0.0025533503669699087
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -2459,7 +2539,7 @@
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 6442.044313496494,
+   "instrument_s": 5290.745440743195,
    "tip_condition": "blunt",
    "diag": {
     "tol_nm": 0.676,
@@ -2544,48 +2624,11 @@
      "field": "double",
      "field_atoms": 11,
      "ghost_fraction": 0.091,
-     "verdict": "double"
-    },
-    {
-     "width_nm": 0.9,
-     "ghost": 0.041,
-     "ghost_lag_nm": [
-      2.0,
-      3.6
-     ],
-     "field": "double",
-     "field_atoms": 11,
-     "ghost_fraction": 0.091,
-     "verdict": "double"
-    },
-    {
-     "width_nm": 0.8,
-     "ghost": 0.183,
-     "ghost_lag_nm": [
+     "field_ghost": [
       0.0,
-      1.1
+      3.9,
+      0.999
      ],
-     "field": "ok",
-     "field_atoms": 11,
-     "ghost_fraction": 0.091,
-     "verdict": "double"
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.8,
-     "ghost": 0.328,
-     "quick": true
-    },
-    {
-     "width_nm": 0.8,
-     "ghost": 0.046,
-     "ghost_lag_nm": [
-      -0.3,
-      4.0
-     ],
-     "field": "ok",
-     "field_atoms": 13,
-     "ghost_fraction": 0.077,
      "verdict": "ok"
     }
    ],
@@ -2869,24 +2912,33 @@
     1.39,
     1.34
    ],
-   "tip_actions": [
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse"
-   ],
-   "tip_rounds": 4,
+   "tip_actions": [],
+   "tip_rounds": 0,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.034,
+   "bare_feature": 0.03,
    "centre_shift_nm": [
-    0.15,
-    0.17
+    0.13,
+    0.16
    ],
    "spectra_dropped": 0,
-   "e0_mev": -417.8941909812194,
+   "peaks_mev": [
+    -372,
+    -308,
+    -216,
+    -98,
+    44
+   ],
+   "peak_prominence": [
+    0.3,
+    0.52,
+    0.76,
+    0.89,
+    0.87
+   ],
+   "e0_mev": -418.48468135578787,
    "drift_comp_nm_per_min": [
-    0.6855900905137579,
-    0.5936854413241784
+    0.632017262583524,
+    0.5781637056574055
    ]
   },
   {
@@ -3008,6 +3060,11 @@
      "field": "ok",
      "field_atoms": 13,
      "ghost_fraction": 0.077,
+     "field_ghost": [
+      -1.4,
+      -2.4,
+      0.966
+     ],
      "verdict": "ok"
     }
    ],
@@ -3261,6 +3318,22 @@
     -0.15
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -424,
+    -374,
+    -298,
+    -198,
+    -82,
+    58
+   ],
+   "peak_prominence": [
+    0.28,
+    0.47,
+    0.64,
+    0.84,
+    0.91,
+    0.84
+   ],
    "e0_mev": -461.3831682203184,
    "drift_comp_nm_per_min": [
     0.2651071957687984,
@@ -3351,6 +3424,11 @@
      "field": "ok",
      "field_atoms": 15,
      "ghost_fraction": 0.111,
+     "field_ghost": [
+      -1.1,
+      -0.4,
+      0.964
+     ],
      "verdict": "ok"
     }
    ],
@@ -3527,6 +3605,20 @@
     0.11
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -436,
+    -384,
+    -284,
+    -146,
+    38
+   ],
+   "peak_prominence": [
+    0.15,
+    0.45,
+    0.79,
+    0.97,
+    0.94
+   ],
    "e0_mev": -454.0562321861365,
    "drift_comp_nm_per_min": [
     -0.6869162734376605,
@@ -3538,7 +3630,7 @@
    "seed": 10,
    "success": false,
    "partial": 0.25,
-   "error": "ActionError: the instrument-time budget is spent",
+   "error": "RuntimeError: the tip could not be conditioned",
    "values": {},
    "truth": {},
    "abs_err": {},
@@ -3548,7 +3640,7 @@
     "peak_hi_mev": false,
     "radius_nm": false
    },
-   "instrument_s": 9513.880855151054,
+   "instrument_s": 11320.825230589518,
    "tip_condition": "double",
    "diag": {
     "tol_nm": 0.532,
@@ -3647,6 +3739,11 @@
      "field": "double",
      "field_atoms": 2,
      "ghost_fraction": 0.4,
+     "field_ghost": [
+      0.2,
+      -0.8,
+      0.977
+     ],
      "verdict": "double"
     },
     {
@@ -3659,6 +3756,11 @@
      "field": "double",
      "field_atoms": 0,
      "ghost_fraction": 0.308,
+     "field_ghost": [
+      0.3,
+      -0.9,
+      0.99
+     ],
      "verdict": "double"
     },
     {
@@ -3671,6 +3773,11 @@
      "field": "unknown",
      "field_atoms": 0,
      "ghost_fraction": 0.25,
+     "field_ghost": [
+      0.6,
+      -1.2,
+      0.975
+     ],
      "verdict": "blunt"
     },
     {
@@ -3683,12 +3790,21 @@
      "field": "double",
      "field_atoms": 0,
      "ghost_fraction": 0.308,
+     "field_ghost": [
+      0.1,
+      -0.9,
+      0.91
+     ],
      "verdict": "double"
     },
     {
      "verdict": "double",
      "width_nm": 0.7,
      "ghost": 0.404,
+     "ghost_lag_nm": [
+      1.9,
+      1.7
+     ],
      "quick": true
     },
     {
@@ -3701,6 +3817,11 @@
      "field": "double",
      "field_atoms": 0,
      "ghost_fraction": 0.308,
+     "field_ghost": [
+      0.6,
+      -1.2,
+      0.987
+     ],
      "verdict": "double"
     },
     {
@@ -3713,6 +3834,11 @@
      "field": "unknown",
      "field_atoms": 0,
      "ghost_fraction": 0.214,
+     "field_ghost": [
+      -1.0,
+      0.8,
+      0.841
+     ],
      "verdict": "blunt"
     },
     {
@@ -3725,6 +3851,11 @@
      "field": "unknown",
      "field_atoms": 0,
      "ghost_fraction": 0.231,
+     "field_ghost": [
+      -1.0,
+      0.8,
+      0.85
+     ],
      "verdict": "blunt"
     },
     {
@@ -3737,6 +3868,11 @@
      "field": "double",
      "field_atoms": 0,
      "ghost_fraction": 0.286,
+     "field_ghost": [
+      0.5,
+      -1.0,
+      0.986
+     ],
      "verdict": "double"
     },
     {
@@ -3749,6 +3885,11 @@
      "field": "unknown",
      "field_atoms": 0,
      "ghost_fraction": 0.2,
+     "field_ghost": [
+      1.7,
+      -2.8,
+      0.909
+     ],
      "verdict": "blunt"
     },
     {
@@ -3761,6 +3902,11 @@
      "field": "unknown",
      "field_atoms": 0,
      "ghost_fraction": 0.214,
+     "field_ghost": [
+      -0.4,
+      0.6,
+      0.985
+     ],
      "verdict": "blunt"
     },
     {
@@ -3773,6 +3919,11 @@
      "field": "unknown",
      "field_atoms": 0,
      "ghost_fraction": 0.267,
+     "field_ghost": [
+      0.7,
+      -1.1,
+      0.935
+     ],
      "verdict": "blunt"
     },
     {
@@ -3785,6 +3936,11 @@
      "field": "unknown",
      "field_atoms": 0,
      "ghost_fraction": 0.167,
+     "field_ghost": [
+      0.6,
+      -1.9,
+      0.928
+     ],
      "verdict": "blunt"
     },
     {
@@ -3797,12 +3953,142 @@
      "field": "unknown",
      "field_atoms": 0,
      "ghost_fraction": 0.167,
+     "field_ghost": [
+      -0.2,
+      -3.9,
+      0.605
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.7,
+     "ghost": 0.031,
+     "ghost_lag_nm": [
+      3.4,
+      2.6
+     ],
+     "field": "unknown",
+     "field_atoms": 0,
+     "ghost_fraction": 0.231,
+     "field_ghost": [
+      0.3,
+      -0.9,
+      0.987
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.7,
+     "ghost": 0.032,
+     "ghost_lag_nm": [
+      3.3,
+      2.5
+     ],
+     "field": "unknown",
+     "field_atoms": 0,
+     "ghost_fraction": 0.25,
+     "field_ghost": [
+      -1.3,
+      0.7,
+      0.928
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.7,
+     "ghost": 0.046,
+     "ghost_lag_nm": [
+      -3.5,
+      2.1
+     ],
+     "field": "unknown",
+     "field_atoms": 0,
+     "ghost_fraction": 0.267,
+     "field_ghost": [
+      0.3,
+      -0.8,
+      0.973
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.7,
+     "ghost": 0.031,
+     "ghost_lag_nm": [
+      -3.3,
+      -2.6
+     ],
+     "field": "unknown",
+     "field_atoms": 0,
+     "ghost_fraction": 0.231,
+     "field_ghost": [
+      0.0,
+      -4.3,
+      0.756
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.7,
+     "ghost": 0.033,
+     "ghost_lag_nm": [
+      -4.2,
+      0.5
+     ],
+     "field": "double",
+     "field_atoms": 0,
+     "ghost_fraction": 0.4,
+     "field_ghost": [
+      0.1,
+      -0.8,
+      0.982
+     ],
+     "verdict": "double"
+    },
+    {
+     "width_nm": 0.7,
+     "ghost": 0.031,
+     "ghost_lag_nm": [
+      4.2,
+      -0.5
+     ],
+     "field": "unknown",
+     "field_atoms": 0,
+     "ghost_fraction": 0.2,
+     "field_ghost": [
+      0.7,
+      -1.5,
+      0.966
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.7,
+     "ghost": 0.031,
+     "ghost_lag_nm": [
+      -4.2,
+      0.5
+     ],
+     "field": "unknown",
+     "field_atoms": 0,
+     "ghost_fraction": 0.231,
+     "field_ghost": [
+      0.1,
+      -0.8,
+      0.935
+     ],
      "verdict": "blunt"
     }
    ],
    "tip_actions": [
     "ok",
     "ok",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
     "pulse",
     "pulse",
     "pulse",
@@ -4203,6 +4489,7 @@
      "field": "ok",
      "field_atoms": 7,
      "ghost_fraction": 0.0,
+     "field_ghost": null,
      "verdict": "ok"
     }
    ],
@@ -4436,6 +4723,20 @@
     -0.2
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -430,
+    -386,
+    -298,
+    -170,
+    -4
+   ],
+   "peak_prominence": [
+    0.12,
+    0.52,
+    0.84,
+    0.98,
+    0.92
+   ],
    "e0_mev": -448.2102254075682,
    "drift_comp_nm_per_min": [
     -0.865759760418687,
@@ -4563,6 +4864,11 @@
      "field": "ok",
      "field_atoms": 4,
      "ghost_fraction": 0.107,
+     "field_ghost": [
+      -1.7,
+      0.4,
+      0.982
+     ],
      "verdict": "ok"
     }
    ],
@@ -4749,6 +5055,22 @@
     -0.24
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -438,
+    -394,
+    -314,
+    -200,
+    -48,
+    142
+   ],
+   "peak_prominence": [
+    0.2,
+    0.48,
+    0.77,
+    0.96,
+    0.89,
+    0.26
+   ],
    "e0_mev": -455.596640308462,
    "drift_comp_nm_per_min": [
     0.030645435129717503,
@@ -4851,6 +5173,7 @@
      "field": "ok",
      "field_atoms": 11,
      "ghost_fraction": 0.0,
+     "field_ghost": null,
      "verdict": "ok"
     }
    ],
@@ -5162,6 +5485,20 @@
     0.24
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -454,
+    -392,
+    -292,
+    -146,
+    42
+   ],
+   "peak_prominence": [
+    0.16,
+    0.55,
+    0.9,
+    0.98,
+    0.84
+   ],
    "e0_mev": -469.6966800320202,
    "drift_comp_nm_per_min": [
     -0.11180761256139929,
@@ -5269,6 +5606,7 @@
      "field": "ok",
      "field_atoms": 5,
      "ghost_fraction": 0.0,
+     "field_ghost": null,
      "verdict": "ok"
     }
    ],
@@ -5518,6 +5856,20 @@
     0.14
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -432,
+    -386,
+    -304,
+    -186,
+    -30
+   ],
+   "peak_prominence": [
+    0.1,
+    0.38,
+    0.77,
+    0.91,
+    1.0
+   ],
    "e0_mev": -446.1595355741902,
    "drift_comp_nm_per_min": [
     -0.30108713123363906,
@@ -5531,18 +5883,18 @@
    "partial": 1.0,
    "error": null,
    "values": {
-    "peak_lo_mev": -326.00000000000006,
-    "peak_hi_mev": -194.00000000000006,
+    "peak_lo_mev": -400.0,
+    "peak_hi_mev": -326.00000000000006,
     "radius_nm": 6.079347929104836
    },
    "truth": {
-    "peak_lo_mev": -329.2355807156904,
-    "peak_hi_mev": -191.23558071569025,
+    "peak_lo_mev": -405.23558071569045,
+    "peak_hi_mev": -329.2355807156904,
     "radius_nm": 6.071176752403414
    },
    "abs_err": {
-    "peak_lo_mev": 3.2355807156903325,
-    "peak_hi_mev": -2.7644192843098097,
+    "peak_lo_mev": 5.235580715690446,
+    "peak_hi_mev": 3.2355807156903325,
     "radius_nm": 0.008171176701422311
    },
    "claims_ok": {
@@ -5618,6 +5970,7 @@
      "field": "ok",
      "field_atoms": 7,
      "ghost_fraction": 0.0,
+     "field_ghost": null,
      "verdict": "ok"
     }
    ],
@@ -5777,6 +6130,22 @@
     0.14
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -400,
+    -326,
+    -194,
+    -104,
+    4,
+    118
+   ],
+   "peak_prominence": [
+    0.26,
+    0.74,
+    0.97,
+    0.1,
+    0.78,
+    0.18
+   ],
    "e0_mev": -427.1664840420276,
    "drift_comp_nm_per_min": [
     0.3628641945676533,
@@ -5787,18 +6156,30 @@
    "paper": "P3-repair",
    "seed": 16,
    "success": false,
-   "partial": 0.0,
-   "error": "RuntimeError: the tip kept changing",
-   "values": {},
-   "truth": {},
-   "abs_err": {},
+   "partial": 0.75,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -360.00000000000006,
+    "peak_hi_mev": -266.0,
+    "radius_nm": 7.2526955311633206
+   },
+   "truth": {
+    "peak_lo_mev": -357.89446039224833,
+    "peak_hi_mev": -265.8944603922482,
+    "radius_nm": 7.242237323442408
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.105539607751723,
+    "peak_hi_mev": -0.10553960775177984,
+    "radius_nm": 0.010458207720912327
+   },
    "claims_ok": {
     "ring_occupancy": false,
-    "peak_lo_mev": false,
-    "peak_hi_mev": false,
-    "radius_nm": false
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
    },
-   "instrument_s": 6599.501905137041,
+   "instrument_s": 5012.149461793079,
    "tip_condition": "double",
    "diag": {
     "tol_nm": 0.599,
@@ -5911,108 +6292,48 @@
      "field": "ok",
      "field_atoms": 11,
      "ghost_fraction": 0.067,
+     "field_ghost": [
+      0.1,
+      -2.0,
+      0.998
+     ],
      "verdict": "double"
     },
     {
      "verdict": "double",
      "width_nm": 0.9,
      "ghost": 0.09,
+     "ghost_lag_nm": [
+      4.5,
+      1.4
+     ],
      "quick": true
     },
     {
      "verdict": "double",
      "width_nm": 0.9,
      "ghost": 0.09,
+     "ghost_lag_nm": [
+      -4.5,
+      -1.4
+     ],
      "quick": true
     },
     {
-     "verdict": "double",
      "width_nm": 0.9,
-     "ghost": 0.09,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 1.05,
-     "ghost": 0.091,
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "width_nm": 1.3,
-     "ghost": 0.083,
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "width_nm": 1.25,
-     "ghost": 0.077,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 1.0,
-     "ghost": 0.091,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 1.05,
-     "ghost": 0.098,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 1.0,
-     "ghost": 0.291,
-     "quick": true
-    },
-    {
-     "width_nm": 1.05,
-     "ghost": 0.066,
+     "ghost": 0.088,
      "ghost_lag_nm": [
-      4.2,
-      -1.9
-     ],
-     "field": "ok",
-     "field_atoms": 12,
-     "ghost_fraction": 0.062,
-     "verdict": "ok"
-    },
-    {
-     "width_nm": 1.0,
-     "ghost": 0.063,
-     "ghost_lag_nm": [
-      -4.2,
-      1.9
+      -4.5,
+      -1.3
      ],
      "field": "ok",
      "field_atoms": 11,
      "ghost_fraction": 0.067,
-     "verdict": "ok"
-    },
-    {
-     "width_nm": 1.0,
-     "ghost": 0.062,
-     "ghost_lag_nm": [
-      -4.2,
-      1.9
+     "field_ghost": [
+      0.0,
+      2.1,
+      0.973
      ],
-     "field": "ok",
-     "field_atoms": 11,
-     "ghost_fraction": 0.067,
-     "verdict": "ok"
-    },
-    {
-     "width_nm": 1.0,
-     "ghost": 0.063,
-     "ghost_lag_nm": [
-      -4.1,
-      1.9
-     ],
-     "field": "ok",
-     "field_atoms": 11,
-     "ghost_fraction": 0.067,
      "verdict": "ok"
     }
    ],
@@ -6020,16 +6341,9 @@
     "ok",
     "pulse",
     "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
     "pulse"
    ],
-   "tip_rounds": 0,
+   "tip_rounds": 3,
    "drift_atoms": [
     15
    ],
@@ -6162,35 +6476,35 @@
     2.66,
     1.32
    ],
-   "bare_clear_nm": 6.6,
-   "bare_feature": 0.056,
-   "tip_changed": [
-    {
-     "at": "radius frame",
-     "verdict": "double",
-     "width_nm": 0.9500000000000001,
-     "ghost": 0.08855890925149243
-    },
-    {
-     "at": "radius frame",
-     "verdict": "double",
-     "width_nm": 1.0,
-     "ghost": 0.08871076639070016
-    },
-    {
-     "at": "radius frame",
-     "verdict": "double",
-     "width_nm": 1.0,
-     "ghost": 0.09256609717889955
-    },
-    {
-     "at": "radius frame",
-     "verdict": "double",
-     "width_nm": 1.0,
-     "ghost": 0.08761811139561344
-    }
+   "ghost_ignored": [
+    "ring"
    ],
-   "attempts_measure": 4
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.042,
+   "centre_shift_nm": [
+    0.17,
+    0.16
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -408,
+    -360,
+    -266,
+    -136,
+    34
+   ],
+   "peak_prominence": [
+    0.08,
+    0.45,
+    0.76,
+    0.96,
+    0.9
+   ],
+   "e0_mev": -424.8109525529273,
+   "drift_comp_nm_per_min": [
+    0.950245539769809,
+    0.4640901362399572
+   ]
   },
   {
    "paper": "P3-repair",
@@ -6288,6 +6602,11 @@
      "field": "ok",
      "field_atoms": 13,
      "ghost_fraction": 0.067,
+     "field_ghost": [
+      0.1,
+      2.9,
+      0.79
+     ],
      "verdict": "ok"
     }
    ],
@@ -6519,6 +6838,22 @@
     0.19
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -400,
+    -362,
+    -286,
+    -174,
+    -32,
+    140
+   ],
+   "peak_prominence": [
+    0.08,
+    0.39,
+    0.69,
+    0.92,
+    0.99,
+    0.08
+   ],
    "e0_mev": -419.20283657958225,
    "drift_comp_nm_per_min": [
     -0.54275806997239,
@@ -6595,14 +6930,19 @@
     "ok",
     {
      "width_nm": 0.9,
-     "ghost": 0.041,
+     "ghost": 0.0,
      "ghost_lag_nm": [
-      -4.0,
-      1.3
+      0.0,
+      0.0
      ],
      "field": "ok",
      "field_atoms": 11,
      "ghost_fraction": 0.152,
+     "field_ghost": [
+      -0.4,
+      -0.8,
+      0.952
+     ],
      "verdict": "ok"
     }
    ],
@@ -6794,6 +7134,22 @@
     -0.16
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -394,
+    -342,
+    -258,
+    -146,
+    -8,
+    146
+   ],
+   "peak_prominence": [
+    0.26,
+    0.43,
+    0.79,
+    0.9,
+    0.91,
+    0.09
+   ],
    "e0_mev": -442.61247776300223,
    "drift_comp_nm_per_min": [
     0.5065464577997937,
@@ -6921,6 +7277,7 @@
      "field": "ok",
      "field_atoms": 8,
      "ghost_fraction": 0.0,
+     "field_ghost": null,
      "verdict": "ok"
     }
    ],
@@ -7184,6 +7541,20 @@
     -0.12
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -430,
+    -376,
+    -272,
+    -124,
+    66
+   ],
+   "peak_prominence": [
+    0.14,
+    0.46,
+    0.82,
+    0.94,
+    0.92
+   ],
    "e0_mev": -447.60324090756,
    "drift_comp_nm_per_min": [
     0.974502051471367,
@@ -7194,18 +7565,30 @@
    "paper": "P3-repair",
    "seed": 20,
    "success": false,
-   "partial": 0.0,
-   "error": "RuntimeError: the tip could not be conditioned",
-   "values": {},
-   "truth": {},
-   "abs_err": {},
+   "partial": 0.75,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -406.0,
+    "peak_hi_mev": -338.00000000000006,
+    "radius_nm": 6.38053911421974
+   },
+   "truth": {
+    "peak_lo_mev": -403.3516062907166,
+    "peak_hi_mev": -337.3516062907165,
+    "radius_nm": 6.369629948390191
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.6483937092834253,
+    "peak_hi_mev": -0.648393709283539,
+    "radius_nm": 0.010909165829549039
+   },
    "claims_ok": {
     "ring_occupancy": false,
-    "peak_lo_mev": false,
-    "peak_hi_mev": false,
-    "radius_nm": false
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
    },
-   "instrument_s": 6581.2713611261925,
+   "instrument_s": 5248.248809668178,
    "tip_condition": "dirty",
    "diag": {
     "tol_nm": 0.476,
@@ -7314,160 +7697,26 @@
     "double",
     {
      "width_nm": 0.95,
-     "ghost": 0.098,
+     "ghost": 0.037,
      "ghost_lag_nm": [
-      -1.0,
-      2.8
+      -3.8,
+      -0.8
      ],
      "field": "ok",
      "field_atoms": 6,
      "ghost_fraction": 0.125,
-     "verdict": "double"
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.9,
-     "ghost": 0.098,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.85,
-     "ghost": 0.318,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.9,
-     "ghost": 0.099,
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.58, inside 1.00",
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.9,
-     "ghost": 0.099,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.9,
-     "ghost": 0.205,
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "width_nm": 1.15,
-     "ghost": 0.053,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.9,
-     "ghost": 0.096,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.95,
-     "ghost": 0.1,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.9,
-     "ghost": 0.099,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.9,
-     "ghost": 0.098,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.85,
-     "ghost": 0.34,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.9,
-     "ghost": 0.099,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.95,
-     "ghost": 0.099,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.9,
-     "ghost": 0.096,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.75,
-     "ghost": 0.365,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.7,
-     "ghost": 0.279,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.9,
-     "ghost": 0.098,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.9,
-     "ghost": 0.097,
-     "quick": true
-    },
-    {
-     "verdict": "double",
-     "width_nm": 0.9,
-     "ghost": 0.101,
-     "quick": true
+     "field_ghost": [
+      -1.7,
+      0.2,
+      0.874
+     ],
+     "verdict": "ok"
     }
    ],
    "tip_actions": [
-    "ok",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse"
+    "ok"
    ],
-   "tip_rounds": 1,
+   "tip_rounds": 0,
    "drift_atoms": [
     8
    ],
@@ -7666,6 +7915,30 @@
     11.79,
     12.22,
     10.44
+   ],
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.038,
+   "centre_shift_nm": [
+    -0.0,
+    -0.26
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -406,
+    -338,
+    -214,
+    -48
+   ],
+   "peak_prominence": [
+    0.35,
+    0.77,
+    0.95,
+    0.85
+   ],
+   "e0_mev": -423.60820990602053,
+   "drift_comp_nm_per_min": [
+    0.21920766893215407,
+    -1.193581624240336
    ]
   },
   {
@@ -7752,6 +8025,7 @@
      "field": "ok",
      "field_atoms": 13,
      "ghost_fraction": 0.0,
+     "field_ghost": null,
      "verdict": "ok"
     }
    ],
@@ -7953,6 +8227,22 @@
     0.12
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -396,
+    -334,
+    -238,
+    -120,
+    28,
+    118
+   ],
+   "peak_prominence": [
+    0.4,
+    0.59,
+    0.83,
+    0.96,
+    0.71,
+    0.08
+   ],
    "e0_mev": -448.2118414555231,
    "drift_comp_nm_per_min": [
     -0.22658040256813458,
@@ -8047,14 +8337,19 @@
     "ok",
     {
      "width_nm": 0.9,
-     "ghost": 0.036,
+     "ghost": 0.0,
      "ghost_lag_nm": [
-      4.1,
-      1.6
+      0.0,
+      0.0
      ],
      "field": "ok",
      "field_atoms": 9,
      "ghost_fraction": 0.125,
+     "field_ghost": [
+      0.7,
+      -0.6,
+      0.989
+     ],
      "verdict": "ok"
     }
    ],
@@ -8328,6 +8623,20 @@
     -0.12
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -388,
+    -326,
+    -236,
+    -116,
+    28
+   ],
+   "peak_prominence": [
+    0.22,
+    0.5,
+    0.79,
+    0.98,
+    0.98
+   ],
    "e0_mev": -435.68080347013034,
    "drift_comp_nm_per_min": [
     0.42318969406051293,
@@ -8463,6 +8772,11 @@
      "field": "ok",
      "field_atoms": 15,
      "ghost_fraction": 0.103,
+     "field_ghost": [
+      0.3,
+      -0.6,
+      0.971
+     ],
      "verdict": "ok"
     }
    ],
@@ -8649,6 +8963,20 @@
     0.24
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -390,
+    -322,
+    -224,
+    -100,
+    54
+   ],
+   "peak_prominence": [
+    0.45,
+    0.77,
+    0.93,
+    0.93,
+    0.82
+   ],
    "e0_mev": -438.1247293580716,
    "drift_comp_nm_per_min": [
     0.3070972294457812,
@@ -8751,6 +9079,11 @@
      "field": "ok",
      "field_atoms": 6,
      "ghost_fraction": 0.125,
+     "field_ghost": [
+      1.0,
+      -1.5,
+      0.84
+     ],
      "verdict": "ok"
     }
    ],
@@ -9019,6 +9352,20 @@
     -0.14
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -410,
+    -358,
+    -268,
+    -128,
+    46
+   ],
+   "peak_prominence": [
+    0.1,
+    0.49,
+    0.87,
+    0.98,
+    0.91
+   ],
    "e0_mev": -427.3260720120714,
    "drift_comp_nm_per_min": [
     0.4560037629679494,
@@ -9032,18 +9379,18 @@
    "partial": 1.0,
    "error": null,
    "values": {
-    "peak_lo_mev": -372.00000000000006,
-    "peak_hi_mev": -244.00000000000006,
+    "peak_lo_mev": -444.00000000000006,
+    "peak_hi_mev": -372.00000000000006,
     "radius_nm": 5.779050178316711
    },
    "truth": {
-    "peak_lo_mev": -372.90717457087766,
-    "peak_hi_mev": -244.90717457087752,
+    "peak_lo_mev": -444.9071745708777,
+    "peak_hi_mev": -372.90717457087766,
     "radius_nm": 5.770769151078532
    },
    "abs_err": {
-    "peak_lo_mev": 0.9071745708776007,
-    "peak_hi_mev": 0.9071745708774586,
+    "peak_lo_mev": 0.9071745708776575,
+    "peak_hi_mev": 0.9071745708776007,
     "radius_nm": 0.008281027238179028
    },
    "claims_ok": {
@@ -9103,6 +9450,11 @@
      "field": "ok",
      "field_atoms": 7,
      "ghost_fraction": 0.143,
+     "field_ghost": [
+      2.4,
+      -2.9,
+      0.98
+     ],
      "verdict": "ok"
     }
    ],
@@ -9349,6 +9701,18 @@
     -0.16
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -444,
+    -372,
+    -244,
+    -60
+   ],
+   "peak_prominence": [
+    0.25,
+    0.71,
+    0.97,
+    0.89
+   ],
    "e0_mev": -463.5688349050552,
    "drift_comp_nm_per_min": [
     -0.46929979932504046,
@@ -9362,9 +9726,9 @@
    "partial": 1.0,
    "error": null,
    "values": {
-    "peak_lo_mev": -368.00000000000006,
-    "peak_hi_mev": -280.0,
-    "radius_nm": 7.090156386072184
+    "peak_lo_mev": -372.00000000000006,
+    "peak_hi_mev": -278.0,
+    "radius_nm": 7.08789868919435
    },
    "truth": {
     "peak_lo_mev": -371.9656454518967,
@@ -9372,9 +9736,9 @@
     "radius_nm": 7.071665980752861
    },
    "abs_err": {
-    "peak_lo_mev": 3.9656454518966484,
-    "peak_hi_mev": 1.9656454518965916,
-    "radius_nm": 0.018490405319323777
+    "peak_lo_mev": -0.03435454810335159,
+    "peak_hi_mev": 3.9656454518965916,
+    "radius_nm": 0.016232708441489052
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -9382,7 +9746,7 @@
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 7123.534919186043,
+   "instrument_s": 6420.658496390315,
    "tip_condition": "good",
    "diag": {
     "tol_nm": 0.617,
@@ -9406,8 +9770,8 @@
      },
      {
       "deg": 146.5,
-      "radial_nm": 0.0,
-      "tangential_nm": -0.0
+      "radial_nm": -0.05,
+      "tangential_nm": 0.25
      },
      {
       "deg": 117.8,
@@ -9416,8 +9780,8 @@
      },
      {
       "deg": 126.7,
-      "radial_nm": 0.13,
-      "tangential_nm": -0.22
+      "radial_nm": 0.0,
+      "tangential_nm": -0.0
      }
     ]
    },
@@ -9430,33 +9794,20 @@
    "judged": [
     "ok",
     {
-     "width_nm": 0.9,
-     "ghost": 0.037,
+     "width_nm": 0.75,
+     "ghost": 0.054,
      "ghost_lag_nm": [
-      -3.4,
-      1.6
-     ],
-     "field": "double",
-     "field_atoms": 6,
-     "ghost_fraction": 0.135,
-     "verdict": "double"
-    },
-    {
-     "verdict": "blunt",
-     "width_nm": 1.25,
-     "ghost": 0.072,
-     "quick": true
-    },
-    {
-     "width_nm": 0.9,
-     "ghost": 0.037,
-     "ghost_lag_nm": [
-      0.5,
-      -3.8
+      -0.4,
+      3.7
      ],
      "field": "ok",
      "field_atoms": 6,
-     "ghost_fraction": 0.167,
+     "ghost_fraction": 0.194,
+     "field_ghost": [
+      -0.4,
+      -0.9,
+      0.933
+     ],
      "verdict": "ok"
     }
    ],
@@ -9479,42 +9830,42 @@
      "t": 773,
      "verdict": "double",
      "width_nm": 0.7,
-     "ghost": 0.313,
-     "spares": 19
+     "ghost": 0.203,
+     "spares": 4
     },
     {
      "t": 858,
      "verdict": "double",
      "width_nm": 0.7,
-     "ghost": 0.212,
+     "ghost": 0.21,
      "spares": 4
     },
     {
-     "t": 943,
+     "t": 1554,
+     "verdict": "double",
+     "width_nm": 0.7,
+     "ghost": 0.205,
+     "spares": 4
+    },
+    {
+     "t": 1639,
      "verdict": "double",
      "width_nm": 0.7,
      "ghost": 0.213,
      "spares": 4
     },
     {
-     "t": 1028,
-     "verdict": "double",
-     "width_nm": 0.7,
-     "ghost": 0.208,
-     "spares": 4
-    },
-    {
      "t": 1724,
      "verdict": "double",
-     "width_nm": 0.7,
-     "ghost": 0.208,
+     "width_nm": 0.65,
+     "ghost": 0.207,
      "spares": 4
     },
     {
      "t": 1809,
      "verdict": "double",
      "width_nm": 0.7,
-     "ghost": 0.22,
+     "ghost": 0.211,
      "spares": 4
     }
    ],
@@ -9524,25 +9875,22 @@
     "double",
     "double",
     "double",
-    "double",
-    "ok",
-    "pulse",
-    "pulse"
+    "double"
    ],
-   "ghost_steady": 0.208,
-   "tip_rounds": 2,
+   "ghost_steady": 0.211,
+   "tip_rounds": 0,
    "drift_atoms": [
     30,
-    23,
-    13
+    21,
+    31
    ],
    "spares_seen": 4,
-   "gap_width_nm": 5.146959185168342,
-   "spacing_nm": 1.2867397962920855,
-   "ring_radius_fit_nm": 7.079660201264703,
+   "gap_width_nm": 5.1682415236655626,
+   "spacing_nm": 1.2920603809163906,
+   "ring_radius_fit_nm": 7.080812038824238,
    "planned_deg": [
-    116.5,
-    126.9,
+    116.4,
+    126.8,
     137.3,
     147.7
    ],
@@ -9552,7 +9900,7 @@
      "r_kohm": 400.0,
      "hops": 0,
      "in": false,
-     "left_nm": 3.27
+     "left_nm": 3.24
     },
     {
      "r_kohm": 320.0,
@@ -9570,7 +9918,7 @@
      "r_kohm": 256.0,
      "hops": 0,
      "in": false,
-     "left_nm": 3.04
+     "left_nm": 3.02
     },
     {
      "r_kohm": 204.8,
@@ -9580,7 +9928,7 @@
     },
     {
      "r_kohm": 163.8,
-     "hops": 4,
+     "hops": 1,
      "in": false,
      "again": true
     },
@@ -9588,7 +9936,7 @@
      "r_kohm": 163.8,
      "hops": 0,
      "in": false,
-     "left_nm": 2.38
+     "left_nm": 2.36
     },
     {
      "r_kohm": 131.1,
@@ -9607,7 +9955,7 @@
      "r_kohm": 209.7,
      "hops": 0,
      "in": false,
-     "left_nm": 4.91
+     "left_nm": 4.88
     },
     {
      "r_kohm": 167.8,
@@ -9625,7 +9973,7 @@
      "r_kohm": 134.2,
      "hops": 0,
      "in": false,
-     "left_nm": 4.66
+     "left_nm": 4.63
     },
     {
      "r_kohm": 107.4,
@@ -9637,168 +9985,174 @@
      "r_kohm": 107.4,
      "hops": 6,
      "in": false,
-     "left_nm": 4.43
+     "left_nm": 4.4
     },
     {
      "r_kohm": 107.4,
      "hops": 3,
      "in": false,
-     "left_nm": 3.07
+     "left_nm": 2.56
     },
     {
      "r_kohm": 107.4,
-     "hops": 0,
-     "in": false,
-     "left_nm": 1.91
-    },
-    {
-     "r_kohm": 85.9,
      "hops": 8,
      "in": false,
-     "again": true
+     "left_nm": 1.88
     },
     {
-     "r_kohm": 85.9,
-     "hops": 7,
-     "in": true,
-     "fine": 0,
-     "off_nm": 2.86
-    },
-    {
-     "r_kohm": 85.9,
-     "hops": 7,
-     "in": true,
-     "fine": 1,
-     "off_nm": 2.85
-    },
-    {
-     "r_kohm": 85.9,
-     "hops": 8,
-     "in": true,
-     "fine": 2,
-     "off_nm": 2.88
-    },
-    {
-     "r_kohm": 85.9,
-     "hops": 8,
-     "in": true,
-     "fine": 3,
-     "off_nm": 0.22
-    },
-    {
-     "r_kohm": 137.4,
-     "hops": 12,
-     "in": false,
-     "left_nm": 4.5
-    },
-    {
-     "r_kohm": 137.4,
-     "hops": 2,
-     "in": false,
-     "left_nm": 1.61
-    },
-    {
-     "r_kohm": 137.4,
-     "hops": 0,
-     "in": false,
-     "left_nm": 1.19
-    },
-    {
-     "r_kohm": 110.0,
-     "hops": 5,
-     "in": false,
-     "again": true
-    },
-    {
-     "r_kohm": 110.0,
-     "hops": 7,
-     "in": true,
-     "fine": 0,
-     "off_nm": 0.17
-    },
-    {
-     "r_kohm": 175.9,
-     "hops": 0,
-     "in": false,
-     "left_nm": 4.68
-    },
-    {
-     "r_kohm": 140.7,
-     "hops": 5,
-     "in": false,
-     "again": true
-    },
-    {
-     "r_kohm": 140.7,
+     "r_kohm": 107.4,
      "hops": 1,
-     "in": false,
-     "left_nm": 3.28
-    },
-    {
-     "r_kohm": 140.7,
-     "hops": 1,
-     "in": false,
-     "left_nm": 3.04
-    },
-    {
-     "r_kohm": 140.7,
-     "hops": 5,
-     "in": false,
-     "left_nm": 2.52
-    },
-    {
-     "r_kohm": 140.7,
-     "hops": 4,
-     "in": false,
-     "left_nm": 0.94
-    },
-    {
-     "r_kohm": 140.7,
-     "hops": 2,
      "in": true,
      "fine": 0,
-     "off_nm": 1.18
+     "off_nm": 1.23
     },
     {
-     "r_kohm": 140.7,
-     "hops": 5,
+     "r_kohm": 107.4,
+     "hops": 1,
      "in": true,
      "fine": 1,
      "off_nm": 0.73
     },
     {
-     "r_kohm": 140.7,
+     "r_kohm": 107.4,
      "hops": 3,
      "in": true,
      "fine": 2,
-     "off_nm": 0.53
+     "off_nm": 0.08
+    },
+    {
+     "r_kohm": 171.8,
+     "hops": 0,
+     "in": false,
+     "left_nm": 4.47
+    },
+    {
+     "r_kohm": 137.4,
+     "hops": 7,
+     "in": false,
+     "again": true
+    },
+    {
+     "r_kohm": 137.4,
+     "hops": 2,
+     "in": false,
+     "left_nm": 2.7
+    },
+    {
+     "r_kohm": 137.4,
+     "hops": 0,
+     "in": false,
+     "left_nm": 2.26
+    },
+    {
+     "r_kohm": 110.0,
+     "hops": 5,
+     "in": false,
+     "again": true
+    },
+    {
+     "r_kohm": 110.0,
+     "hops": 2,
+     "in": true,
+     "fine": 0,
+     "off_nm": 0.93
+    },
+    {
+     "r_kohm": 110.0,
+     "hops": 4,
+     "in": true,
+     "fine": 1,
+     "off_nm": 0.16
+    },
+    {
+     "r_kohm": 175.9,
+     "hops": 2,
+     "in": false,
+     "left_nm": 4.69
+    },
+    {
+     "r_kohm": 175.9,
+     "hops": 0,
+     "in": false,
+     "left_nm": 4.19
+    },
+    {
+     "r_kohm": 140.7,
+     "hops": 1,
+     "in": false,
+     "again": true
+    },
+    {
+     "r_kohm": 140.7,
+     "hops": 1,
+     "in": false,
+     "left_nm": 3.94
+    },
+    {
+     "r_kohm": 140.7,
+     "hops": 6,
+     "in": false,
+     "left_nm": 3.47
+    },
+    {
+     "r_kohm": 140.7,
+     "hops": 4,
+     "in": false,
+     "left_nm": 1.87
+    },
+    {
+     "r_kohm": 140.7,
+     "hops": 3,
+     "in": false,
+     "left_nm": 0.73
+    },
+    {
+     "r_kohm": 140.7,
+     "hops": 0,
+     "in": true,
+     "fine": 0,
+     "off_nm": 1.59
     },
     {
      "r_kohm": 112.6,
-     "hops": 2,
+     "hops": 7,
      "in": true,
-     "fine": 3,
-     "off_nm": 0.15
+     "fine": 1,
+     "off_nm": 0.16
     }
    ],
    "placed": 4,
    "site_fill": [
-    1.49,
-    0.64,
-    1.13,
-    1.31
+    1.65,
+    0.93,
+    1.1,
+    1.59
    ],
-   "bare_clear_nm": 6.6,
-   "bare_feature": 0.029,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.028,
    "centre_shift_nm": [
-    0.04,
-    -0.03
+    0.01,
+    -0.02
    ],
    "spectra_dropped": 0,
-   "e0_mev": -438.1222571554982,
+   "peaks_mev": [
+    -420,
+    -372,
+    -278,
+    -152,
+    12
+   ],
+   "peak_prominence": [
+    0.16,
+    0.5,
+    0.85,
+    0.97,
+    0.89
+   ],
+   "e0_mev": -436.029533618515,
    "drift_comp_nm_per_min": [
-    0.22129110352182338,
-    -0.050841976410533445
+    0.23031497672696732,
+    -0.06820167912192023
    ]
   },
   {
@@ -9901,6 +10255,7 @@
      "field": "ok",
      "field_atoms": 7,
      "ghost_fraction": 0.0,
+     "field_ghost": null,
      "verdict": "ok"
     }
    ],
@@ -10171,6 +10526,24 @@
     0.31
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -438,
+    -392,
+    -300,
+    -160,
+    -82,
+    2,
+    110
+   ],
+   "peak_prominence": [
+    0.15,
+    0.51,
+    0.78,
+    0.89,
+    0.12,
+    0.82,
+    0.22
+   ],
    "e0_mev": -457.27309325061333,
    "drift_comp_nm_per_min": [
     0.3484698921682279,
@@ -10266,6 +10639,11 @@
      "field": "ok",
      "field_atoms": 12,
      "ghost_fraction": 0.13,
+     "field_ghost": [
+      -0.4,
+      -1.2,
+      0.801
+     ],
      "verdict": "ok"
     }
    ],
@@ -10494,6 +10872,18 @@
     0.19
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -434,
+    -360,
+    -220,
+    -28
+   ],
+   "peak_prominence": [
+    0.14,
+    0.59,
+    0.96,
+    0.95
+   ],
    "e0_mev": -454.9746757131243,
    "drift_comp_nm_per_min": [
     -0.5550715395517383,
@@ -10578,6 +10968,7 @@
      "field": "ok",
      "field_atoms": 8,
      "ghost_fraction": 0.0,
+     "field_ghost": null,
      "verdict": "ok"
     }
    ],
@@ -10751,6 +11142,20 @@
     -0.08
    ],
    "spectra_dropped": 0,
+   "peaks_mev": [
+    -406,
+    -346,
+    -254,
+    -136,
+    12
+   ],
+   "peak_prominence": [
+    0.29,
+    0.53,
+    0.76,
+    0.93,
+    1.0
+   ],
    "e0_mev": -455.8471906334223,
    "drift_comp_nm_per_min": [
     -0.8298476229730379,

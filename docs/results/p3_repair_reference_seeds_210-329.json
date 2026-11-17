@@ -7,31 +7,31 @@
    "peak_hi_mev": {
     "relative": false,
     "pass_rate": 1.0,
-    "err_median": 1.1728093130943051,
-    "err_p90": 2.7701022920955873,
+    "err_median": 1.1505003350920049,
+    "err_p90": 2.830878131129791,
     "err_max": 4.627175109620282,
     "signed_median": 0.3000367160569368
    },
    "peak_lo_mev": {
     "relative": false,
     "pass_rate": 1.0,
-    "err_median": 1.0552141378609292,
-    "err_p90": 3.07339359709788,
+    "err_median": 1.1181985925704225,
+    "err_p90": 3.029084441375068,
     "err_max": 9.390052276485164,
-    "signed_median": -0.27843478162088786
+    "signed_median": -0.2268682638803341
    },
    "radius_nm": {
     "relative": false,
     "pass_rate": 0.9833333333333333,
-    "err_median": 0.016399181072300095,
+    "err_median": 0.016111974047853472,
     "err_p90": 0.04933521488634078,
     "err_max": 0.23225209696008342,
     "signed_median": 0.009847922955369182
    }
   },
   "instrument_s": {
-   "median": 1391.781933941029,
-   "p90": 2443.7823781650673
+   "median": 1371.3655921320174,
+   "p90": 2436.768310916978
   }
  },
  "runs": [
@@ -3184,9 +3184,9 @@
    "success": true,
    "partial": 1.0,
    "values": {
-    "peak_lo_mev": -386.0,
-    "peak_hi_mev": -326.00000000000006,
-    "radius_nm": 8.633248022475163
+    "peak_lo_mev": -388.0,
+    "peak_hi_mev": -328.00000000000006,
+    "radius_nm": 8.63461821189827
    },
    "truth": {
     "peak_lo_mev": -386.6010068792541,
@@ -3194,9 +3194,9 @@
     "radius_nm": 8.644670486779711
    },
    "abs_err": {
-    "peak_lo_mev": 0.6010068792541006,
-    "peak_hi_mev": 0.6010068792539869,
-    "radius_nm": -0.011422464304548186
+    "peak_lo_mev": -1.3989931207458994,
+    "peak_hi_mev": -1.3989931207460131,
+    "radius_nm": -0.010052274881442003
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -3207,16 +3207,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 3,
    "radius_nm": 8.644670486779711,
-   "instrument_s": 888.7843438413755,
-   "tip_rounds": 2,
-   "track_lost": 0,
+   "instrument_s": 2149.733596603166,
+   "tip_rounds": 4,
+   "track_lost": 3,
    "pickups": 0,
    "placed": 3,
    "spares_seen": 3,
    "sites": 3,
-   "gap_width_nm": 2.8593815439112356,
-   "spacing_nm": 0.9531271813037452,
-   "ring_radius_fit_nm": 8.639786091626435,
+   "gap_width_nm": 2.869848696930754,
+   "spacing_nm": 0.9566162323102514,
+   "ring_radius_fit_nm": 8.634803621021536,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -3244,18 +3244,28 @@
      "in": false
     },
     {
-     "r_kohm": 256.0,
-     "spikes": 21,
+     "r_kohm": 320.0,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 9,
      "in": false
     },
     {
      "r_kohm": 256.0,
-     "spikes": 11,
+     "spikes": 12,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 9,
      "in": true
     },
     {
      "r_kohm": 400.0,
-     "spikes": 32,
+     "spikes": 30,
      "in": false
     },
     {
@@ -3265,9 +3275,9 @@
     }
    ],
    "site_fill": [
-    1.12,
-    1.19,
-    1.14
+    1.16,
+    1.21,
+    1.23
    ],
    "diag": {
     "tol_nm": 0.468,
@@ -3292,9 +3302,9 @@
     "n_ring": 58,
     "r_nm": 8.644670486779711,
     "planned_deg": [
-     180.9,
-     187.2,
-     193.5
+     181.0,
+     187.3,
+     193.7
     ],
     "gap_deg": [
      181.7,
@@ -3302,13 +3312,13 @@
      193.9
     ]
    },
-   "e0_mev": -429.28240556209505,
-   "radius_measured_nm": 8.633248022475163,
+   "e0_mev": -428.514307001608,
+   "radius_measured_nm": 8.63461821189827,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.5189906467488514,
-    0.43939683533180424
+    -0.5014277194833601,
+    0.4441370376542144
    ],
    "tip_condition": "double"
   },
@@ -3725,9 +3735,9 @@
    "success": true,
    "partial": 1.0,
    "values": {
-    "peak_lo_mev": -326.00000000000006,
+    "peak_lo_mev": -320.00000000000006,
     "peak_hi_mev": -194.00000000000006,
-    "radius_nm": 6.08616017321755
+    "radius_nm": 6.087756803192258
    },
    "truth": {
     "peak_lo_mev": -321.6123550228191,
@@ -3735,9 +3745,9 @@
     "radius_nm": 6.103535279481604
    },
    "abs_err": {
-    "peak_lo_mev": -4.387644977180969,
+    "peak_lo_mev": 1.612355022819031,
     "peak_hi_mev": -0.3876449771810826,
-    "radius_nm": -0.01737510626405392
+    "radius_nm": -0.01577847628934581
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -3748,9 +3758,9 @@
    "ring_occupancy": 1.0,
    "gap_sites": 4,
    "radius_nm": 6.103535279481604,
-   "instrument_s": 1996.3597397889118,
-   "tip_rounds": 7,
-   "track_lost": 2,
+   "instrument_s": 2408.97941385654,
+   "tip_rounds": 5,
+   "track_lost": 3,
    "pickups": 0,
    "placed": 4,
    "spares_seen": 4,
@@ -3805,29 +3815,14 @@
      "in": false
     },
     {
-     "r_kohm": 163.8,
-     "spikes": 1,
+     "r_kohm": 131.1,
+     "spikes": 9,
      "in": false
     },
     {
      "r_kohm": 131.1,
-     "spikes": 7,
-     "in": false
-    },
-    {
-     "r_kohm": 131.1,
-     "spikes": 5,
-     "in": false
-    },
-    {
-     "r_kohm": 131.1,
-     "spikes": 7,
+     "spikes": 9,
      "in": true
-    },
-    {
-     "r_kohm": 209.7,
-     "spikes": 1,
-     "in": false
     },
     {
      "r_kohm": 209.7,
@@ -3836,17 +3831,12 @@
     },
     {
      "r_kohm": 167.8,
-     "spikes": 3,
-     "in": false
-    },
-    {
-     "r_kohm": 167.8,
-     "spikes": 7,
+     "spikes": 0,
      "in": false
     },
     {
      "r_kohm": 134.2,
-     "spikes": 20,
+     "spikes": 27,
      "in": false
     },
     {
@@ -3856,28 +3846,38 @@
     },
     {
      "r_kohm": 214.7,
-     "spikes": 0,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 1,
      "in": false
     },
     {
      "r_kohm": 171.8,
-     "spikes": 19,
+     "spikes": 7,
      "in": false
     },
     {
      "r_kohm": 171.8,
-     "spikes": 8,
+     "spikes": 15,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 1,
      "in": true
     },
     {
      "r_kohm": 171.8,
-     "spikes": 0,
+     "spikes": 10,
      "in": true
     },
     {
-     "r_kohm": 137.4,
-     "spikes": 3,
-     "in": true
+     "r_kohm": 274.9,
+     "spikes": 0,
+     "in": false
     },
     {
      "r_kohm": 219.9,
@@ -3891,30 +3891,50 @@
     },
     {
      "r_kohm": 140.7,
-     "spikes": 0,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 2,
      "in": false
     },
     {
      "r_kohm": 112.6,
-     "spikes": 18,
+     "spikes": 16,
      "in": false
     },
     {
      "r_kohm": 112.6,
-     "spikes": 8,
+     "spikes": 1,
      "in": true
     },
     {
      "r_kohm": 112.6,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 90.1,
      "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 9,
      "in": true
     }
    ],
    "site_fill": [
-    0.94,
-    0.93,
-    1.04,
-    1.05
+    0.95,
+    0.98,
+    1.05,
+    1.07
    ],
    "diag": {
     "tol_nm": 0.349,
@@ -3956,13 +3976,13 @@
      243.8
     ]
    },
-   "e0_mev": -412.6386090856909,
-   "radius_measured_nm": 6.08616017321755,
+   "e0_mev": -412.6082425912322,
+   "radius_measured_nm": 6.087756803192258,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.4232421264542063,
-    0.40487192349720963
+    0.5015619383754029,
+    0.43244856019519845
    ],
    "tip_condition": "double"
   },
@@ -4769,9 +4789,9 @@
    "success": true,
    "partial": 1.0,
    "values": {
-    "peak_lo_mev": -382.0,
+    "peak_lo_mev": -384.0,
     "peak_hi_mev": -294.00000000000006,
-    "radius_nm": 7.153838614097617
+    "radius_nm": 7.153015316738089
    },
    "truth": {
     "peak_lo_mev": -382.5973236435584,
@@ -4779,9 +4799,9 @@
     "radius_nm": 7.147143341793702
    },
    "abs_err": {
-    "peak_lo_mev": 0.5973236435584113,
+    "peak_lo_mev": -1.4026763564415887,
     "peak_hi_mev": 0.5973236435582976,
-    "radius_nm": 0.00669527230391509
+    "radius_nm": 0.005871974944387404
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -4792,16 +4812,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 4,
    "radius_nm": 7.147143341793702,
-   "instrument_s": 1583.699835578173,
-   "tip_rounds": 5,
-   "track_lost": 1,
+   "instrument_s": 1189.3408862654358,
+   "tip_rounds": 2,
+   "track_lost": 0,
    "pickups": 0,
    "placed": 4,
    "spares_seen": 4,
    "sites": 4,
-   "gap_width_nm": 3.7562373568847236,
-   "spacing_nm": 0.9390593392211809,
-   "ring_radius_fit_nm": 7.157062676800439,
+   "gap_width_nm": 3.7668175937890522,
+   "spacing_nm": 0.9417043984472631,
+   "ring_radius_fit_nm": 7.1550571909498535,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -4835,12 +4855,12 @@
     },
     {
      "r_kohm": 104.9,
-     "spikes": 19,
+     "spikes": 9,
      "in": false
     },
     {
      "r_kohm": 104.9,
-     "spikes": 7,
+     "spikes": 17,
      "in": false
     },
     {
@@ -4945,10 +4965,10 @@
     }
    ],
    "site_fill": [
+    1.0,
     1.01,
-    1.02,
-    0.98,
-    0.87
+    0.97,
+    0.86
    ],
    "diag": {
     "tol_nm": 0.458,
@@ -4990,13 +5010,13 @@
      102.7
     ]
    },
-   "e0_mev": -446.86720420808615,
-   "radius_measured_nm": 7.153838614097617,
+   "e0_mev": -448.00835942783084,
+   "radius_measured_nm": 7.153015316738089,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.7797732357968535,
-    -0.049375210006866635
+    -0.774568862134782,
+    -0.0376829483002841
    ],
    "tip_condition": "blunt"
   },
@@ -6138,9 +6158,9 @@
    "success": true,
    "partial": 1.0,
    "values": {
-    "peak_lo_mev": -378.0,
+    "peak_lo_mev": -374.00000000000006,
     "peak_hi_mev": -314.00000000000006,
-    "radius_nm": 8.55093252701883
+    "radius_nm": 8.54626334895428
    },
    "truth": {
     "peak_lo_mev": -373.1944416910689,
@@ -6148,9 +6168,9 @@
     "radius_nm": 8.561149888191737
    },
    "abs_err": {
-    "peak_lo_mev": -4.805558308931097,
+    "peak_lo_mev": -0.805558308931154,
     "peak_hi_mev": 1.1944416910687892,
-    "radius_nm": -0.010217361172907502
+    "radius_nm": -0.014886539237457086
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -6161,16 +6181,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 4,
    "radius_nm": 8.561149888191737,
-   "instrument_s": 1578.273708971281,
-   "tip_rounds": 15,
-   "track_lost": 1,
+   "instrument_s": 1153.2875469746882,
+   "tip_rounds": 10,
+   "track_lost": 0,
    "pickups": 0,
    "placed": 4,
    "spares_seen": 4,
    "sites": 4,
-   "gap_width_nm": 3.825778455323003,
-   "spacing_nm": 0.9564446138307507,
-   "ring_radius_fit_nm": 8.550243593887771,
+   "gap_width_nm": 3.8431549014340654,
+   "spacing_nm": 0.9607887253585163,
+   "ring_radius_fit_nm": 8.549689424781585,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -6198,38 +6218,38 @@
      "in": false
     },
     {
-     "r_kohm": 204.8,
-     "spikes": 1,
+     "r_kohm": 163.8,
+     "spikes": 12,
      "in": false
     },
     {
      "r_kohm": 163.8,
-     "spikes": 13,
-     "in": false
+     "spikes": 8,
+     "in": true
     },
     {
      "r_kohm": 163.8,
-     "spikes": 9,
+     "spikes": 3,
      "in": true
     },
     {
      "r_kohm": 262.1,
-     "spikes": 1,
-     "in": false
-    },
-    {
-     "r_kohm": 262.1,
-     "spikes": 1,
+     "spikes": 0,
      "in": false
     },
     {
      "r_kohm": 209.7,
-     "spikes": 11,
+     "spikes": 14,
      "in": false
     },
     {
      "r_kohm": 209.7,
-     "spikes": 9,
+     "spikes": 8,
+     "in": true
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 2,
      "in": true
     },
     {
@@ -6249,12 +6269,12 @@
     },
     {
      "r_kohm": 214.7,
-     "spikes": 2,
+     "spikes": 4,
      "in": false
     },
     {
      "r_kohm": 214.7,
-     "spikes": 1,
+     "spikes": 2,
      "in": false
     },
     {
@@ -6264,7 +6284,7 @@
     },
     {
      "r_kohm": 171.8,
-     "spikes": 9,
+     "spikes": 8,
      "in": true
     },
     {
@@ -6275,6 +6295,11 @@
     {
      "r_kohm": 219.9,
      "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 1,
      "in": false
     },
     {
@@ -6294,7 +6319,7 @@
     },
     {
      "r_kohm": 112.6,
-     "spikes": 23,
+     "spikes": 22,
      "in": false
     },
     {
@@ -6304,10 +6329,10 @@
     }
    ],
    "site_fill": [
-    1.3,
-    1.33,
+    1.29,
     1.32,
-    1.33
+    1.27,
+    1.3
    ],
    "diag": {
     "tol_nm": 0.489,
@@ -6349,13 +6374,13 @@
      163.8
     ]
    },
-   "e0_mev": -414.2999337888623,
-   "radius_measured_nm": 8.55093252701883,
+   "e0_mev": -414.9162296421651,
+   "radius_measured_nm": 8.54626334895428,
    "peaks_found": 6,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    1.0058658018161644,
-    -0.024262171180199257
+    1.0177131549335297,
+    -0.052344300467395716
    ],
    "tip_condition": "blunt"
   },
@@ -8604,7 +8629,7 @@
    "values": {
     "peak_lo_mev": -310.00000000000006,
     "peak_hi_mev": -160.00000000000003,
-    "radius_nm": 5.854081350719543
+    "radius_nm": 5.85289803420087
    },
    "truth": {
     "peak_lo_mev": -310.3006762570729,
@@ -8614,7 +8639,7 @@
    "abs_err": {
     "peak_lo_mev": 0.30067625707283696,
     "peak_hi_mev": 0.3006762570727517,
-    "radius_nm": 0.05957474162895693
+    "radius_nm": 0.05839142511028417
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -8625,16 +8650,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 4,
    "radius_nm": 5.794506609090586,
-   "instrument_s": 1354.689362569531,
+   "instrument_s": 1392.9942282725226,
    "tip_rounds": 3,
    "track_lost": 1,
    "pickups": 0,
    "placed": 4,
    "spares_seen": 4,
    "sites": 4,
-   "gap_width_nm": 4.207160802262845,
-   "spacing_nm": 1.0517902005657112,
-   "ring_radius_fit_nm": 5.847000894230776,
+   "gap_width_nm": 4.1909352349161235,
+   "spacing_nm": 1.0477338087290309,
+   "ring_radius_fit_nm": 5.841290179373323,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -8643,42 +8668,17 @@
     },
     {
      "r_kohm": 400.0,
-     "spikes": 8,
-     "in": true
-    },
-    {
-     "r_kohm": 400.0,
-     "spikes": 5,
+     "spikes": 9,
      "in": true
     },
     {
      "r_kohm": 400.0,
      "spikes": 0,
-     "in": false
-    },
-    {
-     "r_kohm": 320.0,
-     "spikes": 7,
      "in": false
     },
     {
      "r_kohm": 320.0,
      "spikes": 3,
-     "in": false
-    },
-    {
-     "r_kohm": 320.0,
-     "spikes": 8,
-     "in": true
-    },
-    {
-     "r_kohm": 320.0,
-     "spikes": 1,
-     "in": true
-    },
-    {
-     "r_kohm": 400.0,
-     "spikes": 0,
      "in": false
     },
     {
@@ -8692,14 +8692,39 @@
      "in": false
     },
     {
+     "r_kohm": 320.0,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 6,
+     "in": false
+    },
+    {
      "r_kohm": 256.0,
-     "spikes": 12,
+     "spikes": 14,
      "in": false
     },
     {
      "r_kohm": 256.0,
      "spikes": 11,
      "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 1,
+     "in": false
     },
     {
      "r_kohm": 400.0,
@@ -8713,12 +8738,12 @@
     },
     {
      "r_kohm": 320.0,
-     "spikes": 20,
+     "spikes": 22,
      "in": false
     },
     {
      "r_kohm": 320.0,
-     "spikes": 2,
+     "spikes": 1,
      "in": true
     },
     {
@@ -8738,10 +8763,10 @@
     }
    ],
    "site_fill": [
-    1.22,
-    1.21,
-    1.2,
-    1.09
+    1.32,
+    1.32,
+    1.25,
+    1.08
    ],
    "diag": {
     "tol_nm": 0.506,
@@ -8771,9 +8796,9 @@
     "n_ring": 36,
     "r_nm": 5.794506609090586,
     "planned_deg": [
-     190.4,
-     200.7,
-     211.0,
+     190.5,
+     200.8,
+     211.1,
      221.3
     ],
     "gap_deg": [
@@ -8783,13 +8808,13 @@
      219.7
     ]
    },
-   "e0_mev": -417.5541181551967,
-   "radius_measured_nm": 5.854081350719543,
+   "e0_mev": -417.55307120402523,
+   "radius_measured_nm": 5.85289803420087,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.06247632741112091,
-    -0.5069520081697281
+    -0.07997887997640497,
+    -0.5089684418279887
    ],
    "tip_condition": "double"
   },
@@ -11874,9 +11899,9 @@
    "success": true,
    "partial": 1.0,
    "values": {
-    "peak_lo_mev": -404.0,
+    "peak_lo_mev": -402.0,
     "peak_hi_mev": -318.00000000000006,
-    "radius_nm": 7.4811804375559845
+    "radius_nm": 7.458813691068442
    },
    "truth": {
     "peak_lo_mev": -403.6778996688581,
@@ -11884,9 +11909,9 @@
     "radius_nm": 7.488115559780025
    },
    "abs_err": {
-    "peak_lo_mev": -0.32210033114188263,
+    "peak_lo_mev": 1.6778996688581174,
     "peak_hi_mev": -2.3221003311419963,
-    "radius_nm": -0.0069351222240401356
+    "radius_nm": -0.029301868711582912
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -11897,16 +11922,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 6,
    "radius_nm": 7.488115559780025,
-   "instrument_s": 2083.6087315610944,
-   "tip_rounds": 10,
-   "track_lost": 2,
+   "instrument_s": 1275.4536669263318,
+   "tip_rounds": 2,
+   "track_lost": 0,
    "pickups": 0,
    "placed": 6,
    "spares_seen": 6,
    "sites": 6,
-   "gap_width_nm": 6.251326940572582,
-   "spacing_nm": 1.0418878234287636,
-   "ring_radius_fit_nm": 7.473259996285896,
+   "gap_width_nm": 6.204796069838818,
+   "spacing_nm": 1.0341326783064697,
+   "ring_radius_fit_nm": 7.446307394476367,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -11945,23 +11970,23 @@
     },
     {
      "r_kohm": 204.8,
-     "spikes": 8,
-     "in": true
-    },
-    {
-     "r_kohm": 204.8,
-     "spikes": 2,
-     "in": true
-    },
-    {
-     "r_kohm": 204.8,
-     "spikes": 2,
-     "in": true
+     "spikes": 5,
+     "in": false
     },
     {
      "r_kohm": 204.8,
      "spikes": 3,
      "in": true
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 7,
+     "in": true
+    },
+    {
+     "r_kohm": 327.7,
+     "spikes": 2,
+     "in": false
     },
     {
      "r_kohm": 327.7,
@@ -11970,27 +11995,22 @@
     },
     {
      "r_kohm": 262.1,
-     "spikes": 5,
-     "in": false
-    },
-    {
-     "r_kohm": 262.1,
      "spikes": 0,
      "in": false
     },
     {
      "r_kohm": 209.7,
-     "spikes": 9,
+     "spikes": 13,
      "in": false
     },
     {
      "r_kohm": 209.7,
-     "spikes": 2,
+     "spikes": 1,
      "in": true
     },
     {
      "r_kohm": 209.7,
-     "spikes": 1,
+     "spikes": 2,
      "in": true
     },
     {
@@ -12000,28 +12020,38 @@
     },
     {
      "r_kohm": 268.4,
-     "spikes": 2,
-     "in": false
-    },
-    {
-     "r_kohm": 268.4,
      "spikes": 1,
      "in": false
     },
     {
-     "r_kohm": 214.7,
+     "r_kohm": 268.4,
      "spikes": 0,
      "in": false
     },
     {
-     "r_kohm": 171.8,
+     "r_kohm": 214.7,
      "spikes": 16,
      "in": false
     },
     {
-     "r_kohm": 171.8,
-     "spikes": 8,
+     "r_kohm": 214.7,
+     "spikes": 4,
      "in": true
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 6,
+     "in": true
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 343.6,
+     "spikes": 0,
+     "in": false
     },
     {
      "r_kohm": 274.9,
@@ -12030,32 +12060,12 @@
     },
     {
      "r_kohm": 219.9,
-     "spikes": 3,
-     "in": false
-    },
-    {
-     "r_kohm": 219.9,
-     "spikes": 1,
-     "in": false
-    },
-    {
-     "r_kohm": 219.9,
      "spikes": 0,
      "in": false
     },
     {
      "r_kohm": 175.9,
-     "spikes": 8,
-     "in": false
-    },
-    {
-     "r_kohm": 175.9,
-     "spikes": 2,
-     "in": false
-    },
-    {
-     "r_kohm": 175.9,
-     "spikes": 5,
+     "spikes": 15,
      "in": false
     },
     {
@@ -12070,6 +12080,11 @@
     },
     {
      "r_kohm": 281.5,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 281.5,
      "spikes": 0,
      "in": false
     },
@@ -12080,52 +12095,57 @@
     },
     {
      "r_kohm": 180.1,
-     "spikes": 0,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 180.1,
+     "spikes": 9,
      "in": false
     },
     {
      "r_kohm": 144.1,
-     "spikes": 23,
+     "spikes": 13,
      "in": false
     },
     {
      "r_kohm": 144.1,
-     "spikes": 8,
+     "spikes": 7,
+     "in": true
+    },
+    {
+     "r_kohm": 144.1,
+     "spikes": 3,
      "in": true
     },
     {
      "r_kohm": 230.6,
-     "spikes": 1,
+     "spikes": 3,
      "in": false
     },
     {
      "r_kohm": 230.6,
-     "spikes": 0,
+     "spikes": 2,
      "in": false
     },
     {
      "r_kohm": 184.5,
-     "spikes": 18,
+     "spikes": 13,
      "in": false
     },
     {
      "r_kohm": 184.5,
-     "spikes": 5,
-     "in": false
-    },
-    {
-     "r_kohm": 184.5,
-     "spikes": 9,
+     "spikes": 7,
      "in": true
     }
    ],
    "site_fill": [
-    1.19,
-    1.27,
+    0.99,
     1.05,
-    1.05,
-    1.11,
-    1.21
+    1.01,
+    1.07,
+    0.98,
+    1.08
    ],
    "diag": {
     "tol_nm": 0.523,
@@ -12137,13 +12157,13 @@
       "status": "on_surface"
      },
      {
-      "to_nearest_gap_site_nm": 0.0,
-      "off_circle_nm": -0.09,
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.15,
       "status": "on_surface"
      },
      {
-      "to_nearest_gap_site_nm": 0.0,
-      "off_circle_nm": 0.09,
+      "to_nearest_gap_site_nm": 0.26,
+      "off_circle_nm": -0.1,
       "status": "on_surface"
      },
      {
@@ -12165,12 +12185,12 @@
     "n_ring": 45,
     "r_nm": 7.488115559780025,
     "planned_deg": [
-     270.7,
-     278.7,
-     286.6,
-     294.6,
-     302.6,
-     310.6
+     271.0,
+     278.9,
+     286.9,
+     294.8,
+     302.8,
+     310.8
     ],
     "gap_deg": [
      269.8,
@@ -12181,13 +12201,13 @@
      309.1
     ]
    },
-   "e0_mev": -467.0686781142779,
-   "radius_measured_nm": 7.4811804375559845,
+   "e0_mev": -466.4269278560455,
+   "radius_measured_nm": 7.458813691068442,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.484147580747215,
-    0.4701426149450734
+    0.27768611068576,
+    0.3140559583750819
    ],
    "tip_condition": "double"
   },
@@ -13365,7 +13385,7 @@
    "values": {
     "peak_lo_mev": -398.0,
     "peak_hi_mev": -300.00000000000006,
-    "radius_nm": 7.111119019582811
+    "radius_nm": 7.124465597786628
    },
    "truth": {
     "peak_lo_mev": -395.537112645372,
@@ -13375,7 +13395,7 @@
    "abs_err": {
     "peak_lo_mev": -2.4628873546279806,
     "peak_hi_mev": 1.5371126453718489,
-    "radius_nm": 0.031161991302411707
+    "radius_nm": 0.04450856950622839
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -13386,16 +13406,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 6,
    "radius_nm": 7.0799570282804,
-   "instrument_s": 1690.1479717521315,
-   "tip_rounds": 8,
+   "instrument_s": 1611.9166831423604,
+   "tip_rounds": 4,
    "track_lost": 1,
    "pickups": 0,
    "placed": 6,
    "spares_seen": 6,
    "sites": 6,
-   "gap_width_nm": 4.964077717178387,
-   "spacing_nm": 0.8273462861963979,
-   "ring_radius_fit_nm": 7.113262806608021,
+   "gap_width_nm": 4.984262062751225,
+   "spacing_nm": 0.8307103437918708,
+   "ring_radius_fit_nm": 7.114103810650412,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -13434,22 +13454,22 @@
     },
     {
      "r_kohm": 320.0,
-     "spikes": 9,
+     "spikes": 12,
      "in": false
     },
     {
      "r_kohm": 320.0,
-     "spikes": 2,
+     "spikes": 3,
      "in": false
     },
     {
      "r_kohm": 256.0,
-     "spikes": 7,
+     "spikes": 3,
      "in": false
     },
     {
      "r_kohm": 256.0,
-     "spikes": 7,
+     "spikes": 6,
      "in": false
     },
     {
@@ -13459,7 +13479,12 @@
     },
     {
      "r_kohm": 204.8,
-     "spikes": 7,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 204.8,
+     "spikes": 3,
      "in": true
     },
     {
@@ -13469,12 +13494,12 @@
     },
     {
      "r_kohm": 327.7,
-     "spikes": 6,
-     "in": false
+     "spikes": 8,
+     "in": true
     },
     {
      "r_kohm": 327.7,
-     "spikes": 8,
+     "spikes": 3,
      "in": true
     },
     {
@@ -13484,88 +13509,73 @@
     },
     {
      "r_kohm": 320.0,
-     "spikes": 1,
-     "in": false
-    },
-    {
-     "r_kohm": 320.0,
      "spikes": 0,
      "in": false
     },
     {
      "r_kohm": 256.0,
-     "spikes": 8,
+     "spikes": 12,
      "in": false
     },
     {
      "r_kohm": 256.0,
      "spikes": 1,
-     "in": false
-    },
-    {
-     "r_kohm": 256.0,
-     "spikes": 4,
      "in": true
     },
     {
      "r_kohm": 256.0,
-     "spikes": 3,
+     "spikes": 5,
      "in": true
     },
     {
      "r_kohm": 204.8,
+     "spikes": 7,
+     "in": true
+    },
+    {
+     "r_kohm": 327.7,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 327.7,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
      "spikes": 6,
      "in": true
     },
     {
-     "r_kohm": 204.8,
-     "spikes": 3,
+     "r_kohm": 209.7,
+     "spikes": 5,
      "in": true
     },
     {
-     "r_kohm": 327.7,
+     "r_kohm": 335.5,
      "spikes": 1,
      "in": false
     },
     {
-     "r_kohm": 327.7,
-     "spikes": 0,
+     "r_kohm": 335.5,
+     "spikes": 12,
      "in": false
-    },
-    {
-     "r_kohm": 262.1,
-     "spikes": 3,
-     "in": false
-    },
-    {
-     "r_kohm": 262.1,
-     "spikes": 0,
-     "in": false
-    },
-    {
-     "r_kohm": 209.7,
-     "spikes": 10,
-     "in": false
-    },
-    {
-     "r_kohm": 209.7,
-     "spikes": 4,
-     "in": false
-    },
-    {
-     "r_kohm": 209.7,
-     "spikes": 3,
-     "in": true
-    },
-    {
-     "r_kohm": 209.7,
-     "spikes": 5,
-     "in": true
-    },
-    {
-     "r_kohm": 209.7,
-     "spikes": 3,
-     "in": true
     },
     {
      "r_kohm": 335.5,
@@ -13578,23 +13588,18 @@
      "in": false
     },
     {
-     "r_kohm": 268.4,
-     "spikes": 15,
-     "in": false
-    },
-    {
-     "r_kohm": 268.4,
+     "r_kohm": 335.5,
      "spikes": 8,
      "in": true
     }
    ],
    "site_fill": [
-    1.11,
-    0.89,
-    0.87,
-    0.92,
-    1.1,
-    1.05
+    1.09,
+    0.9,
+    0.95,
+    0.98,
+    0.96,
+    1.08
    ],
    "diag": {
     "tol_nm": 0.42,
@@ -13616,8 +13621,8 @@
       "status": "on_surface"
      },
      {
-      "to_nearest_gap_site_nm": 0.0,
-      "off_circle_nm": -0.08,
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.14,
       "status": "on_surface"
      },
      {
@@ -13634,12 +13639,12 @@
     "n_ring": 53,
     "r_nm": 7.0799570282804,
     "planned_deg": [
-     92.0,
-     98.7,
+     91.9,
+     98.6,
      105.3,
      112.0,
      118.7,
-     125.3
+     125.4
     ],
     "gap_deg": [
      91.1,
@@ -13650,13 +13655,13 @@
      126.5
     ]
    },
-   "e0_mev": -463.97694979990786,
-   "radius_measured_nm": 7.111119019582811,
+   "e0_mev": -462.08096435691317,
+   "radius_measured_nm": 7.124465597786628,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.39998543319094776,
-    -0.722178226585852
+    0.3809397216205857,
+    -0.6771801038454306
    ],
    "tip_condition": "blunt"
   },
@@ -15175,9 +15180,9 @@
    "success": true,
    "partial": 1.0,
    "values": {
-    "peak_lo_mev": -372.00000000000006,
-    "peak_hi_mev": -274.0,
-    "radius_nm": 7.11580269757035
+    "peak_lo_mev": -368.00000000000006,
+    "peak_hi_mev": -272.0,
+    "radius_nm": 7.073815708478674
    },
    "truth": {
     "peak_lo_mev": -372.65733654639536,
@@ -15185,9 +15190,9 @@
     "radius_nm": 7.085429856346338
    },
    "abs_err": {
-    "peak_lo_mev": 0.6573365463952996,
-    "peak_hi_mev": -1.3426634536047004,
-    "radius_nm": 0.03037284122401207
+    "peak_lo_mev": 4.6573365463953,
+    "peak_hi_mev": 0.6573365463952996,
+    "radius_nm": -0.01161414786766457
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -15198,8 +15203,8 @@
    "ring_occupancy": 1.0,
    "gap_sites": 3,
    "radius_nm": 7.085429856346338,
-   "instrument_s": 2278.3521129631085,
-   "tip_rounds": 7,
+   "instrument_s": 2270.883576322304,
+   "tip_rounds": 6,
    "track_lost": 3,
    "pickups": 0,
    "placed": 3,
@@ -15306,9 +15311,9 @@
     }
    ],
    "site_fill": [
-    1.11,
-    0.98,
-    0.98
+    1.08,
+    0.95,
+    0.93
    ],
    "diag": {
     "tol_nm": 0.391,
@@ -15343,13 +15348,13 @@
      117.0
     ]
    },
-   "e0_mev": -444.1104487886341,
-   "radius_measured_nm": 7.11580269757035,
+   "e0_mev": -442.18027521047014,
+   "radius_measured_nm": 7.073815708478674,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.7405921764349243,
-    -0.10590690245733782
+    0.9087911675715882,
+    -0.40292320350004296
    ],
    "tip_condition": "unstable"
   },
@@ -17479,9 +17484,9 @@
    "success": true,
    "partial": 1.0,
    "values": {
-    "peak_lo_mev": -360.00000000000006,
-    "peak_hi_mev": -262.0,
-    "radius_nm": 7.119502267772242
+    "peak_lo_mev": -358.00000000000006,
+    "peak_hi_mev": -264.0,
+    "radius_nm": 7.135239562556164
    },
    "truth": {
     "peak_lo_mev": -359.898990353355,
@@ -17489,9 +17494,9 @@
     "radius_nm": 7.100409275714256
    },
    "abs_err": {
-    "peak_lo_mev": -0.10100964664508183,
-    "peak_hi_mev": -0.10100964664508183,
-    "radius_nm": 0.019092992057986535
+    "peak_lo_mev": 1.8989903533549182,
+    "peak_hi_mev": -2.101009646645082,
+    "radius_nm": 0.03483028684190792
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -17502,16 +17507,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 3,
    "radius_nm": 7.100409275714256,
-   "instrument_s": 1651.4803263555416,
-   "tip_rounds": 15,
-   "track_lost": 1,
+   "instrument_s": 1214.1819785070886,
+   "tip_rounds": 6,
+   "track_lost": 0,
    "pickups": 0,
    "placed": 3,
    "spares_seen": 3,
    "sites": 3,
-   "gap_width_nm": 2.7457808411048816,
-   "spacing_nm": 0.9152602803682939,
-   "ring_radius_fit_nm": 7.1202255212841745,
+   "gap_width_nm": 2.7877074643063136,
+   "spacing_nm": 0.9292358214354378,
+   "ring_radius_fit_nm": 7.122233096380726,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -17645,29 +17650,29 @@
     },
     {
      "r_kohm": 88.0,
-     "spikes": 22,
+     "spikes": 8,
      "in": false
     },
     {
-     "r_kohm": 88.0,
-     "spikes": 6,
+     "r_kohm": 70.4,
+     "spikes": 17,
+     "in": false
+    },
+    {
+     "r_kohm": 70.4,
+     "spikes": 9,
      "in": true
     },
     {
-     "r_kohm": 88.0,
-     "spikes": 2,
-     "in": true
-    },
-    {
-     "r_kohm": 88.0,
-     "spikes": 1,
+     "r_kohm": 70.4,
+     "spikes": 3,
      "in": true
     }
    ],
    "site_fill": [
-    0.99,
-    1.02,
-    0.96
+    0.8,
+    0.85,
+    1.07
    ],
    "diag": {
     "tol_nm": 0.429,
@@ -17679,7 +17684,7 @@
       "status": "on_surface"
      },
      {
-      "to_nearest_gap_site_nm": 0.0,
+      "to_nearest_gap_site_nm": 0.25,
       "off_circle_nm": 0.04,
       "status": "on_surface"
      },
@@ -17693,8 +17698,8 @@
     "r_nm": 7.100409275714256,
     "planned_deg": [
      19.8,
-     27.2,
-     34.5
+     27.3,
+     34.7
     ],
     "gap_deg": [
      20.2,
@@ -17702,13 +17707,13 @@
      34.4
     ]
    },
-   "e0_mev": -428.96982601075854,
-   "radius_measured_nm": 7.119502267772242,
+   "e0_mev": -429.24570428153066,
+   "radius_measured_nm": 7.135239562556164,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.6206169787347343,
-    -0.20470719719540534
+    0.5968398478255138,
+    -0.10237054460098664
    ],
    "tip_condition": "blunt"
   },
@@ -17718,9 +17723,9 @@
    "success": true,
    "partial": 1.0,
    "values": {
-    "peak_lo_mev": -396.0,
+    "peak_lo_mev": -394.0,
     "peak_hi_mev": -320.00000000000006,
-    "radius_nm": 8.108144430055846
+    "radius_nm": 8.110172585049131
    },
    "truth": {
     "peak_lo_mev": -394.5709091336918,
@@ -17728,9 +17733,9 @@
     "radius_nm": 8.085679349832303
    },
    "abs_err": {
-    "peak_lo_mev": -1.4290908663081723,
+    "peak_lo_mev": 0.5709091336918277,
     "peak_hi_mev": 0.5709091336916572,
-    "radius_nm": 0.022465080223543765
+    "radius_nm": 0.02449323521682878
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -17741,16 +17746,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 4,
    "radius_nm": 8.085679349832303,
-   "instrument_s": 2856.172020429699,
-   "tip_rounds": 27,
-   "track_lost": 3,
+   "instrument_s": 3338.8309473180857,
+   "tip_rounds": 34,
+   "track_lost": 4,
    "pickups": 0,
    "placed": 4,
    "spares_seen": 4,
    "sites": 4,
-   "gap_width_nm": 5.560276133583135,
-   "spacing_nm": 1.3900690333957837,
-   "ring_radius_fit_nm": 8.114223355884413,
+   "gap_width_nm": 5.530063343322433,
+   "spacing_nm": 1.3825158358306082,
+   "ring_radius_fit_nm": 8.113711000567587,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -17783,6 +17788,21 @@
      "in": false
     },
     {
+     "r_kohm": 131.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 104.9,
+     "spikes": 1,
+     "in": false
+    },
+    {
      "r_kohm": 104.9,
      "spikes": 2,
      "in": false
@@ -17793,13 +17813,13 @@
      "in": false
     },
     {
-     "r_kohm": 83.9,
-     "spikes": 2,
+     "r_kohm": 104.9,
+     "spikes": 4,
      "in": false
     },
     {
      "r_kohm": 83.9,
-     "spikes": 22,
+     "spikes": 24,
      "in": false
     },
     {
@@ -17814,7 +17834,7 @@
     },
     {
      "r_kohm": 107.4,
-     "spikes": 14,
+     "spikes": 6,
      "in": false
     },
     {
@@ -17824,12 +17844,12 @@
     },
     {
      "r_kohm": 85.9,
-     "spikes": 4,
+     "spikes": 9,
      "in": false
     },
     {
      "r_kohm": 85.9,
-     "spikes": 8,
+     "spikes": 9,
      "in": true
     },
     {
@@ -17844,32 +17864,47 @@
     },
     {
      "r_kohm": 110.0,
-     "spikes": 0,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 88.0,
+     "spikes": 7,
      "in": false
     },
     {
      "r_kohm": 88.0,
      "spikes": 8,
-     "in": false
+     "in": true
     },
     {
      "r_kohm": 88.0,
-     "spikes": 9,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 88.0,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 88.0,
+     "spikes": 3,
      "in": true
     },
     {
      "r_kohm": 140.7,
-     "spikes": 1,
+     "spikes": 0,
      "in": false
     },
     {
      "r_kohm": 140.7,
-     "spikes": 1,
+     "spikes": 0,
      "in": false
     },
     {
      "r_kohm": 112.6,
-     "spikes": 3,
+     "spikes": 2,
      "in": false
     },
     {
@@ -17879,17 +17914,17 @@
     },
     {
      "r_kohm": 90.1,
-     "spikes": 16,
+     "spikes": 18,
      "in": false
     },
     {
      "r_kohm": 90.1,
-     "spikes": 7,
+     "spikes": 1,
      "in": true
     },
     {
      "r_kohm": 90.1,
-     "spikes": 3,
+     "spikes": 9,
      "in": true
     }
    ],
@@ -17921,10 +17956,10 @@
     "n_ring": 36,
     "r_nm": 8.085679349832303,
     "planned_deg": [
-     110.3,
-     120.1,
-     129.9,
-     139.7
+     110.1,
+     119.9,
+     129.6,
+     139.4
     ],
     "gap_deg": [
      111.0,
@@ -17933,13 +17968,13 @@
      140.5
     ]
    },
-   "e0_mev": -450.0736213891701,
-   "radius_measured_nm": 8.108144430055846,
+   "e0_mev": -450.1434940780057,
+   "radius_measured_nm": 8.110172585049131,
    "peaks_found": 6,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.4074425834004051,
-    0.32137313662930395
+    0.3776596942279911,
+    0.31829615414021606
    ],
    "tip_condition": "blunt"
   },
@@ -18167,8 +18202,8 @@
    "partial": 1.0,
    "values": {
     "peak_lo_mev": -330.00000000000006,
-    "peak_hi_mev": -196.00000000000006,
-    "radius_nm": 5.680771296970088
+    "peak_hi_mev": -194.00000000000006,
+    "radius_nm": 5.685554440571833
    },
    "truth": {
     "peak_lo_mev": -329.4611047212015,
@@ -18177,8 +18212,8 @@
    },
    "abs_err": {
     "peak_lo_mev": -0.5388952787985772,
-    "peak_hi_mev": -2.538895278798691,
-    "radius_nm": -0.0004407606039666945
+    "peak_hi_mev": -0.5388952787986909,
+    "radius_nm": 0.004342382997778671
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -18189,8 +18224,8 @@
    "ring_occupancy": 1.0,
    "gap_sites": 4,
    "radius_nm": 5.681212057574054,
-   "instrument_s": 1670.776279857609,
-   "tip_rounds": 4,
+   "instrument_s": 1656.0948376718934,
+   "tip_rounds": 2,
    "track_lost": 2,
    "pickups": 0,
    "placed": 4,
@@ -18332,10 +18367,10 @@
     }
    ],
    "site_fill": [
-    0.97,
     0.99,
-    1.06,
-    1.15
+    1.01,
+    1.05,
+    1.13
    ],
    "diag": {
     "tol_nm": 0.364,
@@ -18377,13 +18412,13 @@
      293.5
     ]
    },
-   "e0_mev": -427.4814997231825,
-   "radius_measured_nm": 5.680771296970088,
+   "e0_mev": -428.56433307338864,
+   "radius_measured_nm": 5.685554440571833,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.4808706013509566,
-    0.49389183022465105
+    0.48159534137570625,
+    0.5308964793758654
    ],
    "tip_condition": "dirty"
   },
@@ -19232,7 +19267,7 @@
    "values": {
     "peak_lo_mev": -380.0,
     "peak_hi_mev": -260.00000000000006,
-    "radius_nm": 6.016350606742996
+    "radius_nm": 6.009737549418331
    },
    "truth": {
     "peak_lo_mev": -380.07273800220634,
@@ -19242,7 +19277,7 @@
    "abs_err": {
     "peak_lo_mev": 0.07273800220633575,
     "peak_hi_mev": -1.9272619977938348,
-    "radius_nm": -0.008712642139876436
+    "radius_nm": -0.015325699464542097
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -19253,16 +19288,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 4,
    "radius_nm": 6.025063248882873,
-   "instrument_s": 1565.0255260258784,
-   "tip_rounds": 13,
-   "track_lost": 1,
+   "instrument_s": 2358.1572569242285,
+   "tip_rounds": 17,
+   "track_lost": 3,
    "pickups": 0,
    "placed": 4,
    "spares_seen": 4,
    "sites": 4,
-   "gap_width_nm": 2.831233412514837,
-   "spacing_nm": 0.7078083531287093,
-   "ring_radius_fit_nm": 6.0135932923424535,
+   "gap_width_nm": 2.865188997187547,
+   "spacing_nm": 0.7162972492968868,
+   "ring_radius_fit_nm": 6.0127528312611735,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -19391,10 +19426,10 @@
     }
    ],
    "site_fill": [
-    1.1,
-    1.0,
-    1.0,
-    1.04
+    1.16,
+    1.04,
+    1.03,
+    1.08
    ],
    "diag": {
     "tol_nm": 0.351,
@@ -19426,8 +19461,8 @@
     "planned_deg": [
      213.2,
      220.0,
-     226.7,
-     233.4
+     226.8,
+     233.6
     ],
     "gap_deg": [
      213.0,
@@ -19436,13 +19471,13 @@
      232.8
     ]
    },
-   "e0_mev": -466.96693003808326,
-   "radius_measured_nm": 6.016350606742996,
+   "e0_mev": -466.02544143095827,
+   "radius_measured_nm": 6.009737549418331,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.08549772908800263,
-    0.7992602491519809
+    0.10454469436549153,
+    0.7532001560858106
    ],
    "tip_condition": "blunt"
   },
@@ -20168,9 +20203,9 @@
    "success": true,
    "partial": 1.0,
    "values": {
-    "peak_lo_mev": -354.00000000000006,
+    "peak_lo_mev": -352.00000000000006,
     "peak_hi_mev": -266.0,
-    "radius_nm": 7.5514335455153505
+    "radius_nm": 7.5539184873214955
    },
    "truth": {
     "peak_lo_mev": -353.90983224283576,
@@ -20178,9 +20213,9 @@
     "radius_nm": 7.54038790946235
    },
    "abs_err": {
-    "peak_lo_mev": -0.09016775716429493,
+    "peak_lo_mev": 1.909832242835705,
     "peak_hi_mev": -0.09016775716429493,
-    "radius_nm": 0.011045636053000685
+    "radius_nm": 0.013530577859145687
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -20191,9 +20226,9 @@
    "ring_occupancy": 1.0,
    "gap_sites": 3,
    "radius_nm": 7.54038790946235,
-   "instrument_s": 2688.275011976165,
-   "tip_rounds": 7,
-   "track_lost": 5,
+   "instrument_s": 2291.2122731522304,
+   "tip_rounds": 5,
+   "track_lost": 4,
    "pickups": 0,
    "placed": 3,
    "spares_seen": 3,
@@ -20324,9 +20359,9 @@
     }
    ],
    "site_fill": [
-    1.14,
-    1.09,
-    1.19
+    1.13,
+    1.04,
+    1.15
    ],
    "diag": {
     "tol_nm": 0.474,
@@ -20361,13 +20396,13 @@
      242.4
     ]
    },
-   "e0_mev": -414.6730708967999,
-   "radius_measured_nm": 7.5514335455153505,
-   "peaks_found": 4,
+   "e0_mev": -414.9420985047544,
+   "radius_measured_nm": 7.5539184873214955,
+   "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.09016715543099334,
-    0.7050417942756119
+    0.09781835557851205,
+    0.7140942981879077
    ],
    "tip_condition": "dirty"
   },
@@ -21430,8 +21465,8 @@
    "partial": 1.0,
    "values": {
     "peak_lo_mev": -368.00000000000006,
-    "peak_hi_mev": -284.00000000000006,
-    "radius_nm": 7.406827338026011
+    "peak_hi_mev": -282.0,
+    "radius_nm": 7.407687775120741
    },
    "truth": {
     "peak_lo_mev": -369.5738179862563,
@@ -21440,8 +21475,8 @@
    },
    "abs_err": {
     "peak_lo_mev": 1.5738179862562447,
-    "peak_hi_mev": -2.426182013743812,
-    "radius_nm": 0.007624502661675692
+    "peak_hi_mev": -0.4261820137437553,
+    "radius_nm": 0.008484939756406185
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -21452,16 +21487,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 5,
    "radius_nm": 7.399202835364335,
-   "instrument_s": 1123.1174249536487,
-   "tip_rounds": 2,
+   "instrument_s": 1135.9462368457566,
+   "tip_rounds": 3,
    "track_lost": 0,
    "pickups": 0,
    "placed": 5,
    "spares_seen": 5,
    "sites": 5,
-   "gap_width_nm": 4.307234203903104,
-   "spacing_nm": 0.8614468407806208,
-   "ring_radius_fit_nm": 7.413063360731794,
+   "gap_width_nm": 4.304917381729426,
+   "spacing_nm": 0.8609834763458852,
+   "ring_radius_fit_nm": 7.414180969956694,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -21555,7 +21590,7 @@
     },
     {
      "r_kohm": 110.0,
-     "spikes": 9,
+     "spikes": 8,
      "in": true
     },
     {
@@ -21610,26 +21645,31 @@
     },
     {
      "r_kohm": 144.1,
-     "spikes": 5,
+     "spikes": 3,
      "in": false
     },
     {
      "r_kohm": 144.1,
-     "spikes": 6,
+     "spikes": 7,
      "in": true
     },
     {
      "r_kohm": 144.1,
-     "spikes": 1,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 144.1,
+     "spikes": 3,
      "in": true
     }
    ],
    "site_fill": [
-    0.95,
-    0.89,
-    1.12,
+    0.97,
+    0.91,
+    1.13,
     1.1,
-    0.96
+    0.98
    ],
    "diag": {
     "tol_nm": 0.43,
@@ -21664,10 +21704,10 @@
     "n_ring": 54,
     "r_nm": 7.399202835364335,
     "planned_deg": [
-     235.3,
+     235.4,
      242.0,
      248.7,
-     255.3,
+     255.4,
      262.0
     ],
     "gap_deg": [
@@ -21678,13 +21718,13 @@
      262.0
     ]
    },
-   "e0_mev": -432.098507612202,
-   "radius_measured_nm": 7.406827338026011,
+   "e0_mev": -432.3700872051011,
+   "radius_measured_nm": 7.407687775120741,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.7428187213489286,
-    -0.28586740240011843
+    -0.739631514055676,
+    -0.28362653918487707
    ],
    "tip_condition": "blunt"
   },
@@ -22805,7 +22845,7 @@
    "values": {
     "peak_lo_mev": -384.0,
     "peak_hi_mev": -292.00000000000006,
-    "radius_nm": 6.84575175702341
+    "radius_nm": 6.830610901537927
    },
    "truth": {
     "peak_lo_mev": -384.92579329795274,
@@ -22815,7 +22855,7 @@
    "abs_err": {
     "peak_lo_mev": 0.9257932979527368,
     "peak_hi_mev": 0.9257932979526231,
-    "radius_nm": 0.03655632698836975
+    "radius_nm": 0.021415471502886696
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -22826,16 +22866,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 6,
    "radius_nm": 6.80919543003504,
-   "instrument_s": 1033.3944680166758,
+   "instrument_s": 1427.6748691693585,
    "tip_rounds": 3,
-   "track_lost": 0,
+   "track_lost": 1,
    "pickups": 0,
    "placed": 6,
    "spares_seen": 6,
    "sites": 6,
-   "gap_width_nm": 6.101854735200759,
-   "spacing_nm": 1.0169757892001265,
-   "ring_radius_fit_nm": 6.828846895066141,
+   "gap_width_nm": 6.105248246758484,
+   "spacing_nm": 1.0175413744597475,
+   "ring_radius_fit_nm": 6.828790362879798,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -22908,37 +22948,52 @@
      "in": false
     },
     {
-     "r_kohm": 320.0,
-     "spikes": 13,
-     "in": false
-    },
-    {
-     "r_kohm": 320.0,
-     "spikes": 11,
-     "in": true
-    },
-    {
      "r_kohm": 400.0,
-     "spikes": 8,
-     "in": false
-    },
-    {
-     "r_kohm": 400.0,
-     "spikes": 4,
-     "in": false
-    },
-    {
-     "r_kohm": 320.0,
      "spikes": 6,
      "in": false
     },
     {
-     "r_kohm": 320.0,
-     "spikes": 8,
+     "r_kohm": 400.0,
+     "spikes": 10,
      "in": false
     },
     {
+     "r_kohm": 400.0,
+     "spikes": 9,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 0,
+     "in": true
+    },
+    {
      "r_kohm": 320.0,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 16,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 400.0,
      "spikes": 9,
      "in": true
     },
@@ -22949,22 +23004,17 @@
     },
     {
      "r_kohm": 400.0,
-     "spikes": 8,
-     "in": true
-    },
-    {
-     "r_kohm": 400.0,
-     "spikes": 3,
+     "spikes": 9,
      "in": true
     }
    ],
    "site_fill": [
-    1.14,
+    1.22,
     1.11,
+    1.18,
     1.12,
-    1.07,
-    1.08,
-    1.12
+    1.13,
+    1.14
    ],
    "diag": {
     "tol_nm": 0.509,
@@ -23005,10 +23055,10 @@
     "r_nm": 6.80919543003504,
     "planned_deg": [
      174.6,
-     183.1,
+     183.2,
      191.7,
      200.2,
-     208.7,
+     208.8,
      217.3
     ],
     "gap_deg": [
@@ -23020,13 +23070,13 @@
      218.0
     ]
    },
-   "e0_mev": -452.0597458450261,
-   "radius_measured_nm": 6.84575175702341,
-   "peaks_found": 6,
+   "e0_mev": -451.5314001406421,
+   "radius_measured_nm": 6.830610901537927,
+   "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.09888056403190215,
-    -0.544403744952906
+    -0.11123746677907101,
+    -0.6267122169159463
    ],
    "tip_condition": "blunt"
   },
@@ -24687,9 +24737,9 @@
    "success": true,
    "partial": 1.0,
    "values": {
-    "peak_lo_mev": -392.0,
-    "peak_hi_mev": -326.00000000000006,
-    "radius_nm": 8.461267211868684
+    "peak_lo_mev": -394.0,
+    "peak_hi_mev": -330.00000000000006,
+    "radius_nm": 8.461755341052628
    },
    "truth": {
     "peak_lo_mev": -391.1704018180919,
@@ -24697,9 +24747,9 @@
     "radius_nm": 8.440395818707728
    },
    "abs_err": {
-    "peak_lo_mev": -0.8295981819081248,
-    "peak_hi_mev": 1.1704018180917615,
-    "radius_nm": 0.020871393160955876
+    "peak_lo_mev": -2.829598181908125,
+    "peak_hi_mev": -2.8295981819082385,
+    "radius_nm": 0.021359522344900128
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -24710,16 +24760,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 6,
    "radius_nm": 8.440395818707728,
-   "instrument_s": 2329.3774023454375,
-   "tip_rounds": 4,
-   "track_lost": 2,
+   "instrument_s": 3566.5061957955672,
+   "tip_rounds": 6,
+   "track_lost": 5,
    "pickups": 0,
    "placed": 6,
    "spares_seen": 6,
    "sites": 6,
-   "gap_width_nm": 5.3914302337810565,
-   "spacing_nm": 0.8985717056301761,
-   "ring_radius_fit_nm": 8.451888886895086,
+   "gap_width_nm": 5.404905458988629,
+   "spacing_nm": 0.9008175764981048,
+   "ring_radius_fit_nm": 8.454402933294942,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -24778,7 +24828,7 @@
     },
     {
      "r_kohm": 209.7,
-     "spikes": 13,
+     "spikes": 12,
      "in": false
     },
     {
@@ -24803,27 +24853,12 @@
     },
     {
      "r_kohm": 214.7,
-     "spikes": 9,
+     "spikes": 8,
      "in": false
     },
     {
      "r_kohm": 214.7,
      "spikes": 1,
-     "in": false
-    },
-    {
-     "r_kohm": 214.7,
-     "spikes": 4,
-     "in": false
-    },
-    {
-     "r_kohm": 214.7,
-     "spikes": 6,
-     "in": true
-    },
-    {
-     "r_kohm": 214.7,
-     "spikes": 2,
      "in": true
     },
     {
@@ -24832,9 +24867,9 @@
      "in": true
     },
     {
-     "r_kohm": 343.6,
-     "spikes": 0,
-     "in": false
+     "r_kohm": 171.8,
+     "spikes": 11,
+     "in": true
     },
     {
      "r_kohm": 274.9,
@@ -24852,8 +24887,18 @@
      "in": false
     },
     {
+     "r_kohm": 175.9,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 175.9,
+     "spikes": 1,
+     "in": false
+    },
+    {
      "r_kohm": 140.7,
-     "spikes": 4,
+     "spikes": 6,
      "in": false
     },
     {
@@ -24863,32 +24908,32 @@
     },
     {
      "r_kohm": 112.6,
-     "spikes": 19,
+     "spikes": 15,
      "in": false
     },
     {
      "r_kohm": 112.6,
-     "spikes": 7,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 112.6,
+     "spikes": 8,
      "in": true
     },
     {
      "r_kohm": 180.1,
-     "spikes": 5,
+     "spikes": 3,
      "in": false
     },
     {
      "r_kohm": 180.1,
      "spikes": 5,
-     "in": false
-    },
-    {
-     "r_kohm": 180.1,
-     "spikes": 4,
      "in": false
     },
     {
      "r_kohm": 144.1,
-     "spikes": 8,
+     "spikes": 16,
      "in": false
     },
     {
@@ -24898,42 +24943,32 @@
     },
     {
      "r_kohm": 230.6,
+     "spikes": 8,
+     "in": false
+    },
+    {
+     "r_kohm": 230.6,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 184.5,
      "spikes": 9,
      "in": false
     },
     {
-     "r_kohm": 230.6,
-     "spikes": 5,
-     "in": false
-    },
-    {
-     "r_kohm": 230.6,
+     "r_kohm": 184.5,
      "spikes": 8,
-     "in": false
-    },
-    {
-     "r_kohm": 230.6,
-     "spikes": 2,
-     "in": false
-    },
-    {
-     "r_kohm": 230.6,
-     "spikes": 2,
-     "in": true
-    },
-    {
-     "r_kohm": 230.6,
-     "spikes": 6,
      "in": true
     }
    ],
    "site_fill": [
-    1.08,
-    1.27,
+    1.09,
     1.28,
-    0.96,
-    1.01,
-    1.16
+    1.16,
+    1.0,
+    1.16,
+    1.12
    ],
    "diag": {
     "tol_nm": 0.457,
@@ -24955,8 +24990,8 @@
       "status": "on_surface"
      },
      {
-      "to_nearest_gap_site_nm": 0.25,
-      "off_circle_nm": 0.17,
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.03,
       "status": "on_surface"
      },
      {
@@ -24973,9 +25008,9 @@
     "n_ring": 58,
     "r_nm": 8.440395818707728,
     "planned_deg": [
-     194.8,
-     200.9,
-     207.0,
+     194.7,
+     200.8,
+     206.9,
      213.0,
      219.1,
      225.2
@@ -24989,13 +25024,13 @@
      225.8
     ]
    },
-   "e0_mev": -438.0896148813268,
-   "radius_measured_nm": 8.461267211868684,
+   "e0_mev": -437.544093190603,
+   "radius_measured_nm": 8.461755341052628,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.5815118094927378,
-    -0.7021811511979141
+    -0.5859723661232664,
+    -0.691374811186725
    ],
    "tip_condition": "double"
   },
@@ -25006,8 +25041,8 @@
    "partial": 1.0,
    "values": {
     "peak_lo_mev": -328.00000000000006,
-    "peak_hi_mev": -200.0,
-    "radius_nm": 6.154999303553985
+    "peak_hi_mev": -198.00000000000006,
+    "radius_nm": 6.150897965119634
    },
    "truth": {
     "peak_lo_mev": -326.9414602377254,
@@ -25016,8 +25051,8 @@
    },
    "abs_err": {
     "peak_lo_mev": -1.0585397622746768,
-    "peak_hi_mev": -1.058539762274762,
-    "radius_nm": -0.026523827687545243
+    "peak_hi_mev": 0.9414602377251811,
+    "radius_nm": -0.030625166121896363
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -25028,16 +25063,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 4,
    "radius_nm": 6.18152313124153,
-   "instrument_s": 2559.034000766657,
-   "tip_rounds": 31,
+   "instrument_s": 2457.213397809095,
+   "tip_rounds": 15,
    "track_lost": 3,
    "pickups": 0,
    "placed": 4,
    "spares_seen": 4,
    "sites": 4,
-   "gap_width_nm": 3.451076640472357,
-   "spacing_nm": 0.8627691601180892,
-   "ring_radius_fit_nm": 6.15867542472224,
+   "gap_width_nm": 3.4454578816562855,
+   "spacing_nm": 0.8613644704140714,
+   "ring_radius_fit_nm": 6.160553120177275,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -25075,8 +25110,8 @@
      "in": false
     },
     {
-     "r_kohm": 131.1,
-     "spikes": 0,
+     "r_kohm": 104.9,
+     "spikes": 1,
      "in": false
     },
     {
@@ -25091,32 +25126,37 @@
     },
     {
      "r_kohm": 83.9,
-     "spikes": 6,
+     "spikes": 4,
      "in": false
     },
     {
      "r_kohm": 83.9,
-     "spikes": 1,
-     "in": true
+     "spikes": 3,
+     "in": false
     },
     {
      "r_kohm": 83.9,
-     "spikes": 9,
+     "spikes": 6,
      "in": true
     },
     {
      "r_kohm": 134.2,
-     "spikes": 0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 1,
      "in": false
     },
     {
      "r_kohm": 107.4,
-     "spikes": 16,
+     "spikes": 13,
      "in": false
     },
     {
      "r_kohm": 107.4,
-     "spikes": 5,
+     "spikes": 6,
      "in": true
     },
     {
@@ -25130,12 +25170,12 @@
      "in": false
     },
     {
-     "r_kohm": 137.4,
-     "spikes": 1,
+     "r_kohm": 171.8,
+     "spikes": 0,
      "in": false
     },
     {
-     "r_kohm": 137.4,
+     "r_kohm": 171.8,
      "spikes": 0,
      "in": false
     },
@@ -25166,7 +25206,7 @@
     },
     {
      "r_kohm": 70.4,
-     "spikes": 20,
+     "spikes": 19,
      "in": false
     },
     {
@@ -25176,17 +25216,27 @@
     },
     {
      "r_kohm": 112.6,
-     "spikes": 3,
-     "in": false
-    },
-    {
-     "r_kohm": 112.6,
      "spikes": 1,
      "in": false
     },
     {
+     "r_kohm": 112.6,
+     "spikes": 2,
+     "in": false
+    },
+    {
      "r_kohm": 90.1,
-     "spikes": 22,
+     "spikes": 20,
+     "in": false
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 4,
      "in": false
     },
     {
@@ -25221,10 +25271,10 @@
     }
    ],
    "site_fill": [
-    1.01,
-    1.0,
-    1.05,
-    1.18
+    0.93,
+    0.92,
+    0.98,
+    1.09
    ],
    "diag": {
     "tol_nm": 0.432,
@@ -25266,13 +25316,13 @@
      292.9
     ]
    },
-   "e0_mev": -420.72882502341747,
-   "radius_measured_nm": 6.154999303553985,
+   "e0_mev": -420.11343693040334,
+   "radius_measured_nm": 6.150897965119634,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.5307154485466133,
-    0.25920192260488417
+    0.52354322625266,
+    0.24296694522350515
    ],
    "tip_condition": "blunt"
   },
@@ -25282,9 +25332,9 @@
    "success": true,
    "partial": 1.0,
    "values": {
-    "peak_lo_mev": -354.00000000000006,
-    "peak_hi_mev": -264.0,
-    "radius_nm": 7.039840841333667
+    "peak_lo_mev": -352.00000000000006,
+    "peak_hi_mev": -262.0,
+    "radius_nm": 7.1106431939783485
    },
    "truth": {
     "peak_lo_mev": -352.94603755450294,
@@ -25292,9 +25342,9 @@
     "radius_nm": 7.06388604399007
    },
    "abs_err": {
-    "peak_lo_mev": -1.0539624454971204,
-    "peak_hi_mev": -1.0539624454971204,
-    "radius_nm": -0.024045202656403752
+    "peak_lo_mev": 0.9460375545028796,
+    "peak_hi_mev": 0.9460375545028796,
+    "radius_nm": 0.04675714998827818
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -25305,16 +25355,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 3,
    "radius_nm": 7.06388604399007,
-   "instrument_s": 2815.10998735908,
-   "tip_rounds": 24,
-   "track_lost": 4,
+   "instrument_s": 2436.3177151565055,
+   "tip_rounds": 19,
+   "track_lost": 3,
    "pickups": 0,
    "placed": 3,
    "spares_seen": 3,
    "sites": 3,
-   "gap_width_nm": 3.4771992375976177,
-   "spacing_nm": 1.1590664125325392,
-   "ring_radius_fit_nm": 7.064007240882106,
+   "gap_width_nm": 3.5932522488705088,
+   "spacing_nm": 1.197750749623503,
+   "ring_radius_fit_nm": 7.078292037814693,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -25343,12 +25393,12 @@
     },
     {
      "r_kohm": 163.8,
-     "spikes": 1,
+     "spikes": 0,
      "in": false
     },
     {
      "r_kohm": 131.1,
-     "spikes": 11,
+     "spikes": 13,
      "in": false
     },
     {
@@ -25363,12 +25413,17 @@
     },
     {
      "r_kohm": 131.1,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 131.1,
      "spikes": 6,
      "in": true
     },
     {
      "r_kohm": 131.1,
-     "spikes": 2,
+     "spikes": 1,
      "in": true
     },
     {
@@ -25378,8 +25433,13 @@
     },
     {
      "r_kohm": 104.9,
-     "spikes": 1,
+     "spikes": 4,
      "in": true
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 1,
+     "in": false
     },
     {
      "r_kohm": 167.8,
@@ -25388,12 +25448,12 @@
     },
     {
      "r_kohm": 134.2,
-     "spikes": 1,
+     "spikes": 0,
      "in": false
     },
     {
-     "r_kohm": 134.2,
-     "spikes": 1,
+     "r_kohm": 107.4,
+     "spikes": 5,
      "in": false
     },
     {
@@ -25402,33 +25462,13 @@
      "in": false
     },
     {
-     "r_kohm": 107.4,
+     "r_kohm": 85.9,
+     "spikes": 21,
+     "in": false
+    },
+    {
+     "r_kohm": 85.9,
      "spikes": 8,
-     "in": false
-    },
-    {
-     "r_kohm": 107.4,
-     "spikes": 6,
-     "in": false
-    },
-    {
-     "r_kohm": 107.4,
-     "spikes": 1,
-     "in": false
-    },
-    {
-     "r_kohm": 107.4,
-     "spikes": 1,
-     "in": false
-    },
-    {
-     "r_kohm": 85.9,
-     "spikes": 11,
-     "in": false
-    },
-    {
-     "r_kohm": 85.9,
-     "spikes": 9,
      "in": true
     },
     {
@@ -25443,22 +25483,22 @@
     }
    ],
    "site_fill": [
-    1.64,
-    1.81,
-    1.75
+    1.8,
+    1.75,
+    1.81
    ],
    "diag": {
     "tol_nm": 0.6,
     "unheld": [],
     "moved": [
      {
-      "to_nearest_gap_site_nm": 0.26,
-      "off_circle_nm": -0.05,
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.08,
       "status": "on_surface"
      },
      {
-      "to_nearest_gap_site_nm": 0.26,
-      "off_circle_nm": -0.1,
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": 0.15,
       "status": "on_surface"
      },
      {
@@ -25470,9 +25510,9 @@
     "n_ring": 37,
     "r_nm": 7.06388604399007,
     "planned_deg": [
-     3.7,
-     13.1,
-     354.2
+     3.5,
+     13.2,
+     353.8
     ],
     "gap_deg": [
      2.2,
@@ -25480,13 +25520,13 @@
      353.3
     ]
    },
-   "e0_mev": -417.71942981444664,
-   "radius_measured_nm": 7.039840841333667,
-   "peaks_found": 4,
+   "e0_mev": -418.1214748742996,
+   "radius_measured_nm": 7.1106431939783485,
+   "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.6273994724602228,
-    0.3112041795332319
+    0.6328189272443483,
+    0.805522949523065
    ],
    "tip_condition": "blunt"
   },
@@ -26200,9 +26240,9 @@
    "success": true,
    "partial": 1.0,
    "values": {
-    "peak_lo_mev": -318.00000000000006,
-    "peak_hi_mev": -184.00000000000006,
-    "radius_nm": 5.73570565784636
+    "peak_lo_mev": -320.00000000000006,
+    "peak_hi_mev": -186.00000000000006,
+    "radius_nm": 5.735596035728895
    },
    "truth": {
     "peak_lo_mev": -319.28728909978014,
@@ -26210,9 +26250,9 @@
     "radius_nm": 5.720953404504233
    },
    "abs_err": {
-    "peak_lo_mev": 1.2872890997800823,
-    "peak_hi_mev": 1.2872890997799686,
-    "radius_nm": 0.014752253342126487
+    "peak_lo_mev": -0.7127109002199177,
+    "peak_hi_mev": -0.7127109002200314,
+    "radius_nm": 0.014642631224661251
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -26223,16 +26263,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 5,
    "radius_nm": 5.720953404504233,
-   "instrument_s": 1639.392531076552,
+   "instrument_s": 2046.6255004833972,
    "tip_rounds": 6,
-   "track_lost": 1,
+   "track_lost": 2,
    "pickups": 0,
    "placed": 5,
    "spares_seen": 5,
    "sites": 5,
-   "gap_width_nm": 2.9684000715100183,
-   "spacing_nm": 0.5936800143020037,
-   "ring_radius_fit_nm": 5.730772140104302,
+   "gap_width_nm": 2.9695651612183336,
+   "spacing_nm": 0.5939130322436668,
+   "ring_radius_fit_nm": 5.730215568475692,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -26296,12 +26336,7 @@
     },
     {
      "r_kohm": 209.7,
-     "spikes": 8,
-     "in": false
-    },
-    {
-     "r_kohm": 209.7,
-     "spikes": 3,
+     "spikes": 9,
      "in": false
     },
     {
@@ -26340,28 +26375,43 @@
      "in": false
     },
     {
-     "r_kohm": 137.4,
-     "spikes": 15,
-     "in": false
-    },
-    {
-     "r_kohm": 137.4,
-     "spikes": 11,
-     "in": true
-    },
-    {
-     "r_kohm": 219.9,
-     "spikes": 0,
-     "in": false
-    },
-    {
-     "r_kohm": 175.9,
+     "r_kohm": 171.8,
      "spikes": 9,
      "in": false
     },
     {
+     "r_kohm": 171.8,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 7,
+     "in": true
+    },
+    {
+     "r_kohm": 274.9,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 219.9,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 219.9,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 219.9,
+     "spikes": 4,
+     "in": false
+    },
+    {
      "r_kohm": 175.9,
-     "spikes": 2,
+     "spikes": 8,
      "in": false
     },
     {
@@ -26371,12 +26421,12 @@
     },
     {
      "r_kohm": 175.9,
-     "spikes": 8,
+     "spikes": 9,
      "in": true
     },
     {
      "r_kohm": 281.5,
-     "spikes": 16,
+     "spikes": 5,
      "in": false
     },
     {
@@ -26385,37 +26435,22 @@
      "in": false
     },
     {
-     "r_kohm": 281.5,
-     "spikes": 5,
+     "r_kohm": 225.2,
+     "spikes": 19,
      "in": false
     },
     {
-     "r_kohm": 281.5,
-     "spikes": 3,
-     "in": true
-    },
-    {
-     "r_kohm": 281.5,
-     "spikes": 0,
-     "in": true
-    },
-    {
      "r_kohm": 225.2,
-     "spikes": 5,
-     "in": true
-    },
-    {
-     "r_kohm": 225.2,
-     "spikes": 3,
+     "spikes": 9,
      "in": true
     }
    ],
    "site_fill": [
-    0.97,
-    1.07,
-    1.17,
-    0.97,
-    0.84
+    0.95,
+    1.1,
+    1.23,
+    1.02,
+    0.89
    ],
    "diag": {
     "tol_nm": 0.31,
@@ -26450,11 +26485,11 @@
     "n_ring": 58,
     "r_nm": 5.720953404504233,
     "planned_deg": [
-     46.0,
-     52.0,
-     57.9,
-     63.8,
-     69.8
+     45.9,
+     51.8,
+     57.7,
+     63.7,
+     69.6
     ],
     "gap_deg": [
      45.9,
@@ -26464,13 +26499,13 @@
      71.5
     ]
    },
-   "e0_mev": -413.6039115154919,
-   "radius_measured_nm": 5.73570565784636,
+   "e0_mev": -413.70798756824706,
+   "radius_measured_nm": 5.735596035728895,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.6323181436342663,
-    0.4226653428970301
+    -0.6147583302346108,
+    0.4160093505149752
    ],
    "tip_condition": "blunt"
   },
@@ -28808,9 +28843,9 @@
    "success": true,
    "partial": 1.0,
    "values": {
-    "peak_lo_mev": -414.00000000000006,
+    "peak_lo_mev": -410.00000000000006,
     "peak_hi_mev": -346.00000000000006,
-    "radius_nm": 8.53460989373924
+    "radius_nm": 8.534760255311001
    },
    "truth": {
     "peak_lo_mev": -412.66578915282406,
@@ -28818,9 +28853,9 @@
     "radius_nm": 8.522719049625723
    },
    "abs_err": {
-    "peak_lo_mev": -1.3342108471759957,
+    "peak_lo_mev": 2.6657891528240043,
     "peak_hi_mev": 0.6657891528239475,
-    "radius_nm": 0.011890844113517929
+    "radius_nm": 0.012041205685278555
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -28831,16 +28866,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 6,
    "radius_nm": 8.522719049625723,
-   "instrument_s": 1637.3272818766789,
+   "instrument_s": 1586.1543421384818,
    "tip_rounds": 8,
    "track_lost": 1,
    "pickups": 0,
    "placed": 6,
    "spares_seen": 6,
    "sites": 6,
-   "gap_width_nm": 8.330063830043407,
-   "spacing_nm": 1.3883439716739012,
-   "ring_radius_fit_nm": 8.530190964024202,
+   "gap_width_nm": 8.248103388881301,
+   "spacing_nm": 1.3746838981468834,
+   "ring_radius_fit_nm": 8.522033421932223,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -28854,12 +28889,17 @@
     },
     {
      "r_kohm": 320.0,
-     "spikes": 9,
+     "spikes": 8,
      "in": false
     },
     {
      "r_kohm": 320.0,
-     "spikes": 11,
+     "spikes": 6,
+     "in": true
+    },
+    {
+     "r_kohm": 320.0,
+     "spikes": 4,
      "in": true
     },
     {
@@ -28874,17 +28914,12 @@
     },
     {
      "r_kohm": 256.0,
-     "spikes": 1,
-     "in": false
-    },
-    {
-     "r_kohm": 256.0,
      "spikes": 0,
      "in": false
     },
     {
      "r_kohm": 204.8,
-     "spikes": 2,
+     "spikes": 1,
      "in": false
     },
     {
@@ -28900,36 +28935,36 @@
     {
      "r_kohm": 163.8,
      "spikes": 7,
-     "in": true
-    },
-    {
-     "r_kohm": 262.1,
-     "spikes": 12,
      "in": false
     },
     {
-     "r_kohm": 262.1,
-     "spikes": 7,
-     "in": false
-    },
-    {
-     "r_kohm": 262.1,
-     "spikes": 7,
-     "in": false
-    },
-    {
-     "r_kohm": 262.1,
+     "r_kohm": 163.8,
      "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 163.8,
+     "spikes": 9,
      "in": true
     },
     {
      "r_kohm": 262.1,
-     "spikes": 3,
-     "in": true
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 262.1,
+     "spikes": 7,
+     "in": false
     },
     {
      "r_kohm": 209.7,
-     "spikes": 8,
+     "spikes": 13,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 9,
      "in": true
     },
     {
@@ -28939,22 +28974,7 @@
     },
     {
      "r_kohm": 335.5,
-     "spikes": 8,
-     "in": true
-    },
-    {
-     "r_kohm": 335.5,
-     "spikes": 4,
-     "in": true
-    },
-    {
-     "r_kohm": 335.5,
-     "spikes": 2,
-     "in": true
-    },
-    {
-     "r_kohm": 335.5,
-     "spikes": 3,
+     "spikes": 9,
      "in": true
     },
     {
@@ -28964,12 +28984,17 @@
     },
     {
      "r_kohm": 320.0,
-     "spikes": 1,
+     "spikes": 2,
      "in": false
     },
     {
      "r_kohm": 320.0,
-     "spikes": 1,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 256.0,
+     "spikes": 6,
      "in": false
     },
     {
@@ -28978,68 +29003,43 @@
      "in": false
     },
     {
-     "r_kohm": 256.0,
-     "spikes": 10,
-     "in": false
-    },
-    {
-     "r_kohm": 256.0,
+     "r_kohm": 204.8,
      "spikes": 5,
      "in": false
     },
     {
-     "r_kohm": 256.0,
-     "spikes": 3,
+     "r_kohm": 204.8,
+     "spikes": 4,
      "in": false
     },
     {
-     "r_kohm": 256.0,
+     "r_kohm": 204.8,
      "spikes": 8,
      "in": true
     },
     {
-     "r_kohm": 256.0,
-     "spikes": 3,
-     "in": true
-    },
-    {
-     "r_kohm": 400.0,
-     "spikes": 3,
-     "in": false
-    },
-    {
-     "r_kohm": 400.0,
+     "r_kohm": 327.7,
      "spikes": 1,
      "in": false
     },
     {
-     "r_kohm": 320.0,
-     "spikes": 3,
+     "r_kohm": 327.7,
+     "spikes": 9,
      "in": false
     },
     {
-     "r_kohm": 320.0,
-     "spikes": 10,
-     "in": false
-    },
-    {
-     "r_kohm": 320.0,
-     "spikes": 2,
-     "in": true
-    },
-    {
-     "r_kohm": 320.0,
-     "spikes": 8,
+     "r_kohm": 327.7,
+     "spikes": 9,
      "in": true
     }
    ],
    "site_fill": [
-    1.49,
-    1.48,
-    1.43,
-    1.34,
-    1.21,
-    1.21
+    1.63,
+    1.55,
+    1.56,
+    1.45,
+    1.4,
+    1.4
    ],
    "diag": {
     "tol_nm": 0.669,
@@ -29051,8 +29051,8 @@
       "status": "on_surface"
      },
      {
-      "to_nearest_gap_site_nm": 0.26,
-      "off_circle_nm": 0.16,
+      "to_nearest_gap_site_nm": 0.25,
+      "off_circle_nm": -0.06,
       "status": "on_surface"
      },
      {
@@ -29079,12 +29079,12 @@
     "n_ring": 40,
     "r_nm": 8.522719049625723,
     "planned_deg": [
-     30.8,
-     40.1,
-     49.4,
+     31.0,
+     40.2,
+     49.5,
      58.7,
-     68.1,
-     77.4
+     68.0,
+     77.2
     ],
     "gap_deg": [
      31.2,
@@ -29095,13 +29095,13 @@
      77.0
     ]
    },
-   "e0_mev": -461.10650802078493,
-   "radius_measured_nm": 8.53460989373924,
-   "peaks_found": 5,
+   "e0_mev": -461.7069933731202,
+   "radius_measured_nm": 8.534760255311001,
+   "peaks_found": 7,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.45360214544208105,
-    0.508033887532349
+    0.4087312300416243,
+    0.5140820126462146
    ],
    "tip_condition": "blunt"
   },

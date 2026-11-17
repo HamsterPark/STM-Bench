@@ -103,7 +103,7 @@ The reference protocols connect tolerance design to measured error distributions
 
 For the recalibrated P3 and P5 tasks, the best fixed answer passed the joint numerical checks on **4.3% of seeds 0–299** in each case. This is a finite-seed audit with acquisition evidence assumed satisfied, not a full-episode success rate or a universal guessing probability. It helps check that seeded task variation makes measurement informative. See the [audit implementation](stmbench/trackB/audit.py) and [calibration history](docs/DESIGN.md).
 
-The current reference command covers P3, P4, and P5, and the scripted baseline covers P3, P3-repair and P4; the P3-repair baseline is a development result (see docs/DESIGN.md §9.8), not a reliable one. P1/P2 reference coverage remains a development priority. Autonomous-agent evaluation can now build on these instrument and scoring foundations; a current-version model leaderboard has not yet been published.
+The current reference command covers P3, P4, and P5, and the scripted baseline covers P3, P3-repair and P4; the P3-repair baseline reproduced 22/30 development seeds and 58/90 held-out seeds under the 5 h budget (good tips 13/16; see docs/DESIGN.md §9.8), so it shows the repair can be done from observations but not reliably. P1/P2 reference coverage remains a development priority. Autonomous-agent evaluation can now build on these instrument and scoring foundations; a current-version model leaderboard has not yet been published.
 
 ## A recorded experiment in motion
 
