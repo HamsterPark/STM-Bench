@@ -13,10 +13,13 @@ scenario's notes have the numbers and the variants that were measured):
 
 1. the isolated Co atom nearest the scan origin (no other atom within 3 nm, ≥ 1.5 nm from a step,
    a bare spot ≥ 2.5 nm away on its terrace);
-2. travel and conditioning at 20 mV and 20 pA (a precaution since the scenario starts at 50 mV; at the
-   100 mV it was first drafted with, a conditioning poke rings the
-   qPlus sensor up and sprays clusters that wipe every adatom within 15 nm (``World._apply_poke_outcome``;
-   P5 pokes at 20 mV for the same reason): the first version lost the target atom on 5 of 10 seeds.
+2. travel and conditioning at 20 mV and 20 pA. The setting dates from the draft, which started at
+   100 mV on a rig whose tip sat on a qPlus fork: a conditioning poke above ~50 mV rang the sensor
+   up and sprayed clusters that wiped every adatom within 15 nm (``World._apply_poke_outcome``; P5,
+   which keeps the fork, pokes at 20 mV for the same reason), and the first version lost the target
+   atom on 5 of 10 seeds. Since the decision of 2026-11-17 the STM rig's tip is an etched W wire,
+   whose poke does not depend on the bias, and P6 starts at 50 mV; the setting is kept, and the
+   reference re-run on seeds 0-29 with the etched tip and the new start is identical.
    An unstable tip, or one carrying an adsorbate, is poked on bare surface ~10 nm away. Blunt and
    double tips are *not* conditioned (``imaging=True`` does it): the pulses displace the apex and
    it reproduced 22/30 instead of 28/30, while the blunt and double tips of the unconditioned
@@ -143,9 +146,9 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str | Path = 
     temp_k = float(inst.info()["temperature_k"])
     ax, ay = _isolated_atom(w)
     bx, by = bare_spot(w, ax, ay)
-    # a poke above ~50 mV rings the sensor up and sprays clusters that wipe every adatom within 15 nm
-    # (World._apply_poke_outcome; P5 pokes at 20 mV for the same reason): travel and condition at a
-    # low bias. The setpoint is lowered too (travel_pa) as a precaution: the tip starts on top of the atom
+    # travel and condition at TRAVEL_V, a setting from the qPlus fork the draft had (point 2 of the
+    # module text; the etched tip's poke does not depend on the bias). The setpoint is lowered too
+    # (travel_pa) as a precaution: the tip starts on top of the atom
     # and a drag at a low junction resistance could take it along, so every travel before the sweeps runs at
     # a high junction resistance
     inst.act("set_bias", bias_v=TRAVEL_V)
