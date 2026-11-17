@@ -333,8 +333,6 @@ class Bench:
             f, _ = self.ops.frame(spot[0], spot[1], 8.0, 80, SLOW_LINE_S)
             near = [a for a in locate(f, compact_frac=1.0) if math.hypot(a[0] - atom[0], a[1] - atom[1]) > 1.5]
             near.append((float(atom[0]), float(atom[1]), 0.0))
-            if not near:
-                return spot
             a = min(near, key=lambda b: math.hypot(b[0] - spot[0], b[1] - spot[1]))
             d = math.hypot(a[0] - spot[0], a[1] - spot[1])
             if d >= need_nm:
