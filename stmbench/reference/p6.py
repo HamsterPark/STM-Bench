@@ -78,12 +78,20 @@ def _isolated_atom(w):
 
 
 def _lead_offset(w) -> tuple[float, float]:
-    """The leading apex's lateral offset (m): the apex that sits closest to the surface carries
-    the tunnelling (privileged: read from the tip)."""
+    """The leading apex's lateral offset (m), chosen as the world's sweep chooses it
+    (``World._sts_curve_resolved``): the apex with the largest current weight at the point the
+    sweep starts from, ``a.w * exp(2 kappa (h_smooth + a.dz))``. With several apexes of unequal
+    weight that is not always the one closest to the surface (privileged: read from the tip)."""
     apexes = getattr(w.tip, "apexes", None) or []
     if not apexes:
         return 0.0, 0.0
-    lead = max(apexes, key=lambda a: a.dz)
+    if len(apexes) == 1:
+        return float(apexes[0].dx), float(apexes[0].dy)
+    ox, oy, _oz = w.drift_offset(w.clock.sim())
+    px, py = np.array([w.tip_x + ox]), np.array([w.tip_y + oy])
+    kappa = w.kappa_m()
+    hs = np.array([float(w.surface.height_smooth(px + a.dx, py + a.dy)[0]) + a.dz for a in apexes])
+    lead = apexes[int(np.argmax(np.array([a.w for a in apexes]) * np.exp(2.0 * kappa * (hs - hs.max()))))]
     return float(lead.dx), float(lead.dy)
 
 
