@@ -225,6 +225,35 @@ notes: |
   **The rig's tip is an etched W wire, not a qPlus fork (2026-11-17, decided by the user).** A poke
   above 50 mV no longer rings a fork up, and a reshaping pulse leaves a better tip with probability 0.55
   instead of 0.50; the worlds at the start (layout, hidden draws, random streams) are unchanged.
-  The reference and baseline numbers above were measured with the qPlus form and are re-run on the new physics; a ledger
-  recorded before this with a high-bias poke does not replay with this code, and one with a pulse
+  A ledger recorded before this with a high-bias poke does not replay with this code, and one with a pulse
   may not (docs/DESIGN.md, 2026-11-17).
+
+  **Re-run on the current code with the etched tip (2026-11-17, commit 1918eaa, khwu cluster, no
+  protocol or tolerance change).** The figures above were measured on 2026-10-13/14 with the qPlus
+  form and the code of those days; they stay above as history. The re-run:
+  reference seeds 0-149 150/150 (147 on the nearest site, 3 on a tied one), reported place |error|
+  median 0.0066 / p90 0.0151 / max 0.0434 nm, instrument time median 885 s, p90 1477 s, max 2477 s
+  (October: 879 / 1428 / 2003 s); baseline seeds 0-299 298/300 (blunt 85/86, dirty 54/54,
+  double 75/76, good 54/54, unstable 30/30), median 1031 s, p90 1624 s, max 3156 s;
+  300-449 150/150, median 987 s, p90 1749 s, max 3628 s; 450-599 149/150 (unstable 21/22),
+  median 986 s, p90 1533 s, max 3781 s (October: 984 / 1410 / 2331 s). 450-599 was held out for the
+  October code; the re-run is of the current code on the same seeds, nothing tuned.
+  (a) The tip change moves no outcome. The parent 39fcd13 (qPlus tip, same code and seeds, same
+  commands) gives the same successes and failures on every range. Bit-identical in time and error
+  on 133/150 (reference), 286/300, 141/150 and 144/150 (baseline) seeds; the others differ only in
+  time and tip rounds (16, 12, 4 and 3 seeds differ in the number of tip rounds). Medians and p90
+  hardly move: reference 885 s / 1422 s on 39fcd13 against 885 s / 1477 s; baseline 0-299
+  1035 s / 1641 s against 1031 s / 1624 s; 300-449 992 s / 1759 s against 987 s / 1749 s;
+  450-599 986 s / 1484 s against 986 s / 1533 s. The 0.55 against 0.50 pulse odds and the missing
+  high-bias poke trap change the path of some runs, not whether they end well.
+  (b) Against the October files, seeds 262 and 275 (baseline, claim ``target_site``, atom off
+  goal) and 575 (baseline, "the work area was not found again" after 3704 s, three conditioning
+  recoveries) now fail, and 331, 333, 364, 376 and 415 (300-449) now succeed. The three failures
+  fail identically on 39fcd13, so their cause is code changed between 2026-10-14 and 39fcd13,
+  not the tip. Not checked: which commit changed them, and the pulse outcomes of those runs (the
+  result files keep no tip events). The recorded rows of October have no ``tip_rounds`` or
+  ``recoveries`` and name the attempt counts ``spikes`` where today's say ``hops``.
+  (c) Also moved by the re-run, qPlus-era value in brackets: baseline error median 0.0055 nm
+  (0.0056) on 0-299; 450-599 median 0.0049 nm, p90 0.0107 nm (0.0054, 0.0111), max 0.385 nm
+  (seed 558; 0.119) - within ``report_nm`` 0.6. Instrument-time figures are for successes.
+  Files: ``docs/results/p4_*``, whose October versions are in git history at 39fcd13.
