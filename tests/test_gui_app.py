@@ -2341,7 +2341,7 @@ def _blocked_failing_job(win):
         gate.wait(10)
         return Outcome("act", "wait", {}, ok=False, refused=True, text="refused")
 
-    win.worker.submit(Job("act", "wait", {}, fn))
+    win._submit(Job("act", "wait", {}, fn))          # through the window, which counts its open jobs
     deadline = time.monotonic() + 5
     while win.worker.running is None and time.monotonic() < deadline:
         time.sleep(0.005)
@@ -2364,15 +2364,15 @@ def test_a_call_that_fails_while_the_window_is_closing_does_not_drop_the_close_t
 def test_a_finish_clicked_on_the_report_tab_is_an_ordinary_click_and_is_dropped_with_its_step(open_window):
     """Only the close-time finish is forced: a Finish queued behind a failing call is dropped with the rest of its
     step, and one clicked while the refusal is not acknowledged is turned away."""
-    from stmbench.gui.jobs import run_finish
-    from stmbench.gui.worker import Job
     win = open_window("en")
     gate = _blocked_failing_job(win)
-    assert win.worker.submit(Job("finish", "finish", {}, run_finish))
+    win._finish()                                      # the Report tab's Finish: queued behind the running call
     gate.set()
     shots.settle(win)
     assert not win.session.finished and win.worker.held
-    assert not win.worker.submit(Job("finish", "finish", {}, run_finish))
+    win._finish()                                      # clicked while the refusal is not acknowledged
+    shots.settle(win)
+    assert not win.session.finished
 
 
 def test_nothing_turned_away_reaches_the_record_and_the_acknowledgement_is_in_no_record_but_the_log(open_window, tmp_path):
