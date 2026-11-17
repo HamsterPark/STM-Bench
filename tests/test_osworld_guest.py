@@ -420,13 +420,13 @@ def test_stm_lockdown_with_a_sound_sudoers_says_nothing_and_keeps_the_dropin(tmp
     assert (tmp_path / "sudoers.d" / "zz-stm-lockdown").exists()
 
 
-@pytest.mark.skipif(os.geteuid() == 0, reason="the refusal is for everyone but root")
+@pytest.mark.skipif(not hasattr(os, "geteuid") or os.geteuid() == 0, reason="the refusal is for everyone but root")
 def test_stm_lockdown_refuses_to_run_without_root():
     r = subprocess.run(["bash", str(GUEST / "stm-lockdown")], capture_output=True, text=True)
     assert r.returncode == 1 and "must run as root" in r.stderr
 
 
-@pytest.mark.skipif(os.geteuid() != 0, reason="writes sudoers and polkit files as root (run in the container test)")
+@pytest.mark.skipif(not hasattr(os, "geteuid") or os.geteuid() != 0, reason="writes sudoers and polkit files as root (run in the container test)")
 def test_stm_lockdown_writes_its_files_and_is_idempotent(tmp_path):
     env = {**os.environ, "STM_SUDOERS_DIR": str(tmp_path / "sudoers.d"), "STM_POLKIT_RULES_DIR": str(tmp_path / "rules.d"),
            "STM_POLKIT_PKLA_DIR": str(tmp_path / "pkla"), "STM_AGENT_USER": "nobody"}

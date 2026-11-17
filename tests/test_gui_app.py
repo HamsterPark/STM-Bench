@@ -1972,7 +1972,12 @@ def test_the_window_fits_a_full_screen_and_a_maximized_window_under_a_title_bar(
     shots.settle(win)
     QApplication.processEvents()
     need = max(p.widget().minimumSizeHint().width() for p in (win.operate, win.spectroscopy)) + 2 * style.px(3)
-    assert win.right.width() == max(704, need) and win.sidebar.width() == 360          # a column is as wide as it needs
+    from stmbench.gui.app import column_needs, column_widths
+    left_need, right_need = column_needs(win.sidebar, (win.operate, win.spectroscopy))
+    assert right_need == need
+    # a column is as wide as it needs: the set width, or the narrowest its pages (the Report form too) allow
+    assert (win.sidebar.width(), win.right.width()) == column_widths(left_need, right_need)
+    assert win.sidebar.width() >= win.sidebar.minimumSizeHint().width()
     assert win.center.width() >= win.center.minimumSizeHint().width()                 # and the centre one is not squeezed
     for tab, panel in (("operate", win.operate), ("spectroscopy", win.spectroscopy)):
         open_right(win, tab)
@@ -2323,6 +2328,53 @@ def test_reads_tab_changes_and_the_viewers_tools_are_not_held_and_the_close_stil
     assert win.close()
     assert win.session.finished and (tmp_path / "run" / "episode.json").is_file()
     assert read_export(tmp_path / "run" / "export")["session"]["finished"]
+
+
+def _blocked_failing_job(win):
+    """An operator job that is running and will fail once the returned event is set (the window's own thread
+    cannot make a real refusal arrive at a chosen moment)."""
+    import threading
+
+    from stmbench.gui.jobs import Outcome
+    from stmbench.gui.worker import Job
+    gate = threading.Event()
+
+    def fn(_sess):
+        gate.wait(10)
+        return Outcome("act", "wait", {}, ok=False, refused=True, text="refused")
+
+    win._submit(Job("act", "wait", {}, fn))          # through the window, which counts its open jobs
+    deadline = time.monotonic() + 5
+    while win.worker.running is None and time.monotonic() < deadline:
+        time.sleep(0.005)
+    assert win.worker.running is not None
+    return gate
+
+
+def test_a_call_that_fails_while_the_window_is_closing_does_not_drop_the_close_time_finish(open_window, tmp_path):
+    """Closing the window queues the end of the episode with ``force``; a refusal of the call running at that moment
+    dropped every queued operator call, the finish among them, and the episode ended without its ledger."""
+    import threading
+    win = open_window("en")
+    gate = _blocked_failing_job(win)
+    threading.Timer(0.2, gate.set).start()
+    win.shutdown(finish=True)                         # queues the finish behind the running call, then waits
+    assert win.session.finished and (tmp_path / "run" / "episode.json").is_file()
+    assert [r["kind"] for r in records(tmp_path)].count("finish") == 1
+
+
+def test_a_finish_clicked_on_the_report_tab_is_an_ordinary_click_and_is_dropped_with_its_step(open_window):
+    """Only the close-time finish is forced: a Finish queued behind a failing call is dropped with the rest of its
+    step, and one clicked while the refusal is not acknowledged is turned away."""
+    win = open_window("en")
+    gate = _blocked_failing_job(win)
+    win._finish()                                      # the Report tab's Finish: queued behind the running call
+    gate.set()
+    shots.settle(win)
+    assert not win.session.finished and win.worker.held
+    win._finish()                                      # clicked while the refusal is not acknowledged
+    shots.settle(win)
+    assert not win.session.finished
 
 
 def test_nothing_turned_away_reaches_the_record_and_the_acknowledgement_is_in_no_record_but_the_log(open_window, tmp_path):
