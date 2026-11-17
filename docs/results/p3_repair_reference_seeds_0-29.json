@@ -10,12 +10,12 @@
     "err_median": 1.3460302204390473,
     "err_p90": 3.1329683113628963,
     "err_max": 3.79627335755373,
-    "signed_median": 0.667823987814316
+    "signed_median": 0.752235463765814
    },
    "peak_lo_mev": {
     "relative": false,
     "pass_rate": 1.0,
-    "err_median": 2.0516655505907124,
+    "err_median": 1.9812179935929635,
     "err_p90": 3.1037829523383555,
     "err_max": 3.7962733575538437,
     "signed_median": 0.194952155566682
@@ -24,14 +24,14 @@
     "relative": false,
     "pass_rate": 1.0,
     "err_median": 0.0215669683894415,
-    "err_p90": 0.06070748741772614,
+    "err_p90": 0.07866879154056969,
     "err_max": 0.13007494623545046,
-    "signed_median": 0.013919196435640657
+    "signed_median": 0.012227431360032348
    }
   },
   "instrument_s": {
    "median": 1318.311879262591,
-   "p90": 2595.230632730178
+   "p90": 2631.9146865791363
   }
  },
  "runs": [
@@ -42,8 +42,8 @@
    "partial": 1.0,
    "values": {
     "peak_lo_mev": -368.00000000000006,
-    "peak_hi_mev": -306.00000000000006,
-    "radius_nm": 8.89147825655683
+    "peak_hi_mev": -304.00000000000006,
+    "radius_nm": 8.857731757634916
    },
    "truth": {
     "peak_lo_mev": -366.5972963566543,
@@ -52,8 +52,8 @@
    },
    "abs_err": {
     "peak_lo_mev": -1.4027036433457738,
-    "peak_hi_mev": -1.4027036433458306,
-    "radius_nm": -0.0588841556388946
+    "peak_hi_mev": 0.5972963566541694,
+    "radius_nm": -0.09263065456080888
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -64,16 +64,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 6,
    "radius_nm": 8.950362412195725,
-   "instrument_s": 3019.9723572763683,
-   "tip_rounds": 7,
-   "track_lost": 4,
+   "instrument_s": 1774.5639492316068,
+   "tip_rounds": 2,
+   "track_lost": 1,
    "pickups": 0,
    "placed": 6,
    "spares_seen": 6,
    "sites": 6,
-   "gap_width_nm": 5.34056677126913,
-   "spacing_nm": 0.8900944618781884,
-   "ring_radius_fit_nm": 8.848120573875374,
+   "gap_width_nm": 5.36943411861395,
+   "spacing_nm": 0.8949056864356583,
+   "ring_radius_fit_nm": 8.853365474111913,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -107,17 +107,12 @@
     },
     {
      "r_kohm": 131.1,
-     "spikes": 1,
-     "in": false
-    },
-    {
-     "r_kohm": 131.1,
-     "spikes": 2,
+     "spikes": 4,
      "in": false
     },
     {
      "r_kohm": 104.9,
-     "spikes": 16,
+     "spikes": 13,
      "in": false
     },
     {
@@ -131,43 +126,33 @@
      "in": false
     },
     {
-     "r_kohm": 167.8,
+     "r_kohm": 134.2,
      "spikes": 0,
      "in": false
     },
     {
-     "r_kohm": 134.2,
+     "r_kohm": 107.4,
      "spikes": 1,
      "in": false
     },
     {
-     "r_kohm": 134.2,
-     "spikes": 0,
-     "in": false
-    },
-    {
      "r_kohm": 107.4,
-     "spikes": 3,
-     "in": false
-    },
-    {
-     "r_kohm": 107.4,
-     "spikes": 3,
+     "spikes": 4,
      "in": false
     },
     {
      "r_kohm": 85.9,
-     "spikes": 11,
+     "spikes": 14,
      "in": false
+    },
+    {
+     "r_kohm": 85.9,
+     "spikes": 8,
+     "in": true
     },
     {
      "r_kohm": 85.9,
      "spikes": 3,
-     "in": false
-    },
-    {
-     "r_kohm": 85.9,
-     "spikes": 9,
      "in": true
     },
     {
@@ -177,32 +162,17 @@
     },
     {
      "r_kohm": 110.0,
-     "spikes": 12,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 23,
      "in": false
     },
     {
      "r_kohm": 110.0,
      "spikes": 4,
-     "in": false
-    },
-    {
-     "r_kohm": 110.0,
-     "spikes": 11,
-     "in": false
-    },
-    {
-     "r_kohm": 110.0,
-     "spikes": 6,
-     "in": true
-    },
-    {
-     "r_kohm": 110.0,
-     "spikes": 1,
-     "in": true
-    },
-    {
-     "r_kohm": 110.0,
-     "spikes": 3,
      "in": true
     },
     {
@@ -222,12 +192,12 @@
     },
     {
      "r_kohm": 112.6,
-     "spikes": 1,
+     "spikes": 0,
      "in": false
     },
     {
-     "r_kohm": 112.6,
-     "spikes": 0,
+     "r_kohm": 90.1,
+     "spikes": 1,
      "in": false
     },
     {
@@ -237,63 +207,43 @@
     },
     {
      "r_kohm": 72.1,
-     "spikes": 3,
+     "spikes": 6,
      "in": false
     },
     {
      "r_kohm": 72.1,
-     "spikes": 7,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 57.6,
+     "spikes": 5,
      "in": false
     },
     {
      "r_kohm": 57.6,
      "spikes": 9,
-     "in": false
-    },
-    {
-     "r_kohm": 57.6,
-     "spikes": 8,
-     "in": true
-    },
-    {
-     "r_kohm": 57.6,
-     "spikes": 3,
      "in": true
     },
     {
      "r_kohm": 92.2,
-     "spikes": 1,
-     "in": false
-    },
-    {
-     "r_kohm": 92.2,
-     "spikes": 1,
-     "in": false
-    },
-    {
-     "r_kohm": 73.8,
-     "spikes": 2,
-     "in": false
-    },
-    {
-     "r_kohm": 73.8,
-     "spikes": 18,
+     "spikes": 0,
      "in": false
     },
     {
      "r_kohm": 73.8,
      "spikes": 12,
+     "in": false
+    },
+    {
+     "r_kohm": 73.8,
+     "spikes": 11,
+     "in": false
+    },
+    {
+     "r_kohm": 73.8,
+     "spikes": 9,
      "in": true
-    },
-    {
-     "r_kohm": 118.1,
-     "spikes": 1,
-     "in": false
-    },
-    {
-     "r_kohm": 118.1,
-     "spikes": 1,
-     "in": false
     },
     {
      "r_kohm": 118.1,
@@ -302,23 +252,23 @@
     },
     {
      "r_kohm": 94.4,
-     "spikes": 5,
+     "spikes": 2,
      "in": false
     },
     {
      "r_kohm": 94.4,
-     "spikes": 10,
+     "spikes": 9,
      "in": false
     },
     {
      "r_kohm": 75.6,
-     "spikes": 5,
+     "spikes": 15,
      "in": false
     },
     {
      "r_kohm": 75.6,
-     "spikes": 6,
-     "in": false
+     "spikes": 2,
+     "in": true
     },
     {
      "r_kohm": 75.6,
@@ -327,12 +277,12 @@
     }
    ],
    "site_fill": [
-    1.37,
-    1.46,
-    1.22,
-    1.32,
-    1.35,
-    1.3
+    1.3,
+    1.4,
+    1.23,
+    1.21,
+    1.26,
+    1.18
    ],
    "diag": {
     "tol_nm": 0.469,
@@ -372,12 +322,12 @@
     "n_ring": 60,
     "r_nm": 8.950362412195725,
     "planned_deg": [
-     4.7,
-     10.5,
+     4.6,
+     10.4,
      16.2,
      22.0,
      27.8,
-     358.9
+     358.8
     ],
     "gap_deg": [
      4.7,
@@ -388,13 +338,13 @@
      358.9
     ]
    },
-   "e0_mev": -411.79526200022724,
-   "radius_measured_nm": 8.89147825655683,
+   "e0_mev": -411.5167249755591,
+   "radius_measured_nm": 8.857731757634916,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.0003658938723908114,
-    0.3946478670259189
+    -0.0728054338583469,
+    0.2083079285173965
    ],
    "tip_condition": "double"
   },
@@ -607,8 +557,8 @@
    "partial": 1.0,
    "values": {
     "peak_lo_mev": -318.00000000000006,
-    "peak_hi_mev": -176.00000000000006,
-    "radius_nm": 5.765227395710887
+    "peak_hi_mev": -174.00000000000006,
+    "radius_nm": 5.767230718560747
    },
    "truth": {
     "peak_lo_mev": -317.4984825232144,
@@ -617,8 +567,8 @@
    },
    "abs_err": {
     "peak_lo_mev": -0.5015174767856365,
-    "peak_hi_mev": -0.5015174767857502,
-    "radius_nm": 0.04134729808322568
+    "peak_hi_mev": 1.4984825232142498,
+    "radius_nm": 0.0433506209330865
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -629,9 +579,9 @@
    "ring_occupancy": 1.0,
    "gap_sites": 6,
    "radius_nm": 5.723880097627661,
-   "instrument_s": 2612.862410938417,
-   "tip_rounds": 9,
-   "track_lost": 3,
+   "instrument_s": 3814.1745458470145,
+   "tip_rounds": 13,
+   "track_lost": 6,
    "pickups": 0,
    "placed": 6,
    "spares_seen": 6,
@@ -811,47 +761,42 @@
      "in": false
     },
     {
-     "r_kohm": 144.1,
-     "spikes": 15,
-     "in": false
-    },
-    {
-     "r_kohm": 144.1,
-     "spikes": 9,
-     "in": false
-    },
-    {
-     "r_kohm": 144.1,
-     "spikes": 4,
-     "in": false
-    },
-    {
-     "r_kohm": 144.1,
-     "spikes": 10,
-     "in": true
-    },
-    {
-     "r_kohm": 144.1,
+     "r_kohm": 180.1,
      "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 144.1,
+     "spikes": 20,
+     "in": false
+    },
+    {
+     "r_kohm": 144.1,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 144.1,
+     "spikes": 8,
      "in": true
     },
     {
-     "r_kohm": 115.3,
-     "spikes": 2,
-     "in": true
-    },
-    {
-     "r_kohm": 115.3,
+     "r_kohm": 144.1,
      "spikes": 3,
      "in": true
     },
     {
-     "r_kohm": 184.5,
-     "spikes": 1,
+     "r_kohm": 230.6,
+     "spikes": 0,
      "in": false
     },
     {
      "r_kohm": 184.5,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 147.6,
      "spikes": 0,
      "in": false
     },
@@ -862,12 +807,7 @@
     },
     {
      "r_kohm": 147.6,
-     "spikes": 0,
-     "in": false
-    },
-    {
-     "r_kohm": 118.1,
-     "spikes": 5,
+     "spikes": 1,
      "in": false
     },
     {
@@ -876,13 +816,18 @@
      "in": false
     },
     {
-     "r_kohm": 94.4,
-     "spikes": 10,
+     "r_kohm": 118.1,
+     "spikes": 5,
      "in": false
     },
     {
      "r_kohm": 94.4,
-     "spikes": 5,
+     "spikes": 14,
+     "in": false
+    },
+    {
+     "r_kohm": 94.4,
+     "spikes": 3,
      "in": false
     },
     {
@@ -892,12 +837,12 @@
     }
    ],
    "site_fill": [
-    0.91,
+    0.96,
+    1.02,
     1.0,
-    0.99,
     1.01,
-    0.99,
-    1.02
+    1.02,
+    1.04
    ],
    "diag": {
     "tol_nm": 0.375,
@@ -953,13 +898,13 @@
      341.6
     ]
    },
-   "e0_mev": -418.6996287315145,
-   "radius_measured_nm": 5.765227395710887,
+   "e0_mev": -418.72546905756343,
+   "radius_measured_nm": 5.767230718560747,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.037240333214330866,
-    -0.7052459965378431
+    0.010344170947188926,
+    -0.6984717413450228
    ],
    "tip_condition": "blunt"
   },
@@ -1537,18 +1482,18 @@
    "partial": 1.0,
    "values": {
     "peak_lo_mev": -374.00000000000006,
-    "peak_hi_mev": -246.00000000000006,
-    "radius_nm": 5.848429993775432
+    "peak_hi_mev": -248.00000000000006,
+    "radius_nm": 5.829384464198333
    },
    "truth": {
     "peak_lo_mev": -371.62679142022773,
-    "peak_hi_mev": -247.62679142022765,
+    "peak_hi_mev": -245.62679142022765,
     "radius_nm": 5.831813811733345
    },
    "abs_err": {
     "peak_lo_mev": -2.3732085797723244,
-    "peak_hi_mev": 1.6267914202275904,
-    "radius_nm": 0.016616182042087146
+    "peak_hi_mev": -2.3732085797724096,
+    "radius_nm": -0.0024293475350116722
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -1556,19 +1501,19 @@
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "ring_occupancy": 1.0,
+   "ring_occupancy": 0.9743589743589743,
    "gap_sites": 5,
    "radius_nm": 5.831813811733345,
-   "instrument_s": 2124.0507544652837,
-   "tip_rounds": 5,
-   "track_lost": 2,
-   "pickups": 0,
-   "placed": 5,
+   "instrument_s": 2979.702949427994,
+   "tip_rounds": 6,
+   "track_lost": 3,
+   "pickups": 1,
+   "placed": 4,
    "spares_seen": 5,
    "sites": 5,
-   "gap_width_nm": 4.551540823444712,
-   "spacing_nm": 0.9103081646889424,
-   "ring_radius_fit_nm": 5.839216358740654,
+   "gap_width_nm": 4.6587160089989315,
+   "spacing_nm": 0.9317432017997863,
+   "ring_radius_fit_nm": 5.8410356072043745,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -1602,18 +1547,48 @@
     },
     {
      "r_kohm": 131.1,
-     "spikes": 16,
+     "spikes": 10,
      "in": false
     },
     {
      "r_kohm": 131.1,
-     "spikes": 3,
+     "spikes": 8,
+     "in": false
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 0,
      "in": true
     },
     {
      "r_kohm": 131.1,
-     "spikes": 7,
+     "spikes": 5,
      "in": true
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 4,
+     "in": true
+    },
+    {
+     "r_kohm": 131.1,
+     "spikes": 4,
+     "in": true
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 134.2,
+     "spikes": 0,
+     "in": false
     },
     {
      "r_kohm": 209.7,
@@ -1627,68 +1602,63 @@
     },
     {
      "r_kohm": 167.8,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 167.8,
      "spikes": 0,
      "in": false
     },
     {
      "r_kohm": 134.2,
-     "spikes": 3,
+     "spikes": 20,
      "in": false
     },
     {
      "r_kohm": 134.2,
-     "spikes": 1,
-     "in": false
-    },
-    {
-     "r_kohm": 107.4,
-     "spikes": 1,
-     "in": false
-    },
-    {
-     "r_kohm": 107.4,
-     "spikes": 11,
-     "in": false
-    },
-    {
-     "r_kohm": 107.4,
      "spikes": 6,
      "in": true
     },
     {
-     "r_kohm": 171.8,
-     "spikes": 1,
+     "r_kohm": 214.7,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 214.7,
+     "spikes": 0,
      "in": false
     },
     {
      "r_kohm": 171.8,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 3,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 0,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 20,
+     "in": false
+    },
+    {
+     "r_kohm": 110.0,
      "spikes": 2,
-     "in": false
-    },
-    {
-     "r_kohm": 137.4,
-     "spikes": 9,
-     "in": false
-    },
-    {
-     "r_kohm": 137.4,
-     "spikes": 4,
-     "in": false
-    },
-    {
-     "r_kohm": 110.0,
-     "spikes": 10,
-     "in": false
-    },
-    {
-     "r_kohm": 110.0,
-     "spikes": 9,
      "in": true
     },
     {
-     "r_kohm": 175.9,
-     "spikes": 2,
-     "in": false
+     "r_kohm": 110.0,
+     "spikes": 7,
+     "in": true
     },
     {
      "r_kohm": 175.9,
@@ -1702,99 +1672,74 @@
     },
     {
      "r_kohm": 112.6,
-     "spikes": 15,
+     "spikes": 2,
      "in": false
     },
     {
      "r_kohm": 112.6,
-     "spikes": 5,
-     "in": false
-    },
-    {
-     "r_kohm": 112.6,
-     "spikes": 3,
-     "in": true
-    },
-    {
-     "r_kohm": 112.6,
-     "spikes": 8,
-     "in": true
-    },
-    {
-     "r_kohm": 180.1,
-     "spikes": 0,
-     "in": false
-    },
-    {
-     "r_kohm": 144.1,
-     "spikes": 0,
-     "in": false
-    },
-    {
-     "r_kohm": 115.3,
-     "spikes": 0,
-     "in": false
-    },
-    {
-     "r_kohm": 92.2,
      "spikes": 1,
      "in": false
     },
     {
-     "r_kohm": 92.2,
-     "spikes": 12,
+     "r_kohm": 90.1,
+     "spikes": 4,
      "in": false
     },
     {
-     "r_kohm": 73.8,
-     "spikes": 3,
+     "r_kohm": 90.1,
+     "spikes": 18,
      "in": false
     },
     {
-     "r_kohm": 73.8,
-     "spikes": 14,
-     "in": false
-    },
-    {
-     "r_kohm": 73.8,
-     "spikes": 6,
-     "in": true
-    },
-    {
-     "r_kohm": 73.8,
+     "r_kohm": 90.1,
      "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 90.1,
+     "spikes": 8,
      "in": true
     }
    ],
    "site_fill": [
-    1.35,
-    1.1,
-    1.22,
-    1.28,
-    1.22
+    1.07,
+    -0.01,
+    0.89,
+    1.3,
+    1.14
    ],
    "diag": {
     "tol_nm": 0.47,
-    "unheld": [],
+    "unheld": [
+     {
+      "angle_deg": 237.2,
+      "nearest_atom_nm": 0.92
+     }
+    ],
     "moved": [
      {
-      "to_nearest_gap_site_nm": 0.26,
-      "off_circle_nm": 0.16,
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.09,
       "status": "on_surface"
      },
      {
+      "to_nearest_gap_site_nm": 4.08,
+      "off_circle_nm": 3.99,
+      "status": "lost"
+     },
+     {
       "to_nearest_gap_site_nm": 0.26,
-      "off_circle_nm": 0.09,
+      "off_circle_nm": 0.14,
       "status": "on_surface"
      },
      {
       "to_nearest_gap_site_nm": 0.0,
-      "off_circle_nm": -0.08,
-      "status": "on_surface"
-     },
-     {
-      "to_nearest_gap_site_nm": 0.25,
-      "off_circle_nm": 0.15,
+      "off_circle_nm": -0.06,
       "status": "on_surface"
      },
      {
@@ -1806,11 +1751,11 @@
     "n_ring": 39,
     "r_nm": 5.831813811733345,
     "planned_deg": [
-     226.7,
-     235.6,
-     244.6,
-     253.5,
-     262.4
+     226.8,
+     235.9,
+     245.0,
+     254.2,
+     263.3
     ],
     "gap_deg": [
      226.3,
@@ -1820,13 +1765,13 @@
      264.0
     ]
    },
-   "e0_mev": -462.75408247145424,
-   "radius_measured_nm": 5.848429993775432,
+   "e0_mev": -462.2291217775095,
+   "radius_measured_nm": 5.829384464198333,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.1106406406354918,
-    0.6843247453137562
+    -0.12593343864160275,
+    0.6112269524319041
    ],
    "tip_condition": "double"
   },
@@ -3154,9 +3099,9 @@
    "success": true,
    "partial": 1.0,
    "values": {
-    "peak_lo_mev": -382.0,
+    "peak_lo_mev": -384.0,
     "peak_hi_mev": -296.00000000000006,
-    "radius_nm": 7.237551465452526
+    "radius_nm": 7.230501697842029
    },
    "truth": {
     "peak_lo_mev": -384.99812677922745,
@@ -3164,9 +3109,9 @@
     "radius_nm": 7.1959717441539075
    },
    "abs_err": {
-    "peak_lo_mev": 2.998126779227448,
+    "peak_lo_mev": 0.998126779227448,
     "peak_hi_mev": -1.0018732207726657,
-    "radius_nm": 0.041579721298618644
+    "radius_nm": 0.034529953688121395
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -3177,9 +3122,9 @@
    "ring_occupancy": 1.0,
    "gap_sites": 5,
    "radius_nm": 7.1959717441539075,
-   "instrument_s": 2025.4305005427877,
-   "tip_rounds": 5,
-   "track_lost": 2,
+   "instrument_s": 2357.1424037186375,
+   "tip_rounds": 4,
+   "track_lost": 3,
    "pickups": 0,
    "placed": 5,
    "spares_seen": 5,
@@ -3285,12 +3230,12 @@
     },
     {
      "r_kohm": 214.7,
-     "spikes": 8,
+     "spikes": 7,
      "in": true
     },
     {
      "r_kohm": 214.7,
-     "spikes": 3,
+     "spikes": 2,
      "in": true
     },
     {
@@ -3300,17 +3245,7 @@
     },
     {
      "r_kohm": 274.9,
-     "spikes": 1,
-     "in": false
-    },
-    {
-     "r_kohm": 274.9,
      "spikes": 0,
-     "in": false
-    },
-    {
-     "r_kohm": 219.9,
-     "spikes": 3,
      "in": false
     },
     {
@@ -3319,18 +3254,18 @@
      "in": false
     },
     {
-     "r_kohm": 175.9,
-     "spikes": 17,
+     "r_kohm": 219.9,
+     "spikes": 5,
      "in": false
     },
     {
      "r_kohm": 175.9,
-     "spikes": 6,
-     "in": true
+     "spikes": 18,
+     "in": false
     },
     {
      "r_kohm": 175.9,
-     "spikes": 4,
+     "spikes": 9,
      "in": true
     },
     {
@@ -3340,7 +3275,7 @@
     },
     {
      "r_kohm": 225.2,
-     "spikes": 1,
+     "spikes": 6,
      "in": false
     },
     {
@@ -3355,21 +3290,16 @@
     },
     {
      "r_kohm": 180.1,
-     "spikes": 6,
-     "in": false
-    },
-    {
-     "r_kohm": 180.1,
-     "spikes": 9,
+     "spikes": 7,
      "in": true
     }
    ],
    "site_fill": [
-    1.06,
     1.03,
-    1.05,
-    1.0,
-    0.94
+    1.02,
+    0.94,
+    0.99,
+    1.11
    ],
    "diag": {
     "tol_nm": 0.443,
@@ -3391,8 +3321,8 @@
       "status": "on_surface"
      },
      {
-      "to_nearest_gap_site_nm": 0.25,
-      "off_circle_nm": 0.18,
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.03,
       "status": "on_surface"
      },
      {
@@ -3418,13 +3348,13 @@
      303.6
     ]
    },
-   "e0_mev": -448.0495967310187,
-   "radius_measured_nm": 7.237551465452526,
+   "e0_mev": -447.87782120528107,
+   "radius_measured_nm": 7.230501697842029,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.7977246177369809,
-    -0.7999477151448604
+    -0.8164316729111114,
+    -0.7977361878412529
    ],
    "tip_condition": "double"
   },
