@@ -69,6 +69,13 @@ GHOST_MIN = 0.085
 #: where the shallow pokes go and where a pulse is applied, from home (nm)
 POKE_AWAY_NM, PULSE_AWAY_NM = 130.0, 170.0
 MAX_ROUNDS = 20
+#: pokes against row jumps at most, and the instrument time (s) after which no more conditioning
+#: is begun: the budget is 5400 s and a measurement takes ~800 s
+MAX_UNSTABLE_POKES = 3
+CONDITION_UNTIL_S = 3300.0
+#: more peaks than this in the spectra at the centre is not a set of resonances (6 is usual; seed 147's
+#: tip jumped between spectra and gave 30)
+MAX_PEAKS = 12
 #: spectra taken at the centre at most, to have three without a jump
 MAX_SPECTRA = 6
 #: a peak is a resolvable resonance when it stands this far (of the spectrum's range above the band
@@ -279,6 +286,7 @@ class Corral:
         self.L = None
         self.frame = None
         self.tip: dict = {}
+        self.force_poke = False
         self.ignore: set[str] = set()                    # tests of a second apex that proved to be the surface's own
         self._ghosts: list[tuple[str, tuple[float, float], float]] = []
 
@@ -356,6 +364,12 @@ class Corral:
         in the log (``judged``, ``tip_actions``)."""
         rounds, acts = 0, self.log.setdefault("tip_actions", [])
         quick = False
+        if self.force_poke:                              # the last spectra were not a clean set of resonances
+            self.force_poke = False
+            acts.append("poke")
+            self.ops.poke_near(3, away_nm=POKE_AWAY_NM)
+            self.ops.go(*self.centre)
+            rounds += 1
         for k in range(MAX_ROUNDS + 1):
             try:
                 j = self.quick_judge() if quick else None
@@ -368,7 +382,12 @@ class Corral:
                                                       if kk != "centre"})
             if j["verdict"] == "double":
                 self.note_ghost(j)
-            if j["verdict"] == "ok" and not self.ops.unstable():
+            # row jumps that three rounds of pokes did not stop are not the tip's (a surface feature
+            # that steps rows; seeds 122, 146, 159 poked twelve times): or time is running out
+            tired = acts.count("poke") >= MAX_UNSTABLE_POKES or self.ops.now() > CONDITION_UNTIL_S
+            if j["verdict"] == "ok" and (tired or not self.ops.unstable()):
+                if tired and self.ops.unstable():
+                    self.log["unstable_ignored"] = True
                 break
             if k == MAX_ROUNDS:
                 raise RuntimeError("the tip could not be conditioned")
@@ -472,13 +491,17 @@ class Corral:
             raise RuntimeError("the spectra at the centre keep jumping")
         names, curves, sp = [names[k] for k in keep], [curves[k] for k in keep], sps[keep[-1]]
         self.log["spectra_dropped"] = dropped
+        peaks = resonance_peaks(sp["v"], np.median(np.vstack(curves), axis=0), e0)
+        if len(peaks) > MAX_PEAKS:
+            self.log.setdefault("tip_changed", []).append({"at": "spectra", "peaks": len(peaks)})
+            self.force_poke = True
+            return None
         _image(v, ops)
         fv, _ = ops.frame(*centre, 36.0, 360, 0.09)
         jv = ring_verdict(fv, frozenset(self.ignore))
-        if jv["verdict"] != "ok" or ops.unstable():       # it changed while the spectra were taken
+        if jv["verdict"] != "ok" or (ops.unstable() and not self.log.get("unstable_ignored")):       # it changed while the spectra were taken
             self.log.setdefault("tip_changed", []).append({"at": "after the spectra", **{k: v for k, v in jv.items() if k != "centre"}})
             return None
-        peaks = resonance_peaks(sp["v"], np.median(np.vstack(curves), axis=0), e0)
         strong = [p["v"] for p in peaks if p["prominence"] >= PEAK_PROMINENCE] or [p["v"] for p in peaks]
         peaks_v = [p["v"] for p in peaks]
         labels = {2 + k: v for k, v in enumerate(strong[:2])}     # the two lowest resolvable peaks
