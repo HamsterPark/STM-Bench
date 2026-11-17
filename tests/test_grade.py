@@ -452,6 +452,9 @@ def test_text_out_of_the_export_is_clipped_before_a_result_repeats_it(tmp_path):
     _wait_export(path)
     nasty = "scan\n\x1b[31m" + "A" * 5000
     _rewrite(path, lambda recs: recs.append({"i": 1, "kind": "act", "name": nasty, "params": {}, "result": {}}))
+    padded = grade_export(path, P4, 0)                       # beyond session.json's count: left out, not graded
+    assert padded["replay"]["consistent"] and padded["replay"]["records"] == 1 and "beyond the count" in padded["note"]
+    _edit_session(path, records=2)                           # counted, it is a record like any other
     res = grade_export(path, P4, 0)
     (m,) = res["replay"]["result_mismatches"]
     assert m["i"] == 1 and len(m["name"]) <= 120 and len(m["error"]) <= 120
@@ -800,3 +803,55 @@ def test_the_grader_image_copies_what_exists_and_pins_what_the_replay_needs():
     assert 'ENTRYPOINT ["python", "-m", "stmbench.cli"]' in docker and "FROM ${PYTHON_IMAGE}" in docker
     assert "ARG PYTHON_IMAGE=python:3.13-slim" in docker and "pip install --no-deps ." in docker
     assert re.search(r"^USER (?!root)\S+", docker, re.M)
+
+
+# ── an export copied while the console was still writing ─────────────────────
+def _racing_copy(tmp_path):
+    """The runner copies session.json first, the console syncs two more records (a scan with a
+    frame, then a report with its report.json), and the runner copies the other three files.
+    Returns (snapshot, prefix): the mixed copy and the export as it stood at the first copy."""
+    inst = Instrument(P4, 0)
+    exp = ExportWriter(inst, tmp_path / "live")
+    inst.act("wait", seconds=30.0)
+    exp.sync()
+    snap, prefix = tmp_path / "snap", tmp_path / "prefix"
+    shutil.copytree(tmp_path / "live", prefix)
+    snap.mkdir()
+    shutil.copy(tmp_path / "live" / "session.json", snap / "session.json")
+    frame = inst.act("scan", center_x_nm=0.0, center_y_nm=0.0, size_nm=8.0, pixels=32)["frame"]
+    exp.sync()
+    inst.report("target_site", 1.0, x_nm=1.0, y_nm=0.0, frame=frame, evidence=[frame])
+    exp.sync()
+    for name in ("actions.jsonl", "digests.jsonl", "report.json"):
+        shutil.copy(tmp_path / "live" / name, snap / name)
+    return snap, prefix
+
+
+def test_records_beyond_the_count_are_left_out_when_the_copy_raced_the_console(tmp_path):
+    snap, prefix = _racing_copy(tmp_path)
+    raw = read_export(snap)
+    assert raw["session"]["records"] == 1 and len(raw["records"]) == 3 and raw["digests"]     # the race happened
+    got, want = grade_export(snap, P4, 0), grade_export(prefix, P4, 0)
+    assert got["replay"]["consistent"] and got["replay"]["digest_mismatches"] == []
+    assert got["replay"]["records"] == 1 and "2 records beyond the count" in got["note"]
+    for k in ("score", "success", "partial", "claims_verified", "instrument_time_s", "actions"):
+        assert got[k] == want[k], k
+
+
+def test_a_count_above_the_log_is_still_damaged_and_a_torn_last_line_still_left_out(tmp_path):
+    snap, _ = _racing_copy(tmp_path)
+    _edit_session(snap, records=9)
+    with pytest.raises(ExportDamaged, match="counts 9 records"):
+        grade_export(snap, P4, 0)
+    _edit_session(snap, records=3)
+    whole = grade_export(snap, P4, 0)
+    assert whole["replay"]["consistent"] and whole["replay"]["records"] == 3
+    with (snap / "actions.jsonl").open("a", encoding="utf-8") as fh:
+        fh.write('{"i": 3, "kind": "act", "na')
+    cut = grade_export(snap, P4, 0)
+    assert cut["replay"]["torn"] and cut["replay"]["consistent"] and cut["replay"]["records"] == 3
+    # torn and beyond the count together
+    _edit_session(snap, records=1)
+    both = grade_export(snap, P4, 0)
+    assert both["replay"]["torn"] and both["replay"]["consistent"] and both["replay"]["records"] == 1
+    assert "cut off" in both["note"] and "beyond the count" in both["note"]
