@@ -107,14 +107,16 @@ notes: |
   rounding (verify's 1e-8). So the reference's moves, computed from the truth, differ in their last
   bits between the platforms, and some drags turn on them; grading a recorded episode does not.
 
-  No-truth baseline (stmbench/baselines/p7.py: frames and move traces only; job 66916): development
-  seeds 0-29 30/30, held out 451-480 29/30; |R-hat / R½ - 1| p50 2.3 %, p90 4.8 %, max 9.3 % held
-  out; instrument time p50 2355 s, p90 2909 s, max 3206 s. It reads each drag from a short frame
-  after it: on seeds 100-139 (2113 drags, its margin fixed on 0-39) it reads 1.7 % of the misses as
-  carries (atoms that stopped one site short) and 2.4 % of the carries as misses; the move trace
-  alone cannot tell a full carry from a stop one site short (9.8 % false carries). The held-out
-  failure, seed 451, is the baseline's: its first atom walked 6 nm in 32 alternating drags and was
-  taken again as the second one, which the judge refused (`same_atom_as`).
+  No-truth baseline (stmbench/baselines/p7.py: frames and move traces only): development seeds 0-29
+  30/30; held out 481-510 (job 66952, used once, after the fix below) 30/30, |R-hat / R½ - 1| p50
+  2.4 %, p90 5.4 %, max 9.4 %, instrument time p50 2206 s, p90 3250 s, max 5956 s (a blunt tip that
+  lost atoms three times). It reads each drag from a short frame after it: on seeds 100-139 (2113
+  drags, its margin fixed on 0-39) it reads 1.7 % of the misses as carries (atoms that stopped one
+  site short) and 2.4 % of the carries as misses; the move trace alone cannot tell a full carry
+  from a stop one site short (9.8 % false carries). Its first held-out range, 451-480 (job 66916),
+  gave 29/30: in seed 451 the first atom walked 6 nm in 32 alternating drags and was taken again as
+  the second one, which the judge refused (`same_atom_as`). Since then the second atom must be 5 nm
+  from every place the first was found; 451-480 counts as seen.
 
   **What is measured.** The follow law (stmsim.physics.adatoms) decides one hop attempt at a time,
   and no measurement sees a single attempt, so the law's own R_th is not the claim. The claim is a
