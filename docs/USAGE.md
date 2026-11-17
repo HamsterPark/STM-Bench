@@ -243,8 +243,8 @@ manual, the same ledger; and the export directory, written as the episode happen
 The window is laid out for a reader of a screenshot downscaled to about 1280x720. A status strip across
 the top shows the instrument time against the budget, the readings after every action (bias, setpoint,
 Z feedback, current, Z, preamplifier range, tip position, lock-in, oscillation, drift compensation) in the
-units of the fields that set them (bias in V, setpoint and current in pA; `n/a` for a switch the rig does
-not have), and in its last line what runs while the instrument is busy (the call with its parameters, how
+units of the fields that set them (bias in V, setpoint and current in pA; the oscillation reading, and the
+Spectroscopy tab's qPlus oscillation (PLL) group, appear only on a rig with a qPlus sensor, P5), and in its last line what runs while the instrument is busy (the call with its parameters, how
 many wait, and a Cancel queued button that drops the ones that have not started) or else the last result:
 a tick and the instrument's reply, or a cross and its refusal. On the left, tabs Task,
 Manual (the instrument's fixed facts, `Instrument.info()` read once when the window opens: the piezo,
