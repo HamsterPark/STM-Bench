@@ -10,6 +10,7 @@ instrument time it takes (budgets at its p90 times a margin).
     python -m stmbench.cli reference --paper P5 --seeds 30 --jobs 4 --json p5.json
     python -m stmbench.cli reference --paper P3 --seeds 30 --jobs 4
     python -m stmbench.cli reference --paper P4 --seeds 30 --jobs 4
+    python -m stmbench.cli reference --paper P6 --seeds 30 --jobs 16 --json p6.json
 """
 from __future__ import annotations
 
@@ -17,9 +18,9 @@ from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
 
-from . import p3, p4, p5
+from . import p3, p4, p5, p6
 
-PAPERS = {"P3": p3.run, "P4": p4.run, "P5": p5.run}
+PAPERS = {"P3": p3.run, "P4": p4.run, "P5": p5.run, "P6": p6.run}
 
 
 def _one(args: tuple[str, int]) -> dict:

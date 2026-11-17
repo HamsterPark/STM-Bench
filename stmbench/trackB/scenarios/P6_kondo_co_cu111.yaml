@@ -10,7 +10,7 @@ material: Cu(111)
 time_scale: 20
 initial:
   approached: true
-  bias_v: 0.1
+  bias_v: 0.05
   setpoint_a: 100.0e-12
   tip: {radius_nm: 1.0, apex_sigma_nm: 0.08, lambda_per_s: 1.0e-4}
   surface: {contamination: 0.0, adsorbate_density_per_um2: 3.0, terrace_median_nm: 150.0}
@@ -57,13 +57,43 @@ notes: |
   with at least 41 points, covering -20…+20 mV, no jump. The evidence says the two measurements
   took place; it does not say the numbers were fitted from them.
 
-  The tolerances (Γ 15 %, q 0.15, ε_K 1.0 meV) are PROVISIONAL until the privileged reference
-  solution calibrates them (about 2x its p90, never widened to let a baseline pass).
+  Start bias 50 mV (2026-11-17; drafted as 100 mV). On this qPlus rig a poke above 50 mV rings the
+  fork up (stmsim/physics/tip.py, poke): the tip blunts and grows apexes and the adatoms within
+  15 nm are lost. P4 starts at 50 mV, so a poke at the starting bias is harmless there; the 100 mV
+  draft made it a trap that has nothing to do with what P6 measures, and P6 now starts as P4 does.
+  The reference numbers below were measured with the 100 mV start.
 
-  Chance audit (best fixed sheet, exact, seeds 0-299, 2026-11-16, provisional tolerances): Gamma 30.7 %
+  Reference solution (stmbench/reference/p6.py, 2026-11-17, seeds 0-29, results in
+  docs/results/p6_reference_seeds_0-29.json): the truth only navigates (the isolated atom, a bare
+  spot, the leading apex over the atom, the tip's state); Γ, q and ε_K come from measured sweeps
+  through stmbench.analysis.kondo. Protocol settled by measurement on seeds 0-29: travel and
+  condition at 20 mV and 20 pA (a poke at 100 mV rings the sensor up and wipes every adatom within
+  15 nm: before this the target atom was gone on 5 of 10 seeds), two drift frames and lateral and Z
+  compensation, lock-in 3 mV zero-to-peak (fitted as 3 mV: the attenuation is not read), +50 mV and
+  100 pA, six sweeps of -50...+50 mV (201 points, 5 ms settle, 100 ms integration) on the atom and
+  four on a bare spot 2.5 nm away, averaged, divided and fitted. Result: all three claims 28/30
+  seeds (Γ 29, q 29, ε_K 30 each); |error| median / p90 / max: Γ 3.7 % / 11.2 % / 17.3 %, q 0.022 /
+  0.097 / 0.25, ε_K 0.21 / 0.56 / 0.90 meV; instrument time median 423 s, p90 433 s. The two
+  failures are a dirty tip whose apex sat 0.08 nm off the atom (q 0.25 off) and a blunt tip with
+  Γ 17 % high. Conditioning blunt and double tips as well (pulses) made it worse (22/30 all
+  claims; the pulse displaces the apex). What the scenario discriminates, same seeds: the lock-in at
+  the instrument's default 10 mV and 5 ms fitted with the nominal 10 mV kernel reproduces 9/30
+  (Γ 43 %, apparent width 15 % low); the reference without drift compensation 1/30 (the tip slides
+  off the atom). 1 mV instead of 3 mV: 15/30; 2 mV: 26/30; 4 mV: 28/30; 3 mV with 3 + 2 sweeps:
+  23/30; 200 ms integration: 27/30; no Z compensation: 27/30.
+
+  The tolerances (Γ 15 %, q 0.15, ε_K 1.0 meV) are kept as drafted. Twice the reference's p90
+  would be Γ 22 %, q 0.19, ε_K 1.1 meV; the draft values are already 1.3-1.8x p90 and a wider rule
+  would raise the chance figure below, so nothing was widened and nothing tightened (the joint
+  chance sits on its 5 % limit already).
+
+  Chance audit (best fixed sheet, exact, seeds 0-299, 2026-11-16 and again 2026-11-17 with the tolerances kept): Gamma 30.7 %
   (best constant 4.49 meV), q 33.0 % (0.52), eps_K 29.7 % (0.08 meV), all three 5.0 % (design target
-  at most 5 %). The joint figure sits on the limit: the reference solution's calibration may tighten
-  a tolerance, which lowers it, but must not widen one.
+  at most 5 %). The joint figure sits on the limit; the reference solution did not move a tolerance.
+  The limit is met by the estimator, and the chance itself is lower: the three truths are drawn
+  independently, so a fixed sheet passes all three on a fresh seed with probability at most
+  25.1 % x 25 % x 25 % = 1.6 %, while the best of 401^3 sheets picked on the same 300 seeds scores
+  4.3-5.3 % (mean 5.0 %) on 12 simulated sets of 300 independent draws from these ranges.
 success: {kind: claims_verified}
 hidden:
   kondo:

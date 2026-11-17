@@ -149,7 +149,8 @@ ACTIONS: dict[str, ActionSpec] = {s.name: s for s in (
                 _P("settle_ms", "number", "settling time per point (ms)", default=5.0, lo=0.0, hi=1000.0),
                 _P("integration_ms", "number", "integration time per point (ms)", default=5.0, lo=0.0, hi=1000.0),
                 _P("z_offset_nm", "number", "tip offset from the setpoint height, positive = away (nm)", default=0.0, lo=-2.0, hi=5.0),
-                _P("backward", "boolean", "also sweep back", default=True))),
+                _P("backward", "boolean", "also sweep back (takes as long again; only the forward sweep is saved)",
+                   default=True))),
     ActionSpec("zspec", "Take a Z sweep toward the surface at the tip's position (I(z); Δf(z) with the qPlus "
                         "sensor oscillating) and save it.",
                (_P("sweep_nm", "number", "distance swept toward the surface (nm)", default=0.2, lo=0.01, hi=5.0),
@@ -158,7 +159,8 @@ ACTIONS: dict[str, ActionSpec] = {s.name: s for s in (
                 _P("sweeps", "integer", "sweeps averaged", default=1, lo=1, hi=100),
                 _P("settle_ms", "number", "settling time per point (ms)", default=5.0, lo=0.0, hi=1000.0),
                 _P("integration_ms", "number", "integration time per point (ms)", default=5.0, lo=0.0, hi=1000.0),
-                _P("backward", "boolean", "also sweep back", default=True))),
+                _P("backward", "boolean", "also sweep back (takes as long again; only the forward sweep is saved)",
+                   default=True))),
     ActionSpec("pll", "Switch the qPlus oscillation (PLL output with amplitude control) on or off; on, the "
                       "oscillation rings up and the frequency shift is re-zeroed where the tip is.",
                (_P("on", "boolean", "true = oscillating", True),
