@@ -10,7 +10,7 @@ material: Cu(111)
 time_scale: 20
 initial:
   approached: true
-  bias_v: 0.1
+  bias_v: 0.05
   setpoint_a: 100.0e-12
   tip: {radius_nm: 1.0, apex_sigma_nm: 0.08, lambda_per_s: 1.0e-4}
   surface: {contamination: 0.0, adsorbate_density_per_um2: 3.0, terrace_median_nm: 150.0}
@@ -56,6 +56,12 @@ notes: |
   0.15 nm of its centre) and one on the clean surface (the nearest atom at least 2 nm away), each
   with at least 41 points, covering -20…+20 mV, no jump. The evidence says the two measurements
   took place; it does not say the numbers were fitted from them.
+
+  Start bias 50 mV (2026-11-17; drafted as 100 mV). On this qPlus rig a poke above 50 mV rings the
+  fork up (stmsim/physics/tip.py, poke): the tip blunts and grows apexes and the adatoms within
+  15 nm are lost. P4 starts at 50 mV, so a poke at the starting bias is harmless there; the 100 mV
+  draft made it a trap that has nothing to do with what P6 measures, and P6 now starts as P4 does.
+  The reference numbers below were measured with the 100 mV start.
 
   Reference solution (stmbench/reference/p6.py, 2026-11-17, seeds 0-29, results in
   docs/results/p6_reference_seeds_0-29.json): the truth only navigates (the isolated atom, a bare
