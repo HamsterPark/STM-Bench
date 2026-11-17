@@ -61,14 +61,14 @@ notes: |
   fork up (stmsim/physics/tip.py, poke): the tip blunts and grows apexes and the adatoms within
   15 nm are lost. P4 starts at 50 mV, so a poke at the starting bias is harmless there; the 100 mV
   draft made it a trap that has nothing to do with what P6 measures, and P6 now starts as P4 does.
-  The reference numbers below were measured with the 100 mV start.
 
-  Reference solution (stmbench/reference/p6.py, 2026-11-17, seeds 0-29, results in
+  Reference solution (stmbench/reference/p6.py, 2026-11-17, re-measured with the 50 mV start: identical
+  to the numbers with the drafted 100 mV start, as the reference sets 20 mV itself; seeds 0-29, results in
   docs/results/p6_reference_seeds_0-29.json): the truth only navigates (the isolated atom, a bare
   spot, the leading apex over the atom, the tip's state); Γ, q and ε_K come from measured sweeps
   through stmbench.analysis.kondo. Protocol settled by measurement on seeds 0-29: travel and
-  condition at 20 mV and 20 pA (a poke at 100 mV rings the sensor up and wipes every adatom within
-  15 nm: before this the target atom was gone on 5 of 10 seeds), two drift frames and lateral and Z
+  condition at 20 mV and 20 pA (kept as a precaution; at the drafted 100 mV a poke rings the sensor up and wipes every adatom within
+  15 nm, and the target atom was gone on 5 of 10 seeds), two drift frames and lateral and Z
   compensation, lock-in 3 mV zero-to-peak (fitted as 3 mV: the attenuation is not read), +50 mV and
   100 pA, six sweeps of -50...+50 mV (201 points, 5 ms settle, 100 ms integration) on the atom and
   four on a bare spot 2.5 nm away, averaged, divided and fitted. Result: all three claims 28/30

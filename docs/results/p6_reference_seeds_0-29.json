@@ -3,7 +3,7 @@
  "scenario": "P6_kondo_co_cu111",
  "seeds": "0-29",
  "date": "2026-11-17",
- "code": "bench/p6-reference (merge of bench/p6-proto f977bee), stmbench.reference.p6 / p6_calibrate, run locally through the heavy-job gate",
+ "code": "bench/p6-reference (merge of bench/p6-proto 96271e0, start bias 50 mV), stmbench.reference.p6 / p6_calibrate, run locally through the heavy-job gate",
  "protocol": {
   "amplitude_mv": 3.0,
   "fit_amplitude_mv": 3.0,

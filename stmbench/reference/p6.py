@@ -13,7 +13,8 @@ scenario's notes have the numbers and the variants that were measured):
 
 1. the isolated Co atom nearest the scan origin (no other atom within 3 nm, ≥ 1.5 nm from a step,
    a bare spot ≥ 2.5 nm away on its terrace);
-2. travel and conditioning at 20 mV and 20 pA. At the scenario's 100 mV a conditioning poke rings the
+2. travel and conditioning at 20 mV and 20 pA (a precaution since the scenario starts at 50 mV; at the
+   100 mV it was first drafted with, a conditioning poke rings the
    qPlus sensor up and sprays clusters that wipe every adatom within 15 nm (``World._apply_poke_outcome``;
    P5 pokes at 20 mV for the same reason): the first version lost the target atom on 5 of 10 seeds.
    An unstable tip, or one carrying an adsorbate, is poked on bare surface ~10 nm away. Blunt and
