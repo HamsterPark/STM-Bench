@@ -3,7 +3,7 @@
  "scenario": "P6_kondo_co_cu111",
  "seeds": "0-29",
  "date": "2026-11-17",
- "code": "bench/p6-reference (merge of bench/p6-proto f977bee), stmbench.reference.p6 / p6_calibrate, run locally through the heavy-job gate",
+ "code": "bench/p6-reference (merge of bench/p6-proto c357ddf, start bias 50 mV, etched tip), stmbench.reference.p6 / p6_calibrate, run locally through the heavy-job gate",
  "protocol": {
   "amplitude_mv": 3.0,
   "fit_amplitude_mv": 3.0,
@@ -16568,9 +16568,9 @@
     "claims": {
      "gamma_mev": {
       "relative": true,
-      "pass_rate": 0.896551724137931,
+      "pass_rate": 0.9310344827586207,
       "err_median": 0.0378808331793683,
-      "err_p90": 0.1491805740097116,
+      "err_p90": 0.1461515694542363,
       "err_max": 0.5121556781302152,
       "signed_median": -0.027936270239457328
      },
@@ -16593,7 +16593,7 @@
     },
     "instrument_s": {
      "median": 432.6608218691658,
-     "p90": 468.13721476256853
+     "p90": 471.504986491013
     }
    }
   },

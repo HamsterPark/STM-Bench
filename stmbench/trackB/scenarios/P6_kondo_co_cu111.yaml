@@ -61,14 +61,16 @@ notes: |
   fork, so a poke at the starting bias rang the fork up (blunted tip, extra apexes, adatoms within
   15 nm lost): a trap unrelated to what P6 measures. P6 now starts at 50 mV and 100 pA, as P4
   does, and the reference-stm rig's tip is an etched W wire for every STM scenario (docs/DESIGN.md,
-  2026-11-17). The reference numbers below were measured with the qPlus form and the 100 mV start.
+  2026-11-17).
 
-  Reference solution (stmbench/reference/p6.py, 2026-11-17, seeds 0-29, results in
+  Reference solution (stmbench/reference/p6.py, 2026-11-17, re-measured with the 50 mV start and the etched tip: identical
+  for the reference and both contrasts to the numbers with the drafted qPlus form and 100 mV start, as
+  the reference sets 20 mV itself and never pokes above it; seeds 0-29, results in
   docs/results/p6_reference_seeds_0-29.json): the truth only navigates (the isolated atom, a bare
   spot, the leading apex over the atom, the tip's state); Γ, q and ε_K come from measured sweeps
   through stmbench.analysis.kondo. Protocol settled by measurement on seeds 0-29: travel and
-  condition at 20 mV and 20 pA (a poke at 100 mV rings the sensor up and wipes every adatom within
-  15 nm: before this the target atom was gone on 5 of 10 seeds), two drift frames and lateral and Z
+  condition at 20 mV and 20 pA (kept as a precaution; at the drafted 100 mV a poke rings the sensor up and wipes every adatom within
+  15 nm, and the target atom was gone on 5 of 10 seeds), two drift frames and lateral and Z
   compensation, lock-in 3 mV zero-to-peak (fitted as 3 mV: the attenuation is not read), +50 mV and
   100 pA, six sweeps of -50...+50 mV (201 points, 5 ms settle, 100 ms integration) on the atom and
   four on a bare spot 2.5 nm away, averaged, divided and fitted. Result: all three claims 28/30
