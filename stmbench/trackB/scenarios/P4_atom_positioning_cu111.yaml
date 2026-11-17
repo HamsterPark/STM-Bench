@@ -221,3 +221,10 @@ notes: |
   the hop count on the same physics; four were slower (seeds 464, 469, 484 and 519, by 56–361 s:
   in 464 a short drag in which nothing hopped read as a hop, in 469 13 hops read as 14, and the
   drags that followed differed; 484 and 519 were not looked into) and none failed.
+
+  **The rig's tip is an etched W wire, not a qPlus fork (2026-11-17, decided by the user).** A poke
+  above 50 mV no longer rings a fork up, and a reshaping pulse leaves a better tip with probability 0.55
+  instead of 0.50; the worlds at the start (layout, hidden draws, random streams) are unchanged.
+  The reference and baseline numbers above were measured with the qPlus form and are re-run on the new physics; a ledger
+  recorded before this with a high-bias poke does not replay with this code, and one with a pulse
+  may not (docs/DESIGN.md, 2026-11-17).

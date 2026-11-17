@@ -12,7 +12,7 @@ initial:
   approached: true
   bias_v: 0.05
   setpoint_a: 100.0e-12
-  tip: {form: etched, radius_nm: 1.0, apex_sigma_nm: 0.08, lambda_per_s: 1.0e-4}
+  tip: {radius_nm: 1.0, apex_sigma_nm: 0.08, lambda_per_s: 1.0e-4}
   surface: {contamination: 0.0, adsorbate_density_per_um2: 3.0, terrace_median_nm: 150.0}
   adatoms: {layout: single, species: Co, target_dx_nm: 4.0, field_per_100nm2: 0.3, field_half_nm: 150}
   kondo: {species: Co}
@@ -57,14 +57,11 @@ notes: |
   with at least 41 points, covering -20…+20 mV, no jump. The evidence says the two measurements
   took place; it does not say the numbers were fitted from them.
 
-  Tip: an etched W wire, no qPlus fork (initial.tip.form: etched, 2026-11-17). The rig's default
-  tip form is qplus (the lab instrument it models), while this instrument has no qPlus sensor for
-  the agent (info shows none, pll is refused); the form only matters through a poke above 50 mV,
-  which rings a fork up (stmsim/physics/tip.py, poke: blunted tip, extra apexes, adatoms within
-  15 nm lost), and a pulse's odds of improving the tip (0.50 with a fork, 0.55 without). A pure
-  STM measurement needs no fork, and the 100 mV start of the draft turned any poke into a trap
-  unrelated to what P6 measures. P6 now starts at 50 mV and 100 pA, as P4 does, with an etched tip.
-  The reference numbers below were measured with the qPlus form and the 100 mV start.
+  Start and tip (2026-11-17). The draft started at 100 mV while the rig's tip still sat on a qPlus
+  fork, so a poke at the starting bias rang the fork up (blunted tip, extra apexes, adatoms within
+  15 nm lost): a trap unrelated to what P6 measures. P6 now starts at 50 mV and 100 pA, as P4
+  does, and the reference-stm rig's tip is an etched W wire for every STM scenario (docs/DESIGN.md,
+  2026-11-17). The reference numbers below were measured with the qPlus form and the 100 mV start.
 
   Reference solution (stmbench/reference/p6.py, 2026-11-17, seeds 0-29, results in
   docs/results/p6_reference_seeds_0-29.json): the truth only navigates (the isolated atom, a bare

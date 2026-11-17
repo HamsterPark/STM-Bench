@@ -105,7 +105,7 @@ class World:
                                herringbone=herringbone, surface_state=surface_state,
                                terrace_median_m=terrace_median_m)
         self.tip = tip or Tip(material=self.rig.get("tip.material", "W"),
-                              form=self.rig.get("tip.form", "qplus"),
+                              form=self.rig.get("tip.form", "etched"),
                               rng=np.random.default_rng(seed + 1))
         if self.tip.apex_radius_ref_m < 0:      # apex smearing never sampled: draw it now
             self.tip._refresh_apex(self.tip.rng)

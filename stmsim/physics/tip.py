@@ -69,7 +69,7 @@ class TipEvent:
 @dataclass
 class Tip:
     material: str = "W"
-    form: str = "qplus"               # etched | cut | qplus
+    form: str = "etched"              # etched | cut | qplus (qplus only where a rig or scenario says so)
     apexes: list[Apex] = field(default_factory=lambda: [Apex(0.0, 0.0, 0.0, 1.0)])
     radius_m: float = 2e-9
     apex_sigma_m: float = 0.08e-9     # lateral smearing of the terminating apex atom (atomic contrast)
