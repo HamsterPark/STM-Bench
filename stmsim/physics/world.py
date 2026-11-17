@@ -1146,7 +1146,9 @@ class World:
                    "df_span_beyond_min_pm": span_beyond,
                    "i_max_a": float(np.nanmax(np.abs(i))) if np.any(np.isfinite(i)) else 0.0,
                    "contact": bool(np.any(contact)), "retract_abort": retract_abort,
-                   "jump": jump, "path": None}
+                   "jump": jump, "path": None,
+                   # a force spectrum needs the sensor oscillating; the judge reads this flag
+                   "oscillating": bool(self.pll is not None and self.pll.output_on)}
             self.zspec_last = {**rec, "z_rel": z_rel, "df": df, "i": i, "amp": amp,
                                "z_n": self.z_ctrl_from_tip(z_tip)}
             self.zspec_records.append(dict(rec))

@@ -160,6 +160,17 @@ def test_too_few_drags_are_refused():
     assert _reason(records, reports)[0] == "too_few_drags"
 
 
+def test_a_drag_cited_twice_counts_once():
+    """One move trace named again (its file name beside ``move:N``, or ``move:N`` twice) is one drag:
+    seven drags cited nine ways are still too few."""
+    records, reports = two_atoms()
+    seven = reports[C1][1][:7]
+    reports[C1] = (200.0, seven + [f"Move-Trace{seven[0]:05d}.dat", seven[1]])
+    reason, ev = _reason(records, reports)
+    assert reason == "too_few_drags" and ev["n_qualifying"] == 7
+    assert verdict(records, reports).details["claims"][C1]["n_distinct_cited"] == 7
+
+
 def test_too_few_distinct_resistances_are_refused():
     """Eight drags at three resistances are three values; at two, two; and values within 2 % of the first
     of their group are one value."""

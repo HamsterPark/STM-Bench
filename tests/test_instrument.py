@@ -284,6 +284,47 @@ def test_force_spectroscopy_through_the_instrument_reproduces_p5():
     assert out["success"], {k: (d["value_ok"], d["evidence"]) for k, d in det.items()}
 
 
+@pytest.mark.parametrize("oscillating", [True, False])
+def test_force_spectra_taken_without_the_oscillation_are_not_evidence(oscillating):
+    """The reference run of the test above, with the PLL switched off (or never on) before the
+    pair is taken: the instrument still saves curves, but their Δf is noise, so the evidence
+    fails. The value (the truth itself) is right either way."""
+    inst = Instrument(P5, 0)                             # fixed seed: the result is deterministic
+    w = inst.world
+    reg = w.surface.site.adatoms
+    atom = min(reg.atoms.values(), key=lambda a: math.hypot(*reg.site_xy(a.i, a.j, a.sub)))
+    inst.act("pll", on=True, amplitude_pm=50.0)
+    if not oscillating:
+        inst.act("pll", on=False)
+
+    def go(sx, sy):
+        ox, oy, _ = w.drift_offset(w.clock.sim())
+        inst.act("move_tip", x_nm=(sx - ox) * 1e9, y_nm=(sy - oy) * 1e9)
+
+    ax, ay = reg.site_xy(atom.i, atom.j, atom.sub)
+    go(ax, ay)
+    on_atom = inst.act("zspec", sweep_nm=0.5, z_offset_nm=0.3, points=256)["spectrum"]
+    go(ax + 6e-9, ay)
+    clean = inst.act("zspec", sweep_nm=0.5, z_offset_nm=0.3, points=256)["spectrum"]
+    truth = w.truth()
+    for c in inst.scenario.claims:
+        inst.report(c["id"], float(truth["force"][c["truth"].split(".", 1)[1]]), evidence=[on_atom, clean])
+    out = inst.finish()
+    det = inst.verdict.details["claims"]
+    assert all(d["value_ok"] for d in det.values())
+    # judged evidence, not the flag: at 39fcd13 the noise-only pair passed (seed 0: 5 of seeds 0-5 did)
+    assert {k: d["evidence_ok"] for k, d in det.items()} == {k: oscillating for k in det},         {k: d["evidence"] for k, d in det.items()}
+    assert out["success"] is oscillating
+
+
+def test_the_oscillation_flag_is_not_in_the_events_digest():
+    """The flag is for the judge only: a ledger written before it existed still verifies."""
+    from stmbench.instrument.core import _portable_events
+    ev = [{"kind": "zspec", "idx": 1, "oscillating": True, "path": "/a/z.dat"}, {"kind": "sts", "idx": 1}]
+    assert _portable_events(ev) == [{"kind": "zspec", "idx": 1, "path": "z.dat"}, {"kind": "sts", "idx": 1}]
+    assert "oscillating" in ev[0]                        # the live event is untouched
+
+
 def test_validate_fills_defaults_and_keeps_types():
     p = validate(ACTIONS["scan"], {"center_x_nm": 1, "center_y_nm": 2, "size_nm": 10})
     assert p["pixels"] == 256 and isinstance(p["center_x_nm"], float) and p["direction"] == "down"

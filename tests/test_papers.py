@@ -170,9 +170,11 @@ def _all_evidence() -> list[dict]:
             "sx_m": i * 1e-9, "sy_m": 0.0, "near_kind": "step", "near_nm": 2.0 + i,
             "corral_centre_dist_nm": 0.2} for i in range(10)]
     zspec = [{"kind": "zspec", "sim_s": 30.0, "near_kind": "adatom", "near_nm": 0.05,
-              "jump": False, "contact": False, "df_span_beyond_min_pm": 120.0},
+              "jump": False, "contact": False, "df_span_beyond_min_pm": 120.0,
+              "oscillating": True},
              {"kind": "zspec", "sim_s": 31.0, "near_kind": "none", "near_nm": 9.0,
-              "jump": False, "contact": False, "df_span_beyond_min_pm": 120.0}]
+              "jump": False, "contact": False, "df_span_beyond_min_pm": 120.0,
+              "oscillating": True}]
     hop = {"kind": "adatom_hop", "cause": "folme", "sim_s": 5.0}
     return [frame, hop, *sts, *zspec]
 
