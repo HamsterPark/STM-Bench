@@ -248,9 +248,9 @@ def test_zspec_pair_evidence():
                           "background": {"near_nm_min": 2.0, "min_n": 1}}}
     truth = {"force": {"f_min_pn": -168.0}}
     on_atom = {"kind": "zspec", "sim_s": 1.0, "near_kind": "adatom", "near_nm": 0.05,
-               "jump": False, "contact": False, "df_span_beyond_min_pm": 90.0}
+               "jump": False, "contact": False, "df_span_beyond_min_pm": 90.0, "oscillating": True}
     bg = {"kind": "zspec", "sim_s": 2.0, "near_kind": "none", "near_nm": 9.0,
-          "jump": False, "contact": False, "df_span_beyond_min_pm": 80.0}
+          "jump": False, "contact": False, "df_span_beyond_min_pm": 80.0, "oscillating": True}
     assert judge("claims_verified", truth, claims=[claim], report=_report(f_min_pn=-160.0),
                  events=[on_atom, bg]).success
     # without the clean-surface curve there is no background to subtract
@@ -343,3 +343,29 @@ def test_a_place_is_mapped_through_the_apex_that_imaged_its_row():
     # a frame from before the apex was recorded maps through the drift alone
     old = {k: v for k, v in fr.items() if k != "apex_runs_nm"}
     assert to_sample_frame(old, 0.0, -4.0) == pytest.approx((0.0, -4.0))
+
+
+def test_zspec_pair_needs_the_oscillation_on_for_every_curve():
+    """With the PLL off a "Δf(z)" curve is noise, and the distance past its noisy minimum can
+    pass the span threshold by chance: only a curve taken with the sensor oscillating counts, on
+    the atom and on the background, and a record without the flag counts as not oscillating."""
+    claim = {"id": "f_min_pn", "kind": "scalar", "tol": {"rel": 0.15}, "truth": "force.f_min_pn",
+             "evidence": {"kind": "zspec_pair",
+                          "adatom": {"near_kind": "adatom", "near_nm_max": 0.15, "min_n": 1,
+                                     "df_span_beyond_min_pm_min": 50},
+                          "background": {"near_nm_min": 2.0, "min_n": 1}}}
+    truth = {"force": {"f_min_pn": -168.0}}
+    on_atom = {"kind": "zspec", "sim_s": 1.0, "near_kind": "adatom", "near_nm": 0.05, "jump": False,
+               "contact": False, "df_span_beyond_min_pm": 90.0, "oscillating": True}
+    bg = {"kind": "zspec", "sim_s": 2.0, "near_kind": "none", "near_nm": 9.0, "jump": False,
+          "contact": False, "df_span_beyond_min_pm": 80.0, "oscillating": True}
+
+    def ok(a, b):
+        return judge("claims_verified", truth, claims=[claim], report=_report(f_min_pn=-160.0),
+                     events=[a, b]).success
+
+    assert ok(on_atom, bg)
+    assert not ok({**on_atom, "oscillating": False}, bg)
+    assert not ok(on_atom, {**bg, "oscillating": False})
+    assert not ok({k: v for k, v in on_atom.items() if k != "oscillating"}, bg)
+    assert not ok(on_atom, {k: v for k, v in bg.items() if k != "oscillating"})

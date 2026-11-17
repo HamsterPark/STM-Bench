@@ -261,3 +261,28 @@ def test_every_rules_version_from_1_on_is_judged_by_the_same_rules():
     versions = sorted({1, 2, RULES_VERSION})
     assert [_battery(v) for v in versions] == [[False, False, True, False]] * len(versions)
     assert _battery(0) == [True, True, True, True]
+
+
+def test_one_acquisition_named_several_times_counts_once():
+    """``min_n`` counts acquisitions: ``sts:1``, its .dat name and a repeat are one spectrum
+    (external review of 39fcd13: one spectrum cited eight times passed ``min_n`` 8). Naming a
+    frame both as ``frame`` and in ``evidence`` is still one frame, and still fine."""
+    rule = {"kind": "spectra_near_scatterer", "min_n": 2, "min_positions": 1, "near_nm": 8.0,
+            "min_points": 64, "v_lo_max": -0.5, "v_hi_min": 0.1}
+    claim = {"id": "e0_mev", "kind": "scalar", "tol": {"abs": 15}, "truth": "surface_state.e0_mev",
+             "evidence": rule}
+    sts = [{"kind": "sts", "sim_s": 5.0 + i, "idx": i + 1, "n": 200, "v0": -0.6, "v1": 0.4, "jump": False,
+            "sx_m": 0.0, "sy_m": 0.0, "near_kind": "step", "near_nm": 2.0} for i in range(2)]
+    events = sts + [{"kind": "dat_saved", "sim_s": 5.1, "path": "/d/BiasSpec001.dat", "sts_idx": 1}]
+    truth = {"surface_state": {"e0_mev": -440.0}}
+    for cited, ok, n in ((["sts:1", "sts:1", "BiasSpec001.dat"], False, 1),
+                         (["sts:1", "BiasSpec001.dat", "sts:2"], True, 2)):
+        v = judge("claims_verified", truth, claims=[claim], events=events,
+                  report=_report("e0_mev", -438.0, evidence=cited), rules_version=1)
+        info = v.details["claims"]["e0_mev"]
+        assert v.success is ok, cited
+        assert info["cited"] == cited and info["n_distinct_cited"] == n
+    # the same frame as ``frame`` and in ``evidence``: one frame, not a failure
+    v = judge("claims_verified", {"herringbone": {"period_nm": 6.4}}, claims=[_period_claim()], events=[FRAME],
+              report=_report("period_nm", 6.5, evidence=["sim001.sxm"], frame="sim001.sxm"), rules_version=1)
+    assert v.success and v.details["claims"]["period_nm"]["n_distinct_cited"] == 1
