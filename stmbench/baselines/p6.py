@@ -230,6 +230,12 @@ def candidates(frame: dict, atoms, obstacles=None, *, avoid=(), why: dict | None
     return [(c[1], c[2]) for c in out]
 
 
+def bare_from(atom, bare, here) -> tuple[float, float]:
+    """The bare patch chosen in a survey beside ``atom``, where it is now that the atom is at
+    ``here``: the same offset from it."""
+    return (float(here[0]) + float(bare[0]) - float(atom[0]), float(here[1]) + float(bare[1]) - float(atom[1]))
+
+
 def bare_spot(frame: dict, atoms, obstacles, near) -> tuple[float, float] | None:
     """Bare terrace of a survey nearest ``near`` for the check of the tip: clear of every bump
     and step. ``None`` when the survey has none."""
@@ -316,14 +322,15 @@ class Bench:
 
     def clear_bare(self, spot, atom, *, need_nm: float = 2.8) -> tuple[float, float]:
         """The bare patch as an image shows it now: an 8 nm frame about ``spot``; a bump closer than
-        ``need_nm`` (the judge asks for 2 nm; dev3 seed 6 had its reference sweeps 1.84 nm from an
-        atom the survey, taken with an unstable tip, had not shown) moves the patch to ``need_nm``
-        + 0.5 nm from it, away from it, and the frame is taken again, twice at most. The bumps are
-        all of them, compact or not, and the atom being measured is not one."""
+        ``need_nm`` (the judge asks for 2 nm from every atom, the one measured included) moves the
+        patch to ``need_nm`` + 0.5 nm from it, away from it, and the frame is taken again, twice
+        at most. The bumps are all of them, compact or not. ``atom`` is where the atom is now:
+        the 8 nm frame about the patch need not show it."""
         spot = (float(spot[0]), float(spot[1]))
         for _ in range(3):
             f, _ = self.ops.frame(spot[0], spot[1], 8.0, 80, SLOW_LINE_S)
             near = [a for a in locate(f, compact_frac=1.0) if math.hypot(a[0] - atom[0], a[1] - atom[1]) > 1.5]
+            near.append((float(atom[0]), float(atom[1]), 0.0))
             if not near:
                 return spot
             a = min(near, key=lambda b: math.hypot(b[0] - spot[0], b[1] - spot[1]))
@@ -473,7 +480,10 @@ def _measure(bench: Bench, atom, bare, comp, log: dict) -> dict | None:
         on_atom.append(bench.sweep(here, -WINDOW_V, WINDOW_V, POINTS, INTEG_MS))
     if len(on_atom) < 3:
         raise RuntimeError("the budget ran out before three sweeps on the atom")
-    bare = bench.clear_bare(bare, here)
+    # the bare patch was worked out in the survey's coordinates, and the sample has drifted since
+    # (dev3/dev4 seed 6: 1.7 nm, the patch ended 1.84 nm from the atom): it keeps its offset
+    # from the atom as the atom is now
+    bare = bench.clear_bare(bare_from(atom, bare, here), here)
     bare_sw = [bench.sweep(bare, -WINDOW_V, WINDOW_V, POINTS, INTEG_MS) for _ in range(N_BARE)]
     # sweeps whose current stepped (the tip changed inside them) are left out
     vv = on_atom[0]["v"]
