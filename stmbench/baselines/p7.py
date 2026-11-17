@@ -137,7 +137,7 @@ class Puller:
         self.spent["frame_after"] += self.ops.now() - t3
         atom = find_atom(f, pos, tip_end)
         return {"trace": r["trace"], "r_ohm": float(r_ohm), "sign": float(sign), "start": tuple(pos),
-                "end": tip_end, "atom": atom, "read": read_carry(spectrum, end=tip_end, atom=atom)}
+                "end": tip_end, "atom": atom, "read": read_carry(spectrum, end=tip_end, atom=atom, framed=True)}
 
 
 def fit_logistic(r_ohm, carried) -> dict | None:
@@ -337,6 +337,13 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
             inst.report(cid, val, unit="kΩ", evidence=ev)
     out = inst.finish()
     det = (inst.verdict.details or {}).get("claims", {})
+    # after the episode, the judge's record of each drag against what the reader said of it
+    records = {int(r["index"]): r for r in inst.world.drag_records}
+    for s in (got["series"] if got else []):
+        for d in s.drags:
+            r = records.get(int(inst.spectra[d["trace"]]["index"]))
+            d["followed"] = None if r is None else bool(r["followed"])
+            d["start_dist_nm"] = None if r is None else r.get("start_dist_nm")
     rows = {}
     for cid in ("r_pull_1_kohm", "r_pull_2_kohm"):
         c = det.get(cid, {})
@@ -344,7 +351,11 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
                      "truth": c.get("truth"), "evidence": c.get("evidence")}
     series = [] if got is None else [{"drags": len(s.drags), "estimate_kohm": s.estimate()["r_ohm"] / 1e3 if s.estimate() else None,
                                       "r_kohm": [round(d["r_ohm"] / 1e3, 1) for d in s.drags],
-                                      "carried": [d["read"]["carried"] for d in s.drags]} for s in got["series"]]
+                                      "carried": [d["read"]["carried"] for d in s.drags],
+                                      "followed": [d["followed"] for d in s.drags],
+                                      "misread": sum(1 for d in s.drags if d["read"]["carried"] != d["followed"]),
+                                      "start_dist_nm": [None if d["start_dist_nm"] is None else round(d["start_dist_nm"], 3) for d in s.drags]}
+                                     for s in got["series"]]
     return {"paper": "P7", "seed": int(seed), "success": bool(out["success"]), "partial": float(out.get("partial", 0.0)),
             "error": error, "claims_ok": {k: bool(c.get("value_ok")) and bool(c.get("evidence_ok", True)) for k, c in det.items()},
             "claims": rows, "reported_kohm": None if got is None else got["r_kohm"], "series": series,

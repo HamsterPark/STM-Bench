@@ -36,10 +36,12 @@ PATH_BAND_NM = 1.3
 #: what is added to the radius for the frame's reading. A carried atom sits 0.10 nm from the end point
 #: at the median (behind the apex: it hops when the apex is 0.6 spacings ahead), up to the radius by
 #: definition, and a frame places it to about 0.06 nm per axis; one dropped at the last site is 0.16-0.3
-#: nm short. Against the judge's record (2245 drags, 40 seeds, 5 nm / 50 px frames, 2026-11-17) the
-#: radius alone read 96 of 1202 carries as drops and 1 of 1043 misses as carried; 0.165 gave 45 and 9,
-#: 0.18 gave about 19 and 18, 0.21 gave 7 and 35: the two populations touch, and the middle is taken.
-FRAME_MARGIN_NM = 0.027
+#: nm short. Against the judge's record (2026-11-17, seeds 0-39, 60 drags each, ~2200 drags each time):
+#: with 5 nm / 50 px frames the radius alone read 96 of 1202 carries as drops and 1 of 1043 misses as
+#: carried, 0.18 gave about 19 and 18, 0.21 gave 7 and 35; with the baseline's 3.2 nm / 32 px frames
+#: (0.1 nm per pixel) 0.153 gave 83 of 1204 and 4 of 1014, 0.165 gave 31 and 12, 0.17 gave 21 and 15,
+#: 0.18 gave 9 and 23 (false drops, false carries). The two populations touch and 0.168 balances them.
+FRAME_MARGIN_NM = 0.015
 #: trace fallback: Z over the last samples against the first (pm). A carried atom is under the tip at
 #: both ends, so Z rises or holds (+8 pm median, the lattice ripple and the tip's drift); an atom left
 #: behind makes it fall (median -30 pm). Nothing here is exact: see the checks.
@@ -77,17 +79,21 @@ def find_atom(frame: dict, start, end, *, band_nm: float = PATH_BAND_NM) -> tupl
     return best
 
 
-def read_carry(spectrum: dict | None, *, end, atom=None) -> dict:
+def read_carry(spectrum: dict | None, *, end, atom=None, framed: bool = False) -> dict:
     """What a drag did: ``{"carried": bool | None, "how": "frame" | "trace" | None, "end_offset_nm":
     float | None, "fall_pm": float | None}``.
 
     ``end``: where the tip stopped (scan coordinates, nm); ``atom``: where the after-frame put the
     atom (:func:`find_atom`), or ``None`` for no frame or no atom found. With an atom the verdict is
     its distance from ``end`` against :data:`CARRY_RADIUS_NM`; without one it is the trace's fall,
-    and ``None`` (unreadable) when that is missing too."""
+    and ``None`` (unreadable) when that is missing too. ``framed``: a frame was taken and showed no
+    atom on the path, so the atom is not at the end (it is on the tip): not carried, whatever the
+    trace says (a lifted atom steps Z down by its height, and a trace that ends high can follow it)."""
     fall = None if spectrum is None else trace_fall_pm(spectrum)
     out = {"carried": None, "how": None, "end_offset_nm": None, "fall_pm": fall}
-    if atom is not None:
+    if atom is None and framed:
+        out.update(carried=False, how="frame")
+    elif atom is not None:
         off = math.hypot(atom[0] - end[0], atom[1] - end[1])
         out.update(carried=bool(off <= CARRY_RADIUS_NM + FRAME_MARGIN_NM), how="frame", end_offset_nm=float(off))
     elif fall is not None:
