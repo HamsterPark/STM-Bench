@@ -80,6 +80,8 @@ CHECK_POINTS, CHECK_INTEG_MS, CHECK_AMP_MV = 150, 20.0, 10.0
 #: a bump in the check's residual above this fraction of the spectrum's level is not the
 #: sample's (a tip's peak is 0.5-0.8 of the density of states; the noise at 20 ms is ~1.5 %)
 FLAW_FRACTION = 0.10
+#: the residual within this of the fitted edge (V) is not read
+EDGE_MASK_V = 0.07
 TIP_ROUNDS = 3
 
 
@@ -126,6 +128,10 @@ def spectral_flaw(v, didv, *, edge_v: float = -0.44) -> dict:
         return {"flaw": float("nan"), "clean": False, "v_peak": float("nan")}
     fit = model(v, *best[1])
     r = smooth(y - fit, 9)
+    # the step's own shape is not an error function (the dev2 probe, seeds 0-7: every tip, clean
+    # or not, left 0.09-0.15 of residual within 40 mV of the edge), so only the residual away
+    # from the edge is read; a peak right on the edge is not seen
+    r = np.where(np.abs(v - float(best[1][0])) > EDGE_MASK_V, r, 0.0)
     k = int(np.argmax(np.abs(r)))
     flaw = float(abs(r[k]) / max(float(np.max(np.abs(fit))), 1e-30))
     return {"flaw": flaw, "clean": bool(flaw < FLAW_FRACTION), "v_peak": float(v[k])}

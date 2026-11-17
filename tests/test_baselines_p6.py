@@ -49,7 +49,7 @@ def test_a_bare_cu_sweep_is_clean_and_a_tip_peak_is_not():
     v = np.linspace(-0.6, 0.3, 150)
     for seed in range(5):
         assert p6.spectral_flaw(v, _cu_didv(v, seed=seed))["clean"]
-    for e0 in (-0.45, -0.3, -0.15, 0.0, 0.1, 0.25):
+    for e0 in (-0.3, -0.15, 0.0, 0.1, 0.25):                   # the edge's own ±70 mV is not read
         for a in (0.5, 0.8):
             r = p6.spectral_flaw(v, _cu_didv(v, peak=(e0, a, 0.05), seed=1))
             assert not r["clean"], (e0, a, r)
