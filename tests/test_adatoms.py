@@ -210,7 +210,10 @@ def test_a_pulse_that_reforms_the_apex_clean_takes_a_picked_up_atom_with_it(tmp_
     w.zctrl.setpoint_a = 100e-9                           # 100 kΩ, under the pull threshold
     w.move_xy(ox, oy)
     w.move_xy_path(ox + 2e-9, oy, speed_m_s=0.5e-9)
-    assert reg.site_xy(other.i, other.j)[0] - ox > 1.5e-9
+    # a tip carrying an atom moves nothing; a clean one drags this atom most of the 2 nm. How far
+    # depends on the tip the pulse left: 1.42 nm (five sites) with the STM rig's etched tip, over
+    # 1.5 nm with the qPlus form it had until 2026-11-17, whose pulses succeed less often
+    assert reg.site_xy(other.i, other.j)[0] - ox > 1.0e-9
 
 
 def test_scanning_at_an_imaging_resistance_leaves_the_atoms_alone(tmp_path):
