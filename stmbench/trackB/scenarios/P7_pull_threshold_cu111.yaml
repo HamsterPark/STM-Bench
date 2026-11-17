@@ -36,7 +36,7 @@ task_en: >-
   junction resistance at which a lateral move of the tip of 1.0 nm at 0.1 nm/s, started over the
   atom, takes the atom along to the end point (it rests there when the move ends) in half of the
   attempts. Report the two thresholds (kΩ) with ReportResult.
-budget: {sim_hours: 1.5, wire_cmds: 200000}
+budget: {sim_hours: 2.5, wire_cmds: 200000}
 hidden:
   adatoms:
     n_bystanders: [2, 4]
@@ -76,8 +76,24 @@ success: {kind: claims_verified}
 notes: |
   Ladder position 1.5: between P4 (move one atom) and P3's measurement variant. P4's physics and
   hidden ranges, unchanged; what is new is the claim and its judge. Prototype (2026-11-16, branch
-  bench/p7-proto): the tolerance, the evidence numbers and the budget are placeholders until the
-  reference solution has been calibrated and the chance audit run.
+  bench/p7-proto). The tip is the rig's etched W tip from 2026-11-17 (bench/etched-tip); the
+  development numbers below marked "fork physics" were measured before, with the qPlus fork's poke
+  and pulse rules, which act only after a pulse or a poke above 50 mV (starting worlds and the
+  truth do not depend on the form).
+
+  **Tolerance 10 %, budget 2.5 h (provisional until the calibration on the etched tip).** Chance
+  audit (2026-11-17, `audit chance --holdout`, seeds 0-1999, truth of the two isolated atoms
+  nearest the origin under the ideal grip, so an upper bound): at 10 % a constant passes claim 1
+  on 13.4 % and claim 2 on 13.0 % of the seeds; both at once on 4.3 % in-sample (sheet chosen and
+  scored on all 2000) and 3.2 % held out (chosen on seeds 0-999, scored on 1000-1999: 32/1000,
+  Wilson 95 % 2.3-4.5 %). At 12 % the held-out figure is 4.9 % (3.7-6.4 %), at 8 % 1.9 %.
+  Reference, fork physics (job 66782, seeds 0-29, 32 drags per atom, fit-guided design at 2 mV):
+  |R-hat / R½ - 1| p50 1.9 %, p90 5.1 %, max 9.1 % over 59 atoms; 29/30 through the judge
+  (seed 13, a blunt tip, spent its time on the first atom); instrument time p50 1501 s, p90
+  3516 s, max 4502 s. The tolerance is about twice that p90; 5 % would need about four times the
+  drags. The budget is twice the slowest seed: 1.5 h stopped seed 13, and the no-truth baseline's
+  first development seed used 5002 s. The evidence floor (8 drags at 3 resistances) only shows
+  that a series was measured: 8 drags give p90 10 %.
 
   **What is measured.** The follow law (stmsim.physics.adatoms) decides one hop attempt at a time,
   and no measurement sees a single attempt, so the law's own R_th is not the claim. The claim is a

@@ -125,3 +125,10 @@ notes: |
   Imaging is at 10 mV / 1 nA = 10 MΩ, three to four orders above the drawn pull threshold, so
   the ring survives being scanned. An agent that images at a manipulation resistance will take
   its own corral apart, and the truth will say so.
+
+  **The rig's tip is an etched W wire, not a qPlus fork (2026-11-17, decided by the user).** A poke
+  above 50 mV no longer rings a fork up, and a reshaping pulse leaves a better tip with probability 0.55
+  instead of 0.50; the worlds at the start (layout, hidden draws, random streams) are unchanged.
+  The reference numbers above were measured with the qPlus form; the numbers on the new physics are re-run
+  on the P3 branch (bench/p3-osworld). A ledger recorded before this with a high-bias poke does not
+  replay with this code, and one with a pulse may not (docs/DESIGN.md, 2026-11-17).
