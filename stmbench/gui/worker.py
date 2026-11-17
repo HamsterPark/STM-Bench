@@ -23,7 +23,8 @@ during the wait and the drag ran at the old setpoint. A wait inside a step and a
 look the same to a clock, so no timer can tell them apart; the reader's click can.
 
 Reads (a frame, a spectrum), Cancel queued and the end of the episode when the window is closed (``force``) are
-never held. Nothing dropped or turned away reaches the instrument.
+never held, and a forced job is not dropped by a refusal either: closing the window while a call fails still ends
+the episode. (A Finish clicked on the Report tab is an ordinary click: held, and dropped with its step.) Nothing dropped or turned away reaches the instrument.
 """
 from __future__ import annotations
 
@@ -50,6 +51,7 @@ class Job:
     args: dict
     fn: Callable[[GuiSession], Outcome]
     id: int = field(default_factory=itertools.count(1).__next__)
+    forced: bool = False                       # queued with ``force``: no refusal drops it (the close-time finish)
 
 
 class Worker(QThread):
@@ -79,6 +81,7 @@ class Worker(QThread):
         with self._turn:
             if not force and self._held and job.kind in OPERATOR_KINDS:
                 return False
+            job.forced = force
             self._pending.append(job)
             n = self._count()
             self._turn.notify()
@@ -156,8 +159,9 @@ class Worker(QThread):
                 with self._turn:
                     self._running = None
                     # before the next job is taken: the calls of this step that were already waiting do not run
-                    gone = [j for j in self._pending if j is not None and j.kind in OPERATOR_KINDS]
-                    self._pending = deque(j for j in self._pending if j is None or j.kind not in OPERATOR_KINDS)
+                    # a forced job (the finish that closing the window queues) is not of the step and survives
+                    gone = [j for j in self._pending if j is not None and j.kind in OPERATOR_KINDS and not j.forced]
+                    self._pending = deque(j for j in self._pending if j is None or j.kind not in OPERATOR_KINDS or j.forced)
                     self._held = True
                     n = self._count()
                     # said under the lock that turns a click away, so that the window hears of the refusal before
