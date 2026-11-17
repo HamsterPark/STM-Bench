@@ -17,9 +17,9 @@ from concurrent.futures import ProcessPoolExecutor
 
 import numpy as np
 
-from . import p3, p4, p5
+from . import p3, p4, p5, p7
 
-PAPERS = {"P3": p3.run, "P4": p4.run, "P5": p5.run}
+PAPERS = {"P3": p3.run, "P4": p4.run, "P5": p5.run, "P7": p7.run}
 
 
 def _one(args: tuple[str, int]) -> dict:

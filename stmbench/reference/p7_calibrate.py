@@ -22,7 +22,7 @@ from . import p7
 def _one(args: tuple) -> dict:
     seed, kw = args
     try:
-        return p7.run(seed, finish=False, **kw)
+        return p7.run(seed, **kw)
     except Exception as exc:  # noqa: BLE001 - a failed seed is a result, not a crash
         return {"paper": "P7", "seed": int(seed), "success": False, "error": f"{type(exc).__name__}: {exc}"}
 
@@ -65,9 +65,12 @@ def main() -> None:
     ap.add_argument("--n-drags", type=int, default=32)
     ap.add_argument("--manip-v", type=float, default=p7.MANIP_V)
     ap.add_argument("--step", type=float, default=p7.STAIR_STEP)
+    ap.add_argument("--design", default="stair", choices=["stair", "fit"])
+    ap.add_argument("--no-judge", action="store_true", help="leave the judge out")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
-    kw = {"n_drags": a.n_drags, "manip_v": a.manip_v, "step": a.step}
+    kw = {"n_drags": a.n_drags, "manip_v": a.manip_v, "step": a.step, "design": a.design,
+          "finish": not a.no_judge}
     tasks = [(s, kw) for s in range(a.first_seed, a.first_seed + a.seeds)]
     if a.jobs > 1:
         with ProcessPoolExecutor(max_workers=a.jobs) as ex:

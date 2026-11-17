@@ -129,11 +129,12 @@ def evidence_ok(records: list[dict], r_hat_kohm: float, *, min_n: int = 8, min_r
 
 
 class _Runner:
-    def __init__(self, s: Session, *, manip_v: float, step: float, n_drags: int):
+    def __init__(self, s: Session, *, manip_v: float, step: float, n_drags: int, design: str = "stair"):
         self.s, self.inst, self.w = s, s.inst, s.w
         self.reg = s.w.surface.site.adatoms
         self.mv = Mover(s, imaging_v=IMAGING_V, imaging_pa=IMAGING_PA)
         self.manip_v, self.step, self.n_drags = float(manip_v), float(step), int(n_drags)
+        self.design = design
         self.log = {"conditionings": 0, "pickups": 0, "restarts": 0, "discarded": 0, "tip_changes": 0,
                     "atoms_tried": 0}
 
@@ -207,10 +208,10 @@ class _Runner:
             if inst.max_sim_s is not None and inst.used_s > 0.97 * inst.max_sim_s:
                 break
             r = min(max(r, R_MIN_KOHM), R_MAX_KOHM)
-            n0 = len(w.events)
+            n0 = len(w.tip.events)
             rec, trace = self.drag(atom, r * 1e3, sign)
             sign = -sign
-            self.log["tip_changes"] += sum(1 for e in w.events[n0:] if str(e.get("kind", "")).startswith("tip"))
+            self.log["tip_changes"] += sum(1 for e in w.tip.events[n0:] if e.kind == "spontaneous_change" or e.kind.startswith("recovery"))
             if rec.get("carrying"):
                 raise PickedUp()
             if rec.get("picked"):
@@ -238,7 +239,14 @@ class _Runner:
             if counted:
                 last = rec["followed"]
                 if any(f) and not all(f):
-                    r = r * (self.step if last else 1.0 / self.step)
+                    if self.design == "fit":
+                        # sequential design: next to the present fit (at most x1.3 from here),
+                        # dithered by one step up and down so that the slope stays measured
+                        fit = fit_threshold([d["r_kohm"] for d in drags], f)
+                        base = min(max(fit["r_hat_kohm"] or r, r / 1.3), r * 1.3)
+                        r = base * (self.step if len(drags) % 2 else 1.0 / self.step)
+                    else:
+                        r = r * (self.step if last else 1.0 / self.step)
                 else:
                     r = r * (BRACKET_UP if last else BRACKET_DOWN)
                 if r <= R_MIN_KOHM:
@@ -283,7 +291,8 @@ def _truth_kohm(w, records: list[dict]) -> float:
 
 
 def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARIO, n_drags: int = 24,
-        manip_v: float = MANIP_V, step: float = STAIR_STEP, finish: bool = True,
+        manip_v: float = MANIP_V, step: float = STAIR_STEP, design: str = "stair",
+        finish: bool = True,
         keep_drags: bool = False) -> dict:
     """One P7 episode by the reference protocol; returns what it reported and how it scored.
     ``finish=False`` leaves the judge out (a branch without P7's verdict, or a calibration that
@@ -291,7 +300,7 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
     row for the precision-cost curve."""
     s = Session(scenario, seed, out_dir)
     inst, w = s.inst, s.w
-    run_ = _Runner(s, manip_v=manip_v, step=step, n_drags=n_drags)
+    run_ = _Runner(s, manip_v=manip_v, step=step, n_drags=n_drags, design=design)
     atoms = run_.pick_two()
     rows, rel_err = [], {}
     for claim, res in zip(CLAIMS, atoms):
