@@ -102,3 +102,17 @@ def test_the_reader_and_the_baseline_reach_for_no_truth():
             names = {n.attr for n in ast.walk(node) if isinstance(n, ast.Attribute)}
             names |= {n.id for n in ast.walk(node) if isinstance(n, ast.Name)}
             assert not names & forbidden, (mod.__name__, getattr(node, "name", None), names & forbidden)
+
+
+def test_an_atom_that_walked_during_the_first_series_is_not_offered_as_the_second():
+    """Held-out seed 451 (2026-11-17): the first atom walked 6 nm along x during its 32 alternating
+    drags and the second atom was chosen at its new place, which the survey offered because only the
+    place where the series began was excluded. Every place the atom was found counts."""
+    places = [(3.0, 4.1), (4.0, 4.2), (6.0, 4.4), (8.8, 4.6), (9.9, 4.6)]      # A (3, 4.1) ... B (9.9, 4.6)
+    assert not p7.unclaimed(9.9, 4.6, [], places)                              # where it is now
+    assert not p7.unclaimed(3.0, 4.1, [], places)                              # where it began
+    assert not p7.unclaimed(6.3, 7.0, [], places)                              # beside its path
+    assert p7.unclaimed(3.0, 12.0, [], places) and p7.unclaimed(17.0, 4.6, [], places)   # 5+ nm from the whole path
+    assert not p7.unclaimed(20.0, 20.0, [(21.0, 20.0)], places)                # still not near an atom lost
+    s = p7.Series(places=[(0.0, 0.0)])
+    assert s.places == [(0.0, 0.0)] and p7.Series().places == []

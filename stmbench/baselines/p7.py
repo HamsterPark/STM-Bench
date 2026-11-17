@@ -165,8 +165,12 @@ def fit_logistic(r_ohm, carried) -> dict | None:
 class Series:
     """One atom's drags and the staircase that chooses the next resistance."""
 
-    def __init__(self, proto: Protocol = PROTO):
+    def __init__(self, proto: Protocol = PROTO, places=None):
         self.p, self.drags = proto, []
+        #: every place the atom was found, from where the series began to where it last was: an atom
+        #: walks along the series (seed 451: 6 nm in 32 alternating drags), and the next atom has to
+        #: be one that never was anywhere on that path
+        self.places: list[tuple[float, float]] = list(places or [])
         self.r = proto.start_kohm * 1e3
         self.seen_carry = self.seen_miss = False
 
@@ -225,7 +229,14 @@ def _prepare(v: Blind, ops: Ops, log: dict):
     return f, ops.drift(*_anchor(f, ops.home))
 
 
-def _pick_atom(v: Blind, ops: Ops, log: dict, comp, lost: list, done: list) -> tuple[tuple[float, float], tuple]:
+def unclaimed(x: float, y: float, lost, places) -> bool:
+    """Is the bump at (x, y) an atom to measure next: not within 11 nm of one lost, and at least
+    :attr:`Protocol.apart_nm` from every place an atom already measured was found (its whole path)."""
+    return (all(math.hypot(x - px, y - py) > AVOID_NM for px, py in lost)
+            and all(math.hypot(x - px, y - py) >= PROTO.apart_nm for px, py in places))
+
+
+def _pick_atom(v: Blind, ops: Ops, log: dict, comp, lost: list, places: list) -> tuple[tuple[float, float], tuple]:
     """An isolated atom of the surveys around home: not within 11 nm of one lost, at least 5 nm from
     one measured. Returns (its place, the drift compensation). A survey that shows a blunt or double
     tip has the tip conditioned first."""
@@ -237,9 +248,7 @@ def _pick_atom(v: Blind, ops: Ops, log: dict, comp, lost: list, done: list) -> t
                 bad = True
                 break
             for x, y, _h in _lone_atoms(survey, locate(survey)):
-                if any(math.hypot(x - px, y - py) <= AVOID_NM for px, py in lost):
-                    continue
-                if any(math.hypot(x - px, y - py) < PROTO.apart_nm for px, py in done):
+                if not unclaimed(x, y, lost, places):
                     continue
                 log["survey_atoms"] = len(locate(survey))
                 return (float(x), float(y)), comp
@@ -259,6 +268,7 @@ def run_series(ops: Ops, pl: Puller, guess, log: dict, *, name: str) -> Series:
     if pos is None:
         raise Lost("the atom is not in the frame centred on it")
     s = Series(pl.p)
+    s.places.append((float(pos[0]), float(pos[1])))
     k = 0
     while len(s.drags) < pl.p.drags_per_atom:
         if ops.now() > ops.budget_s - pl.p.reserve_s:
@@ -271,10 +281,11 @@ def run_series(ops: Ops, pl: Puller, guess, log: dict, *, name: str) -> Series:
             ops.poke_near()
             comp = _recover(ops, pos, log, why="poked")
             log.setdefault("restarts", []).append({"atom": name, "after_drags": len(s.drags)})
-            s = Series(pl.p)
+            s = Series(pl.p, places=s.places)
             pos = pl.measure(pos, within=2.0, wide=True)
             if pos is None:
                 raise Lost("the atom is not where it was after the tip was poked")
+            s.places.append((float(pos[0]), float(pos[1])))
         if pl.p.pre_frame_every and k % pl.p.pre_frame_every == 0:
             pos = pl.measure(pos) or pos
         d = pl.pull(pos, 1.0 if k % 2 == 0 else -1.0, s.r)
@@ -283,6 +294,7 @@ def run_series(ops: Ops, pl: Puller, guess, log: dict, *, name: str) -> Series:
         if d["atom"] is None:
             raise Lost("the atom is in no frame after the drag")
         pos = d["atom"]
+        s.places.append((float(pos[0]), float(pos[1])))
     return s
 
 
@@ -296,7 +308,7 @@ def play(v: Blind, log: dict) -> dict:
     lost: list[tuple[float, float]] = []
     done: list[tuple[tuple[float, float], Series]] = []
     for _ in range(6):
-        g, comp = _pick_atom(v, ops, log, comp, lost, [a for a, _ in done])
+        g, comp = _pick_atom(v, ops, log, comp, lost, [p for _, s in done for p in s.places])
         try:
             s = run_series(ops, pl, g, log, name=f"atom{len(done) + 1}")
         except Lost as exc:
