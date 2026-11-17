@@ -374,12 +374,13 @@ def _check_spectra(kind: str, rule: dict, *, events, truth: dict,
                    if e.get("near_kind") == atom_rule.get("near_kind", "adatom")
                    and float(e.get("near_nm", 1e9)) <= float(atom_rule.get("near_nm_max", 0.15))
                    and not e.get("jump", False) and not e.get("contact", False)
+                   and e.get("oscillating", False)
                    and float(e.get("df_span_beyond_min_pm", 0.0))
                    >= float(atom_rule.get("df_span_beyond_min_pm_min", 0.0))]
         bg = [e for e in zs
               if (e.get("near_kind") in ("none", "step")
                   or float(e.get("near_nm", 0.0)) > float(bg_rule.get("near_nm_min", 2.0)))
-              and not e.get("contact", False)]
+              and not e.get("contact", False) and e.get("oscillating", False)]
         ok = len(on_atom) >= int(atom_rule.get("min_n", 1)) and len(bg) >= int(bg_rule.get("min_n", 1))
         return ok, {"kind": kind, "n_on_atom": len(on_atom), "n_background": len(bg)}
     got = _spectra(pool, "sts")
