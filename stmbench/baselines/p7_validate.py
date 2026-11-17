@@ -66,7 +66,7 @@ def collect(seed: int, n_drags: int, *, out_dir: str | Path | None = None) -> li
     log: dict = {}
     ops.log = log
     _prepare(v, ops, log)            # the baseline's own opening: the tip judged and conditioned, the drift
-    where = [pl.measure(image_xy(a), within=2.0) for a in picks]
+    where = [pl.measure(image_xy(a), within=2.0, wide=True) for a in picks]
     rows: list[dict] = []
     for k in range(n_drags):
         j = k % len(picks)
@@ -81,7 +81,7 @@ def collect(seed: int, n_drags: int, *, out_dir: str | Path | None = None) -> li
             r = r_half * math.exp(rng.normal(0.0, NEAR_SIGMA_LN))
         else:
             r = 1e3 * math.exp(rng.uniform(math.log(WINDOW_KOHM[0]), math.log(WINDOW_KOHM[1])))
-        pos = pl.measure(where[j], within=1.0) or where[j]
+        pos = where[j]               # as the baseline: where the frame after the last drag put the atom
         drag = pl.pull(pos, sign, r)
         rec = dict(w.drag_records[-1])
         snap = w.tip.snapshot()

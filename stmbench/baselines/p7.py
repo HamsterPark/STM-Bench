@@ -37,7 +37,7 @@ from ..analysis.adatoms import locate
 from ..analysis.carry import find_atom, read_carry
 from ..analysis.tip import diagnose
 from ..instrument import Instrument
-from ..reference._manip import SLOW_LINE_S, SLOW_NM, SLOW_PX, nearest
+from ..reference._manip import nearest
 from ._common import JUDGE_NM, JUDGE_PX, Blind, Ops
 from .p4 import AVOID_NM, LINE_S, SEARCH, _anchor, _recover, candidates
 
@@ -64,8 +64,15 @@ class Protocol:
     max_kohm: float = 3000.0
     #: the second atom is at least this far from the first (nm), the frame placing the tip is this big
     apart_nm: float = 5.0
-    #: the search for the first drags' own resistance range stops here
     reserve_s: float = 240.0
+    #: the slow frames that place the atom: side (nm), pixels, line time (s) - 0.1 nm/px at 16 nm/s,
+    #: where the loop's lag is ~0.01 nm (P4's 5 nm / 50 px / 0.25 s costs 25 s, this 6 s)
+    frame_nm: float = 3.2
+    frame_px: int = 32
+    frame_line_s: float = 0.2
+    #: a fresh frame over the atom before every n-th drag (0: only to start, and after a tip event);
+    #: otherwise the drag starts where the frame after the last one put the atom
+    pre_frame_every: int = 0
 
 
 PROTO = Protocol()
@@ -81,6 +88,8 @@ class Puller:
 
     def __init__(self, ops: Ops, proto: Protocol = PROTO):
         self.ops, self.v, self.p = ops, ops.v, proto
+        #: instrument seconds spent on the drags, the frames before and after them, and getting onto the atom
+        self.spent = {"drag": 0.0, "frame_before": 0.0, "frame_after": 0.0, "move_and_settings": 0.0}
 
     def manipulate(self, r_ohm: float) -> None:
         """Manipulation conditions: the preamp's range first, then the bias, then the setpoint."""
@@ -95,9 +104,13 @@ class Puller:
         self.v.act("set_bias", bias_v=self.ops.imaging_v)
         self.v.act("set_current_range", full_scale_na=10.0)
 
-    def measure(self, guess, *, within: float = 1.0):
-        """The atom in a slow frame centred on ``guess``: its place, or ``None``."""
-        f, _ = self.ops.frame(guess[0], guess[1], SLOW_NM, SLOW_PX, SLOW_LINE_S)
+    def measure(self, guess, *, within: float = 1.0, wide: bool = False):
+        """The atom in a slow frame centred on ``guess``: its place, or ``None``. ``wide``: P4's 5 nm
+        frame, for when ``guess`` is where a survey or the creep of a long move put the atom."""
+        t0 = self.ops.now()
+        size, px, line = (5.0, 50, 0.25) if wide else (self.p.frame_nm, self.p.frame_px, self.p.frame_line_s)
+        f, _ = self.ops.frame(guess[0], guess[1], size, px, line)
+        self.spent["frame_before"] += self.ops.now() - t0
         return nearest(locate(f), guess[0], guess[1], within)
 
     def pull(self, pos, sign: float, r_ohm: float) -> dict:
@@ -107,14 +120,21 @@ class Puller:
         Returns the drag with its trace, the reading of it (:func:`stmbench.analysis.carry.read_carry`)
         and the atom's place after it (``None``: not found)."""
         end = (pos[0] + sign * self.p.length_nm, pos[1])
+        t0 = self.ops.now()
         self.v.act("move_tip", x_nm=pos[0], y_nm=pos[1])
         self.manipulate(r_ohm)
+        t1 = self.ops.now()
         r = self.v.act("move_tip", x_nm=end[0], y_nm=end[1], speed_nm_s=self.p.speed_nm_s)
+        t2 = self.ops.now()
         self.image()
+        t3 = self.ops.now()
+        self.spent["move_and_settings"] += (t1 - t0) + (t3 - t2)
+        self.spent["drag"] += t2 - t1
         spectrum = self.v.spectrum(r["trace"])
         tip_end = tuple(float(c) for c in r["tip_nm"])
         mid = (0.5 * (pos[0] + tip_end[0]), 0.5 * (pos[1] + tip_end[1]))
-        f, _ = self.ops.frame(mid[0], mid[1], SLOW_NM, SLOW_PX, SLOW_LINE_S)
+        f, _ = self.ops.frame(mid[0], mid[1], self.p.frame_nm, self.p.frame_px, self.p.frame_line_s)
+        self.spent["frame_after"] += self.ops.now() - t3
         atom = find_atom(f, pos, tip_end)
         return {"trace": r["trace"], "r_ohm": float(r_ohm), "sign": float(sign), "start": tuple(pos),
                 "end": tip_end, "atom": atom, "read": read_carry(spectrum, end=tip_end, atom=atom)}
@@ -226,7 +246,7 @@ def _pick_atom(v: Blind, ops: Ops, log: dict, comp, lost: list, done: list) -> t
 def run_series(ops: Ops, pl: Puller, guess, log: dict, *, name: str) -> Series:
     """The staircase on the atom near ``guess``: drags until the budget of drags per atom is spent
     (or the time is). Raises :class:`Lost` when the atom is no longer seen."""
-    pos = pl.measure(guess)
+    pos = pl.measure(guess, wide=True)
     if pos is None:
         raise Lost("the atom is not in the frame centred on it")
     s = Series(pl.p)
@@ -243,10 +263,11 @@ def run_series(ops: Ops, pl: Puller, guess, log: dict, *, name: str) -> Series:
             comp = _recover(ops, pos, log, why="poked")
             log.setdefault("restarts", []).append({"atom": name, "after_drags": len(s.drags)})
             s = Series(pl.p)
-            pos = pl.measure(pos, within=2.0)
+            pos = pl.measure(pos, within=2.0, wide=True)
             if pos is None:
                 raise Lost("the atom is not where it was after the tip was poked")
-        pos = pl.measure(pos) or pos
+        if pl.p.pre_frame_every and k % pl.p.pre_frame_every == 0:
+            pos = pl.measure(pos) or pos
         d = pl.pull(pos, 1.0 if k % 2 == 0 else -1.0, s.r)
         k += 1
         s.add(d)
@@ -262,6 +283,7 @@ def play(v: Blind, log: dict) -> dict:
     ops = Ops(v, log)
     pl = Puller(ops)
     f, comp = _prepare(v, ops, log)
+    log["prepare_s"] = ops.now()
     lost: list[tuple[float, float]] = []
     done: list[tuple[tuple[float, float], Series]] = []
     for _ in range(6):
@@ -285,6 +307,7 @@ def play(v: Blind, log: dict) -> dict:
     if len(done) < 2:
         raise RuntimeError(f"only {len(done)} atom(s) measured ({log.get('lost')})")
     ests = [s.estimate() for _, s in done]
+    log["spent_s"] = {k: round(x) for k, x in pl.spent.items()}
     return {"r_kohm": [e["r_ohm"] / 1e3 for e in ests],
             "evidence": [[d["trace"] for d in s.drags] for _, s in done],
             "series": [s for _, s in done]}
