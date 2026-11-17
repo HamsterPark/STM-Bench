@@ -23,8 +23,12 @@ Protocol:
    bias is low (2 mV by default): at a given resistance the current, and with it the tip's
    change hazard, falls with the bias;
 4. the resistance of the next drag: from 300 kOhm up by x1.25 after a drag that carried the atom,
-   down by x0.8 after one that did not, until both have been seen; then a one-up-one-down
-   staircase (small steps, x1.05) until ``n_drags`` have been made;
+   down by x0.8 after one that did not, until both have been seen; then (the default ``fit``
+   design) next to the present fit, at most x1.3 from the last drag and dithered x1.05 up and down
+   so that the slope stays measured, until ``n_drags`` = 32 drags have been made (design
+   ``stair``: a one-up-one-down staircase of x1.05 steps instead). Calibrated on seeds 0-29
+   (docs/results/p7_reference_seeds_0-29.json): 2 mV and ``fit`` beat ``stair`` at low n and 5 mV
+   at every n, and the error falls as 1/sqrt(n) to a p90 of about 5 % at 32 drags;
 5. R½ is the location of a maximum-likelihood logistic fit in ln R over every drag of that atom
    under one grip (location and slope free);
 6. a drag whose record shows other conditions than the series' (the grip changed: a crash, a
@@ -129,7 +133,7 @@ def evidence_ok(records: list[dict], r_hat_kohm: float, *, min_n: int = 8, min_r
 
 
 class _Runner:
-    def __init__(self, s: Session, *, manip_v: float, step: float, n_drags: int, design: str = "stair"):
+    def __init__(self, s: Session, *, manip_v: float, step: float, n_drags: int, design: str = "fit"):
         self.s, self.inst, self.w = s, s.inst, s.w
         self.reg = s.w.surface.site.adatoms
         self.mv = Mover(s, imaging_v=IMAGING_V, imaging_pa=IMAGING_PA)
@@ -290,8 +294,8 @@ def _truth_kohm(w, records: list[dict]) -> float:
     return float(math.exp(np.mean(np.log(vals))) / 1e3) if vals else float("nan")
 
 
-def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARIO, n_drags: int = 24,
-        manip_v: float = MANIP_V, step: float = STAIR_STEP, design: str = "stair",
+def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARIO, n_drags: int = 32,
+        manip_v: float = MANIP_V, step: float = STAIR_STEP, design: str = "fit",
         finish: bool = True,
         keep_drags: bool = False) -> dict:
     """One P7 episode by the reference protocol; returns what it reported and how it scored.
