@@ -33,9 +33,13 @@ CARRY_RADIUS_NM = 0.153
 #: how far from the drag's path (nm) a bump in the after-frame is still taken for the atom: an atom
 #: that stayed or was dropped lies on the path, and any other atom is 3 nm away
 PATH_BAND_NM = 1.3
-#: the frame places an atom to a few hundredths of a nm; this much is added to the radius before a
-#: placement counts as "not carried" or removed from it before it counts as "carried"
-FRAME_MARGIN_NM = 0.0
+#: what is added to the radius for the frame's reading. A carried atom sits 0.10 nm from the end point
+#: at the median (behind the apex: it hops when the apex is 0.6 spacings ahead), up to the radius by
+#: definition, and a frame places it to about 0.06 nm per axis; one dropped at the last site is 0.16-0.3
+#: nm short. Against the judge's record (2245 drags, 40 seeds, 5 nm / 50 px frames, 2026-11-17) the
+#: radius alone read 96 of 1202 carries as drops and 1 of 1043 misses as carried; 0.165 gave 45 and 9,
+#: 0.18 gave about 19 and 18, 0.21 gave 7 and 35: the two populations touch, and the middle is taken.
+FRAME_MARGIN_NM = 0.027
 #: trace fallback: Z over the last samples against the first (pm). A carried atom is under the tip at
 #: both ends, so Z rises or holds (+8 pm median, the lattice ripple and the tip's drift); an atom left
 #: behind makes it fall (median -30 pm). Nothing here is exact: see the checks.

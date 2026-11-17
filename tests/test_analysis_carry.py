@@ -72,19 +72,23 @@ def test_the_logistic_fit_finds_the_half_point_and_needs_both_outcomes():
     assert 140e3 <= sep["r_ohm"] <= 180e3
 
 
-def test_the_staircase_climbs_until_both_outcomes_are_seen_then_steps_by_five_percent():
+def test_the_series_looks_for_both_outcomes_then_follows_its_fit_in_small_dithered_steps():
     s = p7.Series()
     r0 = s.r
     read = lambda c: {"carried": c, "how": "frame", "end_offset_nm": 0.0, "fall_pm": 0.0}   # noqa: E731
     s.add({"r_ohm": s.r, "read": read(True), "trace": "a"})
-    assert math.isclose(s.r, r0 * p7.PROTO.up)
-    s.add({"r_ohm": s.r, "read": read(False), "trace": "b"})              # both outcomes seen: small steps
-    assert math.isclose(s.r, r0 * p7.PROTO.up / p7.PROTO.step)
-    s.add({"r_ohm": s.r, "read": read(True), "trace": "c"})
-    assert math.isclose(s.r, r0 * p7.PROTO.up)
+    assert math.isclose(s.r, r0 * p7.PROTO.up)                            # only carries so far: up
     s2 = p7.Series()
     s2.add({"r_ohm": s2.r, "read": read(False), "trace": "a"})
     assert math.isclose(s2.r, r0 * p7.PROTO.down)
+    # both outcomes seen: the next resistance is the fit's (within x1.3 of the last), one step up or down
+    rng = np.random.default_rng(1)
+    s3 = p7.Series()
+    for _ in range(24):
+        p = 1.0 / (1.0 + math.exp(20.0 * (math.log(s3.r) - math.log(150e3))))
+        s3.add({"r_ohm": s3.r, "read": read(bool(rng.random() < p)), "trace": "x"})
+    assert abs(s3.estimate()["r_ohm"] / 150e3 - 1.0) < 0.15
+    assert abs(s3.r / 150e3 - 1.0) < 0.2                                  # and it has gone to the half point
 
 
 def test_the_reader_and_the_baseline_reach_for_no_truth():

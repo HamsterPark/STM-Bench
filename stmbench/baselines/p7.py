@@ -144,14 +144,14 @@ def fit_logistic(r_ohm, carried) -> dict | None:
     """The maximum-likelihood logistic fit of P(carry) against ln R, location ``mu`` and slope ``k``
     both free (P = 1 / (1 + exp(k (ln R - mu)))): ``{"r_ohm": exp(mu), "k": k}``. ``None`` unless both
     outcomes occurred. When the data separate (every carry below every miss) the likelihood has a
-    plateau in ``mu``, and the middle of it is taken; the slope is held to 3-80 (the follow law's
-    own steepness is 8 per hop attempt, a drag of several attempts steepens it)."""
+    plateau in ``mu``, and the middle of it is taken; the slope is held to 1-400 per ln unit (as the
+    reference's fit does)."""
     x = np.log(np.asarray(r_ohm, float))
     y = np.asarray(carried, float)
     if not (y.any() and (1.0 - y).any()):
         return None
-    mus = np.linspace(x.min() - 0.3, x.max() + 0.3, 1201)
-    ks = np.exp(np.linspace(math.log(3.0), math.log(80.0), 40))
+    mus = np.linspace(x.min() - 0.5, x.max() + 0.5, 1201)
+    ks = np.exp(np.linspace(0.0, math.log(400.0), 60))
     z = ks[None, :, None] * (x[None, None, :] - mus[:, None, None])          # (mu, k, drag)
     # log P(carry) = -log(1 + e^z); log P(miss) = -log(1 + e^-z)
     ll = (-np.logaddexp(0.0, z) * y - np.logaddexp(0.0, -z) * (1.0 - y)).sum(axis=2)
@@ -183,10 +183,19 @@ class Series:
             return
         self.seen_carry |= bool(c)
         self.seen_miss |= not c
-        both = self.seen_carry and self.seen_miss
-        # a carry means the threshold is above this resistance (go up), a miss below it (go down)
-        step = self.p.step if both else (self.p.up if c else self.p.down)
-        self.r = drag["r_ohm"] * (step if c else (1.0 / step if both else step))
+        if not (self.seen_carry and self.seen_miss):
+            # looking for both outcomes: a carry means the threshold is above this resistance (go up)
+            self.r = drag["r_ohm"] * (self.p.up if c else self.p.down)
+            return
+        # the fit-guided design of the reference's calibration (2026-11-17, 30 seeds, fork physics): next
+        # to the present fit, at most x1.3 from the last resistance, dithered one step up and down
+        # alternately so that the slope stays measured. At 12 drags p90 7.2 % against 9.2 % for the
+        # plain one-up-one-down staircase
+        rd = self.readable()
+        fit = fit_logistic([d["r_ohm"] for d in rd], [d["read"]["carried"] for d in rd])
+        last = drag["r_ohm"]
+        base = min(max(fit["r_ohm"] if fit else last, last / 1.3), last * 1.3)
+        self.r = base * (self.p.step if len(self.drags) % 2 else 1.0 / self.p.step)
 
     def estimate(self) -> dict | None:
         rd = self.readable()

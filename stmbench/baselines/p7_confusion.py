@@ -54,7 +54,7 @@ def table(rows, mode: str = "frame") -> dict:
             c[("tp" if truth else "fp") if got else ("fn" if truth else "tn")] += 1
     n_miss = c["fp"] + c["tn"] + c["unread_miss"]
     n_carry = c["tp"] + c["fn"] + c["unread_carry"]
-    return {**c, "n": len(rows), "n_carry": n_carry, "n_miss": n_miss,
+    return {**{k: c[k] for k in ("tp", "fp", "fn", "tn", "unread_carry", "unread_miss")}, "n": len(rows), "n_carry": n_carry, "n_miss": n_miss,
             "false_carry_rate": (c["fp"] / n_miss) if n_miss else float("nan"),
             "false_drop_rate": (c["fn"] / n_carry) if n_carry else float("nan")}
 
