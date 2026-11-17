@@ -5,7 +5,7 @@
     python -m stmbench.cli grade <export dir> --scenario P4_atom_positioning_cu111 --seed 0 [--no-strict] [--out result.json]
     python -m stmbench.cli task --scenario P4_atom_positioning_cu111 [--lang zh|en]            # the task text
     python -m stmbench.cli reference --paper P4 [--seeds 30] [--jobs 4] [--json out.json]      # privileged reference runs
-    python -m stmbench.cli baseline --paper P4 [--seeds 30] [--jobs 4] [--json out.json]       # scripted, no truth
+    python -m stmbench.cli baseline --paper P4|P6 [--seeds 30] [--jobs 4] [--json out.json]       # scripted, no truth
     python -m stmbench.cli audit chance [--scenario P3] [--seeds 200] [--jobs 4] [--json out.json]
     python -m stmbench.cli agent --scenario P4_atom_positioning_cu111 --seed 0 --out <run dir> \
                                  [--provider anthropic|openai] [--model ID]                    # a model alone
@@ -288,7 +288,7 @@ def main(argv=None) -> int:
     f.set_defaults(fn=cmd_reference)
     b = sub.add_parser("baseline", help="scripted baselines: the instrument an agent gets and nothing else "
                                         "(no truth); reports success by the tip's state and instrument time")
-    b.add_argument("--paper", required=True, help="P4")
+    b.add_argument("--paper", required=True, help="P4 or P6")
     b.add_argument("--seeds", type=int, default=30, help="number of seeds")
     b.add_argument("--first-seed", type=int, default=0)
     b.add_argument("--jobs", type=int, default=1, help="processes in parallel")
