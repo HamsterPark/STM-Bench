@@ -1032,6 +1032,23 @@ seed 0–29 逐值不变），P3 的测量抽成 `p3.measure()`（seed 0–5 逐
 偏 2.5 nm）；蠕变遗忘旧移动，修针回来后样品在帧与帧之间来回跳 ±10 nm（seed 77、138）。参考解看真值，两处都
 没察觉。
 
+### 9.7 P7 拉动阈值的判分规则（2026-11-17，评审侧；原型分支 bench/p7-proto，未标定）
+- **真值跟着报告引用的拖动走**：`truth: drag_threshold` 不是 `World.truth()` 里的一个数，而是报告引用的那几次
+  `move_tip` 拖动各自条件下的 R½（`stmsim.physics.drag_threshold.record_threshold`）的几何平均。针尖中途变了，
+  各次拖动的 R½ 就不同，所以取几何平均；落选的拖动不动真值。选拖动只有一个函数
+  （`claims.select_drags`），证据规则和真值共用，二者不会对“哪些拖动算数”意见不一。
+- **引用移动轨迹**：`Move-Trace…dat` 文件名或 `move:N`（N 是 `dat_saved.move_idx`，也是拖动记录的 `index`），
+  解析到它的 `dat_saved` 事件。P4 的规则从不看移动轨迹，P4 的判定不变。
+- **证据 `drag_series`**：只在被引用的移动轨迹里查。一次拖动算数：反馈开着、没退针、没超量程、针尖上原来没有
+  原子、结电阻有限、有顶点抓住原子且起点离原子不超过 `start_within_nm`（从抓住它的顶点量起）、长度和速度在
+  `protocol_rel` 内。算数的拖动须是同一个原子、至少 `min_n` 次、至少 `min_resistances` 个不同结电阻
+  （差 2% 以内算同一个）、并且夹住报告值（不高于它处带到终点过，不低于它处没带到过，提到针尖上也算没带到）。
+  第二个 claim 的 `distinct_atom_from` 要求原子不同于第一个。
+- **规则卡**（`RULES_VERSION` 仍为 2：P7 的规则只写在 P7 的卡上，别的论文的卡与判分不变）逐条写出这些数字和“带到终点”的含义（原子停在抓住它的顶点的终点
+  0.6 个格点间距内，Cu(111) 为 0.255 nm × 0.6）。真值定义也写在卡上，卡里不写 R_th、v_max 等隐藏量。
+- **机会审计**：`example_thresholds` 给每个 seed 最靠近原点的两个孤立原子在理想抓握下的 R½，第 k 个
+  `drag_threshold` claim 对第 k 个原子；理想抓握的真值分布最窄，所以审计数字是上界。
+
 ## 10. 复用清单
 - MAST：`mast.io.nanonis_files`（reader 真源）、`test_frame_corrugation.py:41-65`（writer 样板）、`core/nanonis_patch.py`（协议 + 覆盖表 + 错误段）、`working-memory/NanonisClass_upstream.py` + `06_…reference.md`（spec 源）、`monitoring/pump.py`（Osci2T 序列 + `check_timebase_table`）、`knowledge/fault_diagnosis.py`（故障 schema）、`core/tip_conditioning_policy.py`（包络 + `_sources` 真值分层标签）、`core/noble_tip_workflow.py` + `tip_reference_calibration.txt`（转移数字）、`api/bootstrap.py` / `tools/skill_coverage_campaign.py`（无头范本）、`agentruntime/{ic_assembly,loop,pause,sse}.py`、`vision/*`（尺子 + 基线）、MAST 的测试记录（人工版任务定义）、`docs/v2/talks/repro/scan_corpus.py`（批跑检测器）。
 - VIGIL（历史复用规划；此条不是已移植代码清单）：`src/surfaces/*`、`physical_scanner.py` 的 PI×压电 IIR + Preisach + 蠕变 warp、`noise_injector.py`、`config/tip_universe.yaml`（α₁ 先验）。
