@@ -1,5 +1,5 @@
 {
- "note": "P7 privileged reference, seeds 0-29, etched-tip physics, code e35b5df (bench/p7-reference), run locally 2026-11-17 in three chunks of 10 seeds; judge run on every seed (finish=True). rel_err = R-hat / R_half - 1 with R_half the exact truth of the cited drags.",
+ "note": "P7 privileged reference, seeds 0-29, etched-tip physics, code fa99b2f (bench/p7-reference, merged with bench/p7-proto 370832c), run locally 2026-11-17 single-process in three chunks of 10 seeds; judge run on every seed (finish=True). rel_err = R-hat / R_half - 1 with R_half the exact truth of the cited drags. Identical to the e35b5df run.",
  "config": {
   "n_drags": 32,
   "manip_v": 0.002,
