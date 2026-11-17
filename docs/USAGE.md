@@ -593,6 +593,7 @@ p90 5.9 % (F_min), 3.7 % (decay length), 8.7 % (E_b), 354 s of instrument time. 
 
 ```bash
 python -m stmbench.cli baseline --paper P4 --seeds 30 --jobs 4 --json p4-baseline.json
+python -m stmbench.cli baseline --paper P3 --seeds 200 --jobs 8 --json p3-baseline.json
 ```
 
 A scripted baseline (`stmbench.baselines`) drives the instrument an agent gets over MCP and
@@ -603,6 +604,9 @@ the bar an agent should clear. P4 (2026-10-14): 150/150 on seeds 450–599, held
 until the code was final, with 984 s median instrument time (the privileged
 reference: 879 s); 300/300 on seeds 0–299, where it was developed. Per-seed results and
 the earlier held-out rounds: `docs/results/p4_baseline_seeds_*.json`, DESIGN §9.6.
+P3 (corral, DESIGN §9.7): the ring is found in a 60 nm survey, the tip judged from the ring and the spare
+atoms (`stmbench.analysis.corral`: ring width, ghost ring), the drift from two frames of the ring, the band bottom
+from a bare-terrace spectrum; results and per-seed records: `docs/results/p3_baseline_seeds_0-199.json`.
 
 ### Run directory
 
