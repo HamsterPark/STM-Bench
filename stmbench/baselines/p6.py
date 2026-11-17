@@ -20,8 +20,8 @@ frames and sweeps:
   (:func:`stmbench.analysis.adatoms.locate`) the tip is moved to — the resonance falls off over
   ~0.4 nm, and the judge asks for the sweep to start within 0.15 nm of the atom;
 * **the spectra**: lock-in on at a small amplitude (a large one widens the line, and the
-  fraction of it that reaches the junction is not known), the stabilisation point of imaging
-  (+0.1 V, outside the resonance), ±50 mV, several sweeps on the atom and several on the bare
+  fraction of it that reaches the junction is not known), stabilised at +50 mV and 100 pA (the
+  end of the window, outside the resonance), sweeping ±50 mV, several sweeps on the atom and several on the bare
   patch with the same settings; a sweep whose current steps (an unstable tip) is left out;
 * **the fit**: the atom's mean divided by the bare patch's mean, fitted with the Fano line shape
   through the instrument's thermal and lock-in broadening
@@ -65,9 +65,11 @@ AVOID_NM = 4.0
 WINDOW_V, POINTS, SETTLE_MS = 0.05, 201, 5.0
 AMP_MV, INTEG_MS = 3.0, 100.0
 N_ATOM, N_BARE = 6, 4
-#: the tip hangs on a qPlus fork: a poke at more than ~50 mV rings it up (a blunt, multiple tip
-#: and a spray of clusters that takes every atom within 15 nm), so pokes are made at 20 mV and
-#: 20 pA (the operator's rule of thumb for this sensor), imaging stays at the task's 0.1 V.
+#: pokes are made at 20 mV and 20 pA, a precaution: at a low bias the contact current stays small.
+#: (On a qPlus instrument a poke above ~50 mV rings the fork up, which blunts the tip and sprays
+#: clusters over every atom within 15 nm; this STM instrument's tip is an etched tungsten wire
+#: with no fork, since 1918eaa, and P6 opens at 50 mV, so the baseline would be fine without it.)
+#: Imaging stays at the task's bias.
 POKE_V, POKE_PA = 0.02, 20.0
 #: the stabilisation point of the sweeps (V): their window ends at +50 mV, outside the resonance
 SWEEP_BIAS_V = 0.05
