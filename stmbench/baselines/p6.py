@@ -78,8 +78,9 @@ RESERVE_S = 120.0
 CHECK_V = (-0.6, 0.3)
 CHECK_POINTS, CHECK_INTEG_MS, CHECK_AMP_MV = 150, 20.0, 10.0
 #: a bump in the check's residual above this fraction of the spectrum's level is not the
-#: sample's (a tip's peak is 0.5-0.8 of the density of states; the noise at 20 ms is ~1.5 %)
-FLAW_FRACTION = 0.10
+#: sample's (a tip's peak is 0.5-0.8 of the density of states; the noise at 20 ms is ~1.5 %; clean tips
+#: left 0.02-0.06 on the 30 dev3 seeds)
+FLAW_FRACTION = 0.08
 #: the residual within this of the fitted edge (V) is not read
 EDGE_MASK_V = 0.07
 TIP_ROUNDS = 3
