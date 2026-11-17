@@ -125,8 +125,8 @@ differ.
 
 What replay cannot show is that the records are every call the agent made. A record taken out of
 or added to the middle of the log shifts the time stamps of the actions after it, and a frame or
-spectrum added to the end has no hash line, but a call left off the end (or added at the end that
-saves nothing) is caught only by the record count in `session.json`, which the same account
+spectrum added to the end has no hash line, but a call left off the end is caught only by the record count
+in `session.json` (records added beyond that count are ignored, not graded), which the same account
 writes. Keeping the export out of the agent's reach is the machine's side of this.
 
 ## Open, not solved
@@ -145,7 +145,9 @@ writes. Keeping the export out of the agent's reach is the machine's side of thi
 - A task list baked into an image file is readable by whoever holds the image (`STM_NO_TASKS=1`
   bakes none; the list then has to arrive by another route).
 - Copy `session.json` first when collecting: it counts the log's records, and a count above what
-  `actions.jsonl` holds is refused as a log cut short.
+  `actions.jsonl` holds is refused as a log cut short. If the console is still writing, the later
+  copies may hold records beyond that count; the grader judges only the first N and leaves the rest
+  (with their digest lines) out, saying so in the result's `note`.
 
 ## The machine's side (`deploy/osworld/guest/`)
 
