@@ -19,6 +19,13 @@ import numpy as np
 from . import p7
 
 
+def scenario_budget_s() -> float:
+    """The scenario's instrument-time budget (s), read from its YAML."""
+    from stmsim.scenario import Scenario
+    from stmbench.instrument.core import SCENARIO_DIR
+    return float(Scenario.load(SCENARIO_DIR / f"{p7.SCENARIO}.yaml").budget["sim_hours"]) * 3600.0
+
+
 def _one(args: tuple) -> dict:
     seed, kw = args
     try:
@@ -32,7 +39,9 @@ def _pct(v, q):
     return float(np.percentile(v, q)) if v.size else float("nan")
 
 
-def summarize(rows: list[dict], budget_s: float = 5400.0) -> dict:
+def summarize(rows: list[dict], budget_s: float | None = None) -> dict:
+    if budget_s is None:
+        budget_s = scenario_budget_s()
     done = [r for r in rows if "error" not in r]
     atoms = [a for r in done for a in r["atoms"] if a.get("rel_err") is not None]
     err = [abs(a["rel_err"]) for a in atoms]
@@ -65,7 +74,7 @@ def main() -> None:
     ap.add_argument("--n-drags", type=int, default=32)
     ap.add_argument("--manip-v", type=float, default=p7.MANIP_V)
     ap.add_argument("--step", type=float, default=p7.STAIR_STEP)
-    ap.add_argument("--design", default="stair", choices=["stair", "fit"])
+    ap.add_argument("--design", default="fit", choices=["stair", "fit"])
     ap.add_argument("--no-judge", action="store_true", help="leave the judge out")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
