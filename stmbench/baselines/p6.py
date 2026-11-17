@@ -62,9 +62,15 @@ AVOID_NM = 4.0
 #: baseline either side; 101 points make 1 mV steps (thermal FWHM at 4.4 K is 1.3 meV).
 #: The modulation amplitude and the integration time are the trade the task is about: the
 #: line is broadened by √3·V_p (FWHM), the noise grows as 1/V_p and 1/√t_int.
-WINDOW_V, POINTS, SETTLE_MS = 0.05, 101, 5.0
-AMP_MV, INTEG_MS = 2.0, 200.0
+WINDOW_V, POINTS, SETTLE_MS = 0.05, 201, 5.0
+AMP_MV, INTEG_MS = 3.0, 100.0
 N_ATOM, N_BARE = 6, 4
+#: the tip hangs on a qPlus fork: a poke at more than ~50 mV rings it up (a blunt, multiple tip
+#: and a spray of clusters that takes every atom within 15 nm), so pokes are made at 20 mV and
+#: 20 pA (the operator's rule of thumb for this sensor), imaging stays at the task's 0.1 V.
+POKE_V, POKE_PA = 0.02, 20.0
+#: the stabilisation point of the sweeps (V): their window ends at +50 mV, outside the resonance
+SWEEP_BIAS_V = 0.05
 #: what is kept back when sweeps stop (s): the fit, the report
 RESERVE_S = 120.0
 
@@ -256,6 +262,24 @@ class Bench:
         self.log["n_sweeps"] = self.log.get("n_sweeps", 0) + 1
         return s
 
+    def low_bias(self, on: bool) -> None:
+        """20 mV / 20 pA for conditioning (see ``POKE_V``), or back to the imaging point."""
+        v, pa = (POKE_V, POKE_PA) if on else (self.ops.imaging_v, self.ops.imaging_pa)
+        if on:
+            self.v.act("set_setpoint", current_pa=pa)
+            self.v.act("set_bias", bias_v=v)
+        else:
+            self.v.act("set_bias", bias_v=v)
+            self.v.act("set_setpoint", current_pa=pa)
+
+    def condition(self):
+        """:meth:`Ops.condition` (pulses and shallow pokes) with the pokes at the low bias."""
+        self.low_bias(True)
+        try:
+            return self.ops.condition()
+        finally:
+            self.low_bias(False)
+
     def poke_ground(self, n: int, depth_nm: float) -> None:
         """Pokes on fresh ground 60 nm below home, as :meth:`Ops.poke_near` but of a chosen depth
         (a poke that does not reach contact changes nothing on the tip)."""
@@ -265,7 +289,7 @@ class Bench:
             k = ops.n_pokes
             ops.n_pokes += 1
             ops.go(hx + 3.0 * (k % 10) - 13.5, hy - 60.0 - 3.0 * (k // 10))
-            self.v.act("poke", depth_nm=depth_nm, dwell_s=0.5)
+            self.v.act("poke", depth_nm=depth_nm, dwell_s=0.5, bias_v=POKE_V)
         ops.go(hx, hy)
         ops.jumps.clear()
         self.log["pokes"] = self.log.get("pokes", 0) + n
@@ -326,10 +350,10 @@ def play(v: Blind, log: dict) -> dict | None:
     f, _ = ops.frame(*home, JUDGE_NM, JUDGE_PX, LINE_S)
     diag = diagnose(f)
     log["tip_first"] = diag["verdict"]
-    ops.poke_near()
+    bench.poke_ground(3, 0.4)
     waited = 120.0
     if diag["verdict"] != "ok":
-        diag, f = ops.condition()
+        diag, f = bench.condition()
         waited = 300.0
         if diag["verdict"] != "ok":
             raise RuntimeError("the tip could not be conditioned")
@@ -368,7 +392,7 @@ def play(v: Blind, log: dict) -> dict | None:
         else:
             raise RuntimeError(f"no isolated atom with a bare patch near home ({log['passed_over']})")
         if chosen is None:                     # the survey showed a blunt or double tip
-            d, f = ops.condition()
+            d, f = bench.condition()
             if d["verdict"] != "ok":
                 raise RuntimeError("the tip could not be conditioned")
             v.act("wait", seconds=300.0)
@@ -409,6 +433,7 @@ def _measure(bench: Bench, atom, bare, comp, log: dict) -> dict | None:
             break
         comp = (comp[0] + rx, comp[1] + ry)
         v.act("drift_comp", on=True, vx_nm_per_min=comp[0], vy_nm_per_min=comp[1])
+    v.act("set_bias", bias_v=SWEEP_BIAS_V)
     bench.lockin(AMP_MV)
     on_atom: list[dict] = []
     for _ in range(N_ATOM + 3):

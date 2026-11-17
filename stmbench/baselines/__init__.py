@@ -11,6 +11,7 @@ alone, which is the bar an agent should clear.
 from __future__ import annotations
 
 import statistics
+import sys
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor
 
@@ -22,9 +23,13 @@ PAPERS = {"P4": p4.run, "P6": p6.run}
 def _one(args: tuple[str, int]) -> dict:
     paper, seed = args
     try:
-        return PAPERS[paper](seed)
+        row = PAPERS[paper](seed)
     except Exception as exc:  # noqa: BLE001 — a failed seed is a result, not a crash
-        return {"paper": paper, "seed": int(seed), "success": False, "error": f"{type(exc).__name__}: {exc}"}
+        row = {"paper": paper, "seed": int(seed), "success": False, "error": f"{type(exc).__name__}: {exc}"}
+    # one line per finished seed, so a long run that dies still leaves what it did
+    print(f"{paper} seed {int(seed)}: success={row.get('success')} error={row.get('error')} "
+          f"err={row.get('err')} t={row.get('instrument_s')}", file=sys.stderr, flush=True)
+    return row
 
 
 def run_many(paper: str, seeds: list[int], *, jobs: int = 1) -> list[dict]:
