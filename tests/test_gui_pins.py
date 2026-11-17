@@ -1,5 +1,5 @@
 """Readings pinned on a plot (``PlotView``): a click pins the reading at the nearest data point, several clicks several
-pins, each numbered and listed in the numbers the hover readout gives; the viewer's Clear readings button and the next
+pins, each numbered and listed in the numbers the hover readout gives; the viewer's Clear plot readings button and the next
 data remove them. Nothing is found: the pins are where the reader clicked.
 
 Written for the round after screen trial 3 (step 44: the trace's hover readout gives exact values, "but only one per

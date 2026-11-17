@@ -169,7 +169,7 @@ def acts(recs: list[dict]) -> list[str]:
 # ── the layout ──
 @pytest.mark.parametrize("lang", ["zh", "en"])
 def test_every_action_has_its_controls_at_the_agreed_names_and_each_can_be_clicked(open_window, lang):
-    win = open_window(lang)
+    win = open_window(lang, scenario=P5)                     # the rig with every part: the qPlus rig shows the PLL group
     for tab, groups in layout.TABS:
         open_right(win, tab)
         for g in groups:
@@ -418,7 +418,7 @@ def test_the_field_last_clicked_tells_its_range_from_the_action_table_beside_the
     """The screen agent learnt the 100000 pA setpoint limit only from a refusal, in all three trials: the console showed the
     range of no field. The line beside the tabs describes the field last clicked, in the field's own unit, with the table's
     numbers, whole in the widest fonts, with no hover and no height of its own."""
-    win = open_window(lang)
+    win = open_window(lang, scenario=P5)                                       # the qPlus rig: every field is on screen
     line = shots.widget(win, "field.help")
     assert line.text() == ""                                                  # no field clicked yet: nothing to say
     where = {n: shots.widget(win, n).mapTo(win, shots.widget(win, n).rect().topLeft())
@@ -664,9 +664,9 @@ def test_the_status_strip_reads_in_units_and_counts_instrument_time(open_window)
     win = open_window("en")
     plain = win.status.plain_text()
     for want in ("Bias 0.050 V", "Setpoint 200 pA", "Z feedback ON", "Range 10 nA", "Withdrawn no", "Lock-in OFF",
-                 "Oscillation n/a", "Drift comp. OFF", "0:00:00 / 1:30:00", "Actions 0", P4, "READY"):
+                 "Drift comp. OFF", "0:00:00 / 1:30:00", "Actions 0", P4, "READY"):
         assert want in plain, want
-    assert "e-" not in plain
+    assert "e-" not in plain and "Oscillation" not in plain and "振荡" not in plain     # P4: no qPlus sensor
     scan_small(win)
     assert "Actions 1" in win.status.plain_text() and win.status.bar.value() > 0
     zh = open_window("zh", name="run_zh")
@@ -1934,15 +1934,16 @@ def test_on_off_pairs_and_the_range_row_show_the_state_the_instrument_reports(op
     assert checked(win, "run.lockin.on") and not checked(win, "run.lockin.off") and "Lock-in ON" in win.status.plain_text()
 
 
-def test_a_switch_the_rig_does_not_have_shows_neither_state_and_a_refused_click_does_not_stick(open_window):
+def test_a_switch_the_rig_does_not_have_is_not_on_the_screen_and_the_instrument_still_refuses_it(open_window):
     win = open_window("en")
     open_right(win, "spectroscopy")
-    assert not checked(win, "run.pll.on") and not checked(win, "run.pll.off")          # P4 has no qPlus sensor
-    assert "Oscillation n/a" in win.status.plain_text()
-    run_button(win, "run.pll.on")                                                       # the instrument refuses
+    assert not shots.widget(win, "group.pll").isVisible()                              # P4 has no qPlus sensor
+    assert "Oscillation" not in win.status.plain_text()
+    assert not checked(win, "run.pll.on") and not checked(win, "run.pll.off")
+    win.run_action("pll", {"on": True})                                                 # not by a click: the instrument refuses
     shots.settle(win)
     assert win.status.result.full_text() == "✗ refused: pll: this instrument has no qPlus sensor"
-    assert not checked(win, "run.pll.on") and not checked(win, "run.pll.off")          # the click did not leave it selected
+    assert not checked(win, "run.pll.on") and not checked(win, "run.pll.off")          # the call did not leave it selected
     qp = open_window("en", name="run_qplus", scenario=P5)
     open_right(qp, "spectroscopy")
     assert checked(qp, "run.pll.off") and "Oscillation OFF" in qp.status.plain_text()
@@ -2617,3 +2618,18 @@ def test_no_tooltip_comes_up_under_the_pointer(open_window):
     QApplication.sendEvent(b, QHelpEvent(QEvent.Type.ToolTip, QPoint(5, 5), b.mapToGlobal(QPoint(5, 5))))
     QApplication.processEvents()
     assert not QToolTip.isVisible()
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_pll_group_and_the_oscillation_reading_are_there_only_on_a_rig_with_a_qplus_sensor(open_window, lang):
+    p4 = open_window(lang)
+    open_right(p4, "spectroscopy")
+    p5 = open_window(lang, name="run_qplus", scenario=P5)
+    open_right(p5, "spectroscopy")
+    word = "Oscillation" if lang == "en" else "振荡"
+    assert not shots.widget(p4, "group.pll").isVisible() and word not in p4.status.plain_text()
+    assert shots.widget(p5, "group.pll").isVisible() and word in p5.status.plain_text()
+    assert shots.widget(p5, "run.pll.on").isVisible() and shots.widget(p5, "act.pll.amplitude_pm").isVisible()
+    # nothing else of the page went with it
+    for name in ("group.sts", "group.zspec", "group.lockin"):
+        assert shots.widget(p4, name).isVisible() and shots.widget(p5, name).isVisible()

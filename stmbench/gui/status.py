@@ -44,6 +44,8 @@ class StatusStrip(QFrame):
         self.setObjectName("strip")
         self.lang = lang
         self._budget: float | None = None
+        self._qplus = True                                # until the instrument's facts say there is no sensor
+        self._st: dict | None = None
         self._plain: dict[str, str] = {}
         self._last: tuple[bool | None, str] = (None, "")           # the last result: shown whenever nothing runs
         self._busy: str | None = None
@@ -156,6 +158,12 @@ class StatusStrip(QFrame):
         polish(self.state)
         self._plain["state"] = text
 
+    def set_has_qplus(self, has: bool) -> None:
+        """Whether the rig has a qPlus sensor; without one the strip has no oscillation reading."""
+        if has != self._qplus:
+            self._qplus = has
+            self.set_status(self._st)
+
     def set_status(self, st: dict | None) -> None:
         """Readings from ``status()``: instrument time against the budget, the action count, the readings."""
         if st is None:
@@ -163,6 +171,7 @@ class StatusStrip(QFrame):
             self.count.setText(f"{tr('actions', self.lang)} -")
             self.readings.setText("")
             return
+        self._st = st
         used, self._budget = float(st["instrument_time_s"]), st.get("budget_s")
         text = f"{tr('time', self.lang)} {fmt.hms(used)}" + (f" / {fmt.hms(self._budget)}" if self._budget else "")
         self.time.setText(text)
@@ -171,7 +180,7 @@ class StatusStrip(QFrame):
         self.count.setText(f"{tr('actions', self.lang)} {st['actions']}")
         mono, muted = style.mono_family(), style.COLORS["muted"]
         parts, plain = [], []
-        for key, value in fmt.reading_items(st, self.lang):
+        for key, value in fmt.reading_items(st, self.lang, self._qplus):
             label = one(key, self.lang)                  # eleven readings in two languages would not fit one line
             parts.append(f"<nobr><span style='color:{muted}'>{label}</span> "
                          f"<b style=\"font-family:'{mono}'\">{value.replace('<', '&lt;')}</b></nobr>")

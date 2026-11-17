@@ -82,6 +82,10 @@ class ActionPanel(QScrollArea):
         lay.addStretch(1)
         self.setWidget(body)
 
+    def set_group_visible(self, key: str, visible: bool) -> None:
+        """Show or hide one group (a rig without the part it controls, e.g. the qPlus sensor's PLL)."""
+        self.findChild(QGroupBox, f"group.{key}").setVisible(visible)
+
     # ── building ──
     def _group(self, g: Group) -> QGroupBox:
         box = QGroupBox(both(g.en, g.zh, self.lang))
