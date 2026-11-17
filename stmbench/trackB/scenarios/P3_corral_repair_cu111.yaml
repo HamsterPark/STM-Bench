@@ -194,3 +194,10 @@ notes: |
   2.82-4.45 %), biased high. Sheet chosen on seeds 0-999 and scored on seeds 1000-1999: 23/1000 = 2.30 %
   (1.54-3.43 %). This replaces the 4.8 % on 400 seeds above as the figure to hold against the 5 % gate:
   that interval straddled the gate, this one does not. No range, tolerance or rule changed.
+
+  **The rig's tip is an etched W wire, not a qPlus fork (2026-11-17, decided by the user).** A poke
+  above 50 mV no longer rings a fork up, and a reshaping pulse leaves a better tip with probability 0.55
+  instead of 0.50; the worlds at the start (layout, hidden draws, random streams) are unchanged.
+  The numbers above were measured with the qPlus form; the numbers on the new physics are re-run
+  on the P3 branch (bench/p3-osworld). A ledger recorded before this with a high-bias poke does not
+  replay with this code, and one with a pulse may not (docs/DESIGN.md, 2026-11-17).
