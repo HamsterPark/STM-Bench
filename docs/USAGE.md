@@ -282,7 +282,7 @@ current (pA), open on Z against the distance, headed by the conditions the instr
 (from where to where, how fast, the bias, the setpoint, the feedback) and nothing read off the curves - no
 mark, count or note on a step or a spike, which is for the reader to find; over a spectrum, a trace or a line
 profile a cursor reads out the data point nearest the pointer, its x and each curve's y, and a left click
-pins it, up to six pins, which Clear readings or the next data removes); on the right the Operate tab (every action a P4 episode uses,
+pins it, up to six pins, which Clear plot readings (the button beside Clear image markers, which clears the image's markers and its line profile) or the next data removes); on the right the Operate tab (every action a P4 episode uses,
 without scrolling at 1920x1080 or 1920x1016) and the Spectroscopy tab, whose On / Off pairs and range row
 show the state the instrument reports as the selected button, and under them the last five results, newest
 first, in the instrument's words (a refusal stays among them until five calls have followed it). A click queues its job at once with the field values read at that moment and

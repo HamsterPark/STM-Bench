@@ -128,7 +128,7 @@ S: dict[str, Pair] = {
     "flat_none": ("None", "无"),
     "tool_marker": ("Marker", "标记"),
     "tool_profile": ("Profile", "剖面"),
-    "clear_markers": ("Clear markers", "清除标记"),
+    "clear_markers": ("Clear image markers", "清除图像标记"),
     "lbl_flatten": ("Flatten", "拉平"),
     "lbl_contrast": ("Contrast", "对比度"),
     "lbl_zoom": ("Zoom", "缩放"),
@@ -180,5 +180,5 @@ S: dict[str, Pair] = {
     "yes": ("yes", "是"),
     "no": ("no", "否"),
     # the viewer, added after the screen trials of 2026-10-27/28 (gui-viewer)
-    "clear_readings": ("Clear readings", "清除读数"),
+    "clear_readings": ("Clear plot readings", "清除曲线读数"),
 }
