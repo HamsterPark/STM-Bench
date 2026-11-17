@@ -289,7 +289,7 @@ def test_force_spectra_taken_without_the_oscillation_are_not_evidence(oscillatin
     """The reference run of the test above, with the PLL switched off (or never on) before the
     pair is taken: the instrument still saves curves, but their Δf is noise, so the evidence
     fails. The value (the truth itself) is right either way."""
-    inst = Instrument(P5, 0)
+    inst = Instrument(P5, 0)                             # fixed seed: the result is deterministic
     w = inst.world
     reg = w.surface.site.adatoms
     atom = min(reg.atoms.values(), key=lambda a: math.hypot(*reg.site_xy(a.i, a.j, a.sub)))
@@ -306,15 +306,15 @@ def test_force_spectra_taken_without_the_oscillation_are_not_evidence(oscillatin
     on_atom = inst.act("zspec", sweep_nm=0.5, z_offset_nm=0.3, points=256)["spectrum"]
     go(ax + 6e-9, ay)
     clean = inst.act("zspec", sweep_nm=0.5, z_offset_nm=0.3, points=256)["spectrum"]
-    zs = [e for e in w.events if e["kind"] == "zspec"]
-    assert [e["oscillating"] for e in zs] == [oscillating] * 2
     truth = w.truth()
     for c in inst.scenario.claims:
         inst.report(c["id"], float(truth["force"][c["truth"].split(".", 1)[1]]), evidence=[on_atom, clean])
     out = inst.finish()
     det = inst.verdict.details["claims"]
     assert all(d["value_ok"] for d in det.values())
-    assert out["success"] is oscillating, {k: d["evidence"] for k, d in det.items()}
+    # judged evidence, not the flag: at 39fcd13 the noise-only pair passed (seed 0: 5 of seeds 0-5 did)
+    assert {k: d["evidence_ok"] for k, d in det.items()} == {k: oscillating for k in det},         {k: d["evidence"] for k, d in det.items()}
+    assert out["success"] is oscillating
 
 
 def test_the_oscillation_flag_is_not_in_the_events_digest():
