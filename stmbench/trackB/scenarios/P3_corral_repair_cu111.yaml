@@ -41,7 +41,7 @@ task_en: >-
   atoms so that the corral closes, then measure the radius of the repaired corral (nm) from a
   topograph and the dI/dV spectrum at its centre, and report the radius and the energies of the
   two lowest resolvable resonance peaks (meV, relative to the Fermi level) with ReportResult.
-budget: {sim_hours: 5, wire_cmds: 600000}
+budget: {sim_hours: 6, wire_cmds: 720000}
 hidden:
   adatoms:
     ring_n: [36, 60]
@@ -181,7 +181,11 @@ notes: |
   agent sees (stmbench/baselines/p3_repair.py) finds the spares and the sites from frames and
   needs far longer. Under 2.5 h its successes on the hold-out seeds 240-329 took a median 4910 s
   and a p90 6001 s, and 8 of its 90 runs ran out of time, which left an operator slower than that
-  script no room. 5 h is 3.0 times that p90, as P4's 1.5 h is 3.4 times its baseline's. Reported
+  script no room. 5 h is 3.0 times that p90, as P4's 1.5 h is 3.4 times its baseline's. Later that
+  day it became 6 h (wire_cmds 720000): under 5 h the final baseline (docs/DESIGN.md 9.8) is no
+  longer cut off by the budget, and its successes on seeds 240-329 took a p90 of 7081 s, so 5 h was
+  only 2.5 times it. 6 h is 3.05 times, the rule P4 (3.4) and the measurement P3 (2.9-3.3) follow.
+  No run failed on the 5 h budget, so those results stand under 6 h. Reported
   |error|: peaks median 1.1 meV, p90 about 3 meV; radius median 0.02 nm, p90 0.05 nm. A tip that
   starts blunt, double or unstable is conditioned far from the corral first, and again whenever a
   drag changes it (median 3 conditioning rounds per run over seeds 0-29 and 210-329; 26 of the 28
