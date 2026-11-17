@@ -180,7 +180,6 @@ class _NoWorld:
 
 
 @needs_p6
-@pytest.mark.slow
 def test_a_reduced_session_reaches_a_report_that_cites_sweeps(monkeypatch):
     """One seed through the agent's interface only (the guard raises at any other attribute):
     survey, pokes, the check of the tip, the drift, the atom, sweeps on it and on its bare patch,
