@@ -319,12 +319,14 @@ def _evidence(c: dict, lang: str, sc=None) -> str:
                   f"evidence 中至少引用 {a_n} 条在吸附原子正上方（横向偏离不超过 "
                   f"{lateral} nm）测的 Δf(z) 曲线，越过 Δf 极小值后至少再逼近 "
                   f"{span} pm，中途没有跳变、没有接触；以及至少 "
-                  f"{b_n} 条在离吸附原子 {far} nm 以外的干净表面上测的曲线（没有接触）",
+                  f"{b_n} 条在离吸附原子 {far} nm 以外的干净表面上测的曲线（没有接触）；"
+                  f"每条曲线都要在 qPlus 振荡开启（PLL 输出开）时测得",
                   f"cite at least {_count(a_n, 'Δf(z) curve', 'Δf(z) curves')} in the evidence field, "
                   f"measured directly above the adatom (lateral offset at most {lateral} nm), continuing at "
                   f"least {span} pm closer after passing the Δf minimum, with no jump and no contact along "
                   f"the sweep; and at least {_count(b_n, 'curve', 'curves')} measured on the clean surface "
-                  f"more than {far} nm from the adatom (no contact)")
+                  f"more than {far} nm from the adatom (no contact); every curve must be taken with the "
+                  f"qPlus oscillation on (PLL output on)")
     if kind == "didv_maps":
         n, energies = int(rule.get("min_n", 1)), int(rule.get("min_energies", 1))
         v_lo, v_hi, near = _num(rule.get("v_lo_max")), _num(rule.get("v_hi_min")), \

@@ -1,7 +1,16 @@
 {
+ "provenance": {
+  "commit": "1918eaa",
+  "date": "2026-11-17",
+  "command": "python -m stmbench.cli baseline --paper P4 --seeds 150 --first-seed 450 --jobs 8 --json ...",
+  "where": "khwu cluster, job 66809, 8 workers, Python 3.13, Linux",
+  "rig": "reference-stm with an etched W tip (no qPlus fork)",
+  "control": "the parent 39fcd13 (qPlus tip), same command, job 66819: no seed changes outcome between the two commits",
+  "previous_version": "the file of 2026-10-14 (code of that day) is in git history at 39fcd13; this file replaces it with a re-run of the current code, no protocol or tolerance change"
+ },
  "summary": {
   "n": 150,
-  "success_rate": 1.0,
+  "success_rate": 0.9933333333333333,
   "by_tip": {
    "blunt": {
     "success": 30,
@@ -20,16 +29,18 @@
     "n": 30
    },
    "unstable": {
-    "success": 22,
+    "success": 21,
     "n": 22
    }
   },
   "instrument_s": {
-   "median": 984.2903208338629,
-   "p90": 1410.0583027863208,
-   "max": 2330.580303198126
+   "median": 986.0976342890667,
+   "p90": 1533.2770355632051,
+   "max": 3780.6496142169876
   },
-  "failures": {}
+  "failures": {
+   "RuntimeError: the work area was not found again": 1
+  }
  },
  "runs": [
   {
@@ -45,9 +56,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.008981050764862056
+    "target_site": 0.008981050759109228
    },
-   "instrument_s": 960.564343253831,
+   "instrument_s": 960.5643432538347,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -62,45 +73,45 @@
     }
    ],
    "lattice_deg": 57.160000000000004,
-   "lattice_rms_nm": 0.008750081454454814,
+   "lattice_rms_nm": 0.008750081454912271,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
    "candidates": 3,
    "start_nm": [
-    4.419898643332832,
-    5.987406919397992
+    4.419898643331678,
+    5.987406919398685
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.694
     },
     {
      "r_kohm": 131.1,
-     "spikes": 8,
+     "hops": 8,
      "off_goal_nm": 1.672
     },
     {
      "r_kohm": 104.9,
-     "spikes": 7,
+     "hops": 7,
      "off_goal_nm": 0.016
     }
    ],
@@ -119,7 +130,7 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.004237040014553566
+    "target_site": 0.004237040011318847
    },
    "instrument_s": 580.1673571014575,
    "tip_condition": "good",
@@ -138,19 +149,19 @@
     }
    ],
    "lattice_deg": 5.888,
-   "lattice_rms_nm": 0.022840573795426804,
+   "lattice_rms_nm": 0.022840573795533604,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 2,
    "start_nm": [
-    -2.182675876619605,
-    11.974922098397478
+    -2.1826758766209906,
+    11.974922098398569
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 17,
+     "hops": 17,
      "off_goal_nm": 0.019
     }
    ],
@@ -169,12 +180,12 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.005216333389889606
+    "target_site": 0.004862957341913623
    },
-   "instrument_s": 1570.082347491545,
+   "instrument_s": 1570.0973665357888,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
    "tip_rounds": 6,
    "drift_atoms": [
@@ -185,42 +196,42 @@
      "edge": 2
     }
    ],
-   "lattice_deg": 2.5220000000000002,
-   "lattice_rms_nm": 0.010222146438856706,
+   "lattice_deg": 2.5860000000000003,
+   "lattice_rms_nm": 0.008281378352639113,
    "lattice_vectors": 6,
    "ruler_atoms": 4,
    "survey_atoms": 4,
    "candidates": 2,
    "start_nm": [
-    -12.761974578816695,
-    -2.329031053049789
+    -12.766705545965905,
+    -2.329694750018824
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 15,
-     "off_goal_nm": 0.248
+     "hops": 16,
+     "off_goal_nm": 0.251
     },
     {
      "r_kohm": 163.8,
-     "spikes": 1,
-     "off_goal_nm": 0.01
+     "hops": 1,
+     "off_goal_nm": 0.011
     }
    ],
    "r_success_kohm": 163.84
@@ -238,9 +249,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.005299416213186336
+    "target_site": 0.005299416208337057
    },
-   "instrument_s": 814.7592805316202,
+   "instrument_s": 814.7592805316199,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -255,33 +266,33 @@
     }
    ],
    "lattice_deg": 53.242000000000004,
-   "lattice_rms_nm": 0.010518559764935228,
+   "lattice_rms_nm": 0.010518559764515517,
    "lattice_vectors": 91,
    "ruler_atoms": 14,
    "survey_atoms": 14,
    "candidates": 6,
    "start_nm": [
-    2.5428469592847307,
-    1.9132606646247865
+    2.542846959284603,
+    1.913260664625895
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 2,
+     "hops": 1,
      "off_goal_nm": 3.588
     },
     {
      "r_kohm": 256.0,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 3.094
     },
     {
      "r_kohm": 204.8,
-     "spikes": 13,
+     "hops": 13,
      "off_goal_nm": 0.011
     }
    ],
@@ -300,9 +311,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.0043602434681930995
+    "target_site": 0.004360243460222777
    },
-   "instrument_s": 1152.8326628677055,
+   "instrument_s": 1152.8326628677023,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -319,36 +330,36 @@
     }
    ],
    "lattice_deg": 30.532000000000004,
-   "lattice_rms_nm": 0.01078506228659288,
+   "lattice_rms_nm": 0.01078506228607471,
    "lattice_vectors": 66,
    "ruler_atoms": 12,
    "survey_atoms": 12,
    "candidates": 3,
    "start_nm": [
-    1.0493553340611719,
-    -5.849253897420979
+    1.0493553340608308,
+    -5.849253897422724
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 6,
+     "hops": 4,
      "off_goal_nm": 2.649
     },
     {
      "r_kohm": 163.8,
-     "spikes": 12,
+     "hops": 11,
      "off_goal_nm": 0.004
     }
    ],
@@ -367,9 +378,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.005502447603052991
+    "target_site": 0.005502447597171175
    },
-   "instrument_s": 774.136417203325,
+   "instrument_s": 774.1364172033212,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -385,29 +396,29 @@
     }
    ],
    "lattice_deg": 45.388000000000005,
-   "lattice_rms_nm": 0.015533155719963275,
+   "lattice_rms_nm": 0.015533155719762683,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 3,
    "start_nm": [
-    3.2424247085204527,
-    -1.848870710085965
+    3.242424708519927,
+    -1.8488707100871515
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.869
     },
     {
      "r_kohm": 320.0,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 3.39
     },
     {
      "r_kohm": 256.0,
-     "spikes": 15,
+     "hops": 1,
      "off_goal_nm": 0.004
     }
    ],
@@ -426,9 +437,9 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.005748036831992682
+    "target_site": 0.0037500521803084013
    },
-   "instrument_s": 948.9701061448461,
+   "instrument_s": 948.971992754245,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -444,25 +455,25 @@
     }
    ],
    "lattice_deg": 54.55200000000001,
-   "lattice_rms_nm": 0.05383489783502947,
+   "lattice_rms_nm": 0.05389685212570185,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 5,
    "start_nm": [
-    -0.5244868169490076,
-    4.678255105511422
+    -0.5237979566091227,
+    4.679453764611523
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 3,
+     "hops": 1,
      "off_goal_nm": 3.338
     },
     {
      "r_kohm": 320.0,
-     "spikes": 14,
-     "off_goal_nm": 0.002
+     "hops": 14,
+     "off_goal_nm": 0.004
     }
    ],
    "r_success_kohm": 320.0
@@ -480,9 +491,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.003842914102305728
+    "target_site": 0.0038429141103012193
    },
-   "instrument_s": 968.4262125475724,
+   "instrument_s": 968.4262125475553,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -496,41 +507,41 @@
     }
    ],
    "lattice_deg": 38.385999999999996,
-   "lattice_rms_nm": 0.00723534274447812,
+   "lattice_rms_nm": 0.00723534274438298,
    "lattice_vectors": 15,
    "ruler_atoms": 6,
    "survey_atoms": 6,
    "candidates": 5,
    "start_nm": [
-    0.4064686271827753,
-    1.6464287686860075
+    0.40646862718340415,
+    1.6464287686883452
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.77
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 15,
+     "hops": 13,
      "off_goal_nm": 0.438
     },
     {
      "r_kohm": 163.8,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 0.01
     }
    ],
@@ -549,9 +560,9 @@
    "on_goal": true,
    "n_bystanders": 1,
    "abs_err": {
-    "target_site": 0.006120425130774704
+    "target_site": 0.005923718777979057
    },
-   "instrument_s": 1084.2827578556316,
+   "instrument_s": 1084.283898601855,
    "tip_condition": "blunt",
    "atoms_tried": 1,
    "tip_first": "blunt",
@@ -568,29 +579,29 @@
     }
    ],
    "lattice_deg": 4.368,
-   "lattice_rms_nm": 0.01402012798440496,
+   "lattice_rms_nm": 0.013365314386979488,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 4,
    "start_nm": [
-    -0.5230002460947318,
-    -7.37578907950963
+    -0.5243890772220254,
+    -7.375747532608248
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 3.461
     },
     {
      "r_kohm": 256.0,
-     "spikes": 14,
-     "off_goal_nm": 0.03
+     "hops": 14,
+     "off_goal_nm": 0.029
     }
    ],
    "r_success_kohm": 256.0
@@ -608,9 +619,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.005521872342552217
+    "target_site": 0.005521872345722745
    },
-   "instrument_s": 798.7900133462342,
+   "instrument_s": 798.7900133462341,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -624,36 +635,36 @@
     }
    ],
    "lattice_deg": 38.656000000000006,
-   "lattice_rms_nm": 0.015730789290065078,
+   "lattice_rms_nm": 0.0157307892900802,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 6,
    "start_nm": [
-    1.9739618431635506,
-    -0.44626491282775405
+    1.9739618431631776,
+    -0.44626491282640757
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 8,
+     "hops": 7,
      "off_goal_nm": 2.221
     },
     {
      "r_kohm": 163.8,
-     "spikes": 10,
+     "hops": 9,
      "off_goal_nm": 0.001
     }
    ],
@@ -672,9 +683,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.0049407010315509915
+    "target_site": 0.0049407010585808065
    },
-   "instrument_s": 988.6789180222495,
+   "instrument_s": 988.6789180222423,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -689,49 +700,49 @@
     }
    ],
    "lattice_deg": 5.51,
-   "lattice_rms_nm": 0.01184622612903483,
+   "lattice_rms_nm": 0.01184622612916022,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
    "candidates": 3,
    "start_nm": [
-    3.1342823221857756,
-    -0.8170094069400271
+    3.1342823221872322,
+    -0.8170094069398885
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.855
     },
     {
      "r_kohm": 104.9,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 3.347
     },
     {
      "r_kohm": 83.9,
-     "spikes": 14,
+     "hops": 14,
      "off_goal_nm": 0.012
     }
    ],
@@ -750,7 +761,7 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.004253327935441386
+    "target_site": 0.004253327938430577
    },
    "instrument_s": 852.5117791915345,
    "tip_condition": "double",
@@ -767,19 +778,19 @@
     }
    ],
    "lattice_deg": 47.82,
-   "lattice_rms_nm": 0.05421232915234479,
+   "lattice_rms_nm": 0.05421232915209002,
    "lattice_vectors": 28,
    "ruler_atoms": 8,
    "survey_atoms": 8,
    "candidates": 3,
    "start_nm": [
-    3.77876145294627,
-    0.974612142373342
+    3.7787614529496736,
+    0.9746121423737435
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 17,
+     "hops": 3,
      "off_goal_nm": 0.01
     }
    ],
@@ -798,9 +809,9 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.008602120784541457
+    "target_site": 0.008602120815359493
    },
-   "instrument_s": 835.0436381566902,
+   "instrument_s": 835.0436381566876,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -815,40 +826,40 @@
     }
    ],
    "lattice_deg": 0.7340000000000001,
-   "lattice_rms_nm": 0.012738501239202662,
+   "lattice_rms_nm": 0.012738501239140783,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 4,
    "start_nm": [
-    -8.304130039350998,
-    -8.627083601591966
+    -8.304130039349548,
+    -8.62708360159019
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 15,
+     "hops": 11,
      "off_goal_nm": 0.254
     },
     {
      "r_kohm": 163.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 0.005
     }
    ],
@@ -867,9 +878,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.0012026495617808626
+    "target_site": 0.0012026495663728174
    },
-   "instrument_s": 803.9876557609432,
+   "instrument_s": 803.9876557609401,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -884,36 +895,36 @@
     }
    ],
    "lattice_deg": 1.5060000000000002,
-   "lattice_rms_nm": 0.013756033471948871,
+   "lattice_rms_nm": 0.013756033472418385,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 5,
    "start_nm": [
-    -3.1746892584106448,
-    -0.29970511598410354
+    -3.1746892584113766,
+    -0.29970511598424565
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.697
     },
     {
      "r_kohm": 163.8,
-     "spikes": 15,
+     "hops": 15,
      "off_goal_nm": 0.019
     }
    ],
@@ -932,16 +943,16 @@
    "on_goal": false,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.005487653188667062
+    "target_site": 0.0015690709571165586
    },
-   "instrument_s": 1397.9039707705929,
+   "instrument_s": 1453.8193441911408,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
    "pokes": 3,
    "tip_rounds": 1,
    "drift_atoms": [
-    5
+    4
    ],
    "passed_over": [
     {
@@ -952,62 +963,63 @@
      "neighbour": 2
     }
    ],
-   "lattice_deg": 42.736,
-   "lattice_rms_nm": 0.035239922219206764,
-   "lattice_vectors": 28,
-   "ruler_atoms": 8,
-   "survey_atoms": 8,
-   "candidates": 4,
+   "lattice_deg": 42.757999999999996,
+   "lattice_rms_nm": 0.06408127352142522,
+   "lattice_vectors": 36,
+   "ruler_atoms": 9,
+   "survey_atoms": 9,
+   "candidates": 5,
    "start_nm": [
-    23.520511270717638,
-    7.739682153680036
+    23.459540486218327,
+    7.727531821862801
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.803
     },
     {
      "r_kohm": 83.9,
-     "spikes": 16,
+     "hops": 16,
      "off_goal_nm": 0.239
     },
     {
      "r_kohm": 83.9,
-     "spikes": 0
+     "hops": 1,
+     "off_goal_nm": 0.23
     },
     {
-     "r_kohm": 67.1,
-     "spikes": 1,
-     "off_goal_nm": 0.02
+     "r_kohm": 83.9,
+     "hops": 1,
+     "off_goal_nm": 0.029
     }
    ],
-   "r_success_kohm": 67.10886400000001
+   "r_success_kohm": 83.88608000000002
   },
   {
    "paper": "P4",
@@ -1020,18 +1032,19 @@
     "bystander_max_shift_nm": true
    },
    "on_goal": true,
-   "n_bystanders": 0,
+   "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.008257751125132147
+    "target_site": 0.006874352836250351
    },
-   "instrument_s": 2330.580303198126,
+   "instrument_s": 2869.3808519292447,
    "tip_condition": "double",
-   "atoms_tried": 2,
+   "atoms_tried": 1,
    "tip_first": "double",
-   "pokes": 6,
-   "tip_rounds": 3,
+   "pokes": 3,
+   "tip_rounds": 5,
    "drift_atoms": [
     4,
+    6,
     3,
     3
    ],
@@ -1039,75 +1052,57 @@
     {
      "goal": 2,
      "edge": 2
-    },
-    {
-     "edge": 3,
-     "goal": 2,
-     "avoid": 1
     }
    ],
-   "lattice_deg": 45.868,
-   "lattice_rms_nm": 0.00847785010477213,
-   "lattice_vectors": 28,
-   "ruler_atoms": 8,
-   "survey_atoms": 8,
-   "candidates": 2,
+   "lattice_deg": 45.86000000000001,
+   "lattice_rms_nm": 0.010905940912667852,
+   "lattice_vectors": 36,
+   "ruler_atoms": 9,
+   "survey_atoms": 9,
+   "candidates": 5,
    "start_nm": [
-    4.677771432652079,
-    11.38280135013855
+    -2.367056980308277,
+    -5.788173589772633
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 1
+     "hops": 1,
+     "off_goal_nm": 3.671
     },
     {
-     "r_kohm": 400.0,
-     "spikes": 0
+     "r_kohm": 131.1,
+     "hops": 0
     },
     {
-     "r_kohm": 320.0,
-     "spikes": 2,
-     "off_goal_nm": 3.436
-    },
-    {
-     "r_kohm": 256.0,
-     "spikes": 0
-    },
-    {
-     "r_kohm": 204.8,
-     "spikes": 0
-    },
-    {
-     "r_kohm": 163.8,
-     "spikes": 15,
-     "off_goal_nm": 0.002
+     "r_kohm": 104.9,
+     "hops": 15,
+     "off_goal_nm": 0.003
     }
    ],
-   "tip_mid": 1,
+   "tip_mid": 3,
    "recoveries": [
+    "conditioned",
+    "conditioned",
     "conditioned"
    ],
-   "lost": [
-    "the atom is not along its path"
-   ],
-   "r_success_kohm": 163.84
+   "r_success_kohm": 104.8576
   },
   {
    "paper": "P4",
@@ -1122,9 +1117,9 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.0021583414607339152
+    "target_site": 0.0021583414601789495
    },
-   "instrument_s": 878.9800988910843,
+   "instrument_s": 878.9800988910844,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -1140,47 +1135,47 @@
     }
    ],
    "lattice_deg": 40.584,
-   "lattice_rms_nm": 0.049474078646679395,
+   "lattice_rms_nm": 0.04947407864670129,
    "lattice_vectors": 91,
    "ruler_atoms": 14,
    "survey_atoms": 14,
    "candidates": 6,
    "start_nm": [
-    -3.7634870774564106,
-    5.775541138956676
+    -3.7634870774574196,
+    5.775541138955729
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 83.9,
-     "spikes": 18,
+     "hops": 4,
      "off_goal_nm": 0.009
     }
    ],
@@ -1199,9 +1194,9 @@
    "on_goal": true,
    "n_bystanders": 1,
    "abs_err": {
-    "target_site": 0.0014848229802989403
+    "target_site": 0.0014848229929627609
    },
-   "instrument_s": 1098.7976620705958,
+   "instrument_s": 1098.7976620705792,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -1216,7 +1211,7 @@
     }
    ],
    "lattice_deg": 53.72200000000001,
-   "lattice_rms_nm": 0.015868700511663402,
+   "lattice_rms_nm": 0.015868700511721647,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
@@ -1225,39 +1220,39 @@
     "too few fiducials around the atom"
    ],
    "start_nm": [
-    -9.591617566412152,
-    2.399913306910566
+    -9.591617566412099,
+    2.3999133069110776
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.855
     },
     {
      "r_kohm": 131.1,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.598
     },
     {
      "r_kohm": 104.9,
-     "spikes": 15,
+     "hops": 1,
      "off_goal_nm": 0.009
     }
    ],
@@ -1276,48 +1271,48 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.0023234495393716606
+    "target_site": 0.012118467767207531
    },
-   "instrument_s": 1133.8494194071122,
+   "instrument_s": 1041.0267206542119,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
-   "tip_rounds": 2,
+   "tip_rounds": 1,
    "drift_atoms": [
     5
    ],
    "passed_over": [
     {
-     "edge": 4,
+     "edge": 2,
      "path": 1
     }
    ],
-   "lattice_deg": 52.37800000000001,
-   "lattice_rms_nm": 0.014652353479572104,
-   "lattice_vectors": 66,
-   "ruler_atoms": 12,
-   "survey_atoms": 12,
+   "lattice_deg": 52.368,
+   "lattice_rms_nm": 0.01697069465240076,
+   "lattice_vectors": 45,
+   "ruler_atoms": 10,
+   "survey_atoms": 10,
    "candidates": 7,
    "start_nm": [
-    -3.503760226445202,
-    2.1917456219037064
+    -3.306107864358701,
+    1.0189746106088862
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 1,
-     "off_goal_nm": 3.756
+     "hops": 1,
+     "off_goal_nm": 3.766
     },
     {
      "r_kohm": 320.0,
-     "spikes": 7,
-     "off_goal_nm": 2.082
+     "hops": 7,
+     "off_goal_nm": 2.08
     },
     {
      "r_kohm": 256.0,
-     "spikes": 9,
-     "off_goal_nm": 0.014
+     "hops": 9,
+     "off_goal_nm": 0.007
     }
    ],
    "r_success_kohm": 256.0
@@ -1335,12 +1330,12 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.006201116497587756
+    "target_site": 0.005715793534669772
    },
-   "instrument_s": 1172.8708882404985,
+   "instrument_s": 1533.8825487071126,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
    "tip_rounds": 1,
    "drift_atoms": [
@@ -1354,49 +1349,66 @@
     }
    ],
    "lattice_deg": 6.1080000000000005,
-   "lattice_rms_nm": 0.05344892648766865,
+   "lattice_rms_nm": 0.05344892648793575,
    "lattice_vectors": 105,
    "ruler_atoms": 15,
    "survey_atoms": 15,
    "candidates": 4,
    "start_nm": [
-    3.819747577503012,
-    2.947615131564355
+    3.819747577501701,
+    2.9476151315593704
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 3,
+     "hops": 3,
      "off_goal_nm": 3.356
     },
     {
      "r_kohm": 204.8,
-     "spikes": 13,
+     "hops": 14,
      "off_goal_nm": 0.191
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 1,
+     "off_goal_nm": 0.191
     },
     {
-     "r_kohm": 163.8,
-     "spikes": 0
+     "r_kohm": 204.8,
+     "hops": 1,
+     "off_goal_nm": 0.179
     },
     {
-     "r_kohm": 131.1,
-     "spikes": 1,
-     "off_goal_nm": 0.115
+     "r_kohm": 204.8,
+     "hops": 1,
+     "off_goal_nm": 0.171
+    },
+    {
+     "r_kohm": 204.8,
+     "hops": 1,
+     "off_goal_nm": 0.124
+    },
+    {
+     "r_kohm": 204.8,
+     "hops": 1,
+     "off_goal_nm": 0.121
+    },
+    {
+     "r_kohm": 204.8,
+     "hops": 1,
+     "off_goal_nm": 0.118
     }
    ],
-   "r_success_kohm": 131.072
+   "r_success_kohm": 204.8
   },
   {
    "paper": "P4",
@@ -1411,9 +1423,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.0063802581403861825
+    "target_site": 0.006380258137702949
    },
-   "instrument_s": 1031.6187674607572,
+   "instrument_s": 1031.6187674607625,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -1429,29 +1441,29 @@
     }
    ],
    "lattice_deg": 8.144000000000002,
-   "lattice_rms_nm": 0.013033625940318304,
+   "lattice_rms_nm": 0.01303362593818825,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 1,
    "start_nm": [
-    9.340925045887374,
-    -7.94041890000161
+    9.340925045885857,
+    -7.9404188999974465
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 7,
+     "hops": 6,
      "off_goal_nm": 2.34
     },
     {
      "r_kohm": 320.0,
-     "spikes": 5,
+     "hops": 5,
      "off_goal_nm": 1.172
     },
     {
      "r_kohm": 256.0,
-     "spikes": 5,
+     "hops": 5,
      "off_goal_nm": 0.008
     }
    ],
@@ -1470,9 +1482,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.0032149158582524665
+    "target_site": 0.0032149158563159106
    },
-   "instrument_s": 863.4826312292171,
+   "instrument_s": 863.4826312292097,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -1487,34 +1499,34 @@
     }
    ],
    "lattice_deg": 51.855999999999995,
-   "lattice_rms_nm": 0.018142391247954963,
+   "lattice_rms_nm": 0.018142391248032987,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
    "candidates": 4,
    "start_nm": [
-    -1.048685870979508,
-    5.121648224181257
+    -1.048685870979881,
+    5.121648224183131
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.755
     },
     {
      "r_kohm": 320.0,
-     "spikes": 3,
+     "hops": 2,
      "off_goal_nm": 3.013
     },
     {
      "r_kohm": 256.0,
-     "spikes": 3,
+     "hops": 1,
      "off_goal_nm": 2.263
     },
     {
      "r_kohm": 204.8,
-     "spikes": 10,
+     "hops": 9,
      "off_goal_nm": 0.001
     }
    ],
@@ -1533,9 +1545,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.01328418869479363
+    "target_site": 0.013284188664231592
    },
-   "instrument_s": 937.0520962372942,
+   "instrument_s": 937.052096237291,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -1550,45 +1562,45 @@
     }
    ],
    "lattice_deg": 12.49,
-   "lattice_rms_nm": 0.02351031585852514,
+   "lattice_rms_nm": 0.023510315859798847,
    "lattice_vectors": 78,
    "ruler_atoms": 13,
    "survey_atoms": 13,
    "candidates": 7,
    "start_nm": [
-    3.9277734622115013,
-    0.5566573378019726
+    3.927773462209572,
+    0.5566573377956168
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.652
     },
     {
      "r_kohm": 131.1,
-     "spikes": 6,
+     "hops": 7,
      "off_goal_nm": 2.257
     },
     {
      "r_kohm": 104.9,
-     "spikes": 10,
+     "hops": 9,
      "off_goal_nm": 0.014
     }
    ],
@@ -1607,9 +1619,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.0042958646664481796
+    "target_site": 0.004295864659684176
    },
-   "instrument_s": 935.6724872065408,
+   "instrument_s": 935.6724872065338,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -1624,48 +1636,48 @@
     }
    ],
    "lattice_deg": 7.492,
-   "lattice_rms_nm": 0.013573350929869204,
+   "lattice_rms_nm": 0.013573350929702405,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 6,
    "start_nm": [
-    0.16240871552717095,
-    4.909772436461244
+    0.16240871552570013,
+    4.909772436461397
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.848
     },
     {
      "r_kohm": 83.9,
-     "spikes": 16,
+     "hops": 16,
      "off_goal_nm": 0.015
     }
    ],
@@ -1682,50 +1694,50 @@
     "bystander_max_shift_nm": true
    },
    "on_goal": true,
-   "n_bystanders": 6,
+   "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.006640157119612893
+    "target_site": 0.006137367063691982
    },
-   "instrument_s": 1140.1451803342993,
+   "instrument_s": 1659.5874487956794,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
-   "tip_rounds": 1,
+   "tip_rounds": 4,
    "drift_atoms": [
-    4
+    2
    ],
+   "surface_jumps": 1,
    "passed_over": [
     {
-     "edge": 4,
-     "neighbour": 2,
-     "goal": 1
+     "edge": 5,
+     "neighbour": 2
     }
    ],
-   "lattice_deg": 34.812000000000005,
-   "lattice_rms_nm": 0.028339163281954762,
-   "lattice_vectors": 36,
-   "ruler_atoms": 9,
-   "survey_atoms": 9,
-   "candidates": 2,
+   "lattice_deg": 34.790000000000006,
+   "lattice_rms_nm": 0.022555601473720124,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
+   "candidates": 1,
    "start_nm": [
-    -1.6710081493802988,
-    7.797869285420358
+    10.143098881705779,
+    14.950387585484208
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 15,
-     "off_goal_nm": 0.661
+     "hops": 12,
+     "off_goal_nm": 0.844
     },
     {
      "r_kohm": 256.0,
-     "spikes": 3,
-     "off_goal_nm": 0.005
+     "hops": 4,
+     "off_goal_nm": 0.059
     }
    ],
    "r_success_kohm": 256.0
@@ -1743,9 +1755,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.0021789856289474
+    "target_site": 0.002178985636009397
    },
-   "instrument_s": 1266.987735508385,
+   "instrument_s": 1266.9877355083645,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -1760,43 +1772,43 @@
     }
    ],
    "lattice_deg": 15.112000000000002,
-   "lattice_rms_nm": 0.01277439499283971,
+   "lattice_rms_nm": 0.012774394992863482,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
    "candidates": 2,
    "start_nm": [
-    8.384348307218595,
-    4.937697790024965
+    8.38434830721841,
+    4.937697790024382
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 1,
+     "hops": 2,
      "off_goal_nm": 3.823
     },
     {
      "r_kohm": 256.0,
-     "spikes": 2,
+     "hops": 1,
      "off_goal_nm": 3.334
     },
     {
      "r_kohm": 204.8,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 2.905
     },
     {
      "r_kohm": 163.8,
-     "spikes": 12,
+     "hops": 12,
      "off_goal_nm": 0.213
     },
     {
      "r_kohm": 163.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 0.044
     }
    ],
@@ -1815,9 +1827,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.006166951538398885
+    "target_site": 0.006620931528494184
    },
-   "instrument_s": 985.5365774682007,
+   "instrument_s": 985.5341026781431,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -1831,30 +1843,30 @@
      "edge": 6
     }
    ],
-   "lattice_deg": 27.208000000000002,
-   "lattice_rms_nm": 0.042447541017549655,
+   "lattice_deg": 27.212000000000003,
+   "lattice_rms_nm": 0.041938620521087225,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 4,
    "start_nm": [
-    -4.8397133367413065,
-    -5.771311584435523
+    -4.8215937777907065,
+    -5.7565070969483685
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 9,
-     "off_goal_nm": 1.988
+     "hops": 8,
+     "off_goal_nm": 1.987
     },
     {
      "r_kohm": 256.0,
-     "spikes": 9,
-     "off_goal_nm": 0.012
+     "hops": 8,
+     "off_goal_nm": 0.014
     }
    ],
    "r_success_kohm": 256.0
@@ -1872,9 +1884,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.004112088154938023
+    "target_site": 0.0041120881373005935
    },
-   "instrument_s": 1115.482225821399,
+   "instrument_s": 1115.4822258213649,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -1890,40 +1902,40 @@
     }
    ],
    "lattice_deg": 12.454000000000002,
-   "lattice_rms_nm": 0.004159196043005631,
+   "lattice_rms_nm": 0.004159196043611305,
    "lattice_vectors": 15,
    "ruler_atoms": 6,
    "survey_atoms": 6,
    "candidates": 2,
    "start_nm": [
-    -7.643612089118976,
-    10.955175161928885
+    -7.643612089119289,
+    10.955175161929931
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 3.426
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 15,
+     "hops": 1,
      "off_goal_nm": 0.015
     }
    ],
@@ -1942,9 +1954,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.004983561149849244
+    "target_site": 0.004983561149897892
    },
-   "instrument_s": 892.2389954003587,
+   "instrument_s": 892.2389954003492,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -1958,44 +1970,44 @@
     }
    ],
    "lattice_deg": 0.5680000000000002,
-   "lattice_rms_nm": 0.00781309944448659,
+   "lattice_rms_nm": 0.007813099443989833,
    "lattice_vectors": 15,
    "ruler_atoms": 6,
    "survey_atoms": 6,
    "candidates": 5,
    "start_nm": [
-    5.659026083687788,
-    -1.6566601585121212
+    5.659026083684992,
+    -1.656660158512267
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.843
     },
     {
      "r_kohm": 104.9,
-     "spikes": 15,
+     "hops": 3,
      "off_goal_nm": 0.014
     }
    ],
@@ -2014,9 +2026,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.01307985352343971
+    "target_site": 0.01307985353112467
    },
-   "instrument_s": 1072.330589456721,
+   "instrument_s": 1072.3305894567122,
    "tip_condition": "blunt",
    "atoms_tried": 1,
    "tip_first": "blunt",
@@ -2032,28 +2044,28 @@
     }
    ],
    "lattice_deg": 16.534000000000002,
-   "lattice_rms_nm": 0.011925028698757653,
+   "lattice_rms_nm": 0.011925028699116188,
    "lattice_vectors": 28,
    "ruler_atoms": 8,
    "survey_atoms": 8,
    "candidates": 4,
    "start_nm": [
-    5.868593133682207,
-    -2.8781657772472435
+    5.868593133683746,
+    -2.878165777243918
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 17,
+     "hops": 5,
      "off_goal_nm": 0.255
     },
     {
      "r_kohm": 320.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 0.019
     }
    ],
@@ -2072,9 +2084,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.0036927860163935133
+    "target_site": 0.003692786053708878
    },
-   "instrument_s": 889.4719353595643,
+   "instrument_s": 889.4719353595964,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -2089,41 +2101,41 @@
     }
    ],
    "lattice_deg": 17.417999999999996,
-   "lattice_rms_nm": 0.009888595131289677,
+   "lattice_rms_nm": 0.009888595131670008,
    "lattice_vectors": 15,
    "ruler_atoms": 6,
    "survey_atoms": 6,
    "candidates": 2,
    "start_nm": [
-    -9.59771815325847,
-    13.804071096634502
+    -9.597718153260113,
+    13.804071096633283
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 4,
+     "hops": 2,
      "off_goal_nm": 3.128
     },
     {
      "r_kohm": 163.8,
-     "spikes": 10,
+     "hops": 10,
      "off_goal_nm": 0.939
     },
     {
      "r_kohm": 131.1,
-     "spikes": 4,
+     "hops": 4,
      "off_goal_nm": 0.018
     }
    ],
@@ -2142,9 +2154,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.005576511503947821
+    "target_site": 0.005576511501418639
    },
-   "instrument_s": 812.1110300423371,
+   "instrument_s": 812.11103004234,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -2159,33 +2171,33 @@
     }
    ],
    "lattice_deg": 13.688000000000002,
-   "lattice_rms_nm": 0.013205301283398084,
+   "lattice_rms_nm": 0.013205301281362715,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
    "candidates": 2,
    "start_nm": [
-    -4.714067679439722,
-    4.69335591816807
+    -4.714067679439427,
+    4.693355918169255
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 3.421
     },
     {
      "r_kohm": 256.0,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 2.939
     },
     {
      "r_kohm": 204.8,
-     "spikes": 13,
+     "hops": 12,
      "off_goal_nm": 0.002
     }
    ],
@@ -2204,9 +2216,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.00539167807449574
+    "target_site": 0.0038332753509202795
    },
-   "instrument_s": 912.7493509321472,
+   "instrument_s": 912.7734376612289,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -2223,33 +2235,33 @@
     }
    ],
    "lattice_deg": 24.358,
-   "lattice_rms_nm": 0.05907246670395579,
+   "lattice_rms_nm": 0.05909173500615077,
    "lattice_vectors": 78,
    "ruler_atoms": 13,
    "survey_atoms": 13,
    "candidates": 3,
    "start_nm": [
-    3.8232472548115197,
-    -3.9886096742948567
+    3.8232695746921443,
+    -3.988561364837487
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 12,
-     "off_goal_nm": 1.337
+     "hops": 11,
+     "off_goal_nm": 1.344
     },
     {
      "r_kohm": 204.8,
-     "spikes": 6,
-     "off_goal_nm": 0.004
+     "hops": 6,
+     "off_goal_nm": 0.008
     }
    ],
    "r_success_kohm": 204.8
@@ -2267,12 +2279,12 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.004196631555555176
+    "target_site": 0.004381567401849412
    },
-   "instrument_s": 1120.2530012317955,
+   "instrument_s": 1120.2704004167856,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
    "tip_rounds": 1,
    "drift_atoms": [
@@ -2280,46 +2292,46 @@
    ],
    "passed_over": [
     {
-     "edge": 3,
-     "path": 1
+     "path": 1,
+     "edge": 3
     }
    ],
-   "lattice_deg": 43.942,
-   "lattice_rms_nm": 0.057983700723995425,
+   "lattice_deg": 43.944,
+   "lattice_rms_nm": 0.059663994961462574,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 6,
    "start_nm": [
-    0.9112745151462533,
-    -4.7426956453160045
+    0.9085622862655995,
+    -4.744885393105083
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 4,
-     "off_goal_nm": 3.185
+     "hops": 4,
+     "off_goal_nm": 3.189
     },
     {
      "r_kohm": 131.1,
-     "spikes": 14,
-     "off_goal_nm": 0.01
+     "hops": 13,
+     "off_goal_nm": 0.003
     }
    ],
    "r_success_kohm": 131.072
@@ -2337,9 +2349,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.005759360159097972
+    "target_site": 0.0068374725261268355
    },
-   "instrument_s": 1027.7361413608319,
+   "instrument_s": 1139.59339528707,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -2353,61 +2365,63 @@
     }
    ],
    "lattice_deg": 54.846000000000004,
-   "lattice_rms_nm": 0.014883093374840029,
+   "lattice_rms_nm": 0.014883093375203927,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
    "candidates": 6,
    "start_nm": [
-    2.805197236986217,
-    -3.7700924989277205
+    2.8051972369849807,
+    -3.770092498929486
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 5,
+     "hops": 2,
      "off_goal_nm": 2.924
     },
     {
      "r_kohm": 104.9,
-     "spikes": 11,
+     "hops": 12,
      "off_goal_nm": 0.248
     },
     {
      "r_kohm": 104.9,
-     "spikes": 0
+     "hops": 1,
+     "off_goal_nm": 0.244
     },
     {
-     "r_kohm": 83.9,
-     "spikes": 0
+     "r_kohm": 104.9,
+     "hops": 1,
+     "off_goal_nm": 0.241
     },
     {
-     "r_kohm": 67.1,
-     "spikes": 1,
-     "off_goal_nm": 0.011
+     "r_kohm": 104.9,
+     "hops": 1,
+     "off_goal_nm": 0.007
     }
    ],
-   "r_success_kohm": 67.10886400000001
+   "r_success_kohm": 104.8576
   },
   {
    "paper": "P4",
@@ -2422,9 +2436,9 @@
    "on_goal": true,
    "n_bystanders": 6,
    "abs_err": {
-    "target_site": 0.005083772393006923
+    "target_site": 0.0041344917893825
    },
-   "instrument_s": 1621.0809002274718,
+   "instrument_s": 1621.080900227516,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -2440,50 +2454,50 @@
     }
    ],
    "lattice_deg": 16.992000000000004,
-   "lattice_rms_nm": 0.014907850919676939,
+   "lattice_rms_nm": 0.014907850920287617,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
    "candidates": 4,
    "start_nm": [
-    3.173791269703628,
-    13.78793423953286
+    3.173791269702889,
+    13.78793423953062
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 5,
+     "hops": 4,
      "off_goal_nm": 2.928
     },
     {
      "r_kohm": 104.9,
-     "spikes": 7,
+     "hops": 6,
      "off_goal_nm": 1.341
     },
     {
      "r_kohm": 83.9,
-     "spikes": 6,
-     "off_goal_nm": 0.014
+     "hops": 6,
+     "off_goal_nm": 0.015
     }
    ],
    "tip_mid": 1,
@@ -2506,9 +2520,9 @@
    "on_goal": true,
    "n_bystanders": 0,
    "abs_err": {
-    "target_site": 0.0034327677789892284
+    "target_site": 0.00343276776698365
    },
-   "instrument_s": 1410.0583027863208,
+   "instrument_s": 1410.0583027862963,
    "tip_condition": "blunt",
    "atoms_tried": 1,
    "tip_first": "blunt",
@@ -2524,7 +2538,7 @@
     }
    ],
    "lattice_deg": 57.592,
-   "lattice_rms_nm": 0.029470783681382458,
+   "lattice_rms_nm": 0.029470783681701935,
    "lattice_vectors": 28,
    "ruler_atoms": 8,
    "survey_atoms": 8,
@@ -2533,43 +2547,43 @@
     "too few fiducials around the atom"
    ],
    "start_nm": [
-    8.310631988709485,
-    5.553049912344363
+    8.310631988707794,
+    5.553049912342194
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.696
     },
     {
      "r_kohm": 104.9,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.452
     },
     {
      "r_kohm": 83.9,
-     "spikes": 14,
+     "hops": 14,
      "off_goal_nm": 0.015
     }
    ],
@@ -2588,17 +2602,16 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.0034808085094833467
+    "target_site": 0.0018337935851535827
    },
-   "instrument_s": 1744.5527383275344,
+   "instrument_s": 1165.578620446428,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
    "pokes": 3,
-   "tip_rounds": 2,
+   "tip_rounds": 1,
    "drift_atoms": [
-    3,
-    5
+    3
    ],
    "passed_over": [
     {
@@ -2606,57 +2619,49 @@
      "goal": 1
     }
    ],
-   "lattice_deg": 16.695999999999998,
-   "lattice_rms_nm": 0.007912023375757865,
+   "lattice_deg": 16.671999999999997,
+   "lattice_rms_nm": 0.008843013685040967,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
    "candidates": 3,
    "start_nm": [
-    6.452718411810409,
-    3.2597852638856644
+    6.438048272820151,
+    3.1136807532558493
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 2,
-     "off_goal_nm": 3.601
+     "hops": 1,
+     "off_goal_nm": 3.85
     },
     {
      "r_kohm": 104.9,
-     "spikes": 0
-    },
-    {
-     "r_kohm": 83.9,
-     "spikes": 16,
-     "off_goal_nm": 0.008
+     "hops": 10,
+     "off_goal_nm": 0.013
     }
    ],
-   "tip_mid": 1,
-   "recoveries": [
-    "conditioned"
-   ],
-   "r_success_kohm": 83.88608000000002
+   "r_success_kohm": 104.8576
   },
   {
    "paper": "P4",
@@ -2671,9 +2676,9 @@
    "on_goal": true,
    "n_bystanders": 1,
    "abs_err": {
-    "target_site": 0.00847750022171397
+    "target_site": 0.008477500251081915
    },
-   "instrument_s": 960.8737119214062,
+   "instrument_s": 960.8737119214037,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -2688,48 +2693,48 @@
     }
    ],
    "lattice_deg": 44.06000000000001,
-   "lattice_rms_nm": 0.011062609259842506,
+   "lattice_rms_nm": 0.011062609260747211,
    "lattice_vectors": 28,
    "ruler_atoms": 8,
    "survey_atoms": 8,
    "candidates": 4,
    "start_nm": [
-    -9.563615276433437,
-    6.757873851978488
+    -9.563615276433325,
+    6.757873851980612
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.857
     },
     {
      "r_kohm": 83.9,
-     "spikes": 17,
+     "hops": 9,
      "off_goal_nm": 0.048
     }
    ],
@@ -2748,9 +2753,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.017257136420570935
+    "target_site": 0.014955636718089839
    },
-   "instrument_s": 1294.107689577053,
+   "instrument_s": 1294.0911227942797,
    "tip_condition": "blunt",
    "atoms_tried": 1,
    "tip_first": "blunt",
@@ -2766,45 +2771,45 @@
     }
    ],
    "lattice_deg": 49.260000000000005,
-   "lattice_rms_nm": 0.01585411332422219,
+   "lattice_rms_nm": 0.015257524899588943,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 4,
    "start_nm": [
-    -4.598480092836043,
-    -3.2630577031247796
+    -4.599877279798665,
+    -3.262415495412263
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 4,
-     "off_goal_nm": 3.085
+     "hops": 4,
+     "off_goal_nm": 3.083
     },
     {
      "r_kohm": 131.1,
-     "spikes": 12,
-     "off_goal_nm": 0.251
+     "hops": 13,
+     "off_goal_nm": 0.249
     },
     {
      "r_kohm": 131.1,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 0.02
     }
    ],
@@ -2823,12 +2828,12 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.0037901983638059015
+    "target_site": 0.004053498566194388
    },
-   "instrument_s": 1219.06123547459,
+   "instrument_s": 1219.0676422760325,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
    "tip_rounds": 3,
    "drift_atoms": [
@@ -2836,34 +2841,34 @@
    ],
    "passed_over": [
     {
-     "goal": 2,
-     "edge": 6
+     "edge": 6,
+     "goal": 1
     }
    ],
-   "lattice_deg": 40.456,
-   "lattice_rms_nm": 0.022867424455539766,
+   "lattice_deg": 40.458,
+   "lattice_rms_nm": 0.02256492770139427,
    "lattice_vectors": 66,
    "ruler_atoms": 12,
    "survey_atoms": 12,
-   "candidates": 4,
+   "candidates": 5,
    "start_nm": [
-    -2.8503920374054132,
-    -4.311439333247019
+    -2.8510858018182077,
+    -4.311827264504661
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 2,
-     "off_goal_nm": 3.57
+     "hops": 1,
+     "off_goal_nm": 3.571
     },
     {
      "r_kohm": 320.0,
-     "spikes": 15,
-     "off_goal_nm": 0.26
+     "hops": 11,
+     "off_goal_nm": 0.261
     },
     {
      "r_kohm": 320.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 0.007
     }
    ],
@@ -2882,9 +2887,9 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.00579151762916308
+    "target_site": 0.005791517612594352
    },
-   "instrument_s": 931.03817237787,
+   "instrument_s": 931.0381723778729,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -2900,48 +2905,48 @@
     }
    ],
    "lattice_deg": 1.986,
-   "lattice_rms_nm": 0.013216697506617971,
+   "lattice_rms_nm": 0.013216697506353053,
    "lattice_vectors": 66,
    "ruler_atoms": 12,
    "survey_atoms": 12,
    "candidates": 6,
    "start_nm": [
-    0.9106335772174035,
-    5.345687339862025
+    0.9106335772176699,
+    5.3456873398611435
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.696
     },
     {
      "r_kohm": 83.9,
-     "spikes": 15,
+     "hops": 15,
      "off_goal_nm": 0.007
     }
    ],
@@ -2960,12 +2965,12 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.0033244079350339493
+    "target_site": 0.0030081398459252447
    },
-   "instrument_s": 1731.7498982520897,
+   "instrument_s": 1731.7490897706425,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
    "tip_rounds": 3,
    "drift_atoms": [
@@ -2977,38 +2982,38 @@
      "edge": 4
     }
    ],
-   "lattice_deg": 3.5620000000000003,
-   "lattice_rms_nm": 0.007397926710214138,
+   "lattice_deg": 3.5600000000000005,
+   "lattice_rms_nm": 0.007407158911581076,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
    "candidates": 3,
    "start_nm": [
-    9.2898098731931,
-    6.4508367691525805
+    9.287769868953507,
+    6.450488648682571
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.693
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 15,
-     "off_goal_nm": 0.018
+     "hops": 15,
+     "off_goal_nm": 0.017
     }
    ],
    "r_success_kohm": 163.84
@@ -3026,9 +3031,9 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.0040126755363576365
+    "target_site": 0.00401267554162994
    },
-   "instrument_s": 760.721340881495,
+   "instrument_s": 760.7213408815021,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -3045,32 +3050,32 @@
     }
    ],
    "lattice_deg": 38.146,
-   "lattice_rms_nm": 0.0490350427595677,
+   "lattice_rms_nm": 0.04903504275935948,
    "lattice_vectors": 78,
    "ruler_atoms": 13,
    "survey_atoms": 13,
    "candidates": 2,
    "start_nm": [
-    5.199515587512526,
-    3.701633598701296
+    5.199515587513229,
+    3.7016335987011963
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 3,
+     "hops": 1,
      "off_goal_nm": 3.336
     },
     {
      "r_kohm": 204.8,
-     "spikes": 15,
+     "hops": 14,
      "off_goal_nm": 0.004
     }
    ],
@@ -3089,9 +3094,9 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.009570380574053405
+    "target_site": 0.009570380562596341
    },
-   "instrument_s": 884.213951166406,
+   "instrument_s": 884.2139511663945,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -3105,38 +3110,38 @@
     }
    ],
    "lattice_deg": 38.16,
-   "lattice_rms_nm": 0.01142258339672598,
+   "lattice_rms_nm": 0.01142258339805254,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
    "candidates": 6,
    "start_nm": [
-    -0.8139514904410277,
-    2.927513934254659
+    -0.8139514904411271,
+    2.9275139342562504
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 5,
+     "hops": 4,
      "off_goal_nm": 2.883
     },
     {
      "r_kohm": 256.0,
-     "spikes": 11,
+     "hops": 9,
      "off_goal_nm": 0.439
     },
     {
      "r_kohm": 256.0,
-     "spikes": 1,
+     "hops": 2,
      "off_goal_nm": 0.248
     },
     {
      "r_kohm": 256.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 0.005
     }
    ],
@@ -3155,9 +3160,9 @@
    "on_goal": true,
    "n_bystanders": 6,
    "abs_err": {
-    "target_site": 0.01539421232394009
+    "target_site": 0.01460274702545834
    },
-   "instrument_s": 1278.3299452882688,
+   "instrument_s": 1278.3015098687288,
    "tip_condition": "blunt",
    "atoms_tried": 1,
    "tip_first": "unknown",
@@ -3174,31 +3179,31 @@
      "neighbour": 3
     }
    ],
-   "lattice_deg": 47.89000000000001,
-   "lattice_rms_nm": 0.025067004403721546,
+   "lattice_deg": 47.891999999999996,
+   "lattice_rms_nm": 0.024660550260135267,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 5,
    "start_nm": [
-    -0.2935319036458708,
-    -4.43745566127674
+    -0.29546067720826485,
+    -4.442205542668667
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 2,
-     "off_goal_nm": 3.422
+     "hops": 2,
+     "off_goal_nm": 3.417
     },
     {
      "r_kohm": 320.0,
-     "spikes": 7,
-     "off_goal_nm": 1.832
+     "hops": 8,
+     "off_goal_nm": 1.83
     },
     {
      "r_kohm": 256.0,
-     "spikes": 8,
-     "off_goal_nm": 0.003
+     "hops": 8,
+     "off_goal_nm": 0.005
     }
    ],
    "r_success_kohm": 256.0
@@ -3216,9 +3221,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.005358322915942727
+    "target_site": 0.0008460108006004465
    },
-   "instrument_s": 1073.8529000433953,
+   "instrument_s": 1073.8615995122113,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -3233,37 +3238,37 @@
      "goal": 1
     }
    ],
-   "lattice_deg": 4.898000000000001,
-   "lattice_rms_nm": 0.015871216161401903,
+   "lattice_deg": 4.908,
+   "lattice_rms_nm": 0.014633155371412972,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
    "candidates": 4,
    "start_nm": [
-    1.0699337699207376,
-    1.5574553932877286
+    1.0674449895498306,
+    1.5585999133218635
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 4,
-     "off_goal_nm": 2.952
+     "hops": 3,
+     "off_goal_nm": 2.944
     },
     {
      "r_kohm": 163.8,
-     "spikes": 12,
+     "hops": 12,
      "off_goal_nm": 0.004
     }
    ],
@@ -3282,7 +3287,7 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.008130529768649362
+    "target_site": 0.008130529765356161
    },
    "instrument_s": 579.7222907333484,
    "tip_condition": "dirty",
@@ -3299,19 +3304,19 @@
     }
    ],
    "lattice_deg": 33.658,
-   "lattice_rms_nm": 0.01306799641537929,
+   "lattice_rms_nm": 0.0130679964153474,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
    "candidates": 4,
    "start_nm": [
-    1.7163161609499582,
-    -3.254148998181307
+    1.716316160948086,
+    -3.254148998180707
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 18,
+     "hops": 17,
      "off_goal_nm": 0.001
     }
    ],
@@ -3330,12 +3335,12 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.00978389246833129
+    "target_site": 0.009783892464954733
    },
-   "instrument_s": 1198.202265002752,
+   "instrument_s": 1198.2022650027434,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
    "tip_rounds": 1,
    "drift_atoms": [
@@ -3347,41 +3352,41 @@
     }
    ],
    "lattice_deg": 3.7180000000000004,
-   "lattice_rms_nm": 0.015626712967633644,
+   "lattice_rms_nm": 0.01562671296728515,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 6,
    "start_nm": [
-    -2.445119138484742,
-    -3.6246182003666263
+    -2.445119138484923,
+    -3.624618200367852
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.713
     },
     {
      "r_kohm": 163.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.445
     },
     {
      "r_kohm": 131.1,
-     "spikes": 14,
+     "hops": 9,
      "off_goal_nm": 0.013
     }
    ],
@@ -3400,9 +3405,9 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.001913607770700121
+    "target_site": 0.001913607788282334
    },
-   "instrument_s": 974.0250805728131,
+   "instrument_s": 974.025080572815,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -3418,49 +3423,49 @@
     }
    ],
    "lattice_deg": 19.698,
-   "lattice_rms_nm": 0.013720809328671911,
+   "lattice_rms_nm": 0.01372080932848852,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 4,
    "start_nm": [
-    4.186886902124986,
-    2.544509098622438
+    4.186886902125227,
+    2.544509098622804
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 3.601
     },
     {
      "r_kohm": 104.9,
-     "spikes": 15,
+     "hops": 15,
      "off_goal_nm": 0.245
     },
     {
      "r_kohm": 104.9,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 0.017
     }
    ],
@@ -3479,9 +3484,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.0103974607596193
+    "target_site": 0.010397460752152443
    },
-   "instrument_s": 935.0686601846651,
+   "instrument_s": 935.0686601846987,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -3497,42 +3502,42 @@
     }
    ],
    "lattice_deg": 52.464000000000006,
-   "lattice_rms_nm": 0.022830181005510066,
+   "lattice_rms_nm": 0.022830181005511967,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 3,
    "start_nm": [
-    3.496124055211297,
-    1.7181568857753433
+    3.496124055211535,
+    1.718156885776935
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 5,
+     "hops": 3,
      "off_goal_nm": 2.838
     },
     {
      "r_kohm": 204.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 2.582
     },
     {
      "r_kohm": 163.8,
-     "spikes": 10,
+     "hops": 11,
      "off_goal_nm": 0.249
     },
     {
      "r_kohm": 163.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 0.004
     }
    ],
@@ -3551,9 +3556,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.01320308622890988
+    "target_site": 0.01317484226681393
    },
-   "instrument_s": 1212.1442575411688,
+   "instrument_s": 1212.1159960992113,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -3570,46 +3575,46 @@
     }
    ],
    "lattice_deg": 28.552000000000003,
-   "lattice_rms_nm": 0.013547905115674969,
+   "lattice_rms_nm": 0.012516660943598655,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 5,
    "start_nm": [
-    -6.285260404632442,
-    -0.7223633545455463
+    -6.288545371576175,
+    -0.7202328855590849
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 1,
-     "off_goal_nm": 3.764
+     "hops": 1,
+     "off_goal_nm": 3.761
     },
     {
      "r_kohm": 131.1,
-     "spikes": 6,
-     "off_goal_nm": 2.442
+     "hops": 5,
+     "off_goal_nm": 2.437
     },
     {
      "r_kohm": 104.9,
-     "spikes": 11,
-     "off_goal_nm": 0.011
+     "hops": 10,
+     "off_goal_nm": 0.01
     }
    ],
    "r_success_kohm": 104.8576
@@ -3627,9 +3632,9 @@
    "on_goal": true,
    "n_bystanders": 6,
    "abs_err": {
-    "target_site": 0.007759252767118811
+    "target_site": 0.007759252770713977
    },
-   "instrument_s": 718.9540560164161,
+   "instrument_s": 718.9540560164235,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -3646,28 +3651,28 @@
     }
    ],
    "lattice_deg": 46.148,
-   "lattice_rms_nm": 0.02263185564616765,
+   "lattice_rms_nm": 0.02263185564631065,
    "lattice_vectors": 91,
    "ruler_atoms": 14,
    "survey_atoms": 14,
    "candidates": 4,
    "start_nm": [
-    -2.4918795321461076,
-    -2.81339786812039
+    -2.491879532143038,
+    -2.813397868118823
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.679
     },
     {
      "r_kohm": 256.0,
-     "spikes": 16,
+     "hops": 7,
      "off_goal_nm": 0.009
     }
    ],
@@ -3686,9 +3691,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.004038251334714852
+    "target_site": 0.0040382513373188106
    },
-   "instrument_s": 678.1264566995478,
+   "instrument_s": 678.1264566995459,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -3702,24 +3707,24 @@
     }
    ],
    "lattice_deg": 5.477999999999999,
-   "lattice_rms_nm": 0.014704674466744873,
+   "lattice_rms_nm": 0.01470467446659673,
    "lattice_vectors": 10,
    "ruler_atoms": 5,
    "survey_atoms": 5,
    "candidates": 2,
    "start_nm": [
-    -12.560160523616837,
-    -4.053262660260959
+    -12.560160523617386,
+    -4.053262660259396
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.83
     },
     {
      "r_kohm": 320.0,
-     "spikes": 16,
+     "hops": 4,
      "off_goal_nm": 0.016
     }
    ],
@@ -3738,9 +3743,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.0037433791225614044
+    "target_site": 0.002715081678600355
    },
-   "instrument_s": 1100.22789599793,
+   "instrument_s": 1100.233701884512,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -3753,47 +3758,47 @@
      "edge": 4
     }
    ],
-   "lattice_deg": 14.206,
-   "lattice_rms_nm": 0.013444476379684763,
+   "lattice_deg": 14.204000000000002,
+   "lattice_rms_nm": 0.013141246093875148,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
    "candidates": 5,
    "start_nm": [
-    2.044220517680756,
-    -2.31945520785429
+    2.04391712002241,
+    -2.3207030016230554
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 1,
-     "off_goal_nm": 3.667
+     "hops": 1,
+     "off_goal_nm": 3.669
     },
     {
      "r_kohm": 131.1,
-     "spikes": 3,
-     "off_goal_nm": 3.004
+     "hops": 3,
+     "off_goal_nm": 3.005
     },
     {
      "r_kohm": 104.9,
-     "spikes": 13,
-     "off_goal_nm": 0.016
+     "hops": 12,
+     "off_goal_nm": 0.017
     }
    ],
    "r_success_kohm": 104.8576
@@ -3811,16 +3816,15 @@
    "on_goal": true,
    "n_bystanders": 1,
    "abs_err": {
-    "target_site": 0.0043749236580372
+    "target_site": 0.003463276495956698
    },
-   "instrument_s": 1739.0039533498534,
+   "instrument_s": 1200.0589511693652,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
    "pokes": 3,
-   "tip_rounds": 2,
+   "tip_rounds": 1,
    "drift_atoms": [
-    3,
     3
    ],
    "passed_over": [
@@ -3830,54 +3834,50 @@
     }
    ],
    "lattice_deg": 55.30800000000001,
-   "lattice_rms_nm": 0.01638509698819936,
+   "lattice_rms_nm": 0.01636101185084193,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
    "candidates": 2,
    "start_nm": [
-    8.158453027120256,
-    6.473921276679137
+    8.158451310979999,
+    6.473875563080709
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 5,
-     "off_goal_nm": 2.69
+     "hops": 2,
+     "off_goal_nm": 2.7
     },
     {
      "r_kohm": 83.9,
-     "spikes": 11,
-     "off_goal_nm": 0.001
+     "hops": 8,
+     "off_goal_nm": 0.004
     }
-   ],
-   "tip_mid": 1,
-   "recoveries": [
-    "conditioned"
    ],
    "r_success_kohm": 83.88608000000002
   },
@@ -3894,9 +3894,9 @@
    "on_goal": true,
    "n_bystanders": 1,
    "abs_err": {
-    "target_site": 0.001537056869694017
+    "target_site": 0.0009046801271313014
    },
-   "instrument_s": 1193.3626621231906,
+   "instrument_s": 1194.3686206048278,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -3912,49 +3912,49 @@
     }
    ],
    "lattice_deg": 4.846000000000001,
-   "lattice_rms_nm": 0.011428322820056869,
+   "lattice_rms_nm": 0.01078558247213398,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
    "candidates": 5,
    "start_nm": [
-    3.601262527053013,
-    -3.246033591922238
+    3.597995814580557,
+    -3.2456986590316497
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 12,
-     "off_goal_nm": 1.032
+     "hops": 11,
+     "off_goal_nm": 1.284
     },
     {
      "r_kohm": 83.9,
-     "spikes": 4,
-     "off_goal_nm": 0.025
+     "hops": 5,
+     "off_goal_nm": 0.023
     }
    ],
    "r_success_kohm": 83.88608000000002
@@ -3972,9 +3972,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.00405735753879512
+    "target_site": 0.004057357531980733
    },
-   "instrument_s": 810.4740321658701,
+   "instrument_s": 810.4740321658693,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -3990,33 +3990,33 @@
     }
    ],
    "lattice_deg": 58.808000000000014,
-   "lattice_rms_nm": 0.01786405114843945,
+   "lattice_rms_nm": 0.0178640511498753,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 4,
    "start_nm": [
-    3.074539548092936,
-    1.5272684072439269
+    3.0745395480942506,
+    1.5272684072440228
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.84
     },
     {
      "r_kohm": 256.0,
-     "spikes": 8,
+     "hops": 6,
      "off_goal_nm": 1.797
     },
     {
      "r_kohm": 204.8,
-     "spikes": 7,
+     "hops": 7,
      "off_goal_nm": 0.007
     }
    ],
@@ -4035,9 +4035,9 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.01624139364611733
+    "target_site": 0.016241393668934973
    },
-   "instrument_s": 815.3641561817936,
+   "instrument_s": 815.3641561818148,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -4052,33 +4052,33 @@
     }
    ],
    "lattice_deg": 34.152,
-   "lattice_rms_nm": 0.02217311197662753,
+   "lattice_rms_nm": 0.022173111977584377,
    "lattice_vectors": 66,
    "ruler_atoms": 12,
    "survey_atoms": 12,
    "candidates": 7,
    "start_nm": [
-    2.0184670655294994,
-    0.4292572480236423
+    2.018467065530615,
+    0.42925724802143606
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.748
     },
     {
      "r_kohm": 256.0,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 3.299
     },
     {
      "r_kohm": 204.8,
-     "spikes": 15,
+     "hops": 14,
      "off_goal_nm": 0.012
     }
    ],
@@ -4097,9 +4097,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.006526358086212099
+    "target_site": 0.006563575686278179
    },
-   "instrument_s": 760.394308753803,
+   "instrument_s": 760.3943016959138,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -4113,29 +4113,29 @@
     }
    ],
    "lattice_deg": 4.944,
-   "lattice_rms_nm": 0.01013546797224844,
+   "lattice_rms_nm": 0.010134843084404105,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 5,
    "start_nm": [
-    3.073625611943271,
-    -2.419118862365078
+    3.073628265664045,
+    -2.4191175742171147
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.705
     },
     {
      "r_kohm": 320.0,
-     "spikes": 14,
+     "hops": 15,
      "off_goal_nm": 0.253
     },
     {
      "r_kohm": 320.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 0.01
     }
    ],
@@ -4154,9 +4154,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.001127258287500966
+    "target_site": 0.0004992191896421306
    },
-   "instrument_s": 986.0380916211452,
+   "instrument_s": 986.0976342890667,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -4171,30 +4171,30 @@
      "goal": 1
     }
    ],
-   "lattice_deg": 13.568000000000003,
-   "lattice_rms_nm": 0.00897428711531747,
+   "lattice_deg": 13.570000000000002,
+   "lattice_rms_nm": 0.008746176850412093,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 5,
    "start_nm": [
-    7.883969220905399,
-    0.39656401947749487
+    7.894381587843089,
+    0.405893004035466
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 7,
-     "off_goal_nm": 2.262
+     "hops": 7,
+     "off_goal_nm": 2.277
     },
     {
      "r_kohm": 256.0,
-     "spikes": 10,
-     "off_goal_nm": 0.015
+     "hops": 9,
+     "off_goal_nm": 0.025
     }
    ],
    "r_success_kohm": 256.0
@@ -4212,9 +4212,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.011792352455934695
+    "target_site": 0.009570455489851337
    },
-   "instrument_s": 1287.7821664143398,
+   "instrument_s": 1287.7836552694403,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -4230,48 +4230,48 @@
     }
    ],
    "lattice_deg": 16.3,
-   "lattice_rms_nm": 0.01603717563536281,
+   "lattice_rms_nm": 0.016037175636054515,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 4,
    "start_nm": [
-    -1.8769853093959732,
-    -1.2472329754911442
+    -1.876985309399565,
+    -1.2472329754869058
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.864
     },
     {
      "r_kohm": 104.9,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 83.9,
-     "spikes": 17,
+     "hops": 16,
      "off_goal_nm": 0.026
     }
    ],
@@ -4290,9 +4290,9 @@
    "on_goal": true,
    "n_bystanders": 1,
    "abs_err": {
-    "target_site": 0.0015222199471484402
+    "target_site": 0.00152221993919836
    },
-   "instrument_s": 1260.444999674843,
+   "instrument_s": 1260.4449996748122,
    "tip_condition": "blunt",
    "atoms_tried": 1,
    "tip_first": "blunt",
@@ -4307,7 +4307,7 @@
     }
    ],
    "lattice_deg": 51.90000000000001,
-   "lattice_rms_nm": 0.020648702425712886,
+   "lattice_rms_nm": 0.020648702426332193,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
@@ -4316,42 +4316,42 @@
     "too few fiducials around the atom"
    ],
    "start_nm": [
-    -4.528010342501501,
-    12.22124852312623
+    -4.528010342502043,
+    12.221248523127406
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 3.456
     },
     {
      "r_kohm": 83.9,
-     "spikes": 15,
+     "hops": 14,
      "off_goal_nm": 0.068
     }
    ],
@@ -4370,9 +4370,9 @@
    "on_goal": true,
    "n_bystanders": 1,
    "abs_err": {
-    "target_site": 0.0034178243991984623
+    "target_site": 0.0034178244229203293
    },
-   "instrument_s": 886.8050183192187,
+   "instrument_s": 886.8050183192246,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -4388,44 +4388,44 @@
     }
    ],
    "lattice_deg": 47.34,
-   "lattice_rms_nm": 0.06046349159037325,
+   "lattice_rms_nm": 0.06046349159038648,
    "lattice_vectors": 105,
    "ruler_atoms": 15,
    "survey_atoms": 15,
    "candidates": 3,
    "start_nm": [
-    -3.7049525841148743,
-    7.2887860048493724
+    -3.704952584117379,
+    7.288786004849644
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 3.436
     },
     {
      "r_kohm": 104.9,
-     "spikes": 15,
+     "hops": 14,
      "off_goal_nm": 0.032
     }
    ],
@@ -4444,12 +4444,12 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.02063529573778981
+    "target_site": 0.020681873423279266
    },
-   "instrument_s": 1431.154571272617,
+   "instrument_s": 1431.1541948541908,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
    "tip_rounds": 3,
    "drift_atoms": [
@@ -4460,53 +4460,53 @@
      "edge": 6
     }
    ],
-   "lattice_deg": 3.5020000000000002,
-   "lattice_rms_nm": 0.04076252536715826,
+   "lattice_deg": 3.5,
+   "lattice_rms_nm": 0.03851188276731949,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
    "candidates": 3,
    "start_nm": [
-    4.907424488279716,
-    2.519724249112933
+    5.010502454762818,
+    2.517888631072701
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 83.9,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 3.442
     },
     {
      "r_kohm": 67.1,
-     "spikes": 14,
+     "hops": 14,
      "off_goal_nm": 0.017
     }
    ],
@@ -4525,9 +4525,9 @@
    "on_goal": true,
    "n_bystanders": 6,
    "abs_err": {
-    "target_site": 0.004048166543162999
+    "target_site": 0.0027337239935394425
    },
-   "instrument_s": 1208.0739375512535,
+   "instrument_s": 1208.0743481430918,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -4543,49 +4543,49 @@
     }
    ],
    "lattice_deg": 43.568000000000005,
-   "lattice_rms_nm": 0.011122175083903256,
+   "lattice_rms_nm": 0.011122175083533362,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
    "candidates": 4,
    "start_nm": [
-    4.441836223719186,
-    -3.403776793131339
+    4.441836223717985,
+    -3.403776793131918
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 2,
+     "hops": 1,
      "off_goal_nm": 3.676
     },
     {
      "r_kohm": 83.9,
-     "spikes": 16,
-     "off_goal_nm": 0.012
+     "hops": 15,
+     "off_goal_nm": 0.011
     }
    ],
    "r_success_kohm": 83.88608000000002
@@ -4603,9 +4603,9 @@
    "on_goal": true,
    "n_bystanders": 1,
    "abs_err": {
-    "target_site": 0.005006723841665172
+    "target_site": 0.005006723839640859
    },
-   "instrument_s": 757.6393144931517,
+   "instrument_s": 757.6393144931535,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -4620,32 +4620,32 @@
     }
    ],
    "lattice_deg": 3.86,
-   "lattice_rms_nm": 0.007511186215588287,
+   "lattice_rms_nm": 0.00751118621517339,
    "lattice_vectors": 10,
    "ruler_atoms": 5,
    "survey_atoms": 5,
    "candidates": 3,
    "start_nm": [
-    0.06048272145779876,
-    -6.043507484645225
+    0.060482721457898236,
+    -6.043507484644628
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 5,
+     "hops": 6,
      "off_goal_nm": 2.694
     },
     {
      "r_kohm": 204.8,
-     "spikes": 11,
+     "hops": 11,
      "off_goal_nm": 0.005
     }
    ],
@@ -4664,9 +4664,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.008353433534819932
+    "target_site": 0.008353433526373317
    },
-   "instrument_s": 801.3826469454324,
+   "instrument_s": 801.382646945434,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -4681,33 +4681,33 @@
     }
    ],
    "lattice_deg": 8.81,
-   "lattice_rms_nm": 0.05322495625651703,
+   "lattice_rms_nm": 0.05322495625640439,
    "lattice_vectors": 28,
    "ruler_atoms": 8,
    "survey_atoms": 8,
    "candidates": 1,
    "start_nm": [
-    -10.127497835166462,
-    4.08714714098576
+    -10.12749783516719,
+    4.087147140989424
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 3,
+     "hops": 3,
      "off_goal_nm": 3.253
     },
     {
      "r_kohm": 256.0,
-     "spikes": 13,
+     "hops": 14,
      "off_goal_nm": 0.239
     },
     {
      "r_kohm": 256.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 0.004
     }
    ],
@@ -4726,9 +4726,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.004583166388834423
+    "target_site": 0.004583166373871786
    },
-   "instrument_s": 932.7798456944008,
+   "instrument_s": 932.7798456944016,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -4742,48 +4742,48 @@
     }
    ],
    "lattice_deg": 35.65200000000001,
-   "lattice_rms_nm": 0.02380339619891877,
+   "lattice_rms_nm": 0.023803396198606358,
    "lattice_vectors": 10,
    "ruler_atoms": 5,
    "survey_atoms": 5,
    "candidates": 3,
    "start_nm": [
-    -0.12690759367269777,
-    -4.674321771291005
+    -0.12690759367008297,
+    -4.6743217712917975
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.756
     },
     {
      "r_kohm": 83.9,
-     "spikes": 16,
+     "hops": 16,
      "off_goal_nm": 0.035
     }
    ],
@@ -4802,16 +4802,17 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.009513331193255465
+    "target_site": 0.005983454549963073
    },
-   "instrument_s": 1292.7785184854401,
+   "instrument_s": 2055.316080545661,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
    "pokes": 3,
-   "tip_rounds": 1,
+   "tip_rounds": 2,
    "drift_atoms": [
-    4
+    2,
+    3
    ],
    "passed_over": [
     {
@@ -4821,59 +4822,66 @@
      "edge": 1
     }
    ],
-   "lattice_deg": 11.968000000000002,
-   "lattice_rms_nm": 0.014347048337583325,
+   "lattice_deg": 11.984000000000002,
+   "lattice_rms_nm": 0.014249158321749745,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 5,
    "start_nm": [
-    -0.29150313899443603,
-    -7.633353638691773
+    -0.30858694603178094,
+    -7.605258296258178
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 1,
-     "off_goal_nm": 3.686
+     "hops": 1,
+     "off_goal_nm": 3.672
     },
     {
      "r_kohm": 204.8,
-     "spikes": 5,
-     "off_goal_nm": 2.506
+     "hops": 5,
+     "off_goal_nm": 2.5
     },
     {
      "r_kohm": 163.8,
-     "spikes": 10,
-     "off_goal_nm": 0.26
+     "hops": 10,
+     "off_goal_nm": 0.242
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 1,
+     "off_goal_nm": 0.247
     },
     {
-     "r_kohm": 131.1,
-     "spikes": 0
+     "r_kohm": 163.8,
+     "hops": 1,
+     "off_goal_nm": 0.248
     },
     {
-     "r_kohm": 104.9,
-     "spikes": 0
+     "r_kohm": 163.8,
+     "hops": 1,
+     "off_goal_nm": 0.247
     },
     {
-     "r_kohm": 83.9,
-     "spikes": 1,
+     "r_kohm": 163.8,
+     "hops": 1,
      "off_goal_nm": 0.016
     }
    ],
-   "r_success_kohm": 83.88608000000002
+   "tip_mid": 1,
+   "recoveries": [
+    "conditioned"
+   ],
+   "r_success_kohm": 163.84
   },
   {
    "paper": "P4",
@@ -4888,9 +4896,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.01008402534611307
+    "target_site": 0.0091728811680816
    },
-   "instrument_s": 1204.9135444199778,
+   "instrument_s": 1204.9175815439871,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -4906,49 +4914,49 @@
      "edge": 3
     }
    ],
-   "lattice_deg": 38.162,
-   "lattice_rms_nm": 0.015788243522600727,
+   "lattice_deg": 38.16,
+   "lattice_rms_nm": 0.013902201302899302,
    "lattice_vectors": 91,
    "ruler_atoms": 14,
    "survey_atoms": 14,
    "candidates": 8,
    "start_nm": [
-    3.56236395488148,
-    -0.04062257684208248
+    3.557134650736856,
+    -0.04138964520439359
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 2,
-     "off_goal_nm": 3.572
+     "hops": 1,
+     "off_goal_nm": 3.573
     },
     {
      "r_kohm": 83.9,
-     "spikes": 16,
+     "hops": 15,
      "off_goal_nm": 0.006
     }
    ],
@@ -4967,9 +4975,9 @@
    "on_goal": true,
    "n_bystanders": 6,
    "abs_err": {
-    "target_site": 0.008370437673617104
+    "target_site": 0.008370437680252835
    },
-   "instrument_s": 761.2899502838346,
+   "instrument_s": 761.2899502838445,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -4985,29 +4993,29 @@
     }
    ],
    "lattice_deg": 58.94000000000001,
-   "lattice_rms_nm": 0.009182681755293748,
+   "lattice_rms_nm": 0.009182681754458999,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 6,
    "start_nm": [
-    1.6591794208652786,
-    1.3811647184615907
+    1.6591794208651045,
+    1.3811647184641096
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.819
     },
     {
      "r_kohm": 320.0,
-     "spikes": 14,
+     "hops": 3,
      "off_goal_nm": 0.242
     },
     {
      "r_kohm": 320.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 0.008
     }
    ],
@@ -5026,9 +5034,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.0025865053408479183
+    "target_site": 0.0028073989929597006
    },
-   "instrument_s": 978.6536136691249,
+   "instrument_s": 978.566934270318,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -5043,30 +5051,30 @@
      "goal": 1
     }
    ],
-   "lattice_deg": 32.472,
-   "lattice_rms_nm": 0.01396802923254238,
+   "lattice_deg": 32.470000000000006,
+   "lattice_rms_nm": 0.013790563101263201,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 6,
    "start_nm": [
-    -1.7326885100225518,
-    -2.367338599882917
+    -1.7349677842255424,
+    -2.3678336848792014
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 17,
-     "off_goal_nm": 0.266
+     "hops": 4,
+     "off_goal_nm": 0.258
     },
     {
      "r_kohm": 320.0,
-     "spikes": 1,
-     "off_goal_nm": 0.013
+     "hops": 1,
+     "off_goal_nm": 0.008
     }
    ],
    "r_success_kohm": 320.0
@@ -5084,9 +5092,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.006691079909517929
+    "target_site": 0.006691079885324015
    },
-   "instrument_s": 1011.9842109147157,
+   "instrument_s": 1011.9842109147343,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -5100,53 +5108,53 @@
     }
    ],
    "lattice_deg": 26.194000000000003,
-   "lattice_rms_nm": 0.011672910698532943,
+   "lattice_rms_nm": 0.011672910699907366,
    "lattice_vectors": 15,
    "ruler_atoms": 6,
    "survey_atoms": 6,
    "candidates": 5,
    "start_nm": [
-    -2.3469084868832866,
-    -0.5887797893271696
+    -2.346908486885269,
+    -0.588779789324203
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 5,
+     "hops": 4,
      "off_goal_nm": 2.871
     },
     {
      "r_kohm": 83.9,
-     "spikes": 12,
+     "hops": 12,
      "off_goal_nm": 0.259
     },
     {
      "r_kohm": 83.9,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 0.004
     }
    ],
@@ -5165,9 +5173,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.004839575712551903
+    "target_site": 0.004839575719598046
    },
-   "instrument_s": 846.2885633922801,
+   "instrument_s": 846.2885633922805,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -5181,40 +5189,40 @@
     }
    ],
    "lattice_deg": 44.61400000000001,
-   "lattice_rms_nm": 0.013973986647340257,
+   "lattice_rms_nm": 0.013973986647044299,
    "lattice_vectors": 10,
    "ruler_atoms": 5,
    "survey_atoms": 5,
    "candidates": 3,
    "start_nm": [
-    -0.24281554156716822,
-    -10.034766518114495
+    -0.24281554156847562,
+    -10.034766518113436
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 5,
+     "hops": 2,
      "off_goal_nm": 2.944
     },
     {
      "r_kohm": 131.1,
-     "spikes": 13,
+     "hops": 3,
      "off_goal_nm": 0.013
     }
    ],
@@ -5233,9 +5241,9 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.0017930366485394496
+    "target_site": 0.001788734862678504
    },
-   "instrument_s": 1032.3963203369635,
+   "instrument_s": 1032.3962284711984,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -5251,32 +5259,32 @@
     }
    ],
    "lattice_deg": 27.540000000000003,
-   "lattice_rms_nm": 0.02280001413885799,
+   "lattice_rms_nm": 0.022800014139094153,
    "lattice_vectors": 120,
    "ruler_atoms": 16,
    "survey_atoms": 16,
    "candidates": 6,
    "start_nm": [
-    2.6714994257431286,
-    3.0355973546252315
+    2.6714994257430362,
+    3.0355973546241337
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 4,
+     "hops": 3,
      "off_goal_nm": 3.1
     },
     {
      "r_kohm": 204.8,
-     "spikes": 14,
+     "hops": 13,
      "off_goal_nm": 0.008
     }
    ],
@@ -5295,7 +5303,7 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.004009203580454883
+    "target_site": 0.004009203583188882
    },
    "instrument_s": 792.0102465970674,
    "tip_condition": "good",
@@ -5311,39 +5319,39 @@
     }
    ],
    "lattice_deg": 34.81,
-   "lattice_rms_nm": 0.007637235759775135,
+   "lattice_rms_nm": 0.007637235759437152,
    "lattice_vectors": 66,
    "ruler_atoms": 12,
    "survey_atoms": 12,
    "candidates": 7,
    "start_nm": [
-    4.0544352620573285,
-    1.919206091460751
+    4.054435262056572,
+    1.9192060914611702
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 18,
+     "hops": 17,
      "off_goal_nm": 0.012
     }
    ],
@@ -5362,12 +5370,12 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.007679001434225606
+    "target_site": 0.004384355974494624
    },
-   "instrument_s": 1345.8011279667203,
+   "instrument_s": 1345.8223598138757,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
    "tip_rounds": 2,
    "drift_atoms": [
@@ -5378,51 +5386,51 @@
      "edge": 4
     }
    ],
-   "lattice_deg": 11.159999999999998,
-   "lattice_rms_nm": 0.0096615061489167,
+   "lattice_deg": 11.161999999999999,
+   "lattice_rms_nm": 0.009407557406380565,
    "lattice_vectors": 28,
    "ruler_atoms": 8,
    "survey_atoms": 8,
    "candidates": 4,
    "start_nm": [
-    -3.5547531756422828,
-    0.9413001123511293
+    -3.5948946214140918,
+    0.9445275887716384
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 1,
-     "off_goal_nm": 3.764
+     "hops": 1,
+     "off_goal_nm": 3.766
     },
     {
      "r_kohm": 104.9,
-     "spikes": 8,
-     "off_goal_nm": 1.839
+     "hops": 8,
+     "off_goal_nm": 1.842
     },
     {
      "r_kohm": 83.9,
-     "spikes": 8,
-     "off_goal_nm": 0.02
+     "hops": 8,
+     "off_goal_nm": 0.019
     }
    ],
    "r_success_kohm": 83.88608000000002
@@ -5440,9 +5448,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.008959246128522674
+    "target_site": 0.008959246119039673
    },
-   "instrument_s": 983.0440641995251,
+   "instrument_s": 983.0440641995388,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -5456,49 +5464,49 @@
     }
    ],
    "lattice_deg": 57.592,
-   "lattice_rms_nm": 0.011541215546047789,
+   "lattice_rms_nm": 0.011541215545329787,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
    "candidates": 8,
    "start_nm": [
-    -1.15057523174519,
-    -0.24629911786894
+    -1.1505752317444546,
+    -0.24629911786736614
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 2,
+     "hops": 1,
      "off_goal_nm": 3.449
     },
     {
      "r_kohm": 104.9,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.205
     },
     {
      "r_kohm": 83.9,
-     "spikes": 13,
+     "hops": 13,
      "off_goal_nm": 0.021
     }
    ],
@@ -5517,9 +5525,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.004377085284231612
+    "target_site": 0.004704080537661083
    },
-   "instrument_s": 1074.0367693281237,
+   "instrument_s": 1074.0542890778029,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -5533,38 +5541,38 @@
      "edge": 5
     }
    ],
-   "lattice_deg": 25.396000000000004,
-   "lattice_rms_nm": 0.010503135062173975,
+   "lattice_deg": 25.398000000000003,
+   "lattice_rms_nm": 0.010462223993152917,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
    "candidates": 2,
    "start_nm": [
-    7.468392029115506,
-    8.196568080509623
+    7.479950444379856,
+    8.293825082904739
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 5,
-     "off_goal_nm": 2.858
+     "hops": 2,
+     "off_goal_nm": 2.863
     },
     {
      "r_kohm": 163.8,
-     "spikes": 13,
-     "off_goal_nm": 0.005
+     "hops": 12,
+     "off_goal_nm": 0.001
     }
    ],
    "r_success_kohm": 163.84
@@ -5582,9 +5590,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.0028683962696495055
+    "target_site": 0.0028683962683020954
    },
-   "instrument_s": 676.1019752299466,
+   "instrument_s": 676.1019752299464,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -5599,24 +5607,24 @@
     }
    ],
    "lattice_deg": 53.64200000000001,
-   "lattice_rms_nm": 0.05360188032379332,
+   "lattice_rms_nm": 0.053601880323916946,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
    "candidates": 1,
    "start_nm": [
-    7.023267884385017,
-    4.888702610156736
+    7.023267884384534,
+    4.888702610154649
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 3,
+     "hops": 1,
      "off_goal_nm": 3.348
     },
     {
      "r_kohm": 320.0,
-     "spikes": 14,
+     "hops": 14,
      "off_goal_nm": 0.003
     }
    ],
@@ -5635,9 +5643,9 @@
    "on_goal": true,
    "n_bystanders": 6,
    "abs_err": {
-    "target_site": 0.0024511468053700636
+    "target_site": 0.0024511468017101874
    },
-   "instrument_s": 815.4040651362576,
+   "instrument_s": 815.4040651362668,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -5653,33 +5661,33 @@
     }
    ],
    "lattice_deg": 9.664000000000001,
-   "lattice_rms_nm": 0.014502822770322622,
+   "lattice_rms_nm": 0.014502822770431458,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 6,
    "start_nm": [
-    -2.177272560197906,
-    4.643533191001005
+    -2.177272560198851,
+    4.6435331910000315
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.753
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.503
     },
     {
      "r_kohm": 204.8,
-     "spikes": 15,
+     "hops": 2,
      "off_goal_nm": 0.007
     }
    ],
@@ -5698,58 +5706,59 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.014236226043435794
+    "target_site": 0.01072173532037367
    },
-   "instrument_s": 912.6139616500808,
+   "instrument_s": 1048.5552091821778,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
    "pokes": 3,
    "drift_atoms": [
-    4
+    5
    ],
    "passed_over": [
     {
-     "edge": 3,
+     "edge": 6,
      "goal": 1
     }
    ],
-   "lattice_deg": 56.37000000000001,
-   "lattice_rms_nm": 0.012201135256561937,
+   "lattice_deg": 56.362,
+   "lattice_rms_nm": 0.030056398964821048,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
-   "candidates": 7,
+   "candidates": 4,
    "start_nm": [
-    0.28119912656584845,
-    -1.39484226651048
+    -2.1238938348803345,
+    -4.5235106160093785
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 1,
+     "off_goal_nm": 3.956
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 15,
-     "off_goal_nm": 0.256
+     "hops": 16,
+     "off_goal_nm": 0.252
     },
     {
      "r_kohm": 163.8,
-     "spikes": 1,
-     "off_goal_nm": 0.01
+     "hops": 1,
+     "off_goal_nm": 0.014
     }
    ],
    "r_success_kohm": 163.84
@@ -5767,7 +5776,7 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.00294809484804934
+    "target_site": 0.0029480948476860998
    },
    "instrument_s": 871.9840381711236,
    "tip_condition": "dirty",
@@ -5785,39 +5794,39 @@
     {}
    ],
    "lattice_deg": 34.16,
-   "lattice_rms_nm": 0.057253276488305645,
+   "lattice_rms_nm": 0.05725327648803759,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 8,
    "candidates": 8,
    "start_nm": [
-    22.64580348910995,
-    -1.610481584428026
+    22.645803489108616,
+    -1.6104815844276068
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 18,
+     "hops": 13,
      "off_goal_nm": 0.009
     }
    ],
@@ -5836,9 +5845,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.005068379711107415
+    "target_site": 0.005068379704864954
    },
-   "instrument_s": 892.2831716141812,
+   "instrument_s": 892.2831716141845,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -5854,41 +5863,41 @@
     }
    ],
    "lattice_deg": 30.942000000000004,
-   "lattice_rms_nm": 0.013996512204847454,
+   "lattice_rms_nm": 0.013996512205187403,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 3,
    "start_nm": [
-    5.3165320860751955,
-    -0.18143076283756443
+    5.316532086073895,
+    -0.18143076283657678
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.753
     },
     {
      "r_kohm": 163.8,
-     "spikes": 11,
+     "hops": 8,
      "off_goal_nm": 1.33
     },
     {
      "r_kohm": 131.1,
-     "spikes": 6,
+     "hops": 6,
      "off_goal_nm": 0.017
     }
    ],
@@ -5907,9 +5916,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.006893974670976623
+    "target_site": 0.006893974661430573
    },
-   "instrument_s": 1656.3796326550564,
+   "instrument_s": 1656.379632655051,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -5927,40 +5936,40 @@
     }
    ],
    "lattice_deg": 32.558,
-   "lattice_rms_nm": 0.01562605699585682,
+   "lattice_rms_nm": 0.01562605699596,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 4,
    "start_nm": [
-    1.4189078885467374,
-    0.587002706221277
+    1.4189078885469009,
+    0.5870027062206944
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 4,
+     "hops": 2,
      "off_goal_nm": 3.106
     },
     {
      "r_kohm": 131.1,
-     "spikes": 14,
+     "hops": 5,
      "off_goal_nm": 0.006
     }
    ],
@@ -5983,9 +5992,9 @@
    "on_goal": true,
    "n_bystanders": 6,
    "abs_err": {
-    "target_site": 0.0035235029120861865
+    "target_site": 0.0035235029285060515
    },
-   "instrument_s": 1075.2837030664348,
+   "instrument_s": 1075.2837030664332,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -6000,36 +6009,36 @@
     }
    ],
    "lattice_deg": 46.588,
-   "lattice_rms_nm": 0.015066832381198422,
+   "lattice_rms_nm": 0.015066832381307866,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
    "candidates": 5,
    "start_nm": [
-    0.4641010356315789,
-    -6.3522400849909175
+    0.46410103563107796,
+    -6.352240084993461
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 3.433
     },
     {
      "r_kohm": 163.8,
-     "spikes": 15,
+     "hops": 14,
      "off_goal_nm": 0.008
     }
    ],
@@ -6048,69 +6057,67 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.005087821008825048
+    "target_site": 0.005034777412327591
    },
-   "instrument_s": 1811.6176860038372,
+   "instrument_s": 1898.9995242070831,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
    "pokes": 3,
-   "tip_rounds": 2,
+   "tip_rounds": 8,
    "drift_atoms": [
-    4,
     3
    ],
    "passed_over": [
     {
-     "edge": 7,
-     "goal": 1
+     "edge": 4
     }
    ],
-   "lattice_deg": 28.060000000000002,
-   "lattice_rms_nm": 0.0167564542514288,
-   "lattice_vectors": 66,
-   "ruler_atoms": 12,
-   "survey_atoms": 12,
+   "lattice_deg": 28.090000000000003,
+   "lattice_rms_nm": 0.029887339559573713,
+   "lattice_vectors": 28,
+   "ruler_atoms": 8,
+   "survey_atoms": 8,
    "candidates": 4,
    "start_nm": [
-    -4.043612927413967,
-    2.8117753683636977
+    4.9901920336398256,
+    -2.0439459276316008
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 2,
-     "off_goal_nm": 3.547
+     "hops": 1,
+     "off_goal_nm": 3.531
     },
     {
      "r_kohm": 104.9,
-     "spikes": 11,
-     "off_goal_nm": 1.116
+     "hops": 10,
+     "off_goal_nm": 1.089
     },
     {
      "r_kohm": 83.9,
-     "spikes": 5,
-     "off_goal_nm": 0.005
+     "hops": 5,
+     "off_goal_nm": 0.013
     }
    ],
    "r_success_kohm": 83.88608000000002
@@ -6128,9 +6135,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.0061143626557127895
+    "target_site": 0.0016500046615407899
    },
-   "instrument_s": 1339.163624019911,
+   "instrument_s": 1281.6093056088857,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -6144,59 +6151,58 @@
      "edge": 6
     }
    ],
-   "lattice_deg": 29.092000000000006,
-   "lattice_rms_nm": 0.028890400399638055,
+   "lattice_deg": 29.094000000000005,
+   "lattice_rms_nm": 0.02768285511937258,
    "lattice_vectors": 66,
    "ruler_atoms": 12,
    "survey_atoms": 12,
    "candidates": 6,
    "start_nm": [
-    -3.9264196898223034,
-    3.953432536898603
+    -3.918109918330277,
+    3.9624764739119627
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 83.9,
-     "spikes": 2,
-     "off_goal_nm": 3.508
+     "hops": 0
     },
     {
      "r_kohm": 67.1,
-     "spikes": 4,
-     "off_goal_nm": 2.621
+     "hops": 9,
+     "off_goal_nm": 1.757
     },
     {
      "r_kohm": 53.7,
-     "spikes": 12,
-     "off_goal_nm": 0.03
+     "hops": 7,
+     "off_goal_nm": 0.024
     }
    ],
    "r_success_kohm": 53.68709120000002
@@ -6214,9 +6220,9 @@
    "on_goal": true,
    "n_bystanders": 0,
    "abs_err": {
-    "target_site": 0.009830225676421079
+    "target_site": 0.009830225656133413
    },
-   "instrument_s": 1355.0897296141106,
+   "instrument_s": 1355.0897296141288,
    "tip_condition": "blunt",
    "atoms_tried": 1,
    "tip_first": "blunt",
@@ -6231,36 +6237,36 @@
     }
    ],
    "lattice_deg": 37.257999999999996,
-   "lattice_rms_nm": 0.01685014637237721,
+   "lattice_rms_nm": 0.016850146372040176,
    "lattice_vectors": 15,
    "ruler_atoms": 6,
    "survey_atoms": 6,
    "candidates": 4,
    "start_nm": [
-    6.447366520394905,
-    -4.6497538515307895
+    6.4473665203939206,
+    -4.649753851527876
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 3,
+     "hops": 3,
      "off_goal_nm": 3.334
     },
     {
      "r_kohm": 163.8,
-     "spikes": 15,
+     "hops": 14,
      "off_goal_nm": 0.015
     }
    ],
@@ -6279,12 +6285,12 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.002973932892124075
+    "target_site": 0.0029739328910628146
    },
-   "instrument_s": 1205.6945805967662,
+   "instrument_s": 1205.6945805967644,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
    "tip_rounds": 1,
    "drift_atoms": [
@@ -6298,48 +6304,48 @@
     }
    ],
    "lattice_deg": 50.848000000000006,
-   "lattice_rms_nm": 0.014128288044662284,
+   "lattice_rms_nm": 0.014128288044527584,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 5,
    "start_nm": [
-    2.7352864615371573,
-    -2.4526975847215056
+    2.7352864615374095,
+    -2.452697584721175
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.757
     },
     {
      "r_kohm": 83.9,
-     "spikes": 16,
+     "hops": 16,
      "off_goal_nm": 0.009
     }
    ],
@@ -6358,9 +6364,9 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.003970321597330862
+    "target_site": 0.00397032159837415
    },
-   "instrument_s": 1037.118640406613,
+   "instrument_s": 1037.1186404066164,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -6377,29 +6383,29 @@
     }
    ],
    "lattice_deg": 16.902,
-   "lattice_rms_nm": 0.015999820142254893,
+   "lattice_rms_nm": 0.01599982014228734,
    "lattice_vectors": 91,
    "ruler_atoms": 14,
    "survey_atoms": 14,
    "candidates": 3,
    "start_nm": [
-    7.919936656709069,
-    3.3875541211881774
+    7.919936656709048,
+    3.3875541211878506
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 4,
+     "hops": 2,
      "off_goal_nm": 3.188
     },
     {
      "r_kohm": 320.0,
-     "spikes": 7,
+     "hops": 6,
      "off_goal_nm": 1.588
     },
     {
      "r_kohm": 256.0,
-     "spikes": 7,
+     "hops": 7,
      "off_goal_nm": 0.004
     }
    ],
@@ -6418,7 +6424,7 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.0033888319515852413
+    "target_site": 0.003388831953136487
    },
    "instrument_s": 579.6000407626412,
    "tip_condition": "dirty",
@@ -6436,19 +6442,19 @@
     }
    ],
    "lattice_deg": 3.3800000000000003,
-   "lattice_rms_nm": 0.015987085536351312,
+   "lattice_rms_nm": 0.015987085536598944,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 3,
    "start_nm": [
-    -4.023888025381503,
-    7.121374733892145
+    -4.023888025381286,
+    7.121374733893296
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 16,
+     "hops": 3,
      "off_goal_nm": 0.008
     }
    ],
@@ -6467,9 +6473,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.0077248905936943175
+    "target_site": 0.00772489053115796
    },
-   "instrument_s": 888.4511183834682,
+   "instrument_s": 888.451118383403,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -6483,44 +6489,44 @@
     }
    ],
    "lattice_deg": 10.51,
-   "lattice_rms_nm": 0.01153744703410877,
+   "lattice_rms_nm": 0.01153744703446833,
    "lattice_vectors": 28,
    "ruler_atoms": 8,
    "survey_atoms": 8,
    "candidates": 5,
    "start_nm": [
-    3.366238695469505,
-    -0.8362831727252171
+    3.3662386954721484,
+    -0.8362831727173692
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 3,
+     "hops": 3,
      "off_goal_nm": 3.348
     },
     {
      "r_kohm": 104.9,
-     "spikes": 14,
+     "hops": 14,
      "off_goal_nm": 0.014
     }
    ],
@@ -6539,9 +6545,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.004985131351026052
+    "target_site": 0.011510302822922097
    },
-   "instrument_s": 786.4903403818374,
+   "instrument_s": 925.9065357935867,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -6556,37 +6562,43 @@
     }
    ],
    "lattice_deg": 30.860000000000003,
-   "lattice_rms_nm": 0.028970158058712746,
+   "lattice_rms_nm": 0.028970158057801537,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
    "candidates": 3,
    "start_nm": [
-    4.120501098235625,
-    -4.596234636413694
+    4.1205010982315216,
+    -4.5962346364188456
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 3,
+     "hops": 2,
      "off_goal_nm": 3.311
     },
     {
      "r_kohm": 320.0,
-     "spikes": 14,
+     "hops": 3,
      "off_goal_nm": 0.248
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 1,
+     "off_goal_nm": 0.245
     },
     {
-     "r_kohm": 256.0,
-     "spikes": 1,
-     "off_goal_nm": 0.022
+     "r_kohm": 320.0,
+     "hops": 1,
+     "off_goal_nm": 0.245
+    },
+    {
+     "r_kohm": 320.0,
+     "hops": 1,
+     "off_goal_nm": 0.012
     }
    ],
-   "r_success_kohm": 256.0
+   "r_success_kohm": 320.0
   },
   {
    "paper": "P4",
@@ -6601,9 +6613,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.006681429318703869
+    "target_site": 0.006764574658971586
    },
-   "instrument_s": 942.2463836512626,
+   "instrument_s": 942.2463929914051,
    "tip_condition": "blunt",
    "atoms_tried": 1,
    "tip_first": "blunt",
@@ -6619,25 +6631,25 @@
     }
    ],
    "lattice_deg": 53.428000000000004,
-   "lattice_rms_nm": 0.02028636751147429,
+   "lattice_rms_nm": 0.020280963488008265,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
    "candidates": 5,
    "start_nm": [
-    6.570021959208855,
-    -5.337674717683125
+    6.570252961382515,
+    -5.337677951367873
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 10,
+     "hops": 10,
      "off_goal_nm": 1.666
     },
     {
      "r_kohm": 320.0,
-     "spikes": 7,
-     "off_goal_nm": 0.009
+     "hops": 7,
+     "off_goal_nm": 0.008
     }
    ],
    "r_success_kohm": 320.0
@@ -6655,9 +6667,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.0062202770101083445
+    "target_site": 0.006220277008948839
    },
-   "instrument_s": 677.3388556985919,
+   "instrument_s": 677.3388556985865,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -6672,24 +6684,24 @@
     }
    ],
    "lattice_deg": 9.192000000000002,
-   "lattice_rms_nm": 0.012319230280523114,
+   "lattice_rms_nm": 0.012319230280072358,
    "lattice_vectors": 10,
    "ruler_atoms": 5,
    "survey_atoms": 5,
    "candidates": 3,
    "start_nm": [
-    -0.24727616447016842,
-    3.6575859545947544
+    -0.24727616446927314,
+    3.6575859545954295
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.75
     },
     {
      "r_kohm": 320.0,
-     "spikes": 16,
+     "hops": 12,
      "off_goal_nm": 0.008
     }
    ],
@@ -6708,9 +6720,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.002733127470586181
+    "target_site": 0.002733127460370581
    },
-   "instrument_s": 886.8110121612535,
+   "instrument_s": 886.8110121612498,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -6725,44 +6737,44 @@
     }
    ],
    "lattice_deg": 22.24,
-   "lattice_rms_nm": 0.009707890838730013,
+   "lattice_rms_nm": 0.009707890839086806,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
    "candidates": 4,
    "start_nm": [
-    0.8377945526717632,
-    -3.187362739443415
+    0.8377945526723494,
+    -3.1873627394424098
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 5,
+     "hops": 3,
      "off_goal_nm": 2.904
     },
     {
      "r_kohm": 104.9,
-     "spikes": 13,
+     "hops": 2,
      "off_goal_nm": 0.02
     }
    ],
@@ -6781,9 +6793,9 @@
    "on_goal": true,
    "n_bystanders": 1,
    "abs_err": {
-    "target_site": 0.003920713116565762
+    "target_site": 0.003920713105783442
    },
-   "instrument_s": 1118.7151054405128,
+   "instrument_s": 1118.7151054405163,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "blunt",
@@ -6799,40 +6811,40 @@
     }
    ],
    "lattice_deg": 22.162000000000003,
-   "lattice_rms_nm": 0.013841562512091841,
+   "lattice_rms_nm": 0.013841562511223683,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
    "candidates": 4,
    "start_nm": [
-    -0.05762549475952383,
-    -3.884821150322921
+    -0.057625494758415385,
+    -3.8848211503223418
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 3,
+     "hops": 3,
      "off_goal_nm": 3.334
     },
     {
      "r_kohm": 131.1,
-     "spikes": 15,
+     "hops": 14,
      "off_goal_nm": 0.007
     }
    ],
@@ -6851,9 +6863,9 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.0058812347547406
+    "target_site": 0.005881234763753072
    },
-   "instrument_s": 977.6494583821951,
+   "instrument_s": 977.6494583821651,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -6868,49 +6880,49 @@
     }
    ],
    "lattice_deg": 47.964000000000006,
-   "lattice_rms_nm": 0.008135008471737374,
+   "lattice_rms_nm": 0.00813500847161385,
    "lattice_vectors": 28,
    "ruler_atoms": 8,
    "survey_atoms": 8,
    "candidates": 5,
    "start_nm": [
-    -2.981880655300099,
-    0.11929765876537601
+    -2.981880655301797,
+    0.11929765876647025
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.671
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 7,
+     "hops": 4,
      "off_goal_nm": 2.078
     },
     {
      "r_kohm": 83.9,
-     "spikes": 9,
+     "hops": 9,
      "off_goal_nm": 0.007
     }
    ],
@@ -6929,9 +6941,9 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.007231064405123619
+    "target_site": 0.007231064389502887
    },
-   "instrument_s": 761.7482045345496,
+   "instrument_s": 761.7482045345533,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -6946,32 +6958,32 @@
     }
    ],
    "lattice_deg": 36.49,
-   "lattice_rms_nm": 0.013238561052504922,
+   "lattice_rms_nm": 0.01323856105265638,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 7,
    "start_nm": [
-    1.3370818286660722,
-    -2.112416632869383
+    1.3370818286665411,
+    -2.112416632866811
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 3.567
     },
     {
      "r_kohm": 204.8,
-     "spikes": 16,
+     "hops": 15,
      "off_goal_nm": 0.017
     }
    ],
@@ -6988,78 +7000,220 @@
     "bystander_max_shift_nm": true
    },
    "on_goal": true,
-   "n_bystanders": 3,
+   "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.0017574239273470216
+    "target_site": 0.0046929791566521625
    },
-   "instrument_s": 1824.6040082408613,
+   "instrument_s": 3780.6496142169876,
    "tip_condition": "double",
-   "atoms_tried": 1,
+   "atoms_tried": 2,
    "tip_first": "double",
-   "pokes": 3,
-   "tip_rounds": 2,
+   "pokes": 6,
+   "tip_rounds": 1,
    "drift_atoms": [
     5,
-    5
+    3
    ],
    "passed_over": [
     {
      "edge": 3,
      "height": 2
+    },
+    {
+     "edge": 2,
+     "neighbour": 2,
+     "height": 1
     }
    ],
-   "lattice_deg": 31.622,
-   "lattice_rms_nm": 0.04137448769727299,
+   "lattice_deg": 31.152000000000005,
+   "lattice_rms_nm": 0.06524779578356271,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
    "candidates": 2,
    "start_nm": [
-    -11.666551132131108,
-    13.63979874343606
+    4.523093119753906,
+    -3.4745340180669544
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0,
-     "off_goal_nm": 3.978
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 1,
-     "off_goal_nm": 3.755
+     "hops": 0
     },
     {
      "r_kohm": 83.9,
-     "spikes": 17,
-     "off_goal_nm": 0.033
+     "hops": 17,
+     "off_goal_nm": 0.315
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 1,
+     "off_goal_nm": 0.216
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 1,
+     "off_goal_nm": 0.215
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 1,
+     "off_goal_nm": 0.217
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 1,
+     "off_goal_nm": 0.21
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 1,
+     "off_goal_nm": 0.213
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 1,
+     "off_goal_nm": 0.212
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 1,
+     "off_goal_nm": 0.213
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 1,
+     "off_goal_nm": 0.457
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 2,
+     "off_goal_nm": 0.222
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 1,
+     "off_goal_nm": 0.462
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 2,
+     "off_goal_nm": 0.464
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 2,
+     "off_goal_nm": 0.458
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 2,
+     "off_goal_nm": 0.217
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 1,
+     "off_goal_nm": 0.207
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 1,
+     "off_goal_nm": 0.223
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 1,
+     "off_goal_nm": 0.215
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 1,
+     "off_goal_nm": 0.212
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 1,
+     "off_goal_nm": 0.221
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 1,
+     "off_goal_nm": 0.458
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 2,
+     "off_goal_nm": 0.214
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 1,
+     "off_goal_nm": 0.208
+    },
+    {
+     "r_kohm": 83.9,
+     "hops": 1,
+     "off_goal_nm": 0.214
+    },
+    {
+     "r_kohm": 400.0,
+     "hops": 0
+    },
+    {
+     "r_kohm": 320.0,
+     "hops": 0
+    },
+    {
+     "r_kohm": 256.0,
+     "hops": 0
+    },
+    {
+     "r_kohm": 204.8,
+     "hops": 0
+    },
+    {
+     "r_kohm": 163.8,
+     "hops": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "hops": 2,
+     "off_goal_nm": 3.327
+    },
+    {
+     "r_kohm": 104.9,
+     "hops": 9,
+     "off_goal_nm": 0.02
     }
    ],
-   "tip_mid": 1,
-   "recoveries": [
-    "conditioned"
+   "lost": [
+    "the atom did not reach its goal"
    ],
-   "r_success_kohm": 83.88608000000002
+   "r_success_kohm": 104.8576
   },
   {
    "paper": "P4",
@@ -7074,9 +7228,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.0028052240903551347
+    "target_site": 0.0027212579123891724
    },
-   "instrument_s": 1078.8355011162582,
+   "instrument_s": 1078.8353446384078,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -7092,37 +7246,37 @@
     }
    ],
    "lattice_deg": 19.142000000000003,
-   "lattice_rms_nm": 0.013153506368326406,
+   "lattice_rms_nm": 0.013153506367623267,
    "lattice_vectors": 28,
    "ruler_atoms": 8,
    "survey_atoms": 8,
    "candidates": 6,
    "start_nm": [
-    2.369321285832857,
-    -6.432273009297681
+    2.369321285830324,
+    -6.432273009297354
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.813
     },
     {
      "r_kohm": 163.8,
-     "spikes": 17,
-     "off_goal_nm": 0.013
+     "hops": 16,
+     "off_goal_nm": 0.011
     }
    ],
    "r_success_kohm": 163.84
@@ -7140,9 +7294,9 @@
    "on_goal": true,
    "n_bystanders": 1,
    "abs_err": {
-    "target_site": 0.0010370778110619185
+    "target_site": 0.001037077811956696
    },
-   "instrument_s": 943.2056486305496,
+   "instrument_s": 943.2056486305509,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -7157,24 +7311,24 @@
     }
    ],
    "lattice_deg": 6.134,
-   "lattice_rms_nm": 0.013632382904406682,
+   "lattice_rms_nm": 0.013632382904578267,
    "lattice_vectors": 15,
    "ruler_atoms": 6,
    "survey_atoms": 6,
    "candidates": 1,
    "start_nm": [
-    6.770807173147926,
-    5.941940765867491
+    6.7708071731478405,
+    5.94194076586745
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 9,
+     "hops": 9,
      "off_goal_nm": 1.923
     },
     {
      "r_kohm": 320.0,
-     "spikes": 8,
+     "hops": 8,
      "off_goal_nm": 0.003
     }
    ],
@@ -7193,9 +7347,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.007207358857171666
+    "target_site": 0.007207358897149122
    },
-   "instrument_s": 1774.2122654378618,
+   "instrument_s": 1774.2122654378318,
    "tip_condition": "blunt",
    "atoms_tried": 1,
    "tip_first": "unknown",
@@ -7212,37 +7366,37 @@
     }
    ],
    "lattice_deg": 35.108000000000004,
-   "lattice_rms_nm": 0.023538989847131684,
+   "lattice_rms_nm": 0.023538989846424233,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 2,
    "start_nm": [
-    -1.7838532214382887,
-    -2.2129029868478653
+    -1.783853221434775,
+    -2.212902986844938
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.745
     },
     {
      "r_kohm": 204.8,
-     "spikes": 10,
+     "hops": 9,
      "off_goal_nm": 1.549
     },
     {
      "r_kohm": 163.8,
-     "spikes": 7,
+     "hops": 6,
      "off_goal_nm": 0.014
     }
    ],
@@ -7261,12 +7415,12 @@
    "on_goal": true,
    "n_bystanders": 6,
    "abs_err": {
-    "target_site": 0.007928156336986089
+    "target_site": 0.017145452907486557
    },
-   "instrument_s": 1086.2092293335518,
+   "instrument_s": 1111.2213423292033,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
    "tip_rounds": 2,
    "drift_atoms": [
@@ -7280,30 +7434,30 @@
      "step": 1
     }
    ],
-   "lattice_deg": 20.650000000000002,
-   "lattice_rms_nm": 0.014610760703424874,
+   "lattice_deg": 20.652000000000005,
+   "lattice_rms_nm": 0.012744269840026407,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 4,
    "start_nm": [
-    -2.7267906021766635,
-    1.6526079483162377
+    -2.7574804887162827,
+    1.6626065839656476
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 1,
-     "off_goal_nm": 3.809
+     "hops": 1,
+     "off_goal_nm": 3.812
     },
     {
      "r_kohm": 256.0,
-     "spikes": 17,
-     "off_goal_nm": 0.011
+     "hops": 0,
+     "off_goal_nm": 0.003
     }
    ],
    "r_success_kohm": 256.0
@@ -7321,9 +7475,9 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.009538452666179883
+    "target_site": 0.009538452646547487
    },
-   "instrument_s": 790.2223667310589,
+   "instrument_s": 790.2223667310355,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -7340,36 +7494,36 @@
     }
    ],
    "lattice_deg": 55.46,
-   "lattice_rms_nm": 0.015726241175209762,
+   "lattice_rms_nm": 0.01572624117474459,
    "lattice_vectors": 136,
    "ruler_atoms": 17,
    "survey_atoms": 17,
    "candidates": 5,
    "start_nm": [
-    2.4470179872577447,
-    -0.9899616159212314
+    2.4470179872560607,
+    -0.9899616159184532
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 15,
+     "hops": 2,
      "off_goal_nm": 0.255
     },
     {
      "r_kohm": 204.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 0.013
     }
    ],
@@ -7388,9 +7542,9 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.0062025513821062075
+    "target_site": 0.006202551388168112
    },
-   "instrument_s": 835.1804650804291,
+   "instrument_s": 835.1804650804294,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -7406,43 +7560,43 @@
     }
    ],
    "lattice_deg": 22.908,
-   "lattice_rms_nm": 0.006830225181916451,
+   "lattice_rms_nm": 0.006830225182161322,
    "lattice_vectors": 28,
    "ruler_atoms": 8,
    "survey_atoms": 8,
    "candidates": 3,
    "start_nm": [
-    -0.6538953317781733,
-    3.0162099966583575
+    -0.6538953317805429,
+    3.0162099966561904
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 18,
+     "hops": 7,
      "off_goal_nm": 0.006
     }
    ],
@@ -7461,12 +7615,12 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.006979919482120052
+    "target_site": 0.385237884774661
    },
-   "instrument_s": 2184.2011848519874,
+   "instrument_s": 2312.5301011846223,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
    "tip_rounds": 12,
    "drift_atoms": [
@@ -7479,45 +7633,47 @@
     }
    ],
    "lattice_deg": 11.31,
-   "lattice_rms_nm": 0.04805331940240041,
+   "lattice_rms_nm": 0.048053319402935626,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 3,
    "start_nm": [
-    -8.898252601535496,
-    4.58836662555473
+    -8.898252601536802,
+    4.588366625556146
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 1,
+     "off_goal_nm": 4.016
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 1,
+     "off_goal_nm": 3.749
     },
     {
      "r_kohm": 131.1,
-     "spikes": 3,
-     "off_goal_nm": 3.344
+     "hops": 9,
+     "off_goal_nm": 1.41
     },
     {
      "r_kohm": 104.9,
-     "spikes": 14,
-     "off_goal_nm": 0.008
+     "hops": 6,
+     "off_goal_nm": 0.018
     }
    ],
    "r_success_kohm": 104.8576
@@ -7535,7 +7691,7 @@
    "on_goal": true,
    "n_bystanders": 0,
    "abs_err": {
-    "target_site": 0.0028488678160403327
+    "target_site": 0.0028488678169585674
    },
    "instrument_s": 932.5859152508352,
    "tip_condition": "double",
@@ -7556,19 +7712,19 @@
     }
    ],
    "lattice_deg": 55.336000000000006,
-   "lattice_rms_nm": 0.013856302344525274,
+   "lattice_rms_nm": 0.013856302344388996,
    "lattice_vectors": 10,
    "ruler_atoms": 5,
    "survey_atoms": 4,
    "candidates": 1,
    "start_nm": [
-    35.07150928158179,
-    7.869738464489316
+    35.071509281581896,
+    7.869738464486964
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 16,
+     "hops": 5,
      "off_goal_nm": 0.026
     }
    ],
@@ -7587,9 +7743,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.008167006205493202
+    "target_site": 0.008167006202885093
    },
-   "instrument_s": 970.3556577064045,
+   "instrument_s": 970.35565770639,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -7605,49 +7761,49 @@
     }
    ],
    "lattice_deg": 45.546,
-   "lattice_rms_nm": 0.017421764556866278,
+   "lattice_rms_nm": 0.01742176455708715,
    "lattice_vectors": 105,
    "ruler_atoms": 15,
    "survey_atoms": 15,
    "candidates": 7,
    "start_nm": [
-    2.5229805439056747,
-    -3.4371185062598677
+    2.5229805439067654,
+    -3.4371185062615375
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 3.42
     },
     {
      "r_kohm": 104.9,
-     "spikes": 14,
+     "hops": 14,
      "off_goal_nm": 0.25
     },
     {
      "r_kohm": 104.9,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 0.013
     }
    ],
@@ -7666,9 +7822,9 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.014046060615311063
+    "target_site": 0.012655193878925807
    },
-   "instrument_s": 829.1717706958831,
+   "instrument_s": 829.1717678684478,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -7683,37 +7839,37 @@
      "path": 2
     }
    ],
-   "lattice_deg": 4.746,
-   "lattice_rms_nm": 0.018910034456836325,
+   "lattice_deg": 4.744,
+   "lattice_rms_nm": 0.018526497477793162,
    "lattice_vectors": 66,
    "ruler_atoms": 12,
    "survey_atoms": 12,
    "candidates": 5,
    "start_nm": [
-    -3.7843167101243296,
-    2.3325465823695453
+    -3.784461248971656,
+    2.3325308701343275
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 16,
-     "off_goal_nm": 0.007
+     "hops": 4,
+     "off_goal_nm": 0.011
     }
    ],
    "r_success_kohm": 163.84
@@ -7731,12 +7887,12 @@
    "on_goal": true,
    "n_bystanders": 6,
    "abs_err": {
-    "target_site": 0.0020517398749444783
+    "target_site": 0.0015249056659702887
    },
-   "instrument_s": 1303.9112070407268,
+   "instrument_s": 1303.9096883287898,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
    "tip_rounds": 3,
    "drift_atoms": [
@@ -7749,41 +7905,41 @@
     }
    ],
    "lattice_deg": 26.462000000000003,
-   "lattice_rms_nm": 0.0260136246412312,
+   "lattice_rms_nm": 0.02455242685047454,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 2,
    "start_nm": [
-    4.977901433763986,
-    8.699961550184232
+    4.975808754769247,
+    8.700135694094719
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 3,
+     "hops": 1,
      "off_goal_nm": 3.331
     },
     {
      "r_kohm": 131.1,
-     "spikes": 15,
-     "off_goal_nm": 0.009
+     "hops": 14,
+     "off_goal_nm": 0.01
     }
    ],
    "r_success_kohm": 131.072
@@ -7801,9 +7957,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.01108786350113505
+    "target_site": 0.011087863482936763
    },
-   "instrument_s": 942.6794799836971,
+   "instrument_s": 942.6794799837135,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -7817,45 +7973,45 @@
     }
    ],
    "lattice_deg": 29.34,
-   "lattice_rms_nm": 0.014525488579722336,
+   "lattice_rms_nm": 0.014525488579394074,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 6,
    "start_nm": [
-    -1.520826453521888,
-    -4.361686752675556
+    -1.5208264535233766,
+    -4.361686752676867
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.755
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.531
     },
     {
      "r_kohm": 104.9,
-     "spikes": 16,
+     "hops": 15,
      "off_goal_nm": 0.006
     }
    ],
@@ -7874,9 +8030,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.011814230158071393
+    "target_site": 0.011814230160063688
    },
-   "instrument_s": 937.7639383416468,
+   "instrument_s": 937.763938341647,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -7892,27 +8048,27 @@
     }
    ],
    "lattice_deg": 36.916,
-   "lattice_rms_nm": 0.014273293896659345,
+   "lattice_rms_nm": 0.014273293896544127,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 6,
    "start_nm": [
-    3.621787440178352,
-    -3.4179854749336727
+    3.621787440176604,
+    -3.4179854749337544
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 18,
+     "hops": 10,
      "off_goal_nm": 0.001
     }
    ],
@@ -7931,9 +8087,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.003884450654417463
+    "target_site": 0.0038844506599195073
    },
-   "instrument_s": 806.9201838163569,
+   "instrument_s": 806.9201838163559,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -7947,36 +8103,36 @@
     }
    ],
    "lattice_deg": 7.450000000000001,
-   "lattice_rms_nm": 0.01653574851533887,
+   "lattice_rms_nm": 0.01653574851563929,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
    "candidates": 4,
    "start_nm": [
-    -10.81558527852431,
-    -7.979098097428636
+    -10.8155852785239,
+    -7.97909809742896
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.849
     },
     {
      "r_kohm": 163.8,
-     "spikes": 16,
+     "hops": 16,
      "off_goal_nm": 0.009
     }
    ],
@@ -7995,15 +8151,16 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.11924917076326196
+    "target_site": 0.003971340341681004
    },
-   "instrument_s": 1484.4835937691164,
+   "instrument_s": 2116.2306172116023,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
-   "tip_rounds": 4,
+   "tip_rounds": 6,
    "drift_atoms": [
+    4,
     4
    ],
    "passed_over": [
@@ -8012,51 +8169,55 @@
      "path": 1
     }
    ],
-   "lattice_deg": 36.92000000000001,
-   "lattice_rms_nm": 0.01330218478943431,
+   "lattice_deg": 36.902,
+   "lattice_rms_nm": 0.011824666675950866,
    "lattice_vectors": 28,
    "ruler_atoms": 8,
    "survey_atoms": 8,
    "candidates": 4,
    "start_nm": [
-    -8.49049640026128,
-    0.026076766865749335
+    -8.498431843429872,
+    0.02693199104449917
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 1,
-     "off_goal_nm": 3.832
+     "hops": 1,
+     "off_goal_nm": 3.779
     },
     {
      "r_kohm": 83.9,
-     "spikes": 17,
-     "off_goal_nm": 0.027
+     "hops": 16,
+     "off_goal_nm": 0.007
     }
+   ],
+   "tip_mid": 1,
+   "recoveries": [
+    "conditioned"
    ],
    "r_success_kohm": 83.88608000000002
   },
@@ -8073,9 +8234,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.003829007243999352
+    "target_site": 0.003931309995044636
    },
-   "instrument_s": 1056.8535760506325,
+   "instrument_s": 1056.8548423679654,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -8085,43 +8246,43 @@
    ],
    "passed_over": [
     {
-     "neighbour": 1,
      "path": 1,
-     "edge": 3
+     "edge": 3,
+     "neighbour": 1
     }
    ],
-   "lattice_deg": 47.354,
-   "lattice_rms_nm": 0.01050857817799258,
+   "lattice_deg": 47.352000000000004,
+   "lattice_rms_nm": 0.010964740857128634,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
    "candidates": 4,
    "start_nm": [
-    4.615768544560552,
-    6.38974218514625
+    4.571066585440057,
+    6.423405218159147
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.705
     },
     {
      "r_kohm": 204.8,
-     "spikes": 3,
+     "hops": 2,
      "off_goal_nm": 3.031
     },
     {
      "r_kohm": 163.8,
-     "spikes": 13,
+     "hops": 13,
      "off_goal_nm": 0.008
     }
    ],
@@ -8140,9 +8301,9 @@
    "on_goal": true,
    "n_bystanders": 6,
    "abs_err": {
-    "target_site": 0.008488572308621684
+    "target_site": 0.008488572294941838
    },
-   "instrument_s": 930.616630893057,
+   "instrument_s": 930.6166308930352,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -8158,42 +8319,42 @@
     }
    ],
    "lattice_deg": 2.6740000000000004,
-   "lattice_rms_nm": 0.009349904442154907,
+   "lattice_rms_nm": 0.009349904442062759,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 4,
    "start_nm": [
-    -5.198867738087753,
-    -1.0941910072086536
+    -5.198867738087875,
+    -1.0941910072051186
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.688
     },
     {
      "r_kohm": 204.8,
-     "spikes": 12,
+     "hops": 12,
      "off_goal_nm": 0.757
     },
     {
      "r_kohm": 163.8,
-     "spikes": 2,
+     "hops": 3,
      "off_goal_nm": 0.258
     },
     {
      "r_kohm": 163.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 0.01
     }
    ],
@@ -8212,9 +8373,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.004092200083216165
+    "target_site": 0.004092200100082988
    },
-   "instrument_s": 1011.2503278908177,
+   "instrument_s": 1011.2503278908355,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -8228,53 +8389,53 @@
     }
    ],
    "lattice_deg": 15.308,
-   "lattice_rms_nm": 0.015376141950586727,
+   "lattice_rms_nm": 0.015376141950911769,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
    "candidates": 4,
    "start_nm": [
-    -0.022886742079663236,
-    4.90235789129744
+    -0.022886742078547684,
+    4.902357891296541
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 10,
+     "hops": 10,
      "off_goal_nm": 1.823
     },
     {
      "r_kohm": 83.9,
-     "spikes": 7,
+     "hops": 8,
      "off_goal_nm": 0.241
     },
     {
      "r_kohm": 83.9,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 0.011
     }
    ],
@@ -8293,7 +8454,7 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.0037768883135445987
+    "target_site": 0.003776888315329187
    },
    "instrument_s": 579.3627473216187,
    "tip_condition": "good",
@@ -8310,19 +8471,19 @@
     }
    ],
    "lattice_deg": 47.300000000000004,
-   "lattice_rms_nm": 0.00924132774213112,
+   "lattice_rms_nm": 0.009241327741886424,
    "lattice_vectors": 15,
    "ruler_atoms": 6,
    "survey_atoms": 6,
    "candidates": 3,
    "start_nm": [
-    -3.510984495336192,
-    2.0284641778014674
+    -3.5109844953358653,
+    2.0284641778010055
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 17,
+     "hops": 16,
      "off_goal_nm": 0.006
     }
    ],
@@ -8341,51 +8502,51 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.010793853069010654
+    "target_site": 0.004599996910784933
    },
-   "instrument_s": 1035.3942603060282,
+   "instrument_s": 1221.2546796846427,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
    "pokes": 3,
-   "tip_rounds": 1,
+   "tip_rounds": 3,
    "drift_atoms": [
     5
    ],
    "passed_over": [
     {
-     "edge": 4,
-     "path": 2
+     "path": 2,
+     "edge": 3
     }
    ],
-   "lattice_deg": 9.682,
-   "lattice_rms_nm": 0.018199534557132666,
+   "lattice_deg": 9.65,
+   "lattice_rms_nm": 0.013186056204376972,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
-   "candidates": 4,
+   "candidates": 5,
    "start_nm": [
-    2.522088870651295,
-    7.49465980164401
+    3.2557356108873883,
+    9.540939478807783
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 1,
-     "off_goal_nm": 3.738
+     "hops": 1,
+     "off_goal_nm": 3.763
     },
     {
      "r_kohm": 204.8,
-     "spikes": 16,
-     "off_goal_nm": 0.023
+     "hops": 16,
+     "off_goal_nm": 0.013
     }
    ],
    "r_success_kohm": 204.8
@@ -8401,68 +8562,65 @@
     "bystander_max_shift_nm": true
    },
    "on_goal": true,
-   "n_bystanders": 3,
+   "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.006892248910677378
+    "target_site": 0.0066168297835114106
    },
-   "instrument_s": 1186.723291591828,
+   "instrument_s": 1533.2770355632051,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
    "pokes": 3,
-   "tip_rounds": 1,
+   "tip_rounds": 5,
    "drift_atoms": [
-    4
+    3
    ],
    "passed_over": [
     {
      "edge": 3,
-     "neighbour": 2,
-     "goal": 2
-    },
-    {
-     "edge": 3
+     "neighbour": 2
     }
    ],
-   "lattice_deg": 4.704,
-   "lattice_rms_nm": 0.01334065263563635,
+   "lattice_deg": 4.752000000000001,
+   "lattice_rms_nm": 0.022890648230499,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
-   "survey_atoms": 6,
-   "candidates": 3,
+   "survey_atoms": 7,
+   "candidates": 2,
    "start_nm": [
-    14.631898621927498,
-    3.3144978714230042
+    -8.698772110730852,
+    -1.43028349620932
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 1,
+     "off_goal_nm": 3.713
     },
     {
      "r_kohm": 104.9,
-     "spikes": 16,
-     "off_goal_nm": 0.024
+     "hops": 15,
+     "off_goal_nm": 0.035
     }
    ],
    "r_success_kohm": 104.8576
@@ -8480,16 +8638,15 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.013052288923056727
+    "target_site": 0.006544343709070313
    },
-   "instrument_s": 1777.352427150985,
+   "instrument_s": 1145.342543470883,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
-   "tip_rounds": 3,
+   "tip_rounds": 1,
    "drift_atoms": [
-    5,
     5
    ],
    "passed_over": [
@@ -8499,43 +8656,39 @@
      "neighbour": 2
     }
    ],
-   "lattice_deg": 52.752,
-   "lattice_rms_nm": 0.04713865452182824,
+   "lattice_deg": 52.758,
+   "lattice_rms_nm": 0.047059556044797723,
    "lattice_vectors": 28,
    "ruler_atoms": 8,
    "survey_atoms": 8,
    "candidates": 4,
    "start_nm": [
-    -6.451023358884067,
-    -4.981553083356516
+    -6.433932911391345,
+    -4.975338010514932
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 16,
-     "off_goal_nm": 0.251
+     "hops": 8,
+     "off_goal_nm": 0.243
     },
     {
      "r_kohm": 204.8,
-     "spikes": 1,
-     "off_goal_nm": 0.02
+     "hops": 1,
+     "off_goal_nm": 0.008
     }
-   ],
-   "tip_mid": 1,
-   "recoveries": [
-    "conditioned"
    ],
    "r_success_kohm": 204.8
   },
@@ -8552,9 +8705,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.009598669679716343
+    "target_site": 0.009498170848278144
    },
-   "instrument_s": 1171.149875531732,
+   "instrument_s": 1171.1492056232241,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -8570,41 +8723,41 @@
     }
    ],
    "lattice_deg": 37.204,
-   "lattice_rms_nm": 0.020614070784151554,
+   "lattice_rms_nm": 0.02058408002197644,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
    "candidates": 1,
    "start_nm": [
-    9.6662060376188,
-    -4.5642810811539505
+    9.666200299737685,
+    -4.564110582395706
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 1,
-     "off_goal_nm": 3.781
+     "hops": 1,
+     "off_goal_nm": 3.78
     },
     {
      "r_kohm": 163.8,
-     "spikes": 5,
-     "off_goal_nm": 2.665
+     "hops": 4,
+     "off_goal_nm": 2.664
     },
     {
      "r_kohm": 131.1,
-     "spikes": 12,
+     "hops": 1,
      "off_goal_nm": 0.004
     }
    ],
@@ -8613,25 +8766,28 @@
   {
    "paper": "P4",
    "seed": 575,
-   "success": true,
-   "partial": 1.0,
-   "error": null,
+   "success": false,
+   "partial": 0.0,
+   "error": "RuntimeError: the work area was not found again",
    "claims_ok": {
-    "target_site": true,
-    "bystander_max_shift_nm": true
+    "target_site": false,
+    "bystander_max_shift_nm": false
    },
-   "on_goal": false,
-   "n_bystanders": 2,
+   "on_goal": null,
+   "n_bystanders": null,
    "abs_err": {
-    "target_site": 0.058583753405386275
+    "target_site": NaN
    },
-   "instrument_s": 942.8508674746306,
+   "instrument_s": 3704.0372000375473,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
    "pokes": 3,
    "drift_atoms": [
-    6
+    6,
+    5,
+    5,
+    5
    ],
    "passed_over": [
     {
@@ -8639,50 +8795,102 @@
     }
    ],
    "lattice_deg": 42.952000000000005,
-   "lattice_rms_nm": 0.013876149344513259,
+   "lattice_rms_nm": 0.013876149344524217,
    "lattice_vectors": 78,
    "ruler_atoms": 13,
    "survey_atoms": 13,
    "candidates": 7,
    "start_nm": [
-    1.443731020765874,
-    3.8514640261316586
+    1.4437310207648544,
+    3.851464026131815
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 3,
+     "hops": 2,
      "off_goal_nm": 3.554
     },
     {
      "r_kohm": 256.0,
-     "spikes": 16,
+     "hops": 15,
      "off_goal_nm": 0.276
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 1,
+     "off_goal_nm": 0.244
     },
     {
-     "r_kohm": 204.8,
-     "spikes": 0
+     "r_kohm": 256.0,
+     "hops": 1,
+     "off_goal_nm": 0.269
     },
     {
-     "r_kohm": 163.8,
-     "spikes": 1,
-     "off_goal_nm": 0.385
+     "r_kohm": 256.0,
+     "hops": 1,
+     "off_goal_nm": 0.229
     },
     {
-     "r_kohm": 163.8,
-     "spikes": 1,
-     "off_goal_nm": 0.09
+     "r_kohm": 256.0,
+     "hops": 1,
+     "off_goal_nm": 0.259
+    },
+    {
+     "r_kohm": 256.0,
+     "hops": 1,
+     "off_goal_nm": 0.266
+    },
+    {
+     "r_kohm": 256.0,
+     "hops": 1,
+     "off_goal_nm": 0.246
+    },
+    {
+     "r_kohm": 256.0,
+     "hops": 1,
+     "off_goal_nm": 0.26
+    },
+    {
+     "r_kohm": 256.0,
+     "hops": 1,
+     "off_goal_nm": 0.211
+    },
+    {
+     "r_kohm": 256.0,
+     "hops": 1,
+     "off_goal_nm": 0.262
+    },
+    {
+     "r_kohm": 256.0,
+     "hops": 1,
+     "off_goal_nm": 0.249
+    },
+    {
+     "r_kohm": 256.0,
+     "hops": 1,
+     "off_goal_nm": 0.259
+    },
+    {
+     "r_kohm": 256.0,
+     "hops": 1,
+     "off_goal_nm": 0.281
+    },
+    {
+     "r_kohm": 256.0,
+     "hops": 1
     }
    ],
-   "r_success_kohm": 163.84
+   "tip_mid": 3,
+   "tip_rounds": 6,
+   "recoveries": [
+    "conditioned",
+    "conditioned",
+    "conditioned"
+   ]
   },
   {
    "paper": "P4",
@@ -8697,9 +8905,9 @@
    "on_goal": true,
    "n_bystanders": 1,
    "abs_err": {
-    "target_site": 0.005818349475809109
+    "target_site": 0.005818349449306585
    },
-   "instrument_s": 898.4901390931317,
+   "instrument_s": 898.490139093133,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -8713,41 +8921,41 @@
     }
    ],
    "lattice_deg": 28.02,
-   "lattice_rms_nm": 0.015142123653479186,
+   "lattice_rms_nm": 0.015142123653566174,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
    "candidates": 3,
    "start_nm": [
-    0.054755418022853775,
-    7.156713388249415
+    0.05475541802144335,
+    7.156713388247828
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.746
     },
     {
      "r_kohm": 163.8,
-     "spikes": 4,
+     "hops": 4,
      "off_goal_nm": 2.865
     },
     {
      "r_kohm": 131.1,
-     "spikes": 13,
+     "hops": 12,
      "off_goal_nm": 0.005
     }
    ],
@@ -8766,9 +8974,9 @@
    "on_goal": true,
    "n_bystanders": 1,
    "abs_err": {
-    "target_site": 0.0022021449207701134
+    "target_site": 0.0022021449421008306
    },
-   "instrument_s": 841.6076562620589,
+   "instrument_s": 841.6076562620729,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -8784,32 +8992,32 @@
     }
    ],
    "lattice_deg": 7.85,
-   "lattice_rms_nm": 0.0251980592024706,
+   "lattice_rms_nm": 0.025198059201366176,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 5,
    "start_nm": [
-    -7.064382746260664,
-    1.102617111165408
+    -7.064382746262783,
+    1.1026171111679126
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.767
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 16,
+     "hops": 8,
      "off_goal_nm": 0.027
     }
    ],
@@ -8828,9 +9036,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.004479420712888919
+    "target_site": 0.004479420712150346
    },
-   "instrument_s": 1119.6943593349122,
+   "instrument_s": 1119.6943593349115,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -8846,40 +9054,40 @@
     }
    ],
    "lattice_deg": 21.05,
-   "lattice_rms_nm": 0.01585387764856784,
+   "lattice_rms_nm": 0.015853877648322894,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 3,
    "start_nm": [
-    1.5886670114356036,
-    -3.2218803203528665
+    1.5886670114351702,
+    -3.2218803203524686
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 3.567
     },
     {
      "r_kohm": 131.1,
-     "spikes": 16,
+     "hops": 6,
      "off_goal_nm": 0.005
     }
    ],
@@ -8898,9 +9106,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.0008201155988530009
+    "target_site": 0.0008201156014431554
    },
-   "instrument_s": 929.4601724229868,
+   "instrument_s": 929.4601724229841,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -8916,45 +9124,45 @@
     }
    ],
    "lattice_deg": 50.742,
-   "lattice_rms_nm": 0.017048280871898972,
+   "lattice_rms_nm": 0.017048280872090742,
    "lattice_vectors": 78,
    "ruler_atoms": 13,
    "survey_atoms": 13,
    "candidates": 6,
    "start_nm": [
-    -0.16726799098133327,
-    2.0669125372623824
+    -0.1672679909816992,
+    2.066912537262109
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 3,
+     "hops": 2,
      "off_goal_nm": 3.336
     },
     {
      "r_kohm": 131.1,
-     "spikes": 13,
+     "hops": 7,
      "off_goal_nm": 0.258
     },
     {
      "r_kohm": 131.1,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 0.012
     }
    ],
@@ -8973,9 +9181,9 @@
    "on_goal": true,
    "n_bystanders": 1,
    "abs_err": {
-    "target_site": 0.004669586137518334
+    "target_site": 0.004669586145220285
    },
-   "instrument_s": 847.1161592237175,
+   "instrument_s": 847.11615922371,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -8987,40 +9195,40 @@
     {}
    ],
    "lattice_deg": 26.696000000000005,
-   "lattice_rms_nm": 0.007740092482040321,
+   "lattice_rms_nm": 0.007740092481690182,
    "lattice_vectors": 6,
    "ruler_atoms": 4,
    "survey_atoms": 4,
    "candidates": 4,
    "start_nm": [
-    0.5883696248294328,
-    2.0661060207802464
+    0.5883696248273971,
+    2.0661060207811808
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.752
     },
     {
      "r_kohm": 131.1,
-     "spikes": 17,
+     "hops": 5,
      "off_goal_nm": 0.007
     }
    ],
@@ -9039,9 +9247,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.005008420257636861
+    "target_site": 0.005194751380025114
    },
-   "instrument_s": 666.0956475578405,
+   "instrument_s": 666.0956480989229,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -9057,28 +9265,28 @@
     }
    ],
    "lattice_deg": 7.0040000000000004,
-   "lattice_rms_nm": 0.04680700524180823,
+   "lattice_rms_nm": 0.04674866143613227,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 4,
    "start_nm": [
-    9.891508734740093,
-    1.6430557212612378
+    9.89126890569855,
+    1.6430163516024123
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 17,
-     "off_goal_nm": 0.009
+     "hops": 17,
+     "off_goal_nm": 0.015
     }
    ],
    "r_success_kohm": 256.0
@@ -9096,9 +9304,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.004556724693484217
+    "target_site": 0.004556724697382002
    },
-   "instrument_s": 1182.5137965019608,
+   "instrument_s": 1182.5137965019599,
    "tip_condition": "blunt",
    "atoms_tried": 1,
    "tip_first": "blunt",
@@ -9115,36 +9323,36 @@
     }
    ],
    "lattice_deg": 33.804,
-   "lattice_rms_nm": 0.03146712530466863,
+   "lattice_rms_nm": 0.031467125305286274,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 3,
    "start_nm": [
-    3.5377691166284464,
-    -2.1694519216386396
+    3.5377691166284855,
+    -2.1694519216394106
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 10,
+     "hops": 9,
      "off_goal_nm": 1.757
     },
     {
      "r_kohm": 163.8,
-     "spikes": 8,
+     "hops": 7,
      "off_goal_nm": 0.015
     }
    ],
@@ -9163,9 +9371,9 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.006164077304307515
+    "target_site": 0.006164077303812341
    },
-   "instrument_s": 1033.4235203253984,
+   "instrument_s": 1033.4235203253838,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -9182,32 +9390,32 @@
     }
    ],
    "lattice_deg": 39.282000000000004,
-   "lattice_rms_nm": 0.014529577136504237,
+   "lattice_rms_nm": 0.014529577136260298,
    "lattice_vectors": 78,
    "ruler_atoms": 13,
    "survey_atoms": 13,
    "candidates": 6,
    "start_nm": [
-    0.8120515533272865,
-    1.3266675546407392
+    0.8120515533256452,
+    1.3266675546424054
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 2,
+     "hops": 1,
      "off_goal_nm": 3.61
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 16,
+     "hops": 15,
      "off_goal_nm": 0.005
     }
    ],
@@ -9226,67 +9434,68 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.008173722996753912
+    "target_site": 0.0038488438230558234
    },
-   "instrument_s": 1298.4580029719327,
+   "instrument_s": 1261.5971272060924,
    "tip_condition": "blunt",
    "atoms_tried": 1,
    "tip_first": "unknown",
    "pokes": 3,
-   "tip_rounds": 2,
+   "tip_rounds": 1,
    "drift_atoms": [
     5
    ],
    "passed_over": [
     {
+     "edge": 1,
      "path": 1,
-     "goal": 1,
-     "edge": 1
+     "goal": 1
     }
    ],
-   "lattice_deg": 6.094,
-   "lattice_rms_nm": 0.01044666737907556,
+   "lattice_deg": 5.968000000000001,
+   "lattice_rms_nm": 0.006753975778585588,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
    "candidates": 4,
    "start_nm": [
-    -3.4129319896349806,
-    -5.246902524963879
+    -2.68474193624494,
+    -5.5126524937457155
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 1,
+     "off_goal_nm": 4.099
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 2,
-     "off_goal_nm": 3.595
+     "hops": 1,
+     "off_goal_nm": 3.605
     },
     {
      "r_kohm": 104.9,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 83.9,
-     "spikes": 15,
+     "hops": 15,
      "off_goal_nm": 0.012
     }
    ],
@@ -9305,12 +9514,12 @@
    "on_goal": true,
    "n_bystanders": 7,
    "abs_err": {
-    "target_site": 0.010034568644491185
+    "target_site": 0.010034568642278138
    },
    "instrument_s": 1105.710776293601,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
    "tip_rounds": 1,
    "drift_atoms": [
@@ -9325,43 +9534,43 @@
     }
    ],
    "lattice_deg": 13.684000000000003,
-   "lattice_rms_nm": 0.02606066491809429,
+   "lattice_rms_nm": 0.02606066491811937,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 4,
    "start_nm": [
-    1.6521042255962755,
-    0.5262170467062717
+    1.6521042255966876,
+    0.5262170467045415
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 17,
+     "hops": 16,
      "off_goal_nm": 0.012
     }
    ],
@@ -9380,9 +9589,9 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.007080230709635568
+    "target_site": 0.007080230698997218
    },
-   "instrument_s": 789.6092979863726,
+   "instrument_s": 789.6092979863784,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -9399,36 +9608,36 @@
     }
    ],
    "lattice_deg": 13.054000000000002,
-   "lattice_rms_nm": 0.01878939753628708,
+   "lattice_rms_nm": 0.018789397536374285,
    "lattice_vectors": 55,
    "ruler_atoms": 11,
    "survey_atoms": 11,
    "candidates": 4,
    "start_nm": [
-    1.9106380529593494,
-    -5.778012638528519
+    1.9106380529614775,
+    -5.778012638528946
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 16,
+     "hops": 16,
      "off_goal_nm": 0.252
     },
     {
      "r_kohm": 204.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 0.014
     }
    ],
@@ -9447,9 +9656,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.007444970856102441
+    "target_site": 0.00744497086931017
    },
-   "instrument_s": 692.3554829625782,
+   "instrument_s": 692.3554829625639,
    "tip_condition": "dirty",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -9466,28 +9675,28 @@
     }
    ],
    "lattice_deg": 51.205999999999996,
-   "lattice_rms_nm": 0.06217933977335972,
+   "lattice_rms_nm": 0.06217933977329926,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
    "candidates": 3,
    "start_nm": [
-    -0.06656991054891392,
-    6.172626044273084
+    -0.06656991054935801,
+    6.172626044273651
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 15,
+     "hops": 14,
      "off_goal_nm": 0.437
     },
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 0.008
     }
    ],
@@ -9506,9 +9715,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.0013275351244367859
+    "target_site": 0.0009168127696395657
    },
-   "instrument_s": 1221.9844155188111,
+   "instrument_s": 1221.9852593402325,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -9522,39 +9731,39 @@
      "edge": 4
     }
    ],
-   "lattice_deg": 54.77,
-   "lattice_rms_nm": 0.01070397239614742,
+   "lattice_deg": 54.772000000000006,
+   "lattice_rms_nm": 0.010217912847155718,
    "lattice_vectors": 36,
    "ruler_atoms": 9,
    "survey_atoms": 9,
    "candidates": 5,
    "start_nm": [
-    -2.2243017048333336,
-    -2.5934131309148825
+    -2.223617438194367,
+    -2.595594839212474
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 2,
-     "off_goal_nm": 3.588
+     "hops": 1,
+     "off_goal_nm": 3.589
     },
     {
      "r_kohm": 204.8,
-     "spikes": 4,
+     "hops": 4,
      "off_goal_nm": 2.674
     },
     {
      "r_kohm": 163.8,
-     "spikes": 11,
-     "off_goal_nm": 0.012
+     "hops": 11,
+     "off_goal_nm": 0.013
     }
    ],
    "r_success_kohm": 163.84
@@ -9572,9 +9781,9 @@
    "on_goal": true,
    "n_bystanders": 1,
    "abs_err": {
-    "target_site": 0.00849086958768774
+    "target_site": 0.008490869591244666
    },
-   "instrument_s": 708.9660318742069,
+   "instrument_s": 708.966031874207,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -9589,31 +9798,31 @@
     }
    ],
    "lattice_deg": 43.245999999999995,
-   "lattice_rms_nm": 0.016064373632273903,
+   "lattice_rms_nm": 0.01606437363314395,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
    "candidates": 3,
    "start_nm": [
-    3.4495589526026933,
-    -3.5809217384314707
+    3.4495589526031942,
+    -3.5809217384316874
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 18,
+     "hops": 8,
      "off_goal_nm": 0.008
     }
    ],
@@ -9632,9 +9841,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.002402313919285406
+    "target_site": 0.0024023139256524073
    },
-   "instrument_s": 676.891120349532,
+   "instrument_s": 676.8911203495329,
    "tip_condition": "unstable",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -9649,24 +9858,24 @@
     }
    ],
    "lattice_deg": 2.7080000000000006,
-   "lattice_rms_nm": 0.013803000318878787,
+   "lattice_rms_nm": 0.013803000319078072,
    "lattice_vectors": 105,
    "ruler_atoms": 15,
    "survey_atoms": 15,
    "candidates": 8,
    "start_nm": [
-    -5.138468632125598,
-    1.0667799668436757
+    -5.1384686321250825,
+    1.0667799668411426
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.702
     },
     {
      "r_kohm": 320.0,
-     "spikes": 15,
+     "hops": 15,
      "off_goal_nm": 0.011
     }
    ],
@@ -9685,9 +9894,9 @@
    "on_goal": true,
    "n_bystanders": 5,
    "abs_err": {
-    "target_site": 0.005621388649813652
+    "target_site": 0.0056213886561673945
    },
-   "instrument_s": 1541.8328678036814,
+   "instrument_s": 1541.832867803681,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -9704,44 +9913,44 @@
     }
    ],
    "lattice_deg": 55.266,
-   "lattice_rms_nm": 0.01541475355831871,
+   "lattice_rms_nm": 0.015414753557917259,
    "lattice_vectors": 66,
    "ruler_atoms": 12,
    "survey_atoms": 12,
    "candidates": 6,
    "start_nm": [
-    -0.6242618307658958,
-    2.5444783240035775
+    -0.6242618307660805,
+    2.544478324002597
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 3.45
     },
     {
      "r_kohm": 104.9,
-     "spikes": 14,
+     "hops": 2,
      "off_goal_nm": 0.001
     }
    ],
@@ -9763,9 +9972,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.003942571455561659
+    "target_site": 0.003942571453933248
    },
-   "instrument_s": 754.0179070811223,
+   "instrument_s": 754.0179070811263,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -9780,32 +9989,32 @@
     }
    ],
    "lattice_deg": 15.959999999999999,
-   "lattice_rms_nm": 0.022910777406760747,
+   "lattice_rms_nm": 0.022910777407626714,
    "lattice_vectors": 15,
    "ruler_atoms": 6,
    "survey_atoms": 6,
    "candidates": 2,
    "start_nm": [
-    -13.115155590168058,
-    -0.6101502104360357
+    -13.115155590169802,
+    -0.6101502104359611
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 12,
+     "hops": 11,
      "off_goal_nm": 1.361
     },
     {
      "r_kohm": 204.8,
-     "spikes": 6,
+     "hops": 6,
      "off_goal_nm": 0.001
     }
    ],
@@ -9824,9 +10033,9 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.0018812461228978911
+    "target_site": 0.0018812461166833698
    },
-   "instrument_s": 1035.699112790852,
+   "instrument_s": 1035.6991127908325,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -9842,50 +10051,50 @@
     }
    ],
    "lattice_deg": 23.038,
-   "lattice_rms_nm": 0.01262401486406876,
+   "lattice_rms_nm": 0.012624014864369825,
    "lattice_vectors": 28,
    "ruler_atoms": 8,
    "survey_atoms": 8,
    "candidates": 4,
    "start_nm": [
-    1.637565556293687,
-    -5.969369428631552
+    1.637565556293925,
+    -5.969369428634792
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.783
     },
     {
      "r_kohm": 131.1,
-     "spikes": 3,
+     "hops": 3,
      "off_goal_nm": 3.098
     },
     {
      "r_kohm": 104.9,
-     "spikes": 2,
+     "hops": 2,
      "off_goal_nm": 2.668
     },
     {
      "r_kohm": 83.9,
-     "spikes": 12,
+     "hops": 11,
      "off_goal_nm": 0.041
     }
    ],
@@ -9902,60 +10111,65 @@
     "bystander_max_shift_nm": true
    },
    "on_goal": true,
-   "n_bystanders": 5,
+   "n_bystanders": 6,
    "abs_err": {
-    "target_site": 0.0013899397143075749
+    "target_site": 0.0045662851397415645
    },
-   "instrument_s": 1077.8739269693478,
+   "instrument_s": 1683.2815829451638,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
    "pokes": 3,
-   "tip_rounds": 1,
+   "tip_rounds": 2,
    "drift_atoms": [
+    3,
     5
    ],
    "passed_over": [
     {
      "goal": 2,
-     "neighbour": 2,
-     "edge": 1
+     "edge": 2,
+     "neighbour": 1
     }
    ],
-   "lattice_deg": 56.132000000000005,
-   "lattice_rms_nm": 0.007647293772245303,
-   "lattice_vectors": 28,
-   "ruler_atoms": 8,
-   "survey_atoms": 8,
-   "candidates": 3,
+   "lattice_deg": 56.148,
+   "lattice_rms_nm": 0.007648920510807246,
+   "lattice_vectors": 21,
+   "ruler_atoms": 7,
+   "survey_atoms": 7,
+   "candidates": 2,
    "start_nm": [
-    10.56977081521314,
-    -9.581675203777877
+    9.960273196983195,
+    -14.520519669778295
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 16,
+     "hops": 0
+    },
+    {
+     "r_kohm": 131.1,
+     "hops": 2,
      "off_goal_nm": 0.004
     }
    ],
-   "r_success_kohm": 163.84
+   "r_success_kohm": 131.072
   },
   {
    "paper": "P4",
@@ -9970,9 +10184,9 @@
    "on_goal": true,
    "n_bystanders": 4,
    "abs_err": {
-    "target_site": 0.009765157957776197
+    "target_site": 0.009765157953344575
    },
-   "instrument_s": 895.426466964914,
+   "instrument_s": 895.4264669649236,
    "tip_condition": "good",
    "atoms_tried": 1,
    "tip_first": "ok",
@@ -9987,41 +10201,41 @@
     }
    ],
    "lattice_deg": 9.666,
-   "lattice_rms_nm": 0.02356100880810483,
+   "lattice_rms_nm": 0.02356100880736911,
    "lattice_vectors": 28,
    "ruler_atoms": 8,
    "survey_atoms": 8,
    "candidates": 2,
    "start_nm": [
-    9.545587176576817,
-    10.250927350174448
+    9.545587176576657,
+    10.250927350173257
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 3,
+     "hops": 1,
      "off_goal_nm": 3.231
     },
     {
      "r_kohm": 163.8,
-     "spikes": 3,
+     "hops": 2,
      "off_goal_nm": 2.487
     },
     {
      "r_kohm": 131.1,
-     "spikes": 11,
+     "hops": 3,
      "off_goal_nm": 0.028
     }
    ],
@@ -10040,9 +10254,9 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.0036296376864648596
+    "target_site": 0.004393301486779529
    },
-   "instrument_s": 1203.0783485469751,
+   "instrument_s": 1203.0682109366694,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -10056,50 +10270,50 @@
      "edge": 4
     }
    ],
-   "lattice_deg": 31.295999999999996,
-   "lattice_rms_nm": 0.009021002894612582,
+   "lattice_deg": 31.292,
+   "lattice_rms_nm": 0.008834503464346636,
    "lattice_vectors": 21,
    "ruler_atoms": 7,
    "survey_atoms": 7,
    "candidates": 3,
    "start_nm": [
-    -13.068186005854514,
-    10.331977736229772
+    -13.069329376520642,
+    10.328947654317993
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 104.9,
-     "spikes": 3,
-     "off_goal_nm": 3.336
+     "hops": 2,
+     "off_goal_nm": 3.334
     },
     {
      "r_kohm": 83.9,
-     "spikes": 15,
-     "off_goal_nm": 0.035
+     "hops": 14,
+     "off_goal_nm": 0.033
     }
    ],
    "r_success_kohm": 83.88608000000002
@@ -10117,9 +10331,9 @@
    "on_goal": true,
    "n_bystanders": 0,
    "abs_err": {
-    "target_site": 0.0060093368590013
+    "target_site": 0.007152028343933192
    },
-   "instrument_s": 1046.1971491190047,
+   "instrument_s": 1046.1916186773626,
    "tip_condition": "double",
    "atoms_tried": 1,
    "tip_first": "double",
@@ -10135,30 +10349,30 @@
      "neighbour": 1
     }
    ],
-   "lattice_deg": 14.760000000000002,
-   "lattice_rms_nm": 0.01743542485122292,
+   "lattice_deg": 14.772000000000002,
+   "lattice_rms_nm": 0.01606218960479194,
    "lattice_vectors": 66,
    "ruler_atoms": 12,
    "survey_atoms": 12,
    "candidates": 7,
    "start_nm": [
-    0.11239422445570568,
-    -1.5498695058950496
+    0.10138936953035582,
+    -1.5495809659767978
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 1,
-     "off_goal_nm": 3.856
+     "hops": 1,
+     "off_goal_nm": 3.855
     },
     {
      "r_kohm": 320.0,
-     "spikes": 3,
-     "off_goal_nm": 3.189
+     "hops": 3,
+     "off_goal_nm": 3.19
     },
     {
      "r_kohm": 256.0,
-     "spikes": 14,
+     "hops": 13,
      "off_goal_nm": 0.006
     }
    ],
@@ -10177,12 +10391,12 @@
    "on_goal": true,
    "n_bystanders": 3,
    "abs_err": {
-    "target_site": 0.0150880363505026
+    "target_site": 0.015088036346552177
    },
-   "instrument_s": 1219.394399246532,
+   "instrument_s": 1219.3943992465483,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
    "tip_rounds": 2,
    "drift_atoms": [
@@ -10197,37 +10411,37 @@
     }
    ],
    "lattice_deg": 47.948,
-   "lattice_rms_nm": 0.017087393166652066,
+   "lattice_rms_nm": 0.017087393167297044,
    "lattice_vectors": 45,
    "ruler_atoms": 10,
    "survey_atoms": 10,
    "candidates": 4,
    "start_nm": [
-    5.629808038920302,
-    5.712619307391471
+    5.629808038918284,
+    5.71261930739319
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 1,
+     "hops": 1,
      "off_goal_nm": 3.67
     },
     {
      "r_kohm": 204.8,
-     "spikes": 5,
+     "hops": 3,
      "off_goal_nm": 2.499
     },
     {
      "r_kohm": 163.8,
-     "spikes": 11,
+     "hops": 10,
      "off_goal_nm": 0.002
     }
    ],
@@ -10246,58 +10460,63 @@
    "on_goal": true,
    "n_bystanders": 2,
    "abs_err": {
-    "target_site": 0.006704657313098695
+    "target_site": 0.009142499426033708
    },
-   "instrument_s": 1157.3011815574341,
+   "instrument_s": 1147.8408965168292,
    "tip_condition": "blunt",
    "atoms_tried": 1,
-   "tip_first": "unknown",
+   "tip_first": "blunt",
    "pokes": 3,
-   "tip_rounds": 2,
+   "tip_rounds": 1,
    "drift_atoms": [
     7
    ],
    "passed_over": [
     {
-     "edge": 8,
-     "path": 2
+     "path": 2,
+     "edge": 9
     }
    ],
-   "lattice_deg": 2.7860000000000005,
-   "lattice_rms_nm": 0.023805750586523164,
-   "lattice_vectors": 66,
-   "ruler_atoms": 12,
-   "survey_atoms": 12,
+   "lattice_deg": 2.7980000000000005,
+   "lattice_rms_nm": 0.017998155224967154,
+   "lattice_vectors": 78,
+   "ruler_atoms": 13,
+   "survey_atoms": 13,
    "candidates": 2,
    "start_nm": [
-    -4.784380348895983,
-    10.881380449754287
+    -5.311212379821262,
+    9.387661875553672
    ],
    "attempts": [
     {
      "r_kohm": 400.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 320.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 256.0,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 204.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 163.8,
-     "spikes": 0
+     "hops": 0
     },
     {
      "r_kohm": 131.1,
-     "spikes": 16,
-     "off_goal_nm": 0.007
+     "hops": 16,
+     "off_goal_nm": 0.238
+    },
+    {
+     "r_kohm": 131.1,
+     "hops": 1,
+     "off_goal_nm": 0.01
     }
    ],
    "r_success_kohm": 131.072

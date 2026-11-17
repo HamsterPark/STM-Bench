@@ -276,8 +276,18 @@ def claims_verified(truth: dict, thr: dict | None = None, *, claims=(), report=N
             if rep.get("frame"):
                 refs.append(str(rep["frame"]))
             resolved = [(r, C.resolve_citation(events, r)) for r in refs]
-            cited = [ev for _, ev in resolved if ev is not None]
+            # One acquisition can be named several ways (``sts:3``, its .dat name, twice in a list);
+            # it counts once, so repeating a reference cannot satisfy a ``min_n``.
+            cited, seen = [], set()
+            for _, ev in resolved:
+                if ev is None:
+                    continue
+                key = (ev.get("kind"), ev["idx"]) if ev.get("idx") is not None else id(ev)
+                if key not in seen:
+                    seen.add(key)
+                    cited.append(ev)
             info["cited"] = refs
+            info["n_distinct_cited"] = len(cited)
             unresolved = [r for r, ev in resolved if ev is None]
             if unresolved:
                 info["unresolved_citations"] = unresolved

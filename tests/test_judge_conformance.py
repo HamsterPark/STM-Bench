@@ -78,9 +78,11 @@ def _oracle(name: str, tmp_path):
         sink.report("radius_nm", C.truth_at_path(truth, "corral.radius_nm"), evidence=["sim001.sxm"])
     elif sc.family == "P5":
         events += [{"kind": "zspec", "sim_s": 10.0, "idx": 1, "near_kind": "adatom", "near_nm": 0.05,
-                    "jump": False, "contact": False, "df_span_beyond_min_pm": 120.0},
+                    "jump": False, "contact": False, "df_span_beyond_min_pm": 120.0,
+                    "oscillating": True},
                    {"kind": "zspec", "sim_s": 20.0, "idx": 2, "near_kind": "none", "near_nm": 9.0,
-                    "jump": False, "contact": False, "df_span_beyond_min_pm": 120.0}]
+                    "jump": False, "contact": False, "df_span_beyond_min_pm": 120.0,
+                    "oscillating": True}]
         for c in sc.claims:
             sink.report(c["id"], C.truth_at_path(truth, c["truth"]), evidence=["zspec:1", "zspec:2"])
     return sc, truth, sink.folded(), events, orient
