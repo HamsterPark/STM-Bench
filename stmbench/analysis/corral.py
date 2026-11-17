@@ -318,8 +318,26 @@ def ring_width_nm(array: np.ndarray, nm_per_px: float, centre_nm, radius_nm: flo
     return float((above.max() - above.min() + 1) * 0.05)
 
 
+def atom_spacing_nm(array: np.ndarray, nm_per_px: float, centre_nm, radius_nm: float, *,
+                    n_range: tuple[int, int] = (24, 80)) -> float | None:
+    """Spacing (nm) of the atoms along a ring whose atoms the image resolves: the ring's
+    cross-section round the ring (:func:`ring_profile`) has the atom count as its strongest
+    harmonic in ``n_range``. ``None`` when no harmonic stands out (a blunt tip smears the
+    atoms into a ridge)."""
+    _, prof = ring_profile(array, nm_per_px, centre_nm, radius_nm)
+    p = prof - prof.mean()
+    spec = np.abs(np.fft.rfft(p))
+    lo, hi = n_range
+    band = spec[lo:hi + 1]
+    k = int(np.argmax(band)) + lo
+    if band.max() < 3.0 * float(np.median(spec[lo:hi + 1])) or spec[0] <= 0:
+        return None
+    return float(2 * np.pi * radius_nm / k)
+
+
 def ghost_strength(array: np.ndarray, nm_per_px: float, centre_nm, radius_nm: float, *,
-                   annulus_nm: float = 2.5, lag_nm: tuple[float, float] = (0.8, 5.0)) -> tuple[float, tuple[float, float]]:
+                   annulus_nm: float = 2.5, lag_nm: tuple[float, float] = (0.8, 5.0),
+                   skip_nm: float | None = None) -> tuple[float, tuple[float, float]]:
     """How strongly the ring's image has a copy of itself at one displacement: a second apex
     on the tip draws the whole ring twice, the copy weaker.
 
@@ -329,7 +347,10 @@ def ghost_strength(array: np.ndarray, nm_per_px: float, centre_nm, radius_nm: fl
     on 8 rendered double-tip rings of 4.5-10 nm radius (displacements 1.8-3 nm), against at most
     0.08 on the structure a sharp or blunt tip's ring has by itself (30 rings). A copy closer
     than ~1.5 nm merges into the central lobe and is not seen. Returns the height of the highest
-    local maximum between ``lag_nm`` and its displacement (nm, x right, y up)."""
+    local maximum between ``lag_nm`` and its displacement (nm, x right, y up). ``skip_nm``: the
+    atoms' spacing along the ring (:func:`atom_spacing_nm`): a ring of well-resolved atoms 1.2-1.8 nm
+    apart correlates with itself shifted by one or two spacings (0.13 on a good tip's ring of
+    seed 42), which is not a copy."""
     from scipy.ndimage import maximum_filter
 
     z = _background_free(array, nm_per_px, RING_BACKGROUND_NM)
@@ -344,6 +365,9 @@ def ghost_strength(array: np.ndarray, nm_per_px: float, centre_nm, radius_nm: fl
     gy, gx = np.mgrid[-ny:ny, -nx:nx]
     lag = np.hypot(gx, gy) * nm_per_px
     local = (c == maximum_filter(c, size=int(round(0.6 / nm_per_px)) | 1)) & (lag >= lag_nm[0]) & (lag <= lag_nm[1])
+    if skip_nm:                       # the ring's own atoms, one spacing apart, line up with themselves
+        for m in (1, 2):
+            local &= np.abs(lag - m * skip_nm) > 0.4
     if not local.any():
         return 0.0, (0.0, 0.0)
     j, i = np.unravel_index(int(np.argmax(np.where(local, c, -np.inf))), c.shape)
