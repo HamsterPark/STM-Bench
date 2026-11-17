@@ -19,8 +19,12 @@ def test_the_logistic_fit_finds_the_location_and_a_separated_series_its_gap():
 
 
 def test_the_reference_measures_two_atoms_and_the_judge_accepts():
-    """Seed 3 (an unstable tip: it is conditioned first): 14 drags per atom by the fit-guided design."""
-    r = p7.run(3, n_drags=14)
+    """Seed 3 (an unstable tip: it is conditioned first) by the calibrated protocol, 32 drags per atom.
+    Its calibration runs pass it on the desktop and on Linux (docs/results/p7_reference_seeds_0-29.json,
+    khwu job 66799). A shorter series is no test: the two platforms' runs part mid-series (the reference
+    computes its moves from the truth, and the platforms' floating point differs in the last bits) while a
+    recorded episode replays alike on both, and at 14 drags the first atom's error was -17 % on Linux."""
+    r = p7.run(3)
     assert r["success"], r
     assert len(r["atoms"]) == 2 and r["atoms"][0]["atom_id"] != r["atoms"][1]["atom_id"]
     for a in r["atoms"]:
