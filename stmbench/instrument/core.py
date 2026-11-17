@@ -1120,6 +1120,10 @@ def _portable_events(events: list[dict]) -> list[dict]:
     out = []
     for e in events:
         d = dict(e)
+        if d.get("kind") == "zspec":
+            # a judge-only flag added after ledgers existed: left out so their events digest still
+            # matches a replay (the verdict comparison covers what the flag decides)
+            d.pop("oscillating", None)
         if d.get("path"):
             # either separator: a ledger written on Windows is read on Linux, where Path() would keep
             # "D:\run\x.sxm" whole (the digest of its events was computed from the bare file name)
