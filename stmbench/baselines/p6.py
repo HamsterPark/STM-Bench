@@ -59,17 +59,16 @@ BARE_RADII_NM, BARE_CLEAR_NM = (3.5, 4.5, 5.5), 3.0
 AVOID_NM = 4.0
 
 #: the sweeps over the resonance. ±50 mV holds a line of up to ~20 meV half width with a
-#: baseline either side; 101 points make 1 mV steps (thermal FWHM at 4.4 K is 1.3 meV).
+#: baseline either side; 201 points make 0.5 mV steps (thermal FWHM at 4.4 K is 1.3 meV).
 #: The modulation amplitude and the integration time are the trade the task is about: the
 #: line is broadened by √3·V_p (FWHM), the noise grows as 1/V_p and 1/√t_int.
 WINDOW_V, POINTS, SETTLE_MS = 0.05, 201, 5.0
 AMP_MV, INTEG_MS = 3.0, 100.0
 N_ATOM, N_BARE = 6, 4
-#: pokes are made at 20 mV and 20 pA, a precaution: at a low bias the contact current stays small.
-#: (On a qPlus instrument a poke above ~50 mV rings the fork up, which blunts the tip and sprays
-#: clusters over every atom within 15 nm; this STM instrument's tip is an etched tungsten wire
-#: with no fork, since 1918eaa, and P6 opens at 50 mV, so the baseline would be fine without it.)
-#: Imaging stays at the task's bias.
+#: pokes at 20 mV and 20 pA. In the simulator an etched tip's poke does not depend on the bias;
+#: only a qPlus fork rings up above ~50 mV (tip.py, poke), and this STM rig has had no fork since
+#: the decision of 2026-11-17. The setting dates from the fork and is kept, as in the reference
+#: solution; the baseline has not been re-run without it. Imaging stays at the task's bias.
 POKE_V, POKE_PA = 0.02, 20.0
 #: the stabilisation point of the sweeps (V): their window ends at +50 mV, outside the resonance
 SWEEP_BIAS_V = 0.05
