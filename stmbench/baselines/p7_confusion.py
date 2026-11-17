@@ -39,7 +39,7 @@ def reading(r: dict, *, mode: str = "frame") -> bool | None:
     or ``"trace"`` (the trace only)."""
     p = r["pull"]
     atom = p["atom"] if mode == "frame" else None
-    return C.read_carry(r["spectrum"], end=p["end"], atom=atom)["carried"]
+    return C.read_carry(r["spectrum"], end=p["end"], atom=atom, framed=mode == "frame")["carried"]
 
 
 def table(rows, mode: str = "frame") -> dict:
@@ -86,7 +86,8 @@ def report(rows, mode: str = "frame") -> str:
     t = table(on_tip, mode)
     out.append(f"  lifted onto the tip: {len(on_tip)} drags, {t['fp']} read as carried")
     out.append("how it was read: " + ", ".join(f"{k} {v}" for k, v in Counter(
-        C.read_carry(r["spectrum"], end=r["pull"]["end"], atom=r["pull"]["atom"] if mode == "frame" else None)["how"] for r in q).items()))
+        C.read_carry(r["spectrum"], end=r["pull"]["end"], atom=r["pull"]["atom"] if mode == "frame" else None,
+                     framed=mode == "frame")["how"] for r in q).items()))
     return "\n".join(out)
 
 
