@@ -250,7 +250,9 @@ notes: |
   goal) and 575 (baseline, "the work area was not found again" after 3704 s, three conditioning
   recoveries) now fail, and 331, 333, 364, 376 and 415 (300-449) now succeed. The three failures
   fail identically on 39fcd13, so their cause is code changed between 2026-10-14 and 39fcd13,
-  not the tip. Not checked: which commit changed them, and the pulse outcomes of those runs (the
+  not the tip. The reference moved the same way: on 39fcd13 its p90 time is 1422 s against the October
+  1428 s, its p90 error 0.0151 nm against 0.0163 nm, its median error 0.0059 nm against 0.0062 nm
+  (121 of 150 seeds within 1 s of the October time), so those shifts are also code, not tip. Not checked: which commit changed them, and the pulse outcomes of those runs (the
   result files keep no tip events). The recorded rows of October have no ``tip_rounds`` or
   ``recoveries`` and name the attempt counts ``spikes`` where today's say ``hops``.
   (c) Also moved by the re-run, qPlus-era value in brackets: baseline error median 0.0055 nm
