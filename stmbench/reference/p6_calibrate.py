@@ -21,15 +21,14 @@ from . import p6, summarize
 #: the protocol's defaults are p6.run's; a variant lists only what it changes
 VARIANTS: dict[str, dict] = {
     "base": {},
-    "a0.5": {"amplitude_mv": 0.5},
-    "a2": {"amplitude_mv": 2.0},
-    "int100": {"integration_ms": 100.0},
-    "int300": {"integration_ms": 300.0},
-    "noz": {"z_comp": False},
-    "img": {"imaging": True},
-    # contrast (a): the instrument's defaults, fitted with the nominal 10 mV kernel
+    # development variants (the settled protocol is 3 mV, 100 ms, 6 + 4 sweeps, Z compensated)
+    "a1": {"amplitude_mv": 1.0}, "a2": {"amplitude_mv": 2.0}, "a4": {"amplitude_mv": 4.0},
+    "int200": {"integration_ms": 200.0}, "int300": {"integration_ms": 300.0},
+    "s3b2": {"atom_sweeps": 3, "bare_sweeps": 2}, "s8b5": {"atom_sweeps": 8, "bare_sweeps": 5},
+    "noz": {"z_comp": False}, "img": {"imaging": True},
+    # contrast (a): the instrument's defaults (10 mV, 5 ms), fitted with the nominal 10 mV kernel
     "contrast_default": {"amplitude_mv": 10.0, "integration_ms": 5.0},
-    # contrast (b): the careful protocol without drift compensation
+    # contrast (b): the settled protocol without drift compensation
     "contrast_nodrift": {"drift_comp": False},
 }
 
