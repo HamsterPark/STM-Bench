@@ -311,6 +311,27 @@ class Bench:
             within = 2.5
         raise Lost("the atom is not in the frame centred on it")
 
+    def clear_bare(self, spot, atom, *, need_nm: float = 2.8) -> tuple[float, float]:
+        """The bare patch as an image shows it now: an 8 nm frame about ``spot``; a bump closer than
+        ``need_nm`` (the judge asks for 2 nm; dev3 seed 6 had its reference sweeps 1.84 nm from an
+        atom the survey, taken with an unstable tip, had not shown) moves the patch to ``need_nm``
+        + 0.5 nm from it, away from it, and the frame is taken again, twice at most. The bumps are
+        all of them, compact or not, and the atom being measured is not one."""
+        spot = (float(spot[0]), float(spot[1]))
+        for _ in range(3):
+            f, _ = self.ops.frame(spot[0], spot[1], 8.0, 80, SLOW_LINE_S)
+            near = [a for a in locate(f, compact_frac=1.0) if math.hypot(a[0] - atom[0], a[1] - atom[1]) > 1.5]
+            if not near:
+                return spot
+            a = min(near, key=lambda b: math.hypot(b[0] - spot[0], b[1] - spot[1]))
+            d = math.hypot(a[0] - spot[0], a[1] - spot[1])
+            if d >= need_nm:
+                return spot
+            ux, uy = ((spot[0] - a[0]) / d, (spot[1] - a[1]) / d) if d > 1e-6 else (1.0, 0.0)
+            spot = (a[0] + ux * (need_nm + 0.5), a[1] + uy * (need_nm + 0.5))
+            self.log["bare_moved"] = self.log.get("bare_moved", 0) + 1
+        return spot
+
     def tip_check(self, spot) -> dict:
         """A sweep over bare surface at ``spot`` and its reading (:func:`spectral_flaw`)."""
         self.lockin(CHECK_AMP_MV)
@@ -449,6 +470,7 @@ def _measure(bench: Bench, atom, bare, comp, log: dict) -> dict | None:
         on_atom.append(bench.sweep(here, -WINDOW_V, WINDOW_V, POINTS, INTEG_MS))
     if len(on_atom) < 3:
         raise RuntimeError("the budget ran out before three sweeps on the atom")
+    bare = bench.clear_bare(bare, here)
     bare_sw = [bench.sweep(bare, -WINDOW_V, WINDOW_V, POINTS, INTEG_MS) for _ in range(N_BARE)]
     # sweeps whose current stepped (the tip changed inside them) are left out
     vv = on_atom[0]["v"]
