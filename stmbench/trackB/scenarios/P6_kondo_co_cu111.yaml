@@ -65,8 +65,9 @@ notes: |
   STM measurement needs no fork, and the 100 mV start of the draft turned any poke into a trap
   unrelated to what P6 measures. P6 now starts at 50 mV and 100 pA, as P4 does, with an etched tip.
 
-  Reference solution (stmbench/reference/p6.py, 2026-11-17, re-measured with the 50 mV start: identical
-  to the numbers with the drafted 100 mV start, as the reference sets 20 mV itself; seeds 0-29, results in
+  Reference solution (stmbench/reference/p6.py, 2026-11-17, re-measured with the 50 mV start and the etched tip: identical
+  for the reference and both contrasts to the numbers with the drafted qPlus form and 100 mV start, as
+  the reference sets 20 mV itself and never pokes above it; seeds 0-29, results in
   docs/results/p6_reference_seeds_0-29.json): the truth only navigates (the isolated atom, a bare
   spot, the leading apex over the atom, the tip's state); Γ, q and ε_K come from measured sweeps
   through stmbench.analysis.kondo. Protocol settled by measurement on seeds 0-29: travel and
