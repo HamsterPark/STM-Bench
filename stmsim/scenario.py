@@ -255,7 +255,7 @@ class Scenario:
         physics = self.physics_switches()
         tip_cfg = {**dict(ini.get("tip", {})), **drawn.get("tip", {})}
         tip = Tip(material=str(tip_cfg.get("material", rig.get("tip.material", "W"))),
-                  form=str(tip_cfg.get("form", rig.get("tip.form", "qplus"))),
+                  form=str(tip_cfg.get("form", rig.get("tip.form", "etched"))),
                   rng=np.random.default_rng(seed + 1))
         if "radius_nm" in tip_cfg:
             tip.radius_m = float(tip_cfg["radius_nm"]) * 1e-9
