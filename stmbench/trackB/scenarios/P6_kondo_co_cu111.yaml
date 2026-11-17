@@ -12,7 +12,7 @@ initial:
   approached: true
   bias_v: 0.05
   setpoint_a: 100.0e-12
-  tip: {radius_nm: 1.0, apex_sigma_nm: 0.08, lambda_per_s: 1.0e-4}
+  tip: {form: etched, radius_nm: 1.0, apex_sigma_nm: 0.08, lambda_per_s: 1.0e-4}
   surface: {contamination: 0.0, adsorbate_density_per_um2: 3.0, terrace_median_nm: 150.0}
   adatoms: {layout: single, species: Co, target_dx_nm: 4.0, field_per_100nm2: 0.3, field_half_nm: 150}
   kondo: {species: Co}
@@ -57,10 +57,13 @@ notes: |
   with at least 41 points, covering -20…+20 mV, no jump. The evidence says the two measurements
   took place; it does not say the numbers were fitted from them.
 
-  Start bias 50 mV (2026-11-17; drafted as 100 mV). On this qPlus rig a poke above 50 mV rings the
-  fork up (stmsim/physics/tip.py, poke): the tip blunts and grows apexes and the adatoms within
-  15 nm are lost. P4 starts at 50 mV, so a poke at the starting bias is harmless there; the 100 mV
-  draft made it a trap that has nothing to do with what P6 measures, and P6 now starts as P4 does.
+  Tip: an etched W wire, no qPlus fork (initial.tip.form: etched, 2026-11-17). The rig's default
+  tip form is qplus (the lab instrument it models), while this instrument has no qPlus sensor for
+  the agent (info shows none, pll is refused); the form only matters through a poke above 50 mV,
+  which rings a fork up (stmsim/physics/tip.py, poke: blunted tip, extra apexes, adatoms within
+  15 nm lost), and a pulse's odds of improving the tip (0.50 with a fork, 0.55 without). A pure
+  STM measurement needs no fork, and the 100 mV start of the draft turned any poke into a trap
+  unrelated to what P6 measures. P6 now starts at 50 mV and 100 pA, as P4 does, with an etched tip.
 
   Reference solution (stmbench/reference/p6.py, 2026-11-17, re-measured with the 50 mV start: identical
   to the numbers with the drafted 100 mV start, as the reference sets 20 mV itself; seeds 0-29, results in
