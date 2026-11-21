@@ -6,7 +6,7 @@
     python -m stmbench.cli task --scenario P4_atom_positioning_cu111 [--lang zh|en]            # the task text
     python -m stmbench.cli reference --paper P4 [--seeds 30] [--jobs 4] [--json out.json]      # privileged reference runs
     python -m stmbench.cli baseline --paper P4 [--seeds 30] [--jobs 4] [--json out.json]       # scripted, no truth
-    python -m stmbench.cli audit chance [--scenario P3] [--seeds 200] [--jobs 4] [--json out.json]
+    python -m stmbench.cli audit chance [--scenario P3] [--seeds 200] [--jobs 4] [--holdout] [--json out.json]
     python -m stmbench.cli agent --scenario P4_atom_positioning_cu111 --seed 0 --out <run dir> \
                                  [--provider anthropic|openai] [--model ID]                    # a model alone
     python -m stmbench.cli console --scenario P4_atom_positioning_cu111 --seed 0 --out <run dir> [--port 8765]
@@ -56,7 +56,7 @@ def cmd_audit(a) -> int:
     paths = _resolve(a.scenario) if a.scenario else sorted(SCENARIO_DIR.glob("P*.yaml"))
     results = []
     for path in paths:
-        res = audit_scenario(path, a.seeds, jobs=a.jobs, first_seed=a.first_seed)
+        res = audit_scenario(path, a.seeds, jobs=a.jobs, first_seed=a.first_seed, holdout=a.holdout)
         print(format_report(res), flush=True)
         print()
         results.append(res)
@@ -246,6 +246,9 @@ def main(argv=None) -> int:
     u.add_argument("--seeds", type=int, default=200, help="number of seeds drawn")
     u.add_argument("--first-seed", type=int, default=0)
     u.add_argument("--jobs", type=int, default=1, help="processes building worlds in parallel")
+    u.add_argument("--holdout", action="store_true",
+                   help="also choose the sheet on the first half of the seeds and score it on the second "
+                        "(the default figure is fitted to the seeds it is scored on, so biased high)")
     u.add_argument("--json", default=None, help="also write the results here")
     u.set_defaults(fn=cmd_audit)
 
@@ -280,7 +283,7 @@ def main(argv=None) -> int:
 
     f = sub.add_parser("reference", help="privileged reference solutions: the truth navigates, every reported "
                                          "number is measured; reports success, error spread and instrument time")
-    f.add_argument("--paper", required=True, help="P3, P4 or P5")
+    f.add_argument("--paper", required=True, help="P3, P3R (P3's repair variant), P4 or P5")
     f.add_argument("--seeds", type=int, default=30, help="number of seeds")
     f.add_argument("--first-seed", type=int, default=0)
     f.add_argument("--jobs", type=int, default=1, help="processes in parallel")

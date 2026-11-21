@@ -81,14 +81,25 @@ def test_the_switches_of_a_scenario_reach_its_world(tmp_path):
                                     "tip_anisotropy": False, "crash_over_range": True}
 
 
-def test_only_p4_switches_physics_on_and_it_switches_all_four():
+def test_the_osworld_tasks_switch_all_four_on_and_no_other_scenario_does():
+    """P4 since 2026-10-27; P3 and its repair variant since 2026-11-16, so that the tasks given to
+    OSWorld-Science run on one instrument. P1, P2, P5 and the B scenarios build the worlds they always did."""
     on = {}
     for p in sorted(SCEN.glob("*.yaml")):
         sw = Scenario.load(p).physics_switches()
         if sw.any():
             on[p.stem] = sw
-    assert on == {"P4_atom_positioning_cu111": PhysicsSwitches(
-        tip_changes_outside_scans=True, tip_recovery=True, tip_anisotropy=True, crash_over_range=True)}
+    every = PhysicsSwitches(tip_changes_outside_scans=True, tip_recovery=True, tip_anisotropy=True,
+                            crash_over_range=True)
+    assert on == {"P3_corral_cu111": every, "P3_corral_repair_cu111": every, "P4_atom_positioning_cu111": every}
+
+
+@pytest.mark.parametrize("name", ["P3_corral_cu111", "P3_corral_repair_cu111"])
+def test_the_p3_worlds_have_the_mechanisms_wired_and_start_within_range(name, tmp_path):
+    w = Scenario.load(SCEN / f"{name}.yaml").build_world(0, tmp_path / "s", virtual_clock=True)
+    assert w.physics.as_dict() == {k: True for k in PhysicsSwitches.keys()}
+    assert w.tip.recovery_rng is w.rng_recovery and w.tip.aniso_rng is w.rng_aniso
+    assert not w.over_range()                          # imaging at 1 nA on the starting range
 
 
 def test_the_p4_world_has_its_mechanisms_wired(tmp_path):
