@@ -24,6 +24,14 @@ task: |
   Cu(111) 上采集 Δf(z) 曲线，用 Sader–Jarvis 方法反演得到扣除背景后的短程力，报告力的极小值
   F_min（pN）、短程力的衰减长度（pm）与结合能 E_b（meV）。用 ReportResult 报告。
   
+task_en: >-
+  The sample is Cu(111) with isolated Fe adatoms, and the instrument is equipped with a qPlus force
+  sensor (the PLL module is loaded; the sensor's spring constant is given in the tip registration
+  information). Please reproduce the force-spectroscopy experiment of Huber et al. (2019): record
+  Δf(z) curves directly above an Fe atom and, separately, on a clean spot of Cu(111), invert them
+  with the Sader–Jarvis method to obtain the short-range force after background subtraction, and
+  report the minimum of the force F_min (pN), the decay length of the short-range force (pm) and
+  the binding energy E_b (meV). Report them with ReportResult.
 budget: {sim_hours: 1.5, wire_cmds: 100000}
 hidden:
   qplus:
@@ -49,6 +57,7 @@ hidden:
 claims:
   - id: f_min_pn
     say: "扣除背景后短程力的极小值 F_min（吸引力为负）"
+    say_en: "Minimum of the short-range force after background subtraction, F_min (an attractive force is negative)"
     kind: scalar
     unit: pN
     tol: {rel: 0.15}
@@ -59,6 +68,7 @@ claims:
       background: {near_nm_min: 2.0, min_n: 1}
   - id: f_decay_pm
     say: "短程力的衰减长度：吸引短程力随针尖与原子间距离指数衰减的特征长度"
+    say_en: "Decay length of the short-range force: the characteristic length over which the attractive short-range force decays exponentially with the distance between tip and atom"
     kind: scalar
     unit: pm
     tol: {rel: 0.08}
@@ -66,6 +76,7 @@ claims:
     evidence: *pair
   - id: e_bind_mev
     say: "结合能 E_b（正值）：短程力对距离积分得到的势阱深度"
+    say_en: "Binding energy E_b (positive): the depth of the potential well obtained by integrating the short-range force over distance"
     kind: scalar
     unit: meV
     tol: {rel: 0.20}

@@ -92,11 +92,11 @@ def test_the_baseline_names_neither_the_simulator_nor_its_truth():
     import ast
     import inspect
 
-    from stmbench.analysis import tip
+    from stmbench.analysis import tip, trace
     from stmbench.baselines import _common
 
     forbidden = {"world", "truth", "hidden", "draw_hidden", "verdict", "scenario", "inst"}
-    for mod in (p4, _common, tip):
+    for mod in (p4, _common, tip, trace):
         for node in ast.parse(inspect.getsource(mod)).body:
             if (mod is p4 and isinstance(node, ast.FunctionDef) and node.name == "run") or                     (mod is _common and isinstance(node, ast.ClassDef) and node.name == "Blind"):
                 continue

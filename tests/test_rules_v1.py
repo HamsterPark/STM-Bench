@@ -1,5 +1,6 @@
 """Version-1 judging rules: a report names the frame its position was read in and the data its
-value came from, and the evidence rule is checked within that data."""
+value came from, and the evidence rule is checked within that data. They apply to every rules
+version from 1 on: version 2 reworded P4's card and left the judge alone (the last tests)."""
 from __future__ import annotations
 
 
@@ -7,6 +8,7 @@ import pytest
 
 from stmbench.trackB.results import ResultSink, fold_results
 from stmbench.trackB import claims as C
+from stmbench.trackB.rules import RULES_VERSION
 from stmbench.trackB.truth_criteria import judge
 FRAME = {"kind": "scan_saved", "sim_s": 10.0, "idx": 1, "complete": True, "path": "session/sim001.sxm",
          "cx_m": 0.0, "cy_m": 0.0, "w_m": 60e-9, "h_m": 60e-9, "angle_deg": 0.0,
@@ -175,10 +177,10 @@ def _verification(**kw) -> dict:
             "w_m": 10e-9, "h_m": 10e-9, "nx": 64, "ny": 64, **kw}
 
 
-def _verdict(events) -> bool:
+def _verdict(events, *, frame="a002.sxm", version=1) -> bool:
     return judge("claims_verified", _any_target_truth(), claims=[_target_claim()], events=events,
-                 report=_report("target_site", 10.0, x_nm=10.0, y_nm=0.0, frame="a002.sxm"),
-                 rules_version=1).success
+                 report=_report("target_site", 10.0, x_nm=10.0, y_nm=0.0, frame=frame),
+                 rules_version=version).success
 
 
 def test_v1_a_frame_scanned_without_tunnelling_verifies_nothing():
@@ -205,3 +207,82 @@ def test_v1_the_verification_frame_is_timed_by_when_it_was_scanned():
     in_frame = {"kind": "adatom_hop", "cause": "scan", "sim_s": 55.0, "row_sim_s": 57.5}
     assert not _verdict([hop, in_frame, _verification(t_start_sim=55.0)])
     assert _verdict([hop, in_frame, _verification(idx=3, path="s/a002.sxm", t_start_sim=58.0, sim_s=70.0)])
+
+
+def test_v1_a_site_exactly_site_tie_nm_farther_than_the_nearest_counts():
+    """The card says "by at most": the judge accepts a margin ``<= site_tie_nm``, not ``<``. Binary
+    fractions, so the margin is exactly the tie (0.375 - 0.125 = 0.25)."""
+    hop = {"kind": "adatom_hop", "cause": "folme", "sim_s": 50.0}
+    claim = {**_target_claim(), "tol": {"site_tie_nm": 0.25, "report_nm": 0.6}}
+    for d_now, ok in ((0.375, True), (0.3751, False)):
+        truth = _any_target_truth()
+        truth["adatoms"]["target"]["candidates"][0].update(on_goal=False, goal_dist_nm=d_now,
+                                                           goal_nearest_nm=0.125)
+        v = judge("claims_verified", truth, claims=[claim], events=[hop, _verification()],
+                  report=_report("target_site", 10.0, x_nm=10.0, y_nm=0.0, frame="a002.sxm"), rules_version=1)
+        assert v.success is ok, (d_now, v.details["claims"]["target_site"])
+
+
+def test_v1_the_report_is_matched_to_the_moved_atom_nearest_to_it():
+    """The card says so: a moved atom that is farther from the reported place, but would pass, does not
+    rescue a nearer one that does not (both are within ``report_nm``)."""
+    hop = {"kind": "adatom_hop", "cause": "folme", "sim_s": 50.0}
+    truth = _any_target_truth()
+    truth["adatoms"]["target"]["candidates"] = [
+        {"id": 5, "now_nm": [10.0, 0.0], "on_goal": False, "isolated": True},
+        {"id": 6, "now_nm": [10.4, 0.0], "on_goal": True, "isolated": True}]
+    for x_nm, ok, matched in ((10.1, False, 5), (10.3, True, 6)):
+        v = judge("claims_verified", truth, claims=[_target_claim()], events=[hop, _verification()],
+                  report=_report("target_site", x_nm, x_nm=x_nm, y_nm=0.0, frame="a002.sxm"), rules_version=1)
+        assert v.success is ok and v.details["claims"]["target_site"]["atom_id"] == matched, \
+            v.details["claims"]["target_site"]
+
+
+def _battery(version: int) -> list[bool]:
+    """Four verdicts that only the strict rules decide the way they do: a position without the frame
+    it was read in, a frame scanned before the last hop, the right frame, and a value whose evidence
+    is not cited."""
+    hop = {"kind": "adatom_hop", "cause": "folme", "sim_s": 50.0}
+    early = _verification(idx=1, path="s/a001.sxm", sim_s=45.0, t_start_sim=40.0)
+    good = {**FRAME, "idx": 1, "path": "s/good001.sxm"}
+    return [_verdict([hop, _verification()], frame=None, version=version),
+            _verdict([early, hop, _verification()], frame="a001.sxm", version=version),
+            _verdict([hop, _verification()], version=version),
+            judge("claims_verified", {"herringbone": {"period_nm": 6.4}}, claims=[_period_claim()],
+                  events=[good], report=_report("period_nm", 6.5, evidence=[]),
+                  rules_version=version).success]
+
+
+def test_every_rules_version_from_1_on_is_judged_by_the_same_rules():
+    """Version 2 of the rule card reworded P4's card and left the judge alone (``rules_version >= 1`` is
+    the strict rules), so one episode gets one verdict under every version from 1 on. The battery tells
+    the rules apart: an episode from before the card is still judged as it was (any covering frame, any
+    data of the episode), and passes three cases the strict rules fail."""
+    versions = sorted({1, 2, RULES_VERSION})
+    assert [_battery(v) for v in versions] == [[False, False, True, False]] * len(versions)
+    assert _battery(0) == [True, True, True, True]
+
+
+def test_one_acquisition_named_several_times_counts_once():
+    """``min_n`` counts acquisitions: ``sts:1``, its .dat name and a repeat are one spectrum
+    (external review of 39fcd13: one spectrum cited eight times passed ``min_n`` 8). Naming a
+    frame both as ``frame`` and in ``evidence`` is still one frame, and still fine."""
+    rule = {"kind": "spectra_near_scatterer", "min_n": 2, "min_positions": 1, "near_nm": 8.0,
+            "min_points": 64, "v_lo_max": -0.5, "v_hi_min": 0.1}
+    claim = {"id": "e0_mev", "kind": "scalar", "tol": {"abs": 15}, "truth": "surface_state.e0_mev",
+             "evidence": rule}
+    sts = [{"kind": "sts", "sim_s": 5.0 + i, "idx": i + 1, "n": 200, "v0": -0.6, "v1": 0.4, "jump": False,
+            "sx_m": 0.0, "sy_m": 0.0, "near_kind": "step", "near_nm": 2.0} for i in range(2)]
+    events = sts + [{"kind": "dat_saved", "sim_s": 5.1, "path": "/d/BiasSpec001.dat", "sts_idx": 1}]
+    truth = {"surface_state": {"e0_mev": -440.0}}
+    for cited, ok, n in ((["sts:1", "sts:1", "BiasSpec001.dat"], False, 1),
+                         (["sts:1", "BiasSpec001.dat", "sts:2"], True, 2)):
+        v = judge("claims_verified", truth, claims=[claim], events=events,
+                  report=_report("e0_mev", -438.0, evidence=cited), rules_version=1)
+        info = v.details["claims"]["e0_mev"]
+        assert v.success is ok, cited
+        assert info["cited"] == cited and info["n_distinct_cited"] == n
+    # the same frame as ``frame`` and in ``evidence``: one frame, not a failure
+    v = judge("claims_verified", {"herringbone": {"period_nm": 6.4}}, claims=[_period_claim()], events=[FRAME],
+              report=_report("period_nm", 6.5, evidence=["sim001.sxm"], frame="sim001.sxm"), rules_version=1)
+    assert v.success and v.details["claims"]["period_nm"]["n_distinct_cited"] == 1

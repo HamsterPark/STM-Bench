@@ -1,0 +1,14 @@
+#!/bin/bash
+# Return an installed guest to the state before any task was started (root only): stop the launcher, kill the
+# console, empty the episode's private directory and the export, restart the launcher. Used after a smoke test
+# of the instrument in a machine that is going to be baked into an image; never on a machine an agent has used
+# (the export is the evidence there).
+set -eu
+[ "$(id -u)" -eq 0 ] || exec sudo bash "$0" "$@"
+systemctl stop stm-bench.service 2>/dev/null || true
+pkill -u stm 2>/dev/null || true
+rm -rf /var/lib/stm-bench/private/run /var/lib/stm-bench/private/console.log
+find /var/lib/stm-bench/export -mindepth 1 -delete
+rm -rf /run/stm-bench/*
+systemctl start stm-bench.service 2>/dev/null || true
+echo "stm-bench-reset: done"

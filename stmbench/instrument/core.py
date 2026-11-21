@@ -15,12 +15,15 @@ Three kinds of call:
 * **observations** (``status``, ``info``, ``list_data``, ``frame``, ``spectrum``) - read only:
   no instrument time and no random draw, so how often an agent looks cannot change what it
   later measures;
-* **reports** (``report``, ``report_tip_state``, ``finish``) - the result channel of
-  :mod:`stmbench.trackB.results`, judged by the version-1 rules shown on the rule card.
+* **reports** (``report``, ``finish``) - the result channel of :mod:`stmbench.trackB.results`,
+  judged by the rules the rule card shows (:data:`~stmbench.trackB.rules.RULES_VERSION`).
 
-What is deliberately absent: composite skills and a safety gate. An action does what
-the instrument would do, hard limits only (bias, piezo range, preamplifier range); a poke too
-deep, a pulse too high, a coarse step in tunnelling have their physical consequences.
+What is deliberately absent: composite skills, a safety gate, a default strength for tip
+conditioning (the width, depth and dwell of a pulse or poke are the operator's to choose), and
+any call that judges nothing, such as a statement about the tip: no scenario scores it, and
+offering it would only tell an agent to worry about its tip. An action does what the instrument
+would do, hard limits only (bias, piezo range, preamplifier range); a poke too deep, a pulse too
+high, a coarse step in tunnelling have their physical consequences.
 """
 from __future__ import annotations
 
@@ -40,8 +43,12 @@ from stmsim.scenario import Scenario
 from ..trackB.results import ResultSink, fold_results
 from ..trackB.rules import OVERRUN_TOLERANCE, RULES_VERSION, task_text
 
-#: version of the action set, the observations and the log format
-API_VERSION = 1
+#: version of the action set, the observations and the log format. 2: no tip-diagnosis call (so no
+#: ``diagnosis`` record or ledger key either), and ``pulse.width_ms``, ``poke.depth_nm`` and
+#: ``poke.dwell_s`` are required. A ledger or an export of another version is refused by
+#: :func:`replay`, :func:`verify` and the grader (:func:`require_api_version`): its calls and
+#: records are not this version's, so only the code of its own version can re-check it.
+API_VERSION = 2
 SCENARIO_DIR = Path(__file__).resolve().parents[1] / "trackB" / "scenarios"
 MAX_ACTIONS = 3000
 #: success kinds the instrument can judge from what it records: the paper scenarios'. The
@@ -53,6 +60,11 @@ _GAIN_FULL_SCALE_NA = {10000.0: 0, 1000.0: 1, 100.0: 2, 10.0: 3, 1.0: 4, 0.1: 5}
 
 class ActionError(ValueError):
     """A refused call: nothing happened on the instrument and no time passed."""
+
+
+class VersionError(ValueError):
+    """A ledger or an export written under another API version than this code's: it needs the code
+    of its own version (see :func:`require_api_version`)."""
 
 
 @dataclass(frozen=True)
@@ -96,6 +108,9 @@ def _P(*a, **k) -> Param:
     return Param(*a, **k)
 
 
+# pulse.width_ms, poke.depth_nm and poke.dwell_s are required, with no default: any default would be
+# the answer to how hard to condition the tip (in a screen-only trial one default poke mended a
+# double tip at the first try)
 ACTIONS: dict[str, ActionSpec] = {s.name: s for s in (
     ActionSpec("scan", "Image a square frame in constant-current mode and save it. Returns the frame's "
                        "file name, which reports cite. Takes pixels × 2 × line_time_s of instrument time.",
@@ -113,19 +128,19 @@ ACTIONS: dict[str, ActionSpec] = {s.name: s for s in (
                (_P("on", "boolean", "true = on", True),)),
     ActionSpec("set_current_range", "Select the preamplifier range (full-scale current).",
                (_P("full_scale_na", "number", "full scale (nA)", True, choices=tuple(_GAIN_FULL_SCALE_NA)),)),
-    ActionSpec("move_tip", "Move the tip laterally in a straight line at a set speed, in feedback. At a low "
-                           "junction resistance (|bias| / setpoint) this drags whatever the tip grips.",
+    ActionSpec("move_tip", "Move the tip laterally in a straight line at a set speed, recording Z and the "
+                           "current along the path. Returns the file name of the saved trace.",
                (_P("x_nm", "number", "target x (scan coordinates, nm)", True),
                 _P("y_nm", "number", "target y (scan coordinates, nm)", True),
                 _P("speed_nm_s", "number", "lateral speed (nm/s)", default=293.0, lo=0.01, hi=10000.0))),
     ActionSpec("pulse", "Apply a bias pulse at the tip's position (tip conditioning).",
                (_P("bias_v", "number", "pulse voltage (V, absolute)", True, lo=-10.0, hi=10.0),
-                _P("width_ms", "number", "pulse width (ms)", default=50.0, lo=0.1, hi=5000.0),
+                _P("width_ms", "number", "pulse width (ms)", True, lo=0.1, hi=5000.0),
                 _P("z_hold", "boolean", "hold Z during the pulse", default=True))),
     ActionSpec("poke", "Indent the tip into the surface and retract (tip conditioning by controlled contact).",
-               (_P("depth_nm", "number", "indentation depth below the tunnelling height (nm)", default=0.5, lo=0.0, hi=20.0),
+               (_P("depth_nm", "number", "indentation depth below the tunnelling height (nm)", True, lo=0.0, hi=20.0),
                 _P("bias_v", "number", "bias during the indentation (V); omit to keep the current bias", lo=-10.0, hi=10.0),
-                _P("dwell_s", "number", "time held at depth (s)", default=0.5, lo=0.0, hi=10.0))),
+                _P("dwell_s", "number", "time held at depth (s)", True, lo=0.0, hi=10.0))),
     ActionSpec("sts", "Take a bias-spectroscopy sweep (I(V) and dI/dV) at the tip's position and save it. "
                       "Returns the spectrum's file name, which reports cite.",
                (_P("v_start", "number", "sweep start (V)", True, lo=-10.0, hi=10.0),
@@ -213,8 +228,135 @@ def _r(x: float, nd: int = 4) -> float:
     return float(round(float(x), nd))
 
 
+def _peak(a) -> float:
+    """The largest |value| of a curve, NaN-safe (0 for a curve with no finite point)."""
+    a = np.asarray(a, float)
+    return float(np.nanmax(np.abs(a))) if np.any(np.isfinite(a)) else 0.0
+
+
 def array_digest(a: np.ndarray) -> str:
     return hashlib.sha256(np.ascontiguousarray(np.asarray(a, dtype=np.float64)).tobytes()).hexdigest()
+
+
+#: Relative tolerance of a fingerprint comparison (scale: the larger of |min|, |max| of the recorded
+#: finite values). Chosen from two measurements (docs/DESIGN.md, "Export version 2"):
+#:  - rounding: trial 6 and a P2 and a P5 episode recorded on Windows (i5-14400F) and replayed on
+#:    Linux (EPYC 9654), numpy 2.5.4 / OpenBLAS 0.3.34, 2026-11-16 (also under OPENBLAS_CORETYPE=Haswell
+#:    and without AVX-512): the largest relative fingerprint difference of any array is 4.2e-12;
+#:  - real divergence (same Windows host, 2026-11-16): trial-6 records with a drag end moved one lattice
+#:    site, a scan centre moved 0.1 nm (two scans), seed 10 instead of 9, and a 1 s pause inserted: in
+#:    each, the largest difference over the episode's arrays is >= 2.6e-3 (the first changed file, >= 1.5e-3).
+#: An episode is inconsistent when ANY array exceeds the tolerance, so the first must stay a factor
+#: >= 1e3 below RTOL (4.2e-12 -> 2400x) and the second a factor >= 1e3 above it (>= 1e5x). A single
+#: array that hardly responds to a change (the current at constant current) may be below RTOL.
+RTOL = 1e-8
+#: an event's float below this (in its own unit) is not told apart from 0: far below anything physical
+EVENT_ATOL = 1e-15
+
+_BLOCKS_2D = 8          # block means of a frame: 8 x 8 blocks, whatever the shape
+_SEGMENTS_1D = 32       # block means of a curve: min(32, n) segments
+
+
+def _mean_or_none(x: np.ndarray) -> float | None:
+    f = x[np.isfinite(x)]
+    return float(f.mean()) if f.size else None
+
+
+def array_fingerprint(a: np.ndarray) -> dict:
+    """A coarse, comparable summary of one array, for telling a last-bits rounding difference
+    (another libm or BLAS kernel) from a different measurement: the shape, the count and hash of the
+    non-finite mask (exact), and over the finite values their min, max, mean, std and block means on
+    a fixed grid (2-D: 8 x 8 blocks, anything else flattened into min(32, n) segments; a block with
+    no finite value is None). Numbers are Python floats, so they survive JSON exactly."""
+    x = np.asarray(a, dtype=np.float64)
+    mask = np.isfinite(x)
+    fin = x[mask]
+    if x.ndim == 2:
+        blocks = [_mean_or_none(b) for rows in np.array_split(x, _BLOCKS_2D, axis=0)
+                  for b in np.array_split(rows, _BLOCKS_2D, axis=1)]
+    else:
+        flat = x.ravel()
+        blocks = [_mean_or_none(b) for b in np.array_split(flat, min(_SEGMENTS_1D, flat.size))] if flat.size else []
+    return {"shape": list(x.shape), "nonfinite": int(mask.size - fin.size),
+            "nonfinite_mask": hashlib.sha256(np.ascontiguousarray(mask).tobytes()).hexdigest(),
+            "min": float(fin.min()) if fin.size else None, "max": float(fin.max()) if fin.size else None,
+            "mean": float(fin.mean()) if fin.size else None, "std": float(fin.std()) if fin.size else None,
+            "blocks": blocks}
+
+
+def _num(v) -> bool:
+    return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+
+def compare_fingerprints(want, got) -> tuple[str, float | None]:
+    """The recorded fingerprint against the replay's: ``("rounding", r)`` when the structure is equal
+    and every number is within :data:`RTOL` of the recorded scale (``r`` the largest relative
+    difference), ``("beyond", r)`` when a number is further, ``("structure", None)`` when shape,
+    non-finite mask, which blocks are empty, or the form of the record differ. A recorded scale of 0
+    allows no difference at all."""
+    try:
+        if not isinstance(want, dict) or set(want) != set(got):
+            return "structure", None
+        for k in ("shape", "nonfinite", "nonfinite_mask"):
+            if want[k] != got[k]:
+                return "structure", None
+        wb, gb = want["blocks"], got["blocks"]
+        if not isinstance(wb, list) or len(wb) != len(gb):
+            return "structure", None
+        pairs = [(want[k], got[k]) for k in ("min", "max", "mean", "std")] + list(zip(wb, gb))
+        for w, g in pairs:
+            if (w is None) != (g is None) or not (w is None or _num(w)):
+                return "structure", None
+        lo, hi = want["min"], want["max"]
+        scale = max(abs(lo), abs(hi)) if lo is not None else 0.0
+        worst = 0.0
+        for w, g in pairs:
+            if w is None:
+                continue
+            d = abs(float(w) - float(g))
+            rel = d / scale if scale > 0 else (0.0 if d == 0 else float("inf"))
+            worst = max(worst, rel)
+        return ("rounding" if worst <= RTOL else "beyond"), worst
+    except (KeyError, TypeError, ValueError):
+        return "structure", None
+
+
+def events_differ(want, got) -> str | None:
+    """Why two event lists (JSON-shaped, paths already reduced) differ beyond rounding, or None.
+    Same length, keys, strings, booleans and integers exactly; floats within :data:`RTOL` relative
+    (to the larger magnitude of the two) or :data:`EVENT_ATOL` absolute."""
+    if not isinstance(want, list) or not isinstance(got, list) or len(want) != len(got):
+        return "the event count differs"
+    for k, (a, b) in enumerate(zip(want, got)):
+        why = _value_differs(a, b)
+        if why:
+            return f"event {k}: {why}"
+    return None
+
+
+def _value_differs(a, b) -> str | None:
+    if isinstance(a, dict):
+        if not isinstance(b, dict) or set(a) != set(b):
+            return "the keys differ"
+        for key in a:
+            why = _value_differs(a[key], b[key])
+            if why:
+                return f"{key}: {why}"
+        return None
+    if isinstance(a, list):
+        if not isinstance(b, list) or len(a) != len(b):
+            return "a list differs in length"
+        for x, y in zip(a, b):
+            why = _value_differs(x, y)
+            if why:
+                return why
+        return None
+    if isinstance(a, float) and isinstance(b, float):
+        if a == b or (a != a and b != b):
+            return None
+        d = abs(a - b)
+        return None if d <= max(EVENT_ATOL, RTOL * max(abs(a), abs(b))) else "a float differs beyond rounding"
+    return None if (a == b and type(a) is type(b)) else "a value differs"
 
 
 # ── the instrument ──────────────────────────────────────────────────────────
@@ -255,12 +397,14 @@ class Instrument:
             session = Path(self._tmp.name) / "session"
         self.world = scenario.build_world(self.seed, session_dir=session, virtual_clock=True)
         self.t0 = self.world.clock.sim()
+        # the world as the episode found it, for the ledger only (a replay rebuilds and checks
+        # the sample against it, and starts the tip's story from it); reading it draws nothing
+        self.truth_before = self.world.truth()
         b = scenario.budget or {}
         self.max_sim_s = float(b["sim_hours"]) * 3600.0 if b.get("sim_hours") else None
         self.max_actions = int(max_actions)
         self.log: list[dict] = []
         self.sink = ResultSink()
-        self.diagnosis: list[dict] = []
         self.frames: dict[str, FrameRecord] = {}
         self.spectra: dict[str, dict] = {}
         self.n_actions = 0
@@ -268,13 +412,14 @@ class Instrument:
         self.verdict: Any = None
 
     # ── what the agent is told ──
-    def task(self) -> str:
-        """The task with its rule card (stmbench.trackB.rules)."""
-        return task_text(self.scenario)
+    def task(self, lang: str = "zh") -> str:
+        """The task with its rule card (stmbench.trackB.rules), in ``lang``: "zh" or "en"."""
+        return task_text(self.scenario, lang)
 
     @staticmethod
     def manual() -> str:
-        """The action set, one line per parameter: what every agent is told the instrument does."""
+        """The action set, one line per parameter with its default, its choices and its range (min, max): what every
+        agent is told the instrument does."""
         lines = [f"Instrument API v{API_VERSION}: units are nm, V, pA, s; positions are scan coordinates "
                  "(x right, y up); actions spend instrument time, observations do not."]
         for s in ACTIONS.values():
@@ -287,6 +432,12 @@ class Instrument:
                     extra.append(f"default {p.default}")
                 if p.choices is not None:
                     extra.append("one of " + ", ".join(map(str, p.choices)))
+                # the range an MCP agent's input schema carries as minimum and maximum (the screen agent of the
+                # P4 trials learnt the 100000 pA setpoint limit only from a refusal)
+                if p.lo is not None:
+                    extra.append(f"min {p.lo}")
+                if p.hi is not None:
+                    extra.append(f"max {p.hi}")
                 lines.append(f"    {p.name} ({p.kind}): {p.doc}" + (f" [{'; '.join(extra)}]" if extra else ""))
         return "\n".join(lines)
 
@@ -308,6 +459,15 @@ class Instrument:
     def _settle(self, at_least: float = 0.0) -> None:
         self._advance(max(float(at_least), self._transient_left_s()))
 
+    def _settle_tunnelling(self, at_least: float = 0.0, *, current_a: float | None = None,
+                           bias_v: float | None = None) -> None:
+        """:meth:`_settle` for an action that leaves the tip tunnelling: the time it takes also
+        counts for the tip's hazards outside scans (:meth:`World.tunnel_interval`; ``current_a``
+        and ``bias_v`` are the dose and field of a sweep, else the setpoint and the bias)."""
+        dt = max(float(at_least), self._transient_left_s())
+        self.world.tunnel_interval(dt, current_a=current_a, bias_v=bias_v)
+        self._advance(dt)
+
     # ── the one door that changes the instrument ──
     def act(self, name: str, **args) -> dict:
         """Run one action; returns what the instrument reports. :class:`ActionError` if refused."""
@@ -327,7 +487,14 @@ class Instrument:
                              "error": str(exc), "t_s": _r(self.used_s, 6)})
             raise
         t0 = self.used_s
-        out = getattr(self, f"_do_{name}")(**params)
+        try:
+            out = getattr(self, f"_do_{name}")(**params)
+        except ActionError as exc:
+            # the instrument's own checks (piezo range, a withdrawn tip, no qPlus sensor) refuse
+            # before anything moves: a refusal like the ones above, and on the record as one
+            self.log.append({"i": len(self.log), "kind": "refused", "name": name, "args": _jsonable(args),
+                             "error": str(exc), "t_s": _r(self.used_s, 6)})
+            raise
         self.n_actions += 1
         self.log.append({"i": len(self.log), "kind": "act", "name": name, "params": params,
                          "t0_s": _r(t0, 6), "t1_s": _r(self.used_s, 6), "result": _jsonable(out)})
@@ -379,41 +546,53 @@ class Instrument:
 
     def _do_set_bias(self, bias_v) -> dict:
         self.world.set_bias(float(bias_v))
-        self._settle(0.05)
+        self._settle_tunnelling(0.05)
         return {"bias_v": _r(bias_v, 6)}
 
     def _do_set_setpoint(self, current_pa) -> dict:
         self.world.set_setpoint(float(current_pa) * 1e-12)
-        self._settle(0.05)
+        self._settle_tunnelling(0.05)
         return {"setpoint_pa": _r(current_pa, 6)}
 
     def _do_feedback(self, on) -> dict:
         self.world.zctrl_set(bool(on))
-        self._settle(0.05)
+        self._settle_tunnelling(0.05)
         return {"feedback": bool(on)}
 
     def _do_set_current_range(self, full_scale_na) -> dict:
         w = self.world
-        idx = _GAIN_FULL_SCALE_NA[float(full_scale_na)]
-        w.preamp.gain_index = idx
-        w.preamp.full_scale_a = 10.0 / (10.0 ** (6 + idx))
-        self._settle(0.05)
+        w.set_current_range(_GAIN_FULL_SCALE_NA[float(full_scale_na)])      # the world checks the setpoint against it
+        self._settle_tunnelling(0.05)
         return {"full_scale_na": float(full_scale_na)}
 
     def _do_move_tip(self, x_nm, y_nm, speed_nm_s) -> dict:
+        from stmsim.io.dat_writer import save_move_trace
+
         w = self.world
         x, y = x_nm * 1e-9, y_nm * 1e-9
         rx, ry = w.rig.xy_range_m
         if abs(x) > rx / 2 or abs(y) > ry / 2:
             raise ActionError("move_tip: outside the piezo range")
         dist = math.hypot(x - w.tip_x, y - w.tip_y)
-        n_before = len(w.events)
-        w.move_xy_path(x, y, speed_m_s=float(speed_nm_s) * 1e-9)
+        t_start = self.used_s
+        w.move_xy_path(x, y, speed_m_s=float(speed_nm_s) * 1e-9, trace=True)
+        # what the controller recorded along the path, kept like a spectrum: an operator reads
+        # whether atoms hopped from it, and the instrument does not say
+        tr = w.last_move_trace
+        path = save_move_trace(w, "", tr)
+        w.dats_saved.append(path)
+        w._event("dat_saved", path=path, experiment="move trace", idx=len(w.dats_saved), move_idx=tr["index"])
+        name = Path(path).name
+        self.spectra[name] = {"name": name, "kind": "move", "index": int(tr["index"]),
+                              "tip_nm": [_r(x_nm), _r(y_nm)], "from_nm": [_r(v) for v in tr["from_nm"]],
+                              "to_nm": [_r(x_nm), _r(y_nm)], "speed_nm_s": _r(speed_nm_s, 6),
+                              "bias_v": _r(tr["bias_v"], 6), "setpoint_pa": _r(tr["setpoint_pa"], 6),
+                              "feedback": bool(tr["feedback"]), "t_s": t_start,
+                              "t": np.asarray(tr["t"], float), "dist": np.asarray(tr["dist"], float),
+                              "z_abs": np.asarray(tr["z_abs"], float), "i": np.asarray(tr["i"], float)}
         self._settle(dist / (float(speed_nm_s) * 1e-9) + 0.05)
-        # what an operator sees in the current trace: hops show as spikes, not as atom ids
-        hops = sum(int(e.get("n_hops", 1)) for e in w.events[n_before:] if e.get("kind") == "adatom_hop")
-        return {"tip_nm": [_r(x_nm), _r(y_nm)], "distance_nm": _r(dist * 1e9),
-                "current_spikes": int(hops)}
+        return {"tip_nm": [_r(x_nm), _r(y_nm)], "distance_nm": _r(dist * 1e9), "trace": name,
+                "duration_s": _r(float(tr["t"][-1]), 3)}
 
     def _do_pulse(self, bias_v, width_ms, z_hold) -> dict:
         w = self.world
@@ -458,6 +637,9 @@ class Instrument:
                               "tip_nm": [_r(w.tip_x * 1e9), _r(w.tip_y * 1e9)],
                               "v": np.asarray(cur["v"], float), "i": np.asarray(cur["i"], float),
                               "didv": np.asarray(cur["didv"], float), "t_s": self.used_s}
+        # the sweep's hazards: its largest field and its largest current dose (the measurement
+        # above is the tip it started with; a change inside the sweep shows from the next one on)
+        w.tunnel_interval(duration, current_a=_peak(cur["i"]), bias_v=max(abs(float(v_start)), abs(float(v_end))))
         self._advance(duration)
         return {"spectrum": name, "points": int(points), "duration_s": _r(duration, 3)}
 
@@ -487,7 +669,7 @@ class Instrument:
                               # the loop's Z at every point (m), as the .dat file has it: what lines up
                               # a curve over an atom with one over the bare surface
                               "z_abs": np.asarray(cur["z_n"], float), "t_s": self.used_s}
-        self._settle(duration)
+        self._settle_tunnelling(duration, current_a=_peak(cur["i"]))
         return {"spectrum": name, "points": int(points), "duration_s": _r(duration, 3)}
 
     def _do_pll(self, on, amplitude_pm=None) -> dict:
@@ -501,7 +683,9 @@ class Instrument:
         if bool(on) and p.output_on:
             p.excitation_v = p.excitation_for(p.amp_setpoint_m)
         p.set_output(bool(on), w.clock.wall())
-        self._advance(5.0 * p.tau_s if on else 0.05)
+        ring = 5.0 * p.tau_s if on else 0.05
+        w.tunnel_interval(ring)                          # the tip tunnels while the oscillation rings up
+        self._advance(ring)
         # the frequency shift is re-zeroed where the tip is (PLL.FreqShiftAutoCenter)
         if on and not w.withdrawn:
             amp = p.amplitude_now(w.clock.wall())
@@ -515,13 +699,13 @@ class Instrument:
         w.lockin_amp_v = float(amplitude_mv) * 1e-3
         chans = [c for c in w.scan.channels if c != SIG_LI_X]
         w.scan.channels = chans + ([SIG_LI_X] if on else [])
-        self._settle(0.05)
+        self._settle_tunnelling(0.05)
         return {"lockin": bool(on), "amplitude_mv": _r(amplitude_mv, 6)}
 
     def _do_drift_comp(self, on, vx_nm_per_min, vy_nm_per_min, vz_pm_per_min) -> dict:
         self.world.set_drift_comp(bool(on), vx_nm_per_min * 1e-9 / 60.0, vy_nm_per_min * 1e-9 / 60.0,
                                   vz_pm_per_min * 1e-12 / 60.0)
-        self._settle(0.05)
+        self._settle_tunnelling(0.05)
         return {"on": bool(on), "v_nm_per_min": [_r(vx_nm_per_min), _r(vy_nm_per_min)],
                 "vz_pm_per_min": _r(vz_pm_per_min)}
 
@@ -551,6 +735,7 @@ class Instrument:
         return {"direction": direction, "steps": int(steps)}
 
     def _do_wait(self, seconds) -> dict:
+        self.world.tunnel_interval(float(seconds))
         self._advance(float(seconds))
         return {"waited_s": _r(seconds, 3)}
 
@@ -575,6 +760,7 @@ class Instrument:
         self._observe("status")
         z, i = self._z_and_current()
         p = getattr(w, "pll", None)
+        dv = w.drift_comp_v                      # m/s as set_drift_comp stored them: what was programmed, not the drift
         return {"instrument_time_s": _r(self.used_s, 3), "budget_s": self.max_sim_s,
                 "bias_v": _r(w.bias_v, 6), "setpoint_pa": _r(w.zctrl.setpoint_a * 1e12, 4),
                 "feedback": bool(w.zctrl.on), "withdrawn": bool(w.withdrawn),
@@ -583,6 +769,9 @@ class Instrument:
                 "current_full_scale_na": _r(w.preamp.full_scale_a * 1e9, 4),
                 "oscillating": bool(p.output_on) if p is not None else None,
                 "lockin": bool(getattr(w, "lockin_on", False)),
+                # shaped like the drift_comp action's reply, so a reading can be compared with what was set
+                "drift_comp": {"on": bool(w.drift_comp_on), "v_nm_per_min": [_r(dv[0] * 6e10), _r(dv[1] * 6e10)],
+                               "vz_pm_per_min": _r(dv[2] * 6e13)},
                 "actions": self.n_actions}
 
     def info(self) -> dict:
@@ -607,7 +796,7 @@ class Instrument:
         return {"frames": [{"frame": f.name, **f.geometry, "t_start_s": _r(f.t_start_s, 3)}
                            for f in self.frames.values()],
                 "spectra": [{"spectrum": s["name"], "kind": s["kind"], "tip_nm": s["tip_nm"],
-                             "points": int(len(s.get("v", s.get("z_rel", [])))), "t_s": _r(s["t_s"], 3)}
+                             "points": int(len(s.get("v", s.get("z_rel", s.get("t", []))))), "t_s": _r(s["t_s"], 3)}
                             for s in self.spectra.values()]}
 
     def frame(self, name: str, channel: str = "z", direction: str = "forward") -> dict:
@@ -655,15 +844,9 @@ class Instrument:
         missing = [c for c in to_report if c not in self.sink.folded()["claims"]]
         return f"recorded {claim_id} = {value}; still to report: {', '.join(missing) or 'none'}"
 
-    def report_tip_state(self, tip_state: str, junction: str | None = None, note: str = "") -> str:
-        rec = {"tip_state": str(tip_state), "junction": junction, "note": note}
-        self.diagnosis.append(rec)
-        self.log.append({"i": len(self.log), "kind": "diagnosis", "args": rec, "t_s": _r(self.used_s, 6)})
-        return "recorded"
-
     # ── the end ──
     def finish(self) -> dict:
-        """Judge the episode (version-1 rules, budget overrun rule) and write the ledger."""
+        """Judge the episode (the rules of ``RULES_VERSION``, the budget overrun rule) and write the ledger."""
         if self.finished:
             return self._summary()
         from ..trackB.rules import apply_budget_overrun
@@ -692,14 +875,35 @@ class Instrument:
                 "claims_verified": det.get("n_verified"), "instrument_time_s": _r(self.used_s, 3),
                 "actions": self.n_actions, "budget_overrun": det.get("budget_overrun")}
 
+    def frame_digest(self, name: str) -> dict:
+        """Hashes of one saved frame's arrays (the frame's entry in :meth:`digest`)."""
+        f = self.frames[name]
+        return {k: array_digest(getattr(f, k)) for k in ("z_fwd", "z_bwd", "i_fwd", "i_bwd", "didv_fwd", "didv_bwd")
+                if getattr(f, k) is not None}
+
+    def spectrum_digest(self, name: str) -> dict:
+        """Hashes of one saved spectrum's arrays (the spectrum's entry in :meth:`digest`)."""
+        return {k: array_digest(v) for k, v in self.spectra[name].items() if isinstance(v, np.ndarray)}
+
+    def frame_fingerprint(self, name: str) -> dict:
+        """Fingerprints (:func:`array_fingerprint`) of one saved frame's arrays."""
+        f = self.frames[name]
+        return {k: array_fingerprint(getattr(f, k)) for k in ("z_fwd", "z_bwd", "i_fwd", "i_bwd", "didv_fwd", "didv_bwd")
+                if getattr(f, k) is not None}
+
+    def spectrum_fingerprint(self, name: str) -> dict:
+        """Fingerprints of one saved spectrum's (or move trace's) arrays."""
+        return {k: array_fingerprint(v) for k, v in self.spectra[name].items() if isinstance(v, np.ndarray)}
+
+    def fingerprints(self) -> dict:
+        """Fingerprints of everything measured: the ledger's rounding-tolerant companion of :meth:`digest`."""
+        return {"frames": {n: self.frame_fingerprint(n) for n in self.frames},
+                "spectra": {n: self.spectrum_fingerprint(n) for n in self.spectra}}
+
     def digest(self) -> dict:
         """Hashes of everything measured, for re-checking an episode by replay."""
-        return {"frames": {n: {k: array_digest(getattr(f, k)) for k in
-                               ("z_fwd", "z_bwd", "i_fwd", "i_bwd", "didv_fwd", "didv_bwd")
-                               if getattr(f, k) is not None}
-                           for n, f in self.frames.items()},
-                "spectra": {n: {k: array_digest(v) for k, v in s.items() if isinstance(v, np.ndarray)}
-                            for n, s in self.spectra.items()},
+        return {"frames": {n: self.frame_digest(n) for n in self.frames},
+                "spectra": {n: self.spectrum_digest(n) for n in self.spectra},
                 "events": hashlib.sha256(json.dumps(_portable_events(self.world.events), sort_keys=True,
                                                     default=str).encode()).hexdigest()}
 
@@ -713,9 +917,16 @@ class Instrument:
               "claims_total": det.get("n_total"), "claims_reported": det.get("n_reported"),
               "claims_verified": det.get("n_verified"), "instrument_time_s": self.used_s,
               "max_sim_s": self.max_sim_s, "actions": self.n_actions, "verdict": v.as_dict(),
-              "digest": self.digest(), "diagnosis": self.diagnosis, "truth_after": self.truth_after}
+              "digest": self.digest(), "fingerprints": self.fingerprints(),
+              "sim_t0_s": self.t0,
+              "truth_before": self.truth_before, "truth_after": self.truth_after}
         (out / "episode.json").write_text(json.dumps(ep, default=_json_default, ensure_ascii=False, indent=1),
                                           encoding="utf-8")
+        from ..replay.record import tip_timeline
+
+        (out / "tip_timeline.json").write_text(
+            json.dumps(tip_timeline(self.world, initial=(self.truth_before or {}).get("tip")),
+                       default=_json_default, ensure_ascii=False, indent=1), encoding="utf-8")
         with (out / "actions.jsonl").open("w", encoding="utf-8") as fh:
             for rec in self.log:
                 fh.write(json.dumps(rec, default=_json_default, ensure_ascii=False) + "\n")
@@ -726,47 +937,179 @@ class Instrument:
 
 
 # ── re-checking an episode ──────────────────────────────────────────────────
+_ABSENT = object()
+
+
+def _shown(value: Any, limit: int = 40) -> str:
+    """A value read out of a ledger or an export as a message quotes it: one line, printable, cut short."""
+    s = "".join(c if c.isprintable() else "?" for c in json.dumps(value, ensure_ascii=False, default=str))
+    return s if len(s) <= limit else s[:limit - 3] + "..."
+
+
+def require_api_version(found: Any, what: str) -> None:
+    """Pass when ``found``, the ``api_version`` a ledger or an export carries, is this code's
+    :data:`API_VERSION`; otherwise :class:`VersionError` naming ``what`` is refused.
+
+    The calls an agent can make, their parameters and the kinds of record in a log change with the
+    version, so a record of another one would replay into a confusing mismatch, or grade as a zero,
+    instead of into its own episode. It needs the code of its own version, and the message says so."""
+    if isinstance(found, int) and not isinstance(found, bool) and found == API_VERSION:
+        return
+    state = "carries no api_version" if found is None else f"is of api_version {_shown(found)}"
+    raise VersionError(f"{what} {state}; this code is api_version {API_VERSION}. A record replays only under "
+                       "the code of its own API version, so this one needs the code that wrote it "
+                       "(it cannot be replayed, verified or graded here)")
+
+
+def replay_records(scenario: Scenario | str | Path, seed: int, records: list[dict], *,
+                   out_dir: str | Path | None = None,
+                   raise_refused: bool = False) -> tuple[Instrument, list[dict]]:
+    """Rebuild an episode from its log records: the same scenario and seed, the same calls in order.
+
+    ``act`` records are run again (their ``params``), ``report`` records sent again (their
+    ``args``); ``refused`` and ``observe`` records changed nothing and are skipped. Any other kind
+    (a ``diagnosis`` record, say, which no instrument of this API version writes) is a mismatch.
+    The records end at ``finish``, and the instrument is then finished: judged as it stands,
+    which is also how an episode that never reached ``finish`` is judged. What the records say
+    was measured or judged is never used, only what was done.
+
+    Each act's reply, and the instrument times around it, are compared with the record's, since
+    the same seed and calls only measure the same thing in the same numerical environment. What
+    differs comes back with the instrument, as ``{"i", "name", "field"}`` for a reply or a time
+    that differs and ``{"i", "name", "error"}`` for a call the replay refused or a record it could
+    not read: a divergence is reported, not raised. ``raise_refused`` raises a refused call's
+    :class:`ActionError` instead (what :func:`replay` does)."""
+    inst = Instrument(scenario, int(seed), out_dir)
+    mismatches: list[dict] = []
+    over = False
+    for rec in records:
+        if not isinstance(rec, dict):
+            mismatches.append({"i": None, "name": None, "error": "a record is not an object"})
+            continue
+        kind, i = rec.get("kind"), rec.get("i")
+        if kind == "finish":
+            over = True
+        elif over:
+            # after the end the instrument refuses actions and reports, and logs a refusal, not an
+            # act or a report
+            if kind in ("act", "report"):
+                mismatches.append({"i": i, "name": rec.get("name") if kind == "act" else kind,
+                                   "error": "a call after finish"})
+        elif kind == "act":
+            _replay_act(inst, rec, mismatches, raise_refused)
+        elif kind == "report":
+            _replay_report(inst, rec, mismatches, raise_refused)
+        elif kind not in ("refused", "observe"):
+            mismatches.append({"i": i, "name": str(kind), "error": "unknown record kind"})
+    inst.finish()
+    return inst, mismatches
+
+
+def _replay_act(inst: Instrument, rec: dict, mismatches: list[dict], raise_refused: bool) -> None:
+    i, name, params = rec.get("i"), rec.get("name"), rec.get("params")
+    if not isinstance(name, str) or not isinstance(params, dict) or "name" in params:
+        mismatches.append({"i": i, "name": name if isinstance(name, str) else None,
+                           "error": "malformed act record"})
+        return
+    try:
+        inst.act(name, **params)
+    except ActionError as exc:
+        if raise_refused:
+            raise
+        mismatches.append({"i": i, "name": name, "error": str(exc)})
+        return
+    done = inst.log[-1]            # what the act just logged: its result as the log stores it, and its times
+    want = rec.get("result")
+    if isinstance(want, dict):
+        fields = [k for k in sorted(set(done["result"]) | set(want))
+                  if done["result"].get(k, _ABSENT) != want.get(k, _ABSENT)]
+    else:
+        fields = ["result"]
+    fields += [k for k in ("t0_s", "t1_s") if done[k] != rec.get(k)]
+    mismatches.extend({"i": i, "name": name, "field": k} for k in fields)
+
+
+def _replay_report(inst: Instrument, rec: dict, mismatches: list[dict], raise_refused: bool) -> None:
+    args = rec.get("args")
+    try:
+        if not isinstance(args, dict) or "claim_id" not in args or "value" not in args:
+            raise ValueError("malformed report record")
+        a = dict(args)
+        inst.report(a.pop("claim_id"), a.pop("value"), **a)
+    except ActionError as exc:
+        if raise_refused:
+            raise
+        mismatches.append({"i": rec.get("i"), "name": "report", "error": str(exc)})
+    except (TypeError, ValueError) as exc:      # arguments the instrument cannot take at all
+        mismatches.append({"i": rec.get("i"), "name": "report", "error": str(exc)})
+
+
 def replay(run_dir: str | Path) -> Instrument:
-    """Rebuild an episode from its ledger: same scenario and seed, the same calls in order."""
+    """Rebuild an episode from its ledger: same scenario and seed, the same calls in order.
+
+    :class:`VersionError` for a ledger of another API version: only the code of its own version can
+    replay it."""
     run_dir = Path(run_dir)
     ep = json.loads((run_dir / "episode.json").read_text(encoding="utf-8"))
-    inst = Instrument(ep["scenario_id"], int(ep["seed"]))
-    for line in (run_dir / "actions.jsonl").read_text(encoding="utf-8").splitlines():
-        rec = json.loads(line)
-        kind = rec.get("kind")
-        if kind == "act":
-            inst.act(rec["name"], **rec["params"])
-        elif kind == "report":
-            a = dict(rec["args"])
-            inst.report(a.pop("claim_id"), a.pop("value"), **a)
-        elif kind == "diagnosis":
-            inst.report_tip_state(**rec["args"])
-        elif kind == "finish":
-            break
-    inst.finish()
-    return inst
+    require_api_version(ep.get("api_version"), f"the ledger in {run_dir}")
+    records = [json.loads(line) for line in (run_dir / "actions.jsonl").read_text(encoding="utf-8").splitlines()]
+    return replay_records(ep["scenario_id"], int(ep["seed"]), records, raise_refused=True)[0]
 
 
 def verify(run_dir: str | Path) -> dict:
-    """Replay an episode and compare what was measured and how it was judged."""
+    """Replay an episode and compare what was measured and how it was judged. A ledger of another
+    API version is refused, as :func:`replay` refuses it (:class:`VersionError`).
+
+    An array whose hash differs is compared by its fingerprint when the ledger has one (the grader's
+    rule: :func:`compare_fingerprints`), and events are compared by value (:func:`events_differ`),
+    so a last-bits difference between machines does not fail the check. A ledger without
+    fingerprints is checked exactly. ``rounding`` lists the arrays that differed by rounding only,
+    with their largest relative difference."""
     run_dir = Path(run_dir)
     ep = json.loads((run_dir / "episode.json").read_text(encoding="utf-8"))
     inst = replay(run_dir)
     again = inst.digest()
     want = ep.get("digest") or {}
-    diffs = []
+    fps_want = ep.get("fingerprints")
+    fps_got = inst.fingerprints() if isinstance(fps_want, dict) else None
+    diffs: list[str] = []
+    rounding: list[dict] = []
     for part in ("frames", "spectra"):
-        if again.get(part) != want.get(part):
+        bad = False
+        for name in sorted(set(again.get(part) or {}) | set(want.get(part) or {})):
+            w, g = (want.get(part) or {}).get(name), (again.get(part) or {}).get(name)
+            if w == g:
+                continue
+            if not isinstance(w, dict) or not isinstance(g, dict) or fps_got is None:
+                bad = True
+                continue
+            for arr in sorted(set(w) | set(g)):
+                if w.get(arr) == g.get(arr):
+                    continue
+                fw = ((fps_want.get(part) or {}).get(name) or {}).get(arr)
+                fg = (fps_got[part].get(name) or {}).get(arr)
+                kind, rel = compare_fingerprints(fw, fg) if fw is not None and fg is not None else ("structure", None)
+                if kind == "rounding":
+                    rounding.append({part[:-1]: name, "array": arr, "max_rel_diff": rel})
+                else:
+                    bad = True
+        if bad:
             diffs.append(part)
     if again.get("events") != want.get("events"):
-        diffs.append("events")
+        events_path = run_dir / "events.json"
+        if fps_got is None or not events_path.exists():
+            diffs.append("events")
+        else:
+            recorded = _jsonable(_portable_events(json.loads(events_path.read_text(encoding="utf-8"))))
+            if events_differ(recorded, _jsonable(_portable_events(inst.world.events))) is not None:
+                diffs.append("events")
     s = inst._summary()
     same_verdict = (bool(s["success"]) == bool(ep.get("success"))
                     and abs(float(s["partial"]) - float(ep.get("partial", -1))) < 1e-12)
     if not same_verdict:
         diffs.append("verdict")
-    return {"ok": not diffs, "differences": diffs, "success": s["success"], "partial": s["partial"],
-            "recorded": {"success": ep.get("success"), "partial": ep.get("partial")}}
+    return {"ok": not diffs, "differences": diffs, "rounding": rounding, "success": s["success"],
+            "partial": s["partial"], "recorded": {"success": ep.get("success"), "partial": ep.get("partial")}}
 
 
 # ── helpers ─────────────────────────────────────────────────────────────────
@@ -775,8 +1118,14 @@ def _portable_events(events: list[dict]) -> list[dict]:
     out = []
     for e in events:
         d = dict(e)
+        if d.get("kind") == "zspec":
+            # a judge-only flag added after ledgers existed: left out so their events digest still
+            # matches a replay (the verdict comparison covers what the flag decides)
+            d.pop("oscillating", None)
         if d.get("path"):
-            d["path"] = Path(str(d["path"])).name
+            # either separator: a ledger written on Windows is read on Linux, where Path() would keep
+            # "D:\run\x.sxm" whole (the digest of its events was computed from the bare file name)
+            d["path"] = str(d["path"]).replace("\\", "/").rsplit("/", 1)[-1]
         out.append(d)
     return out
 
@@ -797,5 +1146,5 @@ def _jsonable(obj):
     return json.loads(json.dumps(obj, default=_json_default))
 
 
-__all__ = ["ACTIONS", "API_VERSION", "ActionError", "ActionSpec", "Instrument", "Param", "replay", "validate",
-           "verify", "fold_results"]
+__all__ = ["ACTIONS", "API_VERSION", "RTOL", "array_fingerprint", "compare_fingerprints", "events_differ", "ActionError", "ActionSpec", "Instrument", "Param", "VersionError", "replay",
+           "replay_records", "require_api_version", "validate", "verify", "fold_results"]

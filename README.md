@@ -52,7 +52,7 @@ The benchmark's central contract is simple: **a scientific result must be accomp
 3. **Report with provenance.** `report_result` names the claim, its value and units, and its supporting frames or spectra. Positional reports identify the frame in which the coordinates were measured.
 4. **Verify the experiment.** The judge checks values, acquisition conditions, spatial coverage, event ordering, and required sample-state constraints. Complete success requires all claims in the scenario to pass within the episode budget.
 
-Frame provenance matters at STM length scales. The evaluator maps reported coordinates using the drift recorded for the relevant acquisition row. A post-manipulation image must follow the atom's motion; a spectrum must cover the required energy range at the required location. The [version-1 rules](stmbench/trackB/rules.py) expose these conditions directly to the agent.
+Frame provenance matters at STM length scales. The evaluator maps reported coordinates using the drift recorded for the relevant acquisition row. A post-manipulation image must follow the atom's motion; a spectrum must cover the required energy range at the required location. The [rule card](stmbench/trackB/rules.py) exposes these conditions directly to the agent.
 
 Acquisition checks establish that the required measurements occurred and that the reported evidence satisfies the task. They do not inspect the agent's internal derivation. Material knowledge is explicitly allowed for selected claims, including P1's period and P2's material parameters; their acquisition requirements still apply. This makes the role of prior knowledge and the role of experimental evidence explicit.
 
@@ -88,14 +88,14 @@ These protocols have privileged access for navigation and operational decisions�
 | Reference protocol | Seeds | Complete task success | Median instrument time | 90th-percentile measurement error |
 |---|---:|---:|---:|---|
 | **P3 · Corral geometry and resonances** | 0–29 | **30/30** | **485 s** | Peak energies: **2.7 / 2.5 meV** absolute error; radius: **0.038 nm** absolute error |
-| **P4 · Single-atom positioning** | 0–149 | **150/150** | **879 s** | Reported position: **0.016 nm** error |
+| **P4 · Single-atom positioning** (re-run 2026-11-17 on the current code, etched tip) | 0–149 | **150/150** | **885 s** | Reported position: **0.015 nm** error |
 | **P5 · Force spectroscopy** | 0–29 | **30/30** | **354 s** | Absolute relative errors: **5.9%** in force minimum, **3.7%** in decay length, **8.7%** in binding energy |
 
 The calibration records are retained with the [P3](stmbench/trackB/scenarios/P3_corral_cu111.yaml), [P4](stmbench/trackB/scenarios/P4_atom_positioning_cu111.yaml), and [P5](stmbench/trackB/scenarios/P5_sader_jarvis_qplus.yaml) scenarios and in the [design record](docs/DESIGN.md). Per-seed results for every row are in [`docs/results/`](docs/results/); the commands below regenerate them for a specified checkout. Since 14 October the judge maps a reported position through the tip apex that imaged it as well as through drift. Before that, P4's 90th-percentile position error was 0.16 nm, almost all of it the apex offset.
 
-P4 illustrates why the control problem is substantial. Its reference searches a resistance ladder without reading each atom's manipulation threshold, estimates lattice geometry from measured adatom positions, and re-images to follow the result. The 150 documented runs include 100 initial conditioning episodes and 32 runs requiring further conditioning during manipulation. Of the final sites, 147 were the nearest site and three satisfied the stated 0.02 nm near-tie rule. The position error in the table measures the reported location; actual site occupation and neighbour preservation are checked separately. P4's 90th-percentile instrument time was 1,428 s, within its 5,400 s budget.
+P4 illustrates why the control problem is substantial. Its reference searches a resistance ladder without reading each atom's manipulation threshold, estimates lattice geometry from measured adatom positions, and re-images to follow the result. The 150 re-run seeds include 100 initial conditioning episodes (the October count of 32 runs needing further conditioning during manipulation was not recounted). The October figures (150/150, median 879 s, 90th percentile 1,428 s, position error 0.016 nm) were measured on the code of 13–14 October with a qPlus-fork tip; the re-run changes no protocol or tolerance. Of the final sites, 147 were the nearest site and three satisfied the stated 0.02 nm near-tie rule. The position error in the table measures the reported location; actual site occupation and neighbour preservation are checked separately. P4's 90th-percentile instrument time was 1,477 s (re-run 2026-11-17), within its 5,400 s budget.
 
-**Without privileged access.** A scripted P4 baseline in [`stmbench.baselines`](stmbench/baselines/) drives only the interface an MCP agent receives and reads nothing from the simulator. It judges the tip from how its atoms look, chooses the atom from a survey, measures drift on atoms it finds again, and follows the move against fiducial atoms. On seeds 450–599, held out until the code was final, it succeeded on **150/150**, with a median of **984 s** of instrument time against 879 s for the reference. On seeds 0–299, where it was developed, it succeeded on **300/300**. Two earlier held-out rounds, run before the fixes their failures led to, are recorded in the [design record](docs/DESIGN.md). In nearly every run the moved atom had neighbours within the 10 nm that the bystander check covers. This shows that P4 can be solved from observations alone within its budget. It is a script, not an agent result.
+**Without privileged access.** A scripted P4 baseline in [`stmbench.baselines`](stmbench/baselines/) drives only the interface an MCP agent receives and reads nothing from the simulator. It judges the tip from how its atoms look, chooses the atom from a survey, measures drift on atoms it finds again, and follows the move against fiducial atoms. Re-run on 2026-11-17 on the current code and the same seeds, with nothing tuned (seeds 450–599 were held out for the code of 14 October), it succeeded on **149/150** of seeds 450–599, with a median of **986 s** of instrument time against 885 s for the reference, and on **298/300** of seeds 0–299. The three failures (seeds 262 and 275 here, 575 among the held-out seeds) fail identically on the code just before the etched-tip change, so code changed since 14 October causes them, not the tip. On 14 October's code it had succeeded on 150/150 (median 984 s) and 300/300. Two earlier held-out rounds, run before the fixes their failures led to, are recorded in the [design record](docs/DESIGN.md). In nearly every run the moved atom had neighbours within the 10 nm that the bystander check covers. This shows that P4 can be solved from observations alone within its budget. It is a script, not an agent result.
 
 ### Calibrating what a good measurement must accomplish
 
@@ -169,6 +169,24 @@ After completion, replay the recorded actions and verify the measurements and ve
 
 ```bash
 python -m stmbench.cli verify runs/p4_s0
+```
+
+To seat a model at the instrument with these tools and nothing else, `stmbench agent` runs the loop itself — Claude through the anthropic SDK (`pip install -e ".[agent]"`), or any OpenAI-compatible endpoint — and records every turn next to the instrument's ledger:
+
+```bash
+python -m stmbench.cli agent --scenario P4_atom_positioning_cu111 --seed 0 --out runs/p4_s0 --model claude-opus-5-5
+```
+
+For a person, or an agent that works through a screen, `stmbench console` serves the same instrument as a web page and writes the same ledger; the page never shows the truth or the score:
+
+```bash
+python -m stmbench.cli console --scenario P4_atom_positioning_cu111 --seed 0 --out runs/console_p4
+```
+
+An agent that sees only screenshots and acts only with mouse and keyboard gets the same instrument in a native window instead, `stmbench gui` (`pip install -e ".[gui]"`). It opens no network port, so the screen is the only way in. A sealed mode takes the seed on standard input and shows it nowhere, and an export directory written while the episode happens lets a grader elsewhere replay and judge it (`stmbench grade`):
+
+```bash
+python -m stmbench.cli gui --scenario P4_atom_positioning_cu111 --seed 0 --out runs/gui_p4 --lang en
 ```
 
 The [instrument guide](docs/USAGE.md#the-benchmark-instrument) also documents direct Python use through `Instrument`, the available actions, observation formats, and episode files.

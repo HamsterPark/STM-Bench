@@ -1,6 +1,7 @@
 """Judge conformance on the real paper scenarios: the truth, reported with the data the rule
 card asks for, reproduces every paper; a value just inside a tolerance passes and one just
-outside fails. These run the version-1 rules (rules_version=1) end to end on built worlds."""
+outside fails. These run the current rules (rules_version=RULES_VERSION) end to end on built
+worlds; the judging rules of version 1 and of later versions are the same ones (the second test)."""
 from __future__ import annotations
 
 import math
@@ -77,9 +78,11 @@ def _oracle(name: str, tmp_path):
         sink.report("radius_nm", C.truth_at_path(truth, "corral.radius_nm"), evidence=["sim001.sxm"])
     elif sc.family == "P5":
         events += [{"kind": "zspec", "sim_s": 10.0, "idx": 1, "near_kind": "adatom", "near_nm": 0.05,
-                    "jump": False, "contact": False, "df_span_beyond_min_pm": 120.0},
+                    "jump": False, "contact": False, "df_span_beyond_min_pm": 120.0,
+                    "oscillating": True},
                    {"kind": "zspec", "sim_s": 20.0, "idx": 2, "near_kind": "none", "near_nm": 9.0,
-                    "jump": False, "contact": False, "df_span_beyond_min_pm": 120.0}]
+                    "jump": False, "contact": False, "df_span_beyond_min_pm": 120.0,
+                    "oscillating": True}]
         for c in sc.claims:
             sink.report(c["id"], C.truth_at_path(truth, c["truth"]), evidence=["zspec:1", "zspec:2"])
     return sc, truth, sink.folded(), events, orient
@@ -96,6 +99,19 @@ def test_the_truth_reported_as_the_card_asks_reproduces_the_paper(name, tmp_path
               orientation_at=orient, rules_version=RULES_VERSION)
     bad = {cid: d for cid, d in v.details["claims"].items() if not (d["value_ok"] and d["evidence_ok"])}
     assert v.success and not bad, bad
+
+
+@pytest.mark.parametrize("name", ORACLE_PAPERS)
+def test_every_rules_version_from_1_on_reproduces_the_paper_alike(name, tmp_path):
+    """Version 2 reworded P4's card and changed no judging rule: the same report and events get the
+    same verdict, claim by claim, under version 1 and under every later one."""
+    sc, truth, report, events, orient = _oracle(name, tmp_path)
+    verdicts = [judge("claims_verified", truth, claims=sc.claims, report=report, events=events,
+                      orientation_at=orient, rules_version=v) for v in sorted({1, 2, RULES_VERSION})]
+    assert verdicts[0].success
+    for v in verdicts[1:]:
+        assert (v.success, v.partial) == (verdicts[0].success, verdicts[0].partial)
+        assert v.details["checks"] == verdicts[0].details["checks"]
 
 
 @pytest.mark.parametrize("name", ORACLE_PAPERS)

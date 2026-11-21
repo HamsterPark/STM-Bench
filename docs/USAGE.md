@@ -95,17 +95,34 @@ inst.act("move_tip", x_nm=1.2, y_nm=-0.4)
 r = inst.act("zspec", sweep_nm=0.5, z_offset_nm=0.3, points=256)
 inst.spectrum(r["spectrum"])            # read-only: no instrument time, no random draw
 inst.report("f_min_pn", -150.0, evidence=[r["spectrum"], "..."])
-inst.finish()                           # judged with the version-1 rules; ledger written
+inst.finish()                           # judged by the rules the card states; ledger written
 ```
 
 Actions (`stmbench.instrument.ACTIONS`, each with a JSON schema): `scan`, `set_bias`,
-`set_setpoint`, `feedback`, `set_current_range`, `move_tip` (in feedback; at a low junction
-resistance it drags what the tip grips), `pulse`, `poke`, `sts`, `zspec`, `pll`, `lockin`
+`set_setpoint`, `feedback`, `set_current_range`, `move_tip` (records Z and the current along the
+path and replies with the trace's file name), `pulse`, `poke`, `sts`, `zspec`, `pll`, `lockin`
 (bias modulation on: every scan also records a dI/dV map at the scan bias, channel `didv`),
 `drift_comp`, `withdraw`, `approach`, `coarse_move`, `wait`. Only hard instrument limits apply; there is no
 safety gate and there are no composite skills. Observations (`status`, `info`, `list_data`,
 `frame`, `spectrum`) spend no instrument time and draw no random number, so how often an agent
-looks cannot change what it later measures.
+looks cannot change what it later measures. `status` reads the junction and the loop (bias, setpoint,
+feedback, Z, current, current range, tip position, withdrawn) and what was switched on: the lock-in, the
+qPlus oscillation (`null` without a sensor) and the drift compensation (`drift_comp`: on or off and the
+velocities it was programmed with, in the units of the action).
+
+`pulse` and `poke` have no default strength: `pulse.width_ms`, `poke.depth_nm` and `poke.dwell_s`
+are required (their bounds still apply), and a call without one is refused in the instrument's
+words (`pulse: width_ms is required`) before anything happens to the tip, costing no instrument
+time. How hard to condition a tip is the operator's call; a default would be the answer to it.
+
+The API version (`stmbench.instrument.API_VERSION`, now 2) is the first line of the manual and a
+field of `info()`, of the ledger (`episode.json`) and of an export (`session.json`). Calls,
+parameters and record kinds change with it (version 2 dropped the tip-diagnosis call and the
+defaults of `pulse` and `poke`, and `move_tip` replies with the file name of its trace instead of a
+count of current spikes), so `replay`, `verify` and `grade` refuse a ledger or an export of
+another version, saying that it needs the code of its own version, instead of replaying it into a
+mismatch or grading it as a zero. The replay for an audience and the report tables still read the
+records of earlier ledgers.
 
 Any MCP agent can take the instrument's seat:
 
@@ -119,13 +136,212 @@ over their time difference is the drift `drift_comp` takes), and a Z spectrum ca
 loop's Z at every point as the `.dat` file has it (what lines a curve over an atom up with one
 over bare surface).
 
+Every `move_tip` records a trace and keeps it like a spectrum (`list_data` lists it with
+`"kind": "move"`, `spectrum(name)` returns it, the session directory holds it as a `.dat` file and an
+export carries its hashes): `t` (s since the move's start), `dist` (m along the path), `z_abs` (m,
+the Z controller's output, a larger value is a higher tip) and `i` (A, as measured: noise, and the
+preamplifier's limit when the range is too small for the current; with `crash_over_range` on and a
+setpoint above the range, Z follows contact and `i` is the clamp; where the loop holds its target, `i`
+is the setpoint, as `status` reads it, and at a resistance below about 286 kohm that is not what the
+junction would carry at the gap the loop holds), with the move's `from_nm`,
+`to_nm`, `speed_nm_s`, `bias_v`, `setpoint_pa` and `feedback`. The reply has no hop count, and
+nothing else says whether an atom moved: an atom pulled along gives a sawtooth in `z_abs` with the
+lattice period, one left behind makes it fall from the top of its bump. A sample is the mean over
+its dwell (0.2 s at 0.25 nm/s), so its noise is a few tenths of a picometre in Z at that speed (and
+less than a scan pixel's 2 pm at any speed below about 20 nm/s); a tooth is a jump of a picometre or two,
+bigger when the atom lagged long before it hopped, and the fall is what shows most. A trace's file name
+cited in a report's `evidence` is passed over by the judge (it is listed as unresolved): it is not a
+frame, an STS or a Z spectrum.
+`stmbench.analysis.trace.count_hops` reads a drag's trace (what the scripted baseline does).
+
 The MCP tools are the actions, the observations (`show_frame` returns a PNG rendered one fixed
 way — line-flattened, 0.5–99.5 % contrast, integer enlargement to ≥ 512 px — and
-`frame_values` the numbers), `get_task` (task, rule card, manual), `report_result`,
-`report_tip_state` and `finish`. The ledger is `episode.json` (verdict, hashes of every
+`frame_values` the numbers), `get_task` (task, rule card, manual), `report_result` and `finish`.
+There is no tool for stating a diagnosis of the tip: no scenario scores one, and offering it would
+only tell an agent to worry about its tip. The ledger is `episode.json` (verdict, hashes of every
 measurement), `actions.jsonl` (every call, refused ones included), `events.json`,
 `report.json` and `session/` (the saved `.sxm` / `.dat` files). A scenario whose success kind
 the instrument cannot judge (the skill scenarios below) is refused when the episode opens.
+
+### A model alone
+
+```bash
+python -m pip install -e ".[agent]"                       # the anthropic SDK, for --provider anthropic
+python -m stmbench.cli agent --scenario P4_atom_positioning_cu111 --seed 0 --out runs/p4_s0 \
+       --provider anthropic --model claude-opus-5-5 --effort high
+python -m stmbench.cli agent --scenario P4_atom_positioning_cu111 --seed 0 --out runs/p4_s0_b \
+       --provider openai --base-url https://<endpoint>/v1 --api-key-env <VARIABLE> --model <id>
+```
+
+`stmbench.agent` seats a language model at the instrument with the instrument's own MCP tools and
+nothing else — no code sandbox, no files, no helpers — under a short neutral prompt
+(`stmbench.agent.SYSTEM_PROMPT`; its hash, with the tool table, is recorded). Tool calls go
+through the MCP server's own handler, so the model gets exactly the replies and refusals an MCP
+client gets. A turn that calls no tool gets one fixed reminder (at most three in a row); the loop
+ends when the model calls `finish`, at a limit (`--max-turns`, `--max-tool-calls`,
+`--max-wall-min`), on a refusal or on an error, and the instrument is then judged as it stands.
+
+- `--provider anthropic` — Claude through the official SDK: adaptive thinking with summarised
+  thoughts (kept in the record), the effort you pass, automatic prompt caching, history sent back
+  unchanged. Server-side refusal fallbacks stay off unless `--fallbacks` is given: a turn answered
+  by another model would not measure the model under test (every turn records the model that
+  served it).
+- `--provider openai` — any OpenAI-compatible Chat Completions endpoint, over the standard library;
+  images go back in a user message after the tool results (`--no-images` for text-only models).
+
+Next to the instrument's ledger the run directory gets `driver.json` and `transcript.jsonl`
+(below); `verify` and `replay` read the run as usual.
+
+### The console
+
+```bash
+python -m stmbench.cli console --scenario P4_atom_positioning_cu111 --seed 0 --out runs/console_p4
+python -m stmbench.cli console --out runs/console          # pick a paper scenario and a seed on the page
+```
+
+`stmbench.console` serves the instrument as a web page (standard library only, one episode per
+process) for a person at the instrument and for an agent that works through a screen —
+screenshots, mouse and keyboard. The page drives the same `Instrument` an MCP agent gets: the
+same actions (a form per action, generated from the action table), readings, frames (the PNG
+an MCP agent sees), spectra, reports and refusals, on the same virtual clock; the same ledger
+lands in the run directory, and `verify` and `replay` read it. The same calls through the page
+and through the MCP server give the same measurements and verdict (`tests/test_console.py`).
+
+The page shows the task with its rule card and the manual, never the truth; finishing does not
+show the score, which stays in `episode.json`. Every read is an observation in the ledger, so
+the page reads only when asked — after an action or a click — never on a timer. Over a frame
+the cursor reads out scan coordinates (the mapping the frame's MCP reply states,
+`stmbench.render.pixel_to_scan_nm`); a click picks a point, which can be copied into an
+action's or a report's coordinate fields, as a controller's own image window allows.
+
+The server binds `127.0.0.1` unless `--host` says otherwise, and whoever reaches the page can
+operate the instrument. The hidden state lives in the server's process: run the server outside
+the machine a screen agent controls (for a virtual machine, on the host, with `--host` set to
+an interface the guest can reach), since an agent with a shell next to the server could read
+it. An episode not finished on the page is finished, and judged as it stands, by
+`POST /api/finish` or when the server stops (Ctrl-C). `stmbench/console/server.py` lists the
+endpoints.
+
+### The desktop console
+
+```bash
+python -m pip install -e ".[gui]"                          # PySide6; the base package does not need Qt
+python -m stmbench.cli gui --scenario P4_atom_positioning_cu111 --seed 0 --out runs/gui_p4 [--lang zh|en] [--ui-scale 1.0]
+echo '{"scenario": "P4_atom_positioning_cu111", "seed": 0}' | \
+  python -m stmbench.cli gui --sealed --private-dir /srv/ep/private --export-dir /srv/ep/export
+```
+
+`stmbench.gui` is the program an agent that works only through screenshots, mouse and keyboard operates,
+as in a desktop-agent benchmark's virtual machine. It is a native window with no network listener of any
+kind: its screen is the only way to operate it (the web console's HTTP API, by contrast, is a door any
+process on the machine can use). It drives the same `Instrument` an MCP agent gets, through `GuiSession`
+(`stmbench/gui/session.py`): the same actions and parameters (every field comes from `ACTIONS`; the
+arrangement in `stmbench/gui/layout.py` is checked against it by `tests/test_gui_layout.py`), the same
+replies and refusals in the instrument's own words, the same task text with its rule card and the same
+manual, the same ledger; and the export directory, written as the episode happens.
+
+The window is laid out for a reader of a screenshot downscaled to about 1280x720. A status strip across
+the top shows the instrument time against the budget, the readings after every action (bias, setpoint,
+Z feedback, current, Z, preamplifier range, tip position, lock-in, oscillation, drift compensation) in the
+units of the fields that set them (bias in V, setpoint and current in pA; the oscillation reading, and the
+Spectroscopy tab's qPlus oscillation (PLL) group, appear only on a rig with a qPlus sensor, P5), and in its last line what runs while the instrument is busy (the call with its parameters, how
+many wait, and a Cancel queued button that drops the ones that have not started) or else the last result:
+a tick and the instrument's reply, or a cross and its refusal. On the left, tabs Task,
+Manual (the instrument's fixed facts, `Instrument.info()` read once when the window opens: the piezo,
+bias and current ranges, the budget, the temperature, the material and a qPlus sensor's f0, k and Q, above
+the manual; its Wide view button gives the tab the whole window under the status strip, the facts beside the
+text, so that the manual, the same text an MCP agent gets, is two screens or fewer instead of four in the
+column, and leaving the tab or a click on Narrow view gives the window back; a wheel notch moves a text view
+three lines), Report (one radio button per reportable claim, picked from the start where there is only one
+(P4), titled "Report a result (ReportResult)", with
+the fields named as `ReportResult` and the rule card name them - value, x_nm, y_nm, frame, evidence, unit,
+sigma, note, the ones the picked claim needs starred as in the action panels, the note a wrapped field four lines
+tall that shows its whole text, nothing but the claim (where there is one) and the unit filled in for the reader,
+Enter in a field sending the report, and a "+ shown file" button that appends the name of the frame or spectrum the viewer shows to
+`evidence` (or says in the recent results that none is shown) - and Finish with an inline two-click
+confirmation), Data (the frames, the spectra and the move traces, each list under a heading of its own; a wheel
+notch moves a list by exactly one entry, and a click on an entry cut by an edge shows it whole) and Log;
+in the middle the viewer (a frame with nm
+axes, a colour bar, a cursor readout (a grey usage hint, in one language, while it has no reading: hover reads the pixel, a click places a marker), flatten modes, a contrast switch (auto: the 0.5-99.5 percentile
+scale of the image an MCP agent gets, the default; full: the frame's minimum to maximum, which keeps the
+top of an atom from saturating; visible: the minimum to maximum of the part of the frame in view, so that a
+step elsewhere does not flatten the atoms in a zoomed view, and the same as full while the whole frame is in
+view; the readings are the same), a zoom (the wheel steps x1, x2, x4, x8 about the
+pointer, or the Fit, x2, x4 and x8 buttons, about the selected marker or else the centre of the view; the Pan
+tool drags the zoomed image; a new frame is shown whole, except another scan of the same window - the same size,
+pixels and angle, as after a drag - which keeps the zoom and the place in view, and another channel of the same
+frame keeps the view; the axes, the cursor, markers and profiles use the same pixel mapping at every zoom, and
+nothing is found for the reader), numbered markers, each on the centre of the pixel it was placed in, with that
+pixel's value (the cursor reads the same point; six rows before the table scrolls, one row a wheel notch), the
+start time of the frame each was placed on and the distance to the previous one, a line profile, every frame
+of the episode as a thumbnail, newest first (a wheel notch moves the strip one thumbnail; its ▲ and ▼ buttons
+page it and say how many frames lie beyond); or a spectrum with chosen
+columns; or the trace of a tip move, which every `move_tip` saves like a spectrum and the window shows when
+the move is done, as it shows an STS: its distance along the move (nm) or its time (s) against Z (nm) or the
+current (pA), open on Z against the distance, headed by the conditions the instrument recorded of the move
+(from where to where, how fast, the bias, the setpoint, the feedback) and nothing read off the curves - no
+mark, count or note on a step or a spike, which is for the reader to find; over a spectrum, a trace or a line
+profile a cursor reads out the data point nearest the pointer, its x and each curve's y, and a left click
+pins it, up to six pins, which Clear plot readings (the button beside Clear image markers, which clears the image's markers and its line profile) or the next data removes); on the right the Operate tab (every action a P4 episode uses,
+without scrolling at 1920x1080 or 1920x1016) and the Spectroscopy tab, whose On / Off pairs and range row
+show the state the instrument reports as the selected button, and under them the last five results, newest
+first, in the instrument's words (a refusal stays among them until five calls have followed it). A click queues its job at once with the field values read at that moment and
+buttons stay enabled while the instrument works, because one agent step often clicks several in a row;
+jobs run in click order on one worker thread. A refused call ends its step and holds the console: the
+actions, reports and end-of-episode clicks still waiting behind it do not run, and every such click after it is
+turned away until the reader clicks the Acknowledge button of the red band that the refusal puts on the status
+strip (the instrument's words, the call with its parameters, and the calls that did not run; it takes the place
+of the readings and the last result, as tall as the two lines, so that nothing moves, and the pill says HELD).
+There is no timer: an agent clicks a dozen buttons and looks at the screen once, and a Set setpoint over the limit
+followed, after a wait of its own inside the same step, by a drag would run the drag at a junction resistance nobody
+chose (screen trials 4 and 5: a three-second guard had run out during the wait). The Log and the recent results say "not run" for each such click, with the reason (they never reach the
+instrument or the export), and the acknowledgement is a line of the Log only. Reads (a frame, a spectrum), tab
+changes, the viewer's tools and Cancel queued are never held, and closing the window still ends the episode. An
+empty field sends nothing (the instrument's default
+applies, or it refuses: a parameter the action table marks required has a red star, a hint "required" and no
+default, and an empty one is refused in the instrument's words, as the pulse's width and the poke's depth and dwell
+are in API version 2); a field that is not a number is sent as typed; every click in a field selects all
+of it, so click then type replaces the content. The part of the right tabs' row that the two tabs leave empty
+tells the range of the numeric field entered last (its label with its unit, then `range` and the table's
+minimum and maximum, e.g. `setpoint (pA): range 0.1 … 100000`; the manual carries the same numbers in the
+bracket of each parameter's line, `min` and `max`, as an MCP agent's input schema does); nothing is clamped or
+checked in the window, so a value outside it is sent and refused in the instrument's words. The three `← marker` buttons
+copy a marker's coordinates into the move-tip or scan fields or the report form, and Delete marker removes
+the selected one. While a scan runs or waits the viewer says so over what it shows, and a click on a viewer
+that has shown no frame leaves a note among the recent results instead of being lost.
+
+What it deliberately does not do: find atoms, estimate drift, suggest a value, explain a physical effect,
+offer a procedure, or show anything from the episode's truth, the seed, the tolerances beyond the rule
+card, or the verdict (finishing does not show the score; it stays in the private ledger).
+
+*Dev mode* (the first command) writes the usual run directory, so `verify` and `replay` read it, and an
+export beside it at `<out>/export`; closing the window finishes the episode and judges it as it
+stands, as the web console does on Ctrl-C. *Sealed mode* is what the virtual machine runs under a separate
+account: the scenario and the seed arrive as one JSON line on stdin and appear nowhere else (not in argv,
+the title, any widget, the export, stdout or stderr; the error for a bad line never repeats it); the
+run directory (`--private-dir`, mode 0700 on POSIX) holds the seed and, after the end, the truth; the
+window opens full screen (the whole 1920x1080, whatever title bar the window manager would draw around a
+maximized one; a dev window is maximized and the layout fits 1920x1016, a title bar under GNOME's top bar),
+its close button only says in the status strip that the program stays open, and
+the process ends when it is killed. Everything the agent did is then already in the export directory
+(`session.json`, `actions.jsonl`, `digests.jsonl`, `report.json`; read it with
+`stmbench.instrument.export.read_export`), so an episode that is stopped from outside is graded as it
+stands. `--lang en` shows English labels, the English task text with its rule card and each claim's
+`say_en`; `--lang zh` (the default) shows each Chinese label followed by its English, the Chinese task
+text and `say`. `--ui-scale` multiplies every font and
+size; it is an upper bound, because the window is measured with the fonts the machine has and every size
+is shrunk if it would not fit the screen (1.0 is tuned for 1920x1080). The columns are 360, 824 and 704 px
+wide on that screen; a side column whose contents are wider than that with the machine's fonts (the right one,
+with a Chinese label in front of every English one, in a wider font than the window was tuned with) is given the
+width it needs from the centre column, which has 143 px or more to spare, before anything is shrunk: shrinking every size
+cannot mend a column that is too narrow for its contents, since the column shrinks with them.
+
+`python -m stmbench.gui.shots --out <dir>` renders the window offscreen in scripted states (just
+started; after a scan with markers and a profile; a spectrum; the report form; a refusal; the data,
+log and manual tabs; a step with a refusal in it; the image zoomed with the wheel and then panned) at
+1920x1080 and at the 1280x720 a model is shown, through the same clicks and
+keystrokes; look at those pictures after any change to the layout. Every Qt process of the tests and
+of that script runs with `QT_QPA_PLATFORM=offscreen`: no window is ever opened.
 
 ### The paper scenarios
 
@@ -156,6 +372,24 @@ every atom has its own threshold, and pokes, pulses and crashes take the atoms t
 In P4 the report says which atom was moved: `target_site` is matched to the moved atom nearest
 the reported position, and `bystander_max_shift_nm` (`of_claim: target_site`) is that atom's
 neighbourhood.
+
+**Physics switches.** A scenario's `initial.physics` block switches on mechanisms the other
+scenarios do not have (`stmsim.physics.switches`); a missing key is off, an unknown key or a value
+that is not true/false raises when the file is loaded, and with every switch off the world is the
+one it always was (same draws, same records). P4 switches all four on, so that the instrument has
+no safe place: `tip_changes_outside_scans` (the tip's change hazard, λ·(1 + |I|/1 nA + (|V|/2 V)²),
+also runs while the instrument tunnels outside scans and drags: spectroscopy, waiting, moving, the
+settling after a setting; a spectrum that straddles a change shows the tip it started with),
+`tip_recovery` (a tip also gets better on its own, slowly, in about an hour at the imaging dose:
+a metastable apex settles, a spare apex is lost faster at a high current, an adsorbate desorbs
+faster at a high bias, a crashed cluster stops flickering; a blunt tip never sharpens),
+`tip_anisotropy` (a blunt, crashed or damaged tip blurs more along one direction than the other, so
+an atom looks stretched along the tip's long axis, fixed in the sample frame, whatever the scan
+angle) and `crash_over_range` (a setpoint above the preamplifier's range is never reached by its
+saturating reading, so the loop drives the tip into the sample: entering the condition crashes the
+tip, and a scan or a move made in it crashes it again; select the range first, as the reference does).
+Each mechanism draws from its own random stream (`0x71D1`, `0x71D2`, `0x71D3`), so switching one on
+moves no other.
 
 ### Skill scenarios (B1–B9, simulator fixtures)
 
@@ -247,7 +481,7 @@ order), so the tolerances have to be re-derived; each scenario's `notes` says so
 | `angle` | the smallest difference modulo `tol.mod` is within `tol.abs`; a herringbone orientation also accepts either arm at ±α | `distinct_from: {claim, min_sep_deg}` compares the two claims' **truths** |
 | `peak_in_list` | the reported value matches one of the first `rank_max` true peaks | `distinct_from` (a different peak), `greater_than: <claim id>` |
 | `position` | the registry has the target atom **on** the designated lattice site, and the reported coordinates are within `tol.report_nm` of where the atom really is | needs `position: required` |
-| `constraint` | a pure threshold on the truth (`min:` / `max:`), nothing reported | |
+| `constraint` | a pure threshold on the truth (`min:` / `max:`), nothing reported | `of_claim` + `field`: a property of the atom another claim was matched to (P4's `bystander_max_shift_nm`; the card defines its bystanders from `initial.adatoms.bystander_nm`) |
 
 ### Evidence rules
 
@@ -259,12 +493,12 @@ order), so the tolerances have to be re-derived; each scenario's `notes` says so
 | `spectra_near_scatterer` | `min_n` spectra at `min_positions` distinct places within `near_nm` of a scatterer, each with `min_points` points covering `v_lo_max … v_hi_min` |
 | `sts_at_corral_centre` | as above, but within `max_centre_dist_nm` of the corral centre |
 | `zspec_pair` | one Δf curve on an adatom (close enough, no jump, no contact, enough span past the minimum) and one on clean surface |
-| `events` | at least `min_n` events of a kind, optionally with a `cause` |
+| `events` | at least `min_n` events of a kind, optionally with a `cause` (an atom hop made by a `move_tip` drag has cause `folme`, one made by imaging `scan`) |
 
-Under the version-1 rules (every episode run with the rule card) a reported claim's rule is
+Under the strict rules (every episode run with the rule card, rules version 1 on) a reported claim's rule is
 checked **within the data the report cites** (`evidence`), and `frame_covers` /
 `frame_covers_after` use the frame the report names (`frame`), which must satisfy the rule,
-contain the position and, where `after_event` is set, have been saved after the last such event.
+contain the position and, where `after_event` is set, have started scanning after the last such event.
 Constraints and `events` rules have nothing to cite and are checked against the whole episode.
 
 ### The result channel
@@ -292,9 +526,23 @@ checks: each claim's meaning (`say`), unit, tolerance, pairwise rules and eviden
 and coordinate conventions, the budget and the 5 % overrun rule. `task_text(scenario)` appends it
 to the task; `get_task` and the replay show that text. Tolerances are
 public; the values drawn for a seed are not. The ledger records `rules_version`, and the judge
-applies the version-1 rules (citations, the named frame) to episodes with `rules_version ≥ 1`;
-older ledgers re-judge with the rules they ran under. Never state a budget or an evidence rule
-by hand in a task: write it in the claim or the budget, and the card will say it.
+applies the strict rules (citations, the named frame) to episodes with `rules_version ≥ 1`;
+older ledgers re-judge with the rules they ran under. Version 2 changed no judging rule: it made
+P4's card say what the judge does (an atom hop is explained by what it is, not by what causes it;
+a tied lattice site counts "by at most" `site_tie_nm`; the bystanders and their displacement are
+defined as `AdatomRegistry.any_target` computes them; the hop the evidence needs is one made
+during a `move_tip` action) and dropped the controller-command limit (`budget.wire_cmds`, the
+controller TCP path's budget, which the benchmark instrument does not apply). `stmbench grade`
+refuses an export of another rules version. Never state a budget or an evidence rule by hand in a
+task: write it in the claim or the budget, and the card will say it.
+
+The text is Chinese unless asked otherwise: `task_text(scenario, lang="en")` and
+`Instrument.task("en")` give the English text, generated by the same code from the same fields,
+with the scenario's `task_en` and each claim's `say_en` in the places of `task` and `say`; a paper
+scenario without them raises `ValueError` naming what is missing. Being plain text outside `hidden`,
+they move no draw. `python -m stmbench.cli task --scenario P4_atom_positioning_cu111 --lang en`
+prints the text an agent is given (UTF-8, `\n` line breaks), for building the task files of other
+harnesses.
 
 ### The chance audit
 
@@ -350,7 +598,7 @@ python -m stmbench.cli baseline --paper P4 --seeds 30 --jobs 4 --json p4-baselin
 A scripted baseline (`stmbench.baselines`) drives the instrument an agent gets over MCP and
 nothing else — no truth — and decides everything from what it observes: the tip's
 state from how its atoms look (`stmbench.analysis.tip`), which atom to move from a survey, the
-drift from atoms found again, whether the atom moved from current spikes and fiducials. It is
+drift from atoms found again, whether the atom moved from the trace of the drag and fiducials. It is
 the bar an agent should clear. P4 (2026-10-14): 150/150 on seeds 450–599, held out
 until the code was final, with 984 s median instrument time (the privileged
 reference: 879 s); 300/300 on seeds 0–299, where it was developed. Per-seed results and
@@ -361,15 +609,24 @@ the earlier held-out rounds: `docs/results/p4_baseline_seeds_*.json`, DESIGN §9
 ```
 <out>/                the directory given as --out (or Instrument(..., out_dir=...))
 ├── episode.json      ledger: verdict, claims reported / verified, instrument time and budget,
-│                     action count, hashes of every measurement, tip diagnoses, truth after
+│                     action count, hashes of every measurement, the truth before and
+│                     after (for the judge and the replay only)
 ├── actions.jsonl     every call in order, refused ones included, with its instrument time
 ├── events.json       the world's events (frames, pulses, crashes, atoms moving), in sim time
 ├── report.json       the reports, folded: the last report for each claim
+├── tip_timeline.json the tip at the start and after every change, with the state it left
+├── driver.json       agent runs: the agent, the prompt's hash, limits, why it stopped, tokens,
+│                     every turn and tool call stamped with instrument time
+├── transcript.jsonl  agent runs: each turn's content as the model returned it
 └── session/          the .sxm frames and .dat spectra the episode saved
 ```
 
 `stmbench.cli verify <out>` rebuilds the episode from `actions.jsonl` with the same scenario
-and seed and compares every measurement and the verdict.
+and seed and compares every measurement and the verdict. It exits 0 when everything matches, 1 when
+something differs, and 2 (the reason on stderr) when the ledger is of another API version: it needs
+the code of that version. An array whose hash differs is compared by its fingerprint, and events by
+value, with the grader's tolerance (`RTOL` = 1e-8); the arrays that differed by rounding only are
+listed under `rounding`. A ledger without fingerprints is checked exactly.
 
 ### Replays for an audience
 
@@ -377,9 +634,9 @@ and seed and compares every measurement and the verdict.
 python -m stmbench.cli replay <run dir> [--out DIR] [--single-file] [--bare] [--no-truth] [--open]
 ```
 
-builds a page that plays one episode back for people who have never used an STM. It reads
-run directories in the earlier ledger format (`driver.json` with the model's steps,
-`tip_timeline.json`); reading the instrument's `actions.jsonl` is still to be added. The left
+builds a page that plays one episode back for people who have never used an STM. It reads an
+instrument run directory — the steps come from the agent's `driver.json` when the run has
+one, else from `actions.jsonl` — and run directories in the earlier ledger format. The left
 side is what the model saw and did: its frames drawn row by row on the instrument clock, each
 tool call retold in plain words, what it said. The right side is what only the audience sees:
 the tip as a drawing with a traffic light (sharp, blunt, double, crashed and flickering,
@@ -396,6 +653,51 @@ clock stamps and `tip_timeline.json` still replay: the clock is refitted from th
 events (a few seconds off at most) and the tip between start and end is inferred from pulses,
 pokes and crashes — the page labels both. Output goes to `<data>/replays/<name>/` by default
 (`index.html` opens from disk); `--single-file` inlines the images into one `.html`.
+
+### Grading an exported episode
+
+```bash
+python -m stmbench.cli grade <export dir> --scenario P4_atom_positioning_cu111 --seed 0 [--no-strict] [--out result.json]
+```
+
+An agent that works through a screen plays on a machine the instrument's private ledger (the
+seed, the truth, the verdict) never reaches; what leaves it is an **export directory**
+(`stmbench/instrument/export.py`: `session.json`, `actions.jsonl` — the instrument's log records,
+appended as they happen — `digests.jsonl`, the hashes and fingerprints of every saved frame, spectrum and move trace, and
+`report.json`). `grade` runs on a host that holds the seed, and trusts nothing in the export
+about what was measured or how it was judged: it **replays** the recorded actions and reports
+with the scenario and seed it is given (`stmbench.instrument.core.replay_records`) and judges the
+replay as it stands, so an episode whose agent ran out of steps is graded like one that called
+`finish`.
+
+The replay also has to be the recorded episode: every action's reply and instrument times, and
+every frame's and spectrum's hashes, must equal the export's, and every file the replay saved must
+have its hash line. Otherwise `replay.consistent` is false and, by default (strict), the score is
+0, the episode is no success, and the numbers that describe the replay are `null` (it was not the
+episode the agent saw); `--no-strict` keeps the replay's own score and still lists the
+differences. Hashes are bit-exact, so they agree only in the same numerical environment (the
+pinned versions in `deploy/osworld/grader/requirements.txt`). Export version 2 therefore also
+carries a fingerprint per array (shape, non-finite mask, min, max, mean, std, block means): when
+the hashes differ the grader compares the fingerprints, and values within `RTOL` = 1e-8 of the
+array's scale count as a rounding difference (another libm or BLAS kernel changes the last bits;
+measured Windows vs Linux: at most 4.2e-12), not a mismatch. Shape and non-finite values must be
+exactly equal, and a version-1 export (hashes only) is still graded exactly.
+
+The result: `score` (0-1: the fraction of claims verified, capped when over budget; 1.0 reproduces
+the paper), `success`, `partial`, `claims_total`, `claims_verified`, `instrument_time_s`, `actions`,
+`finished_in_episode`, `replay` (`consistent`, `result_mismatches`, `digest_mismatches`, `hashes_equal`,
+`rounding_differences`: the arrays that differed by rounding only, with their largest relative
+difference, `torn`, `records`), `scenario_id`, `rules_version`, `export_version`, `note`. It carries no seed, truth or
+per-claim detail. The exit status is 0 when graded and 2 when the setup does not match: another
+scenario, or another rules, API or export version (the reason is on stderr, and an export of another API
+version is told that it needs the code of its own version): a wrong pairing is an error, never a score.
+A **damaged submission** is graded too, and scores 0 with exit 0: `session.json` counting more records than
+the log holds, a record missing or out of order, a missing or unreadable file, a file that is not JSON, a
+directory that is not an export. The result then has `replay.consistent` false, `replay.damaged` naming the
+damage (no path), the describing numbers `null` and the note `the export is damaged: <why>; scored 0`.
+
+`deploy/osworld/` holds the adapter OSWorld-Science's `module_metric` calls on the host, the
+grader's Docker image and the notes on wiring them up (`deploy/osworld/README.md`).
 
 ### Before adding a paper
 
@@ -449,6 +751,9 @@ tip-shaping traces under `<data-root>/calibration_inputs/poke_traces/` or pass a
 |---|---|
 | `stmbench/instrument/` | the benchmark instrument: `core.py` (actions, observations, reports, ledger, replay check), `mcp_server.py` (MCP stdio), `render.py` (the PNG a frame observation returns) |
 | `stmbench/trackB/` | the scenarios, `rules.py` (rule card, overrun rule), `claims.py` (claim and evidence checks), `results.py` (the result channel's fold), `truth_criteria.py` (verdicts), `audit.py` (chance audit) |
+| `stmbench/console/` | the instrument in a web page (`stmbench.cli console`): `server.py` (the endpoints over `Instrument`), `static/index.html` (the page) |
+| `stmbench/gui/` | the instrument in a native window (`stmbench.cli gui`; the `gui` extra): `session.py` (`GuiSession`, the one door to `Instrument` and the export; `read_spec` for the sealed mode), `layout.py` (which action goes where, checked against `ACTIONS`), `jobs.py` + `worker.py` (every instrument call on one thread, in click order), `app.py` / `panels.py` / `status.py` / `sidebar.py` / `center.py` (the window), `widgets/` (`FrameView`, `PlotView`), `shots.py` (offscreen screenshots) |
+| `stmbench/agent/` | the model-alone loop (`stmbench.cli agent`): `loop.py` (prompt, limits, the record), `models.py` (Claude through the anthropic SDK, OpenAI-compatible endpoints, a scripted port) |
 | `stmbench/reference/`, `stmbench/baselines/` | privileged reference solutions; scripted baselines that see only what an agent sees |
 | `stmbench/analysis/` | measurement analysis the references and baselines use (adatoms, drift, tip, spectra, force, corral) |
 | `stmbench/render.py` | frames and spectra as pictures, pixel → scan-frame nm |
@@ -471,6 +776,11 @@ python -m pytest tests -q -m "not requires_data"      # the same tests, deselect
 `tests/test_no_machine_paths.py` scans `stmsim/` and `stmbench/` (probes included) for
 machine-specific lab paths and for direct `STM_BENCH_*` environment reads outside
 `stmsim/paths.py`; either fails the suite with a file:line list.
+
+The desktop console's tests (`tests/test_gui_session.py`, `test_gui_layout.py` need no Qt;
+`test_gui_app.py`, `test_gui_widgets.py` skip without PySide6) run offscreen. They click at widget
+positions the way an agent's clicks arrive, and `test_gui_session.py` scans the source of `stmbench/gui/` for
+network modules and for reads of the episode's truth, verdict or seed.
 
 ## 7. Gotchas
 

@@ -319,7 +319,10 @@ def _drag_by_d(w, atom):
     """What MoveAtomTo does, by hand: 8 mV and a current that puts R at 0.4 of this atom's
     threshold, 0.2 nm/s, retried until the atom sits on its goal."""
     reg = w.surface.site.adatoms
-    bias, setpoint = w.bias_v, w.zctrl.setpoint_a
+    bias, setpoint, gain = w.bias_v, w.zctrl.setpoint_a, w.preamp.gain_index
+    # P4 switches crash_over_range on: a manipulation current of tens of nA needs its range first
+    # (the widest here, so that no atom's current is out of reach), as an operator selects it
+    w.set_current_range(0)
     w.bias_v = 0.008
     w.zctrl.setpoint_a = w.bias_v / (0.4 * reg.params.r_threshold_ohm * atom.r_scale)
     goal = reg.site_of(atom.x0 + 4e-9, atom.y0)
@@ -329,6 +332,7 @@ def _drag_by_d(w, atom):
         w.move_xy(*reg.site_xy(atom.i, atom.j))
         w.move_xy_path(*reg.site_xy(*goal), speed_m_s=0.2e-9)
     w.bias_v, w.zctrl.setpoint_a = bias, setpoint
+    w.set_current_range(gain)
 
 
 def test_p4_takes_any_isolated_atom_and_judges_the_one_the_report_points_at(tmp_path):

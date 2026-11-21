@@ -9,12 +9,33 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from stmbench.instrument import ACTIONS, ActionError, Instrument, replay, verify
+from stmbench.instrument import ACTIONS, API_VERSION, ActionError, Instrument, replay, verify
 from stmbench.instrument.core import Instrument as _I, validate
 from stmbench.trackB.rules import RULES_VERSION
+from stmsim.io.sxm_reader import read_dat
+from stmsim.physics.adatoms import path_points
 
 P4 = "P4_atom_positioning_cu111"
 P5 = "P5_sader_jarvis_qplus"
+
+
+def test_a_trace_reads_the_current_the_status_reads_in_the_manipulation_regime():
+    """Screen trial 3 (seed 451): the traces of drags at 100 nA read a flat 34.78 nA at 10 mV and
+    6.96 nA at 2 mV, a fixed 287 kohm, while the status bar read the setpoint; the agent concluded
+    that the junction current saturates near 35 nA. The status and the trace now agree in both
+    regimes: the gap floor binds at 100 and 20 kohm and not at 500."""
+    inst = Instrument(P4, 451)
+    inst.act("set_current_range", full_scale_na=100.0)
+    x = -6.0
+    for bias, setpoint_pa in ((0.010, 1e5), (0.002, 1e5), (0.010, 2e4)):
+        inst.act("set_bias", bias_v=bias)
+        inst.act("set_setpoint", current_pa=setpoint_pa)
+        status = inst.status()["current_pa"]
+        r = inst.act("move_tip", x_nm=x + 1.5, y_nm=-6.0, speed_nm_s=0.25)
+        x += 1.5
+        i = np.asarray(inst.spectrum(r["trace"])["i"]) * 1e12
+        assert status == pytest.approx(setpoint_pa, rel=1e-3)
+        assert np.mean(i) == pytest.approx(status, rel=0.01) and np.std(i) < 0.01 * status, (bias, setpoint_pa)
 
 
 def test_a_scenario_the_instrument_cannot_judge_is_refused_at_the_start():
@@ -68,6 +89,25 @@ def test_a_bad_call_is_refused_and_costs_nothing(args, needle):
         inst.act("scan", **args)
     assert inst.used_s == t and inst.n_actions == 0
     assert inst.log[-1]["kind"] == "refused"
+
+
+def test_a_refusal_by_the_instruments_own_checks_is_on_the_record_and_costs_nothing():
+    """Range and state checks inside an action refuse before anything moves; the ledger (and an
+    export, which a grader replays) holds them as it holds a refused bad call."""
+    inst = Instrument(P4, 0)
+    t = inst.used_s
+    with pytest.raises(ActionError, match="outside the piezo range"):
+        inst.act("move_tip", x_nm=1.0e6, y_nm=0.0)
+    with pytest.raises(ActionError, match="exceeds the piezo range"):
+        inst.act("scan", center_x_nm=1.0e6, center_y_nm=0.0, size_nm=10.0)
+    inst.act("withdraw")
+    t_withdrawn = inst.used_s
+    with pytest.raises(ActionError, match="withdrawn"):
+        inst.act("pulse", bias_v=3.0, width_ms=50.0)
+    assert inst.used_s == t_withdrawn > t and inst.n_actions == 1
+    assert [r["kind"] for r in inst.log] == ["refused", "refused", "act", "refused"]
+    assert inst.log[0]["error"] == "move_tip: outside the piezo range"
+    assert inst.log[0]["args"] == {"x_nm": 1.0e6, "y_nm": 0.0}
 
 
 def test_the_same_actions_give_the_same_measurements():
@@ -152,15 +192,70 @@ def test_an_episode_rechecks_by_replay(tmp_path):
     _script(inst, look=True)
     inst.finish()
     ep = json.loads((tmp_path / "run" / "episode.json").read_text(encoding="utf-8"))
-    assert ep["rules_version"] == RULES_VERSION and ep["api_version"] == 1
+    assert ep["rules_version"] == RULES_VERSION and ep["api_version"] == API_VERSION
     assert (tmp_path / "run" / "actions.jsonl").exists() and (tmp_path / "run" / "events.json").exists()
     assert verify(tmp_path / "run")["ok"]
-    # a ledger whose measurements were edited no longer re-checks
+    # a ledger whose measurements were edited no longer re-checks. Without fingerprints (a ledger of
+    # an older run) the check is exact: another hash is a difference
+    fps = ep.pop("fingerprints")
     ep["digest"]["frames"]["sim001.sxm"]["z_fwd"] = "0" * 64
     (tmp_path / "run" / "episode.json").write_text(json.dumps(ep), encoding="utf-8")
     bad = verify(tmp_path / "run")
     assert not bad["ok"] and "frames" in bad["differences"]
     assert replay(tmp_path / "run").digest()["frames"]["sim001.sxm"]["z_fwd"] != "0" * 64
+    # with the fingerprints another hash alone is a rounding difference: the values are the same
+    ep["fingerprints"] = fps
+    (tmp_path / "run" / "episode.json").write_text(json.dumps(ep), encoding="utf-8")
+    again = verify(tmp_path / "run")
+    assert again["ok"] and again["rounding"] == [
+        {"frame": "sim001.sxm", "array": "z_fwd", "max_rel_diff": 0.0}]
+    # ...and a fingerprint that moved beyond rounding is a difference, whatever the hash says
+    ep["fingerprints"]["frames"]["sim001.sxm"]["z_fwd"]["max"] *= 1.0 + 1e-6
+    (tmp_path / "run" / "episode.json").write_text(json.dumps(ep), encoding="utf-8")
+    assert "frames" in verify(tmp_path / "run")["differences"]
+    # events are compared by value: a float off in its last bits passes, a changed integer does not
+    ev_path = tmp_path / "run" / "events.json"
+    events = json.loads(ev_path.read_text(encoding="utf-8"))
+    if events:
+        ep["fingerprints"]["frames"]["sim001.sxm"]["z_fwd"]["max"] /= 1.0 + 1e-6
+        ep["digest"]["events"] = "0" * 64
+        (tmp_path / "run" / "episode.json").write_text(json.dumps(ep), encoding="utf-8")
+        assert verify(tmp_path / "run")["ok"]                     # the replay's events equal events.json
+        events.pop()
+        ev_path.write_text(json.dumps(events), encoding="utf-8")
+        assert "events" in verify(tmp_path / "run")["differences"]
+
+
+def test_fingerprints_tell_rounding_from_a_different_measurement():
+    from stmbench.instrument.core import RTOL, array_fingerprint, compare_fingerprints, events_differ
+
+    rng = np.random.default_rng(0)
+    a = rng.normal(size=(20, 30)) * 1e-10
+    a[3, 4] = np.nan
+    fa = array_fingerprint(a)
+    assert fa["shape"] == [20, 30] and fa["nonfinite"] == 1 and len(fa["blocks"]) == 64
+    assert json.loads(json.dumps(fa)) == fa                      # exact round trip through JSON
+    assert compare_fingerprints(fa, array_fingerprint(a)) == ("rounding", 0.0)
+    kind, rel = compare_fingerprints(fa, array_fingerprint(a * (1 + 1e-13)))
+    assert kind == "rounding" and 0 < rel < RTOL
+    assert compare_fingerprints(fa, array_fingerprint(a * (1 + 1e-6)))[0] == "beyond"
+    b = a.copy()
+    b[3, 4] = 0.0
+    assert compare_fingerprints(fa, array_fingerprint(b))[0] == "structure"      # a non-finite value moved
+    assert compare_fingerprints(fa, array_fingerprint(a[:, :29]))[0] == "structure"
+    assert compare_fingerprints(None, fa)[0] == "structure"
+    # any shape: a curve, a tiny frame, an array with no finite value, an all-zero one (exact)
+    assert len(array_fingerprint(np.arange(5.0))["blocks"]) == 5
+    assert array_fingerprint(np.full((2, 2), np.nan))["min"] is None
+    z = array_fingerprint(np.zeros(4))
+    assert compare_fingerprints(z, array_fingerprint(np.full(4, 1e-300)))[0] == "beyond"
+    # events: floats within rounding, everything else exact
+    ev = [{"kind": "hop", "t": 12.5, "n": 3, "ok": True, "x": [1.0, 2.0]}]
+    assert events_differ(ev, [{"kind": "hop", "t": 12.5 * (1 + 1e-13), "n": 3, "ok": True, "x": [1.0, 2.0]}]) is None
+    assert events_differ(ev, [{"kind": "hop", "t": 12.5 * (1 + 1e-6), "n": 3, "ok": True, "x": [1.0, 2.0]}])
+    assert events_differ(ev, [{"kind": "hop", "t": 12.5, "n": 4, "ok": True, "x": [1.0, 2.0]}])
+    assert events_differ(ev, [{"kind": "hop", "t": 12.5, "n": 3, "ok": False, "x": [1.0, 2.0]}])
+    assert events_differ(ev, ev + ev)
 
 
 def test_force_spectroscopy_through_the_instrument_reproduces_p5():
@@ -187,6 +282,47 @@ def test_force_spectroscopy_through_the_instrument_reproduces_p5():
     out = inst.finish()
     det = inst.verdict.details["claims"]
     assert out["success"], {k: (d["value_ok"], d["evidence"]) for k, d in det.items()}
+
+
+@pytest.mark.parametrize("oscillating", [True, False])
+def test_force_spectra_taken_without_the_oscillation_are_not_evidence(oscillating):
+    """The reference run of the test above, with the PLL switched off (or never on) before the
+    pair is taken: the instrument still saves curves, but their Δf is noise, so the evidence
+    fails. The value (the truth itself) is right either way."""
+    inst = Instrument(P5, 0)                             # fixed seed: the result is deterministic
+    w = inst.world
+    reg = w.surface.site.adatoms
+    atom = min(reg.atoms.values(), key=lambda a: math.hypot(*reg.site_xy(a.i, a.j, a.sub)))
+    inst.act("pll", on=True, amplitude_pm=50.0)
+    if not oscillating:
+        inst.act("pll", on=False)
+
+    def go(sx, sy):
+        ox, oy, _ = w.drift_offset(w.clock.sim())
+        inst.act("move_tip", x_nm=(sx - ox) * 1e9, y_nm=(sy - oy) * 1e9)
+
+    ax, ay = reg.site_xy(atom.i, atom.j, atom.sub)
+    go(ax, ay)
+    on_atom = inst.act("zspec", sweep_nm=0.5, z_offset_nm=0.3, points=256)["spectrum"]
+    go(ax + 6e-9, ay)
+    clean = inst.act("zspec", sweep_nm=0.5, z_offset_nm=0.3, points=256)["spectrum"]
+    truth = w.truth()
+    for c in inst.scenario.claims:
+        inst.report(c["id"], float(truth["force"][c["truth"].split(".", 1)[1]]), evidence=[on_atom, clean])
+    out = inst.finish()
+    det = inst.verdict.details["claims"]
+    assert all(d["value_ok"] for d in det.values())
+    # judged evidence, not the flag: at 39fcd13 the noise-only pair passed (seed 0: 5 of seeds 0-5 did)
+    assert {k: d["evidence_ok"] for k, d in det.items()} == {k: oscillating for k in det},         {k: d["evidence"] for k, d in det.items()}
+    assert out["success"] is oscillating
+
+
+def test_the_oscillation_flag_is_not_in_the_events_digest():
+    """The flag is for the judge only: a ledger written before it existed still verifies."""
+    from stmbench.instrument.core import _portable_events
+    ev = [{"kind": "zspec", "idx": 1, "oscillating": True, "path": "/a/z.dat"}, {"kind": "sts", "idx": 1}]
+    assert _portable_events(ev) == [{"kind": "zspec", "idx": 1, "path": "z.dat"}, {"kind": "sts", "idx": 1}]
+    assert "oscillating" in ev[0]                        # the live event is untouched
 
 
 def test_validate_fills_defaults_and_keeps_types():
@@ -252,3 +388,134 @@ def test_the_judge_maps_an_atom_through_the_apex_that_imaged_it():
     bare = {k: v for k, v in ev.items() if k != "apex_runs_nm"}
     qx, qy = to_sample_frame(bare, hit[0], hit[1])
     assert abs(math.hypot(qx - ax, qy - ay) - 2.0) < 0.2
+
+
+def test_status_reports_the_programmed_drift_compensation_and_reading_it_changes_nothing():
+    """The drift compensation an operator programmed is a reading like the lock-in's state: on or off, and
+    the velocities it was given, in the units the action takes (what was set, never the drift itself)."""
+    inst = Instrument(P4, 0)
+    assert inst.status()["drift_comp"] == {"on": False, "v_nm_per_min": [0.0, 0.0], "vz_pm_per_min": 0.0}
+    inst.act("drift_comp", on=True, vx_nm_per_min=1.5, vy_nm_per_min=-2.25, vz_pm_per_min=30.0)
+    t = inst.used_s
+    st = inst.status()
+    assert st["drift_comp"] == {"on": True, "v_nm_per_min": [1.5, -2.25], "vz_pm_per_min": 30.0}
+    assert inst.status() == st and inst.used_s == t                    # reading takes no time and changes no reading
+    inst.act("drift_comp", on=False, vx_nm_per_min=0.5)
+    assert inst.status()["drift_comp"] == {"on": False, "v_nm_per_min": [0.5, 0.0], "vz_pm_per_min": 0.0}
+    # the reading is the programmed value in the units the action took, and reads no random number: an
+    # instrument that was looked at after every action measures what one nobody looked at does
+    quiet, curious = Instrument(P4, 3), Instrument(P4, 3)
+    for inst_, look in ((quiet, False), (curious, True)):
+        inst_.act("drift_comp", on=True, vx_nm_per_min=-0.75, vy_nm_per_min=0.5)
+        if look:
+            assert inst_.status()["drift_comp"]["v_nm_per_min"] == [-0.75, 0.5]
+        inst_.act("scan", center_x_nm=0.0, center_y_nm=0.0, size_nm=12.0, pixels=32)
+        if look:
+            inst_.status()
+    assert quiet.digest() == curious.digest()
+
+
+# ── the trace of a move ─────────────────────────────────────────────────────
+def _session(inst: Instrument) -> str:
+    """A tip onto an atom, a move at the imaging setpoint and a drag below the pull threshold."""
+    w = inst.world
+    reg = w.surface.site.adatoms
+    atom = reg.atoms[reg.target["atom_id"]]
+    ax, ay = reg.site_xy(atom.i, atom.j)
+    ox, oy, _ = w.drift_offset(w.clock.sim())
+    x, y = (ax - ox) * 1e9, (ay - oy) * 1e9
+    inst.act("move_tip", x_nm=x, y_nm=y)
+    inst.act("set_current_range", full_scale_na=100.0)
+    inst.act("set_bias", bias_v=0.005)
+    inst.act("set_setpoint", current_pa=0.005 / 80e3 * 1e12)
+    return inst.act("move_tip", x_nm=x + 4.0, y_nm=y, speed_nm_s=0.25)["trace"]
+
+
+def test_a_move_replies_with_its_trace_and_keeps_it_like_a_spectrum(tmp_path):
+    inst = Instrument(P4, 24, tmp_path / "run")
+    r = inst.act("move_tip", x_nm=3.0, y_nm=1.0, speed_nm_s=100.0)
+    assert set(r) == {"tip_nm", "distance_nm", "trace", "duration_s", "instrument_time_s", "budget_s"}
+    assert r["tip_nm"] == [3.0, 1.0] and r["distance_nm"] == pytest.approx(math.hypot(3, 1), abs=1e-3)
+    assert r["duration_s"] == pytest.approx(math.hypot(3, 1) / 100.0, abs=1e-3)
+    assert inst.used_s == pytest.approx(math.hypot(3, 1) / 100.0 + 0.05, abs=1e-3)       # time spent as before
+    listed = inst.list_data()["spectra"]
+    assert listed == [{"spectrum": r["trace"], "kind": "move", "tip_nm": [3.0, 1.0],
+                       "points": path_points(math.hypot(3, 1) * 1e-9), "t_s": 0.0}]
+    s = inst.spectrum(r["trace"])
+    assert set(s) == {"name", "kind", "index", "tip_nm", "from_nm", "to_nm", "speed_nm_s", "bias_v", "setpoint_pa",
+                      "feedback", "t_s", "t", "dist", "z_abs", "i"}
+    assert s["kind"] == "move" and s["index"] == 1 and s["from_nm"] == [0.0, 0.0] and s["to_nm"] == [3.0, 1.0]
+    assert s["speed_nm_s"] == 100.0 and s["feedback"] is True and s["setpoint_pa"] == pytest.approx(200.0)
+    assert len(s["t"]) == len(s["dist"]) == len(s["z_abs"]) == len(s["i"]) >= 2
+    r2 = inst.act("move_tip", x_nm=0.0, y_nm=0.0, speed_nm_s=100.0)
+    assert inst.spectrum(r2["trace"])["index"] == 2 and r2["trace"] != r["trace"]
+    assert "current_spikes" not in r and "current_spikes" not in json.dumps(inst.log)
+    # the same file is in the session directory, with the arrays and their units
+    d = read_dat(Path(inst.world.dats_saved[0]))
+    assert d["header"]["Experiment"] == "move trace"
+    assert list(d["columns"]) == ["Distance (m)", "Time (s)", "Z (m)", "Current (A)"]
+    assert d["columns"]["Z (m)"] == pytest.approx(s["z_abs"], rel=1e-5, abs=1e-12)
+    ev = [e for e in inst.world.events if e["kind"] == "dat_saved"]
+    assert [e["experiment"] for e in ev] == ["move trace", "move trace"] and ev[0]["path"] == inst.world.dats_saved[0]
+
+
+def test_an_observation_of_a_trace_costs_nothing_and_changes_nothing(tmp_path):
+    quiet, curious = Instrument(P4, 24), Instrument(P4, 24)
+    for inst, look in ((quiet, False), (curious, True)):
+        t = _session(inst)
+        if look:
+            inst.list_data()
+            inst.spectrum(t)
+    assert quiet.digest() == curious.digest() and quiet.used_s == curious.used_s
+    assert set(quiet.digest()["spectra"]) and all(set(h) == {"t", "dist", "z_abs", "i"} for h in quiet.digest()["spectra"].values())
+
+
+def test_an_episode_with_moves_replays_to_the_same_traces(tmp_path):
+    """``stmbench verify``: the same seed and actions give the same arrays, byte for byte."""
+    inst = Instrument(P4, 24, tmp_path / "run")
+    _session(inst)
+    inst.act("scan", center_x_nm=0.0, center_y_nm=0.0, size_nm=8.0, pixels=48, line_time_s=0.2)
+    inst.act("move_tip", x_nm=-5.0, y_nm=5.0, speed_nm_s=300.0)
+    inst.finish()
+    assert any(s["kind"] == "move" for s in inst.spectra.values()) and len(inst.spectra) == 3
+    res = verify(tmp_path / "run")
+    assert res["ok"], res
+    again = replay(tmp_path / "run")
+    assert again.digest()["spectra"] == inst.digest()["spectra"]
+
+
+def test_a_trace_cited_as_evidence_is_not_a_frame_and_judging_goes_on(tmp_path):
+    """The name of a move's trace in a report's evidence is data the judge does not know as a frame,
+    an STS or a Z spectrum: it resolves to nothing, and the claim is judged on the rest."""
+    from stmbench.trackB import claims as C
+
+    inst = Instrument(P4, 24, tmp_path / "run")
+    t = _session(inst)
+    assert C.resolve_citation(inst.world.events, t) is None
+    inst.act("scan", center_x_nm=0.0, center_y_nm=0.0, size_nm=8.0, pixels=48, line_time_s=0.2)
+    frame = next(iter(inst.frames))
+    inst.report("target_site", 0.0, x_nm=0.0, y_nm=0.0, frame=frame, evidence=[frame, t])
+    out = inst.finish()
+    claim = inst.verdict.details["claims"]["target_site"]
+    assert claim["unresolved_citations"] == [t] and claim["cited"] == [frame, t, frame]
+    assert out["claims_total"] == 2 and claim["evidence"]["kind"] == "frame_covers_after"
+
+
+def test_the_trace_of_an_oscillating_tip_carries_the_setpoint_current():
+    """The loop holds the *averaged* current of a qPlus tip at the setpoint, so the current its
+    trace reads is the setpoint, not the junction's current at the mean height (a third of it
+    at 100 pm of amplitude)."""
+    inst = Instrument(P5, 0)
+    inst.act("pll", on=True, amplitude_pm=100.0)
+    s = inst.spectrum(inst.act("move_tip", x_nm=5.0, y_nm=0.0, speed_nm_s=50.0)["trace"])
+    assert inst.world.osc_factor() > 2.0
+    assert np.mean(s["i"]) == pytest.approx(s["setpoint_pa"] * 1e-12, rel=0.05)
+
+
+def test_event_paths_reduce_to_file_names_whatever_host_wrote_them():
+    """A ledger written on Windows is verified on Linux: its events carry ``D:\\run\\x.sxm`` there."""
+    from stmbench.instrument.core import _portable_events
+
+    got = _portable_events([{"path": "D:\\run\\private\\session\\sim001.sxm"}, {"path": "/a/b/Spec1.dat"},
+                            {"path": "plain.dat"}, {"kind": "x"}])
+    assert [e.get("path") for e in got] == ["sim001.sxm", "Spec1.dat", "plain.dat", None]

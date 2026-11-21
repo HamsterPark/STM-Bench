@@ -30,12 +30,12 @@ Protocol:
    above it. At each step the tip goes onto the atom at the imaging setpoint, the setpoint is
    raised, the tip moves to the goal at 0.25 nm/s and the setpoint is restored.
 
-   No current spikes: the atom stayed, and a slow frame measures it again. Whatever it seems
+   No hops: the atom stayed, and a slow frame measures it again. Whatever it seems
    to have moved is drift the compensation left — the creep of the long move back decays as
    1/(τ + t) and outruns any constant compensation within minutes — so the goal moves by the
    same, and the compensation takes up the residual velocity.
 
-   Spikes: the survey again. Drift, creep and a changed apex shift every atom of one frame
+   Hops: the survey again. Drift, creep and a changed apex shift every atom of one frame
    alike, and the loop's lag is the same for all of them, so against the fiducials the frame
    says how far the atom is from the goal. On the goal (within 0.12 nm), the ladder ends;
    short of it or a site off, the drag resumes from where a slow frame puts the atom, by that

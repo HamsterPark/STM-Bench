@@ -29,7 +29,7 @@ import math
 from dataclasses import dataclass, field
 
 import numpy as np
-from scipy import ndimage
+from scipy import ndimage, signal
 
 from .feedback import Loop
 from .junction import current_metal
@@ -42,6 +42,31 @@ SIG_LI_X = 20                 # lock-in demodulator 1, X: the dI/dV channel of a
 
 #: the lock-in channel's own noise stream, ``[world seed, LOCKIN_STREAM, frames rendered]``
 LOCKIN_STREAM = 0x11D1D1
+
+#: a blur narrower than this (px) is not applied, as in the round-tip path: the pixel grid cannot show it
+MIN_BLUR_SIGMA_PX = 0.3
+
+
+def gaussian_blur_cov(a: np.ndarray, cov: np.ndarray, truncate: float = 4.0) -> np.ndarray:
+    """Blur ``a`` (rows × columns) with a Gaussian of covariance ``cov`` (2×2, in px², ordered
+    row, column), edges replicated as :func:`scipy.ndimage.gaussian_filter` does in its
+    ``nearest`` mode. ``gaussian_filter`` only blurs along the array's own axes; this one takes
+    any orientation, which an elliptical tip needs when the scan frame is rotated against its
+    long axis. A principal width under :data:`MIN_BLUR_SIGMA_PX` is raised to it (a Gaussian
+    that narrow keeps over 99 % of its weight inside the pixel, so it blurs next to nothing,
+    where the round path skips it); a covariance with no width above it returns ``a`` itself."""
+    cov = np.asarray(cov, float)
+    lam, vec = np.linalg.eigh(0.5 * (cov + cov.T))
+    if math.sqrt(max(float(lam[-1]), 0.0)) <= MIN_BLUR_SIGMA_PX:
+        return a
+    lam = np.maximum(lam, MIN_BLUR_SIGMA_PX ** 2)
+    radius = int(math.ceil(truncate * math.sqrt(float(lam[-1]))))
+    inv = (vec / lam) @ vec.T                                    # Σ⁻¹
+    rr, cc = np.mgrid[-radius:radius + 1, -radius:radius + 1]
+    kernel = np.exp(-0.5 * (inv[0, 0] * rr * rr + 2.0 * inv[0, 1] * rr * cc + inv[1, 1] * cc * cc))
+    kernel /= kernel.sum()
+    padded = np.pad(a, radius, mode="edge")
+    return signal.fftconvolve(padded, kernel, mode="valid")
 
 
 @dataclass
@@ -175,6 +200,35 @@ class Renderer:
         smooth, atomic = w.tip.height_parts(w.surface, xs + ox, ys + oy, kappa, apexes=apexes,
                                             bias_v=bias_v)
         return smooth.reshape(-1, n).mean(axis=1), atomic.reshape(-1, n).mean(axis=1)
+
+    def _anisotropic_blur_cov(self, st: ScanSettings, sigma_m: float) -> np.ndarray | None:
+        """The covariance (px², row × column) of the elliptical blur of an anisotropic tip, or
+        ``None`` when the round path applies (``tip_anisotropy`` off, or a round tip).
+
+        The tip blurs the smooth surface with a Gaussian whose long axis has the width the round
+        tip's radius gives (``sigma_m``) and whose short axis is ``axis_ratio`` of it. The long
+        axis points along ``Tip.angle`` in the *sample* frame, so in a scan frame turned by
+        ``st.angle_deg`` it points along ``angle − angle_deg``. Rows are in acquisition order:
+        for ``down`` row 0 is the high-v edge and v falls with the row, for ``up`` it rises, which
+        flips the sign of the row/column covariance. The loop/ADC bandwidth adds its own
+        ``MIN_SIGMA_PX`` along the line, as in the round path."""
+        w = self.w
+        tip = w.tip
+        if not w.physics.tip_anisotropy or tip.axis_ratio >= 1.0 - 1e-9:
+            return None
+        s_maj2 = sigma_m ** 2
+        s_min2 = (sigma_m * max(float(tip.axis_ratio), 0.0)) ** 2
+        alpha = float(tip.angle) - math.radians(st.angle_deg)
+        c, s = math.cos(alpha), math.sin(alpha)
+        c_uu = s_maj2 * c * c + s_min2 * s * s
+        c_vv = s_maj2 * s * s + s_min2 * c * c
+        c_uv = (s_maj2 - s_min2) * s * c
+        px_u, px_v = st.w / st.nx, st.h / st.ny
+        sgn = -1.0 if st.scan_dir == "down" else 1.0
+        cov = np.array([[c_vv / px_v ** 2, sgn * c_uv / (px_u * px_v)],
+                        [sgn * c_uv / (px_u * px_v), c_uu / px_u ** 2]])
+        cov[1, 1] += self.MIN_SIGMA_PX ** 2
+        return cov
 
     @staticmethod
     def hysteresis_profile_px(cols: np.ndarray, nx: int, hyst_px: float, shape: str = "loop",
@@ -332,10 +386,16 @@ class Renderer:
             phi_rows[k] = w.phi_junction()
         # the blur: tip size in both directions, bandwidth along the line. Rows are in
         # acquisition order, which is spatial order along the slow axis either way round.
-        sig = (sigma_tip_y_px if sigma_tip_y_px > 0.3 else 0.0, sigma_fast_px if sigma_fast_px > 0.3 else 0.0)
-        if sig[0] > 0.0 or sig[1] > 0.0:
-            s_f_rows = ndimage.gaussian_filter(s_f_rows, sig, mode="nearest")
-            s_b_rows = ndimage.gaussian_filter(s_b_rows, sig, mode="nearest")
+        cov = self._anisotropic_blur_cov(st, sigma_m)
+        if cov is not None:
+            # an anisotropic tip (tip_anisotropy): the same blur, elliptical and oriented
+            s_f_rows = gaussian_blur_cov(s_f_rows, cov)
+            s_b_rows = gaussian_blur_cov(s_b_rows, cov)
+        else:
+            sig = (sigma_tip_y_px if sigma_tip_y_px > 0.3 else 0.0, sigma_fast_px if sigma_fast_px > 0.3 else 0.0)
+            if sig[0] > 0.0 or sig[1] > 0.0:
+                s_f_rows = ndimage.gaussian_filter(s_f_rows, sig, mode="nearest")
+                s_b_rows = ndimage.gaussian_filter(s_b_rows, sig, mode="nearest")
         # Pass 2 — the feedback loop follows each line in acquisition order; channels and noise
         for k in range(ny):
             t_row = row_times[k]

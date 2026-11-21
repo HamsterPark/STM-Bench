@@ -35,12 +35,28 @@ def test_initialize_and_the_tool_table():
     assert "tools" in init["result"]["capabilities"]
     assert srv.handle({"jsonrpc": "2.0", "method": "notifications/initialized"}) is None
     tools = {t["name"]: t for t in srv.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"})["result"]["tools"]}
-    for name in [*ACTIONS, "get_task", "status", "info", "list_data", "show_frame", "frame_values",
-                 "get_spectrum", "report_result", "report_tip_state", "finish"]:
-        assert name in tools and tools[name]["inputSchema"]["type"] == "object", name
+    names = [*ACTIONS, "get_task", "status", "info", "list_data", "show_frame", "frame_values",
+             "get_spectrum", "report_result", "finish"]
+    assert set(tools) == set(names)                  # and no call that judges nothing, such as a tip diagnosis
+    for name in names:
+        assert tools[name]["inputSchema"]["type"] == "object", name
     assert tools["report_result"]["inputSchema"]["properties"]["claim_id"]["enum"] == \
         ["target_site", "bystander_max_shift_nm"]
     assert srv.handle({"jsonrpc": "2.0", "id": 2, "method": "nope"})["error"]["code"] == -32601
+
+
+def test_get_spectrum_names_the_arrays_of_a_move_trace_and_returns_them():
+    srv = EpisodeServer(Instrument(P4, 0))
+    tools = {t["name"]: t for t in srv.handle({"jsonrpc": "2.0", "id": 1, "method": "tools/list"})["result"]["tools"]}
+    text = tools["get_spectrum"]["description"]
+    assert all(name in text for name in ("move trace", "move_tip", "t (", "dist (", "z_abs (", "i (A)", "1000"))
+    reply = _json(_call(srv, "move_tip", {"x_nm": 3.0, "y_nm": 0.0, "speed_nm_s": 20.0}))
+    trace = _json(_call(srv, "get_spectrum", {"spectrum": reply["trace"]}))
+    assert trace["kind"] == "move" and {"t", "dist", "z_abs", "i"} <= set(trace)
+    n = len(trace["t"])
+    assert n >= 2 and all(len(trace[k]) == n for k in ("dist", "z_abs", "i")) and abs(trace["dist"][-1] - 3.0e-9) < 1e-12
+    listed = _json(_call(srv, "list_data"))["spectra"]
+    assert [s["points"] for s in listed if s["spectrum"] == reply["trace"]] == [n]
 
 
 def test_the_task_carries_the_rule_card_and_the_manual():

@@ -56,6 +56,13 @@ CROWD_NEAR_M, CROWD_FACTOR = 0.6e-9, 0.8
 GONE_SHIFT_NM = 99.0
 
 
+def path_points(length_m: float) -> int:
+    """Samples of a drag path of ``length_m``: one per :data:`PATH_STEP_M`, and both ends. The
+    move trace (:mod:`stmsim.physics.trace`) is drawn on this grid, so the sample a hop was
+    decided at is the sample it shows at."""
+    return max(2, int(length_m / PATH_STEP_M) + 1)
+
+
 @dataclass(frozen=True)
 class GripPoint:
     """One apex that can grab: its lateral offset from the tip position, and how much higher
@@ -419,12 +426,19 @@ class AdatomRegistry:
 
     def drag(self, start: tuple[float, float], end: tuple[float, float], *, r_ohm: float,
              v_m_s: float, sim_s: float, terrace=None, cause: str = "folme", grip: Grip | None = None,
-             blocked: Callable[[float, float], bool] | None = None) -> list[dict]:
+             blocked: Callable[[float, float], bool] | None = None,
+             log: list[dict] | None = None) -> list[dict]:
         """Integrate one tip path; returns aggregated events (one per atom touched).
 
         Whichever apex of ``grip`` gets an atom inside its grab radius first holds it; the atom
         then follows that apex (offset and all) hop by hop, each hop with this atom's own
-        ``p_follow`` at the resistance that apex sees."""
+        ``p_follow`` at the resistance that apex sees.
+
+        ``log`` is recording only: every hop and pick-up is appended to it as ``{"idx", "atom_id",
+        "kind": "hop" | "pickup", "from": (i, j), "to": (i, j) | None}``, ``idx`` being the path
+        sample it was decided at (:func:`path_points`), which is what the move trace needs to
+        draw the surface with every atom where it was at each sample. It adds no draw and
+        changes no outcome."""
         p = self.params
         grip = grip or Grip()
         x0, y0 = start
@@ -432,7 +446,7 @@ class AdatomRegistry:
         length = math.hypot(x1 - x0, y1 - y0)
         if length <= 0:
             return []
-        n = max(2, int(length / PATH_STEP_M) + 1)
+        n = path_points(length)
         ts = np.linspace(0.0, 1.0, n)
         xs = x0 + (x1 - x0) * ts
         ys = y0 + (y1 - y0) * ts
@@ -454,6 +468,9 @@ class AdatomRegistry:
                 if p_p > 1e-6 and self.rng_dyn.random() < p_p:
                     ax, ay = self.site_xy(cand.i, cand.j, cand.sub)
                     self.pick_up(cand, sim_s=sim_s)
+                    if log is not None:
+                        log.append({"idx": idx, "atom_id": cand.id, "kind": "pickup",
+                                    "from": (cand.i, cand.j), "to": None})
                     # what hopped on this path before the pickup did so, the picked atom too
                     # (dropped behind, then caught again): those hops spiked the current
                     events.extend(self._hop_records(moved))
@@ -474,11 +491,15 @@ class AdatomRegistry:
                 continue
             nxt = (float(xs[min(idx + 1, n - 1)]) + held_by.dx, float(ys[min(idx + 1, n - 1)]) + held_by.dy)
             p_f = self.p_follow(r_ohm * held_by.r_factor, v_m_s, attached, grip, terrace)
+            site_before = (attached.i, attached.j) if log is not None else None
             if self.rng_dyn.random() >= p_f or not self._hop(attached, nxt, sim_s=sim_s, cause=cause,
                                                              terrace=terrace, blocked=blocked,
                                                              jitter=grip.jitter):
                 attached = None                              # dropped behind
                 continue
+            if log is not None:
+                log.append({"idx": idx, "atom_id": attached.id, "kind": "hop",
+                            "from": site_before, "to": (attached.i, attached.j)})
             moved[attached.id]["n_hops"] += 1
             if self.rng_dyn.random() < p.p_slip:
                 attached = None

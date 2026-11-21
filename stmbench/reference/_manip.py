@@ -3,7 +3,7 @@
 
 The truth navigates — where an atom is, whether it is still on the surface, the tip's state —
 and the manipulation itself is measured: the resistance at which an atom follows is found by
-lowering it until current spikes say so, and where an atom has to go, and whether it got there,
+lowering it until an atom hops on a drag, and where an atom has to go, and whether it got there,
 is read from frames. What the P4 trials taught is built in:
 
 * the Z loop lags the surface along the fast axis (0.15 nm at 280 nm/s), so places that
@@ -140,13 +140,17 @@ class Mover:
         self.inst.act("set_current_range", full_scale_na=10.0)
 
     def drag(self, frm, to, r_ohm: float) -> int:
-        """The tip onto ``frm`` at the imaging setpoint, to ``to`` at ``r_ohm``; the current
-        spikes on the way (one per hop of an atom)."""
+        """The tip onto ``frm`` at the imaging setpoint, to ``to`` at ``r_ohm``; how many times
+        an atom hopped on the way. The reference may read that off the world's events: the
+        instrument does not say (it records Z and the current along the path, and the hops are
+        read from that trace, as :func:`stmbench.analysis.trace.count_hops` does)."""
         self.inst.act("move_tip", x_nm=frm[0], y_nm=frm[1])
         self.manipulate(r_ohm)
-        r = self.inst.act("move_tip", x_nm=to[0], y_nm=to[1], speed_nm_s=DRAG_NM_S)
+        n_before = len(self.s.w.events)
+        self.inst.act("move_tip", x_nm=to[0], y_nm=to[1], speed_nm_s=DRAG_NM_S)
+        hops = sum(int(e.get("n_hops", 1)) for e in self.s.w.events[n_before:] if e.get("kind") == "adatom_hop")
         self.image()
-        return int(r["current_spikes"])
+        return hops
 
     def drift(self, x0: float, y0: float) -> tuple[float, float]:
         """Lateral drift at a sample point, measured with the compensation off (with it on, two
@@ -190,8 +194,8 @@ def ladder(mv: Mover, atom, *, pos, t: float, goal, comp: tuple[float, float],
     """Move ``atom`` (now at ``pos``, measured at ``t``) to ``goal`` (scan coordinates, same
     time) by the resistance ladder: from ``r_ohm`` down by :data:`LADDER_FACTOR` per rung.
 
-    No current spikes: the atom stayed; a slow frame measures it again and the goal moves with
-    whatever drift that shows (:class:`Track`). Spikes: ``resurvey()`` gives the vector from
+    No hops: the atom stayed; a slow frame measures it again and the goal moves with
+    whatever drift that shows (:class:`Track`). Hops: ``resurvey()`` gives the vector from
     the atom to the goal, read in one fast frame against fiducials; within ``on_goal_nm`` the
     atom is there and ``done()`` (default: :meth:`Mover.verified`) closes the move; short of it,
     or a site off, the drag resumes from where a slow frame puts the atom (one rung lower
@@ -210,16 +214,16 @@ def ladder(mv: Mover, atom, *, pos, t: float, goal, comp: tuple[float, float],
         log["r_resume"] = r_ohm
         if tip_needs_poke(w, imaging=True):
             raise LostTrack()
-        spikes = mv.drag(pos, track.goal, r_ohm)
-        attempts.append({"r_kohm": round(r_ohm / 1e3, 1), "spikes": spikes})
+        hops = mv.drag(pos, track.goal, r_ohm)
+        attempts.append({"r_kohm": round(r_ohm / 1e3, 1), "hops": hops})
         if atom.status != "on_surface":
             return None                                  # it went onto the tip
-        log["r_resume"] = r_ohm * LADDER_FACTOR if spikes == 0 else r_ohm
+        log["r_resume"] = r_ohm * LADDER_FACTOR if hops == 0 else r_ohm
         if tip_needs_poke(w, imaging=True):
             # the manipulation current changed the tip (a second apex doubles every atom):
             # condition it, then find the goal again from the fiducials
             raise LostTrack()
-        if spikes == 0:
+        if hops == 0:
             new, t_new = mv.measure(atom)
             track.still(pos, t, new, t_new)
             pos, t = new, t_new

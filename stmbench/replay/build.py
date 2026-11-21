@@ -38,14 +38,21 @@ OVERVIEW_PX = 480
 OVERVIEW_MIN_NM, OVERVIEW_MAX_NM = 12.0, 1500.0
 
 
-def replay_name(ep: dict) -> str:
-    raw = f"{ep.get('scenario_id')}_seed{ep.get('seed')}_{ep.get('mode')}_{ep.get('model_id') or 'script'}_{ep.get('run_id')}"
+def replay_name(ep: dict, agent: str | None = None) -> str:
+    if ep.get("mode"):                              # the earlier ledgers
+        raw = f"{ep.get('scenario_id')}_seed{ep.get('seed')}_{ep.get('mode')}_{ep.get('model_id') or 'script'}_{ep.get('run_id')}"
+    else:                                          # an instrument run
+        raw = f"{ep.get('scenario_id')}_seed{ep.get('seed')}_{agent or 'agent'}"
     return re.sub(r"[^A-Za-z0-9_.-]+", "-", raw)
 
 
 def mode_text(mode: str, model_id: str | None) -> tuple[str, str]:
     """(who acts, one line on how) — the page is honest about who sat at the instrument."""
     m = str(mode or "")
+    if not m:                                      # an instrument run
+        if model_id:
+            return "AI", f"{model_id} 只用仪器的基本动作操作，和任何智能体拿到的工具与预算相同。"
+        return "智能体", "一个智能体通过仪器接口（MCP）操作；记录里没有写它是谁。"
     if m == "C":
         return "脚本", "模式 C：写死的脚本基线，没有 AI 参与（只用来验证题目可解）。"
     if m == "H":
@@ -107,12 +114,13 @@ def build_replay(run_dir: str | Path, out: str | Path | None = None, *, single_f
     """Build the replay of one episode; returns the page to open."""
     ledger = Ledger.load(run_dir)
     ep = ledger.episode
+    agent = ((ledger.driver or {}).get("agent") or {}).get("model")
     sc = _scenario(ep, Path(scenario_dir))
     specs = {str(c.get("id")): dict(c) for c in (sc.claims or [])} if sc is not None else {}
     tl = build_timeline(ledger, claim_specs=specs)
     if out is None:
         from ..paths import data_path
-        out = data_path("replays", replay_name(ep))
+        out = data_path("replays", replay_name(ep, agent))
     out_dir = Path(out)
     assets: dict[str, bytes] = {}
 
@@ -156,7 +164,7 @@ def build_replay(run_dir: str | Path, out: str | Path | None = None, *, single_f
             opng, _, _ = render.array_png(z, cmap="gray", min_span=60e-12, mask=edge, mask_rgb=(235, 235, 240))
             overview = {"png": _asset(assets, "overview.png", opng), "bbox": list(bbox)}
     fam = sc.family if sc is not None else ep.get("paper_id")
-    actor, how = mode_text(ep.get("mode"), ep.get("model_id"))
+    actor, how = mode_text(ep.get("mode"), ep.get("model_id") or agent)
     paper = dict(sc.paper) if sc is not None and isinstance(sc.paper, dict) else {}
     lay_paper = lay.paper_for(str(ep.get("scenario_id")), fam)
     page_title = ((lay_paper or {}).get("page") if actor == "AI" else None) \
@@ -164,7 +172,7 @@ def build_replay(run_dir: str | Path, out: str | Path | None = None, *, single_f
     data = {
         "v": 1,
         "meta": {"scenario_id": ep.get("scenario_id"), "seed": ep.get("seed"), "mode": ep.get("mode"),
-                 "model_id": ep.get("model_id"), "run_id": ep.get("run_id"), "success": bool(ep.get("success")),
+                 "model_id": ep.get("model_id") or agent, "run_id": ep.get("run_id"), "success": bool(ep.get("success")),
                  "partial": ep.get("partial"), "family": fam, "material": sc.material if sc is not None else None,
                  "actor": actor, "how": how, "page_title": page_title,
                  "paper": {"title": paper.get("title"), "ref": paper.get("ref")},
@@ -176,7 +184,7 @@ def build_replay(run_dir: str | Path, out: str | Path | None = None, *, single_f
         "timeline": tl,
         "truth": {"available": view is not None, "reason": why, "overview": overview},
     }
-    return write_bundle(data, assets, out_dir, single_file=single_file or bare, bare=bare, name=replay_name(ep))
+    return write_bundle(data, assets, out_dir, single_file=single_file or bare, bare=bare, name=replay_name(ep, agent))
 
 
 def page_html(data_script: str, title: str, *, bare: bool = False) -> str:

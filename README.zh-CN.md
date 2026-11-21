@@ -52,7 +52,7 @@ STM 图像是实验过程产生的观测。它的解释取决于偏压、电流�
 3. **报告结果及其来源。** `report_result` 指明结果项、数值、单位及所依据的图像或谱线。位置报告还需注明读取坐标的图像。
 4. **验证实验。** 判分器检查数值、采集条件、空间覆盖、事件先后顺序与必要的样品状态约束。在回合预算内满足场景中的全部结果项，才构成完整成功。
 
-在 STM 的长度尺度上，图像来源与坐标参照尤为关键。评估器根据对应采集行记录的漂移映射报告坐标。操纵后的复查图必须晚于原子移动；谱线必须在指定位置覆盖所需能量范围。[版本 1 规则](stmbench/trackB/rules.py)将这些要求直接呈现给智能体。
+在 STM 的长度尺度上，图像来源与坐标参照尤为关键。评估器根据对应采集行记录的漂移映射报告坐标。操纵后的复查图必须晚于原子移动；谱线必须在指定位置覆盖所需能量范围。[规则卡](stmbench/trackB/rules.py)将这些要求直接呈现给智能体。
 
 采集检查确认必要的测量确实发生，且所报告的证据满足任务要求；智能体内部如何推导数值不在这一检查范围内。部分结果项明确允许使用材料知识，包括 P1 的周期与 P2 的材料参数，同时仍要求完成相应采集。这样，先验知识与实验证据各自承担的作用都得到明确说明。
 
@@ -167,6 +167,24 @@ python -m stmbench.cli episode --scenario P4_atom_positioning_cu111 --seed 0 --o
 
 ```bash
 python -m stmbench.cli verify runs/p4_s0
+```
+
+若要让一个模型只用这些工具、不借助任何其他手段操作仪器，可用 `stmbench agent`：它自己运行交互循环——Claude 经由 anthropic SDK（`pip install -e ".[agent]"`），其他模型经由任一兼容 OpenAI 的接口——并在仪器记录旁写下每一轮：
+
+```bash
+python -m stmbench.cli agent --scenario P4_atom_positioning_cu111 --seed 0 --out runs/p4_s0 --model claude-opus-5-5
+```
+
+供人或通过屏幕操作的智能体使用时，`stmbench console` 把同一台仪器做成网页，写下同样的记录；网页从不显示真值和得分：
+
+```bash
+python -m stmbench.cli console --scenario P4_atom_positioning_cu111 --seed 0 --out runs/console_p4
+```
+
+只看截图、只用鼠标键盘操作的智能体，用的是同一台仪器的桌面窗口版 `stmbench gui`（`pip install -e ".[gui]"`）。它不开任何网络端口，屏幕是唯一入口。密封模式从标准输入读种子，在任何地方都不显示；边做边写的导出目录让判分方在别处重放并判分（`stmbench grade`）：
+
+```bash
+python -m stmbench.cli gui --scenario P4_atom_positioning_cu111 --seed 0 --out runs/gui_p4 --lang en
 ```
 
 [仪器使用指南](docs/USAGE.md#the-benchmark-instrument)还介绍了如何通过 `Instrument` 直接调用 Python 接口，以及可用动作、观测格式与回合文件。

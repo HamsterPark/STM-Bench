@@ -6,6 +6,10 @@
 name: reference-stm-qplus
 extends: reference-stm
 
+tip:
+  form: qplus                     # the tip sits on the qPlus-W sensor (the parent's is an etched STM tip)
+  qplus_poke_bias_v: 0.020        # documented: poke at >~50 mV rings the fork up
+
 modules_loaded:
   - Bias
   - Current

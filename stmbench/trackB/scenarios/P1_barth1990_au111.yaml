@@ -19,6 +19,13 @@ task: |
   样品是退火良好的 Au(111)/mica，已在隧穿态；请复现 Barth 等 1990 年对 Au(111) 22×√3 重构的
   STM 观测：测出重构条纹的周期（垂直于条纹方向）与某一处的条纹取向（给出该处坐标），并找到至少
   两个取向不同的旋转畴、分别报告其位置与取向。每个结果用 ReportResult 报告。
+task_en: >-
+  The sample is well-annealed Au(111)/mica, and the instrument is already in the tunnelling
+  state. Please reproduce the STM observations of Barth et al. (1990) on the 22×√3 reconstruction
+  of Au(111): measure the period of the reconstruction stripes (perpendicular to the stripe
+  direction) and the stripe orientation at one place (give the coordinates of that place), and
+  find at least two rotational domains with different orientations and report the position and
+  orientation of each. Report each result with ReportResult.
 budget: {sim_hours: 3.0, wire_cmds: 400000}
 hidden:
   herringbone:
@@ -38,6 +45,7 @@ hidden:
 claims:
   - id: stripe_period_nm
     say: "重构条纹的周期：相邻两条亮条纹之间、垂直于条纹方向的距离（在锯齿的一条臂上量，即帧的傅里叶谱中条纹峰对应的周期）"
+    say_en: "Period of the reconstruction stripes: the distance between two adjacent bright stripes, perpendicular to the stripe direction (measured on one arm of the zigzag, i.e. the period corresponding to the stripe peak in the frame's Fourier spectrum)"
     kind: scalar
     unit: nm
     # a material constant: knowing it is part of the skill, so the chance audit records how
@@ -48,6 +56,7 @@ claims:
     evidence: {kind: frame, min_fov_nm: 100, max_nm_per_px: 0.4}
   - id: stripe_orientation_deg
     say: "某一处条纹的方向（亮条纹延伸的方向），并用 x_nm、y_nm 给出该处位置"
+    say_en: "Direction of the stripes at one place (the direction along which the bright stripes run); give that place's position in x_nm and y_nm"
     kind: angle
     unit: deg
     tol: {abs: 6, mod: 180}
@@ -56,6 +65,7 @@ claims:
     evidence: {kind: frame_covers, min_fov_nm: 40, max_nm_per_px: 0.5}
   - id: domain_a_orientation_deg
     say: "第一个旋转畴中条纹的方向，并用 x_nm、y_nm 给出该畴内一处位置"
+    say_en: "Direction of the stripes in the first rotational domain; give the position of one place inside that domain in x_nm and y_nm"
     kind: angle
     unit: deg
     tol: {abs: 6, mod: 180}
@@ -64,6 +74,7 @@ claims:
     evidence: {kind: frame_covers, min_fov_nm: 40, max_nm_per_px: 0.5}
   - id: domain_b_orientation_deg
     say: "第二个旋转畴中条纹的方向，并用 x_nm、y_nm 给出该畴内一处位置"
+    say_en: "Direction of the stripes in the second rotational domain; give the position of one place inside that domain in x_nm and y_nm"
     kind: angle
     unit: deg
     tol: {abs: 6, mod: 180}

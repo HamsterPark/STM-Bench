@@ -54,14 +54,14 @@ This is an **alpha research prototype**. Keep these evidence boundaries explicit
 | Question to inspect | Implementation | Tests to read alongside it |
 |---|---|---|
 | Does scoring require measurement, not just a plausible answer? | [claims.py](stmbench/trackB/claims.py), [results.py](stmbench/trackB/results.py) | [test_claims.py](tests/test_claims.py), [test_papers.py](tests/test_papers.py) |
-| Are seeded worlds stable, and does manipulation respond to instrument state? | [scenario.py](stmsim/scenario.py), [world.py](stmsim/physics/world.py), [adatoms.py](stmsim/physics/adatoms.py) | [test_scenario_hidden.py](tests/test_scenario_hidden.py), [test_manipulation_realism.py](tests/test_manipulation_realism.py) |
+| Are seeded worlds stable, and does manipulation respond to instrument state? | [scenario.py](stmsim/scenario.py), [world.py](stmsim/physics/world.py), [adatoms.py](stmsim/physics/adatoms.py), [switches.py](stmsim/physics/switches.py), [trace.py](stmsim/physics/trace.py) | [test_scenario_hidden.py](tests/test_scenario_hidden.py), [test_manipulation_realism.py](tests/test_manipulation_realism.py), [test_physics_switches.py](tests/test_physics_switches.py) (switched-off worlds unchanged), [test_tip_physics.py](tests/test_tip_physics.py), [test_move_trace.py](tests/test_move_trace.py) |
 | Are binary contracts preserved across the client/server boundary? | [codec.py](stmsim/wire/codec.py), [controller modules](stmsim/modules/), [command registry](stmsim/spec/command_registry.json) | [test_codec.py](tests/test_codec.py), [test_world_smoke.py](tests/test_world_smoke.py); no client oracle is bundled |
 | Are instrument time and the budget kept on the virtual clock? | [clock.py](stmsim/physics/clock.py), [instrument/core.py](stmbench/instrument/core.py), [rules.py](stmbench/trackB/rules.py) | [test_clock_freeze_and_faults.py](tests/test_clock_freeze_and_faults.py), [test_budget_overrun.py](tests/test_budget_overrun.py), [test_instrument.py](tests/test_instrument.py) |
 | Can a result be traced to its acquisition, coordinates and tip history? | [instrument/core.py](stmbench/instrument/core.py), [render.py](stmbench/render.py), [replay/](stmbench/replay/) | [test_instrument.py](tests/test_instrument.py), [test_render.py](tests/test_render.py), [test_replay.py](tests/test_replay.py) |
 | Do comparisons respect shared seeds and missing observations? | [stats.py](stmbench/report/stats.py) | [test_stats.py](tests/test_stats.py) |
 | Is every judged rule stated in the task, and can a fixed answer pass? | [rules.py](stmbench/trackB/rules.py), [audit.py](stmbench/trackB/audit.py) | [test_rule_card.py](tests/test_rule_card.py), [test_rules_v1.py](tests/test_rules_v1.py), [test_audit.py](tests/test_audit.py) |
-| Does an episode replay to the same measurements? | [clock.py](stmsim/physics/clock.py), [instrument/](stmbench/instrument/) | [test_instrument.py](tests/test_instrument.py), [test_mcp_server.py](tests/test_mcp_server.py), [test_determinism_probe.py](tests/test_determinism_probe.py) |
-| Can a paper be reproduced by measurement, how precisely, in how much time? And without the truth? | [reference/](stmbench/reference/), [baselines/](stmbench/baselines/), [analysis/](stmbench/analysis/) | [test_reference_p5.py](tests/test_reference_p5.py), [test_reference_p3.py](tests/test_reference_p3.py), [test_reference_p4.py](tests/test_reference_p4.py), [test_baselines_p4.py](tests/test_baselines_p4.py), [test_analysis_tip.py](tests/test_analysis_tip.py), [test_analysis_force.py](tests/test_analysis_force.py), [test_analysis_drift.py](tests/test_analysis_drift.py), [test_analysis_spectra.py](tests/test_analysis_spectra.py), [test_analysis_adatoms.py](tests/test_analysis_adatoms.py), [test_analysis_corral_gap.py](tests/test_analysis_corral_gap.py) |
+| Does an episode replay to the same measurements? | [clock.py](stmsim/physics/clock.py), [instrument/](stmbench/instrument/) | [test_instrument.py](tests/test_instrument.py), [test_mcp_server.py](tests/test_mcp_server.py), [test_determinism_probe.py](tests/test_determinism_probe.py), [test_api_v2.py](tests/test_api_v2.py) (API version, the refusal of another one) |
+| Can a paper be reproduced by measurement, how precisely, in how much time? And without the truth? | [reference/](stmbench/reference/), [baselines/](stmbench/baselines/), [analysis/](stmbench/analysis/) | [test_reference_p5.py](tests/test_reference_p5.py), [test_reference_p3.py](tests/test_reference_p3.py), [test_reference_p4.py](tests/test_reference_p4.py), [test_baselines_p4.py](tests/test_baselines_p4.py), [test_analysis_tip.py](tests/test_analysis_tip.py), [test_analysis_force.py](tests/test_analysis_force.py), [test_analysis_drift.py](tests/test_analysis_drift.py), [test_analysis_spectra.py](tests/test_analysis_spectra.py), [test_analysis_adatoms.py](tests/test_analysis_adatoms.py), [test_analysis_corral_gap.py](tests/test_analysis_corral_gap.py), [test_analysis_trace.py](tests/test_analysis_trace.py) |
 
 Other useful boundaries:
 
@@ -71,6 +71,23 @@ Other useful boundaries:
 - [stmsim/calibrate/](stmsim/calibrate/) fits lab data;
   [stmsim/validate/](stmsim/validate/) compares simulated and real measurements.
   Their external data requirements differ from the standalone physics tests.
+- [stmbench/console/](stmbench/console/) serves the instrument as a web page for a person or a
+  screen-driven agent (`stmbench.cli console`; tests in [test_console.py](tests/test_console.py)).
+- [stmbench/gui/](stmbench/gui/) is the desktop console: a native window (PySide6, the `gui`
+  extra) for an agent that works through screenshots, mouse and keyboard, with no network listener
+  (`stmbench.cli gui`; tests in [test_gui_session.py](tests/test_gui_session.py),
+  [test_gui_layout.py](tests/test_gui_layout.py), [test_gui_app.py](tests/test_gui_app.py) and
+  [test_gui_widgets.py](tests/test_gui_widgets.py)). [session.py](stmbench/gui/session.py) is its one door to the
+  instrument and the export; it must never reach the truth, the verdict or the seed (a source scan
+  enforces it), and in the sealed mode the seed appears in no widget, file or message.
+- [stmbench/instrument/export.py](stmbench/instrument/export.py) writes, while an episode happens, the
+  export directory that leaves an agent's machine (records and measurement hashes; no seed, truth or
+  verdict), and [grade.py](stmbench/instrument/grade.py) grades it elsewhere by replaying it with the
+  seed only the grader holds (`stmbench.cli grade`; tests in [test_export.py](tests/test_export.py)
+  and [test_grade.py](tests/test_grade.py)). [deploy/osworld/](deploy/osworld/) holds the
+  OSWorld-Science host-side adapter and grader image; neither has run inside that harness yet.
+- [stmbench/agent/](stmbench/agent/) seats a language model at the instrument with its MCP tools
+  and nothing else (`stmbench.cli agent`; tests in [test_agent.py](tests/test_agent.py)).
 - [stmbench/reference/](stmbench/reference/) holds the privileged reference solutions and
   [stmbench/baselines/](stmbench/baselines/) the scripted baselines, which see only what an
   MCP agent sees.
@@ -135,8 +152,8 @@ python -m stmbench.cli reference --paper P4 --seeds 30
 python -m stmbench.cli baseline --paper P4 --seeds 30 --first-seed 450
 ```
 
-Replays read files with `stmsim.io.sxm_reader`; they take run directories in the earlier
-ledger format (see [docs/USAGE.md](docs/USAGE.md)):
+Replays read files with `stmsim.io.sxm_reader`; they take an instrument run directory (see
+[docs/USAGE.md](docs/USAGE.md)):
 
 ```bash
 python -m stmbench.cli replay "<run-directory>" --single-file --open
@@ -170,7 +187,7 @@ These apply across the simulator, the instrument, the judge and the presentation
    reduce paper-scenario drift to make a baseline pass. Every rule the judge applies is stated
    to the agent by the rule card (`stmbench.trackB.rules`), generated from the same scenario
    fields: never state a budget or an evidence rule by hand in a task, and never add a judge
-   rule the card does not state. Under rules version 1 a report names the frame its position
+   rule the card does not state. From rules version 1 on, a report names the frame its position
    was read in (`frame`) and the data its value came from (`evidence`), and the evidence rule
    is checked within that data; ledgers record `rules_version`, and older ledgers keep their rules.
 5. **Respect clocks and budgets.** Hardware-side processes use the wall clock; scans,
@@ -195,7 +212,11 @@ These apply across the simulator, the instrument, the judge and the presentation
 8. **Preserve run records.** Use a new output directory for each episode. Do not overwrite
    completed runs or hand-edit them to improve a verdict. `episode.json`, `actions.jsonl`,
    `events.json`, `report.json` and `session/` feed later analysis, `verify` and replay. Schema changes must
-   account for existing readers; missing observations remain unknown, not zero or success.
+   account for existing readers; missing observations remain unknown, not zero or success. A ledger
+   and an export carry `api_version`: a change to what an agent can call, or to the record kinds, bumps
+   it, `verify`, `replay` and `grade` refuse another version (it needs the code of its own; they never
+   replay it into a mismatch), and the replay for an audience and the report tables keep reading the
+   older ledgers.
 9. **Preserve binary contracts and their provenance.** Command names, field widths, array
    counts and reply layouts are client contracts. Do not infer widths from unannotated Python
    handlers or rename commands. Check the bytes against the documented layout.
@@ -226,7 +247,7 @@ These apply across the simulator, the instrument, the judge and the presentation
 - Keep the simulator's name vendor-neutral. Preserve required compatibility API and file-format
   tokens allowed by that same guard; do not erase protocol provenance from documentation.
 - Write code, comments and docstrings in English. Chinese belongs in scenario task text,
-  the replay page, and `docs/DESIGN.md`.
+  the replay page, the console page's and the desktop console's labels (beside their English), and `docs/DESIGN.md`.
 - Update `docs/DESIGN.md` when a design decision changes. Keep operational instructions in
   `docs/USAGE.md` and release claims in `README.md` consistent with the implementation.
   When committing, use one logical change per commit, a present-tense subject, and a body
@@ -237,8 +258,10 @@ These apply across the simulator, the instrument, the judge and the presentation
 1. Add a YAML under `stmbench/trackB/scenarios/` with `paper`, `initial`, `hidden`,
    `claims`, `budget` and `task`. Hidden ranges need physical justification; each claim
    needs its kind, truth reference, acceptance threshold or tolerance, acquisition-evidence
-   rule and a `say` line (its meaning, for the rule card). Require a report where the claim
-   kind calls for one. Mark `knowledge: allowed` only on a material constant.
+   rule and a `say` line (its meaning, for the rule card) with its English `say_en`; the task
+   needs a `task_en` beside `task` (`task_text(sc, "en")` refuses a paper scenario without them,
+   and `tests/test_rule_card_en.py` checks that both cards state the same numbers). Require a
+   report where the claim kind calls for one. Mark `knowledge: allowed` only on a material constant.
    Run `python -m stmbench.cli audit chance --scenario <id>` and record the per-claim and
    joint chance in the scenario notes.
 2. Implement the required physics and expose the truth through `World.truth()` or an

@@ -16,12 +16,22 @@ initial:
   surface: {contamination: 0.0, adsorbate_density_per_um2: 3.0, terrace_median_nm: 150.0}
   adatoms: {layout: single, species: Fe, target: any, target_dx_nm: 4.0, target_dy_nm: 0.0,
             isolation_nm: 3.0, bystander_nm: 10.0, field_per_100nm2: 0.4, field_half_nm: 150}
+  # the mechanisms that leave no safe place at the instrument (stmsim/physics/switches.py)
+  physics: {tip_changes_outside_scans: true, tip_recovery: true, tip_anisotropy: true, crash_over_range: true}
 faults: []
 task: |
   样品是 Cu(111)，表面稀疏地散落着 Fe 吸附原子（扫描坐标原点附近 30 nm 内就有孤立的），仪器已在隧穿态；
   请复现 Eigler 与 Schweizer 1990 年的单原子定位实验：任选一个孤立的 Fe 原子（3 nm 内没有别的原子），
   把它沿 +x 方向横向移动 4.0 nm 到最近的晶格位点；它周围 10 nm 内的其余原子不得移动或损毁。
   用 ReportResult 报告该原子的最终位置（当前扫描坐标，nm）。
+task_en: >-
+  The sample is Cu(111), with Fe adatoms sparsely scattered over the surface (isolated ones can
+  be found within 30 nm of the origin of the scan coordinates), and the instrument is already in
+  the tunnelling state. Please reproduce the 1990 single-atom positioning experiment of Eigler
+  and Schweizer: choose any isolated Fe atom (no other atom within 3 nm) and move it laterally
+  by 4.0 nm along +x to the nearest lattice site; the other atoms within 10 nm of it must not be
+  moved or damaged. Report the final position of that atom (in the current scan coordinates, nm)
+  with ReportResult.
 budget: {sim_hours: 1.5, wire_cmds: 200000}
 hidden:
   adatoms:
@@ -44,6 +54,7 @@ hidden:
 claims:
   - id: target_site
     say: "你搬动的那个原子的最终位置：x_nm、y_nm 写位置，value 写同一个 x_nm"
+    say_en: "The final position of the atom you moved: write the position in x_nm and y_nm, and write the same x_nm in the value field"
     kind: position
     unit: nm
     tol: {site_tie_nm: 0.02, report_nm: 0.6}
@@ -55,7 +66,8 @@ claims:
       max_nm_per_px: 0.2
       after_event: adatom_hop
   - id: bystander_max_shift_nm
-    say: "被搬原子出生位置或目标位置 10 nm 以内的其他原子的最大位移（丢失或被针尖带走算移动）"
+    say: "你搬动的那个原子周围其他原子的最大位移"
+    say_en: "The largest displacement of the other atoms around the atom you moved"
     kind: constraint
     unit: nm
     # the atoms born within bystander_nm of the chosen atom's start or goal — the chosen atom
@@ -145,3 +157,105 @@ notes: |
   the fixes their failures led to: 149/150 (150–299) and 145/150 (300–449). In 296 of the
   300 development successes the moved atom had other atoms within ``bystander_nm``, so the
   bystander claim was tested.
+
+  **Tip physics with no safe place (2026-10-27, ``initial.physics``).** Two screen-only trials
+  found P4 too easy for the wrong reasons, and the simulator had gaps an agent could stand in:
+  the tip changed only inside scan rows and drags (so spectra, waits and moves were safe), never
+  improved by itself, showed no anisotropy in an image, and the Z loop settled on the true
+  current, so a setpoint above the preamplifier's range cost nothing. P4 now switches four
+  mechanisms on (``stmsim/physics/switches.py``; no other scenario does, and with all four off
+  the world is the one it was, draw for draw, which was checked against the commit this round
+  started from, 7604fc0, on P1, P2, P3, P3 repair, P5 and P4 with its switches off, seeds 0 and
+  1: replies, digest, truth, events, tip log and the end state of every random stream equal).
+  ``tip_changes_outside_scans``: the scan row's hazard λ·(1 + |I|/1 nA + (|V|/2 V)²) also runs
+  over the time spent tunnelling in spectra (their largest |V| and |I|), waits, moves and
+  settling, each change at its own time inside the interval; an acquisition is atomic (a
+  spectrum across a change shows the tip it started with). ``tip_recovery``: a metastable apex
+  settles, a spare apex is lost (faster at a high current), an adsorbate desorbs (faster at a
+  high bias), a crashed cluster stops flickering, on the order of an hour at the imaging dose
+  (assumed rates, written beside the constants in ``Tip``); a blunt tip never sharpens.
+  ``tip_anisotropy``: the blur of the smooth surface is an ellipse (short axis ``axis_ratio`` of
+  the long one, the long axis along ``angle`` in the sample frame, so a rotated scan frame sees
+  it rotated), so an atom looks stretched along it; a blunt arrival condition (ratio 0.80 down
+  to 0.35 with ``condition_scale``, the axis along ``condition_angle_deg``: no new hidden draw),
+  a crash, a pulse that ruins the apex, a ring-up and a deep poke leave a tip anisotropic, and
+  the existing restorations (a good pulse, a shallow poke) still restore it.
+  ``crash_over_range``: with the loop closed a setpoint above the range's full scale cannot be
+  reached by the saturating reading, so the loop's target is contact and the current reads the
+  clamp; entering that (a setpoint raised, a range lowered, the feedback switched on, a landing)
+  crashes the tip once, and a scan or a move made in it crashes it again; nothing is gripped
+  while it lasts. The reference's range-first manipulation (the range to 100 nA, then bias, then
+  setpoint, and back in reverse) never enters it. No tolerance, hidden range or rule changed.
+
+  Re-checked on this physics, nothing in the reference or the baseline changed. The reference,
+  seeds 0–19: 20/20, instrument time median 968 s, p90 1529 s (the same seeds on the old
+  physics: 955 s, 1331 s); 10 of the 20 runs are the same to 1 ms and four more to 35 ms, six
+  took between 41 s less and 906 s more (five of them had a tip change outside a scan or a drag,
+  one a recovery inside a scan; other runs had such changes and went on unchanged). The
+  baseline, held-out seeds 450–469: 20/20 (blunt 4/4, dirty 5/5, double 5/5, good 4/4, unstable
+  2/2), median 964 s and p90 1398 s as before, the longest run 2869 s (seed 465, a double tip,
+  was 2331 s); 19 of the 20 runs are the same to 15 ms. In those 40 sessions no setpoint went
+  over the range, 10 of them (8 reference, 2 baseline) saw a tip change outside a scan or a
+  drag, and 5 a recovery. A scripted run works in under half an hour with the tip mostly pinned
+  by pokes, so it barely meets the new physics; what the physics takes away is the safe corner
+  for an agent that waits, tunnels at a high setpoint on a low range, or leaves a bad tip alone.
+
+  **Move traces instead of a hop count; rules version 2 (2026-10-27).** The instrument no
+  longer counts hops for the agent: ``move_tip`` replies with the file name of a trace of Z and
+  the current along its path (``stmsim/physics/trace.py``, kept like a spectrum with
+  ``kind: "move"``), and its description no longer says that a low junction resistance drags.
+  A sample of a trace is the mean over its dwell, so a slow drag carries a few tenths of a
+  picometre of noise in Z. The scripted baseline reads the hops from the trace
+  (``stmbench/analysis/trace.py``; of 5040 drags on seeds 0–119, at 0.25 nm/s 99.6 % of those
+  in which an atom hopped read as hopping and 1.4 % of those in which none did); the reference
+  counts the world's events. The rule card (rules version 2) states the judge's rules as they
+  are, without the operating knowledge it used to give: the last hop is any atom's hop from one
+  lattice site to the next, whatever moved it; a tied site may be farther by at most
+  ``site_tie_nm``; the bystanders are those the judge takes, by their positions at the start of
+  the episode, with the numbers generated from ``initial.adatoms``; the bystander evidence is a
+  hop made during a move_tip action. No tolerance, hidden range or judged rule changed
+  (versions 1 and 2 give the same verdicts). Re-checked on the merged tree (84e8795): the
+  reference, seeds 0–19, 20/20 as above (|error| median 0.008 nm, p90 0.018 nm); the baseline,
+  held-out seeds 450–529, 80/80 (blunt 16/16, dirty 14/14, double 22/22, good 17/17, unstable
+  11/11), median 986 s, p90 1431 s, max 2869 s. 76 of the 80 runs are the same to 0.1 s as with
+  the hop count on the same physics; four were slower (seeds 464, 469, 484 and 519, by 56–361 s:
+  in 464 a short drag in which nothing hopped read as a hop, in 469 13 hops read as 14, and the
+  drags that followed differed; 484 and 519 were not looked into) and none failed.
+
+  **The rig's tip is an etched W wire, not a qPlus fork (2026-11-17, decided by the user).** A poke
+  above 50 mV no longer rings a fork up, and a reshaping pulse leaves a better tip with probability 0.55
+  instead of 0.50; the worlds at the start (layout, hidden draws, random streams) are unchanged.
+  A ledger recorded before this with a high-bias poke does not replay with this code, and one with a pulse
+  may not (docs/DESIGN.md, 2026-11-17).
+
+  **Re-run on the current code with the etched tip (2026-11-17, commit 1918eaa, khwu cluster, no
+  protocol or tolerance change).** The figures above were measured on 2026-10-13/14 with the qPlus
+  form and the code of those days; they stay above as history. The re-run:
+  reference seeds 0-149 150/150 (147 on the nearest site, 3 on a tied one), reported place |error|
+  median 0.0066 / p90 0.0151 / max 0.0434 nm, instrument time median 885 s, p90 1477 s, max 2477 s
+  (October: 879 / 1428 / 2003 s); baseline seeds 0-299 298/300 (blunt 85/86, dirty 54/54,
+  double 75/76, good 54/54, unstable 30/30), median 1031 s, p90 1624 s, max 3156 s;
+  300-449 150/150, median 987 s, p90 1749 s, max 3628 s; 450-599 149/150 (unstable 21/22),
+  median 986 s, p90 1533 s, max 3781 s (October: 984 / 1410 / 2331 s). 450-599 was held out for the
+  October code; the re-run is of the current code on the same seeds, nothing tuned.
+  (a) The tip change moves no outcome. The parent 39fcd13 (qPlus tip, same code and seeds, same
+  commands) gives the same successes and failures on every range. Bit-identical in time and error
+  on 133/150 (reference), 286/300, 141/150 and 144/150 (baseline) seeds; the others differ only in
+  time and tip rounds (16, 12, 4 and 3 seeds differ in the number of tip rounds). Medians and p90
+  hardly move: reference 885 s / 1422 s on 39fcd13 against 885 s / 1477 s; baseline 0-299
+  1035 s / 1641 s against 1031 s / 1624 s; 300-449 992 s / 1759 s against 987 s / 1749 s;
+  450-599 986 s / 1484 s against 986 s / 1533 s. The 0.55 against 0.50 pulse odds and the missing
+  high-bias poke trap change the path of some runs, not whether they end well.
+  (b) Against the October files, seeds 262 and 275 (baseline, claim ``target_site``, atom off
+  goal) and 575 (baseline, "the work area was not found again" after 3704 s, three conditioning
+  recoveries) now fail, and 331, 333, 364, 376 and 415 (300-449) now succeed. The three failures
+  fail identically on 39fcd13, so their cause is code changed between 2026-10-14 and 39fcd13,
+  not the tip. The reference moved the same way: on 39fcd13 its p90 time is 1422 s against the October
+  1428 s, its p90 error 0.0151 nm against 0.0163 nm, its median error 0.0059 nm against 0.0062 nm
+  (121 of 150 seeds within 1 s of the October time), so those shifts are also code, not tip. Not checked: which commit changed them, and the pulse outcomes of those runs (the
+  result files keep no tip events). The recorded rows of October have no ``tip_rounds`` or
+  ``recoveries`` and name the attempt counts ``spikes`` where today's say ``hops``.
+  (c) Also moved by the re-run, qPlus-era value in brackets: baseline error median 0.0055 nm
+  (0.0056) on 0-299; 450-599 median 0.0049 nm, p90 0.0107 nm (0.0054, 0.0111), max 0.385 nm
+  (seed 558; 0.119) - within ``report_nm`` 0.6. Instrument-time figures are for successes.
+  Files: ``docs/results/p4_*``, whose October versions are in git history at 39fcd13.
