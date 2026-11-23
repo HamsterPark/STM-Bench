@@ -292,6 +292,8 @@ MCP 服务器（`stmbench episode`）把它交给任何支持 MCP 的智能体�
 （`deploy/osworld/grader/requirements.txt` 固定版本）。OSWorld 宿主机是 Python 3.11，
 判分器经 `module_metric` 适配器（`deploy/osworld/stm_metric.py`，只用标准库）在 Docker 镜像里运行；镜像尚未构建过。
 
+**复制与写入赛跑（2026-11-17）。** OSWorld 运行器按 session.json、actions.jsonl、digests.jsonl、report.json 的顺序复制，而控制台可能还在做智能体最后一步（一次扫描要几秒墙钟）；每次同步先追加日志与摘要、最后才写 session.json，所以先复制的 session.json 的记录数 N 不会超过之后复制的日志与摘要完整包含的 0..N-1 号记录。此前若同步落在两次复制之间，摘要里会有日志没有的记录，判分报“重放没存这个文件”，完好的一局被判 0。现在 session.json 记数 N 而日志更长时，只判前 N 条：多出的记录及其摘要行（按 `i` ≥ N）一并去掉，note 里写明；report.json 判分本就不读（重放自己重发 report 记录），所以不受影响。记数大于日志仍是损坏、最后一行被截断仍被舍去。多出的记录不会再影响判分，因此“在日志末尾追加记录”不再使这一局判 0，而是被忽略（此前也不会得分，因为追加的内容进不了被判的前 N 条）。回归测试：`tests/test_grade.py::test_records_beyond_the_count_are_left_out_when_the_copy_raced_the_console`。
+
 **导出版本 2：哈希之外的舍入容差（2026-11-16）。** 动机是实测：2026-11-12 把 Windows（i5-14400F）上录的屏幕试做 6 的导出
 拿到一台 Linux 集群节点（EPYC 9654，numpy 2.5.4、OpenBLAS 0.3.34 相同）判分，回复与仪器时间 0 处不符，但 44 个数组哈希
 全不同，诚实的一局得 0 分，而 Linux 自己重放得到的判决与记录一致（0.5）。数组只差最后几位（z 最大差 1.65e-23 m，量程

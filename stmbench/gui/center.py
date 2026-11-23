@@ -485,7 +485,7 @@ class CenterColumn(QWidget):
         self.frame_view.set_zoom(level, focus=(m["x_nm"], m["y_nm"]) if m is not None else None)
 
     def _tools_row(self) -> QWidget:
-        """What a drag on the image does, and Clear markers: a row that stays whatever the viewer shows.
+        """What a drag on the image does, and Clear image markers: a row that stays whatever the viewer shows.
 
         It is outside the pages of the toolbar stack because the markers are not the frame's: they are kept in
         scan coordinates and come back on the next frame. In screen trial 5 (step 39) the agent clicked where Clear
@@ -497,7 +497,9 @@ class CenterColumn(QWidget):
                               "view.tool", "marker")
         self.clear_markers = QPushButton(one("clear_markers", self.lang))
         self.clear_markers.setObjectName("view.clear_markers")
-        # the readings pinned on a plot, which the plot's own toolbar (the axes) has no room for: the same place always
+        # the readings pinned on a plot, which the plot's own toolbar (the axes) has no room for: the same place always.
+        # Both labels name the view they act on, in the screen's own words (image / marker, plot / reading): in four
+        # blind trials "Clear readings" was clicked to clear the image's markers, whose values are also read off the screen.
         self.clear_readings = QPushButton(one("clear_readings", self.lang))
         self.clear_readings.setObjectName("view.clear_readings")
         w.setLayout(self._row(self._caption("lbl_tool"), self.tool, self.clear_markers, self.clear_readings))

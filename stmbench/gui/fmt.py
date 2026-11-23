@@ -116,9 +116,10 @@ def drift_comp_text(dc: dict | None, lang: str = "en") -> str:
     return f"{on_off(True, lang)} ({num(vx, 4)}, {num(vy, 4)}) nm/min" + (f", {num(vz, 4)} pm/min" if vz else "")
 
 
-def reading_items(st: dict, lang: str = "en") -> list[tuple[str, str]]:
+def reading_items(st: dict, lang: str = "en", qplus: bool = True) -> list[tuple[str, str]]:
     """The status strip's second line: ``(label key, value text)`` for every reading of ``status()``, in
-    the order an operator reads them."""
+    the order an operator reads them. ``qplus=False`` (the rig has no qPlus sensor, see ``info()["qplus"]``)
+    leaves out the oscillation reading: an STM tip has none, and the strip would only say ``n/a``."""
     return [
         ("bias", volts(st["bias_v"])),
         ("setpoint", picoamps(st["setpoint_pa"])),
@@ -129,7 +130,7 @@ def reading_items(st: dict, lang: str = "en") -> list[tuple[str, str]]:
         ("tip", position(st["tip_nm"])),
         ("withdrawn", yes_no(st["withdrawn"], lang)),
         ("lockin", on_off(st["lockin"], lang)),
-        ("oscillation", on_off(st.get("oscillating"), lang)),
+        *([("oscillation", on_off(st.get("oscillating"), lang))] if qplus else []),
         ("drift", drift_comp_text(st.get("drift_comp"), lang)),
     ]
 

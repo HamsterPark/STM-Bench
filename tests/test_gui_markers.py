@@ -2,7 +2,7 @@
 in, at that pixel's centre, with that pixel's value), the table that lists them, and the controls around them.
 
 Written for the round after screen trials 3-5 (P4): the agents fitted Gaussians to marker values by hand and lost
-steps to coordinates that were not the pixel's, a table that showed six rows, and a Clear markers button that was
+steps to coordinates that were not the pixel's, a table that showed six rows, and a Clear image markers button that was
 not there when a trace was on show.
 """
 from __future__ import annotations
@@ -205,7 +205,7 @@ def test_the_table_stays_where_the_reader_scrolled_it_until_a_marker_is_placed_o
     assert t.rowCount() == 14 and shown_rows(t)[-1] == 13 and win.center.selected_row() == 13
 
 
-# ── Clear markers, whatever the viewer shows ──
+# ── Clear image markers, whatever the viewer shows ──
 def marker_pixels(win) -> int:
     """How many pixels of the frame view, as rendered now, are in a marker's ring colour (cyan, or the selected one's
     yellow)."""
@@ -218,7 +218,7 @@ def marker_pixels(win) -> int:
 
 
 def clear_position(win) -> QPoint:
-    """Where Clear markers is, as a click on the screen finds it (window coordinates)."""
+    """Where Clear image markers is, as a click on the screen finds it (window coordinates)."""
     b = shots.widget(win, "view.clear_markers")
     return b.mapTo(win, b.rect().center())
 
@@ -241,8 +241,8 @@ def click_at(win, pos: QPoint) -> None:
 
 @pytest.mark.parametrize("lang", ["en", "zh"])
 def test_clear_markers_is_at_the_same_place_and_works_with_a_trace_on_show(fonts, open_window, lang):
-    """Screen trial 5 step 39: Scan and Clear markers in one step left the old markers on the new frame. The click
-    on Clear markers was the step's first event and it went to empty toolbar: a move trace was on show, and the
+    """Screen trial 5 step 39: Scan and Clear image markers in one step left the old markers on the new frame. The click
+    on Clear image markers was the step's first event and it went to empty toolbar: a move trace was on show, and the
     frame toolbar (where the button was) is not there then. The button is now outside the toolbar pages."""
     win = open_window(lang)
     scan(win)
@@ -253,13 +253,13 @@ def test_clear_markers_is_at_the_same_place_and_works_with_a_trace_on_show(fonts
     assert shots.widget(win, "view.clear_markers").isVisible() and len(fv.markers()) == 3
     trace_on_show(win)
     assert not shots.widget(win, "view.channel.z").isVisible()                   # the frame toolbar is away ...
-    assert shots.widget(win, "view.clear_markers").isVisible() and clear_position(win) == here    # ... Clear markers is not
+    assert shots.widget(win, "view.clear_markers").isVisible() and clear_position(win) == here    # ... Clear image markers is not
     assert win.childAt(here) is shots.widget(win, "view.clear_markers")
     shots.hit(win, shots.widget(win, "view.tool.marker"))                        # the tools are there too
     assert len(fv.markers()) == 3 and win.center.table.rowCount() == 3           # the markers outlive the view that drew them
     click_at(win, here)
     assert fv.markers() == [] and win.center.table.rowCount() == 0
-    # the step of the trial: with a trace on show, Clear markers (from where it was) and Scan, clicked one after the other
+    # the step of the trial: with a trace on show, Clear image markers (from where it was) and Scan, clicked one after the other
     scan(win)
     mark(win, 9, 9)
     trace_on_show(win)
@@ -282,7 +282,7 @@ def test_clear_markers_clicked_right_after_scan_while_the_scan_runs_clears_them_
     try:
         run_button(win, "run.scan")
         assert shots.widget(win, "view.busy").isVisible()                         # "scan running": over the viewer, not the toolbar
-        run_button(win, "view.clear_markers")                                     # the same step: Scan, then Clear markers
+        run_button(win, "view.clear_markers")                                     # the same step: Scan, then Clear image markers
         assert fv.markers() == [] and win.center.table.rowCount() == 0
     finally:
         gate.open()
@@ -295,8 +295,8 @@ def test_clear_markers_clicked_right_after_scan_while_the_scan_runs_clears_them_
 @pytest.mark.parametrize("lang", ["en", "zh"])
 def test_the_longest_cursor_readout_fits_the_viewer_whole(fonts, open_window, lang):
     """The readout under the image names the pixel, its centre and its value; with the widest numbers a frame can
-    give (1024 px, -150 nm, a kilo-picometre) it still ends in no ellipsis, and the tools row (the tools, Clear
-    markers, Clear readings) stays on one line inside the column."""
+    give (1024 px, -150 nm, a kilo-picometre) it still ends in no ellipsis, and the tools row (the tools, Clear image
+    markers, Clear plot readings) stays on one line inside the column."""
     win = open_window(lang)
     scan(win)
     c = win.center

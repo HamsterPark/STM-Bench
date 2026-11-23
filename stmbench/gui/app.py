@@ -332,6 +332,9 @@ class MainWindow(QMainWindow):
         if out.kind == "boot":
             if out.info:
                 self.sidebar.facts.set_info(out.info)
+                has_qplus = bool(out.info.get("qplus"))      # an etched-tip STM has no PLL to drive
+                self.spectroscopy.set_group_visible("pll", has_qplus)
+                self.status.set_has_qplus(has_qplus)
             if not out.ok:
                 self._fail(out.text)
             return

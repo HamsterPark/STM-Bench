@@ -14,7 +14,7 @@ A left click pins the point (and emits ``point_picked``): off the axes the reado
 over them it follows the pointer. A later click on another point pins that one too, up to :data:`MAX_PINS`
 (a screenshot is taken after the last event of a step, so several readings are read in one step only if they
 stay): with more than one pin each is numbered, and the readout lists them, one aligned line each, in the
-numbers the hover readout gives; ``clear_pins`` (the viewer's Clear readings button) and new data remove them.
+numbers the hover readout gives; ``clear_pins`` (the viewer's Clear plot readings button) and new data remove them.
 Nothing is found: the pins are where the reader clicked. There is no zoom, pan, wheel handling or context menu.
 """
 from __future__ import annotations
