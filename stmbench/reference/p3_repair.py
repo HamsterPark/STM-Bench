@@ -1,0 +1,320 @@
+"""P3's repair variant, privileged reference solution: close the gap in a quantum corral by
+lateral manipulation, then measure the corral as P3 does.
+
+The truth navigates — where the corral is, which atoms are the spares and where each one is
+now, whether it is still on the surface, the drift, the tip's state. The repair is measured:
+the ring, its gap and the sites that close it are read from a survey
+(:mod:`stmbench.analysis.corral`), each spare is moved by the resistance ladder
+(:mod:`stmbench.reference._manip`), and whether a site is filled is read from the ring.
+
+Protocol:
+
+1. a tip unfit to image is conditioned ~150 nm away, then five minutes for the creep;
+2. lateral drift compensated at the corral;
+3. a 36 nm survey over the corral at 0.1 nm/px (360 nm/s: above 450 nm/s a blunt tip scratches
+   the surface). The ring by a vote of its bright pixels (:func:`find_ring`; a circle fitted
+   through everything is pulled 1-2 nm off by the spares) and the missing sites evenly in the
+   stretch where the ring's cross-section falls to half (:func:`ring_gap`): the task says there
+   are as many spares as atoms missing, and the ring's atoms, 0.6-1.4 nm apart, are too close to
+   count one by one. Which atoms the spares are is navigation: a blunt or double tip shows them
+   faintly, twice, or not at all;
+4. spares paired with sites in angular order. Each spare goes to a staging point 1.5 nm
+   radially outside its site, where it is still an isolated bump, and then in, by the
+   resistance ladder (:mod:`stmbench.reference._manip`: no threshold is read); the last
+   approach is repeated from behind the atom until it is within 0.2 nm of the site. After the
+   last spare a survey reads the ring's cross-section at each site;
+5. the tip conditioned for spectroscopy if it needs to be, and P3's measurement
+   (:func:`stmbench.reference.p3.measure`): the radius, the band bottom, the resonances.
+"""
+from __future__ import annotations
+
+import math
+from pathlib import Path
+
+import numpy as np
+
+from ..analysis.corral import find_ring, ring_gap, ring_profile
+from . import p3
+from ._common import Session, claims_ok, condition_tip, tip_needs_poke
+from ._manip import LADDER_FACTOR, LADDER_KOHM, LADDER_MIN_KOHM, LostTrack, Mover, scan
+
+SCENARIO = "P3_corral_repair_cu111"
+SURVEY_NM, SURVEY_PX, SURVEY_LINE_S = 36.0, 360, 0.1
+#: the staging point, radially outside the site: far enough that the atom is still an isolated
+#: bump there (0.7 nm out from it the ring must stay below 0.6 of its height)
+STAGE_NM = 1.5
+#: how compact a bump has to be to be the atom looked for beside the ring (a bump there may fall
+#: to 0.9 of its height 0.7 nm out on the ring's side)
+NEAR_COMPACT = 0.9
+#: the gap's edges are looked for in the ring's cross-section smoothed over this half-width (nm)
+GAP_SMOOTH_NM = 0.4
+STAGE_ON_GOAL_NM = 0.35
+#: the last approach stops within this of the site (nm); the lattice's nearest site to any point
+#: is within 0.15 nm of it, and a ring site is held by an atom within 0.29-0.37 nm
+FINE_NM = 0.2
+MAX_FINE = 5
+#: drags at one rung that moved the atom less than half the way before the rung comes down
+PARTIAL_MAX = 2
+#: every drag starts this far behind the atom, so that the tip runs over it and carries it
+RUN_UP_NM = 0.5
+MAX_STEPS = 40
+
+
+def _unit(theta: float) -> np.ndarray:
+    return np.array([math.cos(theta), math.sin(theta)])
+
+
+def _survey(s: Session, centre) -> dict:
+    """A fast frame over the corral (centred on the same sample point every time) and what is in
+    it, in scan coordinates: the ring's centre and radius, the isolated atoms, the ring's
+    cross-section along it."""
+    cx, cy = s.scan_xy(*centre)
+    f, t = scan(s.inst, cx, cy, SURVEY_NM, SURVEY_PX, SURVEY_LINE_S)
+    npx = float(f["nm_per_px"])
+    ring = find_ring(f["array"], npx)
+    x0, y0 = cx - SURVEY_NM / 2, cy - SURVEY_NM / 2
+    rc = np.array([x0 + ring["centre_nm"][0], y0 + ring["centre_nm"][1]])
+    th, prof = ring_profile(f["array"], npx, ring["centre_nm"], ring["radius_nm"])
+    return {"frame": f, "t": t, "centre": rc, "R": float(ring["radius_nm"]), "angles": th, "profile": prof}
+
+
+def _cross_section(sv: dict, theta: float, half_nm: float = 0.2) -> float:
+    """The ring's cross-section at ``theta``, averaged over ``half_nm`` of arc either side."""
+    th, prof = sv["angles"], sv["profile"]
+    d = np.abs((th - theta + np.pi) % (2 * np.pi) - np.pi) * sv["R"]
+    return float(np.mean(prof[d <= half_nm]))
+
+
+def _spares(s: Session) -> list:
+    """The spare atoms still on the surface (navigation: the task says there are as many as
+    atoms missing, and a blunt or double tip shows them faintly, twice, or not at all)."""
+    reg = s.w.surface.site.adatoms
+    return [a for a in reg.atoms.values() if a.role == "spare" and a.status == "on_surface"]
+
+
+def _plan(s: Session, sv: dict) -> dict:
+    """The sites the spares go to, from the first survey: the gap, where the ring's cross-section
+    falls to half, divided evenly among as many sites as there are spares."""
+    rc, R = sv["centre"], sv["R"]
+    spares = _spares(s)
+    g = ring_gap(sv["angles"], sv["profile"], R, missing=len(spares), smooth_nm=GAP_SMOOTH_NM)
+    return {"spares": spares, "sites": list(g["sites_rad"]), "level": g["level"], "R": R,
+            "gap_width_nm": g["gap_width_nm"], "spacing_nm": g["spacing_nm"]}
+
+
+def _pair(s: Session, sv: dict, plan: dict) -> list:
+    """(atom, site angle) in angular order: the spares sorted by their angle about the ring's
+    centre, against the sites sorted the same way."""
+    reg = s.w.surface.site.adatoms
+    rc = sv["centre"]
+    atoms = []
+    for a in plan["spares"]:
+        x, y = s.image_xy(*reg.site_xy(a.i, a.j, a.sub))
+        atoms.append((math.atan2(y - rc[1], x - rc[0]), a))
+    ref = plan["sites"][0] if plan["sites"] else 0.0
+
+    def unwrap(t: float) -> float:
+        return (t - ref + np.pi) % (2 * np.pi) - np.pi
+
+    atoms.sort(key=lambda q: unwrap(q[0]))
+    sites = sorted(plan["sites"], key=unwrap)
+    return [(a, t) for (_, a), t in zip(atoms, sites)]
+
+
+def rc_goal(s: Session, rc_m, R: float, theta: float, staged: bool) -> np.ndarray:
+    """Where the current drag is going, in scan coordinates now: the site, or the staging point
+    1.5 nm radially outside it."""
+    rc = np.array(s.image_xy(*rc_m))
+    return rc + (R + (0.0 if staged else STAGE_NM)) * _unit(theta)
+
+
+def _place(s: Session, mv: Mover, centre, atom, theta: float, plan: dict, log: dict, r_ohm: float):
+    """One spare to its site: first to a staging point 1.5 nm radially outside it, where it is
+    still an isolated bump, then in; a rung lower on the resistance ladder whenever a drag
+    moved nothing (no spikes; the threshold is not read).
+
+    Where the atom is and where the ring is are navigation (privileged): the ring's centre
+    and the atom through the tip's apex (:meth:`Session.image_xy`), which puts both in one
+    frame of reference whatever the fast frames' lag and the drift. What is measured is the
+    ring's radius (the first survey) and the angles of its gap's sites. The atom comes to rest
+    on the lattice site nearest where the tip leaves it, a few tenths of a nanometre short of
+    the tip's end (the atom hops only once the apex is 0.6 site spacings past it), and a site
+    is held only if an atom is within half a spacing of it (as little as 0.3 nm), so the last
+    approach is closed-loop: the drag is repeated, from behind the atom, until it is within
+    ``FINE_NM`` of the site.
+
+    Returns the resistance that moved it, or ``None`` when it went onto the tip."""
+    reg = s.w.surface.site.adatoms
+    attempts = log.setdefault("attempts", [])
+    ring = s.w.surface.corral_snapshot()
+    rc_m = tuple(v * 1e-9 for v in ring["centre_nm"])
+    R = plan["R"]
+    staged, fine, partial = False, 0, 0
+    for _ in range(MAX_STEPS):
+        log["r_resume"] = r_ohm
+        if r_ohm < LADDER_MIN_KOHM * 1e3:
+            raise RuntimeError("the spare did not follow down to the lowest resistance")
+        rc = np.array(s.image_xy(*rc_m))
+        pos = np.array(s.image_xy(*reg.site_xy(atom.i, atom.j, atom.sub)))
+        site = rc + R * _unit(theta)
+        stage = rc + (R + STAGE_NM) * _unit(theta)
+        out = float(np.hypot(*(pos - rc))) - R
+        if not staged and (float(np.hypot(*(pos - stage))) <= STAGE_ON_GOAL_NM or out < STAGE_NM):
+            staged = True                                    # there, or already past it
+        if staged and float(np.hypot(*(pos - site))) <= FINE_NM:
+            return r_ohm
+        if fine >= MAX_FINE:
+            return r_ohm                                     # as close as the lattice lets it
+        vec = (site if staged else stage) - pos
+        u = vec / max(float(np.hypot(*vec)), 1e-9)
+        # the drag runs over the atom from RUN_UP_NM behind it to the goal: started on the atom,
+        # a drag of a few tenths of a nanometre hardly moved it (the atom hops only once the
+        # apex is 0.6 site spacings away)
+        start = pos - RUN_UP_NM * u
+        spikes = mv.drag((float(start[0]), float(start[1])), (float(pos[0] + vec[0]), float(pos[1] + vec[1])), r_ohm)
+        attempts.append({"r_kohm": round(r_ohm / 1e3, 1), "spikes": spikes, "in": staged})
+        if atom.status != "on_surface":
+            return None                                      # it went onto the tip
+        if tip_needs_poke(s.w, imaging=True):
+            raise LostTrack()
+        if spikes == 0:
+            r_ohm *= LADDER_FACTOR
+            partial = 0
+            continue
+        after = np.array(s.image_xy(*reg.site_xy(atom.i, atom.j, atom.sub)))
+        d0, d1 = float(np.hypot(*vec)), float(np.hypot(*(rc_goal(s, rc_m, R, theta, staged) - after)))
+        if staged and d0 <= 1.0:
+            fine += 1                                        # the closing approach: counted apart
+        elif d1 > 0.5 * d0:
+            # the atom hopped, but it let go of the tip long before the goal: a few such drags
+            # at a rung say it is too high, as no hop at all does
+            partial += 1
+            if partial >= PARTIAL_MAX:
+                r_ohm *= LADDER_FACTOR
+                partial = 0
+        else:
+            partial = 0
+    raise RuntimeError("the spare did not reach its site")
+
+
+def _clean_tip(s: Session, centre, radius_m: float, log: dict, *, spectroscopy: bool = False) -> bool:
+    """Condition the tip far from the corral if it needs it; True when it did (the long move
+    back creeps, and the drift has to be measured again)."""
+    w = s.w
+    if tip_needs_poke(w, imaging=True, clean_ldos=spectroscopy) or w.tip.carried:
+        log["tip_rounds"] += condition_tip(s, *centre, imaging=True, clean_ldos=spectroscopy or bool(w.tip.carried),
+                                           r_min=radius_m + 150e-9, r_max=radius_m + 200e-9, clear=5e-9)
+        s.go(*centre)
+        s.inst.act("wait", seconds=300.0)
+        return True
+    return False
+
+
+def _diagnose(w, ring: dict, plan: dict, pairs: list) -> dict:
+    """The record of how the repair came out, read from the truth after the last drag (never
+    read during the episode): the designed gap sites no atom is within half a site spacing of,
+    and for each atom the plan moved how far it is from the nearest designed gap site and how
+    far off the circle."""
+    reg = w.surface.site.adatoms
+    cx, cy = (v * 1e-9 for v in ring["centre_nm"])
+    R = float(ring["radius_nm"]) * 1e-9
+    spacing = 2 * math.pi * R / int(ring["n_sites"])
+    gap = [reg.site_xy(i, j) for i, j in ring["gap_sites"]]
+    pts = reg.positions()
+    unheld = []
+    for (i, j), (sx, sy) in zip(ring["gap_sites"], gap):
+        d = float(np.hypot(pts[:, 0] - sx, pts[:, 1] - sy).min()) if pts.shape[0] else float("inf")
+        if d > reg.RING_SITE_TOL * spacing:
+            unheld.append({"angle_deg": round(math.degrees(math.atan2(sy - cy, sx - cx)) % 360.0, 1),
+                           "nearest_atom_nm": round(d * 1e9, 2)})
+    moved = []
+    for a, _theta in pairs:
+        x, y = reg.site_xy(a.i, a.j, a.sub)
+        moved.append({"to_nearest_gap_site_nm": round(min(math.hypot(x - gx, y - gy) for gx, gy in gap) * 1e9, 2),
+                      "off_circle_nm": round((math.hypot(x - cx, y - cy) - R) * 1e9, 2), "status": a.status})
+    return {"tol_nm": round(reg.RING_SITE_TOL * spacing * 1e9, 3), "unheld": unheld, "moved": moved,
+            "n_ring": int(ring["n_sites"]), "r_nm": float(ring["radius_nm"]),
+            "planned_deg": sorted(round(math.degrees(t) % 360.0, 1) for t in plan["sites"]),
+            "gap_deg": sorted(round(math.degrees(math.atan2(gy - cy, gx - cx)) % 360.0, 1) for gx, gy in gap)}
+
+
+def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARIO, repeats: int = 3,
+        integration_ms: float = 20.0) -> dict:
+    """One P3-repair episode by the reference protocol; returns what it reported and how it
+    scored."""
+    s = Session(scenario, seed, out_dir)
+    inst, w = s.inst, s.w
+    ring = w.surface.corral_snapshot()
+    centre = tuple(v * 1e-9 for v in ring["centre_nm"])
+    radius_m = float(ring["radius_nm"]) * 1e-9
+    st = inst.status()
+    mv = Mover(s, imaging_v=st["bias_v"], imaging_pa=st["setpoint_pa"], compact_frac=NEAR_COMPACT,
+               apex_aware=True)
+    log: dict = {"tip_rounds": 0, "track_lost": 0, "pickups": 0, "placed": 0}
+    for _ in range(8):
+        # the first survey can find the tip unfit as well (the unstable and dirty ones change at
+        # any time): condition it and look again
+        if _clean_tip(s, centre, radius_m, log):
+            mv.drift(*centre)
+        elif _ == 0:
+            mv.drift(*centre)
+        try:
+            sv = _survey(s, centre)
+            break
+        except LostTrack:
+            log["track_lost"] += 1
+    else:
+        raise RuntimeError("no usable survey of the corral")
+    plan = _plan(s, sv)
+    pairs = _pair(s, sv, plan)
+    log["first_profile"] = {"deg": [round(float(np.degrees(x)), 1) for x in sv["angles"][::4]],
+                            "y": [round(float(x) * 1e12, 2) for x in sv["profile"][::4]]}
+    log.update(spares_seen=len(plan["spares"]), sites=len(plan["sites"]),
+               gap_width_nm=plan["gap_width_nm"], spacing_nm=plan["spacing_nm"],
+               ring_radius_fit_nm=sv["R"])
+    r_next = LADDER_KOHM * 1e3
+    for atom, theta in pairs:
+        r_ohm = r_next
+        for _ in range(6):
+            if _clean_tip(s, centre, radius_m, log):
+                mv.drift(*centre)
+            if atom.status != "on_surface":
+                break
+            try:
+                got = _place(s, mv, centre, atom, theta, plan, log, r_ohm)
+            except LostTrack:
+                log["track_lost"] += 1
+                r_ohm = log.pop("r_resume", r_ohm)
+                continue
+            except RuntimeError as exc:                      # this spare is not going to its site:
+                log.setdefault("place_errors", []).append(str(exc))   # go on, and the judge says what is left
+                break
+            if got is None:
+                log["pickups"] += 1
+            else:
+                log["placed"] += 1
+                r_next = min(LADDER_KOHM * 1e3, 1.6 * got)
+            break
+    if _clean_tip(s, centre, radius_m, log):
+        mv.drift(*centre)
+    try:
+        # the ring as imaged once it is repaired: its cross-section at each site, relative to its level
+        sv = _survey(s, centre)
+        log["site_fill"] = [round(_cross_section(sv, th) / plan["level"], 2) for th in plan["sites"]]
+    except LostTrack:
+        pass
+    _clean_tip(s, centre, radius_m, log, spectroscopy=True)
+    m = p3.measure(s, centre, radius_m, integration_ms=integration_ms, repeats=repeats, compensated=True,
+                     ring_fit=find_ring)
+    got = m.pop("values")
+    log["diag"] = _diagnose(w, ring, plan, pairs)
+    out = inst.finish()
+    want, err = p3.truth_errors(inst, got, m.pop("radius_claims"))
+    snap = w.truth()["corral"]
+    log.pop("r_resume", None)
+    return {"paper": "P3-repair", "seed": int(seed), "success": bool(out["success"]),
+            "partial": float(out.get("partial", 0.0)),
+            "values": got, "truth": want, "abs_err": err, "claims_ok": claims_ok(inst),
+            "ring_occupancy": float(snap["ring_occupancy"]), "gap_sites": len(ring["gap_sites"]),
+            "radius_nm": float(ring["radius_nm"]), "instrument_s": float(inst.used_s), **log, **m,
+            "tip_condition": inst.scenario.draw_hidden(seed).get("tip", {}).get("condition")}
