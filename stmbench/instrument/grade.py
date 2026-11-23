@@ -195,13 +195,11 @@ def grade_export(export_dir: str | Path, scenario: Scenario | str | Path, seed: 
     counts) raises :class:`~stmbench.instrument.export.ExportDamaged`, a :class:`ValueError` subclass:
     an export that cannot be verified is not a reproduction, so the grade command scores it 0
     (:func:`damaged_result`, exit 0). A **mismatch of setup** raises a plain :class:`ValueError`
-    (exit 2, the grader's or the deployment's problem, which the OSWorld adapter reports as pending). The
-    latter: the directory is not a gradable export of this scenario: not an
-    export at all, another scenario, another rules, API or export version, or a ``session.json``
-    that counts more records than the log holds (a log cut short). An export of another API
-    version is a :class:`~stmbench.instrument.core.VersionError`, whose message says that it needs
-    the code of its own version: its calls and records are not this version's, so a replay here
-    would only differ."""
+    (exit 2, the grader's or the deployment's problem, which the OSWorld adapter reports as pending):
+    the directory is an export of another scenario, or of another rules, API or export version. An
+    export of another API version is a :class:`~stmbench.instrument.core.VersionError`, whose message
+    says that it needs the code of its own version: its calls and records are not this version's, so
+    a replay here would only differ."""
     export = _read(export_dir)
     session, records = export["session"], export["records"]
     sc = _load_scenario(scenario)
