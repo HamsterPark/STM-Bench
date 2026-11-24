@@ -41,7 +41,7 @@ from PySide6.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QVBoxLayou
 from . import fmt, jobs, layout, style
 from .center import THUMB_PX, CenterColumn, thumb_pixmap
 from .controls import ElidedLabel, Tabs
-from .labels import two_lines, tr
+from .labels import two_lines, tr, with_console_notes
 from .panels import ActionPanel
 from .recent import RecentList
 from .session import GuiSession, SpecError, make_private_dir, read_spec
@@ -119,9 +119,9 @@ class MainWindow(QMainWindow):
         col.addLayout(row, 1)
         self._row = row
 
-        self.sidebar = Sidebar(session.task_text(), session.manual(), session.claims(), lang)
+        self.sidebar = Sidebar(session.task_text(), with_console_notes(session.manual()), session.claims(), lang)
         self.center = CenterColumn(lang)
-        self.operate = ActionPanel(layout.OPERATE, self.run_action, lang)
+        self.operate = ActionPanel(layout.OPERATE, self.run_action, lang, submit_move=self.run_move_during)
         self.spectroscopy = ActionPanel(layout.SPECTROSCOPY, self.run_action, lang)
         left_px, right_px = column_widths(*column_needs(self.sidebar, (self.operate, self.spectroscopy)))
         self.sidebar.setFixedWidth(left_px)
@@ -243,6 +243,24 @@ class MainWindow(QMainWindow):
         args = dict(args)
         return self._submit(Job("act", name, args, lambda s, n=name, a=args: jobs.run_act(s, n, a)))
 
+    def run_move_during(self, args: dict, during: dict) -> int:
+        """Queue a move of the tip with values set around it (the Tip group's "during move" fields): one job that runs
+        the calls an operator would click one by one (:func:`stmbench.gui.jobs.run_move_during`). The Log shows the
+        job as the move until it has run, then lists every call it made."""
+        args = {k: v for k, v in args.items()}
+        during = {name: dict(a) for name, a in during.items()}
+        shown = {**args, "during_move": "; ".join(f"{name} {fmt.params_text(a)}" for name, a in during.items())}
+        return self._submit(Job("act", "move_tip", shown, lambda s, a=args, d=during: jobs.run_move_during(s, a, d)))
+
+    def _apply_steps(self, job: Job, out: jobs.Outcome) -> None:
+        """A move with during-move values has run: each call it made is drawn as if it had been clicked (a Log entry,
+        a recent result, the readings), in the order it ran. A refused call holds the console as a click would; the
+        last refusal is the one the band shows (a refused putting back, after a refused move, is the one that ends it)."""
+        calls = [Job("act", s.label, s.args, lambda sess, s=s: s) for s in out.steps]
+        self.sidebar.log.expand(job.id, [(c.id, c.label, c.args) for c in calls], self._t_s)
+        for call, step in zip(calls, out.steps):
+            self._apply(call, step)
+
     def _report(self, body: dict) -> None:
         sent = {k: v for k, v in body.items() if v != ""}
         self._submit(Job("report", "report_result", sent, lambda s, b=dict(body): jobs.run_report(s, b)))
@@ -320,6 +338,9 @@ class MainWindow(QMainWindow):
             self._show_state()
 
     def _apply(self, job: Job, out: jobs.Outcome) -> None:
+        if out.steps:
+            self._apply_steps(job, out)
+            return
         before = self._status                            # what the junction was when this call began
         if out.status:
             self._status = out.status

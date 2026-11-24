@@ -8,7 +8,8 @@ table exactly (``tests/test_gui_layout.py``): every action, every parameter, not
 A panel is a stack of groups; a group is a few lines; a line is a row of cells. A cell is one
 parameter's field (:class:`F`), the button that runs an action (:class:`Run`), the On / Off pair of an
 action that switches something (:class:`OnOff`), or one button per allowed value that runs the action
-at once (:class:`Choices`). Labels say what a control is, with its unit; they carry no advice, and no two controls carry the same
+at once (:class:`Choices`). A fifth, console-only cell (:class:`During`) borrows a setter's parameter for the
+values a move may set around itself; it is not a control of that parameter and is not counted as one. Labels say what a control is, with its unit; they carry no advice, and no two controls carry the same
 label (``tests/test_gui_layout.py``): two fields named "bias (V)" are one misread away from a wrong call.
 The one exception is the same setting of the two sweeps (points, settle, integration, sweep back of
 the STS and of the Z spectrum), each in a box named for its sweep with its own Run button.
@@ -56,7 +57,20 @@ class Choices:
     unit: str = ""
 
 
-Cell = Union[F, Run, OnOff, Choices]
+@dataclass(frozen=True)
+class During:
+    """A console-only control for the optional "during the move" values of the Tip group: it borrows the
+    ``param`` of the setter ``action`` (``set_current_range`` / ``set_bias`` / ``set_setpoint``) for its kind,
+    range and choices, and has no parameter of its own in the action table. It runs nothing when it is
+    touched; blank, or "keep", means the move leaves that setting alone."""
+    action: str
+    param: str
+    en: str
+    zh: str
+    unit: str = ""
+
+
+Cell = Union[F, Run, OnOff, Choices, During]
 
 
 @dataclass(frozen=True)
@@ -91,6 +105,10 @@ OPERATE: tuple[Group, ...] = (
          F("move_tip", "y_nm", "tip y", "针尖", "nm"),
          F("move_tip", "speed_nm_s", "speed", "速度", "nm/s"),
          Run("move_tip", "Move tip", "移动针尖")),
+        # range and setpoint only: with the bias field as well the line measured 746 px in the Chinese window with DejaVu,
+        # against 704 px (the line must keep 8 px to spare); the jobs still run a bias set around a move (jobs.DURING)
+        (During("set_current_range", "full_scale_na", "move range", "移动时量程", "nA"),
+         During("set_setpoint", "current_pa", "move setpoint", "移动时设定点", "pA")),
         (F("drift_comp", "vx_nm_per_min", "vx", "漂移", "nm/min"),
          F("drift_comp", "vy_nm_per_min", "vy", "漂移", "nm/min"),
          F("drift_comp", "vz_pm_per_min", "vz", "漂移", "pm/min"),
@@ -173,5 +191,10 @@ def runners() -> list[str]:
 
 
 def group_of_action() -> dict[str, str]:
-    """The group each action is in."""
-    return {c.action: key for key, c in cells()}
+    """The group each action is in (a :class:`During` cell borrows its setter's parameter; it does not move the setter)."""
+    return {c.action: key for key, c in cells() if not isinstance(c, During)}
+
+
+def during_cells() -> list[During]:
+    """The console-only cells, in panel order."""
+    return [c for _, c in cells() if isinstance(c, During)]

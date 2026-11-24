@@ -8,7 +8,8 @@ checks a value: an empty field sends nothing and a field that is not a number is
 instrument refuses it in its own words.
 
 Object names are the window's address book for tests and for anyone who scripts the screen:
-``act.<action>.<param>`` for every parameter's control, ``run.<action>`` for a run button,
+``act.<action>.<param>`` for every parameter's control, ``during.<setter>.<param>`` for the Tip group's optional
+during-move values (text fields too: blank leaves the setting alone), ``run.<action>`` for a run button,
 ``run.<action>.on`` / ``.off`` for an On / Off pair, ``run.<action>.<value>`` for one of a row of
 value buttons. What an action answered is not shown here: every result goes to the list of recent
 results under the tabs (:mod:`stmbench.gui.recent`), where several calls of one step stay side by side.
@@ -31,7 +32,7 @@ from ..instrument import ACTIONS
 from . import fmt, style
 from .controls import Segmented, SelectAllLineEdit, strong
 from .labels import both, one, tr
-from .layout import Cell, Choices, F, Group, OnOff, Run
+from .layout import Cell, Choices, During, F, Group, OnOff, Run
 
 
 def token(value: Any) -> str:
@@ -47,6 +48,12 @@ def placeholder(p) -> str:
     return "optional"
 
 
+def layout_during_order(cells) -> list[During]:
+    """The during-move cells in the order their setters run (range, bias, setpoint)."""
+    order = ["set_current_range", "set_bias", "set_setpoint"]
+    return sorted(cells, key=lambda c: order.index(c.action))
+
+
 def _param(action: str, name: str):
     return next(p for p in ACTIONS[action].params if p.name == name)
 
@@ -58,11 +65,13 @@ class ActionPanel(QScrollArea):
     field_entered = Signal(str, str)
 
     def __init__(self, groups: tuple[Group, ...], submit: Callable[[str, dict], None], lang: str = "zh",
-                 parent: QWidget | None = None):
+                 parent: QWidget | None = None, submit_move: Callable[[dict, dict], None] | None = None):
         super().__init__(parent)
         self.groups = groups
         self.lang = lang
         self._submit = submit
+        self._submit_move = submit_move                  # (move_tip's arguments, the during-move calls): see run_move_during
+        self._during: dict[tuple[str, str], During] = {}
         self._cells: dict[tuple[str, str], F] = {}
         self.controls: dict[tuple[str, str], QWidget] = {}
         self.run_buttons: dict[str, QPushButton] = {}
@@ -97,7 +106,8 @@ class ActionPanel(QScrollArea):
             h = QHBoxLayout()
             h.setSpacing(style.px(8))
             for cell in line:
-                self._group_of[cell.action] = g.key
+                if not isinstance(cell, During):         # it borrows a setter's parameter; the setter's own group owns the action
+                    self._group_of[cell.action] = g.key
                 widget, stretch = self._cell(cell)
                 h.addWidget(widget, stretch, Qt.AlignmentFlag.AlignBottom)
             v.addLayout(h)
@@ -112,6 +122,8 @@ class ActionPanel(QScrollArea):
         if isinstance(c, OnOff):
             self._onoff.add(c.action)
             return self._onoff_cell(c), 0
+        if isinstance(c, During):
+            return self._during_cell(c), 1
         return self._choices_cell(c), 0
 
     def _label(self, name: str, en: str, zh: str, unit: str = "", required: bool = False) -> QLabel:
@@ -152,6 +164,28 @@ class ActionPanel(QScrollArea):
             w.entered.connect(lambda a=c.action, k=c.param: self.field_entered.emit(a, k))
         w.setObjectName(name)
         self.controls[(c.action, c.param)] = w
+        v.addWidget(w)
+        return cell
+
+    def _during_cell(self, c: During) -> QWidget:
+        """A during-move value: a text field, blank to keep the setting. Touching it runs nothing; the value is read when
+        Move tip is clicked, and checked against the setter's table entry (the range against its choices) before anything runs."""
+        self._during[(c.action, c.param)] = c
+        cell = QWidget()
+        v = QVBoxLayout(cell)
+        v.setContentsMargins(0, 0, 0, 0)
+        v.setSpacing(0)
+        name = f"during.{c.action}.{c.param}"
+        v.addWidget(self._label(f"lbl.{name}", c.en, c.zh, c.unit))
+        w = SelectAllLineEdit()
+        w.setFont(style.mono_font(18))
+        ph = one("keep", self.lang)
+        w.setPlaceholderText(ph)
+        w.setMinimumWidth(max(style.px(84), QFontMetrics(w.font()).horizontalAdvance(ph) + style.px(24)))
+        w.returnPressed.connect(lambda: self._run("move_tip"))
+        w.entered.connect(lambda a=c.action, k=c.param: self.field_entered.emit(f"during.{a}", k))
+        w.setObjectName(name)
+        self.controls[(f"during.{c.action}", c.param)] = w
         v.addWidget(w)
         return cell
 
@@ -223,10 +257,25 @@ class ActionPanel(QScrollArea):
             args[p.name] = fmt.parse_number(text) if p.kind in ("number", "integer") else text
         return args
 
+    def collect_during(self) -> dict[str, dict]:
+        """The during-move values that are set, by the setter that applies them, in the order they run. A blank field
+        and a range left on "keep" are not set; a field that is not a number is returned as typed (the check before the
+        move refuses it in the table's words)."""
+        out: dict[str, dict] = {}
+        for c in layout_during_order(self._during.values()):
+            text = self.controls[(f"during.{c.action}", c.param)].text().strip()
+            if text:
+                out[c.action] = {c.param: fmt.parse_number(text)}
+        return out
+
     def _run(self, action: str, on: bool | None = None) -> None:
         args = self.collect(action)
         if on is not None:
             args = {"on": on, **args}
+        during = self.collect_during() if action == "move_tip" else {}
+        if during and self._submit_move is not None:
+            self._submit_move(args, during)
+            return
         self._submit(action, args)
 
     def _enter(self, action: str) -> None:
@@ -240,12 +289,18 @@ class ActionPanel(QScrollArea):
         """One line about a text field, for the reader who just clicked it: its label as the panel shows it, with
         its unit, and the range the action table gives it, ``setpoint (pA): range 0.1 … 100000``; the label alone
         for a field with no range. The numbers are the table's, in the unit the label states."""
-        c = self._cells.get((action, param))
+        if action.startswith("during."):                 # a during-move value: the range of the setter it borrows
+            action = action[len("during."):]
+            c = self._during.get((action, param))
+        else:
+            c = self._cells.get((action, param))
         if c is None:
             return ""
         p = _param(action, param)
         label = both(c.en, c.zh, self.lang) + (f" ({c.unit})" if c.unit else "")
         rng = fmt.range_text(p.lo, p.hi)
+        if p.choices is not None:                        # a choice is told as its allowed values
+            rng = f"{one('field_one_of', self.lang)} " + ", ".join(fmt.num(ch) for ch in p.choices)
         return f"{label}: {one('field_range', self.lang)} {rng}" if rng else label
 
     # ── what the window tells the panel ──
