@@ -36,12 +36,12 @@ def two_lines(key: str, lang: str = "zh") -> str:
 #: What the console does with the Tip group's "during move" fields, said under the instrument's manual (the manual itself
 #: is the instrument's, the text an MCP agent gets, and stays byte for byte). Facts only: no value and no occasion is named.
 MOVE_NOTE: Pair = (
-    "Console: range and setpoint during move are optional (blank: keep). If either is filled, Move tip first checks "
+    "Console: the fields move range and move setpoint are optional (blank: keep). If either is filled, Move tip first checks "
     "every value (one invalid: nothing runs), then runs set_current_range and set_setpoint for the filled ones, in "
     "this order, then move_tip, then the same setters in reverse order, back to the values the instrument reported "
     "before; a setting that did not change is not set back. Each call is logged as if clicked. If a call is refused, "
     "the settings already changed are set back and the band shows the refusal; a refused set-back stops there.",
-    "控制台：移动时量程、设定点两栏可选（留空＝不变）。填了任一栏，移动针尖先检查所有值（有一个不合法就都不运行），"
+    "控制台：移动时量程、移动时设定点两栏可选（留空＝不变）。填了任一栏，移动针尖先检查所有值（有一个不合法就都不运行），"
     "再按 set_current_range、set_setpoint 的顺序运行已填的项，然后运行 move_tip，再倒序把这些设置恢复为之前仪器报告的值；"
     "没有变的不再恢复。每个调用照常记入日志。调用被拒时，已改的设置同样恢复，红条显示拒绝；恢复被拒则就地停止。",
 )
@@ -51,7 +51,7 @@ MOVE_NOTE: Pair = (
 FLATTEN_NOTE: Pair = (
     "Flatten: Line subtracts each row's median (tilt along a row stays); Plane subtracts one fitted plane "
     "(row-to-row steps stay); None subtracts nothing.",
-    "展平：Line 逐行减去该行中位数（行内倾斜保留）；Plane 减去整幅拟合平面（行间台阶保留）；None 不减。",
+    "拉平：逐行 减去每一行的中位数（行内倾斜保留）；平面 减去整幅拟合平面（行间台阶保留）；无 不减。",
 )
 
 
