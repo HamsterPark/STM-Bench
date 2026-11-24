@@ -2641,3 +2641,9 @@ def test_the_pll_group_and_the_oscillation_reading_are_there_only_on_a_rig_with_
     for name in ("group.sts", "group.zspec", "group.lockin"):
         assert shots.widget(p4, name).isVisible() and shots.widget(p5, name).isVisible()
 
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_manual_says_what_the_flatten_modes_do_in_both_languages(open_window, lang):
+    from stmbench.gui.labels import FLATTEN_NOTE
+    text = shots.widget(open_window(lang), "manual.text").toPlainText()
+    assert FLATTEN_NOTE[0] in text and FLATTEN_NOTE[1] in text

@@ -55,9 +55,17 @@ MOVE_NOTE: Pair = (
 )
 
 
+#: What the viewer's Flatten modes do (stmbench.render.display_array defines them; the console only says so). Facts only.
+FLATTEN_NOTE: Pair = (
+    "Flatten: Line subtracts each row's median (tilt along a row stays); Plane subtracts one fitted plane "
+    "(row-to-row steps stay); None subtracts nothing.",
+    "展平：Line 逐行减去该行中位数（行内倾斜保留）；Plane 减去整幅拟合平面（行间台阶保留）；None 不减。",
+)
+
+
 def with_console_notes(manual: str) -> str:
     """The manual the Manual tab shows: the instrument's, then the console's notes in both languages."""
-    return "\n\n".join([manual, *MOVE_NOTE])
+    return "\n\n".join([manual, *MOVE_NOTE, *FLATTEN_NOTE])
 
 
 S: dict[str, Pair] = {
