@@ -543,7 +543,9 @@ def test_the_task_the_manual_and_the_claims_are_what_every_agent_is_told(open_wi
     assert f"【评分规则 v{RULES_VERSION}】" in shots.widget(zh, "task.text").toPlainText()  # the Chinese one
     shown = shots.widget(en, "manual.text").toPlainText()
     assert shown.startswith(manual) and "move_tip" in manual              # the instrument's manual, byte for byte, first
-    assert shown == with_console_notes(manual) == shots.widget(zh, "manual.text").toPlainText()   # then the console's note
+    shown_zh = shots.widget(zh, "manual.text").toPlainText()
+    assert shown == with_console_notes(manual, "en") and shown_zh == with_console_notes(manual, "zh")   # then the notes, one language each
+    assert shown_zh.startswith(manual) and shown != shown_zh
     assert en.windowTitle() == f"STM-Bench console · {P4}"
     # the report form shows the rule card's line about the claim in the window's language
     def claim_texts(w: MainWindow) -> str:
@@ -615,7 +617,7 @@ def test_the_manuals_wide_view_reads_in_two_screens_and_gives_the_window_back_wh
     assert win.sidebar.width() > 1800 and win.status.height() == strip_h and win.status.isVisible()      # the strip stays
     assert win.width() == shots.WINDOW[0]                                        # and the window did not grow to make room
     assert text.toPlainText().startswith(manual)                                 # the manual an MCP agent gets, byte for byte, then the console's note
-    assert text.toPlainText() == with_console_notes(manual)
+    assert text.toPlainText() == with_console_notes(manual, lang)
     total, page = manual_lines(win)
     assert total <= 2 * page, (total, page)                                      # two screens or fewer, in these fonts too
     table = shots.widget(win, "facts.table")
@@ -2643,7 +2645,8 @@ def test_the_pll_group_and_the_oscillation_reading_are_there_only_on_a_rig_with_
 
 
 @pytest.mark.parametrize("lang", ["en", "zh"])
-def test_the_manual_says_what_the_flatten_modes_do_in_both_languages(open_window, lang):
+def test_the_manual_says_what_the_flatten_modes_do_in_the_windows_language(open_window, lang):
     from stmbench.gui.labels import FLATTEN_NOTE
     text = shots.widget(open_window(lang), "manual.text").toPlainText()
-    assert FLATTEN_NOTE[0] in text and FLATTEN_NOTE[1] in text
+    mine, other = (FLATTEN_NOTE[0], FLATTEN_NOTE[1]) if lang == "en" else (FLATTEN_NOTE[1], FLATTEN_NOTE[0])
+    assert mine in text and other not in text

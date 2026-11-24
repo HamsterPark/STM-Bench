@@ -55,9 +55,10 @@ FLATTEN_NOTE: Pair = (
 )
 
 
-def with_console_notes(manual: str) -> str:
-    """The manual the Manual tab shows: the instrument's, then the console's notes in both languages."""
-    return "\n\n".join([manual, *MOVE_NOTE, *FLATTEN_NOTE])
+def with_console_notes(manual: str, lang: str = "en") -> str:
+    """The manual the Manual tab shows: the instrument's (byte for byte), then the console's notes in the window's language."""
+    i = 0 if lang == "en" else 1
+    return "\n\n".join([manual, MOVE_NOTE[i], FLATTEN_NOTE[i]])
 
 
 S: dict[str, Pair] = {

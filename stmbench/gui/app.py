@@ -119,7 +119,7 @@ class MainWindow(QMainWindow):
         col.addLayout(row, 1)
         self._row = row
 
-        self.sidebar = Sidebar(session.task_text(), with_console_notes(session.manual()), session.claims(), lang)
+        self.sidebar = Sidebar(session.task_text(), with_console_notes(session.manual(), lang), session.claims(), lang)
         self.center = CenterColumn(lang)
         self.operate = ActionPanel(layout.OPERATE, self.run_action, lang, submit_move=self.run_move_during)
         self.spectroscopy = ActionPanel(layout.SPECTROSCOPY, self.run_action, lang)
