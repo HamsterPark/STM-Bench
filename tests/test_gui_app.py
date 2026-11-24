@@ -28,7 +28,7 @@ from PySide6.QtWidgets import (QAbstractButton, QApplication, QComboBox, QLabel,
 
 from stmbench.gui import fmt, layout, shots, style  # noqa: E402
 from stmbench.gui.app import MainWindow  # noqa: E402
-from stmbench.gui.labels import one  # noqa: E402
+from stmbench.gui.labels import one, with_console_notes  # noqa: E402
 from stmbench.gui.panels import token  # noqa: E402
 from stmbench.gui.session import GuiSession, make_private_dir, read_spec  # noqa: E402
 from stmbench.instrument import ACTIONS  # noqa: E402
@@ -189,6 +189,8 @@ def test_every_action_has_its_controls_at_the_agreed_names_and_each_can_be_click
                         names = [f"run.{c.action}"]
                     elif isinstance(c, layout.OnOff):
                         names = [f"run.{c.action}.on", f"run.{c.action}.off", f"act.{c.action}.on"]
+                    elif isinstance(c, layout.During):                   # console-only: no run button of its own
+                        names = [f"during.{c.action}.{c.param}"]
                     else:
                         names = [f"run.{c.action}.{token(ch)}" for ch in params[c.param].choices] \
                                 + [f"act.{c.action}.{c.param}"]
@@ -539,7 +541,11 @@ def test_the_task_the_manual_and_the_claims_are_what_every_agent_is_told(open_wi
     assert f"[Scoring rules v{RULES_VERSION}]" in task and "ReportResult" in task        # the English card
     assert "评分规则" not in task
     assert f"【评分规则 v{RULES_VERSION}】" in shots.widget(zh, "task.text").toPlainText()  # the Chinese one
-    assert shots.widget(en, "manual.text").toPlainText() == manual and "move_tip" in manual
+    shown = shots.widget(en, "manual.text").toPlainText()
+    assert shown.startswith(manual) and "move_tip" in manual              # the instrument's manual, byte for byte, first
+    shown_zh = shots.widget(zh, "manual.text").toPlainText()
+    assert shown == with_console_notes(manual, "en") and shown_zh == with_console_notes(manual, "zh")   # then the notes, one language each
+    assert shown_zh.startswith(manual) and shown != shown_zh
     assert en.windowTitle() == f"STM-Bench console · {P4}"
     # the report form shows the rule card's line about the claim in the window's language
     def claim_texts(w: MainWindow) -> str:
@@ -610,7 +616,8 @@ def test_the_manuals_wide_view_reads_in_two_screens_and_gives_the_window_back_wh
     assert not win.center.isVisible() and not shots.widget(win, "recent.box").isVisible() and not win.right.isVisible()
     assert win.sidebar.width() > 1800 and win.status.height() == strip_h and win.status.isVisible()      # the strip stays
     assert win.width() == shots.WINDOW[0]                                        # and the window did not grow to make room
-    assert text.toPlainText() == manual                                          # the manual an MCP agent gets, byte for byte
+    assert text.toPlainText().startswith(manual)                                 # the manual an MCP agent gets, byte for byte, then the console's note
+    assert text.toPlainText() == with_console_notes(manual, lang)
     total, page = manual_lines(win)
     assert total <= 2 * page, (total, page)                                      # two screens or fewer, in these fonts too
     table = shots.widget(win, "facts.table")
@@ -2635,3 +2642,11 @@ def test_the_pll_group_and_the_oscillation_reading_are_there_only_on_a_rig_with_
     # nothing else of the page went with it
     for name in ("group.sts", "group.zspec", "group.lockin"):
         assert shots.widget(p4, name).isVisible() and shots.widget(p5, name).isVisible()
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_manual_says_what_the_flatten_modes_do_in_the_windows_language(open_window, lang):
+    from stmbench.gui.labels import FLATTEN_NOTE
+    text = shots.widget(open_window(lang), "manual.text").toPlainText()
+    mine, other = (FLATTEN_NOTE[0], FLATTEN_NOTE[1]) if lang == "en" else (FLATTEN_NOTE[1], FLATTEN_NOTE[0])
+    assert mine in text and other not in text

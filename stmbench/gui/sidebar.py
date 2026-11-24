@@ -458,6 +458,18 @@ class LogTab(QuietBrowser):
     def running(self, job_id: int) -> None:
         self._set(job_id, state="running")
 
+    def expand(self, job_id: int, calls: list[tuple[int, str, dict]], t_s: float | None) -> None:
+        """Replace the entry of one job by one entry per call it made (a move with during-move values), in the same place
+        of the log, each waiting to be told what it answered."""
+        new = [{"id": i, "label": label, "args": fmt.params_text(args), "state": "running", "t": t_s, "ok": None, "text": ""}
+               for i, label, args in calls]
+        at = next((k for k, e in enumerate(self._entries) if e["id"] == job_id), None)
+        if at is None:
+            self._entries += new
+        else:
+            self._entries[at:at + 1] = new
+        self._render()
+
     def cancelled(self, job_id: int) -> None:
         """A call dropped before it started: it stays in the log, said to be cancelled."""
         self._set(job_id, state="cancelled")

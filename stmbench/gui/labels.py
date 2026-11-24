@@ -33,6 +33,34 @@ def two_lines(key: str, lang: str = "zh") -> str:
     return en if lang == "en" or not zh or zh == en else zh + chr(10) + en
 
 
+#: What the console does with the Tip group's "during move" fields, said under the instrument's manual (the manual itself
+#: is the instrument's, the text an MCP agent gets, and stays byte for byte). Facts only: no value and no occasion is named.
+MOVE_NOTE: Pair = (
+    "Console: the fields move range and move setpoint are optional (blank: keep). If either is filled, Move tip first checks "
+    "every value (one invalid: nothing runs), then runs set_current_range and set_setpoint for the filled ones, in "
+    "this order, then move_tip, then the same setters in reverse order, back to the values the instrument reported "
+    "before; a setting that did not change is not set back. Each call is logged as if clicked. If a call is refused, "
+    "the settings already changed are set back and the band shows the refusal; a refused set-back stops there.",
+    "控制台：移动时量程、移动时设定点两栏可选（留空＝不变）。填了任一栏，移动针尖先检查所有值（有一个不合法就都不运行），"
+    "再按 set_current_range、set_setpoint 的顺序运行已填的项，然后运行 move_tip，再倒序把这些设置恢复为之前仪器报告的值；"
+    "没有变的不再恢复。每个调用照常记入日志。调用被拒时，已改的设置同样恢复，红条显示拒绝；恢复被拒则就地停止。",
+)
+
+
+#: What the viewer's Flatten modes do (stmbench.render.display_array defines them; the console only says so). Facts only.
+FLATTEN_NOTE: Pair = (
+    "Flatten: Line subtracts each row's median (tilt along a row stays); Plane subtracts one fitted plane "
+    "(row-to-row steps stay); None subtracts nothing.",
+    "拉平：逐行 减去每一行的中位数（行内倾斜保留）；平面 减去整幅拟合平面（行间台阶保留）；无 不减。",
+)
+
+
+def with_console_notes(manual: str, lang: str = "en") -> str:
+    """The manual the Manual tab shows: the instrument's (byte for byte), then the console's notes in the window's language."""
+    i = 0 if lang == "en" else 1
+    return "\n\n".join([manual, MOVE_NOTE[i], FLATTEN_NOTE[i]])
+
+
 S: dict[str, Pair] = {
     # window and status strip
     "app": ("STM-Bench console", "控制台"),
@@ -70,6 +98,7 @@ S: dict[str, Pair] = {
     "ack": ("Acknowledge", "知道了"),
     "acknowledged": ("acknowledged the refusal of", "已确认被拒绝的调用"),
     "field_range": ("range", "范围"),
+    "field_one_of": ("one of", "取值"),
     "recent_title": ("Recent results", "最近结果"),
     "stays_open": ("This program stays open; it is closed from outside.", "此程序保持打开，由外部关闭。"),
     # the instrument's facts (top of the Manual tab)
@@ -183,6 +212,7 @@ S: dict[str, Pair] = {
     "off": ("Off", "关"),
     "yes": ("yes", "是"),
     "no": ("no", "否"),
+    "keep": ("keep", "保持"),
     # the viewer, added after the screen trials of 2026-10-27/28 (gui-viewer)
     "clear_readings": ("Clear plot readings", "清除曲线读数"),
 }
