@@ -36,22 +36,14 @@ def two_lines(key: str, lang: str = "zh") -> str:
 #: What the console does with the Tip group's "during move" fields, said under the instrument's manual (the manual itself
 #: is the instrument's, the text an MCP agent gets, and stays byte for byte). Facts only: no value and no occasion is named.
 MOVE_NOTE: Pair = (
-    "Console note. Next to Move tip are two optional fields, move range (nA) and move setpoint (pA). With none set, "
-    "Move tip runs move_tip alone. With any set, every value set "
-    "and the move's own fields are first checked against the ranges above; a value outside them is refused and nothing "
-    "runs. Otherwise it runs these ordinary calls (recorded as if clicked): set_current_range, "
-    "set_setpoint (those set, in this order); move_tip as typed; then in reverse order set_setpoint, "
-    "set_current_range, each back to what the instrument reported before the first of these calls (unchanged "
-    "ones are not set again). If a call is refused, the settings applied are put back the same way, the red band "
-    "shows the refusal and the Log lists the calls that ran; a refused putting back stops there and is shown.",
-    "控制台说明。移动针尖旁有两个可选栏:移动时量程(nA)、移动时设定点(pA);都不设则只运行 move_tip。"
-    "设了任一栏,先按上文范围检查所有已设的值和移动栏位;超范围即拒绝,不运行任何调用。"
-    "否则依次运行下列普通调用(与点击一样记录):"
-    "set_current_range、set_setpoint(已设的,按此顺序);按所填运行 move_tip;"
-    "再按相反顺序运行 set_setpoint、set_current_range,各自恢复为第一个调用之前仪器报告的值"
-    "(没变的不再设)。"
-    "调用被拒绝时,已生效的设置同样恢复,红条显示拒绝,日志列出已运行的调用;"
-    "恢复被拒绝则就地停止并显示该拒绝。",
+    "Console: range and setpoint during move are optional (blank: keep). If either is filled, Move tip first checks "
+    "every value (one invalid: nothing runs), then runs set_current_range and set_setpoint for the filled ones, in "
+    "this order, then move_tip, then the same setters in reverse order, back to the values the instrument reported "
+    "before; a setting that did not change is not set back. Each call is logged as if clicked. If a call is refused, "
+    "the settings already changed are set back and the band shows the refusal; a refused set-back stops there.",
+    "控制台：移动时量程、设定点两栏可选（留空＝不变）。填了任一栏，移动针尖先检查所有值（有一个不合法就都不运行），"
+    "再按 set_current_range、set_setpoint 的顺序运行已填的项，然后运行 move_tip，再倒序把这些设置恢复为之前仪器报告的值；"
+    "没有变的不再恢复。每个调用照常记入日志。调用被拒时，已改的设置同样恢复，红条显示拒绝；恢复被拒则就地停止。",
 )
 
 
