@@ -21,7 +21,7 @@ import numpy as np
 from .clock import Clock
 from .coarse import AutoApproach, CoarseStage
 from .feedback import Loop, LoopParams
-from .junction import Preamp, current_metal, gap_for_current, iv_curve, kappa_per_m
+from .junction import ParallelLDOS, Preamp, current_metal, gap_for_current, iv_curve, kappa_per_m
 from .noise import NoiseModel
 from .paths import default_session_dir
 from .rig import RigProfile
@@ -1473,6 +1473,63 @@ class World:
                 self.surface.add_feature(Feature(sx, sy, dz * 0.02, 20e-9, kind="crater", born_sim_s=self.clock.sim()))
             self._event("pulse", v=vv, width_s=width_s, **outcome)
 
+    # ── the sample LDOS the apexes see (spectra and dI/dV maps) ──
+    def apex_current_shares(self, x, y, kappa_m: float | None = None) -> list[tuple] | None:
+        """Each apex's share of the tunnelling current with the tip over sample-frame points
+        ``(x, y)`` (arrays of one shape), as ``[(apex, share), …]``, the shares summing to 1 at
+        every point. ``None`` means the sample LDOS is taken under the tip's centre, as it always
+        was: without a surface state (the LDOS is then the material template, the same at every
+        point), and for one apex at zero lateral offset (the fast path of
+        :meth:`Tip.height_parts`), however blunt or dirty that tip is.
+
+        The apexes are parallel tunnelling channels: apex ``a`` carries a current
+        ∝ ``w_a·exp(2κ(h_a − h_max))``, ``h_a`` the smooth surface height under it plus its ``dz``
+        — the weights of the smooth channel's soft-max in :meth:`Tip.height_parts`. (The image's
+        atomic and standing-wave channels weight by ``w/Σw`` alone, without the height difference;
+        a spectrum must not copy that.) The tip's own ``apexes`` are used, not
+        :meth:`Tip.pass_apexes`, which draws a flickering tip's arrangement from the tip's stream:
+        nothing here draws a random number. The apex smearing (``Tip.apex_sigma_m``) is not
+        averaged over: every tip has one, and averaging would change a good tip's spectrum, so a
+        blunt tip still does not weaken the standing waves in a spectrum or a map (FIDELITY).
+        ``kappa_m`` defaults to the junction's now (:meth:`kappa_m`)."""
+        ap = self.tip.apexes
+        if self.surface.surface_state is None or (len(ap) == 1 and ap[0].dx == 0 and ap[0].dy == 0):
+            return None
+        k = self.kappa_m() if kappa_m is None else float(kappa_m)
+        x = np.asarray(x, float)
+        y = np.asarray(y, float)
+        hs = np.stack([self.surface.height_smooth(x + a.dx, y + a.dy) + a.dz for a in ap])
+        ws = np.array([a.w for a in ap], float).reshape((-1,) + (1,) * x.ndim)
+        q = ws * np.exp(2.0 * k * (hs - hs.max(axis=0)))
+        q = q / q.sum(axis=0)
+        return [(a, q[i]) for i, a in enumerate(ap)]
+
+    def ldos_under_tip(self, sx: float, sy: float):
+        """The sample LDOS a spectrum with the tip over sample-frame ``(sx, sy)`` samples:
+        ``Surface.ldos_at(sx, sy)`` on the fast path of :meth:`apex_current_shares`, otherwise
+        each apex's ``ldos_at(sx + dx, sy + dy)`` summed by its share of the current
+        (:class:`~stmsim.physics.junction.ParallelLDOS`)."""
+        shares = self.apex_current_shares(np.array([sx], float), np.array([sy], float))
+        if shares is None:
+            return self.surface.ldos_at(sx, sy)
+        return ParallelLDOS((float(s[0]), self.surface.ldos_at(sx + a.dx, sy + a.dy)) for a, s in shares)
+
+    def ldos_map_under_tip(self, x, y, e_ev: float, kappa_m: float | None = None) -> np.ndarray:
+        """ρ(``e_ev``) at sample-frame pixel centres ``(x, y)`` as a dI/dV map samples it:
+        ``Surface.ldos_map(x, y, e_ev)`` on the fast path of :meth:`apex_current_shares`, otherwise
+        each apex's ``ldos_map(x + dx, y + dy, e_ev)`` weighted pixel by pixel by its share of the
+        current. The renderer passes its frame's ``kappa_m``, the one its image's soft-max uses."""
+        shares = self.apex_current_shares(x, y, kappa_m)
+        if shares is None:
+            return self.surface.ldos_map(x, y, e_ev)
+        x = np.asarray(x, float)
+        y = np.asarray(y, float)
+        out = None
+        for a, s in shares:
+            term = s * self.surface.ldos_map(x + a.dx, y + a.dy, e_ev)
+            out = term if out is None else out + term
+        return out
+
     # ── spectroscopy ──
     def sts_curve(self, v_start: float, v_end: float, n: int, z_offset_m: float = 0.0,
                   settle_s: float = 0.0, integ_s: float = 0.0) -> dict:
@@ -1483,8 +1540,10 @@ class World:
             gap = max(z_tip + z_offset_m - h, 0.02e-9)
             sx, sy = self.sample_xy()
             # position-dependent LDOS when the scenario switched the surface state on (standing
-            # waves near steps / adatoms); otherwise the material template, exactly as before
-            rho_s = self.surface.ldos_at(sx, sy)
+            # waves near steps / adatoms), taken under each apex by its share of the current
+            # (ldos_under_tip; under the centre alone for one apex at zero offset); otherwise the
+            # material template, exactly as before
+            rho_s = self.ldos_under_tip(sx, sy)
             i = iv_curve(vs, gap, self.phi_junction(), rho_s, self.tip.ldos)
             t = np.arange(n) * (settle_s + integ_s)
             i = self.preamp.clamp(self.noise.current_series(i, self.clock.wall() + t))

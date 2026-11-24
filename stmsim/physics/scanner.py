@@ -258,7 +258,8 @@ class Renderer:
 
         Model: the demodulated current is the modulation amplitude times the junction's
         nominal conductance I/V, weighted by the sample LDOS at the bias energy relative to its
-        mean over the frame - the standing-wave pattern of that energy is what the map shows.
+        mean over the frame - the standing-wave pattern of that energy is what the map shows
+        (under every apex, by its share of the current: ``World.ldos_map_under_tip``).
         Simplifications, stated: the setpoint (normalisation) effect of constant-current
         feedback, the energy broadening by the modulation and the tip's own DOS are left out.
         Noise: 3 % of the mean signal at 5 ms per pixel, falling as 1/sqrt(dwell) like a bias
@@ -375,11 +376,13 @@ class Renderer:
             fl_b_rows[k] = w.tip.flicker_series(nx, dt_px_b)   # drawn afresh: the passes disagree
             if lockin:
                 # the sample LDOS at the bias energy under each pixel centre, through this
-                # row's drift, before the scratch below can change the surface
+                # row's drift, before the scratch below can change the surface; under every apex
+                # of this row's tip, by its share of the current (World.ldos_map_under_tip: the
+                # tip's own apexes, not the pass's, so the map draws nothing)
                 xs, ys = st.pixel_xy(cols.astype(float), j)
-                rho_f_rows[k] = w.surface.ldos_map(xs + ox, ys + oy, w.bias_v)
+                rho_f_rows[k] = w.ldos_map_under_tip(xs + ox, ys + oy, w.bias_v, kappa)
                 xs, ys = st.pixel_xy(bwd_pos, j)
-                rho_b_rows[k] = w.surface.ldos_map(xs + ox, ys + oy, w.bias_v)
+                rho_b_rows[k] = w.ldos_map_under_tip(xs + ox, ys + oy, w.bias_v, kappa)
             # scratches: a fragile/blunt tip scanning too fast damages the surface
             w.maybe_scratch(st, j, speed, t_row)
             lam_rows[k] = w.tip.lambda_per_s

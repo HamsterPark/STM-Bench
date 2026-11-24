@@ -155,3 +155,11 @@ notes: |
   The reference numbers above were measured with the qPlus form; the numbers on the new physics are re-run
   on the P3 branch (bench/p3-osworld). A ledger recorded before this with a high-bias poke does not
   replay with this code, and one with a pulse may not (docs/DESIGN.md, 2026-11-17).
+
+  **Spectra and dI/dV maps see every apex (2026-11-24, docs/DESIGN.md 9.3).** A spectrum or a map
+  takes the LDOS under each apex by its share of the current; a tip with one apex at its centre sees
+  what it saw before. Re-run on the current code, on the same seeds:
+  - the privileged reference: 30/30 on seeds 0-29, with the errors and times of the etched-tip run
+    (|error| p90 lower / upper peak 2.7 / 2.5 meV, radius 0.037 nm; median 485 s);
+  - the scripted baseline: 200/200 on seeds 0-199 and 97/100 on the held-out 200-299, as before.
+  The figures above stay as they were measured. Per seed: docs/results/.
