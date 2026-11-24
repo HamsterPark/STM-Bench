@@ -84,7 +84,7 @@ Reference protocols establish **task solvability, achievable measurement precisi
 
 These protocols have privileged access for navigation and operational decisions—for example, locating an atom, selecting bare surface, tracking drift, and deciding when to condition the tip. Their reported physical values come from instrument acquisitions and numerical analysis. The results below characterize this measurement reference. Autonomous-agent performance is evaluated separately.
 
-**Documented calibration results, 13 October 2026 (P4 rerun 14 October):**
+**Documented calibration results, 13 October 2026; the P4 and P7 rows give their own dates:**
 
 | Reference protocol | Seeds | Complete task success | Median instrument time | 90th-percentile measurement error |
 |---|---:|---:|---:|---|
