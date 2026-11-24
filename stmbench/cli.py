@@ -283,7 +283,7 @@ def main(argv=None) -> int:
 
     f = sub.add_parser("reference", help="privileged reference solutions: the truth navigates, every reported "
                                          "number is measured; reports success, error spread and instrument time")
-    f.add_argument("--paper", required=True, help="P3, P3R (P3's repair variant), P4 or P5")
+    f.add_argument("--paper", required=True, help="P3, P3R (P3's repair variant), P4, P5 or P7")
     f.add_argument("--seeds", type=int, default=30, help="number of seeds")
     f.add_argument("--first-seed", type=int, default=0)
     f.add_argument("--jobs", type=int, default=1, help="processes in parallel")
@@ -291,7 +291,7 @@ def main(argv=None) -> int:
     f.set_defaults(fn=cmd_reference)
     b = sub.add_parser("baseline", help="scripted baselines: the instrument an agent gets and nothing else "
                                         "(no truth); reports success by the tip's state and instrument time")
-    b.add_argument("--paper", required=True, help="P4")
+    b.add_argument("--paper", required=True, help="P3, P3R (P3's repair variant), P4 or P7")
     b.add_argument("--seeds", type=int, default=30, help="number of seeds")
     b.add_argument("--first-seed", type=int, default=0)
     b.add_argument("--jobs", type=int, default=1, help="processes in parallel")

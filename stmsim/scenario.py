@@ -326,6 +326,9 @@ class Scenario:
             w.drift_v_m_per_s = v
         self._configure_adatoms(w, drawn, ini, seed)
         self._configure_force(w, drawn, ini)
+        # a claim judged on a series of drags (P7) needs the judge's record of every traced move;
+        # it only reads the instrument, so a world without such a claim is the one it always was
+        w.record_drags = any(str((c.get("evidence") or {}).get("kind")) == "drag_series" for c in self.claims)
         if ini.get("approached", True):
             w.coarse.coarse_gap_m = w.surface_height_here() + 0.6e-9
             w.withdrawn = False

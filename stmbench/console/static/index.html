@@ -592,7 +592,7 @@ function renderReport() {
     simple('rep', 'value', bi('数值', 'value'), true),
     h('div', { class: 'row2' }, simple('rep', 'x_nm', 'x_nm'), simple('rep', 'y_nm', 'y_nm')),
     h('div', { class: 'field' }, h('label', { for: 'rep-frame' }, bi('位置读自哪一帧', 'frame')), h('select', { id: 'rep-frame', name: 'frame' })),
-    h('div', { class: 'field' }, h('div', { class: 'lbl' }, bi('证据：结果来自哪些帧和谱', 'evidence: the frames and spectra the result came from')),
+    h('div', { class: 'field' }, h('div', { class: 'lbl' }, bi('证据：结果来自哪些帧、谱和移动轨迹', 'evidence: the frames, spectra and move traces the result came from')),
       h('div', { class: 'evlist', id: 'rep-evidence' })),
     h('div', { class: 'row2' }, simple('rep', 'unit', bi('单位', 'unit')), simple('rep', 'sigma', bi('不确定度', 'sigma'))),
     simple('rep', 'note', bi('备注', 'note')),

@@ -1,0 +1,146 @@
+id: P7_pull_threshold_cu111
+family: P7
+variant: fe_on_cu
+paper:
+  id: P7
+  title: "Bartels, Meyer & Rieder 1997 — the junction resistance at which an adatom follows the tip (Fe/Cu(111) variant)"
+  ref: "PRL 79, 697"
+rig: reference-stm
+material: Cu(111)
+time_scale: 20
+initial:
+  approached: true
+  bias_v: 0.05
+  setpoint_a: 200.0e-12
+  tip: {radius_nm: 1.0, apex_sigma_nm: 0.08, lambda_per_s: 1.0e-4}
+  surface: {contamination: 0.0, adsorbate_density_per_um2: 3.0, terrace_median_nm: 150.0}
+  # P4's deposit: an isolated atom near the origin, a few within 10 nm of it, and a sparse field
+  adatoms: {layout: single, species: Fe, target: any, target_dx_nm: 4.0, target_dy_nm: 0.0,
+            isolation_nm: 3.0, bystander_nm: 10.0, field_per_100nm2: 0.4, field_half_nm: 150}
+  # P4's tip physics: no safe place at the instrument (stmsim/physics/switches.py)
+  physics: {tip_changes_outside_scans: true, tip_recovery: true, tip_anisotropy: true, crash_over_range: true}
+faults: []
+task: |
+  样品是 Cu(111)，表面稀疏地散落着 Fe 吸附原子（扫描坐标原点附近 30 nm 内就有孤立的），仪器已在隧穿态。
+  请复现横向操纵阈值的测量（Bartels、Meyer 与 Rieder 1997）：结电阻 |V|/I 越低，针尖离原子越近，原子越容易跟着针尖走。
+  任选两个不同的孤立 Fe 原子（3 nm 内没有别的原子），分别测出它们在这台仪器、这个针尖下的拉动阈值：
+  针尖起点放在原子上、以 0.1 nm/s 横向移动 1.0 nm 时，原子有一半次数跟着针尖走到终点（拖完时停在终点处）的结电阻。
+  用 ReportResult 报告两个阈值（kΩ）。
+task_en: >-
+  The sample is Cu(111), with Fe adatoms sparsely scattered over the surface (isolated ones can
+  be found within 30 nm of the origin of the scan coordinates), and the instrument is already in
+  the tunnelling state. Please reproduce the lateral-manipulation threshold measurement of Bartels,
+  Meyer and Rieder (1997): the lower the junction resistance |V|/I, the closer the tip is to an atom
+  and the more readily the atom follows it. Choose two different isolated Fe atoms (no other atom
+  within 3 nm) and measure the pull threshold of each, on this instrument with this tip: the
+  junction resistance at which a lateral move of the tip of 1.0 nm at 0.1 nm/s, started over the
+  atom, takes the atom along to the end point (it rests there when the move ends) in half of the
+  attempts. Report the two thresholds (kΩ) with ReportResult.
+budget: {sim_hours: 2.5, wire_cmds: 200000}
+hidden:
+  adatoms:
+    n_bystanders: [2, 4]
+    height_pm: [80.0, 140.0]
+    sigma_nm: [0.25, 0.35]
+    r_threshold_kohm: {range: [80.0, 400.0], log: true}
+    r_pick_kohm: [15.0, 40.0]
+    v_max_nm_s: [0.5, 2.0]
+    capture_radius_nm: [0.35, 0.6]
+    p_slip: [0.002, 0.010]
+    p_slip_scan: [0.03, 0.10]
+  tip:
+    condition: {choice: [good, blunt, double, unstable, dirty], weights: [0.2, 0.25, 0.25, 0.15, 0.15]}
+    condition_scale: [0.0, 1.0]
+    condition_angle_deg: [0.0, 360.0]
+claims:
+  - id: r_pull_1_kohm
+    say: "第一个原子的拉动阈值：针尖起点在原子上、以 0.1 nm/s 移动 1.0 nm 时，原子有一半次数跟到终点的结电阻 |V|/I"
+    say_en: "The pull threshold of the first atom: the junction resistance |V|/I at which a 1.0 nm move of the tip at 0.1 nm/s, started over the atom, takes the atom to the end point in half of the attempts"
+    kind: scalar
+    unit: kΩ
+    tol: {rel: 0.10}
+    truth: drag_threshold
+    protocol: {length_nm: 1.0, speed_nm_s: 0.1}
+    evidence: {kind: drag_series, min_n: 8, min_resistances: 3, start_within_nm: 0.3, protocol_rel: 0.05}
+  - id: r_pull_2_kohm
+    say: "第二个原子（不是第一个）的拉动阈值，定义同上"
+    say_en: "The pull threshold of the second atom (not the first), defined as above"
+    kind: scalar
+    unit: kΩ
+    tol: {rel: 0.10}
+    truth: drag_threshold
+    protocol: {length_nm: 1.0, speed_nm_s: 0.1}
+    evidence: {kind: drag_series, min_n: 8, min_resistances: 3, start_within_nm: 0.3, protocol_rel: 0.05,
+               distinct_atom_from: r_pull_1_kohm}
+success: {kind: claims_verified}
+notes: |
+  Ladder position 1.5: between P4 (move one atom) and P3's measurement variant. P4's physics and
+  hidden ranges, unchanged; what is new is the claim and its judge. Prototype (2026-11-16, branch
+  bench/p7-proto). The tip is the rig's etched W tip from 2026-11-17 (bench/etched-tip); every
+  number below is on it unless it is said to be with the qPlus fork's poke and pulse rules, which
+  act only after a pulse or a poke above 50 mV (starting worlds and the truth do not depend on the
+  form).
+
+  **Tolerance 10 %, budget 2.5 h.** Chance audit (2026-11-17, `audit chance --holdout`, seeds
+  0-1999, truth of the two isolated atoms nearest the origin under the ideal grip, so an upper
+  bound; it reads starting worlds, which the tip's form does not change): at 10 % a constant passes
+  claim 1 on 13.4 % and claim 2 on 13.0 % of the seeds; both at once on 4.3 % in-sample (sheet
+  chosen and scored on all 2000) and 3.2 % held out (chosen on seeds 0-999, scored on 1000-1999:
+  32/1000, Wilson 95 % 2.3-4.5 %). At 12 % the held-out figure is 4.9 % (3.7-6.4 %), at 8 % 1.9 %.
+
+  Reference (2026-11-17, etched tip, seeds 0-29, 32 drags per atom, fit-guided design at 2 mV, on
+  the desktop; docs/results/p7_reference_seeds_0-29.json): |R-hat / R½ - 1| p50 1.6 %, p90 5.1 %,
+  max 7.3 % over 60 atoms; 29/30 through the judge; instrument time p50 1513 s, p90 3353 s, max
+  5583 s. The failure, seed 13 (a blunt tip), is the reference's own cap of 80 attempts per atom:
+  nine grip changes restarted the second atom's series, which ended at 5 counted drags, under the
+  evidence floor, with 3400 s of the budget left. The tolerance is about twice the p90; 5 % would
+  need about four times the drags. The budget is twice the slowest seed that passed (4501 s). The
+  evidence floor (8 drags at 3 resistances) only shows that a series was measured: cut to 8 drags
+  the same series give p90 10 %. With the qPlus fork's poke and pulse rules (job 66782, before the
+  etched tip): p50 1.9 %, p90 5.1 %, max 9.1 %, 29/30, time max 4502 s.
+
+  Platforms: the same commit on the cluster (Linux, job 66799) also gives 29/30, with seed 13
+  failing the same way (p50 1.8 %, p90 4.8 %, max 9.1 %, time max 4502 s), but in 30 of the 60
+  atoms the series parts from the desktop's mid-way, while the desktop repeats its own run exactly.
+  A recorded episode replays alike on both: seeds 7 and 9, which part at their first drag, recorded
+  on the desktop and verified on Linux (job 66918), 64 drags each: consistent, nothing beyond
+  rounding (verify's 1e-8). So the reference's moves, computed from the truth, differ in their last
+  bits between the platforms, and some drags turn on them; grading a recorded episode does not.
+
+  No-truth baseline (stmbench/baselines/p7.py: frames and move traces only): development seeds 0-29
+  30/30; held out 481-510 (job 66952, used once, after the fix below) 30/30, |R-hat / R½ - 1| p50
+  2.4 %, p90 5.4 %, max 9.4 %, instrument time p50 2206 s, p90 3250 s, max 5956 s (a blunt tip that
+  lost atoms three times). It reads each drag from a short frame after it: on seeds 100-139 (2113
+  drags, its margin fixed on 0-39) it reads 1.7 % of the misses as carries (atoms that stopped one
+  site short) and 2.4 % of the carries as misses; the move trace alone cannot tell a full carry
+  from a stop one site short (9.8 % false carries). Its first held-out range, 451-480 (job 66916),
+  gave 29/30: in seed 451 the first atom walked 6 nm in 32 alternating drags and was taken again as
+  the second one, which the judge refused (`same_atom_as`). Since then the second atom must be 5 nm
+  from every place the first was found; 451-480 counts as seen.
+
+  **What is measured.** The follow law (stmsim.physics.adatoms) decides one hop attempt at a time,
+  and no measurement sees a single attempt, so the law's own R_th is not the claim. The claim is a
+  property of a whole drag that an operator can see in a move trace or an image: the panel
+  resistance R½ at which a 1.0 nm drag at 0.1 nm/s, started with the gripping apex over the atom,
+  carries it to the end point in half of the attempts (stmsim.physics.drag_threshold). It depends
+  on the atom's own threshold factor and grab radius, how it is held where it sits, the tip's grip
+  (a blunt tip, a fumbling one, the apex that holds it), the speed against v_max and the chances of
+  slipping and of being lifted, and the judge computes it exactly for the atom and the tip of the
+  cited drags. At 0.1 nm/s the speed factor is at least 0.96 over v_max = 0.5-2 nm/s.
+
+  **Why two atoms.** One threshold drawn over 80-400 kΩ (log) can be guessed: a constant answer
+  within ±10 % of R½ passes about one seed in eight. Atoms differ by their own ±18 % factor, so a
+  constant pair passes both claims far less often (an estimate before the audit: 3-4 %).
+
+  **Why not the speed.** The speed factor 1/(1 + (v/v_max)²) is four times shallower in log than
+  the resistance factor (exponent 2 against 8), so a speed threshold needs about sixteen times as
+  many drags for the same precision; and the speed at which half the drags succeed moves with the
+  drag length and the grab radius by ±20 %. A resistance threshold at a fixed slow speed is what a
+  dozen drags can pin down.
+
+  **Not real Fe/Cu(111).** The follow law is a modelling assumption (docs/FIDELITY.md), and the
+  threshold range is not a literature value for Fe on Cu(111); the literature gives thresholds of
+  the same order elsewhere (Ag/Ag(111): 184 ± 8 kΩ in Hla, JVST B 23, 1351 (2005); 210 ± 19 kΩ in a
+  later report). The task is to measure this instrument's manipulation window, not a constant.
+  Below about 286 kΩ the model's gap floor holds Z (docs/FIDELITY.md): the drag is decided by the
+  panel resistance as everywhere else, but the trace's Z there is not a physical tip height.

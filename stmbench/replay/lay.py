@@ -102,6 +102,11 @@ PAPERS: dict[str, dict] = {
            "background": "1990 年，IBM 的 Eigler 用 STM 针尖把 35 个氙原子一个个拖到位，拼出了“IBM”三个字母——"
                          "展示了对单个原子的精确操纵。",
            "goal": "用针尖把离原点最近的那个铁原子沿 +x 方向拖 4 纳米，停在指定的格点上，而且不能碰动旁边的原子。"},
+    "P7": {"title": "原子跟着针尖走的结电阻", "page": "AI 测原子的拉动阈值", "who": "Bartels、Meyer、Rieder，1997",
+           "background": "1997 年，Bartels 等发现：针尖离原子越近（结电阻越低），原子越容易跟着针尖走；"
+                         "电阻高于某个值，针尖一动，原子就留在原地。",
+           "goal": "挑两个不同的孤立铁原子，各自测出针尖从原子上方出发、以 0.1 纳米/秒横向移动 1.0 纳米时，"
+                   "有一半次数把原子带到终点的结电阻。"},
     "P5": {"title": "测量单原子作用力", "page": "AI 测量单原子作用力", "who": "Sader–Jarvis 方法；Huber 等，2019",
            "background": "针尖靠近一个原子时，会受到微弱的吸引力。使用振动的 qPlus 传感器，"
                          "能从振动频率的微小变化里把这股力算出来。",
@@ -125,6 +130,7 @@ CLAIM_LABELS = {
     "e0_mev": "电子的能量底 E₀", "m_eff": "电子的有效质量 m*",
     "peak_lo_mev": "最低的共振能量", "peak_hi_mev": "第二低的共振能量", "ring_occupancy": "围栏补齐了",
     "target_site": "原子停在目标格点上", "bystander_max_shift_nm": "旁边的原子没被碰动",
+    "r_pull_1_kohm": "第一个原子的拉动阈值", "r_pull_2_kohm": "第二个原子的拉动阈值",
     "f_min_pn": "最大吸引力 F_min", "f_decay_pm": "力的衰减长度", "e_bind_mev": "结合能 E_b",
 }
 _UNIT_TXT = {"m_e": "mₑ", "deg": "°", "fraction": ""}

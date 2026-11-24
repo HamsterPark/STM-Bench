@@ -40,7 +40,7 @@ _NUMBER = re.compile(r"[-+]?\d+(?:\.\d+)?")
 _IDENTIFIER = re.compile(r"\b[A-Za-z][A-Za-z0-9]*(?:_[A-Za-z0-9]+)+\b")
 
 #: the result channel, the file-name conventions and the report's fields, which both cards name
-_VERBATIM = ("ReportResult", ".sxm", ".dat", "frame:N", "sts:N", "zspec:N", "lockin", "evidence", "frame",
+_VERBATIM = ("ReportResult", ".sxm", ".dat", "frame:N", "sts:N", "zspec:N", "move:N", "lockin", "evidence", "frame",
              "value", "x_nm", "y_nm")
 
 _AFTER_HOP = ("the last atom hop (the last time any atom hopped from one lattice site to a "
