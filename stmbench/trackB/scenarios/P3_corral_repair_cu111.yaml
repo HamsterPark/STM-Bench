@@ -205,3 +205,13 @@ notes: |
   The numbers above were measured with the qPlus form; the numbers on the new physics are re-run
   on the P3 branch (bench/p3-osworld). A ledger recorded before this with a high-bias poke does not
   replay with this code, and one with a pulse may not (docs/DESIGN.md, 2026-11-17).
+
+  **Spectra and dI/dV maps see every apex (2026-11-24, docs/DESIGN.md 9.3).** A spectrum takes the
+  LDOS under each apex by its share of the current. Re-run on the current code, on the same seeds:
+  - the privileged reference: 30/30 on seeds 0-29 and 117/120 on the hold-out 210-329. The seed it
+    lost, 326, had passed before. When its spectra were taken, a secondary apex 2.1 nm off the tip's
+    centre carried 97 % of the current, so the measured peaks were those of the LDOS there, and the
+    lowest was read 36.9 meV off. Its 147 successes took a median 1361 s and a p90 2462 s;
+  - the scripted baseline: 22/30 on seeds 0-29 and 58/90 on 240-329 under the 6 h budget, the counts
+    it had under 5 h.
+  The figures above stay as they were measured. Per seed: docs/results/.
