@@ -81,9 +81,10 @@ def test_the_switches_of_a_scenario_reach_its_world(tmp_path):
                                     "tip_anisotropy": False, "crash_over_range": True}
 
 
-def test_the_osworld_tasks_switch_all_four_on_and_no_other_scenario_does():
+def test_the_osworld_tasks_and_p7_switch_all_four_on_and_no_other_scenario_does():
     """P4 since 2026-10-27; P3 and its repair variant since 2026-11-16, so that the tasks given to
-    OSWorld-Science run on one instrument. P1, P2, P5 and the B scenarios build the worlds they always did."""
+    OSWorld-Science run on one instrument; P7, P4's world with another claim (its scenario file says so),
+    since 2026-11-16. P1, P2, P5 and the B scenarios build the worlds they always did."""
     on = {}
     for p in sorted(SCEN.glob("*.yaml")):
         sw = Scenario.load(p).physics_switches()
@@ -91,7 +92,8 @@ def test_the_osworld_tasks_switch_all_four_on_and_no_other_scenario_does():
             on[p.stem] = sw
     every = PhysicsSwitches(tip_changes_outside_scans=True, tip_recovery=True, tip_anisotropy=True,
                             crash_over_range=True)
-    assert on == {"P3_corral_cu111": every, "P3_corral_repair_cu111": every, "P4_atom_positioning_cu111": every}
+    assert on == {"P3_corral_cu111": every, "P3_corral_repair_cu111": every, "P4_atom_positioning_cu111": every,
+                  "P7_pull_threshold_cu111": every}
 
 
 @pytest.mark.parametrize("name", ["P3_corral_cu111", "P3_corral_repair_cu111"])

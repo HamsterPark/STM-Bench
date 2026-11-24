@@ -221,6 +221,11 @@ class World:
         self.move_counter = 0                   # traces of moves drawn (stmsim.physics.trace)
         self.move_rng = movetrace.new_stream(seed)  # their own random stream: nothing else gains a draw
         self.last_move_trace: dict | None = None
+        # P7's judge record of every traced move (which atom it held, the conditions that decided
+        # its fate, what became of it): only when a scenario's claims need it (record_drags), read
+        # by the judge through truth()["drags"]. Pure reads of the instrument: no draw, no effect.
+        self.record_drags = False
+        self.drag_records: list[dict] = []
         self.force = None                       # ForceParams (P5) or None
         self.pll = None                         # PLLState when the rig loads the PLL module
         self.z_sweep_m = float(self.rig.get("spectroscopy.z_sweep_m", 0.2e-9))
@@ -821,12 +826,14 @@ class World:
             active = (reg is not None and reg.n_on_surface and self.zctrl.on and not self.withdrawn
                       and r_ohm < self.DRAG_CEILING * reg.params.r_threshold_ohm)
             rec = movetrace.begin(self, x, y, speed_m_s) if trace else None
+            judged = self._drag_record_start(x, y, speed_m_s, r_ohm, active) if (trace and self.record_drags) else None
             if active:
                 ox, oy, _ = self.drift_offset(self.clock.sim())
                 events = reg.drag((x0 + ox, y0 + oy), (x + ox, y + oy), r_ohm=r_ohm,
                                   v_m_s=speed_m_s, sim_s=self.clock.sim(),
                                   terrace=self.surface.terrace_level, grip=self.grip(),
-                                  blocked=self.site_blocked, log=rec.drag_log if rec else None)
+                                  blocked=self.site_blocked, log=rec.drag_log if rec else None,
+                                  grabs=judged["grabs"] if judged is not None else None)
                 dt = math.hypot(x - x0, y - y0) / max(speed_m_s, 1e-12)
                 self.tip.maybe_change(dt, self.clock.sim(), current_a=self.zctrl.setpoint_a,
                                       bias_v=self.bias_v)
@@ -856,7 +863,109 @@ class World:
                     del self.motion_log[:-2000]
             if rec:
                 self.last_move_trace = movetrace.finish(self, rec, self.move_rng)
+                if judged is not None:
+                    self._drag_record_end(judged, self.last_move_trace["index"])
             return events
+
+    #: P7's record notes every atom this close to the path of a move (beyond the farthest apex's
+    #: offset) before the move: no apex grabs further than the largest grab radius (0.6 nm × the
+    #: atom's and a blunt tip's factors, under 1.5 nm)
+    DRAG_RECORD_REACH_M = 1.5e-9
+
+    def _drag_record_start(self, x: float, y: float, speed_m_s: float, r_ohm: float, active: bool) -> dict:
+        """What P7's judge needs to know about a traced move before it happens (only with
+        ``record_drags``): where it runs on the sample, at what resistance and speed, the grip the
+        drag will use, and the site, history length and drag conditions of every atom an apex
+        could reach on the way, as they are now - read, never drawn, nothing changed."""
+        from .drag_threshold import conditions_of
+        reg = self.surface.site.adatoms
+        ox, oy, _ = self.drift_offset(self.clock.sim())
+        x0, y0 = self.tip_x + ox, self.tip_y + oy
+        x1, y1 = x + ox, y + oy
+        grip = self.grip()
+        out = {"sim_s": float(self.clock.sim()), "start": (x0, y0), "end": (x1, y1),
+               "r_ohm": float(r_ohm), "speed_m_s": float(speed_m_s), "active": bool(active),
+               "feedback": bool(self.zctrl.on and not self.withdrawn), "withdrawn": bool(self.withdrawn),
+               "over_range": bool(self.over_range()), "grip": grip, "grabs": [], "before": {}}
+        if reg is None:
+            return out
+        out["carrying"] = reg.carried is not None
+        # the atom an apex has hold of where the move starts: what the drag grabs at its first
+        # sample, and what a move at a resistance too high to integrate would have held
+        cand, gp = reg.grab(x0, y0, grip)
+        if cand is not None:
+            out["start_grab"] = {"idx": 0, "atom_id": cand.id,
+                                 "point": next(k for k, q in enumerate(grip.points) if q is gp)}
+        reach = self.DRAG_RECORD_REACH_M + max(math.hypot(q.dx, q.dy) for q in grip.points)
+        ux, uy = x1 - x0, y1 - y0
+        length2 = ux * ux + uy * uy
+        on, xy = reg._arrays()
+        for k, atom in enumerate(on):
+            ax, ay = float(xy[k, 0]), float(xy[k, 1])
+            t = 0.0 if length2 <= 0 else min(max(((ax - x0) * ux + (ay - y0) * uy) / length2, 0.0), 1.0)
+            if math.hypot(ax - (x0 + t * ux), ay - (y0 + t * uy)) > reach:
+                continue
+            out["before"][atom.id] = {
+                "site": (atom.i, atom.j), "n_hist": len(atom.history),
+                "conditions": [conditions_of(reg, atom, grip, q, self.surface.terrace_level)
+                               for q in grip.points]}
+        return out
+
+    def _drag_record_end(self, judged: dict, index: int) -> None:
+        """Close P7's record of the move whose trace is ``index``: the atom the move held first
+        (the drag's first grab, else the one under the apex at the start), the conditions that
+        decided its fate (:class:`~stmsim.physics.drag_threshold.DragConditions`) and the outcome:
+        hops, lifted onto the tip, and whether it ended with the apex (``followed``). For a move
+        that started over the atom (``start_dist_nm`` small) ending with the apex is a full carry;
+        a move that only reaches an atom at its end (the way back to one left behind) ends with
+        it too, which is why the judge looks at the start as well."""
+        from .drag_threshold import WITH_TIP_FRACTION
+        reg = self.surface.site.adatoms
+        grip = judged["grip"]
+        (sx, sy), (ex, ey) = judged["start"], judged["end"]
+        r = judged["r_ohm"]
+        rec = {"index": int(index), "sim_s": judged["sim_s"],
+               "r_kohm": (r / 1e3) if math.isfinite(r) else None,
+               "speed_nm_s": judged["speed_m_s"] * 1e9,
+               "length_nm": math.hypot(ex - sx, ey - sy) * 1e9,
+               "direction_rad": math.atan2(ey - sy, ex - sx),
+               "start_nm": [sx * 1e9, sy * 1e9], "end_nm": [ex * 1e9, ey * 1e9],
+               "active": judged["active"], "feedback": judged["feedback"],
+               "withdrawn": judged["withdrawn"], "over_range": judged["over_range"],
+               "carrying": bool(judged.get("carrying", False)), "atom_id": None}
+        first = judged["grabs"][0] if judged["grabs"] else judged.get("start_grab")
+        if reg is not None and first is not None and first["atom_id"] in judged["before"]:
+            atom = reg.atoms[first["atom_id"]]
+            point = grip.points[first["point"]]
+            before = judged["before"][atom.id]
+            bi, bj = before["site"]
+            ni, nj, status = atom.i, atom.j, atom.status
+            # the conditions where the atom sat when the move began (its hold there)
+            cond = before["conditions"][first["point"]]
+            bx, by = reg.site_xy(bi, bj, atom.sub)
+            px, py = point.dx, point.dy
+            nn = float(self.surface.site.material.nn_m)
+            end_d = None
+            if status == "on_surface":
+                ax, ay = reg.site_xy(ni, nj, atom.sub)
+                end_d = math.hypot(ax - (ex + px), ay - (ey + py))
+            rec.update({"atom_id": atom.id, "grab_idx": int(first.get("idx", 0)), "point": int(first["point"]),
+                        "n_points": len(grip.points),
+                        "start_dist_nm": math.hypot(bx - (sx + px), by - (sy + py)) * 1e9,
+                        "site_before": [bi, bj], "site_after": [ni, nj] if status == "on_surface" else None,
+                        "n_hops": sum(1 for h in atom.history[before["n_hist"]:] if h[3] != "pickup"),
+                        "picked": status == "on_tip",
+                        "end_dist_nm": end_d * 1e9 if end_d is not None else None,
+                        "followed": bool(end_d is not None and end_d <= WITH_TIP_FRACTION * nn),
+                        "conditions": cond.as_dict()})
+        self.drag_records.append(rec)
+
+    def drag_truth(self) -> dict:
+        """P7's judge record (``truth()["drags"]``): the lattice the drags ran on and one record
+        per traced move (:meth:`_drag_record_end`)."""
+        site = self.surface.site
+        return {"lattice": {"nn_m": float(site.material.nn_m), "angle_rad": float(site.lattice_angle)},
+                "records": [dict(r) for r in self.drag_records]}
 
     def registry_scan_row(self, st, row: int, ox: float, oy: float, t_sim: float,
                           speed_m_s: float) -> None:
@@ -1597,6 +1706,8 @@ class World:
                 "n_dats": len(self.dats_saved),
                 **self._qplus_truth(),
                 **physics,
+                # P7: the judge's record of the traced moves, only in a world that keeps it
+                **({"drags": self.drag_truth()} if self.record_drags else {}),
             }
 
     def _qplus_truth(self) -> dict:

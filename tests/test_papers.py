@@ -5,6 +5,7 @@ from pathlib import Path
 
 import pytest
 
+from stmbench.trackB.claims import within_scalar
 from stmbench.trackB.truth_criteria import CRITERIA, judge
 from stmsim.scenario import Scenario
 
@@ -13,7 +14,8 @@ PAPERS = sorted(p for p in SCEN.glob("P*.yaml"))
 PAPER_NAMES = [p.name for p in PAPERS]
 
 #: the paper ladder: one scenario family per paper the benchmark reproduces
-LADDER = {"P1", "P2", "P3", "P4", "P5"}
+#: (P7 sits between P4 and P3's measurement variant: the scenario's notes give its ladder position 1.5)
+LADDER = {"P1", "P2", "P3", "P4", "P5", "P7"}
 
 
 def test_there_is_a_scenario_for_every_paper_in_the_ladder():
@@ -97,7 +99,18 @@ def test_a_frozen_answer_fails_most_seeds(name, tmp_path):
         v = judge("claims_verified", w.truth(), claims=sc.claims,
                   report={"claims": frozen}, events=_all_evidence(),
                   orientation_at=_orientation_of(w))
-        if all(v.details["claims"][c]["value_ok"] for c in frozen):
+        ok = {c: v.details["claims"][c]["value_ok"] for c in frozen}
+        for c in sc.claims:
+            if c["truth"] == "drag_threshold" and c["id"] in frozen:
+                # a pull threshold is judged on the drags a report cites, which a frozen sheet has
+                # none of; what it is up against is the threshold of the atoms it would measure
+                from stmsim.physics.drag_threshold import example_thresholds
+                pulls = [d["id"] for d in sc.claims if d["truth"] == "drag_threshold"]
+                proto = c.get("protocol") or {}
+                ex = example_thresholds(w, len(pulls), length_m=proto["length_nm"] * 1e-9,
+                                        speed_m_s=proto["speed_nm_s"] * 1e-9)[pulls.index(c["id"])]
+                ok[c["id"]] = ex is not None and within_scalar(frozen[c["id"]]["value"], ex / 1e3, c["tol"])
+        if all(ok.values()):
             passed += 1
     assert passed <= 2, f"{name}: a frozen answer passed {passed}/8 seeds"
 
@@ -129,6 +142,16 @@ def _frozen_answers(sc: Scenario, seed: int, session) -> tuple[dict, object]:
             if val is None:
                 continue
             out[c["id"]] = {"value": float(val), "x_nm": x, "y_nm": y}
+            continue
+        if c["truth"] == "drag_threshold":
+            # seed 0's atoms, as the chance audit reads them (kohm)
+            from stmsim.physics.drag_threshold import example_thresholds
+            pulls = [d["id"] for d in sc.claims if d["truth"] == "drag_threshold"]
+            proto = c.get("protocol") or {}
+            ex = example_thresholds(w, len(pulls), length_m=proto["length_nm"] * 1e-9,
+                                    speed_m_s=proto["speed_nm_s"] * 1e-9)[pulls.index(c["id"])]
+            if ex is not None:
+                out[c["id"]] = {"value": ex / 1e3}
             continue
         val = truth_at_path(truth, c["truth"])
         if isinstance(val, (list, tuple)) and val:
@@ -166,6 +189,15 @@ def test_the_world_a_paper_builds_has_the_physics_its_claims_read(name, tmp_path
     for c in sc.claims:
         if c["truth"] == "orientation_at":
             assert truth.get("herringbone"), f"{name}: {c['id']} needs a herringbone field"
+            continue
+        if c["truth"] == "drag_threshold":
+            # a pull threshold is the truth of the drags a report cites: the world keeps the record
+            # that judges them (the lattice and one record per traced move), and an atom to measure
+            from stmsim.physics.drag_threshold import example_thresholds
+            w = sc.build_world(0, session_dir=tmp_path / "s2")
+            assert w.record_drags and set(truth["drags"]) == {"lattice", "records"}, (name, c["id"])
+            ex = example_thresholds(w, len(sc.claims))
+            assert all(r is not None and r > 0 for r in ex), (name, ex)
             continue
         val = truth_at_path(truth, c["truth"])
         assert val is not None, f"{name}: claim {c['id']} truth path {c['truth']} is empty"

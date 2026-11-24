@@ -14,7 +14,7 @@ data analysis supports it.
   preamplifier saturation, spectroscopy, and atom manipulation whose outcome depends on
   junction resistance, speed, tip state and local environment. Controller modules expose
   the physics through an SPM-controller TCP protocol.
-- **`stmbench`** is the experiment around it: six scenarios in five paper families,
+- **`stmbench`** is the experiment around it: seven scenarios in six paper families,
   per-seed hidden targets, a judge that checks both reported results and acquisition
   evidence, episode budgets and records, the MCP instrument, reference solutions and scripted
   baselines, and replay tools.
@@ -61,7 +61,7 @@ This is an **alpha research prototype**. Keep these evidence boundaries explicit
 | Do comparisons respect shared seeds and missing observations? | [stats.py](stmbench/report/stats.py) | [test_stats.py](tests/test_stats.py) |
 | Is every judged rule stated in the task, and can a fixed answer pass? | [rules.py](stmbench/trackB/rules.py), [audit.py](stmbench/trackB/audit.py) | [test_rule_card.py](tests/test_rule_card.py), [test_p3_repair_scenario.py](tests/test_p3_repair_scenario.py), [test_rules_v1.py](tests/test_rules_v1.py), [test_audit.py](tests/test_audit.py) |
 | Does an episode replay to the same measurements? | [clock.py](stmsim/physics/clock.py), [instrument/](stmbench/instrument/) | [test_instrument.py](tests/test_instrument.py), [test_mcp_server.py](tests/test_mcp_server.py), [test_determinism_probe.py](tests/test_determinism_probe.py), [test_api_v2.py](tests/test_api_v2.py) (API version, the refusal of another one) |
-| Can a paper be reproduced by measurement, how precisely, in how much time? And without the truth? | [reference/](stmbench/reference/), [baselines/](stmbench/baselines/), [analysis/](stmbench/analysis/) | [test_reference_p5.py](tests/test_reference_p5.py), [test_reference_p3.py](tests/test_reference_p3.py), [test_reference_p3_repair.py](tests/test_reference_p3_repair.py), [test_reference_p4.py](tests/test_reference_p4.py), [test_baselines_p3.py](tests/test_baselines_p3.py), [test_baselines_p3_repair.py](tests/test_baselines_p3_repair.py), [test_baselines_p4.py](tests/test_baselines_p4.py), [test_analysis_tip.py](tests/test_analysis_tip.py), [test_analysis_force.py](tests/test_analysis_force.py), [test_analysis_drift.py](tests/test_analysis_drift.py), [test_analysis_spectra.py](tests/test_analysis_spectra.py), [test_analysis_adatoms.py](tests/test_analysis_adatoms.py), [test_analysis_corral_gap.py](tests/test_analysis_corral_gap.py), [test_analysis_trace.py](tests/test_analysis_trace.py) |
+| Can a paper be reproduced by measurement, how precisely, in how much time? And without the truth? | [reference/](stmbench/reference/), [baselines/](stmbench/baselines/), [analysis/](stmbench/analysis/) | [test_reference_p5.py](tests/test_reference_p5.py), [test_reference_p3.py](tests/test_reference_p3.py), [test_reference_p3_repair.py](tests/test_reference_p3_repair.py), [test_reference_p4.py](tests/test_reference_p4.py), [test_reference_p7.py](tests/test_reference_p7.py), [test_baselines_p3.py](tests/test_baselines_p3.py), [test_baselines_p3_repair.py](tests/test_baselines_p3_repair.py), [test_baselines_p4.py](tests/test_baselines_p4.py), [test_baselines_p7.py](tests/test_baselines_p7.py), [test_analysis_tip.py](tests/test_analysis_tip.py), [test_analysis_force.py](tests/test_analysis_force.py), [test_analysis_drift.py](tests/test_analysis_drift.py), [test_analysis_spectra.py](tests/test_analysis_spectra.py), [test_analysis_adatoms.py](tests/test_analysis_adatoms.py), [test_analysis_corral_gap.py](tests/test_analysis_corral_gap.py), [test_analysis_trace.py](tests/test_analysis_trace.py), [test_analysis_carry.py](tests/test_analysis_carry.py) |
 
 Other useful boundaries:
 
@@ -91,9 +91,9 @@ Other useful boundaries:
 - [stmbench/reference/](stmbench/reference/) holds the privileged reference solutions and
   [stmbench/baselines/](stmbench/baselines/) the scripted baselines, which see only what an
   MCP agent sees.
-- `P1`–`P5` are the paper families; `B1`–`B9` are skill scenarios kept as simulator fixtures
-  (the instrument refuses them). [trackA/](stmbench/trackA/) is retained development work
-  outside the current scope.
+- `P1`–`P5` and `P7` are the paper families (P6 is a prototype on another branch, so its number is
+  unused here); `B1`–`B9` are skill scenarios kept as simulator fixtures (the instrument refuses
+  them). [trackA/](stmbench/trackA/) is retained development work outside the current scope.
 
 In a review or report, distinguish what the code implements, what the checks you ran
 establish, what historical records describe, and what remains unverified. Cite the relevant

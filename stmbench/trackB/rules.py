@@ -32,7 +32,19 @@ import re
 #: hop the evidence rule needs is one made during a ``move_tip`` action. No card states the controller
 #: command limit of the TCP path (``budget.wire_cmds``) any more: the benchmark instrument does not
 #: enforce it.
+#: A new paper's rules come with its own card and do not change the version (no earlier ledger of that
+#: paper exists): P7's (``drag_series`` evidence, ``distinct_atom_from``, the true value of a pull
+#: threshold, a move trace cited by ``move_tip``'s file name or ``move:N``) are stated in P7's card only,
+#: and every other paper's card and judging are what version 2 says. A version stamps every ledger and
+#: export, and ``grade`` refuses another one, so a change that leaves every other card as it was does
+#: not bump it.
 RULES_VERSION = 2
+
+
+def _cites_moves(sc) -> bool:
+    """Does any claim of ``sc`` rest on cited move traces (a drag series)? Only then does the card's
+    general paragraph on citing data say how a move trace is named."""
+    return any(str((c.get("evidence") or {}).get("kind")) == "drag_series" for c in sc.claims)
 
 #: the overrun rule (:func:`apply_budget_overrun`): beyond this factor of the scenario's budget
 #: an episode is not a reproduction (5 % over is still within budget)
@@ -188,7 +200,65 @@ def _frame_terms(rule: dict, lang: str, after: str | None = None) -> str:
     return _and(terms)
 
 
-def _evidence(c: dict, lang: str) -> str:
+def _drag_series(c: dict, lang: str, sc) -> str:
+    """The evidence rule of a drag series (``claims.select_drags`` and ``claims._check_drag_series``),
+    with every number it reads. The site spacing is the material's (a constant, so a rule can state it)."""
+    from stmsim.physics.drag_threshold import WITH_TIP_FRACTION
+    from stmsim.physics.surface import MATERIALS
+
+    from .claims import DISTINCT_RESISTANCE_FACTOR
+
+    rule, proto = c.get("evidence") or {}, c.get("protocol") or {}
+    length, speed = _num(proto.get("length_nm", 1.0)), _num(proto.get("speed_nm_s", 0.1))
+    rel = _num(100 * float(rule.get("protocol_rel", 0.0) or 0.0))
+    within, n, res = _num(rule.get("start_within_nm", 0.0)), int(rule.get("min_n", 1)), int(rule.get("min_resistances", 1))
+    distinct = _num(round(100 * (DISTINCT_RESISTANCE_FACTOR - 1), 6))
+    material = MATERIALS.get(str(getattr(sc, "material", "") or ""))
+    spacing = f"{material.nn_m * 1e9:g}" if material else None
+    frac = _num(WITH_TIP_FRACTION)
+    reach = f"{WITH_TIP_FRACTION * material.nn_m * 1e9:g}" if material else None
+    zh_spacing = f"（{material.name} 上的格点间距为 {spacing} nm，所以是 {reach} nm）" if material else ""
+    en_spacing = (f" (on {material.name} the site spacing is {spacing} nm, so {reach} nm)") if material else ""
+    return _t(lang,
+              f"evidence 中引用这个结果所依据的拖动：move_tip 返回的轨迹文件名（.dat），或 move:N；引用的不是移动轨迹的数据在这条规则里不计。"
+              f"被引用的一次移动要计入，须同时满足：Z 反馈开着、针尖在隧穿状态（没有退针）、没有超过前置放大器量程、"
+              f"移动开始前针尖上没有原子；设定的结电阻 |V|/I（面板上的偏压除以电流设定值）是有限值；"
+              f"移动开始时针尖的某个顶点抓住了一个原子，该顶点离这个原子不超过 {within} nm（从抓住这个原子的那个顶点量起）；"
+              f"移动长度与 {length} nm 的相对误差不超过 {rel}%，速度与 {speed} nm/s 的相对误差不超过 {rel}%。"
+              f"计入的移动须满足：抓住的全是同一个原子；至少 {n} 次；结电阻至少有 {res} 个不同的值"
+              f"（把结电阻从小到大排，比当前这一组的第一个值大出 {distinct}% 以上才算新的一个值）；"
+              f"你报告的数值被它们夹住：在不高于该数值的结电阻下，至少有一次移动把原子带到了终点，"
+              f"并且在不低于该数值的结电阻下，至少有一次没有（原子被留在原处或被提到针尖上，都算没有）。"
+              f"“把原子带到终点”指移动结束时，原子停在抓住它的那个顶点的终点处，"
+              f"离终点不超过 {frac} 个格点间距{zh_spacing}",
+              f"cite in the evidence field the moves this result rests on: the trace file names (.dat) that move_tip "
+              f"returned, or move:N; cited data that is not a move trace does not count for this rule. A cited move "
+              f"counts only when all of the following hold: the Z feedback was on, the tip was in the tunnelling state "
+              f"(not withdrawn), the preamplifier range was not exceeded, and no atom was on the tip before the move; "
+              f"the junction resistance |V|/I set (the bias voltage divided by the current setpoint on the panel) was "
+              f"finite; an apex of the tip held an atom at the start of the move, within {within} nm of that atom "
+              f"(measured from the apex that held the atom); and the length of the move is within {rel}% of {length} nm "
+              f"and its speed within {rel}% of {speed} nm/s. The counted moves must all have held the same atom; there "
+              f"must be at least {n} of them; their resistances must take at least {res} distinct values (sort the "
+              f"resistances; a value is a new one when it exceeds the first value of the current group by more than "
+              f"{distinct}%); and the reported value must be bracketed by them: at least one counted move that took the "
+              f"atom along to the end point at a resistance at or below the reported value, and at least one that did "
+              f"not at a resistance at or above it (an atom left where it was, or lifted onto the tip, counts as not "
+              f"taken along). An atom is taken along to the end point when, at the end of the move, it rests at the "
+              f"end point of the apex that held it, within {frac} site spacings of it{en_spacing}")
+
+
+def _drag_truth(c: dict, lang: str) -> str:
+    """What a ``drag_threshold`` value is compared with."""
+    return _t(lang,
+              "该原子在计入的那些移动各自的条件下的拉动阈值（定义见上）；如果各次移动的条件不同"
+              "（例如中途针尖变了），取各次移动自己条件下的拉动阈值的几何平均",
+              "the pull threshold of that atom (defined above) under the conditions of the counted moves; if "
+              "the moves were made under different conditions (for example the tip changed in between), the "
+              "geometric mean of the pull thresholds under each move's own conditions")
+
+
+def _evidence(c: dict, lang: str, sc=None) -> str:
     rule = c.get("evidence") or {}
     kind = rule.get("kind", "frame")
     after = rule.get("after_event")
@@ -272,6 +342,8 @@ def _evidence(c: dict, lang: str) -> str:
                   f"{_count(energies, 'different bias value', 'different bias values')} (binned in 10 mV "
                   f"steps) covering {v_lo} V to {v_hi} V; the centre of each map is within {near} nm of "
                   f"the nearest scatterer (step edge or adatom), and the maps must {terms}")
+    if kind == "drag_series":
+        return _drag_series(c, lang, sc)
     if kind == "any_of":
         alts = [_evidence({"evidence": r}, lang) for r in rule.get("rules") or []]
         return _t(lang, "以下任一组即可——" + "；或者，".join(f"（{chr(0x61 + i)}）{a}" for i, a in enumerate(alts)),
@@ -354,7 +426,14 @@ def _claim_lines(c: dict, sc, n: int, lang: str) -> list[str]:
         lines.append(_t(lang, f"   - 针对的是 {c['of_claim']} 所匹配到的那个原子",
                         f"   - It concerns the atom that {c['of_claim']} was matched to"))
         lines += _bystander_lines(c, sc, lang)
-    evidence = _evidence(c, lang)
+    if c.get("truth") == "drag_threshold":
+        truth = _drag_truth(c, lang)
+        lines.append(_t(lang, f"   - 真值：{truth}", f"   - True value: {truth}"))
+    peer = (c.get("evidence") or {}).get("distinct_atom_from")
+    if peer:
+        lines.append(_t(lang, f"   - 计入的移动抓住的原子须不是 {peer} 所用的那个原子",
+                        f"   - The atom the counted moves held must not be the one that {peer} used"))
+    evidence = _evidence(c, lang, sc)
     lines.append(_t(lang, f"   - 证据：{evidence}", f"   - Evidence: {evidence}"))
     return lines
 
@@ -385,13 +464,18 @@ def rule_card(sc, lang: str = "zh") -> str:
     for c in sc.claims:
         n += 1
         lines += _claim_lines(c, sc, n, lang)
+    moves = _cites_moves(sc)
     lines += ["",
               _t(lang,
                  "引用数据：每条报告用 evidence 列出你用到的扫描帧（.sxm 文件名）和谱（.dat 文件名），也可以写 frame:N、"
-                 "sts:N、zspec:N。判分只在你引用的数据里检查证据要求，没有引用的数据不算。",
+                 "sts:N、zspec:N" + ("；移动轨迹用 move_tip 返回的 .dat 文件名，或 move:N（N 是该文件名里的编号）。"
+                                     if moves else "。")
+                 + "判分只在你引用的数据里检查证据要求，没有引用的数据不算。",
                  "Citing data: in each report, list in the evidence field the scan frames (.sxm file names) "
-                 "and spectra (.dat file names) you used; you may also write frame:N, sts:N or zspec:N. "
-                 "Scoring checks the evidence requirements only within the data you cite; data you do not "
+                 "and spectra (.dat file names) you used; you may also write frame:N, sts:N or zspec:N"
+                 + ("; a move trace is named by the .dat file name move_tip returned, or move:N (N being the "
+                    "number in that file name). " if moves else ". ")
+                 + "Scoring checks the evidence requirements only within the data you cite; data you do not "
                  "cite does not count."),
               _t(lang,
                  "位置与角度：位置用扫描坐标（nm），x 向右、y 向上，与扫描框的中心坐标是同一套坐标；位置类结果还要用 "

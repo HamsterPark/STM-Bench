@@ -427,7 +427,7 @@ class AdatomRegistry:
     def drag(self, start: tuple[float, float], end: tuple[float, float], *, r_ohm: float,
              v_m_s: float, sim_s: float, terrace=None, cause: str = "folme", grip: Grip | None = None,
              blocked: Callable[[float, float], bool] | None = None,
-             log: list[dict] | None = None) -> list[dict]:
+             log: list[dict] | None = None, grabs: list[dict] | None = None) -> list[dict]:
         """Integrate one tip path; returns aggregated events (one per atom touched).
 
         Whichever apex of ``grip`` gets an atom inside its grab radius first holds it; the atom
@@ -438,7 +438,12 @@ class AdatomRegistry:
         "kind": "hop" | "pickup", "from": (i, j), "to": (i, j) | None}``, ``idx`` being the path
         sample it was decided at (:func:`path_points`), which is what the move trace needs to
         draw the surface with every atom where it was at each sample. It adds no draw and
-        changes no outcome."""
+        changes no outcome.
+
+        ``grabs`` is recording only too: every time an apex takes hold of an atom (before the
+        pick-up chance is drawn), ``{"idx", "atom_id", "point"}`` is appended, ``point`` being the
+        index of the apex in ``grip.points`` - which atom a drag was about, and which apex held
+        it (the P7 judge's record, :meth:`World.move_xy_path`)."""
         p = self.params
         grip = grip or Grip()
         x0, y0 = start
@@ -463,6 +468,9 @@ class AdatomRegistry:
                 cand, gp = self.grab(tx, ty, grip)
                 if cand is None:
                     continue
+                if grabs is not None:
+                    grabs.append({"idx": idx, "atom_id": cand.id,
+                                  "point": next(k for k, q in enumerate(grip.points) if q is gp)})
                 r_eff = r_ohm * gp.r_factor
                 p_p = self.p_pick(r_eff, cand, grip)
                 if p_p > 1e-6 and self.rng_dyn.random() < p_p:
