@@ -72,6 +72,28 @@ class LDOSTemplate:
 
 FLAT = LDOSTemplate("flat")
 
+
+class ParallelLDOS:
+    """The sample LDOS a tip with several apexes samples: ``Σ_a share_a·ρ_a(E)``.
+
+    The apexes are parallel tunnelling channels, each over its own point of the sample
+    (``ρ_a`` is the LDOS under apex ``a``, ``share_a`` its share of the current, the shares
+    summing to 1). ``iv_curve`` is linear in ``rho_s``, so weighting the LDOS weights the
+    current; the channels' small differences in gap (tens of pm against a gap of ~0.6 nm)
+    enter only through the shares, not through the bias dependence of the barrier."""
+
+    def __init__(self, parts):
+        self.parts = tuple((float(share), ldos) for share, ldos in parts)
+
+    def rho(self, e: np.ndarray) -> np.ndarray:
+        e = np.asarray(e, float)
+        out = None
+        for share, ldos in self.parts:
+            term = share * ldos.rho(e)
+            out = term if out is None else out + term
+        return out
+
+
 # literature Shockley onsets (V) — the analytic fallback and the check the calibrated file ran
 MATERIAL_ONSET_EV = {"Au": -0.49, "Ag": -0.065, "Cu": -0.44}
 STS_TEMPLATES_FILE = "sts_templates.json"
