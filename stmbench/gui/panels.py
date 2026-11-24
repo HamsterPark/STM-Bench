@@ -32,7 +32,7 @@ from ..instrument import ACTIONS
 from . import fmt, style
 from .controls import Segmented, SelectAllLineEdit, strong
 from .labels import both, one, tr
-from .layout import Cell, Choices, During, F, Group, OnOff, Run
+from .layout import OPERATE, Cell, Choices, During, F, Group, OnOff, Run
 
 
 def token(value: Any) -> str:
@@ -56,6 +56,10 @@ def layout_during_order(cells) -> list[During]:
 
 def _param(action: str, name: str):
     return next(p for p in ACTIONS[action].params if p.name == name)
+
+
+#: the Operate tab's tightened vertical spacing in pixels at ui scale 1 (the Spectroscopy tab keeps 3 / 2 / 10 / 11 / 2)
+TIGHT = {"body": 1, "line": 0, "frame_top": 8, "pad_top": 9, "pad_bottom": 1}
 
 
 class ActionPanel(QScrollArea):
@@ -84,8 +88,15 @@ class ActionPanel(QScrollArea):
         body = QWidget()
         body.setObjectName("panel_body")
         lay = QVBoxLayout(body)
+        # The Operate tab is the tall one: its rows, spacing and group frames are tightened by a few pixels (never a control,
+        # its order or a font) so that it keeps its margin of height in the Chinese window on Linux (35 px spare at 1920x1053,
+        # of which the during-move line takes 34). The Spectroscopy tab keeps the looser spacing.
+        self._tight = groups is OPERATE
         lay.setContentsMargins(style.px(2), style.px(2), style.px(2), style.px(2))
-        lay.setSpacing(style.px(3))
+        lay.setSpacing(style.px(TIGHT["body"] if self._tight else 3))
+        if self._tight:
+            self.setStyleSheet(f"QGroupBox {{ margin-top: {style.px(TIGHT['frame_top'])}px; padding-top: {style.px(TIGHT['pad_top'])}px; "
+                               f"padding-bottom: {style.px(TIGHT['pad_bottom'])}px; }}")
         for g in groups:
             lay.addWidget(self._group(g))
         lay.addStretch(1)
@@ -100,8 +111,8 @@ class ActionPanel(QScrollArea):
         box = QGroupBox(both(g.en, g.zh, self.lang))
         box.setObjectName(f"group.{g.key}")
         v = QVBoxLayout(box)
-        v.setContentsMargins(style.px(6), 0, style.px(6), style.px(1))
-        v.setSpacing(style.px(2))
+        v.setContentsMargins(style.px(6), 0, style.px(6), 0 if self._tight else style.px(1))
+        v.setSpacing(style.px(TIGHT["line"] if self._tight else 2))
         for line in g.lines:
             h = QHBoxLayout()
             h.setSpacing(style.px(8))
