@@ -1,0 +1,9377 @@
+{
+ "summary": {
+  "n": 100,
+  "success_rate": 0.97,
+  "by_tip": {
+   "blunt": {
+    "success": 31,
+    "n": 31
+   },
+   "dirty": {
+    "success": 19,
+    "n": 20
+   },
+   "double": {
+    "success": 17,
+    "n": 18
+   },
+   "good": {
+    "success": 21,
+    "n": 22
+   },
+   "unstable": {
+    "success": 9,
+    "n": 9
+   }
+  },
+  "instrument_s": {
+   "median": 785.769746330664,
+   "p90": 1632.809156008947,
+   "max": 3340.1640696108843
+  },
+  "failures": {
+   "RuntimeError: the tip could not be conditioned": 2,
+   "ActionError: the instrument-time budget is spent": 1
+  }
+ },
+ "runs": [
+  {
+   "paper": "P3",
+   "seed": 200,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -426.00000000000006,
+    "peak_hi_mev": -364.00000000000006,
+    "radius_nm": 8.901960136952207
+   },
+   "truth": {
+    "peak_lo_mev": -424.7459406377264,
+    "peak_hi_mev": -366.7459406377264,
+    "radius_nm": 8.88205203725986
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.254059362273665,
+    "peak_hi_mev": 2.745940637726335,
+    "radius_nm": 0.01990809969234597
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6617728022673,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.1,
+     "ghost": 0.051,
+     "ghost_lag_nm": [
+      0.7,
+      3.8
+     ],
+     "field": "ok",
+     "field_atoms": 8,
+     "ghost_fraction": 0.125,
+     "field_ghost": [
+      -2.8,
+      2.5,
+      0.135
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.035,
+   "centre_shift_nm": [
+    0.11,
+    0.18
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -426,
+    -364,
+    -282,
+    -174,
+    -42,
+    116
+   ],
+   "peak_prominence": [
+    0.34,
+    0.61,
+    0.86,
+    0.92,
+    0.91,
+    0.66
+   ],
+   "e0_mev": -468.73014279313617,
+   "drift_comp_nm_per_min": [
+    0.3799757686823176,
+    0.5739160493591094
+   ],
+   "radius_nm": 8.901960136952207,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 201,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -428.00000000000006,
+    "peak_hi_mev": -376.0,
+    "radius_nm": 6.9392896112098805
+   },
+   "truth": {
+    "peak_lo_mev": -427.27924506182546,
+    "peak_hi_mev": -377.2792450618254,
+    "radius_nm": 6.916359171985779
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.7207549381745935,
+    "peak_hi_mev": 1.2792450618254065,
+    "radius_nm": 0.022930439224101207
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1408.3721812604606,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.35,
+     "ghost": 0.04,
+     "ghost_lag_nm": [
+      0.7,
+      4.3
+     ],
+     "field": "unknown",
+     "field_atoms": 0,
+     "ghost_fraction": 0.176,
+     "field_ghost": [
+      0.1,
+      0.8,
+      0.969
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 1.05,
+     "ghost": 0.034,
+     "ghost_lag_nm": [
+      4.0,
+      1.4
+     ],
+     "field": "ok",
+     "field_atoms": 7,
+     "ghost_fraction": 0.111,
+     "field_ghost": [
+      0.0,
+      2.1,
+      0.966
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 1,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.07,
+   "centre_shift_nm": [
+    -0.29,
+    0.01
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -428,
+    -376,
+    -286,
+    -156,
+    8,
+    102
+   ],
+   "peak_prominence": [
+    0.25,
+    0.69,
+    0.96,
+    0.87,
+    0.76,
+    0.13
+   ],
+   "e0_mev": -442.61958061301755,
+   "drift_comp_nm_per_min": [
+    -0.617078819105119,
+    0.027211564313151502
+   ],
+   "radius_nm": 6.9392896112098805,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 202,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -388.0,
+    "peak_hi_mev": -278.0,
+    "radius_nm": 6.397330158770267
+   },
+   "truth": {
+    "peak_lo_mev": -386.22429798358974,
+    "peak_hi_mev": -278.2242979835897,
+    "radius_nm": 6.383016482492931
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.7757020164102642,
+    "peak_hi_mev": 0.224297983589679,
+    "radius_nm": 0.01431367627733593
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6739055827007,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.9,
+     "ghost": 0.043,
+     "ghost_lag_nm": [
+      -0.7,
+      4.1
+     ],
+     "field": "ok",
+     "field_atoms": 5,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.038,
+   "centre_shift_nm": [
+    0.04,
+    -0.13
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -448,
+    -388,
+    -278,
+    -124,
+    76
+   ],
+   "peak_prominence": [
+    0.17,
+    0.64,
+    0.88,
+    0.9,
+    0.83
+   ],
+   "e0_mev": -466.08989052480837,
+   "drift_comp_nm_per_min": [
+    0.4095016492265811,
+    -0.48876897374550254
+   ],
+   "radius_nm": 6.397330158770267,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 203,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -366.00000000000006,
+    "peak_hi_mev": -280.0,
+    "radius_nm": 7.66183785408764
+   },
+   "truth": {
+    "peak_lo_mev": -367.2961591636049,
+    "peak_hi_mev": -283.29615916360484,
+    "radius_nm": 7.670115430378981
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.296159163604841,
+    "peak_hi_mev": 3.296159163604841,
+    "radius_nm": -0.008277576291341404
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.749794661167,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.9,
+     "ghost": 0.035,
+     "ghost_lag_nm": [
+      -4.5,
+      1.0
+     ],
+     "field": "ok",
+     "field_atoms": 4,
+     "ghost_fraction": 0.143,
+     "field_ghost": [
+      -0.9,
+      0.1,
+      0.994
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.039,
+   "centre_shift_nm": [
+    -0.1,
+    0.32
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -412,
+    -366,
+    -280,
+    -162,
+    -8
+   ],
+   "peak_prominence": [
+    0.09,
+    0.39,
+    0.76,
+    0.95,
+    1.0
+   ],
+   "e0_mev": -428.14092281707207,
+   "drift_comp_nm_per_min": [
+    -0.13504475376716302,
+    1.018382637512395
+   ],
+   "radius_nm": 7.66183785408764,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 204,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -340.00000000000006,
+    "peak_hi_mev": -240.00000000000006,
+    "radius_nm": 6.48874466024429
+   },
+   "truth": {
+    "peak_lo_mev": -339.5138864889572,
+    "peak_hi_mev": -239.5138864889571,
+    "radius_nm": 6.461314473189432
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.48611351104284495,
+    "peak_hi_mev": -0.48611351104295863,
+    "radius_nm": 0.02743018705485767
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6579327316646,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.05,
+     "ghost": 0.031,
+     "ghost_lag_nm": [
+      -2.7,
+      3.1
+     ],
+     "field": "ok",
+     "field_atoms": 8,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 7.0,
+   "bare_feature": 0.031,
+   "centre_shift_nm": [
+    0.18,
+    0.08
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -398,
+    -340,
+    -240,
+    -96,
+    90
+   ],
+   "peak_prominence": [
+    0.11,
+    0.51,
+    0.85,
+    0.97,
+    0.91
+   ],
+   "e0_mev": -412.5683824339338,
+   "drift_comp_nm_per_min": [
+    0.8812469902957105,
+    0.300036786743957
+   ],
+   "radius_nm": 6.48874466024429,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 205,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -362.00000000000006,
+    "peak_hi_mev": -226.00000000000003,
+    "radius_nm": 5.68126823677349
+   },
+   "truth": {
+    "peak_lo_mev": -359.87243541530813,
+    "peak_hi_mev": -225.872435415308,
+    "radius_nm": 5.671661741444714
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.1275645846919247,
+    "peak_hi_mev": -0.12756458469203835,
+    "radius_nm": 0.009606495328775999
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1577.1250049107064,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.15,
+     "ghost": 0.023,
+     "ghost_lag_nm": [
+      -4.1,
+      -1.4
+     ],
+     "field": "blunt",
+     "field_atoms": 5,
+     "ghost_fraction": 0.182,
+     "field_ghost": [
+      -0.6,
+      -0.1,
+      0.737
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.25,
+     "ghost": 0.03,
+     "ghost_lag_nm": [
+      3.8,
+      2.0
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.3,
+     "ghost": 0.035,
+     "ghost_lag_nm": [
+      3.9,
+      1.9
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.2,
+     "ghost": 0.031,
+     "ghost_lag_nm": [
+      -1.8,
+      -4.0
+     ],
+     "quick": true
+    },
+    {
+     "width_nm": 1.1,
+     "ghost": 0.021,
+     "ghost_lag_nm": [
+      1.8,
+      4.0
+     ],
+     "field": "ok",
+     "field_atoms": 4,
+     "ghost_fraction": 0.167,
+     "field_ghost": [
+      -1.2,
+      -0.2,
+      0.695
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 4,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.051,
+   "centre_shift_nm": [
+    -0.36,
+    0.2
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -434,
+    -362,
+    -226,
+    -34
+   ],
+   "peak_prominence": [
+    0.15,
+    0.56,
+    0.92,
+    0.92
+   ],
+   "e0_mev": -456.8859864140139,
+   "drift_comp_nm_per_min": [
+    -0.9483421787710982,
+    0.6693734369785634
+   ],
+   "radius_nm": 5.68126823677349,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 206,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -350.00000000000006,
+    "peak_hi_mev": -268.0,
+    "radius_nm": 7.552865815162903
+   },
+   "truth": {
+    "peak_lo_mev": -349.28988943424906,
+    "peak_hi_mev": -267.28988943424895,
+    "radius_nm": 7.561805059540547
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.7101105657509947,
+    "peak_hi_mev": -0.7101105657510516,
+    "radius_nm": -0.008939244377644151
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1937.0818696678946,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.2,
+     "ghost": 0.051,
+     "ghost_lag_nm": [
+      4.2,
+      1.4
+     ],
+     "field": "unknown",
+     "field_atoms": 0,
+     "ghost_fraction": 0.107,
+     "field_ghost": [
+      -1.6,
+      -2.9,
+      0.959
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.15,
+     "ghost": 0.071,
+     "ghost_lag_nm": [
+      -4.0,
+      -1.6
+     ],
+     "quick": true
+    },
+    {
+     "width_nm": 1.2,
+     "ghost": 0.056,
+     "ghost_lag_nm": [
+      4.2,
+      1.5
+     ],
+     "field": "blunt",
+     "field_atoms": 5,
+     "ghost_fraction": 0.167,
+     "field_ghost": [
+      -0.4,
+      -0.7,
+      0.99
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 1.2,
+     "ghost": 0.048,
+     "ghost_lag_nm": [
+      4.2,
+      1.5
+     ],
+     "field": "blunt",
+     "field_atoms": 6,
+     "ghost_fraction": 0.133,
+     "field_ghost": [
+      0.8,
+      0.4,
+      0.96
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.95,
+     "ghost": 0.053,
+     "ghost_lag_nm": [
+      0.3,
+      4.0
+     ],
+     "field": "double",
+     "field_atoms": 10,
+     "ghost_fraction": 0.086,
+     "field_ghost": [
+      1.6,
+      1.2,
+      0.855
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 4,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.055,
+   "centre_shift_nm": [
+    -0.23,
+    0.27
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -390,
+    -350,
+    -268,
+    -150,
+    2,
+    90
+   ],
+   "peak_prominence": [
+    0.08,
+    0.34,
+    0.64,
+    0.94,
+    0.97,
+    0.12
+   ],
+   "e0_mev": -408.74561485560116,
+   "drift_comp_nm_per_min": [
+    -0.4351360464319721,
+    0.8518401624798418
+   ],
+   "radius_nm": 7.552865815162903,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 207,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -370.00000000000006,
+    "peak_hi_mev": -196.00000000000006,
+    "radius_nm": 4.081239974479317
+   },
+   "truth": {
+    "peak_lo_mev": -368.6446944360923,
+    "peak_hi_mev": -196.64469443609218,
+    "radius_nm": 4.067611371289877
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.3553055639077343,
+    "peak_hi_mev": 0.6446944360921236,
+    "radius_nm": 0.013628603189439481
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1523.5541222620702,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.15,
+     "ghost": 0.046,
+     "ghost_lag_nm": [
+      1.7,
+      -3.9
+     ],
+     "field": "blunt",
+     "field_atoms": 9,
+     "ghost_fraction": 0.085,
+     "field_ghost": [
+      -0.8,
+      -0.3,
+      0.945
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.9,
+     "ghost": 0.033,
+     "ghost_lag_nm": [
+      -1.9,
+      3.9
+     ],
+     "field": "ok",
+     "field_atoms": 8,
+     "ghost_fraction": 0.105,
+     "field_ghost": [
+      0.5,
+      -1.0,
+      0.973
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 1,
+   "bare_clear_nm": 6.6,
+   "bare_feature": 0.078,
+   "centre_shift_nm": [
+    -0.04,
+    -0.2
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -370,
+    -196,
+    104
+   ],
+   "peak_prominence": [
+    0.4,
+    0.95,
+    0.63
+   ],
+   "e0_mev": -410.989000872899,
+   "drift_comp_nm_per_min": [
+    0.10001868320661639,
+    -0.8384832868568112
+   ],
+   "radius_nm": 4.081239974479317,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 208,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -424.00000000000006,
+    "peak_hi_mev": -370.00000000000006,
+    "radius_nm": 9.669678158317756
+   },
+   "truth": {
+    "peak_lo_mev": -425.0069618737892,
+    "peak_hi_mev": -371.0069618737891,
+    "radius_nm": 9.66722134611693
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.0069618737891233,
+    "peak_hi_mev": 1.0069618737890664,
+    "radius_nm": 0.002456812200826164
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7682188474296,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.95,
+     "ghost": 0.031,
+     "ghost_lag_nm": [
+      -4.1,
+      1.5
+     ],
+     "field": "ok",
+     "field_atoms": 10,
+     "ghost_fraction": 0.103,
+     "field_ghost": [
+      1.5,
+      -0.4,
+      0.952
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.083,
+   "centre_shift_nm": [
+    -0.21,
+    0.04
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -424,
+    -370,
+    -294,
+    -194,
+    -70,
+    74
+   ],
+   "peak_prominence": [
+    0.33,
+    0.65,
+    0.84,
+    0.92,
+    0.94,
+    0.87
+   ],
+   "e0_mev": -464.4415046238782,
+   "drift_comp_nm_per_min": [
+    -0.4910715547637535,
+    0.15144972541917912
+   ],
+   "radius_nm": 9.669678158317756,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 209,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -360.00000000000006,
+    "peak_hi_mev": -288.00000000000006,
+    "radius_nm": 7.665779437948986
+   },
+   "truth": {
+    "peak_lo_mev": -360.7225021707168,
+    "peak_hi_mev": -288.7225021707167,
+    "radius_nm": 7.683725233006054
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.722502170716723,
+    "peak_hi_mev": 0.7225021707166661,
+    "radius_nm": -0.01794579505706828
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6605765902812,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.05,
+     "ghost": 0.028,
+     "ghost_lag_nm": [
+      4.0,
+      1.7
+     ],
+     "field": "ok",
+     "field_atoms": 8,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.031,
+   "centre_shift_nm": [
+    0.02,
+    -0.09
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -360,
+    -288,
+    -186,
+    -52,
+    110
+   ],
+   "peak_prominence": [
+    0.27,
+    0.55,
+    0.83,
+    0.97,
+    0.74
+   ],
+   "e0_mev": -412.6526920587239,
+   "drift_comp_nm_per_min": [
+    0.17334844550686634,
+    -0.6009568181056618
+   ],
+   "radius_nm": 7.665779437948986,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 210,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -264.0,
+    "peak_hi_mev": -18.000000000000014,
+    "radius_nm": 4.225595529949202
+   },
+   "truth": {
+    "peak_lo_mev": -263.35756882701673,
+    "peak_hi_mev": -15.357568827016499,
+    "radius_nm": 4.215856347689231
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.6424311729832652,
+    "peak_hi_mev": -2.6424311729835157,
+    "radius_nm": 0.00973918225997128
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1601.3394812119168,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.3,
+     "ghost": 0.043,
+     "ghost_lag_nm": [
+      3.5,
+      2.5
+     ],
+     "field": "blunt",
+     "field_atoms": 1,
+     "ghost_fraction": 0.133,
+     "field_ghost": [
+      -0.9,
+      0.3,
+      0.996
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 1.05,
+     "ghost": 0.023,
+     "ghost_lag_nm": [
+      3.5,
+      2.4
+     ],
+     "field": "blunt",
+     "field_atoms": 8,
+     "ghost_fraction": 0.138,
+     "field_ghost": [
+      -0.8,
+      1.7,
+      0.564
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.8,
+     "ghost": 0.026,
+     "ghost_lag_nm": [
+      -3.5,
+      -2.5
+     ],
+     "field": "ok",
+     "field_atoms": 7,
+     "ghost_fraction": 0.103,
+     "field_ghost": [
+      0.9,
+      -0.4,
+      0.984
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 2,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.104,
+   "centre_shift_nm": [
+    -0.01,
+    0.29
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -264,
+    -18
+   ],
+   "peak_prominence": [
+    0.95,
+    0.91
+   ],
+   "e0_mev": -411.75955156874824,
+   "drift_comp_nm_per_min": [
+    0.15204899478392142,
+    0.925966957538731
+   ],
+   "radius_nm": 4.225595529949202,
+   "peaks_found": 2
+  },
+  {
+   "paper": "P3",
+   "seed": 211,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -370.00000000000006,
+    "peak_hi_mev": -306.00000000000006,
+    "radius_nm": 8.325139849777598
+   },
+   "truth": {
+    "peak_lo_mev": -371.0719586800422,
+    "peak_hi_mev": -307.07195868004214,
+    "radius_nm": 8.331093490048573
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.071958680042144,
+    "peak_hi_mev": 1.071958680042087,
+    "radius_nm": -0.005953640270975669
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 965.7192743512519,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.75,
+     "ghost": 0.074,
+     "ghost_lag_nm": [
+      1.0,
+      -4.1
+     ],
+     "field": "double",
+     "field_atoms": 5,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.049,
+   "centre_shift_nm": [
+    0.16,
+    -0.06
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -406,
+    -370,
+    -306,
+    -216,
+    -96,
+    50
+   ],
+   "peak_prominence": [
+    0.1,
+    0.33,
+    0.67,
+    0.87,
+    0.92,
+    0.98
+   ],
+   "e0_mev": -418.06479211499465,
+   "drift_comp_nm_per_min": [
+    0.8228168059415619,
+    -0.22031171934473706
+   ],
+   "radius_nm": 8.325139849777598,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 212,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -394.0,
+    "peak_hi_mev": -330.00000000000006,
+    "radius_nm": 8.272657791327955
+   },
+   "truth": {
+    "peak_lo_mev": -393.7415219355313,
+    "peak_hi_mev": -329.74152193553124,
+    "radius_nm": 8.271935961831588
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.25847806446870436,
+    "peak_hi_mev": -0.25847806446881805,
+    "radius_nm": 0.0007218294963671212
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7153019541133,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.0,
+     "ghost": 0.042,
+     "ghost_lag_nm": [
+      -3.5,
+      2.2
+     ],
+     "field": "ok",
+     "field_atoms": 12,
+     "ghost_fraction": 0.083,
+     "field_ghost": [
+      -2.7,
+      1.3,
+      0.983
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.031,
+   "centre_shift_nm": [
+    0.09,
+    0.14
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -394,
+    -330,
+    -238,
+    -120,
+    28,
+    146
+   ],
+   "peak_prominence": [
+    0.39,
+    0.76,
+    0.91,
+    0.91,
+    0.93,
+    0.13
+   ],
+   "e0_mev": -440.7521762199455,
+   "drift_comp_nm_per_min": [
+    0.5072756668462637,
+    0.4868036703729211
+   ],
+   "radius_nm": 8.272657791327955,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 213,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -412.00000000000006,
+    "peak_hi_mev": -288.00000000000006,
+    "radius_nm": 4.343147215792439
+   },
+   "truth": {
+    "peak_lo_mev": -415.52292348400056,
+    "peak_hi_mev": -287.52292348400044,
+    "radius_nm": 4.346648519909557
+   },
+   "abs_err": {
+    "peak_lo_mev": 3.5229234840005006,
+    "peak_hi_mev": -0.4770765159996131,
+    "radius_nm": -0.0035013041171181314
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6849216734066,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.85,
+     "ghost": 0.037,
+     "ghost_lag_nm": [
+      0.3,
+      4.0
+     ],
+     "field": "ok",
+     "field_atoms": 12,
+     "ghost_fraction": 0.125,
+     "field_ghost": [
+      0.8,
+      -0.1,
+      0.74
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.041,
+   "centre_shift_nm": [
+    0.06,
+    0.2
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -412,
+    -288,
+    -62,
+    82
+   ],
+   "peak_prominence": [
+    0.31,
+    0.89,
+    0.94,
+    0.09
+   ],
+   "e0_mev": -448.82272464355196,
+   "drift_comp_nm_per_min": [
+    0.38619643750124777,
+    0.6435057526127455
+   ],
+   "radius_nm": 4.343147215792439,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 214,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -376.0,
+    "peak_hi_mev": -306.00000000000006,
+    "radius_nm": 8.436861758815287
+   },
+   "truth": {
+    "peak_lo_mev": -375.224756269467,
+    "peak_hi_mev": -307.2247562694669,
+    "radius_nm": 8.44275215862292
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.7752437305330204,
+    "peak_hi_mev": 1.2247562694668659,
+    "radius_nm": -0.005890399807633173
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7425036724138,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.95,
+     "ghost": 0.039,
+     "ghost_lag_nm": [
+      -4.1,
+      -1.8
+     ],
+     "field": "ok",
+     "field_atoms": 9,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.6,
+   "bare_feature": 0.044,
+   "centre_shift_nm": [
+    -0.27,
+    -0.15
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -376,
+    -306,
+    -212,
+    -86,
+    68
+   ],
+   "peak_prominence": [
+    0.39,
+    0.75,
+    0.93,
+    0.98,
+    0.94
+   ],
+   "e0_mev": -423.90298278929083,
+   "drift_comp_nm_per_min": [
+    -0.7106759566120784,
+    -0.6189179318107244
+   ],
+   "radius_nm": 8.436861758815287,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 215,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -346.00000000000006,
+    "peak_hi_mev": -244.00000000000006,
+    "radius_nm": 6.871519283441961
+   },
+   "truth": {
+    "peak_lo_mev": -348.18818987353166,
+    "peak_hi_mev": -244.18818987353157,
+    "radius_nm": 6.877623243828686
+   },
+   "abs_err": {
+    "peak_lo_mev": 2.1881898735315986,
+    "peak_hi_mev": 0.18818987353151329,
+    "radius_nm": -0.006103960386725227
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7211909274616,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.0,
+     "ghost": 0.036,
+     "ghost_lag_nm": [
+      3.8,
+      1.9
+     ],
+     "field": "ok",
+     "field_atoms": 10,
+     "ghost_fraction": 0.182,
+     "field_ghost": [
+      0.8,
+      0.2,
+      0.962
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.028,
+   "centre_shift_nm": [
+    -0.25,
+    0.13
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -402,
+    -346,
+    -244,
+    -98,
+    92
+   ],
+   "peak_prominence": [
+    0.11,
+    0.58,
+    0.85,
+    0.98,
+    0.75
+   ],
+   "e0_mev": -423.21570776173553,
+   "drift_comp_nm_per_min": [
+    -0.6358603722785237,
+    0.42913444180656996
+   ],
+   "radius_nm": 6.871519283441961,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 216,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -390.0,
+    "peak_hi_mev": -286.00000000000006,
+    "radius_nm": 6.530876301283804
+   },
+   "truth": {
+    "peak_lo_mev": -388.4362211035591,
+    "peak_hi_mev": -286.436221103559,
+    "radius_nm": 6.510571583423473
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.5637788964409083,
+    "peak_hi_mev": 0.4362211035589212,
+    "radius_nm": 0.0203047178603315
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1343.4780975317256,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.2,
+     "ghost": 0.037,
+     "ghost_lag_nm": [
+      -3.9,
+      1.6
+     ],
+     "field": "blunt",
+     "field_atoms": 11,
+     "ghost_fraction": 0.083,
+     "field_ghost": [
+      -0.8,
+      -1.0,
+      0.779
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.9,
+     "ghost": 0.029,
+     "ghost_lag_nm": [
+      -3.9,
+      1.3
+     ],
+     "field": "ok",
+     "field_atoms": 10,
+     "ghost_fraction": 0.093,
+     "field_ghost": [
+      0.8,
+      -0.2,
+      1.0
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 1,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.036,
+   "centre_shift_nm": [
+    -0.39,
+    0.15
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -442,
+    -390,
+    -286,
+    -140,
+    -54,
+    50
+   ],
+   "peak_prominence": [
+    0.14,
+    0.46,
+    0.78,
+    0.96,
+    0.09,
+    0.94
+   ],
+   "e0_mev": -460.6984553587821,
+   "drift_comp_nm_per_min": [
+    -1.0701139989549309,
+    0.5267360658400483
+   ],
+   "radius_nm": 6.530876301283804,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 217,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -376.0,
+    "peak_hi_mev": -310.00000000000006,
+    "radius_nm": 8.08669554592961
+   },
+   "truth": {
+    "peak_lo_mev": -377.5162261549726,
+    "peak_hi_mev": -309.5162261549725,
+    "radius_nm": 8.085362309029227
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.5162261549726281,
+    "peak_hi_mev": -0.4837738450275424,
+    "radius_nm": 0.0013332369003826727
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7569951048487,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.95,
+     "ghost": 0.029,
+     "ghost_lag_nm": [
+      1.8,
+      -3.6
+     ],
+     "field": "ok",
+     "field_atoms": 5,
+     "ghost_fraction": 0.111,
+     "field_ghost": [
+      -1.0,
+      -0.6,
+      0.973
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.037,
+   "centre_shift_nm": [
+    -0.19,
+    0.13
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -376,
+    -310,
+    -212,
+    -86,
+    70
+   ],
+   "peak_prominence": [
+    0.33,
+    0.52,
+    0.83,
+    0.96,
+    0.98
+   ],
+   "e0_mev": -428.16095747503545,
+   "drift_comp_nm_per_min": [
+    -0.4400357471006579,
+    0.4273168219896351
+   ],
+   "radius_nm": 8.08669554592961,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 218,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -404.0,
+    "peak_hi_mev": -328.00000000000006,
+    "radius_nm": 8.069356882330322
+   },
+   "truth": {
+    "peak_lo_mev": -402.8799072559979,
+    "peak_hi_mev": -328.87990725599786,
+    "radius_nm": 8.044815951714334
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.1200927440020791,
+    "peak_hi_mev": 0.8799072559978072,
+    "radius_nm": 0.024540930615987833
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6432002866678,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.95,
+     "ghost": 0.069,
+     "ghost_lag_nm": [
+      -1.2,
+      3.8
+     ],
+     "field": "ok",
+     "field_atoms": 2,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.6,
+   "bare_feature": 0.042,
+   "centre_shift_nm": [
+    -0.25,
+    0.02
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -404,
+    -328,
+    -222,
+    -84,
+    88
+   ],
+   "peak_prominence": [
+    0.57,
+    0.81,
+    0.93,
+    0.85,
+    0.79
+   ],
+   "e0_mev": -457.6746449230054,
+   "drift_comp_nm_per_min": [
+    -0.66747867144523,
+    0.0846702187463916
+   ],
+   "radius_nm": 8.069356882330322,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 219,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -434.00000000000006,
+    "peak_hi_mev": -324.00000000000006,
+    "radius_nm": 5.098676049147009
+   },
+   "truth": {
+    "peak_lo_mev": -435.9027266722734,
+    "peak_hi_mev": -323.9027266722733,
+    "radius_nm": 5.0661438587652885
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.9027266722733316,
+    "peak_hi_mev": -0.0972733277267821,
+    "radius_nm": 0.03253219038172084
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1383.4080202952782,
+   "tip_condition": "double",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.8,
+     "ghost": 0.028,
+     "ghost_lag_nm": [
+      3.9,
+      -2.2
+     ],
+     "field": "blunt",
+     "field_atoms": 1,
+     "ghost_fraction": 0.235,
+     "field_ghost": [
+      -0.9,
+      -1.2,
+      0.581
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.85,
+     "ghost": 0.026,
+     "ghost_lag_nm": [
+      -3.6,
+      2.3
+     ],
+     "field": "ok",
+     "field_atoms": 7,
+     "ghost_fraction": 0.111,
+     "field_ghost": [
+      -2.4,
+      -2.7,
+      0.998
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 1,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.026,
+   "centre_shift_nm": [
+    0.03,
+    0.29
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -434,
+    -324,
+    -130
+   ],
+   "peak_prominence": [
+    0.29,
+    0.85,
+    0.97
+   ],
+   "e0_mev": -464.4088089469243,
+   "drift_comp_nm_per_min": [
+    0.2777522393213245,
+    0.9323204322941288
+   ],
+   "radius_nm": 5.098676049147009,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 220,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -404.0,
+    "peak_hi_mev": -326.00000000000006,
+    "radius_nm": 8.109466856155786
+   },
+   "truth": {
+    "peak_lo_mev": -401.64949106293767,
+    "peak_hi_mev": -329.6494910629376,
+    "radius_nm": 8.11379365520245
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.3505089370623296,
+    "peak_hi_mev": 3.6494910629375568,
+    "radius_nm": -0.00432679904666422
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7395847607024,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.85,
+     "ghost": 0.027,
+     "ghost_lag_nm": [
+      -3.6,
+      2.0
+     ],
+     "field": "ok",
+     "field_atoms": 11,
+     "ghost_fraction": 0.077,
+     "field_ghost": [
+      0.5,
+      -1.5,
+      0.96
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.045,
+   "centre_shift_nm": [
+    -0.23,
+    0.17
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -404,
+    -326,
+    -226,
+    -90,
+    72
+   ],
+   "peak_prominence": [
+    0.39,
+    0.58,
+    0.82,
+    0.95,
+    0.95
+   ],
+   "e0_mev": -455.04795875426396,
+   "drift_comp_nm_per_min": [
+    -0.5924243847901516,
+    0.550085860303474
+   ],
+   "radius_nm": 8.109466856155786,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 221,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -364.00000000000006,
+    "peak_hi_mev": -276.0,
+    "radius_nm": 7.293817372793057
+   },
+   "truth": {
+    "peak_lo_mev": -365.0558239543118,
+    "peak_hi_mev": -277.05582395431173,
+    "radius_nm": 7.288456662772175
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.0558239543117338,
+    "peak_hi_mev": 1.0558239543117338,
+    "radius_nm": 0.005360710020881676
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6221672880625,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.9,
+     "ghost": 0.029,
+     "ghost_lag_nm": [
+      -4.2,
+      1.8
+     ],
+     "field": "ok",
+     "field_atoms": 6,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.6,
+   "bare_feature": 0.034,
+   "centre_shift_nm": [
+    0.15,
+    -0.05
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -414,
+    -364,
+    -276,
+    -148,
+    16
+   ],
+   "peak_prominence": [
+    0.12,
+    0.43,
+    0.75,
+    0.96,
+    0.95
+   ],
+   "e0_mev": -430.762579855788,
+   "drift_comp_nm_per_min": [
+    0.7823618458102837,
+    -0.2035238563378775
+   ],
+   "radius_nm": 7.293817372793057,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 222,
+   "success": false,
+   "partial": 0.0,
+   "error": "RuntimeError: the tip could not be conditioned",
+   "values": {},
+   "truth": {},
+   "abs_err": {},
+   "claims_ok": {
+    "peak_lo_mev": false,
+    "peak_hi_mev": false,
+    "radius_nm": false
+   },
+   "instrument_s": 2631.2571649005386,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse"
+   ],
+   "wide_survey": [
+    "coverage 0.72, inside 1.00"
+   ],
+   "judged": [
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.51, inside 1.00"
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.89, inside 0.41",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.85, inside 0.37",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.91, inside 0.32",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.94, inside 0.28",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.21, inside 0.65",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.20, inside 0.71",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.13, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.19, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.14, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.11, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.12, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.14, inside 0.68",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.15, inside 0.65",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.11, inside 0.81",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.61, inside 0.84",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.50, inside 0.76",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.36, inside 0.86",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.33, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.33, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.43, inside 1.00",
+     "quick": true
+    }
+   ]
+  },
+  {
+   "paper": "P3",
+   "seed": 223,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -392.0,
+    "peak_hi_mev": -246.00000000000006,
+    "radius_nm": 4.454186082877419
+   },
+   "truth": {
+    "peak_lo_mev": -391.3956571036279,
+    "peak_hi_mev": -245.39565710362777,
+    "radius_nm": 4.445356162845713
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.6043428963720885,
+    "peak_hi_mev": -0.6043428963722874,
+    "radius_nm": 0.008829920031705463
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7162192873433,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.95,
+     "ghost": 0.034,
+     "ghost_lag_nm": [
+      -0.6,
+      -4.3
+     ],
+     "field": "ok",
+     "field_atoms": 8,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.05,
+   "centre_shift_nm": [
+    -0.22,
+    0.11
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -392,
+    -246,
+    10
+   ],
+   "peak_prominence": [
+    0.37,
+    0.93,
+    0.88
+   ],
+   "e0_mev": -427.0782750058932,
+   "drift_comp_nm_per_min": [
+    -0.5416225330714135,
+    0.3954519249229631
+   ],
+   "radius_nm": 4.454186082877419,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 224,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -388.0,
+    "peak_hi_mev": -314.00000000000006,
+    "radius_nm": 8.174136676918408
+   },
+   "truth": {
+    "peak_lo_mev": -384.4683482179284,
+    "peak_hi_mev": -312.46834821792834,
+    "radius_nm": 8.167842517831218
+   },
+   "abs_err": {
+    "peak_lo_mev": -3.531651782071606,
+    "peak_hi_mev": -1.5316517820717195,
+    "radius_nm": 0.00629415908719011
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7203246961794,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.0,
+     "ghost": 0.042,
+     "ghost_lag_nm": [
+      0.3,
+      3.8
+     ],
+     "field": "ok",
+     "field_atoms": 8,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.035,
+   "centre_shift_nm": [
+    0.18,
+    0.05
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -418,
+    -388,
+    -314,
+    -212,
+    -82,
+    76
+   ],
+   "peak_prominence": [
+    0.12,
+    0.43,
+    0.64,
+    0.85,
+    0.95,
+    0.88
+   ],
+   "e0_mev": -435.25874782104654,
+   "drift_comp_nm_per_min": [
+    0.8188898981128327,
+    0.17857971205804274
+   ],
+   "radius_nm": 8.174136676918408,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 225,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -406.0,
+    "peak_hi_mev": -250.00000000000006,
+    "radius_nm": 4.2883581353894
+   },
+   "truth": {
+    "peak_lo_mev": -404.3860789322256,
+    "peak_hi_mev": -250.38607893222547,
+    "radius_nm": 4.262547671359076
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.6139210677744131,
+    "peak_hi_mev": 0.38607893222541634,
+    "radius_nm": 0.025810464030323388
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1343.6550953382562,
+   "tip_condition": "double",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 0.8,
+     "ghost": 0.047,
+     "ghost_lag_nm": [
+      -3.7,
+      2.0
+     ],
+     "field": "double",
+     "field_atoms": 1,
+     "ghost_fraction": 0.455,
+     "field_ghost": [
+      -0.9,
+      -1.3,
+      0.551
+     ],
+     "verdict": "double"
+    },
+    {
+     "width_nm": 0.85,
+     "ghost": 0.028,
+     "ghost_lag_nm": [
+      3.8,
+      2.7
+     ],
+     "field": "ok",
+     "field_atoms": 5,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 1,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.063,
+   "centre_shift_nm": [
+    0.07,
+    0.09
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -406,
+    -250,
+    22
+   ],
+   "peak_prominence": [
+    0.51,
+    0.96,
+    0.79
+   ],
+   "e0_mev": -444.26238490854274,
+   "drift_comp_nm_per_min": [
+    0.4947731847939382,
+    0.31289266523972575
+   ],
+   "radius_nm": 4.2883581353894,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 226,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -402.0,
+    "peak_hi_mev": -262.0,
+    "radius_nm": 4.526699989805927
+   },
+   "truth": {
+    "peak_lo_mev": -400.0042660244622,
+    "peak_hi_mev": -260.0042660244621,
+    "radius_nm": 4.503299757552918
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.995733975537803,
+    "peak_hi_mev": -1.9957339755379166,
+    "radius_nm": 0.02340023225300847
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7456279267429,
+   "tip_condition": "double",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.0,
+     "ghost": 0.029,
+     "ghost_lag_nm": [
+      4.0,
+      1.7
+     ],
+     "field": "ok",
+     "field_atoms": 7,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.027,
+   "centre_shift_nm": [
+    0.1,
+    0.12
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -402,
+    -262,
+    -14
+   ],
+   "peak_prominence": [
+    0.38,
+    0.93,
+    0.9
+   ],
+   "e0_mev": -435.9540678442942,
+   "drift_comp_nm_per_min": [
+    0.5855053037366192,
+    0.43683112488643083
+   ],
+   "radius_nm": 4.526699989805927,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 227,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -434.00000000000006,
+    "peak_hi_mev": -296.00000000000006,
+    "radius_nm": 4.372398072162605
+   },
+   "truth": {
+    "peak_lo_mev": -432.54590366178445,
+    "peak_hi_mev": -294.54590366178434,
+    "radius_nm": 4.392226351215081
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.4540963382156065,
+    "peak_hi_mev": -1.4540963382157202,
+    "radius_nm": -0.01982827905247575
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6456881753272,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.05,
+     "ghost": 0.043,
+     "ghost_lag_nm": [
+      2.9,
+      -3.2
+     ],
+     "field": "double",
+     "field_atoms": 7,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.033,
+   "centre_shift_nm": [
+    0.21,
+    -0.01
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -434,
+    -296,
+    -52,
+    114
+   ],
+   "peak_prominence": [
+    0.52,
+    0.94,
+    0.88,
+    0.11
+   ],
+   "e0_mev": -467.19357944645145,
+   "drift_comp_nm_per_min": [
+    1.0360800951043012,
+    -0.018912114679979965
+   ],
+   "radius_nm": 4.372398072162605,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 228,
+   "success": false,
+   "partial": 0.0,
+   "error": "ActionError: the instrument-time budget is spent",
+   "values": {},
+   "truth": {},
+   "abs_err": {},
+   "claims_ok": {
+    "peak_lo_mev": false,
+    "peak_hi_mev": false,
+    "radius_nm": false
+   },
+   "instrument_s": 5708.172657337474,
+   "tip_condition": "double",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 0.8,
+     "ghost": 0.048,
+     "ghost_lag_nm": [
+      -0.6,
+      3.7
+     ],
+     "field": "double",
+     "field_atoms": 9,
+     "ghost_fraction": 0.31,
+     "field_ghost": [
+      0.4,
+      -2.0,
+      0.431
+     ],
+     "verdict": "double"
+    },
+    {
+     "verdict": "double",
+     "width_nm": 0.7,
+     "ghost": 0.116,
+     "ghost_lag_nm": [
+      -0.1,
+      4.1
+     ],
+     "quick": true
+    },
+    {
+     "width_nm": 0.85,
+     "ghost": 0.087,
+     "ghost_lag_nm": [
+      0.4,
+      -3.9
+     ],
+     "field": "double",
+     "field_atoms": 6,
+     "ghost_fraction": 0.167,
+     "field_ghost": [
+      -2.0,
+      0.8,
+      0.865
+     ],
+     "verdict": "double"
+    },
+    {
+     "verdict": "double",
+     "width_nm": 0.7,
+     "ghost": 0.089,
+     "ghost_lag_nm": [
+      -0.3,
+      4.0
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.78, inside 1.00"
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.68, inside 1.00"
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.68, inside 1.00"
+    },
+    {
+     "width_nm": 0.7,
+     "ghost": 0.171,
+     "ghost_lag_nm": [
+      -1.0,
+      2.1
+     ],
+     "field": "blunt",
+     "field_atoms": 9,
+     "ghost_fraction": 0.25,
+     "field_ghost": [
+      -0.8,
+      2.0,
+      0.481
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.67, inside 1.00"
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.68, inside 1.00"
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.67, inside 1.00"
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.62, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.67, inside 1.00"
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.69, inside 1.00"
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.68, inside 1.00"
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.68, inside 1.00"
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.66, inside 1.00"
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.71, inside 1.00"
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.66, inside 1.00"
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.64, inside 1.00"
+    },
+    {
+     "width_nm": 0.8,
+     "ghost": 0.075,
+     "ghost_lag_nm": [
+      0.5,
+      -3.9
+     ],
+     "field": "double",
+     "field_atoms": 10,
+     "ghost_fraction": 0.133,
+     "field_ghost": [
+      -1.6,
+      0.6,
+      0.919
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "ghost_ignored": [
+    "ring"
+   ],
+   "unstable_ignored": true,
+   "tip_rounds": 20,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.036
+  },
+  {
+   "paper": "P3",
+   "seed": 229,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -374.00000000000006,
+    "peak_hi_mev": -298.00000000000006,
+    "radius_nm": 8.084006845211972
+   },
+   "truth": {
+    "peak_lo_mev": -375.4745584039013,
+    "peak_hi_mev": -301.47455840390126,
+    "radius_nm": 8.098125336956587
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.4745584039012556,
+    "peak_hi_mev": 3.4745584039011987,
+    "radius_nm": -0.014118491744614659
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1855.5351061504332,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse"
+   ],
+   "wide_survey": [
+    "coverage 0.99, inside 0.72"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.15,
+     "ghost": 0.023,
+     "ghost_lag_nm": [
+      3.75,
+      1.75
+     ],
+     "field": "double",
+     "field_atoms": 86,
+     "ghost_fraction": 0.011,
+     "field_ghost": [
+      -2.75,
+      -3.5,
+      0.95
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.85,
+     "ghost": 0.027,
+     "ghost_lag_nm": [
+      -3.8,
+      -1.9
+     ],
+     "field": "ok",
+     "field_atoms": 10,
+     "ghost_fraction": 0.1,
+     "field_ghost": [
+      2.2,
+      2.2,
+      0.965
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 1,
+   "bare_clear_nm": 7.0,
+   "bare_feature": 0.036,
+   "centre_shift_nm": [
+    -0.26,
+    0.17
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -416,
+    -374,
+    -298,
+    -192,
+    -56,
+    120
+   ],
+   "peak_prominence": [
+    0.09,
+    0.44,
+    0.73,
+    0.88,
+    0.96,
+    0.71
+   ],
+   "e0_mev": -430.78574241833667,
+   "drift_comp_nm_per_min": [
+    -0.5994154766014849,
+    0.5568911291363745
+   ],
+   "radius_nm": 8.084006845211972,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 230,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -414.00000000000006,
+    "peak_hi_mev": -362.00000000000006,
+    "radius_nm": 9.011871297705019
+   },
+   "truth": {
+    "peak_lo_mev": -414.18484541258715,
+    "peak_hi_mev": -360.1848454125871,
+    "radius_nm": 9.006187475427996
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.18484541258709442,
+    "peak_hi_mev": -1.8151545874129624,
+    "radius_nm": 0.005683822277022799
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1499.30835744607,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.15,
+     "ghost": 0.041,
+     "ghost_lag_nm": [
+      4.2,
+      1.8
+     ],
+     "field": "blunt",
+     "field_atoms": 6,
+     "ghost_fraction": 0.135,
+     "field_ghost": [
+      -0.7,
+      -0.2,
+      0.985
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.3,
+     "ghost": 0.0,
+     "ghost_lag_nm": [
+      0.0,
+      0.0
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "double",
+     "width_nm": 1.05,
+     "ghost": 0.392,
+     "ghost_lag_nm": [
+      2.6,
+      -1.7
+     ],
+     "quick": true
+    },
+    {
+     "width_nm": 1.1,
+     "ghost": 0.034,
+     "ghost_lag_nm": [
+      4.3,
+      1.8
+     ],
+     "field": "ok",
+     "field_atoms": 6,
+     "ghost_fraction": 0.098,
+     "field_ghost": [
+      0.2,
+      -0.6,
+      0.916
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 3,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.04,
+   "centre_shift_nm": [
+    -0.28,
+    -0.01
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -414,
+    -362,
+    -282,
+    -182,
+    -62,
+    80
+   ],
+   "peak_prominence": [
+    0.3,
+    0.53,
+    0.79,
+    0.93,
+    0.99,
+    0.95
+   ],
+   "e0_mev": -452.70036749033466,
+   "drift_comp_nm_per_min": [
+    -0.7575708266537995,
+    -0.012531840116609048
+   ],
+   "radius_nm": 9.011871297705019,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 231,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -422.00000000000006,
+    "peak_hi_mev": -270.0,
+    "radius_nm": 4.161612521839785
+   },
+   "truth": {
+    "peak_lo_mev": -422.14153514447145,
+    "peak_hi_mev": -270.14153514447133,
+    "radius_nm": 4.153014489586864
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.1415351444713906,
+    "peak_hi_mev": 0.14153514447133375,
+    "radius_nm": 0.00859803225292044
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7442276025221,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.0,
+     "ghost": 0.031,
+     "ghost_lag_nm": [
+      -2.9,
+      3.1
+     ],
+     "field": "ok",
+     "field_atoms": 8,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.033,
+   "centre_shift_nm": [
+    0.34,
+    0.07
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -422,
+    -270,
+    -4
+   ],
+   "peak_prominence": [
+    0.48,
+    0.98,
+    0.85
+   ],
+   "e0_mev": -458.8845953498718,
+   "drift_comp_nm_per_min": [
+    1.4276086098889713,
+    0.2731435106038385
+   ],
+   "radius_nm": 4.161612521839785,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 232,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -422.00000000000006,
+    "peak_hi_mev": -364.00000000000006,
+    "radius_nm": 8.835060793189802
+   },
+   "truth": {
+    "peak_lo_mev": -422.6414239909485,
+    "peak_hi_mev": -366.64142399094845,
+    "radius_nm": 8.82173576274495
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.6414239909484536,
+    "peak_hi_mev": 2.6414239909483967,
+    "radius_nm": 0.013325030444852004
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.680033519426,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.9,
+     "ghost": 0.036,
+     "ghost_lag_nm": [
+      0.8,
+      -3.6
+     ],
+     "field": "ok",
+     "field_atoms": 10,
+     "ghost_fraction": 0.176,
+     "field_ghost": [
+      -0.4,
+      -0.6,
+      0.972
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.032,
+   "centre_shift_nm": [
+    0.21,
+    0.09
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -422,
+    -364,
+    -288,
+    -186,
+    -62,
+    88
+   ],
+   "peak_prominence": [
+    0.23,
+    0.44,
+    0.69,
+    0.9,
+    0.97,
+    0.9
+   ],
+   "e0_mev": -461.72571216614824,
+   "drift_comp_nm_per_min": [
+    0.7979498020483705,
+    0.3287311106556794
+   ],
+   "radius_nm": 8.835060793189802,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 233,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -376.0,
+    "peak_hi_mev": -290.00000000000006,
+    "radius_nm": 7.127765816014299
+   },
+   "truth": {
+    "peak_lo_mev": -376.3687657866844,
+    "peak_hi_mev": -288.3687657866843,
+    "radius_nm": 7.106891557360955
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.36876578668437787,
+    "peak_hi_mev": -1.6312342133157358,
+    "radius_nm": 0.020874258653344135
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1343.5877093513827,
+   "tip_condition": "double",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.0,
+     "ghost": 0.028,
+     "ghost_lag_nm": [
+      4.2,
+      1.6
+     ],
+     "field": "double",
+     "field_atoms": 10,
+     "ghost_fraction": 0.8,
+     "field_ghost": [
+      -2.3,
+      2.4,
+      0.323
+     ],
+     "verdict": "double"
+    },
+    {
+     "width_nm": 0.95,
+     "ghost": 0.027,
+     "ghost_lag_nm": [
+      4.3,
+      1.7
+     ],
+     "field": "double",
+     "field_atoms": 8,
+     "ghost_fraction": 0.1,
+     "field_ghost": [
+      -2.4,
+      0.0,
+      0.925
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 1,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.036,
+   "centre_shift_nm": [
+    -0.29,
+    -0.16
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -376,
+    -290,
+    -162,
+    2
+   ],
+   "peak_prominence": [
+    0.36,
+    0.68,
+    0.97,
+    0.97
+   ],
+   "e0_mev": -439.7580978326297,
+   "drift_comp_nm_per_min": [
+    -0.9045773787720225,
+    -0.6388384255117117
+   ],
+   "radius_nm": 7.127765816014299,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 234,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -348.00000000000006,
+    "peak_hi_mev": -240.00000000000006,
+    "radius_nm": 6.336993990890767
+   },
+   "truth": {
+    "peak_lo_mev": -347.4074349225391,
+    "peak_hi_mev": -239.407434922539,
+    "radius_nm": 6.320152640972439
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.5925650774609608,
+    "peak_hi_mev": -0.592565077461046,
+    "radius_nm": 0.01684134991832842
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7392735636226,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.95,
+     "ghost": 0.026,
+     "ghost_lag_nm": [
+      3.6,
+      1.8
+     ],
+     "field": "ok",
+     "field_atoms": 8,
+     "ghost_fraction": 0.2,
+     "field_ghost": [
+      -0.5,
+      -1.1,
+      0.854
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.03,
+   "centre_shift_nm": [
+    -0.16,
+    0.28
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -408,
+    -348,
+    -240,
+    -86,
+    114
+   ],
+   "peak_prominence": [
+    0.11,
+    0.62,
+    0.9,
+    0.93,
+    0.54
+   ],
+   "e0_mev": -424.7675211823515,
+   "drift_comp_nm_per_min": [
+    -0.2881740667762086,
+    0.9014931769219722
+   ],
+   "radius_nm": 6.336993990890767,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 235,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -394.0,
+    "peak_hi_mev": -270.0,
+    "radius_nm": 4.5020097205666865
+   },
+   "truth": {
+    "peak_lo_mev": -393.07288878057744,
+    "peak_hi_mev": -273.07288878057733,
+    "radius_nm": 4.472062558837316
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.9271112194225566,
+    "peak_hi_mev": 3.0728887805773297,
+    "radius_nm": 0.029947161729370286
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1632.809156008947,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.15,
+     "ghost": 0.055,
+     "ghost_lag_nm": [
+      -3.8,
+      1.6
+     ],
+     "field": "blunt",
+     "field_atoms": 1,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.95,
+     "ghost": 0.053,
+     "ghost_lag_nm": [
+      -3.7,
+      1.8
+     ],
+     "field": "blunt",
+     "field_atoms": 5,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.85,
+     "ghost": 0.048,
+     "ghost_lag_nm": [
+      3.6,
+      2.2
+     ],
+     "field": "ok",
+     "field_atoms": 5,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 2,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.023,
+   "centre_shift_nm": [
+    0.17,
+    -0.0
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -394,
+    -270,
+    -176,
+    -56,
+    70
+   ],
+   "peak_prominence": [
+    0.39,
+    0.85,
+    0.1,
+    0.83,
+    0.13
+   ],
+   "e0_mev": -425.58553824076984,
+   "drift_comp_nm_per_min": [
+    1.0176266323797458,
+    -0.005948716292292156
+   ],
+   "radius_nm": 4.5020097205666865,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 236,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -400.0,
+    "peak_hi_mev": -350.00000000000006,
+    "radius_nm": 9.77499118634541
+   },
+   "truth": {
+    "peak_lo_mev": -398.54142375572826,
+    "peak_hi_mev": -348.5414237557282,
+    "radius_nm": 9.736695642625474
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.4585762442717396,
+    "peak_hi_mev": -1.4585762442718533,
+    "radius_nm": 0.038295543719936376
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1343.5016274108661,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.25,
+     "ghost": 0.023,
+     "ghost_lag_nm": [
+      -4.1,
+      -1.5
+     ],
+     "field": "ok",
+     "field_atoms": 6,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.95,
+     "ghost": 0.024,
+     "ghost_lag_nm": [
+      2.1,
+      3.8
+     ],
+     "field": "ok",
+     "field_atoms": 6,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 1,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.023,
+   "centre_shift_nm": [
+    -0.23,
+    0.24
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -400,
+    -350,
+    -278,
+    -184,
+    -70,
+    64
+   ],
+   "peak_prominence": [
+    0.29,
+    0.57,
+    0.78,
+    0.95,
+    0.91,
+    0.84
+   ],
+   "e0_mev": -436.4151110517148,
+   "drift_comp_nm_per_min": [
+    -0.5174009292795264,
+    0.7765102378179891
+   ],
+   "radius_nm": 9.77499118634541,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 237,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -354.00000000000006,
+    "peak_hi_mev": -248.00000000000006,
+    "radius_nm": 6.429207282064696
+   },
+   "truth": {
+    "peak_lo_mev": -352.5558352635819,
+    "peak_hi_mev": -250.55583526358183,
+    "radius_nm": 6.423113217112035
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.444164736418145,
+    "peak_hi_mev": 2.55583526358177,
+    "radius_nm": 0.006094064952661071
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7581696506629,
+   "tip_condition": "double",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.85,
+     "ghost": 0.026,
+     "ghost_lag_nm": [
+      4.3,
+      1.6
+     ],
+     "field": "ok",
+     "field_atoms": 12,
+     "ghost_fraction": 0.083,
+     "field_ghost": [
+      2.0,
+      -3.5,
+      0.957
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.024,
+   "centre_shift_nm": [
+    0.2,
+    -0.04
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -408,
+    -354,
+    -248,
+    -104,
+    86
+   ],
+   "peak_prominence": [
+    0.14,
+    0.44,
+    0.83,
+    0.96,
+    0.83
+   ],
+   "e0_mev": -427.77065218426765,
+   "drift_comp_nm_per_min": [
+    0.966737703806555,
+    -0.16027737885540513
+   ],
+   "radius_nm": 6.429207282064696,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 238,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -366.00000000000006,
+    "peak_hi_mev": -274.0,
+    "radius_nm": 7.20081634194699
+   },
+   "truth": {
+    "peak_lo_mev": -364.7856676477508,
+    "peak_hi_mev": -272.78566764775076,
+    "radius_nm": 7.215781548678471
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.2143323522492437,
+    "peak_hi_mev": -1.2143323522492437,
+    "radius_nm": -0.01496520673148094
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1601.407770581734,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.15,
+     "ghost": 0.057,
+     "ghost_lag_nm": [
+      -0.9,
+      4.0
+     ],
+     "field": "blunt",
+     "field_atoms": 5,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 1.1,
+     "ghost": 0.07,
+     "ghost_lag_nm": [
+      -0.7,
+      4.1
+     ],
+     "field": "blunt",
+     "field_atoms": 5,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.9,
+     "ghost": 0.063,
+     "ghost_lag_nm": [
+      -0.6,
+      4.3
+     ],
+     "field": "ok",
+     "field_atoms": 5,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 2,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.023,
+   "centre_shift_nm": [
+    0.05,
+    -0.15
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -412,
+    -366,
+    -274,
+    -142,
+    26
+   ],
+   "peak_prominence": [
+    0.1,
+    0.37,
+    0.69,
+    0.94,
+    0.93
+   ],
+   "e0_mev": -432.2606771445127,
+   "drift_comp_nm_per_min": [
+    0.3411887410957851,
+    -0.5786425902409236
+   ],
+   "radius_nm": 7.20081634194699,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 239,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -382.0,
+    "peak_hi_mev": -318.00000000000006,
+    "radius_nm": 8.729801222243804
+   },
+   "truth": {
+    "peak_lo_mev": -381.7226031382397,
+    "peak_hi_mev": -317.72260313823966,
+    "radius_nm": 8.722848542851315
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.27739686176028044,
+    "peak_hi_mev": -0.27739686176039413,
+    "radius_nm": 0.006952679392489003
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7842871473302,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.95,
+     "ghost": 0.034,
+     "ghost_lag_nm": [
+      -1.7,
+      3.8
+     ],
+     "field": "ok",
+     "field_atoms": 3,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.054,
+   "centre_shift_nm": [
+    -0.16,
+    -0.04
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -410,
+    -382,
+    -318,
+    -228,
+    -112,
+    34
+   ],
+   "peak_prominence": [
+    0.09,
+    0.33,
+    0.58,
+    0.77,
+    0.97,
+    0.96
+   ],
+   "e0_mev": -426.311235228371,
+   "drift_comp_nm_per_min": [
+    -0.3441436174597221,
+    -0.12423255590324342
+   ],
+   "radius_nm": 8.729801222243804,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 240,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -372.00000000000006,
+    "peak_hi_mev": -304.00000000000006,
+    "radius_nm": 8.24596580538271
+   },
+   "truth": {
+    "peak_lo_mev": -373.6976939850034,
+    "peak_hi_mev": -301.69769398500335,
+    "radius_nm": 8.255555999685976
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.6976939850033546,
+    "peak_hi_mev": -2.3023060149967023,
+    "radius_nm": -0.00959019430326613
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1408.4532603629893,
+   "tip_condition": "double",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.25,
+     "ghost": 0.04,
+     "ghost_lag_nm": [
+      1.2,
+      4.2
+     ],
+     "field": "blunt",
+     "field_atoms": 6,
+     "ghost_fraction": 0.115,
+     "field_ghost": [
+      -1.2,
+      0.6,
+      0.993
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 1.0,
+     "ghost": 0.038,
+     "ghost_lag_nm": [
+      4.1,
+      1.1
+     ],
+     "field": "ok",
+     "field_atoms": 7,
+     "ghost_fraction": 0.188,
+     "field_ghost": [
+      -2.9,
+      1.6,
+      0.928
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 1,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.027,
+   "centre_shift_nm": [
+    0.08,
+    0.27
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -372,
+    -304,
+    -198,
+    -68,
+    94
+   ],
+   "peak_prominence": [
+    0.41,
+    0.7,
+    0.9,
+    1.0,
+    0.87
+   ],
+   "e0_mev": -424.01793462835576,
+   "drift_comp_nm_per_min": [
+    0.4318968092932524,
+    0.8765334268574924
+   ],
+   "radius_nm": 8.24596580538271,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 241,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -406.0,
+    "peak_hi_mev": -356.00000000000006,
+    "radius_nm": 8.645743294784161
+   },
+   "truth": {
+    "peak_lo_mev": -408.90132561522285,
+    "peak_hi_mev": -352.9013256152228,
+    "radius_nm": 8.645918539915012
+   },
+   "abs_err": {
+    "peak_lo_mev": 2.901325615222845,
+    "peak_hi_mev": -3.0986743847772686,
+    "radius_nm": -0.0001752451308512093
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1343.5075739983586,
+   "tip_condition": "double",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 0.95,
+     "ghost": 0.103,
+     "ghost_lag_nm": [
+      -2.3,
+      2.0
+     ],
+     "field": "double",
+     "field_atoms": 9,
+     "ghost_fraction": 0.889,
+     "field_ghost": [
+      -2.1,
+      1.9,
+      0.344
+     ],
+     "verdict": "double"
+    },
+    {
+     "width_nm": 0.9,
+     "ghost": 0.029,
+     "ghost_lag_nm": [
+      4.4,
+      -1.5
+     ],
+     "field": "ok",
+     "field_atoms": 10,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 1,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.027,
+   "centre_shift_nm": [
+    -0.09,
+    -0.22
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -406,
+    -356,
+    -272,
+    -164,
+    -30,
+    126
+   ],
+   "peak_prominence": [
+    0.21,
+    0.52,
+    0.7,
+    0.93,
+    0.98,
+    0.54
+   ],
+   "e0_mev": -451.48407218673543,
+   "drift_comp_nm_per_min": [
+    -0.23593085295048175,
+    -1.1257118206360308
+   ],
+   "radius_nm": 8.645743294784161,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 242,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -398.0,
+    "peak_hi_mev": -312.00000000000006,
+    "radius_nm": 7.36210418893745
+   },
+   "truth": {
+    "peak_lo_mev": -397.0579517117443,
+    "peak_hi_mev": -313.05795171174424,
+    "radius_nm": 7.343850223673518
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.9420482882557053,
+    "peak_hi_mev": 1.057951711744181,
+    "radius_nm": 0.018253965263932415
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1421.3988800342215,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.25,
+     "ghost": 0.042,
+     "ghost_lag_nm": [
+      -3.7,
+      2.1
+     ],
+     "field": "blunt",
+     "field_atoms": 9,
+     "ghost_fraction": 0.091,
+     "field_ghost": [
+      -1.9,
+      -0.2,
+      0.999
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.35,
+     "ghost": 0.057,
+     "ghost_lag_nm": [
+      -3.7,
+      2.2
+     ],
+     "quick": true
+    },
+    {
+     "width_nm": 1.05,
+     "ghost": 0.032,
+     "ghost_lag_nm": [
+      4.3,
+      1.7
+     ],
+     "field": "ok",
+     "field_atoms": 9,
+     "ghost_fraction": 0.111,
+     "field_ghost": [
+      -2.2,
+      -0.3,
+      0.976
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 2,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.04,
+   "centre_shift_nm": [
+    -0.17,
+    -0.13
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -442,
+    -398,
+    -312,
+    -192,
+    -40,
+    52
+   ],
+   "peak_prominence": [
+    0.14,
+    0.52,
+    0.86,
+    1.0,
+    0.89,
+    0.13
+   ],
+   "e0_mev": -458.9855345960185,
+   "drift_comp_nm_per_min": [
+    -0.35468174434198707,
+    -0.47782822698855515
+   ],
+   "radius_nm": 7.36210418893745,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 243,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -382.0,
+    "peak_hi_mev": -312.00000000000006,
+    "radius_nm": 8.158103813773588
+   },
+   "truth": {
+    "peak_lo_mev": -379.8091623662332,
+    "peak_hi_mev": -309.8091623662331,
+    "radius_nm": 8.16215170973006
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.1908376337668187,
+    "peak_hi_mev": -2.1908376337669324,
+    "radius_nm": -0.004047895956471592
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6892162608173,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.1,
+     "ghost": 0.0,
+     "ghost_lag_nm": [
+      0.0,
+      0.0
+     ],
+     "field": "ok",
+     "field_atoms": 8,
+     "ghost_fraction": 0.125,
+     "field_ghost": [
+      -1.1,
+      -3.0,
+      0.944
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.6,
+   "bare_feature": 0.023,
+   "centre_shift_nm": [
+    0.17,
+    -0.05
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -416,
+    -382,
+    -312,
+    -208,
+    -78,
+    82
+   ],
+   "peak_prominence": [
+    0.11,
+    0.42,
+    0.76,
+    0.88,
+    0.95,
+    0.92
+   ],
+   "e0_mev": -430.1789593606205,
+   "drift_comp_nm_per_min": [
+    0.8450551223010252,
+    -0.20011382403578895
+   ],
+   "radius_nm": 8.158103813773588,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 244,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -388.0,
+    "peak_hi_mev": -282.0,
+    "radius_nm": 6.916959216545877
+   },
+   "truth": {
+    "peak_lo_mev": -384.5100974745268,
+    "peak_hi_mev": -282.51009747452673,
+    "radius_nm": 6.910508370801861
+   },
+   "abs_err": {
+    "peak_lo_mev": -3.4899025254732123,
+    "peak_hi_mev": 0.5100974745267308,
+    "radius_nm": 0.006450845744015332
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1421.3592130354368,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.15,
+     "ghost": 0.035,
+     "ghost_lag_nm": [
+      1.1,
+      3.9
+     ],
+     "field": "blunt",
+     "field_atoms": 8,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.2,
+     "ghost": 0.04,
+     "ghost_lag_nm": [
+      -3.8,
+      2.1
+     ],
+     "quick": true
+    },
+    {
+     "width_nm": 1.1,
+     "ghost": 0.036,
+     "ghost_lag_nm": [
+      1.0,
+      3.9
+     ],
+     "field": "ok",
+     "field_atoms": 8,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 2,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.055,
+   "centre_shift_nm": [
+    -0.29,
+    -0.07
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -430,
+    -388,
+    -282,
+    -136,
+    52
+   ],
+   "peak_prominence": [
+    0.14,
+    0.42,
+    0.86,
+    0.97,
+    0.85
+   ],
+   "e0_mev": -458.8151010080006,
+   "drift_comp_nm_per_min": [
+    -0.78928349887745,
+    -0.2558139469218005
+   ],
+   "radius_nm": 6.916959216545877,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 245,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -364.00000000000006,
+    "peak_hi_mev": -258.00000000000006,
+    "radius_nm": 6.756344326054561
+   },
+   "truth": {
+    "peak_lo_mev": -364.1144696796308,
+    "peak_hi_mev": -258.1144696796307,
+    "radius_nm": 6.7314542934402235
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.11446967963075849,
+    "peak_hi_mev": 0.1144696796306448,
+    "radius_nm": 0.024890032614337088
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7389449036356,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.9,
+     "ghost": 0.03,
+     "ghost_lag_nm": [
+      1.4,
+      -4.1
+     ],
+     "field": "ok",
+     "field_atoms": 3,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.0,
+   "bare_feature": 0.035,
+   "centre_shift_nm": [
+    0.13,
+    -0.16
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -422,
+    -364,
+    -258,
+    -106,
+    90
+   ],
+   "peak_prominence": [
+    0.12,
+    0.64,
+    0.93,
+    0.99,
+    0.8
+   ],
+   "e0_mev": -440.3509410088178,
+   "drift_comp_nm_per_min": [
+    0.7948442767271551,
+    -0.6873840987006025
+   ],
+   "radius_nm": 6.756344326054561,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 246,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -408.00000000000006,
+    "peak_hi_mev": -304.00000000000006,
+    "radius_nm": 5.252931704880582
+   },
+   "truth": {
+    "peak_lo_mev": -404.03898856832285,
+    "peak_hi_mev": -306.0389885683228,
+    "radius_nm": 5.265285778138667
+   },
+   "abs_err": {
+    "peak_lo_mev": -3.961011431677207,
+    "peak_hi_mev": 2.0389885683227362,
+    "radius_nm": -0.01235407325808513
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7323040282604,
+   "tip_condition": "double",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.9,
+     "ghost": 0.03,
+     "ghost_lag_nm": [
+      -0.2,
+      -4.6
+     ],
+     "field": "ok",
+     "field_atoms": 9,
+     "ghost_fraction": 0.111,
+     "field_ghost": [
+      -3.1,
+      2.6,
+      0.996
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.027,
+   "centre_shift_nm": [
+    -0.06,
+    -0.18
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -408,
+    -304,
+    -128,
+    120
+   ],
+   "peak_prominence": [
+    0.27,
+    0.7,
+    0.97,
+    0.4
+   ],
+   "e0_mev": -434.14036788081194,
+   "drift_comp_nm_per_min": [
+    0.025120203765757267,
+    -0.7445010935500338
+   ],
+   "radius_nm": 5.252931704880582,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 247,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -356.00000000000006,
+    "peak_hi_mev": -268.0,
+    "radius_nm": 7.227152522442426
+   },
+   "truth": {
+    "peak_lo_mev": -356.9848344496177,
+    "peak_hi_mev": -266.9848344496176,
+    "radius_nm": 7.244999466443237
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.9848344496176651,
+    "peak_hi_mev": -1.0151655503823918,
+    "radius_nm": -0.017846944000811327
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7084268970367,
+   "tip_condition": "double",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.05,
+     "ghost": 0.036,
+     "ghost_lag_nm": [
+      -3.8,
+      1.4
+     ],
+     "field": "ok",
+     "field_atoms": 18,
+     "ghost_fraction": 0.111,
+     "field_ghost": [
+      0.8,
+      0.5,
+      0.99
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.034,
+   "centre_shift_nm": [
+    -0.07,
+    0.4
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -404,
+    -356,
+    -268,
+    -142,
+    24
+   ],
+   "peak_prominence": [
+    0.14,
+    0.54,
+    0.85,
+    0.96,
+    1.0
+   ],
+   "e0_mev": -420.45565832426536,
+   "drift_comp_nm_per_min": [
+    -0.020452105376826398,
+    1.2336977265704536
+   ],
+   "radius_nm": 7.227152522442426,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 248,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -376.0,
+    "peak_hi_mev": -234.00000000000003,
+    "radius_nm": 4.256066778666939
+   },
+   "truth": {
+    "peak_lo_mev": -374.55712333961225,
+    "peak_hi_mev": -234.5571233396121,
+    "radius_nm": 4.238374112526824
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.4428766603877534,
+    "peak_hi_mev": 0.557123339612076,
+    "radius_nm": 0.017692666140114888
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7831413362364,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.85,
+     "ghost": 0.035,
+     "ghost_lag_nm": [
+      -3.8,
+      1.6
+     ],
+     "field": "ok",
+     "field_atoms": 7,
+     "ghost_fraction": 0.143,
+     "field_ghost": [
+      2.2,
+      -3.4,
+      0.99
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.031,
+   "centre_shift_nm": [
+    0.14,
+    0.16
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -376,
+    -234,
+    14
+   ],
+   "peak_prominence": [
+    0.33,
+    0.91,
+    0.81
+   ],
+   "e0_mev": -412.091706791384,
+   "drift_comp_nm_per_min": [
+    0.6908791567628455,
+    0.5541499821068652
+   ],
+   "radius_nm": 4.256066778666939,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 249,
+   "success": false,
+   "partial": 0.0,
+   "error": "RuntimeError: the tip could not be conditioned",
+   "values": {},
+   "truth": {},
+   "abs_err": {},
+   "claims_ok": {
+    "peak_lo_mev": false,
+    "peak_hi_mev": false,
+    "radius_nm": false
+   },
+   "instrument_s": 2631.09866490054,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse"
+   ],
+   "wide_survey": [
+    "coverage 0.99, inside 0.82"
+   ],
+   "judged": [
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.53, inside 1.00"
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.10, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.13, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.10, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.11, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.11, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.10, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.09, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.10, inside 0.79",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.12, inside 0.89",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.13, inside 0.79",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.17, inside 0.59",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.13, inside 0.54",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.09, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.09, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.13, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.14, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.12, inside 1.00",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.12, inside 0.92",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.13, inside 0.79",
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.26, inside 1.00",
+     "quick": true
+    }
+   ]
+  },
+  {
+   "paper": "P3",
+   "seed": 250,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -384.0,
+    "peak_hi_mev": -278.0,
+    "radius_nm": 4.751390972952583
+   },
+   "truth": {
+    "peak_lo_mev": -383.0742182735818,
+    "peak_hi_mev": -277.0742182735817,
+    "radius_nm": 4.726598992631204
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.9257817264182222,
+    "peak_hi_mev": -0.925781726418279,
+    "radius_nm": 0.024791980321379192
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6352966898343,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.95,
+     "ghost": 0.029,
+     "ghost_lag_nm": [
+      0.0,
+      4.3
+     ],
+     "field": "ok",
+     "field_atoms": 17,
+     "ghost_fraction": 0.05,
+     "field_ghost": [
+      -1.4,
+      2.9,
+      1.0
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.6,
+   "bare_feature": 0.043,
+   "centre_shift_nm": [
+    -0.12,
+    -0.16
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -384,
+    -278,
+    -86
+   ],
+   "peak_prominence": [
+    0.26,
+    0.83,
+    0.98
+   ],
+   "e0_mev": -411.2445842221733,
+   "drift_comp_nm_per_min": [
+    -0.20234209207802137,
+    -0.6625124689052714
+   ],
+   "radius_nm": 4.751390972952583,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 251,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -404.0,
+    "peak_hi_mev": -314.00000000000006,
+    "radius_nm": 7.23362570798662
+   },
+   "truth": {
+    "peak_lo_mev": -404.02043656481993,
+    "peak_hi_mev": -312.0204365648199,
+    "radius_nm": 7.235210445974766
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.02043656481993139,
+    "peak_hi_mev": -1.9795634351801823,
+    "radius_nm": -0.0015847379881455126
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6621676940783,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.8,
+     "ghost": 0.033,
+     "ghost_lag_nm": [
+      3.6,
+      1.5
+     ],
+     "field": "double",
+     "field_atoms": 6,
+     "ghost_fraction": 0.143,
+     "field_ghost": [
+      0.8,
+      0.7,
+      0.912
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.024,
+   "centre_shift_nm": [
+    0.21,
+    0.11
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -404,
+    -314,
+    -184,
+    -12
+   ],
+   "peak_prominence": [
+    0.4,
+    0.76,
+    0.94,
+    0.98
+   ],
+   "e0_mev": -470.489678609785,
+   "drift_comp_nm_per_min": [
+    0.8561269824885527,
+    0.3746816031829248
+   ],
+   "radius_nm": 7.23362570798662,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 252,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -390.0,
+    "peak_hi_mev": -280.0,
+    "radius_nm": 5.099717033063283
+   },
+   "truth": {
+    "peak_lo_mev": -387.8827087344063,
+    "peak_hi_mev": -279.88270873440626,
+    "radius_nm": 5.080620331287464
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.1172912655936784,
+    "peak_hi_mev": -0.11729126559373526,
+    "radius_nm": 0.019096701775819014
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1601.2998090122642,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.05,
+     "ghost": 0.032,
+     "ghost_lag_nm": [
+      -3.2,
+      2.9
+     ],
+     "field": "blunt",
+     "field_atoms": 9,
+     "ghost_fraction": 0.099,
+     "field_ghost": [
+      -1.5,
+      -0.5,
+      0.971
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "double",
+     "width_nm": 1.2,
+     "ghost": 0.104,
+     "ghost_lag_nm": [
+      3.6,
+      2.9
+     ],
+     "quick": true
+    },
+    {
+     "width_nm": 0.95,
+     "ghost": 0.033,
+     "ghost_lag_nm": [
+      3.1,
+      -2.7
+     ],
+     "field": "ok",
+     "field_atoms": 12,
+     "ghost_fraction": 0.103,
+     "field_ghost": [
+      -0.7,
+      -0.9,
+      0.821
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 2,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.069,
+   "centre_shift_nm": [
+    0.15,
+    0.11
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -390,
+    -280,
+    -88
+   ],
+   "peak_prominence": [
+    0.25,
+    0.84,
+    0.99
+   ],
+   "e0_mev": -414.3374437614075,
+   "drift_comp_nm_per_min": [
+    0.7026088062162779,
+    0.38499068367727884
+   ],
+   "radius_nm": 5.099717033063283,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 253,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -416.00000000000006,
+    "peak_hi_mev": -318.00000000000006,
+    "radius_nm": 5.427119517786456
+   },
+   "truth": {
+    "peak_lo_mev": -413.0118255066717,
+    "peak_hi_mev": -317.01182550667164,
+    "radius_nm": 5.417457531693319
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.9881744933283585,
+    "peak_hi_mev": -0.9881744933284153,
+    "radius_nm": 0.009661986093136399
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.661752935954,
+   "tip_condition": "double",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.85,
+     "ghost": 0.031,
+     "ghost_lag_nm": [
+      0.6,
+      -4.2
+     ],
+     "field": "ok",
+     "field_atoms": 6,
+     "ghost_fraction": 0.25,
+     "field_ghost": [
+      -1.7,
+      0.3,
+      0.591
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.043,
+   "centre_shift_nm": [
+    -0.05,
+    -0.24
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -416,
+    -318,
+    -146,
+    100
+   ],
+   "peak_prominence": [
+    0.23,
+    0.71,
+    1.0,
+    0.75
+   ],
+   "e0_mev": -440.3199830271892,
+   "drift_comp_nm_per_min": [
+    0.04030979419080146,
+    -1.0764053543367813
+   ],
+   "radius_nm": 5.427119517786456,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 254,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -438.00000000000006,
+    "peak_hi_mev": -350.00000000000006,
+    "radius_nm": 5.222999355881122
+   },
+   "truth": {
+    "peak_lo_mev": -438.89955071464345,
+    "peak_hi_mev": -348.89955071464334,
+    "radius_nm": 5.190602836859851
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.8995507146433965,
+    "peak_hi_mev": -1.1004492853567172,
+    "radius_nm": 0.03239651902127072
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7594966346581,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.05,
+     "ghost": 0.024,
+     "ghost_lag_nm": [
+      -3.8,
+      1.9
+     ],
+     "field": "ok",
+     "field_atoms": 12,
+     "ghost_fraction": 0.161,
+     "field_ghost": [
+      -0.6,
+      -0.3,
+      0.921
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.02,
+   "centre_shift_nm": [
+    0.14,
+    -0.03
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -438,
+    -350,
+    -190,
+    40
+   ],
+   "peak_prominence": [
+    0.23,
+    0.7,
+    0.98,
+    0.85
+   ],
+   "e0_mev": -463.51134754045256,
+   "drift_comp_nm_per_min": [
+    0.7551564377963293,
+    -0.12724362611285453
+   ],
+   "radius_nm": 5.222999355881122,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 255,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -398.0,
+    "peak_hi_mev": -270.0,
+    "radius_nm": 4.405089630415852
+   },
+   "truth": {
+    "peak_lo_mev": -397.095500887411,
+    "peak_hi_mev": -271.0955008874109,
+    "radius_nm": 4.405094026635078
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.9044991125890078,
+    "peak_hi_mev": 1.0955008874108785,
+    "radius_nm": -4.396219225988318e-06
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.79493295094,
+   "tip_condition": "double",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.95,
+     "ghost": 0.033,
+     "ghost_lag_nm": [
+      -4.4,
+      2.2
+     ],
+     "field": "ok",
+     "field_atoms": 9,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.031,
+   "centre_shift_nm": [
+    -0.14,
+    0.25
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -398,
+    -270,
+    -42
+   ],
+   "peak_prominence": [
+    0.49,
+    0.94,
+    0.9
+   ],
+   "e0_mev": -429.86202271334355,
+   "drift_comp_nm_per_min": [
+    -0.24305325735481925,
+    0.8149194440494575
+   ],
+   "radius_nm": 4.405089630415852,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 256,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -384.0,
+    "peak_hi_mev": -230.00000000000003,
+    "radius_nm": 4.278809466155602
+   },
+   "truth": {
+    "peak_lo_mev": -383.601301473214,
+    "peak_hi_mev": -229.60130147321382,
+    "radius_nm": 4.259379724296107
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.39869852678600637,
+    "peak_hi_mev": -0.3986985267862053,
+    "radius_nm": 0.01942974185949531
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6138043912574,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.9,
+     "ghost": 0.027,
+     "ghost_lag_nm": [
+      -3.7,
+      2.5
+     ],
+     "field": "ok",
+     "field_atoms": 8,
+     "ghost_fraction": 0.154,
+     "field_ghost": [
+      0.1,
+      -0.7,
+      0.952
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.039,
+   "centre_shift_nm": [
+    -0.01,
+    0.41
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -384,
+    -230,
+    44
+   ],
+   "peak_prominence": [
+    0.44,
+    0.95,
+    0.86
+   ],
+   "e0_mev": -423.2640510755329,
+   "drift_comp_nm_per_min": [
+    0.14474007939454347,
+    1.2563669591436075
+   ],
+   "radius_nm": 4.278809466155602,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 257,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -390.0,
+    "peak_hi_mev": -314.00000000000006,
+    "radius_nm": 5.8093054149872225
+   },
+   "truth": {
+    "peak_lo_mev": -389.1773421088623,
+    "peak_hi_mev": -311.17734210886226,
+    "radius_nm": 5.805837919717372
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.8226578911376805,
+    "peak_hi_mev": -2.822657891137794,
+    "radius_nm": 0.0034674952698505734
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.8707527661023,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.85,
+     "ghost": 0.047,
+     "ghost_lag_nm": [
+      4.0,
+      1.7
+     ],
+     "field": "double",
+     "field_atoms": 4,
+     "ghost_fraction": 0.133,
+     "field_ghost": [
+      -0.2,
+      -3.4,
+      0.653
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.031,
+   "centre_shift_nm": [
+    -0.05,
+    0.28
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -390,
+    -314,
+    -172,
+    28
+   ],
+   "peak_prominence": [
+    0.28,
+    0.77,
+    0.95,
+    0.86
+   ],
+   "e0_mev": -411.00393787357325,
+   "drift_comp_nm_per_min": [
+    0.025489882187399067,
+    0.9262716694033286
+   ],
+   "radius_nm": 5.8093054149872225,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 258,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -436.00000000000006,
+    "peak_hi_mev": -352.00000000000006,
+    "radius_nm": 5.432238107146076
+   },
+   "truth": {
+    "peak_lo_mev": -435.3063332000441,
+    "peak_hi_mev": -353.30633320004404,
+    "radius_nm": 5.424001361049551
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.6936667999559631,
+    "peak_hi_mev": 1.30633320004398,
+    "radius_nm": 0.008236746096525138
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7183803689807,
+   "tip_condition": "double",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.95,
+     "ghost": 0.029,
+     "ghost_lag_nm": [
+      -3.6,
+      2.3
+     ],
+     "field": "ok",
+     "field_atoms": 5,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.03,
+   "centre_shift_nm": [
+    0.06,
+    -0.17
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -436,
+    -352,
+    -208,
+    2,
+    128
+   ],
+   "peak_prominence": [
+    0.24,
+    0.8,
+    0.96,
+    0.91,
+    0.08
+   ],
+   "e0_mev": -458.855353406802,
+   "drift_comp_nm_per_min": [
+    0.5315053280475331,
+    -0.7199933900079578
+   ],
+   "radius_nm": 5.432238107146076,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 259,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -390.0,
+    "peak_hi_mev": -242.00000000000006,
+    "radius_nm": 4.190980133269057
+   },
+   "truth": {
+    "peak_lo_mev": -388.31443583440694,
+    "peak_hi_mev": -244.31443583440682,
+    "radius_nm": 4.197443267497351
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.685564165593064,
+    "peak_hi_mev": 2.3144358344067655,
+    "radius_nm": -0.006463134228294365
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.662536522264,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.95,
+     "ghost": 0.043,
+     "ghost_lag_nm": [
+      -3.3,
+      2.3
+     ],
+     "field": "ok",
+     "field_atoms": 7,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.6,
+   "bare_feature": 0.032,
+   "centre_shift_nm": [
+    0.17,
+    0.15
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -390,
+    -242,
+    14
+   ],
+   "peak_prominence": [
+    0.34,
+    0.9,
+    0.84
+   ],
+   "e0_mev": -426.5555889303985,
+   "drift_comp_nm_per_min": [
+    0.7786284296474701,
+    0.503162847178416
+   ],
+   "radius_nm": 4.190980133269057,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 260,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -396.0,
+    "peak_hi_mev": -266.0,
+    "radius_nm": 4.358862516762763
+   },
+   "truth": {
+    "peak_lo_mev": -394.82128537720246,
+    "peak_hi_mev": -264.82128537720234,
+    "radius_nm": 4.345181229947936
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.1787146227975427,
+    "peak_hi_mev": -1.1787146227976564,
+    "radius_nm": 0.013681286814826166
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 3236.8455005259198,
+   "tip_condition": "dirty",
+   "pokes": 12,
+   "tip_actions": [
+    "poke",
+    "poke",
+    "poke"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.05,
+     "ghost": 0.066,
+     "ghost_lag_nm": [
+      3.7,
+      2.1
+     ],
+     "field": "ok",
+     "field_atoms": 9,
+     "ghost_fraction": 0.089,
+     "field_ghost": [
+      -0.1,
+      -3.7,
+      0.743
+     ],
+     "verdict": "ok"
+    },
+    {
+     "width_nm": 1.0,
+     "ghost": 0.064,
+     "ghost_lag_nm": [
+      -3.8,
+      -2.0
+     ],
+     "field": "ok",
+     "field_atoms": 10,
+     "ghost_fraction": 0.128,
+     "field_ghost": [
+      3.9,
+      1.8,
+      0.801
+     ],
+     "verdict": "ok"
+    },
+    {
+     "width_nm": 0.95,
+     "ghost": 0.066,
+     "ghost_lag_nm": [
+      3.6,
+      2.1
+     ],
+     "field": "ok",
+     "field_atoms": 10,
+     "ghost_fraction": 0.133,
+     "field_ghost": [
+      0.4,
+      1.7,
+      0.736
+     ],
+     "verdict": "ok"
+    },
+    {
+     "width_nm": 0.95,
+     "ghost": 0.064,
+     "ghost_lag_nm": [
+      3.7,
+      2.1
+     ],
+     "field": "ok",
+     "field_atoms": 11,
+     "ghost_fraction": 0.107,
+     "field_ghost": [
+      0.9,
+      -0.3,
+      0.942
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "unstable_ignored": true,
+   "tip_rounds": 3,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.031,
+   "surface_jumps": 4,
+   "centre_shift_nm": [
+    -0.34,
+    0.12
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -396,
+    -266,
+    -32
+   ],
+   "peak_prominence": [
+    0.5,
+    0.95,
+    0.84
+   ],
+   "e0_mev": -427.1172961785159,
+   "drift_comp_nm_per_min": [
+    -0.7641204167615953,
+    0.38912257329453814
+   ],
+   "radius_nm": 4.358862516762763,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 261,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -412.00000000000006,
+    "peak_hi_mev": -310.00000000000006,
+    "radius_nm": 5.182424438058533
+   },
+   "truth": {
+    "peak_lo_mev": -408.5041460845037,
+    "peak_hi_mev": -308.5041460845036,
+    "radius_nm": 5.168534580096818
+   },
+   "abs_err": {
+    "peak_lo_mev": -3.4958539154963546,
+    "peak_hi_mev": -1.4958539154964683,
+    "radius_nm": 0.013889857961714824
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 2068.4804629481446,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.3,
+     "ghost": 0.036,
+     "ghost_lag_nm": [
+      -1.2,
+      4.2
+     ],
+     "field": "unknown",
+     "field_atoms": 0,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.55,
+     "ghost": 0.048,
+     "ghost_lag_nm": [
+      -3.9,
+      2.0
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.4,
+     "ghost": 0.043,
+     "ghost_lag_nm": [
+      3.8,
+      -2.2
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.6,
+     "ghost": 0.057,
+     "ghost_lag_nm": [
+      -1.3,
+      4.4
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.35,
+     "ghost": 0.045,
+     "ghost_lag_nm": [
+      -3.8,
+      2.0
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.55,
+     "ghost": 0.05,
+     "ghost_lag_nm": [
+      1.6,
+      -4.2
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.35,
+     "ghost": 0.046,
+     "ghost_lag_nm": [
+      -3.8,
+      2.0
+     ],
+     "quick": true
+    },
+    {
+     "width_nm": 1.2,
+     "ghost": 0.032,
+     "ghost_lag_nm": [
+      -1.0,
+      4.1
+     ],
+     "field": "blunt",
+     "field_atoms": 11,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 1.0,
+     "ghost": 0.026,
+     "ghost_lag_nm": [
+      -1.0,
+      4.2
+     ],
+     "field": "ok",
+     "field_atoms": 11,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 8,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.021,
+   "centre_shift_nm": [
+    0.1,
+    -0.17
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -412,
+    -310,
+    -130,
+    -2,
+    132
+   ],
+   "peak_prominence": [
+    0.27,
+    0.76,
+    0.96,
+    0.1,
+    0.26
+   ],
+   "e0_mev": -435.9911870788341,
+   "drift_comp_nm_per_min": [
+    0.6753315517077908,
+    -0.6946742291020214
+   ],
+   "radius_nm": 5.182424438058533,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 262,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -404.0,
+    "peak_hi_mev": -298.00000000000006,
+    "radius_nm": 5.0853649733345945
+   },
+   "truth": {
+    "peak_lo_mev": -404.58443465661634,
+    "peak_hi_mev": -298.5844346566163,
+    "radius_nm": 5.078678604630175
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.5844346566163381,
+    "peak_hi_mev": 0.5844346566162244,
+    "radius_nm": 0.006686368704419188
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7361132871067,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.8,
+     "ghost": 0.038,
+     "ghost_lag_nm": [
+      -3.8,
+      -0.8
+     ],
+     "field": "double",
+     "field_atoms": 6,
+     "ghost_fraction": 0.167,
+     "field_ghost": [
+      2.1,
+      2.3,
+      0.943
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.033,
+   "centre_shift_nm": [
+    -0.21,
+    0.21
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -404,
+    -298,
+    -114
+   ],
+   "peak_prominence": [
+    0.38,
+    0.93,
+    0.98
+   ],
+   "e0_mev": -431.19720745643906,
+   "drift_comp_nm_per_min": [
+    -0.45926019756963543,
+    0.7085338937371178
+   ],
+   "radius_nm": 5.0853649733345945,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 263,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -422.00000000000006,
+    "peak_hi_mev": -272.0,
+    "radius_nm": 4.207042223141481
+   },
+   "truth": {
+    "peak_lo_mev": -422.56826125816036,
+    "peak_hi_mev": -272.56826125816025,
+    "radius_nm": 4.199372706890318
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.5682612581603053,
+    "peak_hi_mev": 0.5682612581602484,
+    "radius_nm": 0.007669516251162634
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1421.3865521025393,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.15,
+     "ghost": 0.037,
+     "ghost_lag_nm": [
+      1.4,
+      -4.0
+     ],
+     "field": "blunt",
+     "field_atoms": 9,
+     "ghost_fraction": 0.091,
+     "field_ghost": [
+      -3.5,
+      1.0,
+      0.954
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "double",
+     "width_nm": 1.0,
+     "ghost": 0.265,
+     "ghost_lag_nm": [
+      3.8,
+      1.2
+     ],
+     "quick": true
+    },
+    {
+     "width_nm": 0.9,
+     "ghost": 0.041,
+     "ghost_lag_nm": [
+      -1.5,
+      3.8
+     ],
+     "field": "ok",
+     "field_atoms": 11,
+     "ghost_fraction": 0.077,
+     "field_ghost": [
+      -3.4,
+      1.1,
+      0.989
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 2,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.042,
+   "centre_shift_nm": [
+    0.1,
+    -0.2
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -422,
+    -272,
+    -12
+   ],
+   "peak_prominence": [
+    0.48,
+    0.96,
+    0.92
+   ],
+   "e0_mev": -458.3263265693132,
+   "drift_comp_nm_per_min": [
+    0.6852127209212894,
+    -0.8392250611488776
+   ],
+   "radius_nm": 4.207042223141481,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 264,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -406.0,
+    "peak_hi_mev": -326.00000000000006,
+    "radius_nm": 6.013229821988346
+   },
+   "truth": {
+    "peak_lo_mev": -404.52937675149263,
+    "peak_hi_mev": -326.5293767514926,
+    "radius_nm": 6.0148521755648385
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.4706232485073656,
+    "peak_hi_mev": 0.5293767514925207,
+    "radius_nm": -0.0016223535764927632
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1421.4420678931206,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.1,
+     "ghost": 0.04,
+     "ghost_lag_nm": [
+      -1.1,
+      4.1
+     ],
+     "field": "blunt",
+     "field_atoms": 5,
+     "ghost_fraction": 0.167,
+     "field_ghost": [
+      0.1,
+      -1.3,
+      0.83
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.2,
+     "ghost": 0.044,
+     "ghost_lag_nm": [
+      3.8,
+      -1.9
+     ],
+     "quick": true
+    },
+    {
+     "width_nm": 1.1,
+     "ghost": 0.039,
+     "ghost_lag_nm": [
+      -4.0,
+      -1.4
+     ],
+     "field": "ok",
+     "field_atoms": 4,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 2,
+   "bare_clear_nm": 6.6,
+   "bare_feature": 0.053,
+   "centre_shift_nm": [
+    0.13,
+    -0.19
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -406,
+    -326,
+    -184,
+    14
+   ],
+   "peak_prominence": [
+    0.28,
+    0.75,
+    0.94,
+    0.97
+   ],
+   "e0_mev": -427.70116932937464,
+   "drift_comp_nm_per_min": [
+    0.7748708512915715,
+    -0.754395740683617
+   ],
+   "radius_nm": 6.013229821988346,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 265,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -422.00000000000006,
+    "peak_hi_mev": -370.00000000000006,
+    "radius_nm": 9.736640007527699
+   },
+   "truth": {
+    "peak_lo_mev": -414.8806101400547,
+    "peak_hi_mev": -366.88061014005467,
+    "radius_nm": 9.726590063756479
+   },
+   "abs_err": {
+    "peak_lo_mev": -7.119389859945329,
+    "peak_hi_mev": -3.119389859945386,
+    "radius_nm": 0.010049943771219816
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6589829954174,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.0,
+     "ghost": 0.059,
+     "ghost_lag_nm": [
+      1.1,
+      4.3
+     ],
+     "field": "ok",
+     "field_atoms": 15,
+     "ghost_fraction": 0.107,
+     "field_ghost": [
+      -0.3,
+      -1.7,
+      0.776
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.025,
+   "centre_shift_nm": [
+    0.1,
+    -0.18
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -422,
+    -370,
+    -296,
+    -204,
+    -88,
+    50
+   ],
+   "peak_prominence": [
+    0.22,
+    0.51,
+    0.7,
+    0.82,
+    0.95,
+    0.96
+   ],
+   "e0_mev": -453.762498972145,
+   "drift_comp_nm_per_min": [
+    0.34622774163782044,
+    -0.7009887382003989
+   ],
+   "radius_nm": 9.736640007527699,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 266,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -378.0,
+    "peak_hi_mev": -228.00000000000003,
+    "radius_nm": 4.37996458918602
+   },
+   "truth": {
+    "peak_lo_mev": -379.77827476634246,
+    "peak_hi_mev": -227.77827476634232,
+    "radius_nm": 4.370540000568222
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.778274766342463,
+    "peak_hi_mev": -0.22172523365770758,
+    "radius_nm": 0.009424588617798157
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.673219844225,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.85,
+     "ghost": 0.023,
+     "ghost_lag_nm": [
+      3.6,
+      2.8
+     ],
+     "field": "ok",
+     "field_atoms": 8,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.038,
+   "centre_shift_nm": [
+    -0.1,
+    -0.18
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -378,
+    -228,
+    44
+   ],
+   "peak_prominence": [
+    0.29,
+    0.94,
+    0.86
+   ],
+   "e0_mev": -417.9552150850608,
+   "drift_comp_nm_per_min": [
+    -0.16624255672288882,
+    -0.7709546469000647
+   ],
+   "radius_nm": 4.37996458918602,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 267,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -350.00000000000006,
+    "peak_hi_mev": -232.00000000000003,
+    "radius_nm": 6.378089190575542
+   },
+   "truth": {
+    "peak_lo_mev": -351.45364680132946,
+    "peak_hi_mev": -231.45364680132934,
+    "radius_nm": 6.403487127756702
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.4536468013293984,
+    "peak_hi_mev": -0.5463531986706869,
+    "radius_nm": -0.025397937181160124
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1343.5685636198814,
+   "tip_condition": "double",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 0.75,
+     "ghost": 0.075,
+     "ghost_lag_nm": [
+      2.6,
+      0.7
+     ],
+     "field": "double",
+     "field_atoms": 10,
+     "ghost_fraction": 0.478,
+     "field_ghost": [
+      2.5,
+      0.7,
+      0.317
+     ],
+     "verdict": "double"
+    },
+    {
+     "width_nm": 0.75,
+     "ghost": 0.036,
+     "ghost_lag_nm": [
+      0.0,
+      4.1
+     ],
+     "field": "double",
+     "field_atoms": 6,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 1,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.063,
+   "centre_shift_nm": [
+    0.17,
+    0.17
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -414,
+    -350,
+    -232,
+    -62
+   ],
+   "peak_prominence": [
+    0.15,
+    0.51,
+    0.83,
+    1.0
+   ],
+   "e0_mev": -437.41626108622245,
+   "drift_comp_nm_per_min": [
+    0.6768485423066718,
+    0.5546696560502667
+   ],
+   "radius_nm": 6.378089190575542,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 268,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -406.0,
+    "peak_hi_mev": -312.00000000000006,
+    "radius_nm": 5.425926422984717
+   },
+   "truth": {
+    "peak_lo_mev": -406.6794119481475,
+    "peak_hi_mev": -312.6794119481474,
+    "radius_nm": 5.41779732415086
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.6794119481475036,
+    "peak_hi_mev": 0.6794119481473331,
+    "radius_nm": 0.00812909883385693
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1343.505380480308,
+   "tip_condition": "double",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 0.95,
+     "ghost": 0.03,
+     "ghost_lag_nm": [
+      0.6,
+      4.3
+     ],
+     "field": "double",
+     "field_atoms": 0,
+     "ghost_fraction": 0.45,
+     "field_ghost": [
+      -1.4,
+      -0.9,
+      0.628
+     ],
+     "verdict": "double"
+    },
+    {
+     "width_nm": 1.0,
+     "ghost": 0.03,
+     "ghost_lag_nm": [
+      -2.7,
+      3.6
+     ],
+     "field": "ok",
+     "field_atoms": 9,
+     "ghost_fraction": 0.111,
+     "field_ghost": [
+      0.0,
+      -2.4,
+      0.983
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 1,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.045,
+   "centre_shift_nm": [
+    -0.28,
+    0.05
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -406,
+    -312,
+    -144,
+    92
+   ],
+   "peak_prominence": [
+    0.36,
+    0.9,
+    0.98,
+    0.71
+   ],
+   "e0_mev": -431.72872186262117,
+   "drift_comp_nm_per_min": [
+    -0.7604903028506113,
+    0.17043447337979897
+   ],
+   "radius_nm": 5.425926422984717,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 269,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -398.0,
+    "peak_hi_mev": -340.00000000000006,
+    "radius_nm": 6.4022126605036345
+   },
+   "truth": {
+    "peak_lo_mev": -398.3754701147962,
+    "peak_hi_mev": -340.37547011479614,
+    "radius_nm": 6.393355719593906
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.37547011479620096,
+    "peak_hi_mev": 0.3754701147960873,
+    "radius_nm": 0.00885694090972855
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6588628637808,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.0,
+     "ghost": 0.032,
+     "ghost_lag_nm": [
+      2.8,
+      -3.1
+     ],
+     "field": "ok",
+     "field_atoms": 4,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.023,
+   "centre_shift_nm": [
+    -0.0,
+    -0.25
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -398,
+    -340,
+    -234,
+    -88,
+    106
+   ],
+   "peak_prominence": [
+    0.26,
+    0.62,
+    0.91,
+    0.96,
+    0.67
+   ],
+   "e0_mev": -415.0962767620479,
+   "drift_comp_nm_per_min": [
+    0.2868173494582464,
+    -1.1101301280331142
+   ],
+   "radius_nm": 6.4022126605036345,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 270,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -330.00000000000006,
+    "peak_hi_mev": -208.00000000000003,
+    "radius_nm": 6.034419148464546
+   },
+   "truth": {
+    "peak_lo_mev": -329.6698346425608,
+    "peak_hi_mev": -207.66983464256066,
+    "radius_nm": 6.025279649695983
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.33016535743928443,
+    "peak_hi_mev": -0.3301653574393697,
+    "radius_nm": 0.00913949876856357
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1576.9569802415551,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.2,
+     "ghost": 0.037,
+     "ghost_lag_nm": [
+      -4.2,
+      1.8
+     ],
+     "field": "blunt",
+     "field_atoms": 10,
+     "ghost_fraction": 0.1,
+     "field_ghost": [
+      2.3,
+      -0.7,
+      0.892
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.4,
+     "ghost": 0.052,
+     "ghost_lag_nm": [
+      -4.2,
+      -1.8
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "double",
+     "width_nm": 1.4,
+     "ghost": 0.277,
+     "ghost_lag_nm": [
+      1.3,
+      3.7
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.15,
+     "ghost": 0.046,
+     "ghost_lag_nm": [
+      -4.1,
+      1.8
+     ],
+     "quick": true
+    },
+    {
+     "width_nm": 1.1,
+     "ghost": 0.033,
+     "ghost_lag_nm": [
+      1.2,
+      -4.1
+     ],
+     "field": "ok",
+     "field_atoms": 12,
+     "ghost_fraction": 0.125,
+     "field_ghost": [
+      -0.7,
+      -0.6,
+      0.919
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 4,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.119,
+   "centre_shift_nm": [
+    0.19,
+    -0.11
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -330,
+    -208,
+    -34
+   ],
+   "peak_prominence": [
+    0.52,
+    0.87,
+    0.94
+   ],
+   "e0_mev": -402.7324349336348,
+   "drift_comp_nm_per_min": [
+    0.9528182921919153,
+    -0.43636180911026134
+   ],
+   "radius_nm": 6.034419148464546,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 271,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -398.0,
+    "peak_hi_mev": -284.00000000000006,
+    "radius_nm": 4.705153539205686
+   },
+   "truth": {
+    "peak_lo_mev": -395.92679439035294,
+    "peak_hi_mev": -283.9267943903528,
+    "radius_nm": 4.697205129212234
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.0732056096470615,
+    "peak_hi_mev": -0.073205609647232,
+    "radius_nm": 0.007948409993451477
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1666.1951206100975,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.25,
+     "ghost": 0.039,
+     "ghost_lag_nm": [
+      3.7,
+      2.0
+     ],
+     "field": "blunt",
+     "field_atoms": 10,
+     "ghost_fraction": 0.1,
+     "field_ghost": [
+      2.6,
+      -1.1,
+      0.964
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 1.15,
+     "ghost": 0.039,
+     "ghost_lag_nm": [
+      3.7,
+      1.9
+     ],
+     "field": "blunt",
+     "field_atoms": 13,
+     "ghost_fraction": 0.077,
+     "field_ghost": [
+      0.7,
+      -2.9,
+      0.934
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 1.1,
+     "ghost": 0.035,
+     "ghost_lag_nm": [
+      3.7,
+      1.9
+     ],
+     "field": "ok",
+     "field_atoms": 13,
+     "ghost_fraction": 0.077,
+     "field_ghost": [
+      1.4,
+      -1.8,
+      0.997
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 2,
+   "bare_clear_nm": 6.6,
+   "bare_feature": 0.133,
+   "centre_shift_nm": [
+    -0.1,
+    0.36
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -398,
+    -284,
+    -82
+   ],
+   "peak_prominence": [
+    0.45,
+    0.96,
+    0.93
+   ],
+   "e0_mev": -447.39627579150493,
+   "drift_comp_nm_per_min": [
+    -0.0790807226370622,
+    1.1209933305092037
+   ],
+   "radius_nm": 4.705153539205686,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 272,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -394.0,
+    "peak_hi_mev": -296.00000000000006,
+    "radius_nm": 7.07574129504332
+   },
+   "truth": {
+    "peak_lo_mev": -393.0059089524837,
+    "peak_hi_mev": -297.00590895248365,
+    "radius_nm": 7.07825009498388
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.9940910475162923,
+    "peak_hi_mev": 1.005908952483594,
+    "radius_nm": -0.002508799940559747
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1601.3398846423768,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.15,
+     "ghost": 0.034,
+     "ghost_lag_nm": [
+      1.2,
+      -3.9
+     ],
+     "field": "blunt",
+     "field_atoms": 8,
+     "ghost_fraction": 0.114,
+     "field_ghost": [
+      0.6,
+      0.4,
+      0.961
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 1.15,
+     "ghost": 0.037,
+     "ghost_lag_nm": [
+      -1.6,
+      3.6
+     ],
+     "field": "blunt",
+     "field_atoms": 8,
+     "ghost_fraction": 0.121,
+     "field_ghost": [
+      -1.0,
+      -0.6,
+      0.984
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.95,
+     "ghost": 0.03,
+     "ghost_lag_nm": [
+      -4.2,
+      1.6
+     ],
+     "field": "ok",
+     "field_atoms": 9,
+     "ghost_fraction": 0.139,
+     "field_ghost": [
+      -0.3,
+      -0.7,
+      0.978
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 2,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.021,
+   "centre_shift_nm": [
+    0.23,
+    -0.09
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -448,
+    -394,
+    -296,
+    -160,
+    22
+   ],
+   "peak_prominence": [
+    0.14,
+    0.53,
+    0.86,
+    0.96,
+    0.93
+   ],
+   "e0_mev": -461.208508621935,
+   "drift_comp_nm_per_min": [
+    1.1074919345556666,
+    -0.34756465073712245
+   ],
+   "radius_nm": 7.07574129504332,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 273,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -426.00000000000006,
+    "peak_hi_mev": -278.0,
+    "radius_nm": 4.108717422209257
+   },
+   "truth": {
+    "peak_lo_mev": -426.96670347489555,
+    "peak_hi_mev": -278.96670347489544,
+    "radius_nm": 4.085495591679156
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.9667034748954961,
+    "peak_hi_mev": 0.9667034748954393,
+    "radius_nm": 0.023221830530101073
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 3078.170127863875,
+   "tip_condition": "dirty",
+   "pokes": 12,
+   "tip_actions": [
+    "poke",
+    "poke",
+    "poke"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.05,
+     "ghost": 0.037,
+     "ghost_lag_nm": [
+      -0.2,
+      -4.1
+     ],
+     "field": "ok",
+     "field_atoms": 8,
+     "ghost_fraction": 0.125,
+     "field_ghost": [
+      1.8,
+      -4.1,
+      0.765
+     ],
+     "verdict": "ok"
+    },
+    {
+     "width_nm": 1.1,
+     "ghost": 0.033,
+     "ghost_lag_nm": [
+      0.3,
+      4.1
+     ],
+     "field": "ok",
+     "field_atoms": 7,
+     "ghost_fraction": 0.143,
+     "field_ghost": [
+      1.6,
+      -4.2,
+      0.737
+     ],
+     "verdict": "ok"
+    },
+    {
+     "width_nm": 0.95,
+     "ghost": 0.031,
+     "ghost_lag_nm": [
+      0.3,
+      4.2
+     ],
+     "field": "ok",
+     "field_atoms": 7,
+     "ghost_fraction": 0.143,
+     "field_ghost": [
+      1.8,
+      -4.1,
+      0.811
+     ],
+     "verdict": "ok"
+    },
+    {
+     "width_nm": 1.0,
+     "ghost": 0.031,
+     "ghost_lag_nm": [
+      0.1,
+      4.1
+     ],
+     "field": "ok",
+     "field_atoms": 7,
+     "ghost_fraction": 0.143,
+     "field_ghost": [
+      1.8,
+      -4.0,
+      0.795
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "unstable_ignored": true,
+   "tip_rounds": 3,
+   "bare_clear_nm": 6.4,
+   "bare_feature": 0.021,
+   "surface_jumps": 2,
+   "centre_shift_nm": [
+    -0.15,
+    -0.16
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -426,
+    -278,
+    -18
+   ],
+   "peak_prominence": [
+    0.48,
+    0.94,
+    0.75
+   ],
+   "e0_mev": -463.6565367999,
+   "drift_comp_nm_per_min": [
+    -0.3070763261161555,
+    -0.6420795068529563
+   ],
+   "radius_nm": 4.108717422209257,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 274,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -368.00000000000006,
+    "peak_hi_mev": -256.00000000000006,
+    "radius_nm": 6.3399551835229495
+   },
+   "truth": {
+    "peak_lo_mev": -367.65545793638165,
+    "peak_hi_mev": -255.65545793638157,
+    "radius_nm": 6.3273335452157236
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.34454206361840534,
+    "peak_hi_mev": -0.3445420636184906,
+    "radius_nm": 0.012621638307225957
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6423471160836,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.1,
+     "ghost": 0.029,
+     "ghost_lag_nm": [
+      2.1,
+      3.7
+     ],
+     "field": "ok",
+     "field_atoms": 16,
+     "ghost_fraction": 0.059,
+     "field_ghost": [
+      1.8,
+      3.1,
+      0.969
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 7.0,
+   "bare_feature": 0.029,
+   "centre_shift_nm": [
+    -0.27,
+    0.04
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -432,
+    -368,
+    -256,
+    -92,
+    118
+   ],
+   "peak_prominence": [
+    0.13,
+    0.59,
+    0.87,
+    1.0,
+    0.55
+   ],
+   "e0_mev": -449.322644941601,
+   "drift_comp_nm_per_min": [
+    -0.6937951352341338,
+    0.15498520164311078
+   ],
+   "radius_nm": 6.3399551835229495,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 275,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -382.0,
+    "peak_hi_mev": -322.00000000000006,
+    "radius_nm": 8.2154939807785
+   },
+   "truth": {
+    "peak_lo_mev": -383.1398001406573,
+    "peak_hi_mev": -321.13980014065726,
+    "radius_nm": 8.209168982466993
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.1398001406573144,
+    "peak_hi_mev": -0.8601998593427993,
+    "radius_nm": 0.006324998311507457
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1499.2401004458802,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.3,
+     "ghost": 0.032,
+     "ghost_lag_nm": [
+      0.2,
+      4.3
+     ],
+     "field": "blunt",
+     "field_atoms": 5,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.3,
+     "ghost": 0.034,
+     "ghost_lag_nm": [
+      -2.1,
+      3.5
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.15,
+     "ghost": 0.036,
+     "ghost_lag_nm": [
+      -3.3,
+      -2.2
+     ],
+     "quick": true
+    },
+    {
+     "width_nm": 1.1,
+     "ghost": 0.022,
+     "ghost_lag_nm": [
+      -3.1,
+      -2.7
+     ],
+     "field": "ok",
+     "field_atoms": 6,
+     "ghost_fraction": 0.125,
+     "field_ghost": [
+      -0.1,
+      1.6,
+      1.0
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 3,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.032,
+   "centre_shift_nm": [
+    -0.37,
+    0.12
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -382,
+    -322,
+    -234,
+    -116,
+    24,
+    102
+   ],
+   "peak_prominence": [
+    0.3,
+    0.46,
+    0.79,
+    0.93,
+    0.92,
+    0.08
+   ],
+   "e0_mev": -428.9821376716529,
+   "drift_comp_nm_per_min": [
+    -0.8936656165737178,
+    0.4135853365114858
+   ],
+   "radius_nm": 8.2154939807785,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 276,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -334.00000000000006,
+    "peak_hi_mev": -222.00000000000003,
+    "radius_nm": 6.373889094084662
+   },
+   "truth": {
+    "peak_lo_mev": -331.7079658862996,
+    "peak_hi_mev": -221.7079658862995,
+    "radius_nm": 6.390389617425357
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.292034113700481,
+    "peak_hi_mev": -0.292034113700538,
+    "radius_nm": -0.01650052334069496
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1343.5349862390276,
+   "tip_condition": "double",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.45,
+     "ghost": 0.037,
+     "ghost_lag_nm": [
+      3.8,
+      1.9
+     ],
+     "field": "double",
+     "field_atoms": 7,
+     "ghost_fraction": 0.714,
+     "field_ghost": [
+      0.1,
+      -1.1,
+      0.674
+     ],
+     "verdict": "double"
+    },
+    {
+     "width_nm": 0.95,
+     "ghost": 0.032,
+     "ghost_lag_nm": [
+      3.8,
+      1.9
+     ],
+     "field": "ok",
+     "field_atoms": 7,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 1,
+   "bare_clear_nm": 6.6,
+   "bare_feature": 0.025,
+   "centre_shift_nm": [
+    -0.15,
+    0.2
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -390,
+    -334,
+    -222,
+    -64
+   ],
+   "peak_prominence": [
+    0.19,
+    0.51,
+    0.85,
+    0.97
+   ],
+   "e0_mev": -411.57506123779945,
+   "drift_comp_nm_per_min": [
+    -0.28219344964044757,
+    0.6279992361076621
+   ],
+   "radius_nm": 6.373889094084662,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 277,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -356.00000000000006,
+    "peak_hi_mev": -276.0,
+    "radius_nm": 7.661118496787949
+   },
+   "truth": {
+    "peak_lo_mev": -354.2621357592383,
+    "peak_hi_mev": -276.2621357592382,
+    "radius_nm": 7.665934585967082
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.7378642407617804,
+    "peak_hi_mev": 0.26213575923821963,
+    "radius_nm": -0.004816089179133343
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1343.4730931217136,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.35,
+     "ghost": 0.059,
+     "ghost_lag_nm": [
+      3.9,
+      1.9
+     ],
+     "field": "unknown",
+     "field_atoms": 0,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 1.0,
+     "ghost": 0.034,
+     "ghost_lag_nm": [
+      -2.2,
+      3.4
+     ],
+     "field": "ok",
+     "field_atoms": 5,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 1,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.036,
+   "centre_shift_nm": [
+    0.03,
+    -0.0
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -356,
+    -276,
+    -166,
+    -24
+   ],
+   "peak_prominence": [
+    0.37,
+    0.62,
+    0.9,
+    1.0
+   ],
+   "e0_mev": -411.7198565200156,
+   "drift_comp_nm_per_min": [
+    0.38699046521946495,
+    0.022776169936527098
+   ],
+   "radius_nm": 7.661118496787949,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 278,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -422.00000000000006,
+    "peak_hi_mev": -312.00000000000006,
+    "radius_nm": 4.998238509431654
+   },
+   "truth": {
+    "peak_lo_mev": -421.6228988005676,
+    "peak_hi_mev": -311.62289880056755,
+    "radius_nm": 4.981841068479076
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.37710119943244536,
+    "peak_hi_mev": -0.3771011994325022,
+    "radius_nm": 0.016397440952578002
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.769746330664,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.95,
+     "ghost": 0.022,
+     "ghost_lag_nm": [
+      0.9,
+      4.3
+     ],
+     "field": "ok",
+     "field_atoms": 9,
+     "ghost_fraction": 0.111,
+     "field_ghost": [
+      2.1,
+      2.1,
+      0.977
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.036,
+   "centre_shift_nm": [
+    0.02,
+    0.22
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -422,
+    -312,
+    -118
+   ],
+   "peak_prominence": [
+    0.3,
+    0.83,
+    0.98
+   ],
+   "e0_mev": -450.3450412189286,
+   "drift_comp_nm_per_min": [
+    0.27694565481503924,
+    0.7459611458847404
+   ],
+   "radius_nm": 4.998238509431654,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 279,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -422.00000000000006,
+    "peak_hi_mev": -278.0,
+    "radius_nm": 4.349391659801585
+   },
+   "truth": {
+    "peak_lo_mev": -424.4753475156035,
+    "peak_hi_mev": -278.4753475156034,
+    "radius_nm": 4.3358511453707305
+   },
+   "abs_err": {
+    "peak_lo_mev": 2.4753475156034597,
+    "peak_hi_mev": 0.4753475156034028,
+    "radius_nm": 0.013540514430854245
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1601.211923347354,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.05,
+     "ghost": 0.035,
+     "ghost_lag_nm": [
+      2.5,
+      3.5
+     ],
+     "field": "blunt",
+     "field_atoms": 11,
+     "ghost_fraction": 0.091,
+     "field_ghost": [
+      -2.6,
+      -3.2,
+      0.947
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.95,
+     "ghost": 0.039,
+     "ghost_lag_nm": [
+      1.6,
+      -3.9
+     ],
+     "field": "blunt",
+     "field_atoms": 11,
+     "ghost_fraction": 0.077,
+     "field_ghost": [
+      0.7,
+      4.1,
+      0.728
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 0.75,
+     "ghost": 0.038,
+     "ghost_lag_nm": [
+      -1.7,
+      3.9
+     ],
+     "field": "ok",
+     "field_atoms": 11,
+     "ghost_fraction": 0.077,
+     "field_ghost": [
+      0.8,
+      4.2,
+      0.835
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 2,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.043,
+   "centre_shift_nm": [
+    -0.19,
+    -0.03
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -422,
+    -278,
+    -18
+   ],
+   "peak_prominence": [
+    0.36,
+    0.94,
+    0.91
+   ],
+   "e0_mev": -460.7826231965787,
+   "drift_comp_nm_per_min": [
+    -0.4506061902846076,
+    -0.1016697818722082
+   ],
+   "radius_nm": 4.349391659801585,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 280,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -326.00000000000006,
+    "peak_hi_mev": -258.00000000000006,
+    "radius_nm": 9.395790215544844
+   },
+   "truth": {
+    "peak_lo_mev": -327.6960479683793,
+    "peak_hi_mev": -255.6960479683792,
+    "radius_nm": 9.374723465911222
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.6960479683792187,
+    "peak_hi_mev": -2.3039520316208666,
+    "radius_nm": 0.021066749633622095
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7433953791601,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.05,
+     "ghost": 0.051,
+     "ghost_lag_nm": [
+      1.8,
+      3.4
+     ],
+     "field": "ok",
+     "field_atoms": 5,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.024,
+   "centre_shift_nm": [
+    -0.42,
+    0.01
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -378,
+    -326,
+    -258,
+    -166,
+    -52,
+    82
+   ],
+   "peak_prominence": [
+    0.16,
+    0.47,
+    0.65,
+    0.9,
+    0.96,
+    0.88
+   ],
+   "e0_mev": -412.31878787366816,
+   "drift_comp_nm_per_min": [
+    -1.2058445296279683,
+    0.00920526766268515
+   ],
+   "radius_nm": 9.395790215544844,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 281,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -422.00000000000006,
+    "peak_hi_mev": -266.0,
+    "radius_nm": 4.146300030055106
+   },
+   "truth": {
+    "peak_lo_mev": -421.46201810527066,
+    "peak_hi_mev": -267.46201810527054,
+    "radius_nm": 4.125672073109039
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.5379818947293984,
+    "peak_hi_mev": 1.4620181052705448,
+    "radius_nm": 0.02062795694606745
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6940885643637,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.05,
+     "ghost": 0.03,
+     "ghost_lag_nm": [
+      2.0,
+      -3.5
+     ],
+     "field": "ok",
+     "field_atoms": 7,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.031,
+   "centre_shift_nm": [
+    0.17,
+    -0.06
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -422,
+    -266,
+    6
+   ],
+   "peak_prominence": [
+    0.52,
+    0.96,
+    0.77
+   ],
+   "e0_mev": -460.6627050060285,
+   "drift_comp_nm_per_min": [
+    0.9060132602912002,
+    -0.23567060655422806
+   ],
+   "radius_nm": 4.146300030055106,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 282,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -430.00000000000006,
+    "peak_hi_mev": -294.00000000000006,
+    "radius_nm": 4.537946881938294
+   },
+   "truth": {
+    "peak_lo_mev": -431.67367136006243,
+    "peak_hi_mev": -293.67367136006226,
+    "radius_nm": 4.515372366895773
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.6736713600623716,
+    "peak_hi_mev": -0.3263286399377989,
+    "radius_nm": 0.02257451504252117
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6466903776599,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.85,
+     "ghost": 0.025,
+     "ghost_lag_nm": [
+      -0.1,
+      4.3
+     ],
+     "field": "ok",
+     "field_atoms": 9,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.6,
+   "bare_feature": 0.025,
+   "centre_shift_nm": [
+    0.06,
+    0.09
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -430,
+    -294,
+    -54
+   ],
+   "peak_prominence": [
+    0.32,
+    0.86,
+    0.98
+   ],
+   "e0_mev": -465.7234157114354,
+   "drift_comp_nm_per_min": [
+    0.4310367885495523,
+    0.3147163243023002
+   ],
+   "radius_nm": 4.537946881938294,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 283,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -346.00000000000006,
+    "peak_hi_mev": -190.00000000000006,
+    "radius_nm": 5.592018415966425
+   },
+   "truth": {
+    "peak_lo_mev": -344.29168414409446,
+    "peak_hi_mev": -190.29168414409432,
+    "radius_nm": 5.579867480859598
+   },
+   "abs_err": {
+    "peak_lo_mev": -1.708315855905596,
+    "peak_hi_mev": 0.2916841440942619,
+    "radius_nm": 0.012150935106827632
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.8177993206668,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.0,
+     "ghost": 0.024,
+     "ghost_lag_nm": [
+      -2.0,
+      3.4
+     ],
+     "field": "ok",
+     "field_atoms": 9,
+     "ghost_fraction": 0.111,
+     "field_ghost": [
+      -2.6,
+      1.6,
+      0.999
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.041,
+   "centre_shift_nm": [
+    -0.06,
+    0.33
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -432,
+    -346,
+    -190,
+    32
+   ],
+   "peak_prominence": [
+    0.16,
+    0.7,
+    0.97,
+    0.82
+   ],
+   "e0_mev": -453.92570649552346,
+   "drift_comp_nm_per_min": [
+    0.033761601094858866,
+    1.0163452676223887
+   ],
+   "radius_nm": 5.592018415966425,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 284,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -392.0,
+    "peak_hi_mev": -314.00000000000006,
+    "radius_nm": 5.94002703206963
+   },
+   "truth": {
+    "peak_lo_mev": -389.91407290467623,
+    "peak_hi_mev": -315.9140729046762,
+    "radius_nm": 5.9268495793195175
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.0859270953237683,
+    "peak_hi_mev": 1.914072904676118,
+    "radius_nm": 0.013177452750112728
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7700946315296,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.9,
+     "ghost": 0.023,
+     "ghost_lag_nm": [
+      4.2,
+      1.5
+     ],
+     "field": "ok",
+     "field_atoms": 12,
+     "ghost_fraction": 0.158,
+     "field_ghost": [
+      -1.1,
+      0.5,
+      0.993
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.043,
+   "centre_shift_nm": [
+    0.11,
+    0.15
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -392,
+    -314,
+    -182,
+    12
+   ],
+   "peak_prominence": [
+    0.21,
+    0.71,
+    0.99,
+    0.89
+   ],
+   "e0_mev": -411.20984149496286,
+   "drift_comp_nm_per_min": [
+    0.559254072926101,
+    0.5233927894416609
+   ],
+   "radius_nm": 5.94002703206963,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 285,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -350.00000000000006,
+    "peak_hi_mev": -260.00000000000006,
+    "radius_nm": 6.9233963063942
+   },
+   "truth": {
+    "peak_lo_mev": -349.6292608214201,
+    "peak_hi_mev": -257.62926082142,
+    "radius_nm": 6.909341800978699
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.3707391785799814,
+    "peak_hi_mev": -2.3707391785800382,
+    "radius_nm": 0.01405450541550124
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6732439587912,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.8,
+     "ghost": 0.027,
+     "ghost_lag_nm": [
+      -3.9,
+      -1.6
+     ],
+     "field": "ok",
+     "field_atoms": 10,
+     "ghost_fraction": 0.1,
+     "field_ghost": [
+      1.8,
+      2.8,
+      0.968
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.0,
+   "bare_feature": 0.033,
+   "centre_shift_nm": [
+    -0.29,
+    -0.04
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -398,
+    -350,
+    -260,
+    -126,
+    46
+   ],
+   "peak_prominence": [
+    0.12,
+    0.37,
+    0.72,
+    0.97,
+    0.94
+   ],
+   "e0_mev": -416.30775945540125,
+   "drift_comp_nm_per_min": [
+    -0.8744024441687711,
+    -0.19923501296411059
+   ],
+   "radius_nm": 6.9233963063942,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 286,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -422.00000000000006,
+    "peak_hi_mev": -328.00000000000006,
+    "radius_nm": 5.046819806141337
+   },
+   "truth": {
+    "peak_lo_mev": -421.2233947494404,
+    "peak_hi_mev": -327.2233947494403,
+    "radius_nm": 5.045375404985846
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.776605250559669,
+    "peak_hi_mev": -0.7766052505597827,
+    "radius_nm": 0.0014444011554912706
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7606489019655,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.1,
+     "ghost": 0.029,
+     "ghost_lag_nm": [
+      1.3,
+      4.4
+     ],
+     "field": "ok",
+     "field_atoms": 9,
+     "ghost_fraction": 0.111,
+     "field_ghost": [
+      -2.0,
+      -1.6,
+      0.998
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.034,
+   "centre_shift_nm": [
+    0.14,
+    -0.14
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -422,
+    -328,
+    -162,
+    74
+   ],
+   "peak_prominence": [
+    0.41,
+    0.9,
+    0.91,
+    0.72
+   ],
+   "e0_mev": -446.54494725276385,
+   "drift_comp_nm_per_min": [
+    0.851624923868847,
+    -0.5565918314818173
+   ],
+   "radius_nm": 5.046819806141337,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 287,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -402.0,
+    "peak_hi_mev": -244.00000000000006,
+    "radius_nm": 4.176061986351138
+   },
+   "truth": {
+    "peak_lo_mev": -399.406033312885,
+    "peak_hi_mev": -243.40603331288486,
+    "radius_nm": 4.159667385164812
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.593966687115028,
+    "peak_hi_mev": -0.5939666871151985,
+    "radius_nm": 0.01639460118632652
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6631789539243,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.95,
+     "ghost": 0.026,
+     "ghost_lag_nm": [
+      -3.9,
+      -1.1
+     ],
+     "field": "ok",
+     "field_atoms": 11,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.0,
+   "bare_feature": 0.053,
+   "centre_shift_nm": [
+    -0.19,
+    0.21
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -402,
+    -244,
+    32
+   ],
+   "peak_prominence": [
+    0.32,
+    0.89,
+    0.87
+   ],
+   "e0_mev": -437.8091890538427,
+   "drift_comp_nm_per_min": [
+    -0.396865521150108,
+    0.7081575596451745
+   ],
+   "radius_nm": 4.176061986351138,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 288,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -350.00000000000006,
+    "peak_hi_mev": -212.00000000000003,
+    "radius_nm": 5.706678297234714
+   },
+   "truth": {
+    "peak_lo_mev": -352.02503568429233,
+    "peak_hi_mev": -212.02503568429222,
+    "radius_nm": 5.729326032683852
+   },
+   "abs_err": {
+    "peak_lo_mev": 2.025035684292277,
+    "peak_hi_mev": 0.025035684292191718,
+    "radius_nm": -0.022647735449138118
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1343.4795503020287,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.15,
+     "ghost": 0.03,
+     "ghost_lag_nm": [
+      -4.1,
+      -1.1
+     ],
+     "field": "blunt",
+     "field_atoms": 8,
+     "ghost_fraction": 0.114,
+     "field_ghost": [
+      -0.6,
+      -1.3,
+      0.893
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 1.05,
+     "ghost": 0.03,
+     "ghost_lag_nm": [
+      -4.1,
+      -1.1
+     ],
+     "field": "ok",
+     "field_atoms": 9,
+     "ghost_fraction": 0.182,
+     "field_ghost": [
+      0.6,
+      0.2,
+      0.987
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 1,
+   "bare_clear_nm": 6.6,
+   "bare_feature": 0.023,
+   "centre_shift_nm": [
+    -0.03,
+    0.29
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -428,
+    -350,
+    -212,
+    -14
+   ],
+   "peak_prominence": [
+    0.17,
+    0.6,
+    0.92,
+    0.87
+   ],
+   "e0_mev": -449.6806524792713,
+   "drift_comp_nm_per_min": [
+    0.10554377597965262,
+    0.9127092360010616
+   ],
+   "radius_nm": 5.706678297234714,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 289,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -432.00000000000006,
+    "peak_hi_mev": -314.00000000000006,
+    "radius_nm": 4.5106513128451455
+   },
+   "truth": {
+    "peak_lo_mev": -432.6046754390459,
+    "peak_hi_mev": -314.6046754390458,
+    "radius_nm": 4.498915310378897
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.6046754390458204,
+    "peak_hi_mev": 0.6046754390457636,
+    "radius_nm": 0.011736002466248507
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6529309286213,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.0,
+     "ghost": 0.032,
+     "ghost_lag_nm": [
+      3.9,
+      2.0
+     ],
+     "field": "ok",
+     "field_atoms": 7,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.027,
+   "centre_shift_nm": [
+    -0.3,
+    0.21
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -432,
+    -314,
+    -104
+   ],
+   "peak_prominence": [
+    0.32,
+    0.86,
+    0.93
+   ],
+   "e0_mev": -464.147360407138,
+   "drift_comp_nm_per_min": [
+    -0.7382253579202138,
+    0.7025590017013967
+   ],
+   "radius_nm": 4.5106513128451455,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 290,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -426.00000000000006,
+    "peak_hi_mev": -262.0,
+    "radius_nm": 4.072698276573361
+   },
+   "truth": {
+    "peak_lo_mev": -426.59259603478637,
+    "peak_hi_mev": -260.59259603478625,
+    "radius_nm": 4.052830328971135
+   },
+   "abs_err": {
+    "peak_lo_mev": 0.5925960347863111,
+    "peak_hi_mev": -1.4074039652137458,
+    "radius_nm": 0.019867947602225655
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1679.3138004712227,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.25,
+     "ghost": 0.032,
+     "ghost_lag_nm": [
+      -0.9,
+      4.0
+     ],
+     "field": "unknown",
+     "field_atoms": 0,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 1.0,
+     "ghost": 0.032,
+     "ghost_lag_nm": [
+      -3.5,
+      2.0
+     ],
+     "field": "blunt",
+     "field_atoms": 9,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.66, inside 1.00",
+     "quick": true
+    },
+    {
+     "width_nm": 0.9,
+     "ghost": 0.031,
+     "ghost_lag_nm": [
+      -0.4,
+      3.9
+     ],
+     "field": "ok",
+     "field_atoms": 12,
+     "ghost_fraction": 0.083,
+     "field_ghost": [
+      0.5,
+      -3.7,
+      0.455
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 3,
+   "bare_clear_nm": 6.6,
+   "bare_feature": 0.072,
+   "centre_shift_nm": [
+    0.11,
+    -0.13
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -426,
+    -262,
+    26
+   ],
+   "peak_prominence": [
+    0.6,
+    0.97,
+    0.84
+   ],
+   "e0_mev": -465.7678381863519,
+   "drift_comp_nm_per_min": [
+    0.7136568340758105,
+    -0.5080068258639749
+   ],
+   "radius_nm": 4.072698276573361,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 291,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -358.00000000000006,
+    "peak_hi_mev": -278.0,
+    "radius_nm": 7.377637871089823
+   },
+   "truth": {
+    "peak_lo_mev": -359.064703292516,
+    "peak_hi_mev": -279.0647032925159,
+    "radius_nm": 7.366035732236683
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.0647032925159579,
+    "peak_hi_mev": 1.064703292515901,
+    "radius_nm": 0.011602138853140431
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1343.4136800201582,
+   "tip_condition": "double",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.15,
+     "ghost": 0.042,
+     "ghost_lag_nm": [
+      -3.9,
+      1.6
+     ],
+     "field": "ok",
+     "field_atoms": 8,
+     "ghost_fraction": 0.062,
+     "field_ghost": [
+      0.1,
+      -0.8,
+      0.795
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 1.05,
+     "ghost": 0.031,
+     "ghost_lag_nm": [
+      -4.1,
+      1.6
+     ],
+     "field": "ok",
+     "field_atoms": 6,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 1,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.044,
+   "centre_shift_nm": [
+    -0.09,
+    -0.25
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -404,
+    -358,
+    -278,
+    -170,
+    -22
+   ],
+   "peak_prominence": [
+    0.15,
+    0.59,
+    0.84,
+    0.96,
+    0.94
+   ],
+   "e0_mev": -415.57821777317815,
+   "drift_comp_nm_per_min": [
+    -0.12295853364186081,
+    -1.1605487732514406
+   ],
+   "radius_nm": 7.377637871089823,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 292,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -326.00000000000006,
+    "peak_hi_mev": -250.00000000000006,
+    "radius_nm": 9.219619795276085
+   },
+   "truth": {
+    "peak_lo_mev": -322.4813532377526,
+    "peak_hi_mev": -250.48135323775256,
+    "radius_nm": 9.21435041936197
+   },
+   "abs_err": {
+    "peak_lo_mev": -3.5186467622474424,
+    "peak_hi_mev": 0.4813532377525007,
+    "radius_nm": 0.005269375914114249
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6454770705358,
+   "tip_condition": "good",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.95,
+     "ghost": 0.041,
+     "ghost_lag_nm": [
+      -3.9,
+      -1.6
+     ],
+     "field": "ok",
+     "field_atoms": 4,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.077,
+   "centre_shift_nm": [
+    -0.03,
+    0.2
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -372,
+    -326,
+    -250,
+    -154,
+    -40,
+    96
+   ],
+   "peak_prominence": [
+    0.17,
+    0.43,
+    0.6,
+    0.83,
+    0.99,
+    0.94
+   ],
+   "e0_mev": -412.39788189689017,
+   "drift_comp_nm_per_min": [
+    0.11475248346505944,
+    0.6689381777241442
+   ],
+   "radius_nm": 9.219619795276085,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 293,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -378.0,
+    "peak_hi_mev": -318.00000000000006,
+    "radius_nm": 9.403788942323692
+   },
+   "truth": {
+    "peak_lo_mev": -377.9139902128801,
+    "peak_hi_mev": -319.91399021288004,
+    "radius_nm": 9.40230660734907
+   },
+   "abs_err": {
+    "peak_lo_mev": -0.08600978711990592,
+    "peak_hi_mev": 1.9139902128799804,
+    "radius_nm": 0.0014823349746215797
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1421.5049090584675,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.3,
+     "ghost": 0.039,
+     "ghost_lag_nm": [
+      -0.3,
+      4.3
+     ],
+     "field": "blunt",
+     "field_atoms": 6,
+     "ghost_fraction": 0.172,
+     "field_ghost": [
+      1.1,
+      -0.3,
+      0.966
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "double",
+     "width_nm": 1.0,
+     "ghost": 0.321,
+     "ghost_lag_nm": [
+      -2.6,
+      -2.9
+     ],
+     "quick": true
+    },
+    {
+     "width_nm": 0.95,
+     "ghost": 0.032,
+     "ghost_lag_nm": [
+      -0.3,
+      4.5
+     ],
+     "field": "ok",
+     "field_atoms": 9,
+     "ghost_fraction": 0.174,
+     "field_ghost": [
+      -0.8,
+      -0.1,
+      0.99
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 2,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.037,
+   "centre_shift_nm": [
+    0.01,
+    0.23
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -378,
+    -318,
+    -240,
+    -136,
+    -4
+   ],
+   "peak_prominence": [
+    0.3,
+    0.51,
+    0.78,
+    0.92,
+    0.99
+   ],
+   "e0_mev": -418.38497881556117,
+   "drift_comp_nm_per_min": [
+    0.2588641819970015,
+    0.7206484037998332
+   ],
+   "radius_nm": 9.403788942323692,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 294,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -424.00000000000006,
+    "peak_hi_mev": -270.0,
+    "radius_nm": 4.247737385861889
+   },
+   "truth": {
+    "peak_lo_mev": -427.445305164222,
+    "peak_hi_mev": -269.4453051642219,
+    "radius_nm": 4.239683797713636
+   },
+   "abs_err": {
+    "peak_lo_mev": 3.4453051642219634,
+    "peak_hi_mev": -0.5546948357780934,
+    "radius_nm": 0.008053588148253077
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.6100778352481,
+   "tip_condition": "double",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 1.05,
+     "ghost": 0.045,
+     "ghost_lag_nm": [
+      2.7,
+      -3.3
+     ],
+     "field": "ok",
+     "field_atoms": 7,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.053,
+   "centre_shift_nm": [
+    0.07,
+    0.19
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -424,
+    -270,
+    6
+   ],
+   "peak_prominence": [
+    0.43,
+    0.95,
+    0.99
+   ],
+   "e0_mev": -465.78417131900824,
+   "drift_comp_nm_per_min": [
+    0.4778627852829304,
+    0.6400271595296682
+   ],
+   "radius_nm": 4.247737385861889,
+   "peaks_found": 3
+  },
+  {
+   "paper": "P3",
+   "seed": 295,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -348.00000000000006,
+    "peak_hi_mev": -264.0,
+    "radius_nm": 9.16824553401097
+   },
+   "truth": {
+    "peak_lo_mev": -344.0158197961059,
+    "peak_hi_mev": -264.01581979610586,
+    "radius_nm": 9.171035969561787
+   },
+   "abs_err": {
+    "peak_lo_mev": -3.984180203894141,
+    "peak_hi_mev": 0.01581979610585904,
+    "radius_nm": -0.0027904355508177048
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 3340.1640696108843,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse"
+   ],
+   "wide_survey": [
+    "coverage 0.75, inside 1.00"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.35,
+     "ghost": 0.0,
+     "ghost_lag_nm": [
+      0.0,
+      0.0
+     ],
+     "field": "blunt",
+     "field_atoms": 22,
+     "ghost_fraction": 0.043,
+     "field_ghost": [
+      4.0,
+      -1.75,
+      0.95
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.45,
+     "ghost": 0.0,
+     "ghost_lag_nm": [
+      0.0,
+      0.0
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.35,
+     "ghost": 0.0,
+     "ghost_lag_nm": [
+      0.0,
+      0.0
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.4,
+     "ghost": 0.0,
+     "ghost_lag_nm": [
+      0.0,
+      0.0
+     ],
+     "quick": true
+    },
+    {
+     "width_nm": 1.15,
+     "ghost": 0.0,
+     "ghost_lag_nm": [
+      0.0,
+      0.0
+     ],
+     "field": "ok",
+     "field_atoms": 2,
+     "ghost_fraction": 0.13,
+     "field_ghost": [
+      1.2,
+      -0.4,
+      0.978
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "blunt",
+     "no_ring": "coverage 0.78, inside 1.00"
+    },
+    {
+     "width_nm": 1.25,
+     "ghost": 0.035,
+     "ghost_lag_nm": [
+      0.0,
+      4.4
+     ],
+     "field": "ok",
+     "field_atoms": 2,
+     "ghost_fraction": 0.13,
+     "field_ghost": [
+      -2.7,
+      -0.7,
+      0.989
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 1.15,
+     "ghost": 0.036,
+     "ghost_lag_nm": [
+      0.0,
+      4.4
+     ],
+     "field": "ok",
+     "field_atoms": 2,
+     "ghost_fraction": 0.231,
+     "field_ghost": [
+      -0.8,
+      -0.4,
+      0.961
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 1.05,
+     "ghost": 0.043,
+     "ghost_lag_nm": [
+      0.0,
+      4.4
+     ],
+     "field": "ok",
+     "field_atoms": 2,
+     "ghost_fraction": 0.083,
+     "field_ghost": [
+      -1.5,
+      -0.1,
+      0.817
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 8,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.058,
+   "centre_shift_nm": [
+    -0.22,
+    -0.19
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -404,
+    -348,
+    -264,
+    -158,
+    -32,
+    120
+   ],
+   "peak_prominence": [
+    0.17,
+    0.37,
+    0.72,
+    0.91,
+    0.96,
+    0.58
+   ],
+   "e0_mev": -437.94938498403116,
+   "drift_comp_nm_per_min": [
+    -0.6353483800062577,
+    -0.8248322546550059
+   ],
+   "radius_nm": 9.16824553401097,
+   "peaks_found": 6
+  },
+  {
+   "paper": "P3",
+   "seed": 296,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -368.00000000000006,
+    "peak_hi_mev": -266.0,
+    "radius_nm": 6.73976820716643
+   },
+   "truth": {
+    "peak_lo_mev": -365.3542185288955,
+    "peak_hi_mev": -269.3542185288954,
+    "radius_nm": 6.731178501011044
+   },
+   "abs_err": {
+    "peak_lo_mev": -2.6457814711045557,
+    "peak_hi_mev": 3.3542185288953874,
+    "radius_nm": 0.008589706155386345
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 785.7202946585478,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "tip_actions": [],
+   "judged": [
+    {
+     "width_nm": 0.85,
+     "ghost": 0.027,
+     "ghost_lag_nm": [
+      -4.1,
+      -1.5
+     ],
+     "field": "ok",
+     "field_atoms": 8,
+     "ghost_fraction": 0.133,
+     "field_ghost": [
+      -1.7,
+      -0.5,
+      0.991
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.036,
+   "centre_shift_nm": [
+    0.01,
+    0.2
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -420,
+    -368,
+    -266,
+    -130,
+    50
+   ],
+   "peak_prominence": [
+    0.11,
+    0.49,
+    0.82,
+    0.97,
+    0.86
+   ],
+   "e0_mev": -436.17327304057596,
+   "drift_comp_nm_per_min": [
+    0.2340728363461246,
+    0.6495759990150549
+   ],
+   "radius_nm": 6.73976820716643,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 297,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -442.00000000000006,
+    "peak_hi_mev": -364.00000000000006,
+    "radius_nm": 5.747341484074463
+   },
+   "truth": {
+    "peak_lo_mev": -445.40619269659504,
+    "peak_hi_mev": -361.406192696595,
+    "radius_nm": 5.750408185383951
+   },
+   "abs_err": {
+    "peak_lo_mev": 3.406192696594985,
+    "peak_hi_mev": -2.5938073034050717,
+    "radius_nm": -0.0030667013094882734
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1421.4048243522896,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.3,
+     "ghost": 0.046,
+     "ghost_lag_nm": [
+      1.4,
+      4.0
+     ],
+     "field": "unknown",
+     "field_atoms": 0,
+     "ghost_fraction": 0.12,
+     "field_ghost": [
+      1.0,
+      -0.3,
+      0.951
+     ],
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "double",
+     "width_nm": 1.05,
+     "ghost": 0.347,
+     "ghost_lag_nm": [
+      4.0,
+      -1.4
+     ],
+     "quick": true
+    },
+    {
+     "width_nm": 0.9,
+     "ghost": 0.033,
+     "ghost_lag_nm": [
+      1.6,
+      3.9
+     ],
+     "field": "ok",
+     "field_atoms": 12,
+     "ghost_fraction": 0.13,
+     "field_ghost": [
+      -0.7,
+      -2.4,
+      0.993
+     ],
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 2,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.071,
+   "centre_shift_nm": [
+    -0.27,
+    -0.07
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -442,
+    -364,
+    -214,
+    -6
+   ],
+   "peak_prominence": [
+    0.21,
+    0.77,
+    0.96,
+    0.88
+   ],
+   "e0_mev": -463.78250079105885,
+   "drift_comp_nm_per_min": [
+    -0.7687818074484044,
+    -0.27309248345437975
+   ],
+   "radius_nm": 5.747341484074463,
+   "peaks_found": 4
+  },
+  {
+   "paper": "P3",
+   "seed": 298,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -408.00000000000006,
+    "peak_hi_mev": -344.0,
+    "radius_nm": 7.901275778605641
+   },
+   "truth": {
+    "peak_lo_mev": -410.37292621998955,
+    "peak_hi_mev": -342.3729262199895,
+    "radius_nm": 7.921231862715684
+   },
+   "abs_err": {
+    "peak_lo_mev": 2.3729262199894947,
+    "peak_hi_mev": -1.6270737800105053,
+    "radius_nm": -0.019956084110043015
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1834.9461352751687,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.25,
+     "ghost": 0.031,
+     "ghost_lag_nm": [
+      -3.9,
+      -2.1
+     ],
+     "field": "blunt",
+     "field_atoms": 6,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.5,
+     "ghost": 0.066,
+     "ghost_lag_nm": [
+      -3.9,
+      -2.3
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.4,
+     "ghost": 0.0,
+     "ghost_lag_nm": [
+      0.0,
+      0.0
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.3,
+     "ghost": 0.0,
+     "ghost_lag_nm": [
+      0.0,
+      0.0
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.15,
+     "ghost": 0.0,
+     "ghost_lag_nm": [
+      0.0,
+      0.0
+     ],
+     "quick": true
+    },
+    {
+     "width_nm": 1.05,
+     "ghost": 0.005,
+     "ghost_lag_nm": [
+      -2.7,
+      -4.0
+     ],
+     "field": "ok",
+     "field_atoms": 4,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 5,
+   "bare_clear_nm": 6.0,
+   "bare_feature": 0.034,
+   "centre_shift_nm": [
+    0.3,
+    0.03
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -408,
+    -344,
+    -244,
+    -118,
+    36
+   ],
+   "peak_prominence": [
+    0.3,
+    0.5,
+    0.78,
+    0.95,
+    0.96
+   ],
+   "e0_mev": -461.677456348882,
+   "drift_comp_nm_per_min": [
+    1.3135642883167862,
+    0.13331609528011068
+   ],
+   "radius_nm": 7.901275778605641,
+   "peaks_found": 5
+  },
+  {
+   "paper": "P3",
+   "seed": 299,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -378.0,
+    "peak_hi_mev": -298.00000000000006,
+    "radius_nm": 7.460292348908342
+   },
+   "truth": {
+    "peak_lo_mev": -379.6789831053479,
+    "peak_hi_mev": -297.67898310534787,
+    "radius_nm": 7.454160894481913
+   },
+   "abs_err": {
+    "peak_lo_mev": 1.6789831053479247,
+    "peak_hi_mev": -0.32101689465218897,
+    "radius_nm": 0.006131454426428817
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1912.9607983876401,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "tip_actions": [
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse",
+    "pulse"
+   ],
+   "judged": [
+    {
+     "width_nm": 1.2,
+     "ghost": 0.049,
+     "ghost_lag_nm": [
+      -4.0,
+      1.6
+     ],
+     "field": "blunt",
+     "field_atoms": 10,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "blunt"
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.4,
+     "ghost": 0.06,
+     "ghost_lag_nm": [
+      3.3,
+      2.5
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.3,
+     "ghost": 0.066,
+     "ghost_lag_nm": [
+      3.3,
+      2.5
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.5,
+     "ghost": 0.065,
+     "ghost_lag_nm": [
+      -3.4,
+      -2.6
+     ],
+     "quick": true
+    },
+    {
+     "verdict": "blunt",
+     "width_nm": 1.25,
+     "ghost": 0.062,
+     "ghost_lag_nm": [
+      3.1,
+      2.6
+     ],
+     "quick": true
+    },
+    {
+     "width_nm": 1.15,
+     "ghost": 0.053,
+     "ghost_lag_nm": [
+      3.2,
+      2.6
+     ],
+     "field": "ok",
+     "field_atoms": 10,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "blunt"
+    },
+    {
+     "width_nm": 1.05,
+     "ghost": 0.043,
+     "ghost_lag_nm": [
+      3.0,
+      2.6
+     ],
+     "field": "ok",
+     "field_atoms": 12,
+     "ghost_fraction": 0.0,
+     "field_ghost": null,
+     "verdict": "ok"
+    }
+   ],
+   "tip_rounds": 6,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.027,
+   "centre_shift_nm": [
+    0.01,
+    0.28
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -424,
+    -378,
+    -298,
+    -186,
+    -34
+   ],
+   "peak_prominence": [
+    0.09,
+    0.48,
+    0.82,
+    0.95,
+    0.9
+   ],
+   "e0_mev": -436.1860140091134,
+   "drift_comp_nm_per_min": [
+    0.24882584641933145,
+    0.8966869769620155
+   ],
+   "radius_nm": 7.460292348908342,
+   "peaks_found": 5
+  }
+ ]
+}

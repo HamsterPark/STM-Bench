@@ -147,3 +147,17 @@ def test_readings_pinned_on_a_spectrum_stay_in_the_picture_and_clear_readings_an
     win.request_frame(win._data["frames"][-1]["frame"])
     shots.settle(win)
     assert shots.widget(win, "view.clear_readings").mapTo(win, shots.widget(win, "view.clear_readings").rect().center()) == here
+
+
+@pytest.mark.parametrize("lang", ["en", "zh"])
+def test_the_two_clear_buttons_name_the_view_each_acts_on(fonts, open_window, lang):
+    """Four blind screen trials clicked "Clear readings" to clear the image's markers (their values are readings too).
+    Each label now names its view, in the screen's own words, and neither is a prefix or a word-for-word part of the
+    other, so a reader cannot take one for the other."""
+    win = open_window(lang)
+    image = shots.widget(win, "view.clear_markers").text()
+    plot = shots.widget(win, "view.clear_readings").text()
+    words = {"en": (("image", "marker"), ("plot", "reading")), "zh": (("图像", "标记"), ("曲线", "读数"))}[lang]
+    assert all(w in image for w in words[0]) and not any(w in image for w in words[1])
+    assert all(w in plot for w in words[1]) and not any(w in plot for w in words[0])
+    assert image != plot

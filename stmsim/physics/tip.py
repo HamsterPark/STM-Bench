@@ -288,9 +288,11 @@ class Tip:
         * ``unstable`` — metastable with a 3e-3–3e-2 /s change hazard: row jumps, spectra
           that jump, a tip that changes under a manipulation current (a shallow poke
           stabilises it, a pulse alone does not);
-        * ``dirty`` — something adsorbed on the apex: a peak in the tip's density of states
-          inside the usual sweep window and a lowered barrier, so every spectrum carries a
-          feature that is not the sample's."""
+        * ``dirty`` — something adsorbed on the apex: a peak in the tip's density of states at
+          E0 = −0.45 + 0.7·``scale`` eV and a lowered barrier. A spectrum shows that peak at sample
+          bias −E0, between −0.25 and +0.45 V (:func:`stmsim.physics.junction.iv_curve` samples the
+          tip's states at e − V), so a ±0.5 V sweep always carries a feature that is not the
+          sample's, while a sweep that stops at +0.1 V (P3's) carries it only for ``scale`` ≥ 0.5."""
         if kind not in self.CONDITIONS:
             raise ValueError(f"unknown tip condition {kind!r} (known: {self.CONDITIONS})")
         s = min(max(float(scale), 0.0), 1.0)

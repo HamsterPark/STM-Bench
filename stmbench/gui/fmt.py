@@ -116,9 +116,10 @@ def drift_comp_text(dc: dict | None, lang: str = "en") -> str:
     return f"{on_off(True, lang)} ({num(vx, 4)}, {num(vy, 4)}) nm/min" + (f", {num(vz, 4)} pm/min" if vz else "")
 
 
-def reading_items(st: dict, lang: str = "en") -> list[tuple[str, str]]:
+def reading_items(st: dict, lang: str = "en", qplus: bool = True) -> list[tuple[str, str]]:
     """The status strip's second line: ``(label key, value text)`` for every reading of ``status()``, in
-    the order an operator reads them."""
+    the order an operator reads them. ``qplus=False`` (the rig has no qPlus sensor, see ``info()["qplus"]``)
+    leaves out the oscillation reading: an STM tip has none, and the strip would only say ``n/a``."""
     return [
         ("bias", volts(st["bias_v"])),
         ("setpoint", picoamps(st["setpoint_pa"])),
@@ -129,7 +130,7 @@ def reading_items(st: dict, lang: str = "en") -> list[tuple[str, str]]:
         ("tip", position(st["tip_nm"])),
         ("withdrawn", yes_no(st["withdrawn"], lang)),
         ("lockin", on_off(st["lockin"], lang)),
-        ("oscillation", on_off(st.get("oscillating"), lang)),
+        *([("oscillation", on_off(st.get("oscillating"), lang))] if qplus else []),
         ("drift", drift_comp_text(st.get("drift_comp"), lang)),
     ]
 
@@ -233,3 +234,23 @@ def parse_number(text: str) -> int | float | str:
         v = float(raw)
         return v if math.isfinite(v) else raw
     return raw
+
+
+def sweep_text(j: dict | None) -> str:
+    """What a spectrum's sweep was, from the arguments the window sent (``v_start``, ``v_end``, ``sweep_nm``):
+    ``sweep -0.550 to 0.150 V``. Empty when the window did not take the spectrum."""
+    if not j:
+        return ""
+    if "v_start" in j and "v_end" in j:
+        return f"sweep {volts(float(j['v_start']))[:-2]} to {volts(float(j['v_end']))}"
+    if "sweep_nm" in j:
+        return f"sweep {num(float(j['sweep_nm']), 4)} nm"
+    return ""
+
+
+def junction_text(j: dict | None) -> str:
+    """The bias and setpoint the junction stood at when the sweep started: the status the window had read before the
+    call, not anything the instrument reported about the spectrum."""
+    if not j or "bias_v" not in j or "setpoint_pa" not in j:
+        return ""
+    return f"from {volts(j['bias_v'])} · {picoamps(j['setpoint_pa'])}"

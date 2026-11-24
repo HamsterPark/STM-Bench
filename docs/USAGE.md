@@ -243,8 +243,8 @@ manual, the same ledger; and the export directory, written as the episode happen
 The window is laid out for a reader of a screenshot downscaled to about 1280x720. A status strip across
 the top shows the instrument time against the budget, the readings after every action (bias, setpoint,
 Z feedback, current, Z, preamplifier range, tip position, lock-in, oscillation, drift compensation) in the
-units of the fields that set them (bias in V, setpoint and current in pA; `n/a` for a switch the rig does
-not have), and in its last line what runs while the instrument is busy (the call with its parameters, how
+units of the fields that set them (bias in V, setpoint and current in pA; the oscillation reading, and the
+Spectroscopy tab's qPlus oscillation (PLL) group, appear only on a rig with a qPlus sensor, P5), and in its last line what runs while the instrument is busy (the call with its parameters, how
 many wait, and a Cancel queued button that drops the ones that have not started) or else the last result:
 a tick and the instrument's reply, or a cross and its refusal. On the left, tabs Task,
 Manual (the instrument's fixed facts, `Instrument.info()` read once when the window opens: the piezo,
@@ -282,7 +282,7 @@ current (pA), open on Z against the distance, headed by the conditions the instr
 (from where to where, how fast, the bias, the setpoint, the feedback) and nothing read off the curves - no
 mark, count or note on a step or a spike, which is for the reader to find; over a spectrum, a trace or a line
 profile a cursor reads out the data point nearest the pointer, its x and each curve's y, and a left click
-pins it, up to six pins, which Clear readings or the next data removes); on the right the Operate tab (every action a P4 episode uses,
+pins it, up to six pins, which Clear plot readings (the button beside Clear image markers, which clears the image's markers and its line profile) or the next data removes); on the right the Operate tab (every action a P4 episode uses,
 without scrolling at 1920x1080 or 1920x1016) and the Spectroscopy tab, whose On / Off pairs and range row
 show the state the instrument reports as the selected button, and under them the last five results, newest
 first, in the instrument's words (a refusal stays among them until five calls have followed it). A click queues its job at once with the field values read at that moment and
@@ -593,6 +593,7 @@ p90 5.9 % (F_min), 3.7 % (decay length), 8.7 % (E_b), 354 s of instrument time. 
 
 ```bash
 python -m stmbench.cli baseline --paper P4 --seeds 30 --jobs 4 --json p4-baseline.json
+python -m stmbench.cli baseline --paper P3 --seeds 200 --jobs 8 --json p3-baseline.json
 ```
 
 A scripted baseline (`stmbench.baselines`) drives the instrument an agent gets over MCP and
@@ -603,6 +604,9 @@ the bar an agent should clear. P4 (2026-10-14): 150/150 on seeds 450–599, held
 until the code was final, with 984 s median instrument time (the privileged
 reference: 879 s); 300/300 on seeds 0–299, where it was developed. Per-seed results and
 the earlier held-out rounds: `docs/results/p4_baseline_seeds_*.json`, DESIGN §9.6.
+P3 (corral, DESIGN §9.7): the ring is found in a 60 nm survey, the tip judged from the ring and the spare
+atoms (`stmbench.analysis.corral`: ring width, ghost ring), the drift from two frames of the ring, the band bottom
+from a bare-terrace spectrum; results and per-seed records: `docs/results/p3_baseline_seeds_0-199.json`.
 
 ### Run directory
 

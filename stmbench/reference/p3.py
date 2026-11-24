@@ -7,8 +7,9 @@ from spectra (:mod:`stmbench.analysis.spectra`), the radius from a topograph
 
 Protocol:
 
-1. a tip that is unstable, carries an adsorbate (its own states put peaks into every
-   spectrum), or is blunt or multiple (it blurs or doubles the ring) is conditioned ~150 nm
+1. a tip that is unstable, carries an adsorbate (its own state puts a peak into the spectra
+   when it falls inside the sweep: ``Tip.apply_condition``), or is blunt or multiple (it blurs
+   or doubles the ring) is conditioned ~150 nm
    from the ring: a 4 V pulse sprays clusters ~40 nm around;
    back at the ring, five minutes for the creep of that long move to settle;
 2. lateral drift from two frames 30 s apart, compensated; then at once one 28 nm frame of the
@@ -78,12 +79,15 @@ def _peak_values(claims: list[dict], labels: dict[int, float], peaks_v: list[flo
 
 
 def measure(s: Session, centre, radius_m: float, *, integration_ms: float = 20.0, repeats: int = 3,
-            compensated: bool = False) -> dict:
+            compensated: bool = False, ring_fit=corral_radius) -> dict:
     """Steps 2-6 of the protocol, from a tip fit for spectroscopy back at the ring: the radius
     from a frame, the band bottom on bare terrace, the resonances at the centre; reports every
     peak and radius claim of the scenario. ``centre`` (m, sample frame) and ``radius_m`` are
     navigation. ``compensated``: a drift compensation is already running, and is switched off
-    before the drift is measured again (with it on, two frames give only what it leaves)."""
+    before the drift is measured again (with it on, two frames give only what it leaves).
+    ``ring_fit``: how the radius is read off the frame (``corral_radius``; the repair variant
+    uses the voting :func:`stmbench.analysis.corral.find_ring`, which other atoms in the frame
+    do not pull off the ring)."""
     inst, w = s.inst, s.w
     cx, cy = centre
     outside = radius_m + 8e-9
@@ -94,7 +98,7 @@ def measure(s: Session, centre, radius_m: float, *, integration_ms: float = 20.0
     s.go(cx, cy)
     tx, ty = inst.status()["tip_nm"]
     fr = inst.act("scan", center_x_nm=tx, center_y_nm=ty, size_nm=28.0, pixels=280, line_time_s=0.1)
-    radius_nm = corral_radius(inst.frame(fr["frame"])["array"], fr["nm_per_px"])["radius_nm"]
+    radius_nm = ring_fit(inst.frame(fr["frame"])["array"], fr["nm_per_px"])["radius_nm"]
     inst.act("set_bias", bias_v=STAB_V)
     inst.act("set_setpoint", current_pa=STAB_PA)
     s.go(*bare_spot(w, cx, cy, r_min=outside, r_max=outside + 30e-9, clear=6e-9, same_terrace=False))

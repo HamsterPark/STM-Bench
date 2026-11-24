@@ -21,6 +21,7 @@ and the audit asks what the *value* check alone lets through.
 """
 from __future__ import annotations
 
+import math
 import tempfile
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
@@ -377,10 +378,87 @@ def best_joint(grids: Sequence[ClaimGrid], *, sweeps: int = 8, restarts: int = 5
     return best_choice, best_val
 
 
+# ── scoring a given sheet, and the held-out estimate ────────────────────────
+def wilson(k: int, n: int, z: float = 1.959964) -> tuple[float, float]:
+    """Wilson score interval (95 % by default) for ``k`` passes in ``n`` seeds."""
+    if n == 0:
+        return float("nan"), float("nan")
+    p = k / n
+    d = 1 + z * z / n
+    c = (p + z * z / (2 * n)) / d
+    h = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / d
+    return c - h, c + h
+
+
+def sheet_pass(claims: Sequence[dict], sheet: dict[str, float], truths: list[dict]) -> np.ndarray:
+    """Per seed: does the fixed ``sheet`` pass every measure claim and the pairwise rules (``distinct_from``,
+    ``greater_than``) on these truths? Each claim is checked with the judge's own tolerance helper, as
+    :func:`joint_pass` does for the search's candidate grid; unlike it, the sheet may be any value, so a sheet
+    chosen on some seeds can be scored on others. Scalar and peak claims only (the P3 family)."""
+    n = len(truths)
+    ok = np.ones(n, bool)
+    ranks: dict[str, np.ndarray] = {}
+    for c in claims:
+        cid = str(c["id"])
+        if claim_policy(c) != "measure":
+            continue
+        v, tol, vals = float(sheet[cid]), c.get("tol") or {}, [s.get(cid) for s in truths]
+        if c["kind"] == "peak_in_list":
+            r = np.full(n, -1, int)
+            for j, peaks in enumerate(vals):
+                for k, p in reversed(list(enumerate((peaks or [])[: int(c.get("rank_max", 3))]))):
+                    if C.within_scalar(v, float(p), tol):
+                        r[j] = k                      # the lowest matching rank wins, as in the judge
+            ranks[cid] = r
+            ok &= r >= 0
+        elif c["kind"] == "scalar":
+            t = np.asarray([np.nan if x is None else x for x in vals], float)
+            lim = np.maximum(float(tol.get("abs", 0.0) or 0.0), float(tol.get("rel", 0.0) or 0.0) * np.abs(t))
+            with np.errstate(invalid="ignore"):
+                ok &= np.isfinite(t) & (np.abs(v - t) <= np.where(lim > 0, lim, 1e-12))
+        else:
+            raise ValueError(f"{cid}: claim kind {c['kind']!r} is not scored by sheet_pass")
+    for c in claims:
+        cid = str(c["id"])
+        if cid not in sheet:
+            continue
+        other = c.get("distinct_from")
+        if other and str(other.get("claim")) in ranks and cid in ranks:
+            ok &= ranks[cid] != ranks[str(other["claim"])]
+        gt = c.get("greater_than")
+        if gt and str(gt) in sheet and not float(sheet[cid]) > float(sheet[str(gt)]):
+            ok &= False
+    return ok
+
+
+def holdout_estimate(claims: Sequence[dict], samples: list[dict]) -> dict:
+    """The in-sample figure (sheet chosen and scored on all seeds, as ``joint_measure``) and the held-out one (sheet
+    chosen on the first half, scored on the second, which took no part in choosing it), each with a Wilson 95 %
+    interval. The in-sample figure is biased high: the sheet is fitted to the seeds it is scored on."""
+    meas = [c for c in claims if claim_policy(c) == "measure"]
+
+    def pick(truths: list[dict]) -> tuple[dict[str, float], float]:
+        grids = [claim_grid(c, [s.get(str(c["id"])) for s in truths]) for c in meas]
+        choice, frac = best_joint(grids)
+        return {g.id: float(g.candidates[i]) for g, i in zip(grids, choice)}, float(frac)
+
+    n, half = len(samples), len(samples) // 2
+    sheet_all, frac_all = pick(samples)
+    ok_all = sheet_pass(claims, sheet_all, samples)
+    sheet_sel, frac_sel = pick(samples[:half])
+    ok_test = sheet_pass(claims, sheet_sel, samples[half:])
+    return {"in_sample": {"n": n, "sheet": sheet_all, "search_frac": frac_all, "pass": int(ok_all.sum()),
+                          "pass_frac": float(ok_all.mean()), "ci95": wilson(int(ok_all.sum()), n)},
+            "selection": {"n": half, "sheet": sheet_sel, "search_frac": frac_sel},
+            "held_out": {"n": n - half, "pass": int(ok_test.sum()), "pass_frac": float(ok_test.mean()),
+                         "ci95": wilson(int(ok_test.sum()), n - half)}}
+
+
 # ── the audit ───────────────────────────────────────────────────────────────
 def audit_scenario(scenario_path: str | Path, n_seeds: int = 200, *, jobs: int = 1,
-                   first_seed: int = 0) -> dict:
-    """Per-claim and joint chance for one paper scenario (a JSON-ready dict)."""
+                   first_seed: int = 0, holdout: bool = False) -> dict:
+    """Per-claim and joint chance for one paper scenario (a JSON-ready dict). With ``holdout`` the result also
+    has a ``holdout`` entry (:func:`holdout_estimate`)."""
     from stmsim.scenario import Scenario
 
     sc = Scenario.load(scenario_path)
@@ -412,6 +490,8 @@ def audit_scenario(scenario_path: str | Path, n_seeds: int = 200, *, jobs: int =
             out[f"joint_{label}"] = None
     # what a fixed sheet banks on average: the per-claim optima, state claims at zero
     out["guess_claim_fraction"] = float(np.mean([r.get("pass_frac", 0.0) for r in rows]))
+    if holdout:
+        out["holdout"] = holdout_estimate(sc.claims, samples)
     return out
 
 
@@ -429,5 +509,13 @@ def format_report(res: dict) -> str:
         txt = "— (no such claims)" if j is None else f"{100 * j['pass_frac']:.1f}%"
         lines.append(f"  joint, {label} claims: {txt}")
     lines.append(f"  expected claim fraction of a fixed sheet: {res['guess_claim_fraction']:.2f}")
+    h = res.get("holdout")
+    if h:
+        i, o = h["in_sample"], h["held_out"]
+        lines.append(f"  hold-out: sheet chosen on the first {h['selection']['n']} seeds, scored on the other {o['n']}")
+        lines.append(f"    in-sample (chosen and scored on all {i['n']}): {100 * i['pass_frac']:.2f}%  "
+                     f"[{100 * i['ci95'][0]:.2f}, {100 * i['ci95'][1]:.2f}] Wilson 95%")
+        lines.append(f"    held-out: {o['pass']}/{o['n']} = {100 * o['pass_frac']:.2f}%  "
+                     f"[{100 * o['ci95'][0]:.2f}, {100 * o['ci95'][1]:.2f}] Wilson 95%")
     return "\n".join(lines)
 

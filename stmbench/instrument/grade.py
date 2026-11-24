@@ -181,7 +181,9 @@ def grade_export(export_dir: str | Path, scenario: Scenario | str | Path, seed: 
     stands. ``replay`` says whether the replay was the recorded episode (``consistent``), where it
     was not (``result_mismatches``: replies and instrument times, ``digest_mismatches``: hashes of
     frames and spectra), whether the log's last line was cut off and left out (``torn``) and how
-    many records were replayed.
+    many records were replayed. Records beyond the count in ``session.json`` (the console moved on
+    between the copies of its files) are left out with their digest lines and said so in ``note``;
+    ``replay.records`` is what was judged.
 
     ``strict``: an inconsistent replay scores 0 and is no success, and the numbers that describe
     it are ``None``: it was not the recorded episode, so they are those of a world the agent never
@@ -193,13 +195,11 @@ def grade_export(export_dir: str | Path, scenario: Scenario | str | Path, seed: 
     counts) raises :class:`~stmbench.instrument.export.ExportDamaged`, a :class:`ValueError` subclass:
     an export that cannot be verified is not a reproduction, so the grade command scores it 0
     (:func:`damaged_result`, exit 0). A **mismatch of setup** raises a plain :class:`ValueError`
-    (exit 2, the grader's or the deployment's problem, which the OSWorld adapter reports as pending). The
-    latter: the directory is not a gradable export of this scenario: not an
-    export at all, another scenario, another rules, API or export version, or a ``session.json``
-    that counts more records than the log holds (a log cut short). An export of another API
-    version is a :class:`~stmbench.instrument.core.VersionError`, whose message says that it needs
-    the code of its own version: its calls and records are not this version's, so a replay here
-    would only differ."""
+    (exit 2, the grader's or the deployment's problem, which the OSWorld adapter reports as pending):
+    the directory is an export of another scenario, or of another rules, API or export version. An
+    export of another API version is a :class:`~stmbench.instrument.core.VersionError`, whose message
+    says that it needs the code of its own version: its calls and records are not this version's, so
+    a replay here would only differ."""
     export = _read(export_dir)
     session, records = export["session"], export["records"]
     sc = _load_scenario(scenario)
@@ -215,9 +215,19 @@ def grade_export(export_dir: str | Path, scenario: Scenario | str | Path, seed: 
     counted = session.get("records")
     if _is_int(counted) and counted > len(records):
         raise ExportDamaged(f"session.json counts {counted} records but the log holds {len(records)}")
+    # session.json is written last by every sync and copied first, so a log (or digest file) copied
+    # after the console had moved on may hold records the count does not: the recorded episode is
+    # the first `counted` records. Digest lines of later records leave with them (report.json is
+    # not read: the replay re-sends the report records itself).
+    digests = export["digests"]
+    left_out = 0
+    if _is_int(counted) and counted < len(records):
+        left_out = len(records) - counted
+        records = records[:counted]
+        digests = [d for d in digests if not (isinstance(d, dict) and _is_int(d.get("i")) and d["i"] >= counted)]
 
     inst, result_mismatches = replay_records(sc, seed, records)
-    digest_mismatches, rounded = _digest_check(inst, export["digests"], records)
+    digest_mismatches, rounded = _digest_check(inst, digests, records)
     consistent = not result_mismatches and not digest_mismatches
     judged = consistent or not strict                         # whether the replay's own judgement is the grade
     summary = inst.finish()                                   # finished by the replay: its judged summary
@@ -233,6 +243,8 @@ def grade_export(export_dir: str | Path, scenario: Scenario | str | Path, seed: 
         parts.append("the episode never reached finish: judged as it stands")
     if export["torn"]:
         parts.append("the log's last line was cut off and left out")
+    if left_out:
+        parts.append(f"{left_out} records beyond the count in session.json were left out")
     if consistent:
         parts.append("replay consistent" + (f" (rounding differences in {len(rounded)} arrays, within {RTOL:g})"
                                             if rounded else ""))

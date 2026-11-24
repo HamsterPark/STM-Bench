@@ -485,7 +485,7 @@ class CenterColumn(QWidget):
         self.frame_view.set_zoom(level, focus=(m["x_nm"], m["y_nm"]) if m is not None else None)
 
     def _tools_row(self) -> QWidget:
-        """What a drag on the image does, and Clear markers: a row that stays whatever the viewer shows.
+        """What a drag on the image does, and Clear image markers: a row that stays whatever the viewer shows.
 
         It is outside the pages of the toolbar stack because the markers are not the frame's: they are kept in
         scan coordinates and come back on the next frame. In screen trial 5 (step 39) the agent clicked where Clear
@@ -497,7 +497,9 @@ class CenterColumn(QWidget):
                               "view.tool", "marker")
         self.clear_markers = QPushButton(one("clear_markers", self.lang))
         self.clear_markers.setObjectName("view.clear_markers")
-        # the readings pinned on a plot, which the plot's own toolbar (the axes) has no room for: the same place always
+        # the readings pinned on a plot, which the plot's own toolbar (the axes) has no room for: the same place always.
+        # Both labels name the view they act on, in the screen's own words (image / marker, plot / reading): in four
+        # blind trials "Clear readings" was clicked to clear the image's markers, whose values are also read off the screen.
         self.clear_readings = QPushButton(one("clear_readings", self.lang))
         self.clear_readings.setObjectName("view.clear_readings")
         w.setLayout(self._row(self._caption("lbl_tool"), self.tool, self.clear_markers, self.clear_readings))
@@ -585,8 +587,9 @@ class CenterColumn(QWidget):
         self._show_readout("")
         self.strip.set_current(frame["frame"])
 
-    def show_spectrum(self, spec: dict, axes: tuple[str, str] | None = None) -> None:
-        """Show a spectrum, or a move trace (``kind`` "move"), plotted against the columns the reader picks."""
+    def show_spectrum(self, spec: dict, axes: tuple[str, str] | None = None, junction: dict | None = None) -> None:
+        """Show a spectrum, or a move trace (``kind`` "move"), plotted against the columns the reader picks.
+        ``junction``: the sweep and the starting bias and setpoint the window noted for it (:func:`fmt.sweep_text`)."""
         self._spec = spec
         xcols, ycols = axis_columns(spec)
         if not xcols or not ycols:
@@ -601,18 +604,21 @@ class CenterColumn(QWidget):
         self.stack.setCurrentIndex(1)
         self.strip.set_current("")
         self._show_readout("")
-        self.info.setText(self._spectrum_info(spec, int(np.size(spec[xcols[0]]))))
+        self.info.setText(self._spectrum_info(spec, int(np.size(spec[xcols[0]])), junction))
         self._draw_spectrum(xk, yk)
 
     @staticmethod
-    def _spectrum_info(spec: dict, points: int) -> str:
+    def _spectrum_info(spec: dict, points: int, junction: dict | None = None) -> str:
         """Two lines: the record's name and when it was taken, then what it is. A move trace also says what the
         instrument recorded of the move (where from and to, how fast, at what bias and setpoint, feedback on or
         off), the file's own header, and nothing that was read off the curves."""
         first = f"{spec['name']}   at {fmt.hms(spec['t_s'])}"
         if spec.get("kind") != "move":
             x, y = spec["tip_nm"]
-            return f"{first}\n{spec['kind']} · tip ({x:.3f}, {y:.3f}) nm · {points} points"
+            # the sweep beside the name, the junction it started from beside the kind: two lines, as before
+            first = " · ".join(t for t in (first, fmt.sweep_text(junction)) if t)
+            kind = " · ".join(t for t in (spec["kind"], fmt.junction_text(junction)) if t)
+            return f"{first}\n{kind} · tip ({x:.3f}, {y:.3f}) nm · {points} points"
         junction = [fmt.volts(spec["bias_v"]) if "bias_v" in spec else "",
                     fmt.picoamps(spec["setpoint_pa"]) if "setpoint_pa" in spec else "",
                     f"feedback {fmt.on_off(spec['feedback'])}" if "feedback" in spec else ""]
