@@ -172,16 +172,18 @@ class ActionPanel(QScrollArea):
         Move tip is clicked, and checked against the setter's table entry (the range against its choices) before anything runs."""
         self._during[(c.action, c.param)] = c
         cell = QWidget()
-        v = QVBoxLayout(cell)
+        # the label stands beside its field, not above it: the tab has no height to spare (in the Chinese window on Linux a
+        # line with its label above measured 59 px against 35 px left), and one line of fields is one field high
+        v = QHBoxLayout(cell)
         v.setContentsMargins(0, 0, 0, 0)
-        v.setSpacing(0)
+        v.setSpacing(style.px(6))
         name = f"during.{c.action}.{c.param}"
-        v.addWidget(self._label(f"lbl.{name}", c.en, c.zh, c.unit))
+        v.addWidget(self._label(f"lbl.{name}", c.en, c.zh, c.unit), 0, Qt.AlignmentFlag.AlignVCenter)
         w = SelectAllLineEdit()
         w.setFont(style.mono_font(18))
         ph = one("keep", self.lang)
         w.setPlaceholderText(ph)
-        w.setMinimumWidth(max(style.px(84), QFontMetrics(w.font()).horizontalAdvance(ph) + style.px(24)))
+        w.setMinimumWidth(max(style.px(72), QFontMetrics(w.font()).horizontalAdvance(ph) + style.px(24)))
         w.returnPressed.connect(lambda: self._run("move_tip"))
         w.entered.connect(lambda a=c.action, k=c.param: self.field_entered.emit(f"during.{a}", k))
         w.setObjectName(name)
