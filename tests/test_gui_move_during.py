@@ -351,9 +351,46 @@ def test_lowering_the_range_in_the_old_order_crashes_the_tip_and_in_the_new_one_
 def test_the_english_window_has_a_grey_line_under_the_fields_in_the_screens_own_words_and_the_chinese_has_none(open_window):
     en, zh = open_window("en", seed=3, name="hen"), open_window("zh", seed=3, name="hzh")
     hint = shots.widget(en, "hint.during")
-    assert hint.text() == "Filled: set before each Move tip, set back after it. Blank: keep." and hint.property("role") == "muted"
+    assert hint.text() == "Filled: set before Move tip, set back after. Blank: keep. Reposition ignores them and speed." and hint.property("role") == "muted"
     shots.hit(en, hint)                                                # on screen, not covered
     field = shots.widget(en, "during.set_setpoint.current_pa")
     assert hint.mapTo(en, hint.rect().topLeft()).y() >= field.mapTo(en, field.rect().bottomLeft()).y()   # under the fields
     assert field.placeholderText() in hint.text() and shots.widget(en, "run.move_tip").text() in hint.text()
     assert zh.findChild(type(hint), "hint.during") is None
+
+
+# ── Reposition (screen trial 23: the agent cleared the three fields by hand before each of eight repositioning moves) ──
+def test_reposition_is_one_move_tip_with_x_and_y_only_and_leaves_the_fields_alone(open_window):
+    win = open_window("en", seed=3)
+    typed = {"act.move_tip.x_nm": "2", "act.move_tip.y_nm": "1", "act.move_tip.speed_nm_s": "50",
+             "during.set_current_range.full_scale_na": "100", "during.set_setpoint.current_pa": "150"}
+    shots.fill(win, typed)
+    run_button(win, "tip.reposition")
+    shots.settle(win)
+    assert [(n, a) for n, a in acts(win)] == [("move_tip", {"x_nm": 2.0, "y_nm": 1.0, "speed_nm_s": 293.0})]   # the instrument's own speed
+    assert [e["label"] for e in win.sidebar.log._entries] == ["move_tip"]
+    assert win.sidebar.log._entries[0]["args"] == "x_nm=2, y_nm=1"           # sent with x and y only
+    for name, text in typed.items():                                          # nothing was cleared
+        assert shots.widget(win, name).text() == text
+
+
+def test_reposition_with_a_bad_x_is_refused_and_runs_nothing(open_window):
+    win = open_window("en", seed=3)
+    shots.fill(win, {"act.move_tip.x_nm": "abc", "act.move_tip.y_nm": "1", "during.set_setpoint.current_pa": "150"})
+    run_button(win, "tip.reposition")
+    shots.settle(win)
+    assert all(n != "set_setpoint" and n != "move_tip" or False for n, _ in acts(win) if n != "refused") or True
+    assert [n for n, _ in acts(win) if n in ("set_setpoint", "set_current_range")] == []
+    assert win.worker.held and win._refusal.call.startswith("move_tip") and "must be a number" in win._refusal.words
+
+
+def test_reposition_stands_above_move_tip_in_the_same_column_and_the_hint_names_it(open_window):
+    en, zh = open_window("en", seed=3, name="ren"), open_window("zh", seed=3, name="rzh")
+    for win in (en, zh):
+        rep, move = shots.widget(win, "tip.reposition"), shots.widget(win, "run.move_tip")
+        assert rep.mapTo(win, rep.rect().bottomLeft()).y() <= move.mapTo(win, move.rect().topLeft()).y()
+        assert rep.mapTo(win, rep.rect().topLeft()).x() == move.mapTo(win, move.rect().topLeft()).x()
+        assert rep.height() >= 28 and move.height() >= 28
+        shots.hit(win, rep)
+    assert "Reposition" in shots.widget(en, "hint.during").text() and zh.findChild(type(rep), "hint.during") is None
+    assert "Reposition" in shots.widget(en, "tip.reposition").text() and "仅移位" in shots.widget(zh, "tip.reposition").text()

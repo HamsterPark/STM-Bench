@@ -189,6 +189,8 @@ def test_every_action_has_its_controls_at_the_agreed_names_and_each_can_be_click
                         names = [f"run.{c.action}"]
                     elif isinstance(c, layout.OnOff):
                         names = [f"run.{c.action}.on", f"run.{c.action}.off", f"act.{c.action}.on"]
+                    elif isinstance(c, layout.Reposition):
+                        names = ["tip.reposition"]
                     elif isinstance(c, layout.During):                   # console-only: no run button of its own
                         names = [f"during.{c.action}.{c.param}"]
                     else:
