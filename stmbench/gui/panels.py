@@ -122,6 +122,12 @@ class ActionPanel(QScrollArea):
                 widget, stretch = self._cell(cell)
                 h.addWidget(widget, stretch, Qt.AlignmentFlag.AlignBottom)
             v.addLayout(h)
+            if any(isinstance(cell, During) for cell in line):
+                hint = QLabel(one("during_hint", self.lang))
+                hint.setObjectName("hint.during")
+                hint.setProperty("role", "muted")
+                hint.setFont(style.sans_font(15))
+                v.addWidget(hint)
         return box
 
     def _cell(self, c: Cell) -> tuple[QWidget, int]:

@@ -346,3 +346,17 @@ def test_lowering_the_range_in_the_old_order_crashes_the_tip_and_in_the_new_one_
     n = _crashes(old)
     old.act("set_current_range", {"full_scale_na": 1.0})              # the order the console used to run
     assert _crashes(old) == n + 1                                     # 5 nA setpoint on a 1 nA range: the tip is crashed
+
+
+def test_a_grey_line_under_the_fields_says_what_the_console_does_in_the_screens_own_words(open_window):
+    for lang, want in (("en", "Filled: set before each Move tip, set back after it. Blank: keep."),
+                       ("zh", "填了值：每次移动针尖前设上，移完改回原值。留空：保持。")):
+        win = open_window(lang, seed=3, name=f"h{lang}")
+        hint = shots.widget(win, "hint.during")
+        assert hint.text() == want and hint.property("role") == "muted"
+        shots.hit(win, hint)                                           # on screen, not covered
+        field = shots.widget(win, "during.set_setpoint.current_pa")
+        assert hint.mapTo(win, hint.rect().topLeft()).y() >= field.mapTo(win, field.rect().bottomLeft()).y()   # under the fields
+        assert field.placeholderText() in want                         # "keep" / "保持" as the field shows it
+        assert shots.widget(win, "run.move_tip").text().split()[0 if lang == "zh" else 0] in ("Move", "移动针尖")
+        assert ("Move tip" if lang == "en" else "移动针尖") in want

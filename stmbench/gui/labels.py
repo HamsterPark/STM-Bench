@@ -181,6 +181,10 @@ S: dict[str, Pair] = {
     "col_t": ("time", "时间"),
     "no_view": ("Nothing shown.", "没有显示的内容。"),
     "scan_running": ("scan running…", "扫描进行中…"),
+    # under the Tip group's during-move fields (screen trial 22: "labelled keep and not explained"): what the console does with
+    # them, in the words of the screen's own labels ("Move tip", "keep"); no advice on values or on when to fill them
+    "during_hint": ("Filled: set before each Move tip, set back after it. Blank: keep.",
+                    "填了值：每次移动针尖前设上，移完改回原值。留空：保持。"),
     # the readout line's usage hints, shown while it has no reading: how the viewer works, never about the experiment
     # each says what the pointer does with the tool picked, and that the wheel zooms about the pointer (p3check1, finding 1:
     # a sighted agent zoomed about the centre with the buttons and then had to pan to a ring at the edge)
