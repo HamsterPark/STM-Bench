@@ -41,7 +41,8 @@ DURING_HINT_EN = "Filled: set before each Move tip, set back after it. Blank: ke
 #: is the instrument's, the text an MCP agent gets, and stays byte for byte). Facts only: no value and no occasion is named.
 MOVE_NOTE: Pair = (
     "Console: the fields move range and move setpoint keep their values; while either is filled, every Move tip uses "
-    "them (blank: keep). Move tip first checks every value (one invalid: nothing runs), then sets the filled ones, moves the tip, and sets each setting it changed back to the value the "
+    "them (blank: keep). Move tip first checks every value (one invalid: nothing runs), then sets the filled ones, "
+    "moves the tip, and sets each setting it changed back to the value the "
     "instrument reported before; a setting that did not change is not set back. Each call is logged as if clicked. If a "
     "call is refused, the settings already changed are set back and the band shows the refusal; a refused set-back stops "
     "there.",
