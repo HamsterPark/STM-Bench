@@ -31,7 +31,7 @@ from PySide6.QtWidgets import (QFrame, QGroupBox, QHBoxLayout, QLabel, QPushButt
 from ..instrument import ACTIONS
 from . import fmt, style
 from .controls import Segmented, SelectAllLineEdit, strong
-from .labels import both, one, tr
+from .labels import DURING_HINT_EN, both, one, tr
 from .layout import OPERATE, Cell, Choices, During, F, Group, OnOff, Run
 
 
@@ -122,6 +122,15 @@ class ActionPanel(QScrollArea):
                 widget, stretch = self._cell(cell)
                 h.addWidget(widget, stretch, Qt.AlignmentFlag.AlignBottom)
             v.addLayout(h)
+            # English window only. The Chinese one has no height for the line (its Operate tab keeps 38 px of 1053, the line takes
+            # 23), its labels already say "移动时" (during the move), the console note stands at the head of the manual, and the
+            # screen agents (the OSWorld guest, the trial harness) run the English window.
+            if self.lang == "en" and any(isinstance(cell, During) for cell in line):
+                hint = QLabel(DURING_HINT_EN)
+                hint.setObjectName("hint.during")
+                hint.setProperty("role", "muted")
+                hint.setFont(style.sans_font(15))
+                v.addWidget(hint)
         return box
 
     def _cell(self, c: Cell) -> tuple[QWidget, int]:

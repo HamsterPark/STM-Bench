@@ -302,3 +302,58 @@ def test_the_range_field_help_lists_the_allowed_values(open_window):
     help_ = win.operate.field_help("during.set_current_range", "full_scale_na")
     assert help_.endswith("one of 10000, 1000, 100, 10, 1, 0.1") or all(v in help_ for v in ("0.1", "1", "10", "100", "1000", "10000"))
     assert help_.startswith("move range (nA)")
+
+
+# ── the order when the range is lowered (screen trial 22) ──
+def test_a_lowered_range_runs_the_setpoint_first_and_puts_the_range_back_first():
+    s = Stand()                                           # range 1 nA, setpoint 20 pA
+    out = jobs.run_move_during(s, MOVE, {"set_current_range": {"full_scale_na": 0.1}, "set_setpoint": {"current_pa": 50.0}})
+    assert out.ok and [n for n, _ in s.calls] == ["set_setpoint", "set_current_range", "move_tip", "set_current_range",
+                                                  "set_setpoint"]
+    assert s.state == STATE
+    s = Stand()                                           # a raised range keeps the order
+    jobs.run_move_during(s, MOVE, {"set_current_range": {"full_scale_na": 10.0}, "set_setpoint": {"current_pa": 50.0}})
+    assert [n for n, _ in s.calls] == ["set_current_range", "set_setpoint", "move_tip", "set_setpoint", "set_current_range"]
+
+
+def test_a_lowered_range_refused_midway_puts_back_in_the_reverse_of_the_order_it_ran():
+    s = Stand(refuse=("set_current_range", 1))
+    out = jobs.run_move_during(s, MOVE, {"set_current_range": {"full_scale_na": 0.1}, "set_setpoint": {"current_pa": 50.0}})
+    assert not out.ok and [n for n, _ in s.calls] == ["set_setpoint", "set_setpoint"] and s.state == STATE
+
+
+def _crashes(sess) -> int:
+    return sum(1 for e in sess._inst.world.events if e["kind"] == "crash")
+
+
+def _real_session(tmp_path, name):
+    from stmbench.gui.session import GuiSession
+    sess = GuiSession(P4, 3, run_dir=tmp_path / name, export_dir=tmp_path / name / "export")
+    assert sess._inst.world.physics.crash_over_range                  # the P4 world: a setpoint over the range crashes the tip
+    sess.act("set_setpoint", {"current_pa": 5000.0})                  # 5 nA on the 10 nA range
+    return sess
+
+
+def test_lowering_the_range_in_the_old_order_crashes_the_tip_and_in_the_new_one_does_not(tmp_path):
+    during = {"set_current_range": {"full_scale_na": 1.0}, "set_setpoint": {"current_pa": 500.0}}
+    new = _real_session(tmp_path, "new")
+    n = _crashes(new)
+    out = jobs.run_move_during(new, MOVE, during)
+    assert out.ok and _crashes(new) == n                              # no setpoint_over_range, the tip is as it was
+    st = new.status()
+    assert (st["current_full_scale_na"], st["setpoint_pa"]) == (10.0, 5000.0)
+    old = _real_session(tmp_path, "old")
+    n = _crashes(old)
+    old.act("set_current_range", {"full_scale_na": 1.0})              # the order the console used to run
+    assert _crashes(old) == n + 1                                     # 5 nA setpoint on a 1 nA range: the tip is crashed
+
+
+def test_the_english_window_has_a_grey_line_under_the_fields_in_the_screens_own_words_and_the_chinese_has_none(open_window):
+    en, zh = open_window("en", seed=3, name="hen"), open_window("zh", seed=3, name="hzh")
+    hint = shots.widget(en, "hint.during")
+    assert hint.text() == "Filled: set before each Move tip, set back after it. Blank: keep." and hint.property("role") == "muted"
+    shots.hit(en, hint)                                                # on screen, not covered
+    field = shots.widget(en, "during.set_setpoint.current_pa")
+    assert hint.mapTo(en, hint.rect().topLeft()).y() >= field.mapTo(en, field.rect().bottomLeft()).y()   # under the fields
+    assert field.placeholderText() in hint.text() and shots.widget(en, "run.move_tip").text() in hint.text()
+    assert zh.findChild(type(hint), "hint.during") is None

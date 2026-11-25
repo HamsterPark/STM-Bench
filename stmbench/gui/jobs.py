@@ -99,8 +99,11 @@ def run_move_during(sess: GuiSession, args: dict, during: dict[str, dict]) -> Ou
 
     ``during`` maps a setter's name to its arguments, for the ones that are set. Every value is checked against
     the action table first (the move's own fields with them): a value that is refused ends it with nothing run. Then
-    the setters run in the order range, bias, setpoint; then the move with ``args`` as typed; then, in reverse order,
-    each value that a setter changed goes back to what ``status()`` reported when this began. If a call is refused (or
+    the setters run in the order range, bias, setpoint, except when the range is lowered (below what ``status()``
+    reported when this began): then setpoint, bias, range, so that the range never stands below the setpoint the
+    junction still has (the instrument's ``crash_over_range`` hits the tip when the loop's setpoint is over the range, which
+    screen trial 22 met by hand); then the move with ``args`` as typed; then, in the reverse of the order the setters
+    ran, each value that a setter changed goes back to what ``status()`` reported when this began. If a call is refused (or
     faults) the setters that were applied are put back all the same, and the outcome says what was refused; if a
     putting back is refused, the rest is left and that refusal is the one that is shown. Every call is a normal
     action of the session, so each is in the Log, the export and the ledger as if it had been clicked; the outcome
@@ -119,6 +122,11 @@ def run_move_during(sess: GuiSession, args: dict, during: dict[str, dict]) -> Ou
     except Exception as exc:  # noqa: BLE001
         return _fail(out, exc)
     keys = {name: (param, key) for name, param, key in DURING}
+    lowered = ("set_current_range" in during
+               and isinstance(before.get("current_full_scale_na"), (int, float))
+               and during["set_current_range"]["full_scale_na"] < before["current_full_scale_na"])
+    if lowered:                                                   # decided now that the state is read: the plan runs the setters the other way round
+        plan = [(name, dict(during[name])) for name, _, _ in reversed(DURING) if name in during] + [("move_tip", dict(args))]
     applied: list[str] = []
     for name, a in plan:
         step = run_act(sess, name, a)
