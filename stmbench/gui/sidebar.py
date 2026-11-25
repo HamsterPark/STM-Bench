@@ -111,12 +111,19 @@ class ReportTab(QWidget):
         # (unit, sigma, Submit, Finish) moves while the reader types (screen trial 23: Submit jumped by 28 px and two clicks
         # landed on labels). A longer list fills the lines and ends in "+N more"; it never grows.
         self._evidence_full.setWordWrap(False)
-        self._evidence_full.setProperty("role", "label")
+        # role "muted", not "label": the "label" style sheet sets 17 px and overrides the 14 px font below, so that the height
+        # sized from the font was too small for the lines that were drawn (the underscores of the second line were cut off)
+        self._evidence_full.setProperty("role", "muted")
         self._evidence_full.setProperty("tone", "note")
         self._evidence_full.setFont(style.mono_font(14))
         self._evidence_full.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
         self._evidence_full.setMinimumWidth(0)
-        self._evidence_full.setFixedHeight(EVIDENCE_LINES * self._evidence_full.fontMetrics().lineSpacing() + style.px(2))
+        # tall enough for EVIDENCE_LINES whole lines as the style sheet draws them (its padding and frame, and the descent of the
+        # last line: an underscore sits below the baseline and was cut off by a height of line spacings alone)
+        self._evidence_full.setText("\n".join(["Xgy_"] * EVIDENCE_LINES))
+        self._evidence_full.ensurePolished()
+        self._evidence_full.setFixedHeight(self._evidence_full.sizeHint().height() + style.px(4))   # the hint ends at the descent: leave room under it
+        self._evidence_full.setText("")
 
         def cell(key: str, beside: QWidget | None = None, wrap: bool = False) -> QWidget:
             """A field with its label above it (and a button at the end of the label's line, if ``beside``)."""
@@ -135,7 +142,7 @@ class ReportTab(QWidget):
             box = QWidget()
             col = QVBoxLayout(box)
             col.setContentsMargins(0, 0, 0, 0)
-            col.setSpacing(style.px(1))
+            col.setSpacing(0)
             if beside is None:
                 col.addWidget(lab)
             else:
@@ -315,32 +322,31 @@ class ReportTab(QWidget):
         self._evidence_full.setText(self._evidence_lines(text, room) if wide else "")
 
     def _evidence_lines(self, text: str, room: int) -> str:
-        """The files of ``text`` packed into at most EVIDENCE_LINES lines of ``room`` px; what does not fit is told as "+N more"."""
+        """The files of ``text`` packed into at most EVIDENCE_LINES lines of ``room`` px, separated as the field has them (", ");
+        what does not fit is told as ", ... +N more" (whole names only) at the end of the last line."""
         fm = self._evidence_full.fontMetrics()
         files = [t.strip() for t in text.replace("，", ",").split(",") if t.strip()]
-        lines: list[str] = []
+        lines: list[list[str]] = []
         i = 0
         while i < len(files) and len(lines) < EVIDENCE_LINES:
-            line = ""
-            while i < len(files):
-                trial = f"{line}, {files[i]}" if line else files[i]
-                if line and fm.horizontalAdvance(trial + ",") > room:
-                    break
-                line = trial
+            line: list[str] = []
+            while i < len(files) and (not line or fm.horizontalAdvance(", ".join([*line, files[i]]) + ",") <= room):
+                line.append(files[i])
                 i += 1
-            if not line:
-                break
             lines.append(line)
         left = len(files) - i
+        out = [", ".join(line) + "," for line in lines[:-1]]
+        last = lines[-1]
         if left > 0:
-            more = f" +{left} more"
-            last = lines[-1] if lines else ""
-            while last and fm.horizontalAdvance(last + "…" + more) > room:
-                last = last[:-1]
-            lines[-1:] = [last + "…" + more]
+            more = f", … +{left} more"
+            while len(last) > 1 and fm.horizontalAdvance(", ".join(last) + more) > room:
+                left += 1
+                last = last[:-1]                          # a whole name goes into the count
+                more = f", … +{left} more"
+            out.append(", ".join(last) + more)
         else:
-            lines = [ln + "," if k < len(lines) - 1 else ln for k, ln in enumerate(lines)]
-        return "\n".join(lines)
+            out.append(", ".join(last))
+        return "\n".join(out)
 
     def resizeEvent(self, ev) -> None:
         super().resizeEvent(ev)
