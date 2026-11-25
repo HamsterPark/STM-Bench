@@ -122,7 +122,9 @@ def run_move_during(sess: GuiSession, args: dict, during: dict[str, dict]) -> Ou
     except Exception as exc:  # noqa: BLE001
         return _fail(out, exc)
     keys = {name: (param, key) for name, param, key in DURING}
-    lowered = "set_current_range" in during and isinstance(before.get("current_full_scale_na"), (int, float))         and during["set_current_range"]["full_scale_na"] < before["current_full_scale_na"]
+    lowered = ("set_current_range" in during
+               and isinstance(before.get("current_full_scale_na"), (int, float))
+               and during["set_current_range"]["full_scale_na"] < before["current_full_scale_na"])
     if lowered:                                                   # decided now that the state is read: the plan runs the setters the other way round
         plan = [(name, dict(during[name])) for name, _, _ in reversed(DURING) if name in during] + [("move_tip", dict(args))]
     applied: list[str] = []
