@@ -13,7 +13,7 @@ from html import escape
 
 from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtWidgets import (QAbstractItemView, QBoxLayout, QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel,
-                               QListWidget, QListWidgetItem, QPushButton, QRadioButton, QScrollArea, QStyle, QVBoxLayout,
+                               QListWidget, QListWidgetItem, QPushButton, QRadioButton, QScrollArea, QSizePolicy, QStyle, QVBoxLayout,
                                QWidget)
 
 from . import fmt, style
@@ -52,6 +52,10 @@ class _ClaimLabel(QLabel):
 
     def mousePressEvent(self, ev) -> None:
         self._radio.click()
+
+
+#: the lines reserved under the evidence field for the full list of cited files (two: the lists of the trials were one to three files)
+EVIDENCE_LINES = 2
 
 
 class ReportTab(QWidget):
@@ -103,11 +107,16 @@ class ReportTab(QWidget):
         # showed only the end of "2.dat, sim004.sxm", so which spectrum was cited could not be read (p3check1, finding 2)
         self._evidence_full = QLabel()
         self._evidence_full.setObjectName("report.evidence_full")
-        self._evidence_full.setWordWrap(True)
+        # its space is reserved for good: EVIDENCE_LINES lines, empty while the field shows everything, so that nothing below it
+        # (unit, sigma, Submit, Finish) moves while the reader types (screen trial 23: Submit jumped by 28 px and two clicks
+        # landed on labels). A longer list fills the lines and ends in "+N more"; it never grows.
+        self._evidence_full.setWordWrap(False)
         self._evidence_full.setProperty("role", "label")
         self._evidence_full.setProperty("tone", "note")
         self._evidence_full.setFont(style.mono_font(16))
-        self._evidence_full.hide()
+        self._evidence_full.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
+        self._evidence_full.setMinimumWidth(0)
+        self._evidence_full.setFixedHeight(EVIDENCE_LINES * self._evidence_full.fontMetrics().lineSpacing() + style.px(2))
 
         def cell(key: str, beside: QWidget | None = None, wrap: bool = False) -> QWidget:
             """A field with its label above it (and a button at the end of the label's line, if ``beside``)."""
@@ -116,7 +125,7 @@ class ReportTab(QWidget):
             lab.setTextFormat(Qt.TextFormat.RichText)
             lab.setProperty("role", "label")
             self.labels[key] = lab
-            e = WrapField(4) if wrap else SelectAllLineEdit()   # the note wraps: a line edit a third of the form wide showed a few words
+            e = WrapField(3) if wrap else SelectAllLineEdit()   # the note wraps: a line edit a third of the form wide showed a few words
             e.setObjectName(f"report.{key}")
             e.setFont(style.mono_font(18))
             if wrap:
@@ -155,22 +164,17 @@ class ReportTab(QWidget):
         self.viewed_button.setProperty("role", "tiny")             # as tall as a label's line: the form is no taller for it
         self.viewed_button.setObjectName("report.viewed")
         self.viewed_button.clicked.connect(self._append_viewed)
-        # four rows, as before: P1's four claims in English leave the page 49 px at 1920x1053 (27 in DejaVu), so the note
-        # gets the last row to itself, as wide as the form allows (two thirds, wrapped, four lines tall), with the unit
-        # and the uncertainty stacked in the third that the narrow field it had was in
+        # four rows: the unit and the uncertainty stand in the frame's row, and the note has the last row to itself, as wide
+        # as the form (so three lines show the longest note of the tests). The space reserved under the evidence field for its list
+        # (EVIDENCE_LINES lines, so that Submit never moves: screen trial 23) is paid for here: P1 in English leaves the page 49 px at
+        # 1920x1053 (27 in DejaVu) and the reservation takes 44.
         row((cell("value"), 1), (cell("x_nm"), 1), (cell("y_nm"), 1))
-        row((cell("frame"), 1))
+        row((cell("frame"), 2), (cell("unit"), 1), (cell("sigma"), 1))
         row((cell("evidence", beside=self.viewed_button), 1))
         ev = self.fields["evidence"]
         ev.setPlaceholderText(one("rep_evidence_hint", lang))
         ev.textChanged.connect(lambda _t: self._show_full_evidence())
-        small = QWidget()
-        stack = QVBoxLayout(small)
-        stack.setContentsMargins(0, 0, 0, 0)
-        stack.setSpacing(style.px(3))
-        stack.addWidget(cell("unit"))
-        stack.addWidget(cell("sigma"))
-        row((small, 1), (cell("note", wrap=True), 3))
+        row((cell("note", wrap=True), 1))
         v.addSpacing(style.px(4))
         v.addLayout(form)
         v.addSpacing(style.px(4))
@@ -293,13 +297,41 @@ class ReportTab(QWidget):
         self.fields["evidence"].setText(", ".join(have))
 
     def _show_full_evidence(self) -> None:
-        """The cited files in full, in grey under the field, when the field cannot show them all."""
+        """The cited files, in grey under the field, when the field cannot show them all: as many as fit in the reserved lines,
+        then "+N more". The label keeps its place and its height whether it shows anything or not."""
         ev = self.fields["evidence"]
         text = ev.text().strip()
         room = ev.width() - 2 * style.px(8)
         wide = bool(text) and ev.fontMetrics().horizontalAdvance(text) > room
-        self._evidence_full.setText(text if wide else "")
-        self._evidence_full.setVisible(wide)
+        self._evidence_full.setText(self._evidence_lines(text, room) if wide else "")
+
+    def _evidence_lines(self, text: str, room: int) -> str:
+        """The files of ``text`` packed into at most EVIDENCE_LINES lines of ``room`` px; what does not fit is told as "+N more"."""
+        fm = self._evidence_full.fontMetrics()
+        files = [t.strip() for t in text.replace("，", ",").split(",") if t.strip()]
+        lines: list[str] = []
+        i = 0
+        while i < len(files) and len(lines) < EVIDENCE_LINES:
+            line = ""
+            while i < len(files):
+                trial = f"{line}, {files[i]}" if line else files[i]
+                if line and fm.horizontalAdvance(trial + ",") > room:
+                    break
+                line = trial
+                i += 1
+            if not line:
+                break
+            lines.append(line)
+        left = len(files) - i
+        if left > 0:
+            more = f" +{left} more"
+            last = lines[-1] if lines else ""
+            while last and fm.horizontalAdvance(last + "…" + more) > room:
+                last = last[:-1]
+            lines[-1:] = [last + "…" + more]
+        else:
+            lines = [ln + "," if k < len(lines) - 1 else ln for k, ln in enumerate(lines)]
+        return "\n".join(lines)
 
     def resizeEvent(self, ev) -> None:
         super().resizeEvent(ev)
