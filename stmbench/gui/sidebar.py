@@ -247,13 +247,17 @@ class ReportTab(QWidget):
         """Each result keeps its own entries (screen trial 23: value, evidence, note and position carried over from one result
         to the next, and a radius would have been submitted with the files of another result). What the fields hold is kept
         for the result being left, and the picked one shows what it held when it was left (as typed or as submitted); a result not
-        opened before shows empty fields and its unit, the one thing prefilled."""
+        opened before shows empty fields and its unit, the one thing prefilled. The first pick of all keeps what the form holds
+        (a marker copied with the "Report" button of the viewer, or a value or files typed, before the result was chosen) as that
+        result's entries."""
+        first = not self._current
         if self._current and self._current != cid:
             self._entries[self._current] = {k: e.text() for k, e in self.fields.items()}
         self._current = cid
         saved = self._entries.get(cid)
-        for key, e in self.fields.items():
-            e.setText(saved[key] if saved else "")
+        if not (first and not saved):                            # the first pick keeps the form as it is
+            for key, e in self.fields.items():
+                e.setText(saved[key] if saved else "")
         if not saved:
             self.fields["unit"].setText(self._claims[cid]["unit"])
         self._mark_required(cid)

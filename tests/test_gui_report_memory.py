@@ -48,3 +48,31 @@ def test_a_result_not_opened_before_shows_today_s_unit_prefill(open_window):
     run_button(win, f"report.claim.{B}")
     assert rep.fields["unit"].text() == rep._claims[B]["unit"]
     assert all(v == "" for k, v in fields(win).items() if k != "unit")
+
+
+def test_the_first_pick_keeps_what_the_form_holds_a_marker_copied_or_typed_before(open_window):
+    win = open_window("en", scenario=P1)
+    win.sidebar.show_tab("report")
+    rep = win.sidebar.report
+    assert rep.claim_id() == ""
+    rep.fill_position(1.0, 2.0, "sim001.sxm")                    # the marker is copied before the result is chosen
+    shots.fill(win, {"report.value": "30", "report.evidence": "sim001.sxm"})
+    run_button(win, f"report.claim.{A}")
+    got = fields(win)
+    assert (got["x_nm"], got["y_nm"], got["frame"]) == ("1.000", "2.000", "sim001.sxm")
+    assert got["value"] == "30" and got["evidence"] == "sim001.sxm" and got["unit"] == rep._claims[A]["unit"]
+    run_button(win, f"report.claim.{B}")                         # from here on, results swap their entries
+    assert fields(win)["value"] == "" and not rep.fields["x_nm"].isEnabled()
+    run_button(win, f"report.claim.{A}")
+    assert fields(win) == got
+
+
+def test_the_first_pick_of_a_result_with_no_position_clears_the_position_as_before(open_window):
+    win = open_window("en", scenario=P1)
+    win.sidebar.show_tab("report")
+    rep = win.sidebar.report
+    rep.fill_position(1.0, 2.0, "sim001.sxm")
+    shots.fill(win, {"report.value": "4"})
+    run_button(win, f"report.claim.{B}")                         # B names no place: position greyed and empty, value kept
+    got = fields(win)
+    assert got["value"] == "4" and (got["x_nm"], got["y_nm"], got["frame"]) == ("", "", "")
