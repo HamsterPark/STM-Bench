@@ -293,3 +293,50 @@ def test_a_title_strip_is_not_used_when_there_is_none_or_nothing_fits_it(app):
     assert not lay.show_title and plot.strip_text(plot._fields(5), lay) is None
     move(plot, plot.point_position(5))
     plot.grab()                                                                 # paints without failing
+
+
+def lone_dot_plot() -> PlotView:
+    """Two curves: A is dense over the right 60 % of the axes (full height) and has a lone point at the top left; B is
+    dense along the bottom. The top-left corner holds one curve point, the fewest, and it is the read dot."""
+    plot = PlotView()
+    font = QFont("Arial")
+    font.setPixelSize(16)
+    plot.setFont(font)
+    plot.resize(640, 340)
+    x = np.linspace(0.0, 1.0, 201)
+    a = np.sin(2 * np.pi * 40 * x)
+    a[:80] = np.nan
+    a[5] = 1.4
+    b = -1.3 + 0.05 * np.sin(2 * np.pi * 40 * x)
+    plot.set_series(x, [("A", a), ("B", b)], "x", "y", "t")
+    return plot
+
+
+def test_the_box_never_covers_the_dots_being_read_even_when_that_corner_has_the_fewest_curve_points(app):
+    plot = lone_dot_plot()
+    lay = plot._layout_now()
+    here = plot.point_position(5)
+    w, h = 150.0, 60.0
+    plain_box = plot._pick_corner(lay, w, h, 6, here, here.x())
+    assert plain_box.adjusted(-4, -4, 4, 4).contains(here)                     # by curve points alone it is the top left
+    dots = plot._dots_at(lay, [5])
+    assert len(dots) == 2
+    box = plot._pick_corner(lay, w, h, 6, here, here.x(), dots=dots)
+    assert not any(box.adjusted(-4, -4, 4, 4).contains(d) for d in dots)
+    move(plot, here)                                                           # and as painted
+    assert plot._hover == 5
+    colour = dot_colour_at(plot, 5)
+    assert colour != tuple(pv.READOUT_BG.getRgb()[:3]) and colour[2] > colour[0] + 40
+
+
+def test_the_pins_list_never_covers_a_pinned_dot(app):
+    plot = lone_dot_plot()
+    for i in (5, 150):
+        click(plot, plot.point_position(i))
+    lay = plot._layout_now()
+    dots = plot._dots_at(lay, [5, 150])
+    box = plot._pick_corner(lay, 300.0, 56.0, 6, None, dots=dots)
+    assert not any(box.adjusted(-4, -4, 4, 4).contains(d) for d in dots)
+    for i in (5, 150):
+        colour = dot_colour_at(plot, i)                                        # series A's blue, not the list's background
+        assert colour != tuple(pv.READOUT_BG.getRgb()[:3]) and colour[2] > colour[0] + 40, i

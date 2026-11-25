@@ -767,7 +767,8 @@ class PlotView(QWidget):
             return
         if h > 0.85 * plot.height():                         # no room for even one line: the line and dots say it
             return
-        box = self._pick_corner(lay, w, h, margin, self._pointer if self._pointer is not None else self._cursor_spot(lay, i), gx)
+        box = self._pick_corner(lay, w, h, margin, self._pointer if self._pointer is not None else self._cursor_spot(lay, i), gx,
+                                dots=self._dots_at(lay, [i]))
         inset = 1.0 if pinned else 0.5                                          # the border's centre, on the pixel grid
         p.setPen(QPen(_CURSOR_PIN if pinned else _AXIS, 2.0 if pinned else 1.0))
         p.setBrush(READOUT_BG)
@@ -781,10 +782,11 @@ class PlotView(QWidget):
                 p.fillRect(QRectF(box.left() + pad, row.center().y() - 2, 11, 4), fields[n][0])
 
     def _pick_corner(self, lay: SimpleNamespace, w: float, h: float, margin: float, here: QPointF | None,
-                     line_x: float | None = None) -> QRectF:
-        """The box of ``w`` x ``h`` in the corner of the axes whose rectangle covers the fewest points of the drawn
-        curves; among those, one the cursor's line (at ``line_x``) does not cross; then the one farthest from ``here``
-        (the pointer, or where the cursor stands)."""
+                     line_x: float | None = None, dots: list[QPointF] | None = None) -> QRectF:
+        """The box of ``w`` x ``h`` in the corner of the axes that covers the fewest of the readings' ``dots`` (the point
+        being read must never be covered, however dense the curve), then the fewest points of the drawn curves; among
+        those, one the cursor's line (at ``line_x``) does not cross; then the one farthest from ``here`` (the pointer,
+        or where the cursor stands)."""
         plot = lay.plot
         corners = (QRectF(plot.left() + margin, plot.top() + margin, w, h),
                    QRectF(plot.right() - margin - w, plot.top() + margin, w, h),
@@ -792,15 +794,21 @@ class PlotView(QWidget):
                    QRectF(plot.right() - margin - w, plot.bottom() - margin - h, w, h))
         samples = self._curve_samples(lay)
 
-        def key(b: QRectF) -> tuple[int, bool, float]:
+        def key(b: QRectF) -> tuple[int, int, bool, float]:
             r = b.adjusted(-4, -4, 4, 4)
+            under_dots = sum(1 for d in dots or () if r.contains(d))
             covered = int(np.count_nonzero((samples[:, 0] >= r.left()) & (samples[:, 0] <= r.right())
                                            & (samples[:, 1] >= r.top()) & (samples[:, 1] <= r.bottom())))
             crossed = line_x is not None and b.left() - 8 <= line_x <= b.right() + 8
             far = 0.0 if here is None else -math.hypot(b.center().x() - here.x(), b.center().y() - here.y())
-            return covered, crossed, far
+            return under_dots, covered, crossed, far
 
         return min(corners, key=key)
+
+    def _dots_at(self, lay: SimpleNamespace, indices: list[int]) -> list[QPointF]:
+        """The dot each curve has at each of the points ``indices`` (where finite), in widget pixels."""
+        return [self._to_px(lay, float(self._x[i]), float(self._values[k, i])) for i in indices
+                for k in range(len(self._series)) if math.isfinite(float(self._values[k, i]))]
 
     def _cursor_spot(self, lay: SimpleNamespace, i: int) -> QPointF:
         """Where point ``i`` is drawn (at the mean of its curves' values: the cursor's place when the pointer is away)."""
@@ -924,7 +932,8 @@ class PlotView(QWidget):
         if shown:
             w = 2 * pad + max(mfm.horizontalAdvance(t) for t in shown)
             h = 2 * pad + lh * len(shown)
-            box = self._pick_corner(lay, w, h, margin, self._pointer)       # the corner that hides the fewest curve points
+            box = self._pick_corner(lay, w, h, margin, self._pointer,       # the corner that hides the fewest dots, then curve points
+                                    dots=self._dots_at(lay, drawn + ([hover] if hover is not None else [])))
             top_box = box.top() < plot.center().y()
             p.setPen(QPen(_CURSOR_PIN, 2.0))
             p.setBrush(READOUT_BG)
