@@ -69,20 +69,21 @@ def test_the_evidence_field_has_the_form_width_and_the_whole_list_is_shown_when_
     shots.settle(win)
     rep = win.sidebar.report
     ev, full, button = rep.fields["evidence"], shots.widget(win, "report.evidence_full"), shots.widget(win, "report.viewed")
-    assert ev.placeholderText() == one("rep_evidence_hint", lang) and not full.isVisible()
+    assert ev.placeholderText() == one("rep_evidence_hint", lang) and full.text() == ""
     label = rep.labels["evidence"]
     assert button.mapTo(rep, button.rect().topLeft()).y() < ev.mapTo(rep, ev.rect().topLeft()).y()      # the button is above
     assert ev.width() >= rep.width() - 2 * 12 - 4                                                      # the field is the form wide
     assert label.isVisible() and button.isVisible()
     ev.setText("sim001.sxm")
-    assert not full.isVisible()                                          # it fits: nothing is repeated
+    assert full.text() == ""                                             # it fits: nothing is repeated (its lines stay reserved)
     names = "sim001.sxm, 2.dat, sim004.sxm, sim005.sxm"
     ev.setText(names)
     shots.settle(win)
-    assert ev.fontMetrics().horizontalAdvance(names) > ev.width() and full.isVisible() and full.text() == names
+    assert ev.fontMetrics().horizontalAdvance(names) > ev.width() and full.isVisible()   # its place is always there (screen trial 23)
+    assert all(n in full.text().replace(chr(10), " ") for n in names.split(", ")) or "more" in full.text()
     assert full.mapTo(rep, full.rect().topLeft()).y() >= ev.mapTo(rep, ev.rect().bottomLeft()).y()   # under the field
     ev.setText("")
-    assert not full.isVisible() and full.text() == ""
+    assert full.text() == ""
 
 
 def test_a_spectrum_says_its_sweep_and_where_the_junction_stood_when_it_began(open_window):

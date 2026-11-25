@@ -74,7 +74,7 @@ class ReportTab(QWidget):
         self._current = ""                                     # the result whose entries the fields hold
         v = QVBoxLayout(self)
         v.setContentsMargins(style.px(8), style.px(4), style.px(8), style.px(4))
-        v.setSpacing(style.px(1))                        # the claims of P1 in English fill the page: see the form below
+        v.setSpacing(0)                        # the claims of P1 in English fill the page: see the form below
         self.title = self._title(f"{tr('report_title', lang)} (ReportResult)")
         self.title.setObjectName("report.title")
         v.addWidget(self.title)
@@ -99,7 +99,7 @@ class ReportTab(QWidget):
             v.addWidget(lab)
 
         form = QVBoxLayout()
-        form.setSpacing(style.px(3))
+        form.setSpacing(style.px(1))
         self.fields: dict[str, SelectAllLineEdit | WrapField] = {}
 
         self.labels: dict[str, QLabel] = {}
@@ -113,7 +113,7 @@ class ReportTab(QWidget):
         self._evidence_full.setWordWrap(False)
         self._evidence_full.setProperty("role", "label")
         self._evidence_full.setProperty("tone", "note")
-        self._evidence_full.setFont(style.mono_font(16))
+        self._evidence_full.setFont(style.mono_font(14))
         self._evidence_full.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
         self._evidence_full.setMinimumWidth(0)
         self._evidence_full.setFixedHeight(EVIDENCE_LINES * self._evidence_full.fontMetrics().lineSpacing() + style.px(2))
@@ -125,7 +125,7 @@ class ReportTab(QWidget):
             lab.setTextFormat(Qt.TextFormat.RichText)
             lab.setProperty("role", "label")
             self.labels[key] = lab
-            e = WrapField(3) if wrap else SelectAllLineEdit()   # the note wraps: a line edit a third of the form wide showed a few words
+            e = WrapField(4) if wrap else SelectAllLineEdit()   # the note wraps: a line edit a third of the form wide showed a few words
             e.setObjectName(f"report.{key}")
             e.setFont(style.mono_font(18))
             if wrap:
@@ -135,7 +135,7 @@ class ReportTab(QWidget):
             box = QWidget()
             col = QVBoxLayout(box)
             col.setContentsMargins(0, 0, 0, 0)
-            col.setSpacing(style.px(3))
+            col.setSpacing(style.px(1))
             if beside is None:
                 col.addWidget(lab)
             else:
@@ -164,20 +164,25 @@ class ReportTab(QWidget):
         self.viewed_button.setProperty("role", "tiny")             # as tall as a label's line: the form is no taller for it
         self.viewed_button.setObjectName("report.viewed")
         self.viewed_button.clicked.connect(self._append_viewed)
-        # four rows: the unit and the uncertainty stand in the frame's row, and the note has the last row to itself, as wide
-        # as the form (so three lines show the longest note of the tests). The space reserved under the evidence field for its list
-        # (EVIDENCE_LINES lines, so that Submit never moves: screen trial 23) is paid for here: P1 in English leaves the page 49 px at
-        # 1920x1053 (27 in DejaVu) and the reservation takes 44.
+        # four rows, as before: P1's four claims in English leave the page 49 px at 1920x1053 (27 in DejaVu), so the note
+        # gets the last row to itself, as wide as the form allows (two thirds, wrapped, four lines tall), with the unit
+        # and the uncertainty stacked in the third that the narrow field it had was in
         row((cell("value"), 1), (cell("x_nm"), 1), (cell("y_nm"), 1))
-        row((cell("frame"), 2), (cell("unit"), 1), (cell("sigma"), 1))
+        row((cell("frame"), 1))
         row((cell("evidence", beside=self.viewed_button), 1))
         ev = self.fields["evidence"]
         ev.setPlaceholderText(one("rep_evidence_hint", lang))
         ev.textChanged.connect(lambda _t: self._show_full_evidence())
-        row((cell("note", wrap=True), 1))
-        v.addSpacing(style.px(4))
+        small = QWidget()
+        stack = QVBoxLayout(small)
+        stack.setContentsMargins(0, 0, 0, 0)
+        stack.setSpacing(style.px(1))
+        stack.addWidget(cell("unit"))
+        stack.addWidget(cell("sigma"))
+        row((small, 1), (cell("note", wrap=True), 3))
+        v.addSpacing(style.px(1))
         v.addLayout(form)
-        v.addSpacing(style.px(4))
+        v.addSpacing(style.px(1))
 
         self.submit = QPushButton(tr("rep_submit", lang))
         self.submit.setObjectName("report.submit")
@@ -190,7 +195,7 @@ class ReportTab(QWidget):
         self.reply.setProperty("role", "label")
         v.addWidget(self.reply)
 
-        v.addSpacing(style.px(4))
+        v.addSpacing(style.px(1))
         self.finish_begin = QPushButton(tr("finish", lang))
         self.finish_begin.setObjectName("finish.begin")
         strong(self.finish_begin, "danger")
