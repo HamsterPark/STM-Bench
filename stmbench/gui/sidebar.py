@@ -66,6 +66,8 @@ class ReportTab(QWidget):
         self.lang = lang
         self._claims = {c["id"]: c for c in claims}
         self._viewed = ""
+        self._entries: dict[str, dict[str, str]] = {}          # per result: what its fields held when it was last left
+        self._current = ""                                     # the result whose entries the fields hold
         v = QVBoxLayout(self)
         v.setContentsMargins(style.px(8), style.px(4), style.px(8), style.px(4))
         v.setSpacing(style.px(1))                        # the claims of P1 in English fill the page: see the form below
@@ -233,7 +235,18 @@ class ReportTab(QWidget):
         return next((cid for cid, r in self.radios.items() if r.isChecked()), "")
 
     def _claim_picked(self, cid: str) -> None:
-        self.fields["unit"].setText(self._claims[cid]["unit"])          # the one thing prefilled
+        """Each result keeps its own entries (screen trial 23: value, evidence, note and position carried over from one result
+        to the next, and a radius would have been submitted with the files of another result). What the fields hold is kept
+        for the result being left, and the picked one shows what it held when it was left (as typed or as submitted); a result not
+        opened before shows empty fields and its unit, the one thing prefilled."""
+        if self._current and self._current != cid:
+            self._entries[self._current] = {k: e.text() for k, e in self.fields.items()}
+        self._current = cid
+        saved = self._entries.get(cid)
+        for key, e in self.fields.items():
+            e.setText(saved[key] if saved else "")
+        if not saved:
+            self.fields["unit"].setText(self._claims[cid]["unit"])
         self._mark_required(cid)
         self._enable_position(not self._takes_no_position(cid))
 
