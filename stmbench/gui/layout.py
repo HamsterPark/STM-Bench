@@ -70,7 +70,17 @@ class During:
     unit: str = ""
 
 
-Cell = Union[F, Run, OnOff, Choices, During]
+@dataclass(frozen=True)
+class Reposition:
+    """A console-only button (``tip.reposition``) that makes the call Move tip makes when the during-move fields and the speed are
+    blank: one ``move_tip`` with the x and y fields, the instrument's own default speed, no setter before or after. It runs the
+    action ``action`` but is not the way the arrangement runs it (Move tip is), so it is not counted among the runners."""
+    action: str
+    en: str
+    zh: str
+
+
+Cell = Union[F, Run, OnOff, Choices, During, Reposition]
 
 
 @dataclass(frozen=True)
@@ -104,6 +114,7 @@ OPERATE: tuple[Group, ...] = (
         (F("move_tip", "x_nm", "tip x", "针尖", "nm"),
          F("move_tip", "y_nm", "tip y", "针尖", "nm"),
          F("move_tip", "speed_nm_s", "speed", "速度", "nm/s"),
+         Reposition("move_tip", "Reposition", "仅移位"),      # stacked above Move tip, in the same column
          Run("move_tip", "Move tip", "移动针尖")),
         # range and setpoint only: with the bias field as well the line measured 746 px in the Chinese window with DejaVu,
         # against 704 px (the line must keep 8 px to spare); the jobs still run a bias set around a move (jobs.DURING)
@@ -192,7 +203,7 @@ def runners() -> list[str]:
 
 def group_of_action() -> dict[str, str]:
     """The group each action is in (a :class:`During` cell borrows its setter's parameter; it does not move the setter)."""
-    return {c.action: key for key, c in cells() if not isinstance(c, During)}
+    return {c.action: key for key, c in cells() if not isinstance(c, (During, Reposition))}
 
 
 def during_cells() -> list[During]:

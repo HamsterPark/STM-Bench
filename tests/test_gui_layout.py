@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import Counter
 
 from stmbench.gui import layout
-from stmbench.gui.layout import Choices, During, F, OnOff
+from stmbench.gui.layout import Choices, During, F, OnOff, Reposition
 from stmbench.instrument import ACTIONS
 
 #: the actions a P4 episode uses: the Operate tab shows all of them
@@ -29,6 +29,8 @@ def test_each_kind_of_cell_fits_the_parameter_it_controls():
             assert params["on"].kind == "boolean" and params["on"].required, c.action
         elif isinstance(c, Choices):
             assert params[c.param].choices and len(spec.params) == 1, c.action
+        elif isinstance(c, Reposition):      # console-only: the call Move tip makes with nothing around it
+            assert c.action == "move_tip", c
         elif isinstance(c, During):          # console-only: it borrows a setter's one parameter, and is none of its own
             assert c.action in ("set_current_range", "set_bias", "set_setpoint") and len(spec.params) == 1, c.action
             assert c.param in params and params[c.param].kind in ("number", "integer") and params[c.param].required, c

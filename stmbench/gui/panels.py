@@ -32,7 +32,7 @@ from ..instrument import ACTIONS
 from . import fmt, style
 from .controls import Segmented, SelectAllLineEdit, strong
 from .labels import DURING_HINT_EN, both, one, tr
-from .layout import OPERATE, Cell, Choices, During, F, Group, OnOff, Run
+from .layout import OPERATE, Cell, Choices, During, F, Group, OnOff, Reposition, Run
 
 
 def token(value: Any) -> str:
@@ -59,7 +59,7 @@ def _param(action: str, name: str):
 
 
 #: the Operate tab's tightened vertical spacing in pixels at ui scale 1 (the Spectroscopy tab keeps 3 / 2 / 10 / 11 / 2)
-TIGHT = {"body": 1, "line": 0, "frame_top": 8, "pad_top": 9, "pad_bottom": 1}
+TIGHT = {"body": 0, "line": 0, "frame_top": 7, "pad_top": 6, "pad_bottom": 0}
 
 
 class ActionPanel(QScrollArea):
@@ -116,8 +116,24 @@ class ActionPanel(QScrollArea):
         for line in g.lines:
             h = QHBoxLayout()
             h.setSpacing(style.px(8))
-            for cell in line:
-                if not isinstance(cell, During):         # it borrows a setter's parameter; the setter's own group owns the action
+            cells = list(line)
+            for k, cell in enumerate(cells):
+                if isinstance(cell, Reposition) and k + 1 < len(cells) and isinstance(cells[k + 1], Run):
+                    below = cells[k + 1]                # Reposition stands over Move tip, in one column of two buttons
+                    self._group_of[below.action] = g.key
+                    self._runs.add(below.action)
+                    col = QWidget()
+                    stack = QVBoxLayout(col)
+                    stack.setContentsMargins(0, 0, 0, 0)
+                    stack.setSpacing(style.px(2))
+                    stack.addWidget(self._cell(cell)[0])
+                    stack.addWidget(self._run_cell(below))
+                    h.addWidget(col, 0, Qt.AlignmentFlag.AlignBottom)
+                    cells[k + 1] = None
+                    continue
+                if cell is None:
+                    continue
+                if not isinstance(cell, (During, Reposition)):         # it borrows a setter's parameter; the setter's own group owns the action
                     self._group_of[cell.action] = g.key
                 widget, stretch = self._cell(cell)
                 h.addWidget(widget, stretch, Qt.AlignmentFlag.AlignBottom)
@@ -129,7 +145,7 @@ class ActionPanel(QScrollArea):
                 hint = QLabel(DURING_HINT_EN)
                 hint.setObjectName("hint.during")
                 hint.setProperty("role", "muted")
-                hint.setFont(style.sans_font(15))
+                hint.setFont(style.sans_font(14))
                 v.addWidget(hint)
         return box
 
@@ -144,6 +160,10 @@ class ActionPanel(QScrollArea):
             return self._onoff_cell(c), 0
         if isinstance(c, During):
             return self._during_cell(c), 1
+        if isinstance(c, Reposition):
+            b = self._button("tip.reposition", both(c.en, c.zh, self.lang))
+            b.clicked.connect(lambda _=False: self._reposition())
+            return b, 0
         return self._choices_cell(c), 0
 
     def _label(self, name: str, en: str, zh: str, unit: str = "", required: bool = False) -> QLabel:
@@ -299,6 +319,12 @@ class ActionPanel(QScrollArea):
             self._submit_move(args, during)
             return
         self._submit(action, args)
+
+    def _reposition(self) -> None:
+        """Move tip as it is when the during-move fields and the speed are blank: the x and y fields as typed (the instrument
+        checks them in its own words), no speed, no setter. The fields are left as they are."""
+        args = {k: v for k, v in self.collect("move_tip").items() if k in ("x_nm", "y_nm")}
+        self._submit("move_tip", args)
 
     def _enter(self, action: str) -> None:
         """Enter in a field runs its group's main action (the On button where there is an On / Off pair)."""

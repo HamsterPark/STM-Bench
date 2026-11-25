@@ -13,7 +13,7 @@ from html import escape
 
 from PySide6.QtCore import QSize, Qt, Signal
 from PySide6.QtWidgets import (QAbstractItemView, QBoxLayout, QButtonGroup, QFrame, QGridLayout, QHBoxLayout, QLabel,
-                               QListWidget, QListWidgetItem, QPushButton, QRadioButton, QScrollArea, QStyle, QVBoxLayout,
+                               QListWidget, QListWidgetItem, QPushButton, QRadioButton, QScrollArea, QSizePolicy, QStyle, QVBoxLayout,
                                QWidget)
 
 from . import fmt, style
@@ -54,6 +54,10 @@ class _ClaimLabel(QLabel):
         self._radio.click()
 
 
+#: the lines reserved under the evidence field for the full list of cited files (two: the lists of the trials were one to three files)
+EVIDENCE_LINES = 2
+
+
 class ReportTab(QWidget):
     """Report a result, and finish the episode (two clicks, no dialog)."""
 
@@ -66,9 +70,11 @@ class ReportTab(QWidget):
         self.lang = lang
         self._claims = {c["id"]: c for c in claims}
         self._viewed = ""
+        self._entries: dict[str, dict[str, str]] = {}          # per result: what its fields held when it was last left
+        self._current = ""                                     # the result whose entries the fields hold
         v = QVBoxLayout(self)
         v.setContentsMargins(style.px(8), style.px(4), style.px(8), style.px(4))
-        v.setSpacing(style.px(1))                        # the claims of P1 in English fill the page: see the form below
+        v.setSpacing(0)                        # the claims of P1 in English fill the page: see the form below
         self.title = self._title(f"{tr('report_title', lang)} (ReportResult)")
         self.title.setObjectName("report.title")
         v.addWidget(self.title)
@@ -93,7 +99,7 @@ class ReportTab(QWidget):
             v.addWidget(lab)
 
         form = QVBoxLayout()
-        form.setSpacing(style.px(3))
+        form.setSpacing(style.px(1))
         self.fields: dict[str, SelectAllLineEdit | WrapField] = {}
 
         self.labels: dict[str, QLabel] = {}
@@ -101,11 +107,23 @@ class ReportTab(QWidget):
         # showed only the end of "2.dat, sim004.sxm", so which spectrum was cited could not be read (p3check1, finding 2)
         self._evidence_full = QLabel()
         self._evidence_full.setObjectName("report.evidence_full")
-        self._evidence_full.setWordWrap(True)
-        self._evidence_full.setProperty("role", "label")
+        # its space is reserved for good: EVIDENCE_LINES lines, empty while the field shows everything, so that nothing below it
+        # (unit, sigma, Submit, Finish) moves while the reader types (screen trial 23: Submit jumped by 28 px and two clicks
+        # landed on labels). A longer list fills the lines and ends in "+N more"; it never grows.
+        self._evidence_full.setWordWrap(False)
+        # role "muted", not "label": the "label" style sheet sets 17 px and overrides the 14 px font below, so that the height
+        # sized from the font was too small for the lines that were drawn (the underscores of the second line were cut off)
+        self._evidence_full.setProperty("role", "muted")
         self._evidence_full.setProperty("tone", "note")
-        self._evidence_full.setFont(style.mono_font(16))
-        self._evidence_full.hide()
+        self._evidence_full.setFont(style.mono_font(14))
+        self._evidence_full.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
+        self._evidence_full.setMinimumWidth(0)
+        # tall enough for EVIDENCE_LINES whole lines as the style sheet draws them (its padding and frame, and the descent of the
+        # last line: an underscore sits below the baseline and was cut off by a height of line spacings alone)
+        self._evidence_full.setText("\n".join(["Xgy_"] * EVIDENCE_LINES))
+        self._evidence_full.ensurePolished()
+        self._evidence_full.setFixedHeight(self._evidence_full.sizeHint().height() + style.px(4))   # the hint ends at the descent: leave room under it
+        self._evidence_full.setText("")
 
         def cell(key: str, beside: QWidget | None = None, wrap: bool = False) -> QWidget:
             """A field with its label above it (and a button at the end of the label's line, if ``beside``)."""
@@ -124,7 +142,7 @@ class ReportTab(QWidget):
             box = QWidget()
             col = QVBoxLayout(box)
             col.setContentsMargins(0, 0, 0, 0)
-            col.setSpacing(style.px(3))
+            col.setSpacing(0)
             if beside is None:
                 col.addWidget(lab)
             else:
@@ -165,13 +183,13 @@ class ReportTab(QWidget):
         small = QWidget()
         stack = QVBoxLayout(small)
         stack.setContentsMargins(0, 0, 0, 0)
-        stack.setSpacing(style.px(3))
+        stack.setSpacing(style.px(1))
         stack.addWidget(cell("unit"))
         stack.addWidget(cell("sigma"))
         row((small, 1), (cell("note", wrap=True), 3))
-        v.addSpacing(style.px(4))
+        v.addSpacing(style.px(1))
         v.addLayout(form)
-        v.addSpacing(style.px(4))
+        v.addSpacing(style.px(1))
 
         self.submit = QPushButton(tr("rep_submit", lang))
         self.submit.setObjectName("report.submit")
@@ -184,7 +202,7 @@ class ReportTab(QWidget):
         self.reply.setProperty("role", "label")
         v.addWidget(self.reply)
 
-        v.addSpacing(style.px(4))
+        v.addSpacing(style.px(1))
         self.finish_begin = QPushButton(tr("finish", lang))
         self.finish_begin.setObjectName("finish.begin")
         strong(self.finish_begin, "danger")
@@ -233,7 +251,22 @@ class ReportTab(QWidget):
         return next((cid for cid, r in self.radios.items() if r.isChecked()), "")
 
     def _claim_picked(self, cid: str) -> None:
-        self.fields["unit"].setText(self._claims[cid]["unit"])          # the one thing prefilled
+        """Each result keeps its own entries (screen trial 23: value, evidence, note and position carried over from one result
+        to the next, and a radius would have been submitted with the files of another result). What the fields hold is kept
+        for the result being left, and the picked one shows what it held when it was left (as typed or as submitted); a result not
+        opened before shows empty fields and its unit, the one thing prefilled. The first pick of all keeps what the form holds
+        (a marker copied with the "Report" button of the viewer, or a value or files typed, before the result was chosen) as that
+        result's entries."""
+        first = not self._current
+        if self._current and self._current != cid:
+            self._entries[self._current] = {k: e.text() for k, e in self.fields.items()}
+        self._current = cid
+        saved = self._entries.get(cid)
+        if not (first and not saved):                            # the first pick keeps the form as it is
+            for key, e in self.fields.items():
+                e.setText(saved[key] if saved else "")
+        if not saved:
+            self.fields["unit"].setText(self._claims[cid]["unit"])
         self._mark_required(cid)
         self._enable_position(not self._takes_no_position(cid))
 
@@ -280,13 +313,40 @@ class ReportTab(QWidget):
         self.fields["evidence"].setText(", ".join(have))
 
     def _show_full_evidence(self) -> None:
-        """The cited files in full, in grey under the field, when the field cannot show them all."""
+        """The cited files, in grey under the field, when the field cannot show them all: as many as fit in the reserved lines,
+        then "+N more". The label keeps its place and its height whether it shows anything or not."""
         ev = self.fields["evidence"]
         text = ev.text().strip()
         room = ev.width() - 2 * style.px(8)
         wide = bool(text) and ev.fontMetrics().horizontalAdvance(text) > room
-        self._evidence_full.setText(text if wide else "")
-        self._evidence_full.setVisible(wide)
+        self._evidence_full.setText(self._evidence_lines(text, room) if wide else "")
+
+    def _evidence_lines(self, text: str, room: int) -> str:
+        """The files of ``text`` packed into at most EVIDENCE_LINES lines of ``room`` px, separated as the field has them (", ");
+        what does not fit is told as ", ... +N more" (whole names only) at the end of the last line."""
+        fm = self._evidence_full.fontMetrics()
+        files = [t.strip() for t in text.replace("，", ",").split(",") if t.strip()]
+        lines: list[list[str]] = []
+        i = 0
+        while i < len(files) and len(lines) < EVIDENCE_LINES:
+            line: list[str] = []
+            while i < len(files) and (not line or fm.horizontalAdvance(", ".join([*line, files[i]]) + ",") <= room):
+                line.append(files[i])
+                i += 1
+            lines.append(line)
+        left = len(files) - i
+        out = [", ".join(line) + "," for line in lines[:-1]]
+        last = lines[-1]
+        if left > 0:
+            more = f", … +{left} more"
+            while len(last) > 1 and fm.horizontalAdvance(", ".join(last) + more) > room:
+                left += 1
+                last = last[:-1]                          # a whole name goes into the count
+                more = f", … +{left} more"
+            out.append(", ".join(last) + more)
+        else:
+            out.append(", ".join(last))
+        return "\n".join(out)
 
     def resizeEvent(self, ev) -> None:
         super().resizeEvent(ev)

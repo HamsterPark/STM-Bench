@@ -35,7 +35,7 @@ def two_lines(key: str, lang: str = "zh") -> str:
 
 #: Under the Tip group's during-move fields in the English window (screen trial 22: "labelled keep and not explained"): what the
 #: console does with them, in the words of the screen's own labels ("Move tip", "keep"); no advice on values or on when to fill them
-DURING_HINT_EN = "Filled: set before each Move tip, set back after it. Blank: keep."
+DURING_HINT_EN = "Filled: set before Move tip, set back after. Blank: keep. Reposition ignores them and speed."
 
 #: What the console does with the Tip group's "during move" fields, said in front of the instrument's manual (the manual itself
 #: is the instrument's, the text an MCP agent gets, and stays byte for byte). Facts only: no value and no occasion is named.
@@ -45,10 +45,10 @@ MOVE_NOTE: Pair = (
     "moves the tip, and sets each setting it changed back to the value the "
     "instrument reported before; a setting that did not change is not set back. Each call is logged as if clicked. If a "
     "call is refused, the settings already changed are set back and the band shows the refusal; a refused set-back stops "
-    "there.",
+    "there. Reposition moves the tip to x and y alone, without the move range, the move setpoint and the speed.",
     "控制台：移动时量程、移动时设定点两栏的值会一直保留，只要填着，每次移动针尖都会用（留空＝不变）。填了任一栏，移动针尖先检查所有值"
     "（有一个不合法就都不运行），再设上已填的项，移动针尖，然后把改过的项恢复为之前仪器报告的值；没有变的不再恢复。"
-    "每个调用照常记入日志。调用被拒时，已改的设置同样恢复，红条显示拒绝；恢复被拒则就地停止。",
+    "每个调用照常记入日志。调用被拒时，已改的设置同样恢复，红条显示拒绝；恢复被拒则就地停止。仅移位只按 x、y 移动针尖，不用移动时量程、移动时设定点和速度。",
 )
 
 
