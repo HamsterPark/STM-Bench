@@ -33,12 +33,15 @@ def two_lines(key: str, lang: str = "zh") -> str:
     return en if lang == "en" or not zh or zh == en else zh + chr(10) + en
 
 
-#: What the console does with the Tip group's "during move" fields, said under the instrument's manual (the manual itself
+#: Under the Tip group's during-move fields in the English window (screen trial 22: "labelled keep and not explained"): what the
+#: console does with them, in the words of the screen's own labels ("Move tip", "keep"); no advice on values or on when to fill them
+DURING_HINT_EN = "Filled: set before each Move tip, set back after it. Blank: keep."
+
+#: What the console does with the Tip group's "during move" fields, said in front of the instrument's manual (the manual itself
 #: is the instrument's, the text an MCP agent gets, and stays byte for byte). Facts only: no value and no occasion is named.
 MOVE_NOTE: Pair = (
-    "Console: the values in the fields move range and move setpoint stay where they are typed and are used by every Move "
-    "tip while they are filled (blank: keep). If either is filled, Move tip first checks every value (one invalid: "
-    "nothing runs), then sets the filled ones, moves the tip, and sets each setting it changed back to the value the "
+    "Console: the fields move range and move setpoint keep their values; while either is filled, every Move tip uses "
+    "them (blank: keep). Move tip first checks every value (one invalid: nothing runs), then sets the filled ones, moves the tip, and sets each setting it changed back to the value the "
     "instrument reported before; a setting that did not change is not set back. Each call is logged as if clicked. If a "
     "call is refused, the settings already changed are set back and the band shows the refusal; a refused set-back stops "
     "there.",
@@ -181,10 +184,6 @@ S: dict[str, Pair] = {
     "col_t": ("time", "时间"),
     "no_view": ("Nothing shown.", "没有显示的内容。"),
     "scan_running": ("scan running…", "扫描进行中…"),
-    # under the Tip group's during-move fields (screen trial 22: "labelled keep and not explained"): what the console does with
-    # them, in the words of the screen's own labels ("Move tip", "keep"); no advice on values or on when to fill them
-    "during_hint": ("Filled: set before each Move tip, set back after it. Blank: keep.",
-                    "填了值：每次移动针尖前设上，移完改回原值。留空：保持。"),
     # the readout line's usage hints, shown while it has no reading: how the viewer works, never about the experiment
     # each says what the pointer does with the tool picked, and that the wheel zooms about the pointer (p3check1, finding 1:
     # a sighted agent zoomed about the centre with the buttons and then had to pan to a ring at the edge)

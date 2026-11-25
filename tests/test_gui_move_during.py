@@ -348,15 +348,12 @@ def test_lowering_the_range_in_the_old_order_crashes_the_tip_and_in_the_new_one_
     assert _crashes(old) == n + 1                                     # 5 nA setpoint on a 1 nA range: the tip is crashed
 
 
-def test_a_grey_line_under_the_fields_says_what_the_console_does_in_the_screens_own_words(open_window):
-    for lang, want in (("en", "Filled: set before each Move tip, set back after it. Blank: keep."),
-                       ("zh", "填了值：每次移动针尖前设上，移完改回原值。留空：保持。")):
-        win = open_window(lang, seed=3, name=f"h{lang}")
-        hint = shots.widget(win, "hint.during")
-        assert hint.text() == want and hint.property("role") == "muted"
-        shots.hit(win, hint)                                           # on screen, not covered
-        field = shots.widget(win, "during.set_setpoint.current_pa")
-        assert hint.mapTo(win, hint.rect().topLeft()).y() >= field.mapTo(win, field.rect().bottomLeft()).y()   # under the fields
-        assert field.placeholderText() in want                         # "keep" / "保持" as the field shows it
-        assert shots.widget(win, "run.move_tip").text().split()[0 if lang == "zh" else 0] in ("Move", "移动针尖")
-        assert ("Move tip" if lang == "en" else "移动针尖") in want
+def test_the_english_window_has_a_grey_line_under_the_fields_in_the_screens_own_words_and_the_chinese_has_none(open_window):
+    en, zh = open_window("en", seed=3, name="hen"), open_window("zh", seed=3, name="hzh")
+    hint = shots.widget(en, "hint.during")
+    assert hint.text() == "Filled: set before each Move tip, set back after it. Blank: keep." and hint.property("role") == "muted"
+    shots.hit(en, hint)                                                # on screen, not covered
+    field = shots.widget(en, "during.set_setpoint.current_pa")
+    assert hint.mapTo(en, hint.rect().topLeft()).y() >= field.mapTo(en, field.rect().bottomLeft()).y()   # under the fields
+    assert field.placeholderText() in hint.text() and shots.widget(en, "run.move_tip").text() in hint.text()
+    assert zh.findChild(type(hint), "hint.during") is None
