@@ -211,6 +211,10 @@ S: dict[str, Pair] = {
     "mk_none": ("No marker selected.", "没有选中的标记。"),
     "profile": ("Profile", "剖面"),
     "trace": ("Reply", "回复"),
+    # the small plot beside the marker table is a thumbnail of the big one (screen trial 23: its axes were 65 px wide)
+    "plot_enlarge": ("Click to enlarge", "点击放大"),
+    "plot_return": ("Click to go back", "点击返回"),
+    "plot_back": ("← Back to view", "← 返回视图"),
     # log
     "log_empty": ("Nothing yet.", "还没有操作。"),
     "log_running": ("running", "运行中"),
