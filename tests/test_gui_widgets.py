@@ -878,17 +878,27 @@ def box_of(plot: PlotView):
     return None if xs_.size == 0 else (x0 + xs_.min(), y0 + ys_.min(), x0 + xs_.max(), y0 + ys_.max())
 
 
-def test_a_wheel_over_the_plot_leaves_the_cursor_where_it_is(app):
+def test_a_wheel_over_the_plot_zooms_it_and_leaves_the_pin_and_off_the_axes_changes_nothing(app):
+    """The wheel zooms (see test_gui_plot_zoom.py); it never picks a point or moves a pin, and off the axes it is taken
+    and does nothing at all."""
     plot, x, ys = sts_plot()
     got = Capture(plot.point_picked)
     click(plot, plot.point_position(46))
-    before = rgb(plot)
-    for delta in (120, -120, 480):
-        ev = QWheelEvent(QPointF(200, 150), QPointF(plot.mapToGlobal(QPoint(200, 150))), QPoint(0, 0), QPoint(0, delta),
-                         Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier, Qt.ScrollPhase.NoScrollPhase, False)
+
+    def notch(pos, delta):
+        ev = QWheelEvent(QPointF(pos), QPointF(plot.mapToGlobal(QPoint(int(pos.x()), int(pos.y())))), QPoint(0, 0),
+                         QPoint(0, delta), Qt.MouseButton.NoButton, Qt.KeyboardModifier.NoModifier,
+                         Qt.ScrollPhase.NoScrollPhase, False)
         QApplication.sendEvent(plot, ev)
         assert ev.isAccepted()
-    assert np.array_equal(rgb(plot), before) and plot.pinned_point() == reading(46, x, ys) and len(got.items) == 1
+
+    before = rgb(plot)
+    for delta in (120, -120, 480):
+        notch(QPointF(2, 2), delta)                                            # off the axes
+    assert np.array_equal(rgb(plot), before)
+    for delta in (120, -120, 480):
+        notch(plot.plot_rect().center(), delta)                                # over them
+    assert plot.pinned_point() == reading(46, x, ys) and len(got.items) == 1
 
 
 def test_the_readout_digits_follow_each_quantitys_range():
@@ -1078,16 +1088,20 @@ def test_only_a_left_click_on_the_axes_picks_and_a_double_click_picks_once(app):
     assert len(got.items) == 1 and plot.pinned_point()["index"] == 60
 
 
-def test_the_readout_box_sits_top_left_and_hops_right_when_the_cursor_is_under_it(app):
+def test_the_readout_box_sits_in_a_corner_clear_of_the_curve_and_of_the_point_read(app):
+    """Screen trial 23: the box was drawn over the peak being read. It now takes the corner with the fewest curve points
+    (here the peak's flank is in the top-left corner, the baseline along the bottom), and never covers the point."""
     plot, x, ys = sts_plot()
     r = plot.plot_rect()
-    move(plot, plot.point_position(180))                                       # the cursor is far from the top-left corner
-    left, top, right, bottom = box_of(plot)
-    assert left <= r.left() + 12 and top <= r.top() + 12 and right < r.center().x()
-    move(plot, plot.point_position(10))                                        # now it would be under the box
-    left, top, right, bottom = box_of(plot)
-    assert right >= r.right() - 12 and top <= r.top() + 12 and left > r.center().x()
-    assert not (left <= plot.point_position(10).x() <= right)                  # and the point itself is in the clear
+    samples = plot._curve_samples(plot._layout_now())
+    for i in (180, 10, 60):
+        move(plot, plot.point_position(i))
+        left, top, right, bottom = box_of(plot)
+        assert right >= r.right() - 12 and top <= r.top() + 12 and left > r.center().x(), i      # the top right
+        inside = (samples[:, 0] >= left) & (samples[:, 0] <= right) & (samples[:, 1] >= top) & (samples[:, 1] <= bottom)
+        assert not inside.any(), i                                              # no point of the curve under the box
+        here = plot.point_position(i)
+        assert not (left <= here.x() <= right and top <= here.y() <= bottom)         # and the point itself is in the clear
 
 
 def test_a_big_plot_reads_a_table_and_a_small_one_a_single_line(app):

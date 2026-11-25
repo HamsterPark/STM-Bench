@@ -523,6 +523,11 @@ class CenterColumn(QWidget):
             row.addWidget(self._caption(key))
             row.addStretch(1)
             col.addLayout(row)
+        # the wheel zooms the plot about the pointer; this goes back to the whole range (named as the frame view's)
+        self.fit_plot = QPushButton(one("zoom_fit", self.lang))
+        self.fit_plot.setObjectName("view.fit_plot")
+        self.fit_plot.clicked.connect(lambda: self.plot.fit())
+        self.spec_x_row.addWidget(self.fit_plot)
         return w
 
     def _marker_table(self, parent: QWidget) -> QTableWidget:
