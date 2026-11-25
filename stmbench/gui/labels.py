@@ -194,7 +194,8 @@ S: dict[str, Pair] = {
                            "悬停读坐标和数值，拖动画剖面线，滚轮以指针处为中心缩放"),
     "hint_image_pan": ("Hover to read; drag to move the zoomed view; wheel to zoom about the pointer",
                        "悬停读坐标和数值，拖动平移，滚轮以指针处为中心缩放"),
-    "hint_plot": ("Hover over the plot to read a point; click to pin it", "悬停查看数值，点击固定读数"),
+    "hint_plot": ("Hover over the plot to read a point; click to pin it; wheel to zoom",
+                  "悬停查看数值，点击固定读数，滚轮缩放"),
     "no_frame_click": ("no frame shown: nothing marked", "没有显示的帧：未标记"),
     "delete_marker": ("Delete marker", "删除标记"),
     "mk_num": ("#", "#"),
@@ -210,6 +211,10 @@ S: dict[str, Pair] = {
     "mk_none": ("No marker selected.", "没有选中的标记。"),
     "profile": ("Profile", "剖面"),
     "trace": ("Reply", "回复"),
+    # the small plot beside the marker table is a thumbnail of the big one (screen trial 23: its axes were 65 px wide)
+    "plot_enlarge": ("Click to enlarge", "点击放大"),
+    "plot_return": ("Click to go back", "点击返回"),
+    "plot_back": ("← Back to view", "← 返回视图"),
     # log
     "log_empty": ("Nothing yet.", "还没有操作。"),
     "log_running": ("running", "运行中"),

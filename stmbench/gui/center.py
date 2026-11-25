@@ -341,6 +341,7 @@ class CenterColumn(QWidget):
         self.toolbars.setObjectName("view.toolbars")
         self.toolbars.addWidget(self._frame_toolbar())
         self.toolbars.addWidget(self._spectrum_toolbar())
+        self.toolbars.addWidget(self._profile_toolbar())
         v.addWidget(self.toolbars)
         v.addWidget(self._tools_row())
 
@@ -354,8 +355,15 @@ class CenterColumn(QWidget):
         self.frame_view.set_placeholder(tr("no_view", lang))
         self.plot = PlotView()
         self.plot.setObjectName("view.plot")
+        # the small profile plot's content, large: its own page, so that the spectrum's toolbar and the frame view
+        # stay as they were (the frame view is not touched while this shows)
+        self.profile_big = PlotView()
+        self.profile_big.setObjectName("view.profile_big")
         self.stack.addWidget(self.frame_view)
         self.stack.addWidget(self.plot)
+        self.stack.addWidget(self.profile_big)
+        self._enlarged = False
+        self._back_to = (0, 0)                        # the toolbar and stack pages the viewer returns to
         # while a scan runs (or waits) the viewer says so over whatever it shows; the pointer passes through it
         self.overlay = QLabel(tr("scan_running", lang), self.stack)
         self.overlay.setObjectName("view.busy")
@@ -391,7 +399,24 @@ class CenterColumn(QWidget):
         self.small_plot.setObjectName("view.profile")
         self.small_plot.setMinimumWidth(style.px(180))
         self.small_plot.clear(tr("profile", lang))
-        bottom.addWidget(self.small_plot, 2)
+        # a thumbnail of the big plot: a click enlarges it (it pins nothing and the wheel is dropped), and the line under
+        # it says so
+        self.small_plot.set_pin_clicks(False)
+        self.small_plot.set_wheel_zoom(False)
+        self.small_plot.activated.connect(self._small_clicked)
+        self.small_hint = QLabel()
+        self.small_hint.setObjectName("view.profile_hint")
+        self.small_hint.setFont(style.sans_font(14))
+        self.small_hint.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.small_hint.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Fixed)
+        self.small_hint.setProperty("tone", "note")
+        small = QVBoxLayout()
+        small.setContentsMargins(0, 0, 0, 0)
+        small.setSpacing(style.px(2))
+        small.addWidget(self.small_plot, 1)
+        small.addWidget(self.small_hint)
+        bottom.addLayout(small, 2)
+        self._small_hint_text()
         v.addWidget(strip)
         buttons = QHBoxLayout()
         buttons.setSpacing(style.px(8))
@@ -506,7 +531,8 @@ class CenterColumn(QWidget):
         self.tool.changed.connect(lambda t: (self.frame_view.set_tool(t),
                                              self.readout.property("tone") == "note" and self._show_readout("")))
         self.clear_markers.clicked.connect(lambda: (self.frame_view.clear_markers(), self.frame_view.clear_profile()))
-        self.clear_readings.clicked.connect(lambda: (self.plot.clear_pins(), self.small_plot.clear_pins()))
+        self.clear_readings.clicked.connect(
+            lambda: (self.plot.clear_pins(), self.small_plot.clear_pins(), self.profile_big.clear_pins()))
         return w
 
     def _spectrum_toolbar(self) -> QWidget:
@@ -523,6 +549,27 @@ class CenterColumn(QWidget):
             row.addWidget(self._caption(key))
             row.addStretch(1)
             col.addLayout(row)
+        # the wheel zooms the plot about the pointer; this goes back to the whole range (named as the frame view's)
+        self.fit_plot = QPushButton(one("zoom_fit", self.lang))
+        self.fit_plot.setObjectName("view.fit_plot")
+        self.fit_plot.clicked.connect(lambda: self.plot.fit())
+        self.spec_x_row.addWidget(self.fit_plot)
+        return w
+
+    def _profile_toolbar(self) -> QWidget:
+        """The enlarged profile's page: the way back to what was on show, and the plot's Fit."""
+        w = QWidget()
+        col = QVBoxLayout(w)
+        col.setContentsMargins(0, 0, 0, 0)
+        col.setSpacing(style.px(4))
+        self.profile_back = QPushButton(one("plot_back", self.lang))
+        self.profile_back.setObjectName("view.profile_back")
+        self.profile_back.clicked.connect(self.leave_enlarged)
+        self.profile_fit = QPushButton(one("zoom_fit", self.lang))
+        self.profile_fit.setObjectName("view.profile_fit")
+        self.profile_fit.clicked.connect(lambda: self.profile_big.fit())
+        col.addLayout(self._row(self.profile_back, self.profile_fit))
+        col.addStretch(1)
         return w
 
     def _marker_table(self, parent: QWidget) -> QTableWidget:
@@ -570,8 +617,7 @@ class CenterColumn(QWidget):
     def show_frame(self, frame: dict, channels: list[str] | None = None, meta: dict | None = None) -> None:
         """Show an ``Instrument.frame()`` dict. ``channels`` are the ones the frame has; ``meta`` its entry
         of the data list (its start time)."""
-        self.toolbars.setCurrentIndex(0)
-        self.stack.setCurrentIndex(0)
+        self._set_pages(0, 0)
         self._has_frame = True
         chans = channels or ["z", "current"]
         self.channel.set_enabled_values(chans)
@@ -594,14 +640,12 @@ class CenterColumn(QWidget):
         xcols, ycols = axis_columns(spec)
         if not xcols or not ycols:
             self.plot.clear(tr("no_view", self.lang))
-            self.toolbars.setCurrentIndex(1)
-            self.stack.setCurrentIndex(1)
+            self._set_pages(1, 1)
             self._show_readout("")
             return
         xk, yk = axes or default_axes(spec)
         self._rebuild_axes(xcols, ycols, xk, yk)
-        self.toolbars.setCurrentIndex(1)
-        self.stack.setCurrentIndex(1)
+        self._set_pages(1, 1)
         self.strip.set_current("")
         self._show_readout("")
         self.info.setText(self._spectrum_info(spec, int(np.size(spec[xcols[0]])), junction))
@@ -679,7 +723,7 @@ class CenterColumn(QWidget):
         """What the readout line says while it has no reading: how the viewer is used (what the pointer and a click
         do in the view on show, and with the tool picked), nothing about the experiment. One language: the line is
         a single line of the width of the column, which both at once would not fit."""
-        if self.stack.currentIndex() == 1:
+        if self.stack.currentIndex() in (1, 2):
             return one("hint_plot", self.lang)
         if not self._has_frame:
             return ""                      # a click marks nothing before the first frame: no hint rather than a false one
@@ -743,12 +787,19 @@ class CenterColumn(QWidget):
     def _profile(self, p: dict) -> None:
         if not p:
             self.small_plot.clear(tr("profile", self.lang))
+            self.profile_big.clear(tr("profile", self.lang))
+            self.leave_enlarged()                         # nothing left to show large
+            self._small_hint_text()
             return
         length = float(p["s_nm"][-1]) if p.get("s_nm") else 0.0
-        # the frame is the one on show (a profile drawn on another is dropped), so the title is the length alone:
-        # the plot is a third of the column wide
-        self.small_plot.set_series(p["s_nm"], [("profile", p["values"])], "distance (nm)", p.get("unit", ""),
-                                   f"A→B {length:.2f} nm")
+        # the frame is the one on show (a profile drawn on another is dropped), so the small plot's title is the length
+        # alone: it is a third of the column wide. The value is named with its unit for the readout ("profile (pm) = 4.5")
+        unit = p.get("unit", "")
+        name = f"profile ({unit})" if unit else "profile"
+        self.small_plot.set_series(p["s_nm"], [(name, p["values"])], "distance (nm)", unit, f"A→B {length:.2f} nm")
+        self.profile_big.set_series(p["s_nm"], [(name, p["values"])], "distance (nm)", unit,
+                                    f"{p.get('frame', '')}   A→B {length:.2f} nm".strip())
+        self._small_hint_text()
 
     def show_trace(self, title: str, lists: dict[str, list[float]]) -> None:
         """Plot the equal-length numeric lists of an action's reply: the first against the others when
@@ -758,7 +809,55 @@ class CenterColumn(QWidget):
             x, series, xl = lists[names[0]], [(n, lists[n]) for n in names[1:]], names[0]
         else:
             x, series, xl = list(range(len(lists[names[0]]))), [(names[0], lists[names[0]])], "index"
-        self.small_plot.set_series(x, series, xl, "", f"{tr('trace', self.lang)}: {title}")
+        title = f"{tr('trace', self.lang)}: {title}"
+        self.small_plot.set_series(x, series, xl, "", title)
+        self.profile_big.set_series(x, series, xl, "", title)
+        self._small_hint_text()
+
+    # ── the small plot, enlarged ──
+    def _set_pages(self, toolbar: int, stack: int) -> None:
+        """Show a page of the viewer (a new frame or spectrum): whatever was enlarged is left."""
+        self.toolbars.setCurrentIndex(toolbar)
+        self.stack.setCurrentIndex(stack)
+        self._enlarged = False
+        self._small_hint_text()
+
+    def _small_hint_text(self) -> None:
+        """The line under the small plot: what a click on it does (nothing to say while it has no curve)."""
+        self.small_hint.setText("" if not self.small_plot.has_data()
+                                else one("plot_return" if self._enlarged else "plot_enlarge", self.lang))
+
+    def _small_clicked(self) -> None:
+        if self._enlarged:
+            self.leave_enlarged()
+        else:
+            self.enlarge_plot()
+
+    def enlarge_plot(self) -> bool:
+        """Show the small plot's curve in the viewer's area, with the way back; False when it has none. The frame
+        view (frame, zoom, markers, profile line) is not touched, and a new frame or spectrum leaves this view."""
+        if self._enlarged or not self.small_plot.has_data():
+            return False
+        self._back_to = (self.toolbars.currentIndex(), self.stack.currentIndex())
+        self.toolbars.setCurrentIndex(2)
+        self.stack.setCurrentIndex(2)
+        self._enlarged = True
+        self._small_hint_text()
+        self._show_readout("")
+        return True
+
+    def leave_enlarged(self) -> None:
+        """Back to the view that was on show when the plot was enlarged."""
+        if not self._enlarged:
+            return
+        self.toolbars.setCurrentIndex(self._back_to[0])
+        self.stack.setCurrentIndex(self._back_to[1])
+        self._enlarged = False
+        self._small_hint_text()
+        self._show_readout("")
+
+    def plot_enlarged(self) -> bool:
+        return self._enlarged
 
     def selected_row(self) -> int | None:
         """The marker the table has selected (0-based), if any."""

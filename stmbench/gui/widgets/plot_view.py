@@ -15,7 +15,17 @@ over them it follows the pointer. A later click on another point pins that one t
 (a screenshot is taken after the last event of a step, so several readings are read in one step only if they
 stay): with more than one pin each is numbered, and the readout lists them, one aligned line each, in the
 numbers the hover readout gives; ``clear_pins`` (the viewer's Clear plot readings button) and new data remove them.
-Nothing is found: the pins are where the reader clicked. There is no zoom, pan, wheel handling or context menu.
+Nothing is found: the pins are where the reader clicked.
+
+The wheel zooms x about the pointer (a notch halves or doubles the visible span, up is in, as the frame view's wheel
+does), y is refitted to the finite data in the visible x range with the full view's margins, and :meth:`fit` (the
+viewer's Fit button) or any new data goes back to the whole range. Off the axes, and with Ctrl, the wheel does
+nothing, and it never reaches a parent; ``set_wheel_zoom(False)`` (the small profile plot) drops it altogether. A pin
+outside the visible range is not drawn but stays listed. There is no pan or context menu.
+
+The readout box sits in the one of the axes' four corners whose rectangle covers the fewest points of the drawn
+curves (the one farther from the pointer on a tie), so it does not hide the curve under the pointer; a plot too small
+for every field in a box reads them in its title strip, on one line, when the title is shown.
 """
 from __future__ import annotations
 
@@ -30,6 +40,9 @@ from PySide6.QtWidgets import QSizePolicy, QWidget
 MIN_FONT_PX = 14
 #: most readings pinned at once; one more clicked drops the oldest (the list must fit the axes)
 MAX_PINS = 6
+#: the wheel's zoom: one notch changes the visible x span by this factor, and no further in than 1/MAX_ZOOM of the data's
+ZOOM_FACTOR = 2.0
+MAX_ZOOM = 64
 #: Okabe-Ito colours (no yellow: it vanishes on white); more series than colours cycle
 SERIES_COLORS = ("#0072B2", "#D55E00", "#009E73", "#CC79A7", "#E69F00", "#56B4E9", "#000000")
 #: the readout's numbers are fixed-pitch so that digits line up; the first family the machine has wins
@@ -126,6 +139,10 @@ class PlotView(QWidget):
     and every series' y there (NaN where a series has none)."""
 
     point_picked = Signal(dict)
+    #: a left press on a plot that does not pin (:meth:`set_pin_clicks`), when it has data: the small profile plot's click
+    activated = Signal()
+    #: the visible x range changed (a wheel notch, :meth:`fit`)
+    zoom_changed = Signal()
 
     def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
@@ -145,6 +162,9 @@ class PlotView(QWidget):
         self._pin: int | None = None                    # the last point pinned
         self._pins: list[int] = []                      # every point pinned, in the order they were clicked
         self._pointer: QPointF | None = None            # where the pointer last was over the widget
+        self._zoom: tuple[float, float] | None = None   # the visible x range, None: all of the data
+        self._wheel_zoom = True
+        self._pin_clicks = True
         self.setMouseTracking(True)
         self.setCursor(Qt.CursorShape.CrossCursor)
         self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
@@ -161,6 +181,7 @@ class PlotView(QWidget):
         self._x = xs
         self._series = [(str(name), _as_floats(y)[:len(xs)]) for name, y in series]
         self._x_label, self._y_label, self._title = str(x_label), str(y_label), str(title)
+        self._zoom = None                               # new data: the whole range
         self._ext = self._extent()
         self._message = "" if self._ext is not None else _NO_DATA
         self._index_points()
@@ -172,6 +193,7 @@ class PlotView(QWidget):
         self._series = []
         self._x_label = self._y_label = self._title = ""
         self._message = str(message)
+        self._zoom = None
         self._ext = None
         self._index_points()
         self.update()
@@ -212,6 +234,92 @@ class PlotView(QWidget):
         x, y = np.concatenate(xs), np.concatenate(ys)
         return float(x.min()), float(x.max()), float(y.min()), float(y.max())
 
+    def _view_extent(self) -> tuple[float, float, float, float] | None:
+        """The bounds the axes show: the data's, or, zoomed, the visible x range with y fitted to the finite
+        data in it (the layout adds the margin)."""
+        ext = self._ext
+        if ext is None or self._zoom is None:
+            return ext
+        lo, hi = self._zoom
+        ys = []
+        for _, y in self._series:
+            x = self._x[:len(y)]
+            ok = np.isfinite(x) & np.isfinite(y) & (x >= lo) & (x <= hi)
+            if ok.any():
+                ys.append(y[ok])
+        if not ys:
+            return lo, hi, ext[2], ext[3]
+        y = np.concatenate(ys)
+        return lo, hi, float(y.min()), float(y.max())
+
+    # ── zoom ──
+    def has_data(self) -> bool:
+        """Whether there is a curve to show (not a message or nothing)."""
+        return self._ext is not None
+
+    def is_zoomed(self) -> bool:
+        return self._zoom is not None
+
+    def x_range(self) -> tuple[float, float] | None:
+        """The x range the axes show (None with nothing to draw)."""
+        lay = self._layout_now()
+        return None if lay is None else (float(lay.x0), float(lay.x1))
+
+    def set_wheel_zoom(self, on: bool) -> None:
+        """Whether the wheel zooms (the default); off, it is taken and does nothing."""
+        self._wheel_zoom = bool(on)
+
+    def set_pin_clicks(self, on: bool) -> None:
+        """Whether a click pins a reading (the default); off, a left press emits :attr:`activated` instead."""
+        self._pin_clicks = bool(on)
+
+    def fit(self) -> None:
+        """Back to the whole range of the data."""
+        if self._zoom is not None:
+            self._zoom = None
+            self._after_zoom()
+
+    def _after_zoom(self) -> None:
+        self._layout_cache = None
+        self._hover = None if self._pointer is None else self._index_at(self._pointer)
+        self.update()
+        self.zoom_changed.emit()
+
+    def _zoom_about(self, direction: int, pos: QPointF) -> None:
+        """One notch about the data x under ``pos`` (over the axes): in when ``direction`` > 0. The point under the
+        pointer stays under it; the range stays inside the data's; zooming out past the whole range is the whole range."""
+        lay = self._layout_now()
+        ext = self._ext
+        if lay is None or ext is None or ext[1] <= ext[0]:
+            return
+        plot = lay.plot
+        px = lay.x0 + (pos.x() - plot.left()) / plot.width() * (lay.x1 - lay.x0)
+        full0, full1 = ext[0], ext[1]
+        lo, hi = self._zoom or (full0, full1)
+        span, full = hi - lo, full1 - full0
+        new = span / ZOOM_FACTOR if direction > 0 else span * ZOOM_FACTOR
+        if new >= full * (1.0 - 1e-9):
+            target = None
+        else:
+            new = max(new, full / MAX_ZOOM)
+            lo2 = min(max(px - (px - lo) / span * new, full0), full1 - new)
+            target = (lo2, lo2 + new)
+        if target == self._zoom:
+            return
+        self._zoom = target
+        for _ in range(3):
+            # the y tick labels have other widths now, so the axes may start a few pixels elsewhere: place the range
+            # again for where they are, until the point that was under the pointer is again
+            lay = self._layout_now()
+            if target is None or lay is None:
+                break
+            fx = min(max((pos.x() - lay.plot.left()) / lay.plot.width(), 0.0), 1.0)
+            lo2 = min(max(px - fx * new, full0), full1 - new)
+            if abs(lo2 - target[0]) < 1e-9 * full:
+                break
+            target = self._zoom = (lo2, lo2 + new)
+        self._after_zoom()
+
     # ── size and events ──
     def _fpx(self) -> int:
         return max(MIN_FONT_PX, font_px(self.font()))
@@ -224,8 +332,22 @@ class PlotView(QWidget):
         k = self._fpx() / 16.0
         return QSize(int(220 * k), int(140 * k))
 
-    def wheelEvent(self, ev) -> None:        # accepted and dropped: no zoom, and no scrolling of a parent
+    def wheelEvent(self, ev) -> None:
+        """A notch over the axes zooms x about the pointer (up: in); off the axes, with Ctrl, and on a plot that does not
+        zoom, nothing. Always taken: a parent never scrolls."""
         ev.accept()
+        if not self._wheel_zoom or ev.modifiers() & Qt.KeyboardModifier.ControlModifier:
+            return
+        dy = ev.angleDelta().y()
+        lay = self._layout_now()
+        if not dy or lay is None:
+            return
+        pos = QPointF(ev.position())
+        plot = lay.plot
+        if not (plot.left() <= pos.x() <= plot.right() and plot.top() <= pos.y() <= plot.bottom()):
+            return
+        self._pointer = pos
+        self._zoom_about(1 if dy > 0 else -1, pos)
 
     def contextMenuEvent(self, ev) -> None:
         ev.accept()
@@ -252,7 +374,11 @@ class PlotView(QWidget):
         if not (plot.left() <= pos.x() <= plot.right() and plot.top() <= pos.y() <= plot.bottom()):
             return None                           # closed: the last point's own position is on the edge
         target = lay.x0 + (pos.x() - plot.left()) / plot.width() * (lay.x1 - lay.x0)
-        return int(self._valid[int(np.argmin(np.abs(self._x[self._valid] - target)))])
+        xs = self._x[self._valid]
+        inside = np.flatnonzero((xs >= lay.x0) & (xs <= lay.x1))      # zoomed: only the points that are shown
+        if inside.size == 0:
+            return None
+        return int(self._valid[inside[int(np.argmin(np.abs(xs[inside] - target)))]])
 
     def _series_label(self, k: int) -> str:
         return self._series[k][0] or self._y_label or "y"
@@ -305,6 +431,11 @@ class PlotView(QWidget):
 
     def mousePressEvent(self, ev) -> None:
         self._pointer = QPointF(ev.position())
+        if not self._pin_clicks:
+            if ev.button() == Qt.MouseButton.LeftButton and self.has_data():
+                self.activated.emit()
+            ev.accept()
+            return
         i = self._index_at(self._pointer) if ev.button() == Qt.MouseButton.LeftButton else None
         if i is not None:
             if i not in self._pins:                      # a click on a pinned point changes nothing but the last one
@@ -356,9 +487,9 @@ class PlotView(QWidget):
         if self._ext is None:
             return None
         regular, bold = self._fonts()
-        key = (self.width(), self.height(), self._tpx(), regular.key())
+        key = (self.width(), self.height(), self._tpx(), regular.key(), self._zoom)
         if self._layout_cache is None or self._layout_cache[0] != key:
-            lay = self._layout(self._ext, QFontMetrics(regular), QFontMetrics(bold), self._tpx())
+            lay = self._layout(self._view_extent(), QFontMetrics(regular), QFontMetrics(bold), self._tpx())
             self._layout_cache = (key, lay)
         return self._layout_cache[1]
 
@@ -553,14 +684,44 @@ class PlotView(QWidget):
         w = 2 * pad + swatch + max(mfm.horizontalAdvance(r) for r in rows)
         if w <= 0.8 * plot.width() and 2 * pad + len(rows) * mfm.height() <= 0.5 * plot.height():
             return rows, swatch
-        labelled = [f"{lab} = {val}" for _, lab, val in fields]
-        tags = [f"x={fields[0][2]}"] + ([f"y={fields[1][2]}"] if len(fields) == 2
-                                        else [f"y{k}={f[2]}" for k, f in enumerate(fields[1:], 1)])
-        for text in ("  ".join(labelled), "  ".join(labelled[:2]), "  ".join(tags), "  ".join(tags[:2]), labelled[0],
-                     tags[0]):
+        for text, _full in PlotView._line_options(fields):
             if 2 * pad + mfm.horizontalAdvance(text) <= plot.width() - 12:
                 return [text], 0
         return [fields[0][2]], 0                             # too narrow even for that: the number alone, never cut
+
+    @staticmethod
+    def _line_options(fields) -> list[tuple[str, bool]]:
+        """The readout on one line, widest first, each with whether it has every field: the labelled fields, fewer, the
+        short tags (``x=..  y=..``), then the first field alone."""
+        labelled = [f"{lab} = {val}" for _, lab, val in fields]
+        tags = [f"x={fields[0][2]}"] + ([f"y={fields[1][2]}"] if len(fields) == 2
+                                        else [f"y{k}={f[2]}" for k, f in enumerate(fields[1:], 1)])
+        two = len(fields) == 2
+        return [("  ".join(labelled), True), ("  ".join(labelled[:2]), two), ("  ".join(tags), True),
+                ("  ".join(tags[:2]), two), (labelled[0], False), (tags[0], False)]
+
+    def _curve_samples(self, lay: SimpleNamespace) -> np.ndarray:
+        """Where the drawn curves are, in widget pixels: every point and, along each segment between two finite
+        points, one about every five pixels (a long segment crosses a corner that holds no point)."""
+        plot = lay.plot
+        out = []
+        for _, y in self._series:
+            x = self._x[:len(y)]
+            ok = np.isfinite(x) & np.isfinite(y)
+            if not ok.any():
+                continue
+            px = plot.left() + (x - lay.x0) / (lay.x1 - lay.x0) * plot.width()
+            py = plot.bottom() - (y - lay.y0) / (lay.y1 - lay.y0) * plot.height()
+            out.append(np.column_stack((px[ok], py[ok])))
+            seg = np.flatnonzero(ok[:-1] & ok[1:])
+            if seg.size:
+                a = np.column_stack((px[seg], py[seg]))
+                b = np.column_stack((px[seg + 1], py[seg + 1]))
+                n = np.clip(np.ceil(np.hypot(*(b - a).T) / 5.0), 1, 400).astype(np.intp)
+                which = np.repeat(np.arange(seg.size), n)
+                t = (np.arange(int(n.sum())) - np.repeat(np.cumsum(n) - n, n)) / np.repeat(n, n)
+                out.append(a[which] + t[:, None] * (b - a)[which])
+        return np.concatenate(out) if out else np.empty((0, 2))
 
     def _paint_cursor(self, p: QPainter, lay: SimpleNamespace, to_px) -> None:
         if len(self._pins) >= 2:
@@ -599,15 +760,15 @@ class PlotView(QWidget):
         rows, swatch = self._readout_rows(fields, mfm, plot, pad)
         w = 2 * pad + swatch + max(mfm.horizontalAdvance(t) for t in rows)
         h = 2 * pad + lh * len(rows)
+        # a box that cannot hold every field (the line profile beside the marker table: the distance alone) gives way to
+        # a one-line reading in the title strip, which has the width of the whole plot
+        complete = len(rows) == len(fields) or (len(rows) == 1 and any(f and t == rows[0] for t, f in self._line_options(fields)))
+        if (not complete or h > 0.85 * plot.height()) and self._paint_strip(p, lay, fields, pinned):
+            return
         if h > 0.85 * plot.height():                         # no room for even one line: the line and dots say it
             return
-        left = QRectF(plot.left() + margin, plot.top() + margin, w, h)
-        right = QRectF(plot.right() - margin - w, plot.top() + margin, w, h)
-
-        def over_line(b: QRectF) -> bool:
-            return b.left() - 8 <= gx <= b.right() + 8
-
-        box = right if over_line(left) and not over_line(right) else left       # never hide the point itself
+        box = self._pick_corner(lay, w, h, margin, self._pointer if self._pointer is not None else self._cursor_spot(lay, i), gx,
+                                dots=self._dots_at(lay, [i]))
         inset = 1.0 if pinned else 0.5                                          # the border's centre, on the pixel grid
         p.setPen(QPen(_CURSOR_PIN if pinned else _AXIS, 2.0 if pinned else 1.0))
         p.setBrush(READOUT_BG)
@@ -619,6 +780,89 @@ class PlotView(QWidget):
             p.drawText(row, int(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter), text)
             if swatch and fields[n][0] is not None:
                 p.fillRect(QRectF(box.left() + pad, row.center().y() - 2, 11, 4), fields[n][0])
+
+    def _pick_corner(self, lay: SimpleNamespace, w: float, h: float, margin: float, here: QPointF | None,
+                     line_x: float | None = None, dots: list[QPointF] | None = None) -> QRectF:
+        """The box of ``w`` x ``h`` in the corner of the axes that covers the fewest of the readings' ``dots`` (the point
+        being read must never be covered, however dense the curve), then the fewest points of the drawn curves; among
+        those, one the cursor's line (at ``line_x``) does not cross; then the one farthest from ``here`` (the pointer,
+        or where the cursor stands)."""
+        plot = lay.plot
+        corners = (QRectF(plot.left() + margin, plot.top() + margin, w, h),
+                   QRectF(plot.right() - margin - w, plot.top() + margin, w, h),
+                   QRectF(plot.left() + margin, plot.bottom() - margin - h, w, h),
+                   QRectF(plot.right() - margin - w, plot.bottom() - margin - h, w, h))
+        samples = self._curve_samples(lay)
+
+        def key(b: QRectF) -> tuple[int, int, bool, float]:
+            r = b.adjusted(-4, -4, 4, 4)
+            under_dots = sum(1 for d in dots or () if r.contains(d))
+            covered = int(np.count_nonzero((samples[:, 0] >= r.left()) & (samples[:, 0] <= r.right())
+                                           & (samples[:, 1] >= r.top()) & (samples[:, 1] <= r.bottom())))
+            crossed = line_x is not None and b.left() - 8 <= line_x <= b.right() + 8
+            far = 0.0 if here is None else -math.hypot(b.center().x() - here.x(), b.center().y() - here.y())
+            return under_dots, covered, crossed, far
+
+        return min(corners, key=key)
+
+    def _dots_at(self, lay: SimpleNamespace, indices: list[int]) -> list[QPointF]:
+        """The dot each curve has at each of the points ``indices`` (where finite), in widget pixels."""
+        return [self._to_px(lay, float(self._x[i]), float(self._values[k, i])) for i in indices
+                for k in range(len(self._series)) if math.isfinite(float(self._values[k, i]))]
+
+    def _cursor_spot(self, lay: SimpleNamespace, i: int) -> QPointF:
+        """Where point ``i`` is drawn (at the mean of its curves' values: the cursor's place when the pointer is away)."""
+        col = self._values[:, i]
+        col = col[np.isfinite(col)]
+        return self._to_px(lay, float(self._x[i]), float(col.mean()) if col.size else lay.y0)
+
+    def _strip_font(self, px: int) -> QFont:
+        font = self._mono_font()
+        font.setPixelSize(px)
+        return font
+
+    def _strip_choice(self, fields, lay: SimpleNamespace) -> tuple[str, QFont] | None:
+        """The reading, with every field, as wide a form as fits the title strip, and its font: the tick numbers' size,
+        else the least size the plot uses (:data:`MIN_FONT_PX`), the tags with one space between them last. None
+        without a strip or with no such form."""
+        if not lay.show_title:
+            return None
+        forms = [t for t, full in self._line_options(fields) if full]
+        forms += [t.replace("  ", " ") for t in forms[-1:]]            # the tags, closer
+        width = lay.W - 2 * lay.pad - 8
+        for px in dict.fromkeys((self._tpx(), MIN_FONT_PX)):
+            font = self._strip_font(px)
+            fm = QFontMetrics(font)
+            if fm.height() > lay.title_h + 2:
+                continue
+            for text in forms:
+                if fm.horizontalAdvance(text) <= width:
+                    return text, font
+        return None
+
+    def strip_text(self, fields, lay: SimpleNamespace) -> str | None:
+        """What the title strip reads in place of the box (:meth:`_strip_choice`); None when it does not."""
+        got = self._strip_choice(fields, lay)
+        return None if got is None else got[0]
+
+    def _paint_strip(self, p: QPainter, lay: SimpleNamespace, fields, pinned: bool) -> bool:
+        """The reading on one line over the title strip, with every field: the labelled form, else the short tags.
+        False (nothing drawn) when the plot has no title strip or no form with every field fits its width."""
+        got = self._strip_choice(fields, lay)
+        if got is None:
+            return False
+        text, font = got
+        r = QRectF(lay.pad, lay.vpad, lay.W - 2 * lay.pad, lay.title_h)
+        p.save()
+        p.setRenderHint(QPainter.RenderHint.Antialiasing, False)
+        p.setPen(QPen(_CURSOR_PIN if pinned else _AXIS, 2.0 if pinned else 1.0))
+        p.setBrush(READOUT_BG)
+        p.drawRect(r.adjusted(1.0, 0.5, -1.0, 0.0))
+        p.setFont(font)
+        p.setPen(_TEXT)
+        p.drawText(r, int(Qt.AlignmentFlag.AlignCenter), text)
+        p.restore()
+        return True
 
     # several pins: a line and dots each, a number on each line, one readout box that lists them
     def _draw_reading(self, p: QPainter, lay: SimpleNamespace, to_px, i: int, pinned: bool) -> None:
@@ -665,6 +909,7 @@ class PlotView(QWidget):
     def _paint_pins(self, p: QPainter, lay: SimpleNamespace, to_px) -> None:
         plot = lay.plot
         pins = [i for i in self._pins if 0 <= i < len(self._x)]
+        drawn = [i for i in pins if lay.x0 <= float(self._x[i]) <= lay.x1]        # zoomed: a pin out of view is listed only
         hover = self._hover if self._hover is not None and self._hover not in pins and 0 <= self._hover < len(self._x) else None
         p.save()
         p.setClipRect(plot.adjusted(-2, -2, 2, 2))
@@ -672,7 +917,7 @@ class PlotView(QWidget):
         p.setBrush(Qt.BrushStyle.NoBrush)
         if hover is not None:
             self._draw_reading(p, lay, to_px, hover, pinned=False)
-        for i in pins:
+        for i in drawn:
             self._draw_reading(p, lay, to_px, i, pinned=True)
         p.restore()
 
@@ -687,14 +932,8 @@ class PlotView(QWidget):
         if shown:
             w = 2 * pad + max(mfm.horizontalAdvance(t) for t in shown)
             h = 2 * pad + lh * len(shown)
-            spots = [QPointF(to_px(float(self._x[i]), float(self._values[k, i])))
-                     for _t, i in entries for k in range(len(self._series)) if math.isfinite(float(self._values[k, i]))]
-            corners = (QRectF(plot.left() + margin, plot.top() + margin, w, h),
-                       QRectF(plot.right() - margin - w, plot.top() + margin, w, h),
-                       QRectF(plot.left() + margin, plot.bottom() - margin - h, w, h),
-                       QRectF(plot.right() - margin - w, plot.bottom() - margin - h, w, h))
-            cost = [sum(r.adjusted(-8, -8, 8, 8).contains(q) for q in spots) for r in corners]
-            box = corners[cost.index(min(cost))]               # the corner that hides the fewest of the readings' dots
+            box = self._pick_corner(lay, w, h, margin, self._pointer,       # the corner that hides the fewest dots, then curve points
+                                    dots=self._dots_at(lay, drawn + ([hover] if hover is not None else [])))
             top_box = box.top() < plot.center().y()
             p.setPen(QPen(_CURSOR_PIN, 2.0))
             p.setBrush(READOUT_BG)
@@ -709,12 +948,14 @@ class PlotView(QWidget):
         bold = self._fonts()[1]
         bfm = QFontMetrics(bold)
         th = bfm.height() + 2
-        dots = [to_px(float(self._x[i]), float(self._values[k, i])) for i in pins for k in range(len(self._series))
+        dots = [to_px(float(self._x[i]), float(self._values[k, i])) for i in drawn for k in range(len(self._series))
                 if math.isfinite(float(self._values[k, i]))]
         placed: list[QRectF] = [box] if shown else []
         p.setFont(bold)
         up, down = plot.bottom() - 2 - th, plot.top() + 2
         for k, i in enumerate(pins):
+            if i not in drawn:
+                continue
             text = str(k + 1)
             tw = max(th, bfm.horizontalAdvance(text) + 10)
             cx = min(max(round(to_px(float(self._x[i]), lay.y0).x()), plot.left() + tw / 2 + 1), plot.right() - tw / 2 - 1)
