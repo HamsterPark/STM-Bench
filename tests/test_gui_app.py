@@ -542,10 +542,10 @@ def test_the_task_the_manual_and_the_claims_are_what_every_agent_is_told(open_wi
     assert "评分规则" not in task
     assert f"【评分规则 v{RULES_VERSION}】" in shots.widget(zh, "task.text").toPlainText()  # the Chinese one
     shown = shots.widget(en, "manual.text").toPlainText()
-    assert shown.startswith(manual) and "move_tip" in manual              # the instrument's manual, byte for byte, first
+    assert shown.endswith(manual) and "move_tip" in manual              # the instrument's manual, byte for byte, last
     shown_zh = shots.widget(zh, "manual.text").toPlainText()
     assert shown == with_console_notes(manual, "en") and shown_zh == with_console_notes(manual, "zh")   # then the notes, one language each
-    assert shown_zh.startswith(manual) and shown != shown_zh
+    assert shown_zh.endswith(manual) and shown != shown_zh
     assert en.windowTitle() == f"STM-Bench console · {P4}"
     # the report form shows the rule card's line about the claim in the window's language
     def claim_texts(w: MainWindow) -> str:
@@ -616,7 +616,7 @@ def test_the_manuals_wide_view_reads_in_two_screens_and_gives_the_window_back_wh
     assert not win.center.isVisible() and not shots.widget(win, "recent.box").isVisible() and not win.right.isVisible()
     assert win.sidebar.width() > 1800 and win.status.height() == strip_h and win.status.isVisible()      # the strip stays
     assert win.width() == shots.WINDOW[0]                                        # and the window did not grow to make room
-    assert text.toPlainText().startswith(manual)                                 # the manual an MCP agent gets, byte for byte, then the console's note
+    assert text.toPlainText().endswith(manual)                                 # the manual an MCP agent gets, byte for byte, after the console's notes
     assert text.toPlainText() == with_console_notes(manual, lang)
     total, page = manual_lines(win)
     assert total <= 2 * page, (total, page)                                      # two screens or fewer, in these fonts too
