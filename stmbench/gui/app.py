@@ -202,15 +202,16 @@ class MainWindow(QMainWindow):
         self.field_help.set_full_text("")
 
     def _focus_changed(self, old: QWidget | None, new: QWidget | None) -> None:
-        """Focus left the described field for another widget of this window: the line is cleared (another numeric field
-        shows its own range as it is entered). Focus that leaves the window (deactivation) or goes to a popup is not a move
-        to another widget of this window, and the line stays."""
+        """Focus left the described field for another widget of this window outside the action panels (a report field, a
+        viewer control): the line is cleared. Another numeric field shows its own range as it is entered, and a button of the
+        panels (Set setpoint after a refusal) leaves the line on the field it belongs to. Focus that leaves the window
+        (deactivation) or goes to a popup is not a move to another widget of this window, and the line stays."""
         if self._help_field is None or old is not self._help_field or new is None or new is old:
             return
         if new.window() is not self.window() or new.window() is not self:
             return
-        if hasattr(new, "entered"):                      # a text field of the panels: it sets the line itself
-            return
+        if self.operate.isAncestorOf(new) or self.spectroscopy.isAncestorOf(new):
+            return                                       # a field of the panels sets the line itself; a button of theirs keeps it
         self._clear_field_help()
 
     # ── jobs ──
