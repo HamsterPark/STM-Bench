@@ -148,8 +148,13 @@ class MainWindow(QMainWindow):
         self.field_help.setFixedWidth(max(style.px(200), right_px - self.right.tabBar().sizeHint().width() - style.px(14)))
         self.right.setCornerWidget(corner, Qt.Corner.TopRightCorner)
         corner.show()                                    # setting the parent hid it
+        self._help_field: QWidget | None = None          # the field the line above describes
         for panel in (self.operate, self.spectroscopy):
-            panel.field_entered.connect(lambda a, k, p=panel: self.field_help.set_full_text(p.field_help(a, k)))
+            panel.field_entered.connect(lambda a, k, p=panel: self._field_entered(p, a, k))
+        # the line describes the field entered last: it goes with the tab (screen trial 24: it still read "tip y" on the
+        # Spectroscopy tab) and with the focus, when that moves to another widget of this window
+        self.right.currentChanged.connect(lambda _i: self._clear_field_help())
+        QApplication.instance().focusChanged.connect(self._focus_changed)
         self.recent = RecentList(lang)
         self.right_column = QWidget()                    # the tabs, and under them what the last calls answered
         rc = QVBoxLayout(self.right_column)
@@ -186,6 +191,27 @@ class MainWindow(QMainWindow):
         self._turned_away.connect(self._turned_away_now, Qt.ConnectionType.QueuedConnection)
         self.worker.start()
         self._submit(Job("boot", "start", {}, jobs.run_boot), log=False)
+
+    # ── the range line beside the right tabs ──
+    def _field_entered(self, panel: ActionPanel, action: str, param: str) -> None:
+        self._help_field = panel.controls.get((action, param))
+        self.field_help.set_full_text(panel.field_help(action, param))
+
+    def _clear_field_help(self) -> None:
+        self._help_field = None
+        self.field_help.set_full_text("")
+
+    def _focus_changed(self, old: QWidget | None, new: QWidget | None) -> None:
+        """Focus left the described field for another widget of this window: the line is cleared (another numeric field
+        shows its own range as it is entered). Focus that leaves the window (deactivation) or goes to a popup is not a move
+        to another widget of this window, and the line stays."""
+        if self._help_field is None or old is not self._help_field or new is None or new is old:
+            return
+        if new.window() is not self.window() or new.window() is not self:
+            return
+        if hasattr(new, "entered"):                      # a text field of the panels: it sets the line itself
+            return
+        self._clear_field_help()
 
     # ── jobs ──
     def _submit(self, job: Job, log: bool = True) -> int:
