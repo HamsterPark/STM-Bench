@@ -125,6 +125,7 @@ QLabel[tone="ok"] {{ color: {c['ok']}; }}
 QLabel[tone="bad"] {{ color: {c['bad']}; }}
 QLabel[tone="note"] {{ color: {c['muted']}; }}
 QLabel[tone="busy"] {{ color: {c['warn']}; }}
+QLabel[tone="warn"] {{ color: {c['warn']}; }}
 QLabel[role="pill"] {{ border-radius: {px(6)}px; padding: 1px {px(10)}px; background: {c['accent_soft']}; color: {c['accent_dark']}; }}
 QLabel[role="pill"][tone="busy"] {{ background: #ffe9c2; color: {c['warn']}; }}
 QLabel[role="pill"][tone="done"] {{ background: #d9f0df; color: {c['ok']}; }}

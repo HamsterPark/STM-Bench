@@ -405,6 +405,11 @@ class MainWindow(QMainWindow):
             self._succeed(str(out.reply))
             self.sidebar.report.set_reply(True, str(out.reply))
             self.sidebar.log.done(job.id, True, str(out.reply), self._t_s)
+            if self.sidebar.report.claim_cites(str(job.args.get("claim_id") or "")) and not job.args.get("evidence"):
+                # what was sent, nothing more: a window event, in no ledger or export (screen trial 24: the green reply was the
+                # same with and without files)
+                self.recent.push("warn", tr("no_evidence_note", self.lang))
+                self.sidebar.report.set_reply_note(tr("no_evidence_note", self.lang))
         elif out.kind == "finish":
             self._finished = True
             self.sidebar.report.set_finished()

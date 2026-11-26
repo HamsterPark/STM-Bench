@@ -224,6 +224,8 @@ S: dict[str, Pair] = {
     "yes": ("yes", "是"),
     "no": ("no", "否"),
     "keep": ("keep", "保持"),
+    # after a report of a claim whose card line asks to cite data, sent with no evidence files (screen trial 24): what was sent, nothing more
+    "no_evidence_note": ("no evidence files named", "没有列出证据文件"),
     # the viewer, added after the screen trials of 2026-10-27/28 (gui-viewer)
     "clear_readings": ("Clear plot readings", "清除曲线读数"),
 }

@@ -284,11 +284,18 @@ class ReportTab(QWidget):
             self.labels[key].setEnabled(on)
 
     def required_fields(self) -> set[str]:
-        """The fields the picked claim needs: the value always, and the position (x_nm, y_nm) and the frame it
-        was read in when the claim is about a place."""
+        """The fields the picked claim needs: the value always, the position (x_nm, y_nm) and the frame it
+        was read in when the claim is about a place, and the evidence when the card's evidence line asks to cite data
+        (screen trial 24: a report of such a claim went out with no files, and the label had no mark). Only the value is
+        refused on, here and by the instrument: the mark says what the card asks, nothing more."""
         cid = self.claim_id()
         needs_position = bool(cid) and bool(self._claims[cid].get("position"))
-        return {"value"} | ({"x_nm", "y_nm", "frame"} if needs_position else set())
+        return {"value"} | ({"x_nm", "y_nm", "frame"} if needs_position else set()) \
+            | ({"evidence"} if self.claim_cites(cid) else set())
+
+    def claim_cites(self, cid: str) -> bool:
+        """Whether the card's evidence line for ``cid`` asks to cite data in the evidence field."""
+        return bool(cid) and bool(self._claims.get(cid, {}).get("cite"))
 
     def _mark_required(self, _cid: str = "") -> None:
         need = self.required_fields()
@@ -361,9 +368,17 @@ class ReportTab(QWidget):
         self.fields["frame"].setText(frame)
 
     def set_reply(self, ok: bool, text: str) -> None:
+        self.reply.setTextFormat(Qt.TextFormat.PlainText)
         self.reply.setText(("✓ " if ok else "✗ ") + text)
         self.reply.setProperty("tone", "ok" if ok else "bad")
         polish(self.reply)
+
+    def set_reply_note(self, note: str) -> None:
+        """An amber second line under the reply: what the window noticed about what was sent (a window event, in no ledger)."""
+        plain = self.reply.text()
+        esc = lambda t: t.replace("&", "&amp;").replace("<", "&lt;")      # noqa: E731
+        self.reply.setTextFormat(Qt.TextFormat.RichText)
+        self.reply.setText(f"{esc(plain)}<br><span style='color:{style.COLORS['warn']}'>! {esc(note)}</span>")
 
     # ── finishing ──
     def _ask(self) -> None:
