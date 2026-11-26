@@ -69,6 +69,10 @@ _PERCENTILES = (0.5, 99.5)
 # Overlay colours are fixed (not taken from the palette): they must read on every grey level
 MARKER_COLOR = QColor("#00e5ff")
 MARKER_SELECTED_COLOR = QColor("#ffd400")
+#: a press in the Marker tool on a zoomed frame that moves this far (widget px) before the release is a pan, not a click
+MARK_DRAG_PX = 4.0
+#: a marker placed on another frame is drawn at this opacity, as an outline only
+OTHER_FRAME_OPACITY = 0.55
 PROFILE_COLOR = QColor("#ff4dff")
 _BACKGROUND = QColor("#ffffff")
 _TEXT = QColor("#111111")
@@ -299,6 +303,7 @@ class FrameView(QWidget):
         self._zoom = 1
         self._c0 = self._r0 = 0.0                    # the view's top-left corner, in pixel edges of the frame
         self._pan_last: QPointF | None = None        # where the pointer was at the last move of a pan drag
+        self._mark_press: tuple[QPointF, dict] | None = None   # a Marker-tool press on a zoomed frame, decided on release or move
         self._markers: list[dict] = []
         self._selected = -1
         self._profile: dict | None = None            # its ends in scan nm, and the frame it was drawn on
@@ -337,6 +342,7 @@ class FrameView(QWidget):
             if self._contrast == "visible":                # the part in view sets the scale
                 new.set_mode(self._flatten, "visible", self._region())
         self._pan_last = None
+        self._mark_press = None
         self._invalidate()
         self._reconcile_profile()
         self.update()
@@ -503,6 +509,7 @@ class FrameView(QWidget):
         self._tool = tool
         self._drag = None
         self._pan_last = None
+        self._mark_press = None
         self.setCursor({"none": Qt.CursorShape.ArrowCursor, "pan": Qt.CursorShape.OpenHandCursor}.get(
             tool, Qt.CursorShape.CrossCursor))
         self.update()
@@ -738,6 +745,12 @@ class FrameView(QWidget):
     # ── mouse ──
     def mouseMoveEvent(self, ev) -> None:
         pos = ev.position()
+        if self._mark_press is not None:                     # a press that moved: a pan of the zoomed frame, no marker
+            a = self._mark_press[0]
+            if math.hypot(pos.x() - a.x(), pos.y() - a.y()) >= MARK_DRAG_PX:
+                self._mark_press = None
+                self._pan_last = QPointF(a)                  # the image catches up with the pointer from where it went down
+                self.setCursor(Qt.CursorShape.ClosedHandCursor)
         if self._pan_last is not None:                       # a pan drag carries the image with the pointer
             self.pan_by(pos.x() - self._pan_last.x(), pos.y() - self._pan_last.y())
             self._pan_last = QPointF(pos)
@@ -776,24 +789,36 @@ class FrameView(QWidget):
             ev.accept()
             return
         if self._tool == "marker":
-            m = {**{k: p[k] for k in ("x_nm", "y_nm", "col", "row", "value", "unit")}, "frame": self._shown.name}
-            self._markers.append(m)
-            self._selected = len(self._markers) - 1
-            self.update()
-            self.markers_changed.emit(self.markers())      # the list first, then the event: a slot of the
-            self.marker_added.emit(dict(m))                # latter finds the former already refreshed
+            if self._zoom > 1:                              # there is image to pan to: click or drag is known on release
+                self._mark_press = (QPointF(ev.position()), p)
+            else:
+                self._place_marker(p)
         else:
             self._drag = (QPointF(ev.position()), QPointF(ev.position()))
             self.update()
         ev.accept()
 
+    def _place_marker(self, p: dict) -> None:
+        m = {**{k: p[k] for k in ("x_nm", "y_nm", "col", "row", "value", "unit")}, "frame": self._shown.name}
+        self._markers.append(m)
+        self._selected = len(self._markers) - 1
+        self.update()
+        self.markers_changed.emit(self.markers())          # the list first, then the event: a slot of the
+        self.marker_added.emit(dict(m))                    # latter finds the former already refreshed
+
     def mouseDoubleClickEvent(self, ev) -> None:
         ev.accept()                                  # a double click is one click: the press before it did the work
 
     def mouseReleaseEvent(self, ev) -> None:
+        if ev.button() == Qt.MouseButton.LeftButton and self._mark_press is not None:
+            p = self._mark_press[1]                         # a click: the marker is where the button went down
+            self._mark_press = None
+            self._place_marker(p)
+            ev.accept()
+            return
         if ev.button() == Qt.MouseButton.LeftButton and self._pan_last is not None:
             self._pan_last = None
-            self.setCursor(Qt.CursorShape.OpenHandCursor)
+            self.setCursor(Qt.CursorShape.OpenHandCursor if self._tool == "pan" else Qt.CursorShape.CrossCursor)
             ev.accept()
             return
         if ev.button() != Qt.MouseButton.LeftButton or self._drag is None:
@@ -876,8 +901,9 @@ class FrameView(QWidget):
             self._paint_marker(p, lay, pt, m, selected)
             if leader:                                            # a number that had to stand off: a line to its ring
                 self._paint_leader(p, lay, pt, rect, selected)
-        for (number, _pt, selected, _m), (rect, _leader) in zip(items, rects):
-            self._label(p, lay, str(number), rect, MARKER_SELECTED_COLOR if selected else MARKER_COLOR)
+        for (number, _pt, selected, m), (rect, _leader) in zip(items, rects):
+            self._label(p, lay, str(number), rect, MARKER_SELECTED_COLOR if selected else MARKER_COLOR,
+                        faded=self._on_other_frame(m, selected))
         p.end()
 
     def _paint_axes(self, p: QPainter, lay: SimpleNamespace) -> None:
@@ -934,7 +960,13 @@ class FrameView(QWidget):
         p.drawText(QRectF(bar.x(), lay.img.y(), 200, fh), int(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter),
                    self._shown.unit)
 
-    def _label(self, p: QPainter, lay: SimpleNamespace, text: str, rect: QRectF, color: QColor) -> None:
+    def _on_other_frame(self, m: dict, selected: bool) -> bool:
+        """Whether a marker is drawn faded: placed on another frame (a channel or direction of this one is the same
+        frame) and not the selected one."""
+        return not selected and m.get("frame") != self._shown.name
+
+    def _label(self, p: QPainter, lay: SimpleNamespace, text: str, rect: QRectF, color: QColor,
+               faded: bool = False) -> None:
         """A dark label with a bold white number or letter, kept inside the widget."""
         rect = QRectF(rect)
         if rect.right() > self.width() - 2:
@@ -947,6 +979,8 @@ class FrameView(QWidget):
             rect.moveBottom(self.height() - 2)
         p.save()
         p.setClipping(False)
+        if faded:
+            p.setOpacity(OTHER_FRAME_OPACITY)
         p.setPen(QPen(color, 1.5))
         p.setBrush(_LABEL_BG)
         p.drawRoundedRect(rect, 3, 3)
@@ -976,6 +1010,14 @@ class FrameView(QWidget):
                 p.drawRect(box)
                 p.setPen(QPen(color, 2.0))
                 p.drawRect(box)
+        if self._on_other_frame(m, selected):                  # another frame's: an outline, dim, rimmed dark and light
+            p.setPen(QPen(QColor(0, 0, 0, 110), 3.6))
+            p.drawEllipse(pt, r, r)
+            faint = QColor(color)
+            faint.setAlphaF(OTHER_FRAME_OPACITY)
+            p.setPen(QPen(faint, 1.6))
+            p.drawEllipse(pt, r, r)
+            return
         p.setPen(QPen(QColor(0, 0, 0, 235), 4.5))
         p.drawEllipse(pt, r, r)
         p.setPen(QPen(color, 2.6 if selected else 2.0))

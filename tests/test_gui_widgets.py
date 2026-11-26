@@ -583,7 +583,14 @@ def test_a_marker_placed_on_one_frame_is_drawn_where_the_same_scan_coordinates_l
         # ... and the ring is really there: its colour, centred on that point, in the rendered widget
         shot = rgb(view)
         yy, xx = np.mgrid[0:shot.shape[0], 0:shot.shape[1]]
-        ring = near(shot, fv.MARKER_COLOR) & (np.hypot(xx + 0.5 - want.x(), yy + 0.5 - want.y()) <= r + 2.5)
+        if frame is a:
+            ring = near(shot, fv.MARKER_COLOR) & (np.hypot(xx + 0.5 - want.x(), yy + 0.5 - want.y()) <= r + 2.5)
+        else:                                                          # another frame's marker is a faded ring: found by what it changes
+            kept, view._markers = view._markers, []
+            bare = rgb(view)
+            view._markers = kept
+            changed = np.abs(shot.astype(int) - bare.astype(int)).sum(axis=2) > 30
+            ring = changed & (np.hypot(xx + 0.5 - want.x(), yy + 0.5 - want.y()) <= r + 2.5)
         assert ring.sum() > 20
         assert xx[ring].mean() + 0.5 == pytest.approx(want.x(), abs=1.0)
         assert yy[ring].mean() + 0.5 == pytest.approx(want.y(), abs=1.0)
