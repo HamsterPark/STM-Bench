@@ -13,7 +13,8 @@ import pytest
 pytest.importorskip("PySide6")
 os.environ["QT_QPA_PLATFORM"] = "offscreen"
 
-from PySide6.QtCore import QCoreApplication, Qt  # noqa: E402
+from PySide6.QtCore import Qt  # noqa: E402
+from PySide6.QtWidgets import QApplication  # noqa: E402
 
 from stmbench.gui.jobs import Outcome  # noqa: E402
 from stmbench.gui.worker import OPERATOR_KINDS, Job, Worker  # noqa: E402
@@ -21,7 +22,9 @@ from stmbench.gui.worker import OPERATOR_KINDS, Job, Worker  # noqa: E402
 
 @pytest.fixture
 def worker():
-    QCoreApplication.instance() or QCoreApplication(["test"])
+    # a QApplication, not a QCoreApplication: with xdist the next GUI test of this worker needs widgets, and a core
+    # application left behind makes the creation of any QWidget abort the worker
+    QApplication.instance() or QApplication(["test"])
     w = Worker(session=None)
     w.start()
     yield w
