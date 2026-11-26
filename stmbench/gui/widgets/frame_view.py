@@ -71,6 +71,8 @@ MARKER_COLOR = QColor("#00e5ff")
 MARKER_SELECTED_COLOR = QColor("#ffd400")
 #: a press in the Marker tool on a zoomed frame that moves this far (widget px) before the release is a pan, not a click
 MARK_DRAG_PX = 4.0
+#: a marker placed on another frame is drawn at this opacity, as an outline only
+OTHER_FRAME_OPACITY = 0.55
 PROFILE_COLOR = QColor("#ff4dff")
 _BACKGROUND = QColor("#ffffff")
 _TEXT = QColor("#111111")
@@ -899,8 +901,9 @@ class FrameView(QWidget):
             self._paint_marker(p, lay, pt, m, selected)
             if leader:                                            # a number that had to stand off: a line to its ring
                 self._paint_leader(p, lay, pt, rect, selected)
-        for (number, _pt, selected, _m), (rect, _leader) in zip(items, rects):
-            self._label(p, lay, str(number), rect, MARKER_SELECTED_COLOR if selected else MARKER_COLOR)
+        for (number, _pt, selected, m), (rect, _leader) in zip(items, rects):
+            self._label(p, lay, str(number), rect, MARKER_SELECTED_COLOR if selected else MARKER_COLOR,
+                        faded=self._on_other_frame(m, selected))
         p.end()
 
     def _paint_axes(self, p: QPainter, lay: SimpleNamespace) -> None:
@@ -957,7 +960,13 @@ class FrameView(QWidget):
         p.drawText(QRectF(bar.x(), lay.img.y(), 200, fh), int(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter),
                    self._shown.unit)
 
-    def _label(self, p: QPainter, lay: SimpleNamespace, text: str, rect: QRectF, color: QColor) -> None:
+    def _on_other_frame(self, m: dict, selected: bool) -> bool:
+        """Whether a marker is drawn faded: placed on another frame (a channel or direction of this one is the same
+        frame) and not the selected one."""
+        return not selected and m.get("frame") != self._shown.name
+
+    def _label(self, p: QPainter, lay: SimpleNamespace, text: str, rect: QRectF, color: QColor,
+               faded: bool = False) -> None:
         """A dark label with a bold white number or letter, kept inside the widget."""
         rect = QRectF(rect)
         if rect.right() > self.width() - 2:
@@ -970,6 +979,8 @@ class FrameView(QWidget):
             rect.moveBottom(self.height() - 2)
         p.save()
         p.setClipping(False)
+        if faded:
+            p.setOpacity(OTHER_FRAME_OPACITY)
         p.setPen(QPen(color, 1.5))
         p.setBrush(_LABEL_BG)
         p.drawRoundedRect(rect, 3, 3)
@@ -999,6 +1010,14 @@ class FrameView(QWidget):
                 p.drawRect(box)
                 p.setPen(QPen(color, 2.0))
                 p.drawRect(box)
+        if self._on_other_frame(m, selected):                  # another frame's: an outline, dim, rimmed dark and light
+            p.setPen(QPen(QColor(0, 0, 0, 110), 3.6))
+            p.drawEllipse(pt, r, r)
+            faint = QColor(color)
+            faint.setAlphaF(OTHER_FRAME_OPACITY)
+            p.setPen(QPen(faint, 1.6))
+            p.drawEllipse(pt, r, r)
+            return
         p.setPen(QPen(QColor(0, 0, 0, 235), 4.5))
         p.drawEllipse(pt, r, r)
         p.setPen(QPen(color, 2.6 if selected else 2.0))
