@@ -27,6 +27,7 @@ from typing import Any, Iterator
 from ..instrument import ActionError, Instrument
 from ..instrument.core import SCENARIO_DIR
 from ..instrument.export import ExportWriter
+from ..trackB.rules import asks_citation
 
 #: report fields beyond claim_id and value, in the order the result channel names them
 REPORT_FIELDS = ("x_nm", "y_nm", "frame", "evidence", "unit", "sigma", "note")
@@ -108,11 +109,12 @@ class GuiSession:
             return inst.manual()
 
     def claims(self) -> list[dict]:
-        """The reportable claims, as the rule card states them (constraints are not reported)."""
+        """The reportable claims, as the rule card states them (constraints are not reported); ``cite``: whether the card's
+        evidence line asks to cite data in the evidence field."""
         with self._call() as inst:
             return [{"id": str(c["id"]), "kind": c.get("kind"), "unit": c.get("unit") or "",
                      "position": c.get("position") == "required", "say": str(c.get("say") or "").strip(),
-                     "say_en": str(c.get("say_en") or "").strip()}
+                     "say_en": str(c.get("say_en") or "").strip(), "cite": asks_citation(c)}
                     for c in inst.scenario.claims if c.get("kind") != "constraint"]
 
     # ── the instrument ──
