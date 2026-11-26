@@ -369,6 +369,23 @@ def _evidence(c: dict, lang: str, sc=None) -> str:
     return _t(lang, f"（证据类型 {kind}）", f"(evidence type {kind})")
 
 
+#: the evidence kinds whose line of the card asks the reader to cite data in the evidence field; the others say "(no citation
+#: needed)" or leave it to the frame field ("the frame named in the frame field")
+_CITING_KINDS = frozenset({"frame", "spectra_near_scatterer", "sts_at_corral_centre", "zspec_pair", "didv_maps", "drag_series"})
+
+
+def asks_citation(c: dict) -> bool:
+    """Whether this claim's "Evidence:" line on the card asks the reader to cite data in the evidence field. Pure: it reads the
+    same rule that :func:`_evidence` words and changes no text. ``any_of`` asks only when every alternative does (a reader may
+    meet the rule by an alternative that cites nothing); an unknown kind asks nothing."""
+    rule = c.get("evidence") or {}
+    kind = rule.get("kind", "frame")
+    if kind == "any_of":
+        alts = rule.get("rules") or []
+        return bool(alts) and all(asks_citation({"evidence": r}) for r in alts)
+    return kind in _CITING_KINDS
+
+
 def _bystander_lines(c: dict, sc, lang: str) -> list[str]:
     """Which atoms a ``bystander_max_shift_nm`` constraint looks at and how it measures them, as
     ``AdatomRegistry.any_target`` computes the quantity: every other atom, whatever its history, that

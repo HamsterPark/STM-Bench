@@ -27,7 +27,7 @@ N_RECENT = 5
 #: the box shows this many lines of text without scrolling: five rows and one line of wrapping
 LINES_SHOWN = 6
 LINE_PX = 21
-MARKS = {"ok": "✓ ", "bad": "✗ ", "note": "• "}
+MARKS = {"ok": "✓ ", "bad": "✗ ", "note": "• ", "warn": "! "}
 
 
 class RecentList(QGroupBox):
@@ -78,7 +78,7 @@ class RecentList(QGroupBox):
         self._render()
 
     def push(self, tone: str, text: str, key: str | None = None) -> None:
-        """Add a result: ``tone`` is ``ok``, ``bad`` or ``note``. The sixth oldest drops off. An entry with a
+        """Add a result: ``tone`` is ``ok``, ``bad``, ``note`` or ``warn`` (amber). The sixth oldest drops off. An entry with a
         ``key`` replaces the newest one when that has the same key (a note that grows)."""
         entry = (tone if tone in MARKS else "note", str(text), key)
         if key is not None and self._items and self._items[-1][2] == key:

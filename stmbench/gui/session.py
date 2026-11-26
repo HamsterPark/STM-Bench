@@ -27,6 +27,7 @@ from typing import Any, Iterator
 from ..instrument import ActionError, Instrument
 from ..instrument.core import SCENARIO_DIR
 from ..instrument.export import ExportWriter
+from ..trackB.rules import asks_citation
 
 #: report fields beyond claim_id and value, in the order the result channel names them
 REPORT_FIELDS = ("x_nm", "y_nm", "frame", "evidence", "unit", "sigma", "note")
@@ -36,6 +37,12 @@ _SCENARIO_ID = re.compile(r"[A-Za-z0-9_]{1,80}")
 
 class SpecError(ValueError):
     """The sealed mode's input line is not a usable ``{"scenario": ..., "seed": ...}``."""
+
+
+def evidence_files(text) -> list[str]:
+    """The files a report's evidence field names: its text split at commas (full-width too), each name stripped, empty ones
+    dropped. One place for what :meth:`GuiSession.report` sends and what the window says was sent."""
+    return [e.strip() for e in str(text or "").replace("，", ",").split(",") if e.strip()]
 
 
 def read_spec(stream) -> tuple[str, int]:
@@ -108,11 +115,12 @@ class GuiSession:
             return inst.manual()
 
     def claims(self) -> list[dict]:
-        """The reportable claims, as the rule card states them (constraints are not reported)."""
+        """The reportable claims, as the rule card states them (constraints are not reported); ``cite``: whether the card's
+        evidence line asks to cite data in the evidence field."""
         with self._call() as inst:
             return [{"id": str(c["id"]), "kind": c.get("kind"), "unit": c.get("unit") or "",
                      "position": c.get("position") == "required", "say": str(c.get("say") or "").strip(),
-                     "say_en": str(c.get("say_en") or "").strip()}
+                     "say_en": str(c.get("say_en") or "").strip(), "cite": asks_citation(c)}
                     for c in inst.scenario.claims if c.get("kind") != "constraint"]
 
     # ── the instrument ──
@@ -156,7 +164,7 @@ class GuiSession:
             raise ActionError("report: value is required")
         ev = b.get("evidence")
         if isinstance(ev, str):
-            b["evidence"] = [e.strip() for e in ev.replace("，", ",").split(",") if e.strip()]
+            b["evidence"] = evidence_files(ev)
         args: dict[str, Any] = {}
         for k in REPORT_FIELDS:
             v = b.get(k)

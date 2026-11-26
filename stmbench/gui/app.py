@@ -41,10 +41,10 @@ from PySide6.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QVBoxLayou
 from . import fmt, jobs, layout, style
 from .center import THUMB_PX, CenterColumn, thumb_pixmap
 from .controls import ElidedLabel, Tabs
-from .labels import two_lines, tr, with_console_notes
+from .labels import one, two_lines, tr, with_console_notes
 from .panels import ActionPanel
 from .recent import RecentList
-from .session import GuiSession, SpecError, make_private_dir, read_spec
+from .session import GuiSession, SpecError, evidence_files, make_private_dir, read_spec
 from .sidebar import Sidebar
 from .status import StatusStrip
 from .worker import Job, Worker
@@ -148,8 +148,13 @@ class MainWindow(QMainWindow):
         self.field_help.setFixedWidth(max(style.px(200), right_px - self.right.tabBar().sizeHint().width() - style.px(14)))
         self.right.setCornerWidget(corner, Qt.Corner.TopRightCorner)
         corner.show()                                    # setting the parent hid it
+        self._help_field: QWidget | None = None          # the field the line above describes
         for panel in (self.operate, self.spectroscopy):
-            panel.field_entered.connect(lambda a, k, p=panel: self.field_help.set_full_text(p.field_help(a, k)))
+            panel.field_entered.connect(lambda a, k, p=panel: self._field_entered(p, a, k))
+        # the line describes the field entered last: it goes with the tab (screen trial 24: it still read "tip y" on the
+        # Spectroscopy tab) and with the focus, when that moves to another widget of this window
+        self.right.currentChanged.connect(lambda _i: self._clear_field_help())
+        QApplication.instance().focusChanged.connect(self._focus_changed)
         self.recent = RecentList(lang)
         self.right_column = QWidget()                    # the tabs, and under them what the last calls answered
         rc = QVBoxLayout(self.right_column)
@@ -186,6 +191,28 @@ class MainWindow(QMainWindow):
         self._turned_away.connect(self._turned_away_now, Qt.ConnectionType.QueuedConnection)
         self.worker.start()
         self._submit(Job("boot", "start", {}, jobs.run_boot), log=False)
+
+    # ── the range line beside the right tabs ──
+    def _field_entered(self, panel: ActionPanel, action: str, param: str) -> None:
+        self._help_field = panel.controls.get((action, param))
+        self.field_help.set_full_text(panel.field_help(action, param))
+
+    def _clear_field_help(self) -> None:
+        self._help_field = None
+        self.field_help.set_full_text("")
+
+    def _focus_changed(self, old: QWidget | None, new: QWidget | None) -> None:
+        """Focus left the described field for another widget of this window outside the action panels (a report field, a
+        viewer control): the line is cleared. Another numeric field shows its own range as it is entered, and a button of the
+        panels (Set setpoint after a refusal) leaves the line on the field it belongs to. Focus that leaves the window
+        (deactivation) or goes to a popup is not a move to another widget of this window, and the line stays."""
+        if self._help_field is None or old is not self._help_field or new is None or new is old:
+            return
+        if new.window() is not self.window() or new.window() is not self:
+            return
+        if self.operate.isAncestorOf(new) or self.spectroscopy.isAncestorOf(new):
+            return                                       # a field of the panels sets the line itself; a button of theirs keeps it
+        self._clear_field_help()
 
     # ── jobs ──
     def _submit(self, job: Job, log: bool = True) -> int:
@@ -258,8 +285,33 @@ class MainWindow(QMainWindow):
         last refusal is the one the band shows (a refused putting back, after a refused move, is the one that ends it)."""
         calls = [Job("act", s.label, s.args, lambda sess, s=s: s) for s in out.steps]
         self.sidebar.log.expand(job.id, [(c.id, c.label, c.args) for c in calls], self._t_s)
+        refused = any(not s.ok for s in out.steps)
         for call, step in zip(calls, out.steps):
-            self._apply(call, step)
+            # the Log and the readings get every call; the band and the recent results get the move's own reply once (screen
+            # trial 24: the band ended on the last set-back and one move filled all five rows), a refusal as it is, and, when
+            # a call was refused, the move's reply too if the move went through (its trace name is what a drag cites)
+            self._apply(call, step, quiet=step.ok and not (refused and step.label == "move_tip"))
+        if not refused:
+            move = next((s for s in out.steps if s.label == "move_tip"), None)
+            if move is not None:
+                text = fmt.reply_summary("move_tip", move.reply)
+                back = self._set_back_text(out.steps)
+                self._succeed(f"{text} · {back}" if back else text)
+
+    def _set_back_text(self, steps: list) -> str:
+        """What a move with during-move values put back, from the calls that ran after the move: "set back: current range
+        10 nA, setpoint 50 pA". Empty when nothing was put back."""
+        names = {"set_current_range": ("sb_range", "full_scale_na", "nA"), "set_setpoint": ("sb_setpoint", "current_pa", "pA"),
+                 "set_bias": ("sb_bias", "bias_v", "V")}
+        moved = False
+        parts = []
+        for s in steps:
+            if s.label == "move_tip":
+                moved = True
+            elif moved and s.ok and s.label in names:
+                key, param, unit = names[s.label]
+                parts.append(f"{one(key, self.lang)} {fmt.num(s.args.get(param))} {unit}")
+        return f"{one('set_back', self.lang)}: {', '.join(parts)}" if parts else ""
 
     def _report(self, body: dict) -> None:
         sent = {k: v for k, v in body.items() if v != ""}
@@ -337,7 +389,9 @@ class MainWindow(QMainWindow):
             self._running_job = None
             self._show_state()
 
-    def _apply(self, job: Job, out: jobs.Outcome) -> None:
+    def _apply(self, job: Job, out: jobs.Outcome, quiet: bool = False) -> None:
+        """Draw what a job brought back. ``quiet``: a call of a move with during-move values that went through is not told
+        on its own (the band and the list of recent results get one entry for the move: :meth:`_apply_steps`)."""
         if out.steps:
             self._apply_steps(job, out)
             return
@@ -386,7 +440,8 @@ class MainWindow(QMainWindow):
             return
         if out.kind == "act":
             summary = fmt.reply_summary(job.label, out.reply)
-            self._succeed(summary)
+            if not quiet:
+                self._succeed(summary)
             self.sidebar.log.done(job.id, True, fmt.reply_full(out.reply), t)
             if out.frame is not None:
                 self._remember(out.frame)
@@ -405,6 +460,11 @@ class MainWindow(QMainWindow):
             self._succeed(str(out.reply))
             self.sidebar.report.set_reply(True, str(out.reply))
             self.sidebar.log.done(job.id, True, str(out.reply), self._t_s)
+            if self.sidebar.report.claim_cites(str(job.args.get("claim_id") or "")) and not evidence_files(job.args.get("evidence")):
+                # what was sent, nothing more: a window event, in no ledger or export (screen trial 24: the green reply was the
+                # same with and without files)
+                self.recent.push("warn", tr("no_evidence_note", self.lang))
+                self.sidebar.report.set_reply_note(tr("no_evidence_note", self.lang))
         elif out.kind == "finish":
             self._finished = True
             self.sidebar.report.set_finished()
