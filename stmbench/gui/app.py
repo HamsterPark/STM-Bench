@@ -44,7 +44,7 @@ from .controls import ElidedLabel, Tabs
 from .labels import one, two_lines, tr, with_console_notes
 from .panels import ActionPanel
 from .recent import RecentList
-from .session import GuiSession, SpecError, make_private_dir, read_spec
+from .session import GuiSession, SpecError, evidence_files, make_private_dir, read_spec
 from .sidebar import Sidebar
 from .status import StatusStrip
 from .worker import Job, Worker
@@ -460,7 +460,7 @@ class MainWindow(QMainWindow):
             self._succeed(str(out.reply))
             self.sidebar.report.set_reply(True, str(out.reply))
             self.sidebar.log.done(job.id, True, str(out.reply), self._t_s)
-            if self.sidebar.report.claim_cites(str(job.args.get("claim_id") or "")) and not job.args.get("evidence"):
+            if self.sidebar.report.claim_cites(str(job.args.get("claim_id") or "")) and not evidence_files(job.args.get("evidence")):
                 # what was sent, nothing more: a window event, in no ledger or export (screen trial 24: the green reply was the
                 # same with and without files)
                 self.recent.push("warn", tr("no_evidence_note", self.lang))

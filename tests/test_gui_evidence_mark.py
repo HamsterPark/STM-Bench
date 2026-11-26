@@ -81,3 +81,17 @@ def test_a_refused_report_gets_no_note(open_window):
     assert win.worker.held
 
 
+
+
+@pytest.mark.parametrize("text", [",", " , ", "，", ", ,"])
+def test_an_evidence_field_of_only_separators_names_no_file_and_gets_the_note(open_window, text):
+    from stmbench.gui.session import evidence_files
+    assert evidence_files(text) == [] and evidence_files(" a.dat ,, b.dat，") == ["a.dat", "b.dat"]
+    win = open_window("en", scenario=P1)
+    win.sidebar.show_tab("report")
+    run_button(win, "report.claim.stripe_period_nm")
+    shots.fill(win, {"report.value": "4.5"})
+    win.sidebar.report.fields["evidence"].setText(text)           # QTest cannot type the full-width comma
+    run_button(win, "report.submit")
+    shots.settle(win)
+    assert win.recent.entries()[0] == ("warn", "no evidence files named") and "recorded" in win.sidebar.report.reply.text()

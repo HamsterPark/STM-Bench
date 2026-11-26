@@ -39,6 +39,12 @@ class SpecError(ValueError):
     """The sealed mode's input line is not a usable ``{"scenario": ..., "seed": ...}``."""
 
 
+def evidence_files(text) -> list[str]:
+    """The files a report's evidence field names: its text split at commas (full-width too), each name stripped, empty ones
+    dropped. One place for what :meth:`GuiSession.report` sends and what the window says was sent."""
+    return [e.strip() for e in str(text or "").replace("，", ",").split(",") if e.strip()]
+
+
 def read_spec(stream) -> tuple[str, int]:
     """The scenario id and the seed from one JSON line of ``stream`` (sealed mode's stdin).
 
@@ -158,7 +164,7 @@ class GuiSession:
             raise ActionError("report: value is required")
         ev = b.get("evidence")
         if isinstance(ev, str):
-            b["evidence"] = [e.strip() for e in ev.replace("，", ",").split(",") if e.strip()]
+            b["evidence"] = evidence_files(ev)
         args: dict[str, Any] = {}
         for k in REPORT_FIELDS:
             v = b.get(k)
