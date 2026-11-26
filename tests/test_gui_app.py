@@ -751,11 +751,11 @@ def test_the_report_form_marks_what_the_picked_claim_needs_and_enter_sends_it(op
     starred = lambda: {k for k, lab in rep.labels.items() if lab.text().endswith("*</span>")}       # noqa: E731
     assert starred() == {"value"}                                         # no claim yet: a value is always needed
     run_button(win, "report.claim.stripe_period_nm")                     # a number about the whole surface
-    assert starred() == {"value"} and rep.required_fields() == {"value"}
+    assert starred() == {"value", "evidence"} and rep.required_fields() == {"value", "evidence"}   # the card asks to cite a frame
     run_button(win, "report.claim.stripe_orientation_deg")               # an angle at a place: where, and in which frame
     assert starred() == {"value", "x_nm", "y_nm", "frame"}
     run_button(win, "report.claim.stripe_period_nm")                     # and back
-    assert starred() == {"value"}
+    assert starred() == {"value", "evidence"}
     assert shots.widget(win, "report.label.x_nm").text().startswith("x_nm ")      # the name still comes first
     # Enter in any field sends the report, as the button does
     run_button(win, "report.claim.stripe_orientation_deg")
