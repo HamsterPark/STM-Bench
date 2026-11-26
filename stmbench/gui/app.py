@@ -41,7 +41,7 @@ from PySide6.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QVBoxLayou
 from . import fmt, jobs, layout, style
 from .center import THUMB_PX, CenterColumn, thumb_pixmap
 from .controls import ElidedLabel, Tabs
-from .labels import two_lines, tr, with_console_notes
+from .labels import one, two_lines, tr, with_console_notes
 from .panels import ActionPanel
 from .recent import RecentList
 from .session import GuiSession, SpecError, make_private_dir, read_spec
@@ -258,8 +258,33 @@ class MainWindow(QMainWindow):
         last refusal is the one the band shows (a refused putting back, after a refused move, is the one that ends it)."""
         calls = [Job("act", s.label, s.args, lambda sess, s=s: s) for s in out.steps]
         self.sidebar.log.expand(job.id, [(c.id, c.label, c.args) for c in calls], self._t_s)
+        refused = any(not s.ok for s in out.steps)
         for call, step in zip(calls, out.steps):
-            self._apply(call, step)
+            # the Log and the readings get every call; the band and the recent results get the move's own reply once (screen
+            # trial 24: the band ended on the last set-back and one move filled all five rows), a refusal as it is, and, when
+            # a call was refused, the move's reply too if the move went through (its trace name is what a drag cites)
+            self._apply(call, step, quiet=step.ok and not (refused and step.label == "move_tip"))
+        if not refused:
+            move = next((s for s in out.steps if s.label == "move_tip"), None)
+            if move is not None:
+                text = fmt.reply_summary("move_tip", move.reply)
+                back = self._set_back_text(out.steps)
+                self._succeed(f"{text} · {back}" if back else text)
+
+    def _set_back_text(self, steps: list) -> str:
+        """What a move with during-move values put back, from the calls that ran after the move: "set back: current range
+        10 nA, setpoint 50 pA". Empty when nothing was put back."""
+        names = {"set_current_range": ("sb_range", "full_scale_na", "nA"), "set_setpoint": ("sb_setpoint", "current_pa", "pA"),
+                 "set_bias": ("sb_bias", "bias_v", "V")}
+        moved = False
+        parts = []
+        for s in steps:
+            if s.label == "move_tip":
+                moved = True
+            elif moved and s.ok and s.label in names:
+                key, param, unit = names[s.label]
+                parts.append(f"{one(key, self.lang)} {fmt.num(s.args.get(param))} {unit}")
+        return f"{one('set_back', self.lang)}: {', '.join(parts)}" if parts else ""
 
     def _report(self, body: dict) -> None:
         sent = {k: v for k, v in body.items() if v != ""}
@@ -337,7 +362,9 @@ class MainWindow(QMainWindow):
             self._running_job = None
             self._show_state()
 
-    def _apply(self, job: Job, out: jobs.Outcome) -> None:
+    def _apply(self, job: Job, out: jobs.Outcome, quiet: bool = False) -> None:
+        """Draw what a job brought back. ``quiet``: a call of a move with during-move values that went through is not told
+        on its own (the band and the list of recent results get one entry for the move: :meth:`_apply_steps`)."""
         if out.steps:
             self._apply_steps(job, out)
             return
@@ -386,7 +413,8 @@ class MainWindow(QMainWindow):
             return
         if out.kind == "act":
             summary = fmt.reply_summary(job.label, out.reply)
-            self._succeed(summary)
+            if not quiet:
+                self._succeed(summary)
             self.sidebar.log.done(job.id, True, fmt.reply_full(out.reply), t)
             if out.frame is not None:
                 self._remember(out.frame)
