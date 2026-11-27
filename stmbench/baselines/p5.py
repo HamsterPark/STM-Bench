@@ -62,8 +62,10 @@ MIN_DIP_HZ = 1.0
 FINE_NM, FINE_PX, FINE_LINE_S = 5.0, 50, 0.05
 #: the grid (nm, both axes) of coarse curves that finds the bond's centre, and their points
 CENTRE_GRID, CENTRE_POINTS = tuple(np.arange(-0.24, 0.241, 0.08)), 96
-#: the fitted bond must stand this many rms residuals out of the grid's depths, else the image's place stands
-CENTRE_MIN_SNR = 8.0
+#: the fitted centre is used when the fit puts it within this (nm, one standard error from the fit's
+#: Jacobian and residuals) in each direction, else the image's place stands: a bond too weak to
+#: see in the grid (a physisorbed one, ~0.5 Hz deep) is fitted to the bounds
+CENTRE_MAX_SE_NM = 0.03
 CENTRE_FINE = tuple(np.arange(-0.12, 0.121, 0.06))
 SPOT_SHIFT_MAX_NM = 1.5
 #: how long the atom is watched to find the drift the survey's measurement left
@@ -249,6 +251,13 @@ class Rig:
                     best = f
             return best
 
+        def se_xy(f, free):
+            """Standard errors (nm) of the centre's two coordinates in a fit with ``free`` parameters."""
+            j = f.jac[:, free]
+            dof = max(len(f.fun) - len(free), 1)
+            cov = np.linalg.pinv(j.T @ j) * (2.0 * f.cost / dof)
+            return float(np.sqrt(cov[2, 2])), float(np.sqrt(cov[3, 3]))
+
         def moved(a, b):
             dt = max(b[2] - a[2], 1.0)
             return ((b[0] - a[0]) / dt, (b[1] - a[1]) / dt)
@@ -265,7 +274,9 @@ class Rig:
                "span_hz": round(float(np.max(d) - np.min(d)), 2), "rms_hz": round(rms1, 3),
                "v_nm_min": [round(60.0 * c, 3) for c in moved(first, second)]}
         self.log.setdefault("centre", []).append(rec)
-        if abs(q1[2]) > 0.3 or abs(q1[3]) > 0.3 or q1[1] > -CENTRE_MIN_SNR * rms1 or float(np.max(d) - np.min(d)) < CENTRE_MIN_SNR * rms1:
+        se1 = se_xy(f1, [0, 1, 2, 3, 4])
+        rec["se_nm"] = [round(se1[0], 3), round(se1[1], 3)]
+        if abs(q1[2]) > 0.3 or abs(q1[3]) > 0.3 or q1[1] >= 0.0 or max(se1) > CENTRE_MAX_SE_NM:
             return None
         mid = (second[0] + float(q1[2]), second[1] + float(q1[3]))
         p2, d2, t2 = self._depths(mid, CENTRE_FINE, 2)
@@ -276,7 +287,7 @@ class Rig:
         q2 = f2.x
         rec.update(fine_bx=round(float(q2[2]), 3), fine_by=round(float(q2[3]), 3),
                    fine_rms_hz=round(float(np.sqrt(2 * f2.cost / len(d2))), 3))
-        if abs(q2[2] - q1[2]) > 0.2 or abs(q2[3] - q1[3]) > 0.2:
+        if abs(q2[2] - q1[2]) > 0.2 or abs(q2[3] - q1[3]) > 0.2 or max(se_xy(f2, [0, 1, 2, 3])) > CENTRE_MAX_SE_NM:
             return float(q1[2]), float(q1[3])
         return float(q2[2]), float(q2[3])
 
