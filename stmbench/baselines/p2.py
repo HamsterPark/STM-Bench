@@ -330,13 +330,14 @@ def side_is_clear(z: np.ndarray, npx: float, x_edge_nm: float, side_col: int, *,
 
 
 def ghost_steps(z: np.ndarray, npx: float, *, lo_nm: float = 1.2, hi_nm: float = 8.0, ratio_min: float = 0.3,
-                same_nm: float = 0.8) -> dict | None:
+                same_nm: float = 0.8, same_ratio: float = 0.2) -> dict | None:
     """A second apex of the tip, as a frame whose rows cross the steps shows it: every step drawn
     twice, the copy weaker and a fixed distance to one side of it (the apex's offset along the
     normal, the part of it that moves the standing wave). In the steepness of the columns the
     steps are peaks, a copy a weaker peak ``lo_nm`` to ``hi_nm`` off; two or more steps with a copy
-    at one distance (``same_nm``) and one side are a second apex (one pair alone could be two steps
-    a terrace of a few nm apart). Returns ``{"offset_nm": signed distance of the copy, "pairs": n}``
+    at one distance (``same_nm``), one side and one relative height (``same_ratio``) are a second
+    apex (one pair alone could be two steps a terrace of a few nm apart, and pairs of bunched
+    steps differ in distance and in height). Returns ``{"offset_nm": signed distance of the copy, "pairs": n}``
     or None."""
     P = ndi.gaussian_filter1d(stepness(z, npx).mean(axis=0), 0.3 / npx)
     pk, _ = find_peaks(P, height=0.25 * P.max(), distance=max(1, int(round(0.5 / npx))))
@@ -353,11 +354,11 @@ def ghost_steps(z: np.ndarray, npx: float, *, lo_nm: float = 1.2, hi_nm: float =
             found.append(best)
     if len(found) < 2:
         return None
-    ds = np.array([f[0] for f in found])
-    for d0 in ds:
-        close = ds[np.abs(ds - d0) <= same_nm]
-        if len(close) >= 2 and np.all(np.sign(close) == np.sign(d0)):
-            return {"offset_nm": float(np.median(close)), "pairs": int(len(close))}
+    ds, rs = np.array([f[0] for f in found]), np.array([f[1] for f in found])
+    for d0, r0 in found:
+        close = (np.abs(ds - d0) <= same_nm) & (np.abs(rs - r0) <= same_ratio) & (np.sign(ds) == np.sign(d0))
+        if close.sum() >= 2:
+            return {"offset_nm": float(np.median(ds[close])), "pairs": int(close.sum())}
     return None
 
 
@@ -555,7 +556,7 @@ class Standing:
         return fit
 
     def check_place(self, plan: dict) -> dict:
-        """A 60 nm frame at the planned centre (the long move to it has crept the sample): where the
+        """A 100 nm frame at the planned centre (the long move to it has crept the sample): where the
         edge really is, the adatoms near the centre, and what the tip makes of the frame."""
         v = self.v
         c = plan["centre"]
@@ -775,76 +776,6 @@ class Standing:
             n_rep += 1
             self.repair_tip(plan, n_rep)
             chk = self.check_place(plan)
-        self.set_comp(plan)
-        return n_rep
-
-    @staticmethod
-    def quality(maps: list[dict]) -> dict:
-        """How well the maps agree with one tip and one straight edge, as a set. Three things stay the
-        same across energies when they do, and a second apex breaks them (its wave is the first one
-        displaced by a nanometre or two, so the sum is another standing wave, of a phase and an
-        amplitude that turn with k and of a k that is a percent or two off):
-        ``resid_rms``, the scatter of k about the dispersion's parabola (relative; a sound set is
-        within 0.3 %); ``amp_cv``, the spread of the waves' amplitudes (a sound set is within 6 %:
-        the step's reflection does not change much over 0.4 eV); ``phase_rms`` the scatter of their
-        phases about a straight line in k (a sound set within 0.05 rad). The reflection model is
-        one reflection amplitude and phase for all energies, which the P2 step edge has; a surface
-        whose edge reflected otherwise would have to be fitted otherwise. ``chi2_max`` is the
-        worst reduced chi-square of the profile fits (a sound tip 1-3)."""
-        good = [m for m in maps if m["fit"].get("ok")]
-        out = {"maps_ok": len(good), "maps": len(maps), "resid_rms": float("inf"), "amp_cv": float("inf"),
-               "phase_rms": float("inf"), "chi2_max": float("inf"), "suspect": True}
-        if len(good) < 5:
-            return out
-        e = np.array([m["bias_v"] for m in good])
-        k = np.array([m["fit"]["k"] for m in good])
-        c = np.linalg.lstsq(np.vstack([np.ones(len(k)), k ** 2]).T, e, rcond=None)[0]
-        rel = (k - np.sqrt(np.clip((e - c[0]) / c[1], 1e-9, None))) / k
-        out["resid_rms"] = float(np.sqrt(np.mean(rel ** 2)))
-        amp = np.array([m["fit"]["amp"] for m in good], float)
-        out["amp_cv"] = float(np.std(np.abs(amp)) / max(float(np.mean(np.abs(amp))), 1e-9))
-        ph = np.array([m["fit"]["phase"] for m in good], float) + np.where(amp < 0, math.pi, 0.0)
-        mean = math.atan2(float(np.mean(np.sin(ph))), float(np.mean(np.cos(ph))))
-        dev = (ph - mean + math.pi) % (2 * math.pi) - math.pi
-        out["phase_rms"] = float(np.std(dev - np.polyval(np.polyfit(k, dev, 1), k)))
-        out["chi2_max"] = float(max(m["fit"]["chi2_red"] for m in good))
-        out["suspect"] = bool(out["resid_rms"] > RESID_MAX or out["chi2_max"] > CHI2_MAX or out["amp_cv"] > AMP_CV_MAX
-                              or out["phase_rms"] > PHASE_RMS_MAX or len(good) < len(maps) - 1)
-        return out
-
-    def run_maps(self, plan: dict, energies=ENERGIES_V) -> list[dict]:
-        """A map at each energy. One whose edge began further from the centre than the rule allows
-        (the sample moved faster than it was told) is taken again at once, with the edge's
-        position now known."""
-        self.v.act("lockin", on=True, amplitude_mv=10.0)
-        for e in energies:
-            m = self.take_map(plan, e)
-            if m.get("start_nm", 0.0) > START_MAX_NM:
-                self.maps.append(m)
-                self.log["retaken"] = self.log.get("retaken", 0) + 1
-                m = self.take_map(plan, e)
-            self.maps.append(m)
-            v = self.edge_velocity()
-            if v is not None and abs(v) > COMP_UPDATE_NM_S:
-                self.set_comp(plan)
-        return self.maps
-
-    def prepare(self, plan: dict, n_rep: int, chk: dict | None = None) -> int:
-        """Find the edge again, judge the tip by a trial map (and repair it while the map says it is
-        not sound, ``MAX_REPAIRS`` times at most over the session), programme the drift
-        compensation. Returns the repairs made so far."""
-        chk = chk or self.check_place(plan)
-        plan["centre"] = chk["centre"]
-        while True:
-            fit = self.trial_map(plan)
-            if fit.get("ok") and fit["chi2_red"] <= CHI2_TRIAL:
-                break
-            if n_rep >= MAX_REPAIRS or self.ops.now() > BUDGET_STOP_S:
-                break
-            n_rep += 1
-            self.repair_tip(plan, n_rep)
-            chk = self.check_place(plan)
-            plan["centre"] = chk["centre"]
         self.set_comp(plan)
         return n_rep
 
