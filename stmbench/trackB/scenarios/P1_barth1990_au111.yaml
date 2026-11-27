@@ -13,7 +13,13 @@ initial:
   bias_v: 0.1
   setpoint_a: 50.0e-12
   tip: {radius_nm: 1.5, apex_sigma_nm: 0.07, lambda_per_s: 2.0e-4}
-  surface: {contamination: 0.0, adsorbate_density_per_um2: 150.0, terrace_median_nm: 250.0}
+  surface:
+    contamination: 0.0
+    adsorbate_density_per_um2: 150.0
+    terrace_median_nm: 250.0
+    # the lines bend at the elbows without a jump, as in the paper (stmsim/physics/herringbone.py;
+    # a fixed choice, no random draw)
+    herringbone: {elbow: continuous}
 faults: []
 task: |
   样品是退火良好的 Au(111)/mica，已在隧穿态；请复现 Barth 等 1990 年对 Au(111) 22×√3 重构的
@@ -29,9 +35,13 @@ task_en: >-
 budget: {sim_hours: 3.0, wire_cmds: 400000}
 hidden:
   herringbone:
-    period_nm: [6.0, 6.6]
-    chevron_period_nm: [22.0, 34.0]
-    arm_half_angle_deg: [8.0, 18.0]
+    # Barth et al. 1990: lines bending by +-120 deg (arms 60 deg apart: alpha = 30 deg, the rows of the
+    # top layer turned ~1.5-2 deg against the bulk, p. 9312), ~250 A between elbow lines (one arm; a
+    # full zigzag ~500 A, ~200 A in a less ordered area, p. 9311), 63 A between the lines of an arm
+    # (T cos alpha, p. 9310). Ranges set 2026-11-27; draws and their order unchanged.
+    period_nm: [6.9, 7.6]
+    chevron_period_nm: [40.0, 60.0]
+    arm_half_angle_deg: [28.0, 32.0]
     amp_pm: [8.0, 15.0]
     second_harmonic: [0.1, 0.4]
     domain_spacing_nm: [200.0, 500.0]
