@@ -60,10 +60,20 @@ LOBE_MIN_SEP_DEG = 35.0
 #: radius (cycles/nm) of the disc around an arm's wavevector over which its comb is summed, and
 #: the estimator: the power-weighted mean of |k| in the disc. Chosen on 30 synthetic continuous
 #: zigzags of the P1 ranges (120 nm windows, 0.4 nm/px, 3 pm noise), against 0.03 / 0.06 and the
-#: length of the vector centroid: this one has p90 0.045 nm and max 0.052 nm error (a steady
-#: +0.03 nm); 0.03 gives max 0.097, 0.06 a +0.05 bias, the vector centroid +0.05 (it is shortened
-#: by the comb's angular spread)
+#: length of the vector centroid: before the bias correction below this one had max 0.052 nm error
+#: (a steady +0.03 nm); 0.03 gave max 0.097, 0.06 a +0.05 bias, the vector centroid +0.05
 COMB_RADIUS = 0.045
+#: the comb is not symmetric about its arm's wavevector: the continuous bend sends the line's
+#: wavevector through the values between the two arms at every elbow, which leaves a skirt of power
+#: on the side of the mean direction (the comb's centroid sits ~0.002 /nm short of the arm along the
+#: stripes, 0.5 % of |k| after the geometry). The skirt makes the |k| centroid short. Measured on 80
+#: synthetic zigzags of P1's ranges (the field's own height expression, 120 nm windows, 0.4 nm/px,
+#: 3 pm noise, 2026-11-27): true |k| over the centroid's is 1 + mean 0.49 %, std 0.14 %, range
+#: 0.25..0.90 % (larger as the chevron gets shorter). It is a property of the estimator on this kind
+#: of field, not of a seed; correcting it takes 0.03 nm out of the period (synthetic error then p90
+#: 0.014 nm, max 0.021). A mode or a smoothed-envelope peak was tried and is worse (+0.05 nm bias,
+#: p90 0.09-0.19 nm); the vector centroid is +0.05 nm
+COMB_K_BIAS = 0.0049
 #: an arm counts when its comb holds this fraction of the strongest comb's power, and its mean
 #: power density is this many times the median of the band
 ARM_REL_POWER_MIN = 0.12
@@ -332,7 +342,7 @@ def find_arms(z: np.ndarray, nm_per_px: float, *, band_period_nm: tuple[float, f
         if pw < ARM_REL_POWER_MIN * top or q < ARM_QUALITY_MIN:
             continue
         arms.append(Arm(direction_deg=(math.degrees(math.atan2(ky, kx)) + 90.0) % 180.0,
-                        period_nm=1.0 / kabs, power=pw / top, quality=q, kx=kx, ky=ky))
+                        period_nm=1.0 / (kabs * (1.0 + COMB_K_BIAS)), power=pw / top, quality=q, kx=kx, ky=ky))
     return arms, background
 
 

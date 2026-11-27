@@ -54,7 +54,7 @@ def test_a_window_reads_both_arms_with_the_arm_period_at_the_corners_of_the_rang
     z, _, pa, _, _ = zigzag(T=T, alpha_deg=alpha, L=L, stripe_deg=sd, noise=3e-12, amp=10e-12, pv=0.4)
     a = hb.assess_window(z, 0.4)
     assert a.verdict == "ok" and a.n_arms == 2, a.reason
-    assert abs(a.period_along_arm_nm - pa) < 0.08                 # the claim allows 0.15
+    assert abs(a.period_along_arm_nm - pa) < 0.04                 # the claim allows 0.15
     arms = sorted(arm.direction_deg for arm in a.arms)
     want = sorted([(sd + alpha) % 180.0, (sd - alpha) % 180.0])
     assert all(angle_err(x, y) < 2.5 for x, y in zip(arms, want))
@@ -74,7 +74,7 @@ def test_random_draws_of_the_ranges_give_period_and_directions():
         errs.append(abs(a.period_along_arm_nm - pa))
         want = [(sd + al) % 180.0, (sd - al) % 180.0]
         derrs += [min(angle_err(arm.direction_deg, t) for t in want) for arm in a.arms]
-    assert max(errs) < 0.08 and max(derrs) < 2.5
+    assert max(errs) < 0.04 and max(derrs) < 2.5
 
 
 def test_a_step_a_row_jump_and_noise():
