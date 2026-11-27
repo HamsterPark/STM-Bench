@@ -27,14 +27,22 @@ Protocol:
 
 A tip changes spontaneously during a session (on seed 0 the conditioned single apex turned
 double within ~700 s, and a double tip puts a ghost of the edge into the maps, which read k 1 %
-high): after every
-frame the tip is checked and a frame taken with a changed tip is retaken after conditioning.
-Only the forward lines are used (:func:`_profile`). A frame whose dI/dV channel is blank is
-retaken.
+high): after every frame the tip is checked and a frame taken with a changed tip is retaken
+after conditioning. Only the forward lines are used (:func:`_profile`). A frame whose dI/dV
+channel is blank is retaken.
 
-On seeds 0-29 (the draws of 2026-11-27, this physics): 30/30 reproduced, |E0 error| p90 1.9 meV
-(max 2.4), |m* error| p90 0.7 % (max 0.9 %), 1217 s of instrument time (median; p90 1401 s),
-about 25 s of wall clock per seed. Every terrace was >= 60 nm wide.
+The edge is taken where it runs along the mean step direction (``MAX_SLOPE``, 1.5 deg), so
+the rows cross it along its local normal as well as the mean one, and the profile reads the
+true wavelength whichever of the two distances the step's wave is a function of (the two differ
+by sqrt(1 + w'^2) - 1 < 0.04 % there). The simulator uses the distance across the local edge
+since 2026-11-27 and the distance along the mean normal before; across that change the results
+moved within their noise (|m* error| p90 0.65 % before, 0.66 % after).
+
+On seeds 0-29, run locally at df705e6 (2026-11-27, the simulator with both surface-state fixes
+of that day): 30/30 reproduced, |E0 error| p90 2.0 meV (max 2.3), |m* error| p90 0.7 % (max
+0.85 %), 1213 s of instrument time (median; p90 1401 s), about 25 s of wall clock per seed.
+Every terrace was >= 60 nm wide. The validation run on khwu is recorded in docs/DESIGN.md
+(section 9.10) and docs/results/p2_reference_seeds_0-29.json.
 """
 from __future__ import annotations
 
@@ -190,10 +198,11 @@ def run(seed: int, out_dir: str | Path | None = None) -> dict:
             continue
         prof = _profile(inst, r["frame"], nm_per_px)
         if prof is None:
-            # A blank (NaN) map: scipy 1.18.1's struve(0, z) has a numerical hole at z = 25.765
-            # and one pixel landing on it blanks the whole channel (the lock-in reference is the
-            # frame mean). Retaking moves the pixels. Once the hole is fixed this never fires;
-            # it is capped so that a map that is bad for another reason cannot loop.
+            # A blank (NaN) map: scipy 1.18.1's struve(0, z) has a numerical hole at z = 25.765,
+            # and one pixel landing on it blanked the whole channel (the lock-in reference is the
+            # frame mean). The simulator steps over the hole since 2026-11-27
+            # (surface_state._struve0), so this no longer fires; it is kept, capped, for a map
+            # that is blank or edgeless for another reason, so that such a map cannot loop.
             blank += 1
             if blank > MAX_RETAKES:
                 raise RuntimeError(f"map at {e:+.2f} V unusable: {blank} blank or edgeless maps in "
