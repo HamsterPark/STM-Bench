@@ -167,7 +167,42 @@ def test_a_sheet_is_scored_by_the_judges_checks_on_hand_made_truths():
     both = A.sheet_pass(_CLAIMS, {"lo": -240.0, "hi": -236.0, "r": 8.4}, _truths(([-238, -150, -100], 8.4)))
     assert not both.any()                                   # both answers land on rank 0: not distinct
     with pytest.raises(ValueError, match="not scored"):
-        A.sheet_pass([{"id": "a", "kind": "angle"}], {"a": 0.0}, [{"a": 1.0}])
+        A.sheet_pass([{"id": "a", "kind": "count"}], {"a": 0.0}, [{"a": 1.0}])
+
+
+_ANGLES = [{"id": "a", "kind": "angle", "truth": "orientation_at", "tol": {"abs": 4, "mod": 180}},
+           {"id": "b", "kind": "angle", "truth": "orientation_at", "tol": {"abs": 4, "mod": 180},
+            "distinct_from": {"claim": "a", "min_sep_deg": 30}}]
+
+
+def _local(a: float, b: float) -> dict:
+    """The truths of a local claim at two places, as _sample_seed records them."""
+    return {"a": {"stripe_deg": a, "accept": [a]}, "b": {"stripe_deg": b, "accept": [b]}}
+
+
+def test_an_angle_sheet_is_scored_by_the_judges_checks_on_hand_made_truths():
+    t = [_local(10.0, 70.0),       # both within 4 degrees, the places 60 degrees apart: pass
+         _local(178.0, 58.0),      # 10 vs 178 is 12 degrees apart (mod 180): fail
+         _local(12.0, 68.0),       # both within 2 degrees: pass
+         _local(10.0, 30.0),       # b is 40 degrees off: fail
+         _local(10.0, 10.0)]       # the two places on one arm (truths 0 degrees apart): fail
+    ok = A.sheet_pass(_ANGLES, {"a": 10.0, "b": 70.0}, t)
+    assert ok.tolist() == [True, False, True, False, False]
+    wrap = A.sheet_pass(_ANGLES, {"a": 178.0, "b": 58.0}, [_local(1.0, 60.0)])
+    assert wrap.tolist() == [True]                          # 178 is 3 degrees from 1 (mod 180)
+    either = [{"a": {"stripe_deg": 0.0, "accept": [0.0, 30.0, 150.0]}, "b": {"stripe_deg": 60.0, "accept": [60.0]}}]
+    assert A.sheet_pass(_ANGLES, {"a": 31.0, "b": 61.0}, either).tolist() == [True]   # any accepted direction
+    assert A.sheet_pass(_ANGLES, {"a": 10.0, "b": 70.0}, [{"a": None, "b": {"stripe_deg": 70.0, "accept": [70.0]}}]
+                        ).tolist() == [False]               # no truth at a place: fail, as the judge
+
+
+def test_p1s_rescored_in_sample_fraction_equals_the_searchs_own():
+    """The hold-out estimate scores P1's angle claims and their distinct_from rule as the search does."""
+    res = A.audit_scenario(SCEN / "P1_barth1990_au111.yaml", 40, holdout=True)
+    h = res["holdout"]
+    assert h["in_sample"]["pass_frac"] == pytest.approx(h["in_sample"]["search_frac"])
+    assert h["in_sample"]["pass_frac"] == pytest.approx(res["joint_measure"]["pass_frac"])
+    assert h["selection"]["n"] == 20 and h["held_out"]["n"] == 20
 
 
 def test_wilson_interval_matches_known_values():
