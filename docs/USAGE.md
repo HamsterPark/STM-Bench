@@ -577,6 +577,9 @@ P3's repair spectra in 43 %, P2 in 16 % (all knowledge claims) and P5 in 13 %;
 P1's measurement claims together passed 4.3 %. After recalibration on 2026-10-13 against
 their reference solutions (below), the joint value-check acceptance rates for P5 and P3
 were 4.3 % each.
+P1's orientation claims, judged since 2026-11-27 on the line direction at the reported place
+with a 3° tolerance, pass together 0.70 % in-sample on seeds 0–1999 and 0.20 % held out
+(`--holdout`: the sheet chosen on seeds 0–999, scored on 1000–1999).
 
 ### Reference solutions
 

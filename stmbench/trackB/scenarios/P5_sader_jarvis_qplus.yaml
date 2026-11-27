@@ -100,7 +100,7 @@ notes: |
   (physisorption to chemisorption), a 7–25 /nm (decay 40–143 pm) — so that F_min spans
   roughly −55…−785 pN and E_b 50–540 meV. Chance (best fixed sheet, exact, seeds 0–299):
   F_min 16.0 %, decay 17.7 %, E_b 21.0 %, all three 4.3 % (was 14.0 % at the old draws and
-  a 25 % decay tolerance).
+  a 25 % decay tolerance; re-run 2026-11-27 on code efbf454, khwu: unchanged).
 
   Background subtraction is defined the way an experimenter does it: the atom curve minus the
   clean-surface curve at the same tip height. The van der Waals term is common to both and
