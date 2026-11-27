@@ -186,11 +186,21 @@ def _scan_area(s: Session, cx_nm: float, cy_nm: float, size_nm: float):
 
 
 def _best_window(res):
-    """The window whose direction to report: two resolved arms and the highest peak quality; else
-    a single arm's."""
+    """The window whose direction to report. Windows with two resolved arms (their mean is the
+    domain's direction) when there are at least three, else every measurable window; the direction
+    is the median over them, and the window reported is the one nearest to it (highest peak
+    quality on a tie). One window alone can mislead: when the arms are 8 degrees apart, a window
+    whose two peaks are only 1.7 FFT bins apart pulls them together (seed 17 of the calibration
+    read an arm and the mean peak as the pair, 4.7 degrees off); the others in the frame agree."""
     ok = [a for a in res if a.verdict == "ok"]
-    pool = ok or [a for a in res if a.verdict == "one_arm"]
-    return max(pool, key=lambda a: a.quality) if pool else None
+    pool = ok if len(ok) >= 3 else [a for a in res if a.measurable]
+    if not pool:
+        return None
+    ref = pool[0].direction_deg
+    dev = [((a.direction_deg - ref + 90.0) % 180.0) - 90.0 for a in pool]
+    med = float(np.median(dev))
+    order = sorted(range(len(pool)), key=lambda i: (round(abs(dev[i] - med), 1), -pool[i].quality))
+    return pool[order[0]]
 
 
 def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARIO) -> dict:
