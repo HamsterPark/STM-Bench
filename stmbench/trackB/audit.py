@@ -88,6 +88,12 @@ def _sample_seed(args) -> dict:
         if c.get("truth") == "orientation_at":
             x, y = spots[cid]
             info = w.surface.orientation_at(x * 1e-9, y * 1e-9) or {}
+            if c.get("local"):
+                # judged on the line direction at the place (one arm = one domain): it alone is the
+                # truth, the accepted answer and what a distinct_from compares
+                local = info.get("stripe_local_deg")
+                out[cid] = None if local is None else {"stripe_deg": float(local), "accept": [float(local)]}
+                continue
             stripe = info.get("stripe_deg")
             out[cid] = None if stripe is None else {
                 "stripe_deg": float(stripe), "accept": [float(stripe), *map(float, info.get("arms_deg") or [])]}

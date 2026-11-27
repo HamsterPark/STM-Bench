@@ -157,6 +157,50 @@ def test_two_domains_must_really_be_two_domains():
     assert two.success
 
 
+def test_one_arm_is_one_domain_and_neighbouring_arms_are_two():
+    """``local: true`` (P1 since 2026-11-27, the user's choice): as in Barth et al. 1990
+    ("rotational domains are arranged in a zigzag pattern"), each arm of the zigzag is a
+    rotational domain, and the truth is the direction of the lines at the reported place. Two
+    neighbouring arms are two domains; two places on one arm are one; the zigzag's mean direction,
+    30 deg off every line, is not the answer."""
+    from stmsim.physics.herringbone import HerringboneParams
+    from stmsim.physics.surface import Surface
+    params = HerringboneParams.from_nm({"period_nm": 7.3, "chevron_period_nm": 50.0, "arm_half_angle_deg": 30.0,
+                                        "amp_pm": 12.0, "elbow": "continuous"})
+    surf = Surface("Au(111)", seed=7, adsorbate_density_per_um2=0.0, herringbone=params)
+    th = surf.site.lattice_angle + math.pi / 6
+
+    def at(v_nm):                                    # a place at u = 0, v along the lines (nm)
+        return -v_nm * math.sin(th), v_nm * math.cos(th)
+
+    def orientation_at(x, y):
+        return surf.orientation_at(x * 1e-9, y * 1e-9)
+
+    claims = [_angle_claim("domain_a_orientation_deg", local=True),
+              _angle_claim("domain_b_orientation_deg", local=True,
+                           distinct_from={"claim": "domain_a_orientation_deg", "min_sep_deg": 30})]
+
+    def verdict(va, vb):
+        (xa, ya), (xb, yb) = at(va), at(vb)
+        la, lb = orientation_at(xa, ya)["stripe_local_deg"], orientation_at(xb, yb)["stripe_local_deg"]
+        rep = _report(domain_a_orientation_deg=(la, xa, ya), domain_b_orientation_deg=(lb, xb, yb))
+        return judge("claims_verified", _truth(), claims=claims, report=rep, events=[FRAME],
+                     orientation_at=orientation_at), la, lb
+
+    two, la, lb = verdict(-12.5, 12.5)               # the middle of two neighbouring arms (L/2 = 25 nm)
+    assert angle_diff(la, lb) == pytest.approx(60.0, abs=0.01)
+    assert two.success
+    one, la, lb = verdict(10.0, 15.0)                # two places on one arm
+    assert la == pytest.approx(lb)
+    assert not one.success and one.details["claims"]["domain_b_orientation_deg"]["distinct_from_failed"]
+    x, y = at(12.5)
+    mean = orientation_at(x, y)["stripe_deg"]
+    assert angle_diff(mean, orientation_at(x, y)["stripe_local_deg"]) == pytest.approx(30.0, abs=0.01)
+    v = judge("claims_verified", _truth(), claims=[_angle_claim(local=True)],
+              report=_report(stripe_orientation_deg=(mean, x, y)), events=[FRAME], orientation_at=orientation_at)
+    assert not v.success
+
+
 # ── drift mapping ────────────────────────────────────────────────────────────
 def test_reported_position_is_mapped_through_the_frame_drift():
     drifted = {**FRAME, "drift_m": [7e-9, -3e-9]}

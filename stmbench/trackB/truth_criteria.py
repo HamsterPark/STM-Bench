@@ -316,7 +316,14 @@ def claims_verified(truth: dict, thr: dict | None = None, *, claims=(), report=N
                     sx, sy = C.to_sample_frame(fr, float(rep["x_nm"]), float(rep["y_nm"]))
                     truth_val = orientation_at(sx, sy) if callable(orientation_at) else None
                 info["sample_xy_nm"] = [sx, sy]
-                if isinstance(truth_val, dict):
+                if isinstance(truth_val, dict) and claim.get("local"):
+                    # one rotational domain is one arm of the zigzag (Barth et al. 1990: "rotational
+                    # domains are arranged in a zigzag pattern"): the truth is the direction of the
+                    # lines at the reported place, and only that one; a distinct_from compares these
+                    truth_val = truth_val.get("stripe_local_deg")
+                    if truth_val is not None:
+                        info["accept_deg"] = [round(float(truth_val), 3)]
+                elif isinstance(truth_val, dict):
                     accept = list(truth_val.get("arms_deg") or [])
                     truth_val = truth_val.get("stripe_deg")
                     if truth_val is not None:
