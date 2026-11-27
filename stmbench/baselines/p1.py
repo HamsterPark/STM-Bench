@@ -64,6 +64,11 @@ FALLBACK_ATOM_NM = 140.0
 #: a drift faster than this (nm/min) is a misread (a lattice mismatch, the wrong atom), not used
 DRIFT_MAX_NM_MIN = 6.0
 RESERVE_S = 600.0
+#: no further survey is taken when less than this is left (s): a survey is 800 s and the sites need ~1500
+SURVEY_RESERVE_S = 3600.0
+#: pairs of sites tried, and the distance within which a site that could not be read rules out its neighbours (nm)
+MAX_ATTEMPTS = 3
+FAILED_NM = 50.0
 #: frames are added on a site (offsets from its first, nm) until this many two-arm windows give a period
 MIN_PERIODS = 8
 EXTRA_OFFSETS_NM = ((45.0, 0.0), (-45.0, 0.0), (0.0, 45.0), (0.0, -45.0))
@@ -279,26 +284,36 @@ def play(v: Blind, log: dict) -> dict | None:
     ops = Ops(v, log)
     ops.poke_near(3)
     surveys: list[Survey] = []
-    pair = None
     here = ops.home
-    for k, (dx, dy) in enumerate(SURVEY_CENTRES[:5]):
-        if ops.budget_s - ops.now() < 3600.0:
-            break
-        surveys.append(take_survey(ops, ops.home[0] + dx, ops.home[1] + dy, log))
-        pair = choose_pair(sites_of(surveys[-1], len(surveys) - 1), (dx, dy))
-        log["surveys"] = len(surveys)
-        if pair is not None:
-            break
-    if pair is None:
-        raise RuntimeError("no two domains found")
-    sv = surveys[pair[0].survey]
-    log["survey_s"] = ops.now()
+    failed: list[Site] = []
     readings: list[Reading] = []
-    for site in sorted(pair, key=lambda s: math.hypot(s.x - here[0], s.y - here[1])):
-        r = read_site(ops, site, log, expect=site.psi)
-        if r is None:
-            raise RuntimeError("a site could not be read")
-        readings.append(r)
+    for attempt in range(MAX_ATTEMPTS):
+        # a pair of sites in one survey; when the surveys so far hold none, the next survey comes first
+        pair = None
+        while True:
+            pool = [s for i, sv in enumerate(surveys) for s in sites_of(sv, i)
+                    if all(s.survey != f.survey or math.hypot(s.x - f.x, s.y - f.y) > FAILED_NM for f in failed)]
+            pair = choose_pair(pool, here)
+            if pair is not None or len(surveys) >= len(SURVEY_CENTRES) or ops.budget_s - ops.now() < SURVEY_RESERVE_S:
+                break
+            dx, dy = SURVEY_CENTRES[len(surveys)]
+            surveys.append(take_survey(ops, ops.home[0] + dx, ops.home[1] + dy, log))
+            log["surveys"] = len(surveys)
+        if pair is None:
+            raise RuntimeError("no two domains found")
+        log["survey_s"] = ops.now()
+        readings = []
+        for site in sorted(pair, key=lambda s: math.hypot(s.x - here[0], s.y - here[1])):
+            r = read_site(ops, site, log, expect=site.psi)
+            if r is None:
+                failed.append(site)
+                log["site_retries"] = log.get("site_retries", 0) + 1
+                break
+            readings.append(r)
+        if len(readings) == 2:
+            break
+    if len(readings) != 2:
+        raise RuntimeError("a site could not be read")
     a, b = readings
     # the sites were chosen 40 degrees or more apart in the survey (domain means); what the frames read can be
     # an arm on either side of the mean, so the survey's means are what must still differ
