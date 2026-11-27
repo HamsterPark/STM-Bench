@@ -526,7 +526,9 @@ class Standing:
         allows (the edge drifts towards the middle of the frame while the series runs)."""
         npx = m["npx"]
         pairs = []
-        for z, d in ((m["zf"], m["df"]), (m["zb"], m["db"])):
+        # forward rows only: the backward ones carry the scanner's hysteresis, up to ~0.3 nm along the row,
+        # which stretches distances by a few percent
+        for z, d in ((m["zf"], m["df"]),):
             ed = crop_edges(z, npx, MAP_NM / 2.0 + m["x_expect"], EDGE_WINDOW_NM, slope_prior)
             if ed["n_good"] >= 20:
                 pairs.append((z, d, ed))
@@ -653,6 +655,14 @@ class Standing:
         want = -plan["side_col"] * EDGE_FROM_CENTRE_NM
         centre = self.predict_centre(plan, MAP_PX * 2 * MAP_LINE_S)
         m = self.scan_map(bias_v, centre, plan["angle_deg"], want)
+        # a dI/dV map that is mostly NaN (a hole in a special function the simulator's step term uses, hit by
+        # a pixel, blanks the whole map) is taken again at the same place; once the simulator is fixed this
+        # never triggers
+        for _ in range(2):
+            if float(np.mean(~np.isfinite(m["df"]))) <= 0.2:
+                break
+            self.log["nan_retakes"] = self.log.get("nan_retakes", 0) + 1
+            m = self.scan_map(bias_v, centre, plan["angle_deg"], want)
         fit = self.fit_map(m, plan["side_col"], self.slope_prior)
         m["fit"] = fit
         plan["centre"] = centre
@@ -876,7 +886,7 @@ def play(v: Blind, log: dict) -> dict:
     log["stage"] = "dispersion"
     disp = s.dispersion()
     log["dispersion"] = {"e0_mev": round(disp["e0_ev"] * 1e3, 1), "m_star": round(disp["m_star"], 4), "e0_err_mev": round(disp["e0_err"] * 1e3, 2),
-                         "m_err": round(disp["m_err"], 4), "dropped": [int(i) for i in disp["dropped"]]}
+                         "m_err": round(disp["m_err"], 4), "dropped": disp["dropped"]}
     log["stage"] = "reported"
     ids = claim_ids(v.task())
     ev = [m["frame"] for m in s.maps]
