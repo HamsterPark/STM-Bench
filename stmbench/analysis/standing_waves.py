@@ -143,10 +143,24 @@ def step_profile(didv: np.ndarray, edges: dict, nm_per_px: float, *, side: int,
     return {"d_nm": d, "y": mean, "sem": sd / np.sqrt(np.maximum(cnt, 1)), "n_rows": len(rows)}
 
 
+def _struve0(z: np.ndarray) -> np.ndarray:
+    """``special.struve(0, z)``, finite everywhere. scipy 1.18.1 returns NaN on an interval about
+    2.5e-5 wide at z = 25.765, and a fit's grid in k lands on it now and then (one NaN in the
+    basis stops the least squares); there the value 1e-4 further out is taken."""
+    h = special.struve(0, z)
+    if np.all(np.isfinite(h)):
+        return h
+    h = np.array(h, dtype=float, copy=True)
+    zz = np.broadcast_to(np.asarray(z, float), h.shape)
+    bad = ~np.isfinite(h)
+    h[bad] = special.struve(0, zz[bad] + 1e-4)
+    return h
+
+
 def _basis(d: np.ndarray, k: float, L: float) -> np.ndarray:
     z = 2.0 * k * d
     damp = np.exp(-2.0 * d / L)
-    return np.column_stack([np.ones_like(d), special.j0(z) * damp, special.struve(0, z) * damp])
+    return np.column_stack([np.ones_like(d), special.j0(z) * damp, _struve0(z) * damp])
 
 
 def _linear_part(d, y, w, k, L):

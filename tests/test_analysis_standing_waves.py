@@ -159,3 +159,17 @@ def test_a_phase_free_fit_survives_an_edge_position_error_that_a_j0_fit_does_not
     fit = fit_step_wave(d, y, k_guess=k_guess(e))
     assert abs(fit["k"] / kt - 1) < 0.005
     assert j0_err > 3 * abs(fit["k"] / kt - 1) and j0_err > 0.01
+
+
+def test_a_fit_whose_grid_crosses_scipys_struve_hole_still_fits():
+    """scipy 1.18.1's struve(0, z) is NaN on ~2.5e-5 at z = 25.765; a fit's grid in k landing on
+    it once stopped the least squares (P2 reference, seeds 0, 18 and 21, 2026-11-27). A profile
+    with a point exactly at 2kd = 25.76537118 for the guessed k fits, and the basis is finite."""
+    from stmbench.analysis.standing_waves import _basis
+
+    k = 1.9
+    d = np.sort(np.append(np.arange(0.6, 17.0, 0.2), 25.76537118 / (2 * k)))
+    assert np.isfinite(_basis(d, k, 40.0)).all()
+    y = 1.0 + 0.3 * special.j0(2 * k * d) * np.exp(-2 * d / 40.0)
+    fit = fit_step_wave(d, y, k_guess=k)
+    assert fit["ok"] and abs(fit["k"] / k - 1) < 0.002
