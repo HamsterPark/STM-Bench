@@ -38,3 +38,16 @@ def test_the_range_line_goes_when_focus_moves_to_another_widget_of_the_window_no
     assert win.field_help.full_text().startswith("tip x")
     win.clearFocus()                                                              # nothing takes the focus: the line stays
     assert win.field_help.full_text().startswith("tip x")
+
+
+def test_the_range_line_is_cleared_when_focus_reaches_the_report_after_a_field_and_a_panel_button(open_window):
+    """Screen trial 25: "pixels: range ..." stayed up from a Scan to the Report steps, because the focus had been on the Scan
+    button, not on the field, when it moved on."""
+    win = open_window("en", seed=3)
+    shots.click(win, shots.widget(win, "act.scan.pixels"))
+    assert win.field_help.full_text().startswith("pixels")
+    shots.widget(win, "run.scan").setFocus()                                   # a button of the panels: the line stays
+    assert win.field_help.full_text().startswith("pixels")
+    win.sidebar.show_tab("report")
+    win.sidebar.report.fields["value"].setFocus()                              # a report field: the line goes
+    assert win.field_help.full_text() == ""
