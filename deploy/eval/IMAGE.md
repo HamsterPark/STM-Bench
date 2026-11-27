@@ -78,7 +78,7 @@ of them.
 - the pristine OSWorld image at `<runner>/vm/base/Ubuntu.qcow2` (`scripts/vm_prep/base/download_base.sh` of the runner
   downloads it, about 24 GB; the build refuses an image with a backing file).
 - the private task list, `tasks.json`, **outside the repository**: `{"<task id>": {"scenario": ..., "seed": ...}, ...}`,
-  21 entries for the evaluation version. Mode 0600. It is read for its shape (and for the task ids, to pick which tasks the
+  9 entries for the first batch, 21 for the full evaluation version (`--expect-tasks` says which; it has no default). Mode 0600. It is read for its shape (and for the task ids, to pick which tasks the
   check boots); no seed is printed, logged or put on a command line.
 
 ## The three inputs, as the build takes them
@@ -100,11 +100,11 @@ of them.
 docker pull happysixd/osworld-docker
 
 # what can be checked without building (also on a machine without KVM: the machine checks then say what is missing)
-deploy/eval/build_image.sh --ref <freeze ref> --tasks <private tasks.json> --runner <runner> --out <new dir> --check-only
+deploy/eval/build_image.sh --ref <freeze ref> --tasks <private tasks.json> --runner <runner> --out <new dir> --expect-tasks 9 --check-only
 
 # the build: pre-flight, source tarball, grading image, VM image, in-VM check
 deploy/eval/build_image.sh --ref <freeze ref> --tasks <private tasks.json> --runner <runner> --out <new dir> \
-    [--scan-click X,Y] [--quick]
+    [--scan-click X,Y] --expect-tasks <N> [--check-scope all-tasks|scenario|quick]
 ```
 
 Steps, in order (`--skip-grader`, `--skip-vm` and `--skip-check` leave one out, for a re-run after a failure):
@@ -118,7 +118,7 @@ Steps, in order (`--skip-grader`, `--skip-vm` and `--skip-check` leave one out, 
    do, starts the console once through `stm-start` for a smoke test and resets it (`smoke.png` is the screenshot), overwrites
    the free space with zeros (so that the deleted private copy of the task list is not recoverable from the image), powers
    the guest down and flattens it into a self-contained qcow2.
-5. **In-VM check**: for the first task of each scenario (`--quick`: one task), a **cold boot of the built image** and
+5. **In-VM check** (`--check-scope`: `all-tasks` by default, one cold boot per task so that every task's `stm-start` runs; `scenario`: the first task of each scenario; `quick`: one task), a **cold boot of the built image** and
    `check_eval_guest.sh --stage <task id>` run as the agent's account (see
    [the guest README](../osworld/README.md#the-evaluation-guest-a-data-copy-and-the-models-own-python)). Output and
    screenshots go to `<out>/check/<task id>/`; every `PASS`, `FAIL` and `NOT-RUN` line is printed. The build exits 0 only if
@@ -295,3 +295,40 @@ they never share a name with the delivered tasks (`stm_p4_atom_*`, `stm_p3_*`) a
 two. They fit the launcher's id pattern (lower case letters, digits and underscores, starting with a letter, at most 48
 characters; the longest planned one has 28) and `stm-start` and the check scripts use them unchanged; the runner's domain
 logic works on the snapshot's `domain` label and on the tasks' directories, not on the id's spelling (the runner's `TaskSet` refuses a duplicate id across data roots, which the prefix rules out).
+
+## The first batch (9 tasks) and the exact dispatch
+
+The first image holds nine tasks, for the in-house collaborators: the P3 measurement, the P3 repair and the P4 families,
+three worlds each. Nothing here says which world is which.
+
+| Family | Task ids |
+|---|---|
+| P3, quantum corral measured | `stm_eval_p3_corral_01`, `stm_eval_p3_corral_02`, `stm_eval_p3_corral_03` |
+| P3, quantum corral repaired first | `stm_eval_p3_corral_repair_01`, `stm_eval_p3_corral_repair_02`, `stm_eval_p3_corral_repair_03` |
+| P4, atom positioning | `stm_eval_p4_atom_01`, `stm_eval_p4_atom_02`, `stm_eval_p4_atom_03` |
+
+The private `tasks.json` of this batch must hold exactly these nine entries (`--expect-tasks 9`; the later 21-task image uses
+21). The in-VM check boots the built image once per task, so all nine `stm-start` calls are run (nine cold boots: 10 to 20
+minutes each in the worst case on a hosted runner, inside the workflow's 360-minute limit but the longest part of the run).
+
+**The dispatch, prepared and not run** (to be used after the user has made the private repository and its token, and after
+the coordinator has confirmed the push with the user; nothing is pushed or triggered before that):
+
+```bash
+# 0. the user: a PRIVATE repository HamsterPark/stm-bench-eval-vm on Hugging Face (suggested name, to be confirmed),
+#    and a fine-grained token with write access to that repository only
+# 1. the secrets (the commands read the secret from a file or the prompt; none is passed on a command line)
+gh secret set STM_EVAL_TASKS_JSON --repo HamsterPark/OSWorld-Science < <private tasks.json of the 9 tasks>
+gh secret set HF_EVAL_VM_TOKEN    --repo HamsterPark/OSWorld-Science
+# 2. push the runner branch eval-guest-check to the fork, and the freeze commit of STM-Bench to HamsterPark/STM-Bench
+# 3. start it (inputs: stm_commit = the 40 hex digits of the freeze commit; expect_tasks has no default)
+gh workflow run build-stm-eval.yml --repo HamsterPark/OSWorld-Science --ref eval-guest-check \
+    -f stm_commit=<40 hex> -f expect_tasks=9 -f destination=hf -f upload_repo=HamsterPark/stm-bench-eval-vm \
+    -f check_scope=all-tasks -f scan_click=<X,Y>
+# 4. afterwards: gh secret delete STM_EVAL_TASKS_JSON --repo HamsterPark/OSWorld-Science
+```
+
+The secrets are `STM_EVAL_TASKS_JSON` and `HF_EVAL_VM_TOKEN` (for the Google Drive fallback instead:
+`GDRIVE_EVAL_CLIENT_ID`, `GDRIVE_EVAL_CLIENT_SECRET`, `GDRIVE_EVAL_TOKEN`, with `-f destination=gdrive -f gdrive_folder=<name>`).
+`scan_click` is read off a screenshot of the console first (see "Build"); without it the check's CSV step is `NOT-RUN`
+and the check does not pass.

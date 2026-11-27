@@ -26,10 +26,11 @@
 #   --vm-dir DIR     the runner's vm directory (default <runner>/vm); needs base/Ubuntu.qcow2, the pristine OSWorld image
 #                    (scripts/vm_prep/base/download_base.sh of the runner puts it there). Images are built under images/.
 #   --port N         control port of the build guest (default 5191)
-#   --expect-tasks N refuse a task list that does not hold exactly N tasks (default 21; 0 = any)
+#   --expect-tasks N REQUIRED: refuse a task list that does not hold exactly N tasks (9 for the first batch, 21 later); no default, so that a wrong list cannot pass by omission
 #   --scan-click X,Y position of the console's Scan button for the in-VM check's CSV step (IMAGE.md: how to read it off a
 #                    screenshot); without it that step is reported NOT-RUN and the check does not pass
-#   --quick          check one task only after the build (default: one per scenario, a cold boot each)
+#   --check-scope S  all-tasks (default: a cold boot of the built image for every task of the list, so that every task's stm-start is
+#                    run), scenario (one task per scenario) or quick (one task); --quick is the same as --check-scope quick
 #   --check-only     do the pre-flight (inputs and machine) and print every check's result, build nothing
 #   --skip-grader / --skip-vm / --skip-check   leave that step out (a re-run after a failure)
 # Environment: STM_TASKS_JSON, OSCI_RUNNER_DIR, OSCI_VM_DIR stand in for --tasks, --runner, --vm-dir; PYTHON (default python3).
@@ -41,7 +42,7 @@ REPO=$(cd "$HERE/../.." && pwd -P)
 PYTHON=${PYTHON:-python3}
 
 REF=""; TASKS=${STM_TASKS_JSON:-}; RUNNER=${OSCI_RUNNER_DIR:-}; OUT=""; VMDIR=${OSCI_VM_DIR:-}
-PORT=5191; EXPECT=21; SCAN_CLICK=""; QUICK=0; CHECK_ONLY=0; DO_GRADER=1; DO_VM=1; DO_CHECK=1
+PORT=5191; EXPECT=""; SCAN_CLICK=""; SCOPE=all-tasks; CHECK_ONLY=0; DO_GRADER=1; DO_VM=1; DO_CHECK=1
 usage() { sed -n '2,/^set -euo/p' "$0" | sed 's/^# \{0,1\}//' | head -n -1; }
 die() { echo "build_image: $*" >&2; exit 2; }
 while [ $# -gt 0 ]; do
@@ -54,7 +55,8 @@ while [ $# -gt 0 ]; do
     --port) PORT=${2:?}; shift 2;;
     --expect-tasks) EXPECT=${2:?}; shift 2;;
     --scan-click) SCAN_CLICK=${2:?}; shift 2;;
-    --quick) QUICK=1; shift;;
+    --quick) SCOPE=quick; shift;;
+    --check-scope) SCOPE=${2:?}; shift 2;;
     --check-only) CHECK_ONLY=1; shift;;
     --skip-grader) DO_GRADER=0; shift;;
     --skip-vm) DO_VM=0; shift;;
@@ -69,7 +71,10 @@ done
 [ "$DO_VM" = 0 ] && [ "$DO_GRADER" = 0 ] && [ "$CHECK_ONLY" = 0 ] && die "nothing to build"
 case "$OUT" in *[[:space:]]*) die "--out must not contain whitespace (it is passed through a word-split variable)";; esac
 case "$SCAN_CLICK" in ""|[0-9]*,[0-9]*) ;; *) die "--scan-click wants X,Y in pixels";; esac
+[ -n "$EXPECT" ] || die "--expect-tasks N is required (the number of tasks the list must hold)"
 case "$PORT$EXPECT" in *[!0-9]*) die "--port and --expect-tasks are numbers";; esac
+[ "$EXPECT" -ge 1 ] || die "--expect-tasks must be at least 1"
+case "$SCOPE" in all-tasks|scenario|quick) ;; *) die "--check-scope is all-tasks, scenario or quick";; esac
 
 say() { echo "[build_image $(date +%H:%M:%S)] $*"; }
 BAD=0
@@ -134,7 +139,7 @@ for tid, e in tasks.items():
     if not ok:
         sys.exit("a task entry is malformed or names a scenario the commit does not have (entry not shown)")
     used.add(e["scenario"])
-if expect and len(tasks) != expect:
+if len(tasks) != expect:
     sys.exit(f"{len(tasks)} tasks, expected {expect} (--expect-tasks)")
 print(f"{len(tasks)} tasks over {len(used)} scenarios")
 PY
@@ -250,7 +255,7 @@ if [ "$DO_CHECK" = 1 ]; then
   [ -s "$OUT/ubuntu_stm_eval.qcow2" ] || { echo "no image to check at $OUT/ubuntu_stm_eval.qcow2"; exit 1; }
   say "in-VM check (a cold boot per scenario; screenshots in $OUT/check)"
   ARGS=(--image "$OUT/ubuntu_stm_eval.qcow2" --guest-dir "$WORK/src/deploy/osworld/guest" --out "$OUT/check" --port "$PORT")
-  [ "$QUICK" = 1 ] && ARGS+=(--quick)
+  ARGS+=(--scope "$SCOPE")
   [ -z "$SCAN_CLICK" ] || ARGS+=(--scan-click "$SCAN_CLICK")
   ( cd "$RUNNER" && STM_TASKS_JSON="$TASKS" OSCI_VM_DIR="$VMDIR" uv run python scripts/vm_prep/stm_eval/check_image.py "${ARGS[@]}" ) \
     2>&1 | tee "$OUT/check.log" || true
