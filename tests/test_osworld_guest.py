@@ -29,7 +29,7 @@ ROOT = Path(__file__).resolve().parents[1]
 GUEST = ROOT / "deploy" / "osworld" / "guest"
 P4 = "P4_atom_positioning_cu111"
 SEED = 913275
-TASK = "stm_p4_atom_07"
+TASK = "stm_eval_p4_atom_07"
 
 
 def _load():
@@ -70,8 +70,9 @@ def box(tmp_path):
     fake = tmp_path / "fake_console.py"
     fake.write_text(FAKE, encoding="utf-8")
     (private / "tasks.json").write_text(json.dumps({TASK: {"scenario": P4, "seed": SEED},
-                                                    "stm_p4_atom_08": {"scenario": P4, "seed": SEED + 1}}))
+                                                    "stm_eval_p4_atom_08": {"scenario": P4, "seed": SEED + 1}}))
     cfg = L.Config(run_dir=run, private_dir=private, export_dir=export, home=tmp_path / "home",
+                   data_dir=tmp_path / "data",
                    console_cmd=[sys.executable, str(fake)], extra_env={"FAKE_SEEN": str(tmp_path / "seen.json")})
     return cfg
 
@@ -108,7 +109,7 @@ def wait_for(pred, timeout=10.0):
 
 
 # ── parsing ──
-@pytest.mark.parametrize("raw", [b"stm_p4_atom_01", b"stm_p4_atom_01\n", b"  stm_p4_atom_01 \r\n", b"a", b"a" * 48])
+@pytest.mark.parametrize("raw", [b"stm_eval_p1_herringbone_02", b"stm_eval_p4_atom_01", b"stm_eval_p4_atom_01\n", b"  stm_eval_p4_atom_01 \r\n", b"a", b"a" * 48])
 def test_a_task_id_is_lower_case_letters_digits_and_underscores(raw):
     assert L.parse_request(raw) == raw.strip().decode()
 
@@ -199,7 +200,7 @@ def test_the_same_id_again_changes_nothing_and_another_id_is_refused(running):
     write_request(cfg, (TASK + "\n").encode())
     time.sleep(0.3)
     assert running.child is not None and running.child.pid == pid and not cfg.error.exists()
-    write_request(cfg, b"stm_p4_atom_08\n")
+    write_request(cfg, b"stm_eval_p4_atom_08\n")
     assert wait_for(cfg.error.exists)
     assert "already started" in cfg.error.read_text()
     assert running.child.pid == pid and cfg.task.read_text().strip() == TASK
@@ -249,7 +250,7 @@ def test_a_request_without_a_newline_waits_and_an_overlong_one_is_dropped(box):
     launcher = L.Launcher(box)
     launcher.setup()
     try:
-        assert launcher.feed(b"stm_p4") == []
+        assert launcher.feed(b"stm_eval_p4") == []
         assert launcher.feed(b"_atom_07\n") == ["started"]
         launcher.stop_console()
         launcher.child = None
@@ -273,7 +274,7 @@ def test_stm_start_waits_for_the_console_and_exits_0(running):
     assert r.returncode == 0 and "up" in r.stdout and str(SEED) not in r.stdout + r.stderr
     again = run_start(running.cfg, TASK)                  # a second call: already up
     assert again.returncode == 0
-    assert run_start(running.cfg, "stm_p4_atom_08").returncode == 1
+    assert run_start(running.cfg, "stm_eval_p4_atom_08").returncode == 1
 
 
 @pytest.mark.parametrize("args", [(), ("a", "b"), ("Bad",), ("1x",), ("a;b",), ("",)])
@@ -340,6 +341,7 @@ def test_the_unit_and_the_autostart_entry_agree_with_the_launcher_defaults():
     assert unit["Install"]["WantedBy"] == "multi-user.target"
     assert L.Config().run_dir == Path("/run/stm-bench") and L.Config().private_dir == Path("/var/lib/stm-bench/private")
     assert L.Config().export_dir == Path("/var/lib/stm-bench/export")
+    assert L.Config().data_dir == Path("/srv/stm-data")
     desk = configparser.ConfigParser(interpolation=None)
     desk.read(GUEST / "stm-bench-xhost.desktop")
     assert desk["Desktop Entry"]["Exec"] == "xhost +SI:localuser:stm"
@@ -357,6 +359,190 @@ def test_the_installer_scripts_are_valid_bash_and_the_package_list_is_plain():
             if ln.strip() and not ln.startswith("#")]
     assert len(pkgs) == len(set(pkgs)) and all(re.fullmatch(r"[a-z0-9][a-z0-9+.-]+", p) for p in pkgs)
     assert "libxcb-cursor0" in pkgs and "x11-xserver-utils" in pkgs      # Qt >= 6.5's xcb plugin, and xhost
+    assert "python3-numpy" in pkgs and "python3-scipy" in pkgs           # the model's terminal: system Python 3.10
+
+
+# ── the plain-text data copy (the evaluation guest) ──
+def test_the_launcher_makes_the_data_directory_when_it_is_missing_and_opens_it_to_everyone(box):
+    assert not box.data_dir.exists()
+    launcher = L.Launcher(box)
+    launcher.setup()
+    try:
+        assert box.data_dir.is_dir() and stat.S_IMODE(box.data_dir.stat().st_mode) == 0o755
+    finally:
+        launcher.close()
+    box.data_dir.chmod(0o700)                              # a directory that exists with the wrong mode is put right
+    launcher = L.Launcher(box)
+    launcher.setup()
+    try:
+        assert stat.S_IMODE(box.data_dir.stat().st_mode) == 0o755
+    finally:
+        launcher.close()
+
+
+def test_a_start_empties_the_data_directory_and_gives_the_console_its_option(running, tmp_path):
+    cfg = running.cfg
+    (cfg.data_dir / "old.csv").write_text("x\n")
+    (cfg.data_dir / "sub").mkdir()
+    (cfg.data_dir / "sub" / "old2.csv").write_text("x\n")
+    write_request(cfg, (TASK + "\n").encode())
+    assert wait_for(cfg.ready.exists)
+    assert cfg.data_dir.is_dir() and not list(cfg.data_dir.iterdir())          # emptied, itself kept
+    argv = json.loads((tmp_path / "seen.json").read_text())["argv"]
+    assert argv[argv.index(L.DATA_DIR_OPTION) + 1] == str(cfg.data_dir)
+    assert "--export-dir" in argv and "--private-dir" in argv                   # the other options are unchanged
+
+
+def test_the_console_option_is_spelled_in_one_place_only():
+    src = (GUEST / "stm_launcher.py").read_text(encoding="utf-8")
+    assert L.DATA_DIR_OPTION == "--data-dir"
+    assert src.count('"--data-dir"') == 2                  # the constant, and the launcher's own argument of the same name
+
+
+def test_a_console_that_dies_before_its_window_leaves_no_data_behind(running):
+    cfg = running.cfg
+    cfg.extra_env["FAKE_MODE"] = "die"
+    write_request(cfg, (TASK + "\n").encode())
+    (cfg.data_dir / "half.csv").write_text("x\n")
+    assert wait_for(cfg.error.exists)
+    assert "before its window" in cfg.error.read_text()
+    assert wait_for(lambda: not list(cfg.data_dir.iterdir()))
+
+
+def test_after_the_window_was_shown_the_data_copy_is_never_touched(running):
+    cfg = running.cfg
+    write_request(cfg, (TASK + "\n").encode())
+    assert wait_for(cfg.ready.exists)
+    (cfg.data_dir / "scan_001.csv").write_text("a,b\n1,2\n")                    # what the console would have written
+    os.killpg(running.child.pid, 9)
+    assert wait_for(cfg.error.exists) and "ended" in cfg.error.read_text()
+    cfg.error.unlink()
+    write_request(cfg, (TASK + "\n").encode())                                  # a second run is refused, and touches nothing
+    assert wait_for(cfg.error.exists) and "already started" in cfg.error.read_text()
+    assert (cfg.data_dir / "scan_001.csv").read_text() == "a,b\n1,2\n"
+
+
+def test_a_restarted_service_leaves_the_data_copy_as_it_was(box):
+    (box.private_dir / "run").mkdir()
+    (box.private_dir / "run" / "ledger.jsonl").write_text("{}\n")
+    box.data_dir.mkdir()
+    (box.data_dir / "scan_001.csv").write_text("a\n")
+    launcher = L.Launcher(box)
+    launcher.setup()
+    try:
+        assert launcher.feed((TASK + "\n").encode()) == ["refused"]
+        assert (box.data_dir / "scan_001.csv").exists()
+    finally:
+        launcher.close()
+
+
+def test_the_same_id_again_does_not_empty_the_data_copy(running):
+    cfg = running.cfg
+    write_request(cfg, (TASK + "\n").encode())
+    assert wait_for(cfg.ready.exists)
+    (cfg.data_dir / "scan_001.csv").write_text("a\n")
+    write_request(cfg, (TASK + "\n").encode())
+    time.sleep(0.5)
+    assert (cfg.data_dir / "scan_001.csv").exists()
+
+
+def test_without_a_data_directory_the_console_gets_no_option_and_nothing_is_made(box, tmp_path):
+    box.data_dir = None
+    launcher = L.Launcher(box)
+    launcher.setup()
+    try:
+        assert launcher.feed((TASK + "\n").encode()) == ["started"]
+        assert wait_for((tmp_path / "seen.json").exists)
+        argv = json.loads((tmp_path / "seen.json").read_text())["argv"]
+        assert L.DATA_DIR_OPTION not in argv and not (tmp_path / "data").exists()
+    finally:
+        launcher.close()
+
+
+def test_a_data_directory_that_cannot_be_made_refuses_the_request_without_naming_a_path(box):
+    blocker = box.private_dir.parent / "blocker"
+    blocker.write_text("a file where a directory is wanted")
+    box.data_dir = blocker / "stm-data"
+    launcher = L.Launcher(box)
+    launcher.setup()                                       # does not stop the service: install.sh is what makes the directory
+    try:
+        assert launcher.feed((TASK + "\n").encode()) == ["refused"]
+        assert launcher.child is None and "data directory" in box.error.read_text()
+        assert str(blocker) not in box.error.read_text()
+    finally:
+        launcher.close()
+
+
+def test_the_launcher_arguments_name_the_data_directory():
+    cfg = L._config_from_args(["--data-dir", "/tmp/x"])
+    assert cfg.data_dir == Path("/tmp/x")
+    assert L._config_from_args([]).data_dir == Path("/srv/stm-data")
+    assert L._config_from_args(["--no-data-dir"]).data_dir is None
+
+
+def test_stm_bench_reset_empties_the_data_copy_too(tmp_path):
+    """The real script, with its absolute paths pointed into a scratch tree and root, systemctl and pkill stubbed."""
+    text = (GUEST / "stm-bench-reset").read_text(encoding="utf-8")
+    assert "/srv/stm-data" in text
+    root = tmp_path / "t"
+    for d in ("lib/export", "lib/private/run", "data/sub", "run/qt", "bin"):
+        (root / d).mkdir(parents=True)
+    for f in ("lib/export/actions.jsonl", "lib/private/console.log", "lib/private/run/ledger.jsonl", "data/scan.csv",
+              "data/sub/trace.csv", "run/task"):
+        (root / f).write_text("x\n")
+    (root / "lib/private/tasks.json").write_text("{}")
+    body = (text.replace("/var/lib/stm-bench", str(root / "lib")).replace("/srv/stm-data", str(root / "data"))
+            .replace("/run/stm-bench", str(root / "run")).replace('[ "$(id -u)" -eq 0 ] || exec sudo bash "$0" "$@"', ":"))
+    script = root / "reset.sh"
+    script.write_text(body, encoding="utf-8")
+    for stub in ("systemctl", "pkill"):
+        (root / "bin" / stub).write_text("#!/bin/sh\nexit 0\n")
+        (root / "bin" / stub).chmod(0o755)
+    r = subprocess.run(["bash", str(script)], capture_output=True, text=True,
+                       env={**os.environ, "PATH": f"{root / 'bin'}:{os.environ['PATH']}"})
+    assert r.returncode == 0, r.stderr
+    assert (root / "data").is_dir() and not list((root / "data").iterdir())
+    assert not list((root / "lib" / "export").iterdir()) and not (root / "lib" / "private" / "run").exists()
+    assert (root / "lib" / "private" / "tasks.json").exists()                  # the task list is the image's, not the run's
+    assert not list((root / "run").iterdir())
+
+
+def test_install_makes_the_data_directory_stm_owned_and_open_to_read():
+    text = (GUEST / "install.sh").read_text(encoding="utf-8")
+    assert "install -d -m 0755 /srv /srv/stm-data" in text
+    own_line = next(ln for ln in text.splitlines() if ln.startswith('own "$STM_USER:$STM_USER"'))
+    assert "/srv/stm-data" in own_line
+
+
+def test_the_lockdown_leaves_the_terminal_python_and_the_data_copy_alone():
+    """stm-lockdown changes the agent's rights (sudo, polkit, groups) and nothing else: no path, no mode, no python."""
+    text = (GUEST / "stm-lockdown").read_text(encoding="utf-8")
+    code = "\n".join(ln for ln in text.splitlines() if not ln.lstrip().startswith("#"))
+    for word in ("chmod", "chown", "chgrp", "/srv", "/opt", "/usr/bin", "python", "pip", "apt"):
+        assert word not in code, word
+
+
+def test_the_in_guest_check_scripts_parse_and_name_what_the_readme_names():
+    assert subprocess.run(["bash", "-n", str(GUEST / "check_eval_guest.sh")], capture_output=True).returncode == 0
+    compile((GUEST / "check_eval_keyboard.py").read_text(encoding="utf-8"), "check_eval_keyboard.py", "exec")
+    sh = (GUEST / "check_eval_guest.sh").read_text(encoding="utf-8")
+    for needle in ("numpy", "scipy", "/srv/stm-data", "/opt/stm-bench", "/var/lib/stm-bench/private", "tasks.json",
+                   "sudo -n true", "check_eval_keyboard.py", "NOT-RUN"):
+        assert needle in sh, needle
+    kb = (GUEST / "check_eval_keyboard.py").read_text(encoding="utf-8")
+    for needle in ("ctrl", "alt", "tab", "import numpy, scipy", "stmbench-gui"):
+        assert needle in kb, needle
+    for text in (sh, kb):                                  # neither parses the task list (a seed lives there)
+        assert "json.load" not in text
+
+
+@pytest.mark.skipif(os.name != "posix", reason="runs the shell script")
+def test_the_in_guest_check_refuses_a_bad_task_id_and_says_what_it_is():
+    r = subprocess.run(["bash", str(GUEST / "check_eval_guest.sh"), "Bad Id"], capture_output=True, text=True)
+    assert r.returncode == 64 and "check_eval_guest.sh [--stage]" in r.stderr
+    r = subprocess.run(["bash", str(GUEST / "check_eval_guest.sh"), "--scan-click", "x", "stm_eval_p4_atom_01"],
+                       capture_output=True, text=True)
+    assert r.returncode == 64
 
 
 def test_the_pins_are_exact_and_the_defaults_are_the_cautious_ones():
@@ -449,7 +635,11 @@ def test_the_launcher_starts_the_real_sealed_console_and_the_export_appears(tmp_
     private.mkdir(mode=0o700)
     export.mkdir()
     (private / "tasks.json").write_text(json.dumps({TASK: {"scenario": P4, "seed": SEED}}))
-    cfg = L.Config(run_dir=run, private_dir=private, export_dir=export, home=tmp_path / "home",
+    # The console of this checkout may not know the data option yet (it is console-manip's): then it is not passed.
+    gui_help = subprocess.run([sys.executable, "-m", "stmbench.cli", "gui", "--help"], capture_output=True, text=True,
+                              env={**os.environ, "PYTHONPATH": str(ROOT)}).stdout
+    data = tmp_path / "data" if L.DATA_DIR_OPTION in gui_help else None
+    cfg = L.Config(run_dir=run, private_dir=private, export_dir=export, home=tmp_path / "home", data_dir=data,
                    console_cmd=[sys.executable, "-m", "stmbench.cli", "gui"],
                    extra_env={"QT_QPA_PLATFORM": "offscreen", "PYTHONPATH": str(ROOT)})
     launcher = L.Launcher(cfg)
@@ -471,7 +661,53 @@ def test_the_launcher_starts_the_real_sealed_console_and_the_export_appears(tmp_
             if p.is_file():
                 assert str(SEED) not in p.read_text(errors="replace"), p.name
         assert str(SEED) not in r.stdout + r.stderr
+        if data is not None:                                                  # the console accepted the option
+            assert stat.S_IMODE(data.stat().st_mode) == 0o755
+            for p in data.rglob("*"):
+                assert str(SEED) not in p.read_text(errors="replace"), p.name
     finally:
         stop.set()
         th.join(10)
         launcher.close()
+
+
+def test_the_consoles_real_parser_accepts_the_launchers_argv_and_the_data_directory_layout(tmp_path, monkeypatch):
+    """The launcher's argv against stmbench.cli's own argparse (the console is not started): the layout of the image,
+    with the data directory beside /var/lib/stm-bench and not inside the run, private or export directory."""
+    sys.path.insert(0, str(ROOT))
+    try:
+        import stmbench.cli as cli
+    finally:
+        sys.path.remove(str(ROOT))
+    base = tmp_path / "img"
+    private, export, data = base / "var/lib/stm-bench/private", base / "var/lib/stm-bench/export", base / "srv/stm-data"
+    private.mkdir(parents=True, mode=0o700)
+    export.mkdir(parents=True)
+    (private / "tasks.json").write_text(json.dumps({TASK: {"scenario": P4, "seed": SEED}}))
+    cfg = L.Config(run_dir=tmp_path / "run", private_dir=private, export_dir=export, home=tmp_path / "home", data_dir=data)
+    seen = {}
+
+    class FakePopen:
+        def __init__(self, argv, **kw):
+            seen["argv"] = argv
+            self.stdin = type("S", (), {"write": lambda s, b: None, "close": lambda s: None})()
+
+        def poll(self):
+            return None
+
+    launcher = L.Launcher(cfg)
+    launcher.setup()
+    monkeypatch.setattr(L.subprocess, "Popen", FakePopen)
+    try:
+        assert launcher.feed((TASK + "\n").encode()) == ["started"]
+    finally:
+        launcher.child = None
+        launcher.close()
+    argv = seen["argv"]
+    gui_args = argv[argv.index("gui") + 1:]
+    parsed = {}
+    monkeypatch.setattr(cli, "cmd_gui", lambda a: parsed.setdefault("a", a) and 0)
+    assert cli.main(["gui", *gui_args]) == 0
+    a = parsed["a"]
+    assert a.sealed and a.data_dir == str(data) and a.export_dir == str(export) and a.private_dir == str(cfg.episode_dir)
+    assert a.ready_file == str(cfg.ready) and a.lang == "en"

@@ -30,3 +30,6 @@ libxcb-sync1
 libxcb-xfixes0
 libxcb-xinerama0
 libxcb-xkb1
+# The model works in a terminal with the system Python (3.10 on Ubuntu 22.04); the console keeps its own 3.13 in /opt/stm-bench.
+python3-numpy
+python3-scipy
