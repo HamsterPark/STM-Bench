@@ -3,7 +3,7 @@
 
     python build_tree.py --worlds <worlds.json> --out <root> --code <STM-Bench checkout> \
         --adapter <stm_metric.py> --grader-image stmbench-grader:<12 hex> [--fixtures <dir>] \
-        [--max-steps p7=400 ...] [--families p5,p7] [--no-lockdown]
+        [--max-steps p7=400 ...] [--families p3,p3r,p4] [--no-lockdown]
 
 ``worlds.json`` is PRIVATE (it holds seeds): ``{"tasks": {<task id>: {"scenario", "seed", "note"}}}``, where ``note``
 is free text for the maintainers (the starting tip class and what the world was checked for). The repository holds
@@ -158,16 +158,16 @@ def main() -> int:
     ap.add_argument("--grader-image", required=True)
     ap.add_argument("--fixtures", type=Path, help="reference exports (reference_export.py --out)")
     ap.add_argument("--max-steps", nargs="*", default=[], metavar="FAMILY=N", help="override a family's step budget")
-    ap.add_argument("--families", help="comma-separated family keys to build (default: all seven)")
+    ap.add_argument("--families", help="families to build: p1,p2,p3,p3_repair (or p3r),p4,p5,p7 (default: all seven)")
     ap.add_argument("--no-lockdown", action="store_true")
     a = ap.parse_args()
 
     table = json.loads(a.worlds.read_text(encoding="utf-8"))
     table = table.get("tasks", table)
-    keys = a.families.split(",") if a.families else list(F.FAMILIES)
-    bad = [k for k in keys if k not in F.FAMILIES]
-    if bad:
-        print(f"build_tree: unknown family {bad}", file=sys.stderr)
+    try:
+        keys = F.parse_families(a.families)
+    except ValueError as e:
+        print(f"build_tree: {e}", file=sys.stderr)
         return 1
     steps = {k: F.FAMILIES[k]["max_steps"] for k in F.FAMILIES}
     for kv in a.max_steps:
@@ -177,10 +177,14 @@ def main() -> int:
             return 1
         steps[k] = int(n)
     want = [t for t in F.task_ids() if F.family_of(t) in keys]
-    if sorted(table) != sorted(want):
-        print(f"build_tree: {a.worlds.name} must hold exactly the {len(want)} task ids of the chosen families; "
-              f"missing {sorted(set(want) - set(table))}, extra {sorted(set(table) - set(want))}", file=sys.stderr)
+    # a selection may be built from a larger worlds file (the other families' entries are ignored); without a
+    # selection the file must hold exactly the 21 tasks
+    extra = sorted(set(table) - set(want))
+    if set(want) - set(table) or (extra and not a.families):
+        print(f"build_tree: {a.worlds.name} must hold the {len(want)} task ids of the chosen families; "
+              f"missing {sorted(set(want) - set(table))}, extra {extra if not a.families else []}", file=sys.stderr)
         return 1
+    table = {t: table[t] for t in want}
     for tid in want:
         if table[tid].get("scenario") != F.FAMILIES[F.family_of(tid)]["scenario"]:
             print(f"build_tree: task {tid} has the wrong scenario", file=sys.stderr)
@@ -241,7 +245,7 @@ def main() -> int:
             if rr and rr.is_file():
                 shutil.copy(rr, tests / "fixtures" / tid)
 
-    m = manifest(a.out)
+    m = manifest(a.out, keys)
     (a.out / "MANIFEST.stm-fragment.json").write_text(json.dumps(m, indent=2) + "\n", encoding="utf-8")
     print(f"built {dom}: {len(want)} tasks, {len(m)} files, max_steps {steps}, "
           + ", ".join(f"{k} instruction {len(v)} characters" for k, v in sorted(texts.items())))

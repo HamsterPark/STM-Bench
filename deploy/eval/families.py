@@ -242,5 +242,34 @@ def family_of(task_id: str) -> str:
     raise KeyError(task_id)
 
 
+#: short names accepted on the command line
+ALIASES = {"p3r": "p3_repair"}
+
+
+def parse_families(arg: str | None) -> list[str]:
+    """The family keys of a ``--families`` argument (comma-separated; ``p3r`` is ``p3_repair``); all seven if empty."""
+    if not arg:
+        return list(FAMILIES)
+    keys = [ALIASES.get(k.strip(), k.strip()) for k in arg.split(",") if k.strip()]
+    bad = [k for k in keys if k not in FAMILIES]
+    if bad or not keys:
+        raise ValueError(f"unknown family {bad or arg!r}; known: {', '.join(FAMILIES)} (and p3r)")
+    return list(dict.fromkeys(keys))
+
+
+def family_of_path(rel: str) -> str | None:
+    """The family a file of the tree belongs to (by the task id or the grader-test name in its path), else None."""
+    for part in rel.replace("\\", "/").split("/"):
+        name = part[:-5] if part.endswith(".json") else part
+        try:
+            return family_of(name)
+        except KeyError:
+            pass
+        for key, f in FAMILIES.items():
+            if part == f["tests"]:
+                return key
+    return None
+
+
 def task_ids() -> list[str]:
     return [f"{f['prefix']}_{n:02d}" for f in FAMILIES.values() for n in range(1, N_PER_FAMILY + 1)]

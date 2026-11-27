@@ -20,7 +20,8 @@ OSWorld delivery; the ids still match the launcher's pattern `[a-z][a-z0-9_]{0,4
 
 The table is `families.py` (`FAMILIES`), with the shared text constants (`FRAME`, `DATA_SENTENCE`, `SNAPSHOT`,
 `TASK_VERSION`) and each family's two audit texts. The step budgets are provisional until a blind trial fixes them;
-`--max-steps p7=500` overrides one.
+`--max-steps p7=500` overrides one. `--families p3,p3r,p4` (also on `make_tasks_json.py` and `make_fragment.py`) builds and checks
+only the chosen families (`p3r` is `p3_repair`); the first batch of 9 tasks is that selection.
 
 ## Inputs
 
