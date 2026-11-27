@@ -157,11 +157,11 @@ def _linear_part(d, y, w, k, L):
 
 def fit_step_wave(d_nm: np.ndarray, y: np.ndarray, *, k_guess: float, sem: np.ndarray | None = None) -> dict:
     """c + A·[cos φ·J0(2k d) + sin φ·H0(2k d)]·exp(-2 d / L): the standing wave of one straight
-    edge with a complex reflection, multistart in k (±10 %) and φ. Keys: k, k_err, phase, amp,
+    edge with a complex reflection, multistart in k (±20 %) and φ. Keys: k, k_err, phase, amp,
     decay_nm, offset, chi2_red, ok.
 
     Given k and L the model is linear in (c, A cos φ, A sin φ), so φ needs no starting values:
-    it is solved exactly at every trial (variable projection). k is scanned over ±10 % of the
+    it is solved exactly at every trial (variable projection). k is scanned over ±20 % of the
     guess and L over a log grid, the best cell is refined with all parameters free and k_err
     comes from the covariance, scaled by the reduced chi² when that exceeds 1. ``ok`` is False
     for a fit that ran into its bounds or lacks data."""
@@ -184,7 +184,7 @@ def fit_step_wave(d_nm: np.ndarray, y: np.ndarray, *, k_guess: float, sem: np.nd
         sig = np.full(d.size, 1.0)
     w = 1.0 / sig
     L_lo, L_hi = 8.0, 400.0
-    ks = k_guess * np.linspace(0.9, 1.1, 81)
+    ks = k_guess * np.linspace(0.8, 1.2, 161)
     Ls = np.geomspace(L_lo, L_hi, 9)
     best = (np.inf, None, None)
     for k in ks:
