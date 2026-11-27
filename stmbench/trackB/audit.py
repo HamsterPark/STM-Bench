@@ -400,16 +400,22 @@ def sheet_pass(claims: Sequence[dict], sheet: dict[str, float], truths: list[dic
     """Per seed: does the fixed ``sheet`` pass every measure claim and the pairwise rules (``distinct_from``,
     ``greater_than``) on these truths? Each claim is checked with the judge's own tolerance helper, as
     :func:`joint_pass` does for the search's candidate grid; unlike it, the sheet may be any value, so a sheet
-    chosen on some seeds can be scored on others. Scalar and peak claims only (the P3 family)."""
+    chosen on some seeds can be scored on others. Scalar, peak and angle claims (the P3, P7 and P1 families)."""
     n = len(truths)
     ok = np.ones(n, bool)
     ranks: dict[str, np.ndarray] = {}
+    angles: dict[str, list] = {}
     for c in claims:
         cid = str(c["id"])
         if claim_policy(c) != "measure":
             continue
         v, tol, vals = float(sheet[cid]), c.get("tol") or {}, [s.get(cid) for s in truths]
-        if c["kind"] == "peak_in_list":
+        if c.get("truth") == "orientation_at" or c["kind"] == "angle":
+            # as _angle_grid: the answer is within the tolerance of one accepted direction
+            angles[cid] = vals
+            ok &= np.asarray([bool(info) and any(C.within_angle(v, float(a), tol) for a in info["accept"])
+                              for info in vals], bool)
+        elif c["kind"] == "peak_in_list":
             r = np.full(n, -1, int)
             for j, peaks in enumerate(vals):
                 for k, p in reversed(list(enumerate((peaks or [])[: int(c.get("rank_max", 3))]))):
@@ -431,6 +437,11 @@ def sheet_pass(claims: Sequence[dict], sheet: dict[str, float], truths: list[dic
         other = c.get("distinct_from")
         if other and str(other.get("claim")) in ranks and cid in ranks:
             ok &= ranks[cid] != ranks[str(other["claim"])]
+        elif other and str(other.get("claim")) in angles and cid in angles:
+            # as _truths_apart: the judge compares the truths at the two places, not the answers
+            sep = float(other.get("min_sep_deg", other.get("min_sep", 0.0)))
+            ok &= np.asarray([bool(a and b and C.angle_diff(a["stripe_deg"], b["stripe_deg"]) >= sep)
+                              for a, b in zip(angles[cid], angles[str(other["claim"])])], bool)
         gt = c.get("greater_than")
         if gt and str(gt) in sheet and not float(sheet[cid]) > float(sheet[str(gt)]):
             ok &= False
