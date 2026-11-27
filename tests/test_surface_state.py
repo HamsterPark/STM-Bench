@@ -240,3 +240,30 @@ def test_a_small_corrals_lowest_resonance_is_counted():
         c = w.surface.corral_snapshot()
         hw1 = c["hard_wall_ev"][0] * 1e3
         assert c["peaks_mev"][0] - hw1 < 25.0, (seed, c["radius_nm"], c["peaks_mev"][:2], hw1)
+
+
+def test_the_struve_hole_leaves_a_finite_wave_and_every_other_value_as_it_was():
+    """scipy 1.18.1's struve(0, z) is NaN on ~2.5e-5 around z = 25.765, and one pixel of a dI/dV
+    map whose 2kd fell there blanked the whole map (2026-11-27). A step's wave is finite there
+    now, continuous with its neighbours, and wherever scipy's value is finite it is the value it
+    was, bit for bit."""
+    ss = SurfaceState(CU)
+    e, r, phi = 0.0, 0.5, 3.0
+    k = float(ss.k_of_e(e))
+    z = np.concatenate([np.linspace(25.7650, 25.7657, 7001), np.linspace(0.05, 60.0, 4001)])
+    d_m = z / (2.0 * k) * 1e-9
+    got = ss.line_modulation(d_m, e, r, phi)
+    assert np.isfinite(got).all()
+    # the expression as it was, evaluated the same way
+    d_nm = np.abs(np.asarray(d_m, float)) * 1e9
+    zz = 2 * ss.k_of_e(e) * d_nm
+    damp = np.exp(-2 * d_nm / np.maximum(ss.l_phi_nm(e), 1e-6))
+    raw = special.struve(0, zz)
+    before = r * (math.cos(phi) * special.j0(zz) + math.sin(phi) * raw) * damp
+    fin = np.isfinite(raw)
+    assert np.array_equal(got[fin], before[fin])
+    hole = np.flatnonzero(~fin)
+    if hole.size:                                   # the hole this scipy has; a fixed one has none
+        assert np.max(np.abs(got[hole] - got[hole.min() - 1])) < 1e-4
+        one = ss.line_modulation(float(d_m[hole[0]]), e, r, phi)      # a scalar argument too
+        assert np.isfinite(one) and abs(float(one) - float(got[hole[0]])) < 1e-12
