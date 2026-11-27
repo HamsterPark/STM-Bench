@@ -150,18 +150,26 @@ def _scan_area(s: Session, cx_nm: float, cy_nm: float, size_nm: float):
 
 
 def find_area(w, size_nm: float, reach_nm: float = SEARCH_NM):
-    """The nearest-to-the-origin area of ``size_nm`` inside one region, step-free and clear of walls:
-    (cx, cy) in sample-frame nm, or None. Privileged: reads the truth."""
-    found = []
-    g = np.arange(-reach_nm, reach_nm + 1e-9, SEARCH_STEP_NM)
-    for cx in g:
-        for cy in g:
-            if _area_ok(w, float(cx), float(cy), size_nm) is not None:
-                found.append((math.hypot(cx, cy), float(cx), float(cy)))
-    if not found:
-        return None
-    _, cx, cy = min(found)
-    return cx, cy
+    """The nearest-to-the-origin area of ``size_nm`` inside one region, step-free and clear of walls,
+    centred on an isolated adsorbate: (cx, cy) in sample-frame nm, or None. Privileged: reads the truth.
+
+    Centred on the adsorbate because the drift is registered on it: the scan then starts where the
+    tip already is. A scan that starts after a move of D nm creeps like any move, at ~0.05 D / (tau + t)
+    along the move, which the drift measured before it does not contain: on seed 5 of the calibration
+    the adsorbate was 70 nm from the frame centre and every window read the period 1.7 % short (it
+    followed the scan time, 2.3x worse at half the speed, and the scan angle; not the waiting time)."""
+    surf = w.surface
+    ads = np.array([(f.x, f.y) for f in surf.site.features if f.kind == "adsorbate"], float) * 1e9
+    near = ads[np.hypot(ads[:, 0], ads[:, 1]) <= reach_nm]
+    for i in np.argsort(np.hypot(near[:, 0], near[:, 1])):
+        x, y = near[i]
+        if np.count_nonzero(np.hypot(ads[:, 0] - x, ads[:, 1] - y) <= 12.0) > 1:
+            continue
+        if not surf.step_free_window(x * 1e-9, y * 1e-9, 8e-9):
+            continue
+        if _area_ok(w, float(x), float(y), size_nm) is not None:
+            return float(x), float(y)
+    return None
 
 
 def _condition_spot(a, size_nm: float):
@@ -227,12 +235,15 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
         if full:
             s.go(cx * 1e-9, cy * 1e-9)
             inst.act("wait", seconds=CREEP_WAIT_S)
-            ads = _adsorbate_near(w, cx, cy)
-            if ads is None:
-                raise RuntimeError("no isolated adsorbate near the area to register the drift on")
-            phase("move")
-            _register_drift(s, ads, log)
-            phase("drift")
+        ads = _adsorbate_near(w, cx, cy)
+        if ads is None:
+            raise RuntimeError("no isolated adsorbate near the area to register the drift on")
+        phase("move")
+        # every take starts from a fresh drift measurement: the creep of the long move decays as
+        # 1/(tau + t), so a compensation programmed before an earlier frame is stale for the next
+        # (seed 5 of the calibration, third take: all its windows read the period 2 % short)
+        _register_drift(s, ads, log)
+        phase("drift")
         fr = _scan_area(s, cx, cy, size)
         log["frames"] += 1
         phase("frame")
