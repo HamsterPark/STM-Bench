@@ -66,8 +66,12 @@ DRIFT_MAX_NM_MIN = 6.0
 RESERVE_S = 600.0
 #: no further survey is taken when less than this is left (s): a survey is 800 s and the sites need ~1500
 SURVEY_RESERVE_S = 3600.0
+#: Ops.poke_near puts its pokes 60 nm below home; no site is taken within this distance of them (nm)
+POKE_DOWN_NM, POKE_AVOID_NM = 60.0, 45.0
 #: pairs of sites tried, and the distance within which a site that could not be read rules out its neighbours (nm)
 MAX_ATTEMPTS = 3
+#: surveys taken at most: the first, one more, a third and a fourth only while the budget leaves 3600 s
+MAX_SURVEYS = 4
 FAILED_NM = 50.0
 #: frames are added on a site (offsets from its first, nm) until this many two-arm windows give a period
 MIN_PERIODS = 8
@@ -135,7 +139,7 @@ def take_survey(ops: Ops, cx: float, cy: float, log: dict) -> Survey:
     return Survey(f, find_atoms(f, coarse=True), dm, cw, float(f["t_start_s"]))
 
 
-def sites_of(sv: Survey, idx: int) -> list[Site]:
+def sites_of(sv: Survey, idx: int, ops_home: tuple[float, float] = (0.0, 0.0)) -> list[Site]:
     """Windows of a survey that sit well inside one domain, with the landmark atom nearest each."""
     dm, cw = sv.dm, sv.radius
     out = []
@@ -144,6 +148,8 @@ def sites_of(sv: Survey, idx: int) -> list[Site]:
             if cw[i, j] < 1:
                 continue
             x, y = to_scan_nm(sv.frame, float(dm.cols[j]) - 0.5, float(dm.rows[i]) - 0.5)
+            if math.hypot(x - ops_home[0], y - (ops_home[1] - POKE_DOWN_NM)) < POKE_AVOID_NM:
+                continue                     # the pokes' clusters (Ops.poke_near) are there
             s = Site(x, y, float(dm.psi_deg[i, j]), int(cw[i, j]), float(dm.masked[i, j]), survey=idx)
             near = sorted((math.hypot(ax - x, ay - y), ax, ay) for ax, ay, _ in sv.atoms)
             if near:
@@ -212,6 +218,31 @@ def atom_shift(ops: Ops, predicted: tuple[float, float], log: dict) -> tuple[tup
     v.act("drift_comp", on=True, vx_nm_per_min=vx, vy_nm_per_min=vy)
     log.setdefault("drift_nm_min", []).append([round(vx, 3), round(vy, 3)])
     return (shots[1][0], shots[1][1]), (vx, vy)
+
+
+def next_centre(surveys: list[Survey], home: tuple[float, float]) -> tuple[float, float]:
+    """Where the next survey goes (offset from home): the first is at home. After that, 300 nm from the last
+    survey's centre towards the side of its frame where the windows disagree most (a band of windows that
+    are not clean is a domain wall, and the other domain is beyond it); the centre must not repeat one taken
+    and stays within 600 nm of home (the other direction is certain to be there)."""
+    if not surveys:
+        return SURVEY_CENTRES[0]
+    sv = surveys[-1]
+    cx, cy = (float(c) - h for c, h in zip(sv.frame["center_nm"], home))
+    cw = sv.radius
+    n_i, n_j = cw.shape
+    k = max(2, n_i // 5)
+    side = {(1.0, 0.0): cw[:, -k:], (-1.0, 0.0): cw[:, :k], (0.0, 1.0): cw[:k, :], (0.0, -1.0): cw[-k:, :]}
+    taken = [tuple(float(c) - h for c, h in zip(s.frame["center_nm"], home)) for s in surveys]
+    best = None
+    for (ux, uy), blk in sorted(side.items(), key=lambda kv: float(np.mean(kv[1] < 1)), reverse=True):
+        c = (cx + 300.0 * ux, cy + 300.0 * uy)
+        if max(abs(c[0]), abs(c[1])) <= 600.0 and all(math.hypot(c[0] - t[0], c[1] - t[1]) > 150.0 for t in taken):
+            best = c
+            break
+    if best is None:
+        best = next(c for c in SURVEY_CENTRES if all(math.hypot(c[0] - t[0], c[1] - t[1]) > 150.0 for t in taken))
+    return best
 
 
 # ── a site ────────────────────────────────────────────────────────────────────
@@ -291,12 +322,12 @@ def play(v: Blind, log: dict) -> dict | None:
         # a pair of sites in one survey; when the surveys so far hold none, the next survey comes first
         pair = None
         while True:
-            pool = [s for i, sv in enumerate(surveys) for s in sites_of(sv, i)
+            pool = [s for i, sv in enumerate(surveys) for s in sites_of(sv, i, ops.home)
                     if all(s.survey != f.survey or math.hypot(s.x - f.x, s.y - f.y) > FAILED_NM for f in failed)]
             pair = choose_pair(pool, here)
-            if pair is not None or len(surveys) >= len(SURVEY_CENTRES) or ops.budget_s - ops.now() < SURVEY_RESERVE_S:
+            if pair is not None or len(surveys) >= MAX_SURVEYS or ops.budget_s - ops.now() < SURVEY_RESERVE_S:
                 break
-            dx, dy = SURVEY_CENTRES[len(surveys)]
+            dx, dy = next_centre(surveys, ops.home)
             surveys.append(take_survey(ops, ops.home[0] + dx, ops.home[1] + dy, log))
             log["surveys"] = len(surveys)
         if pair is None:

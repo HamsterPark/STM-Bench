@@ -52,3 +52,16 @@ def test_a_step_is_masked_and_does_not_set_the_direction():
     dm = direction_map(z, 1.0)
     ok = ~np.isnan(dm.psi_deg) & (dm.masked < 0.3)
     assert ok.any() and np.abs(circ_diff(dm.psi_deg[ok], 60.0)).max() < 6.0
+
+
+def test_the_locator_and_the_stripe_analysis_agree_on_a_windows_direction():
+    """The locator only finds places; what is reported comes from stmbench.analysis.herringbone. On the
+    same window of plain stripes the two read the same direction (the locator within a few degrees)."""
+    from stmbench.analysis import herringbone as hb
+
+    for angle in (15.0, 70.0, 130.0):
+        z = _stripes(angle, n=128, npx=0.5, period=6.3)
+        a = hb.assess_window(z, 0.5)
+        dm = direction_map(z, 0.5, win_nm=64.0, stride_nm=64.0)
+        assert a.measurable and abs(circ_diff(a.direction_deg, angle)) < 1.0
+        assert abs(circ_diff(dm.psi_deg[0, 0], a.direction_deg)) < 4.0

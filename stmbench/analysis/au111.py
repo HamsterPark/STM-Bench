@@ -1,7 +1,8 @@
 """Au(111) herringbone from a survey frame: where the steps are and which way the stripes run.
 
-The stripe FFT that measures a window to the accuracy of a claim is
-:mod:`stmbench.analysis.herringbone`. What is here is coarser and is for finding places to
+A LOCATOR ONLY: no number reported in a claim comes from here. The stripe FFT that measures a window
+to the accuracy of a claim is :mod:`stmbench.analysis.herringbone`, and every reported period and direction
+is read from a measurement frame with it. What is here is coarser and is for finding places to
 measure in a large frame taken at ~1 nm/px (a 6.3 nm stripe is still six pixels wide):
 
 * :func:`step_mask`: where a step edge (235 pm against stripes of 8-15 pm) runs, so that a
@@ -20,7 +21,7 @@ import math
 from dataclasses import dataclass
 
 import numpy as np
-from scipy.ndimage import binary_dilation, gaussian_filter, maximum_filter
+from scipy.ndimage import binary_dilation, gaussian_filter
 
 #: stripe wavenumbers searched (1/nm): periods of 4.5-9 nm. The drawn period is 6.0-6.6 nm and an
 #: arm's is that times cos(alpha) (alpha up to 18 deg): 5.7-6.6 nm.
