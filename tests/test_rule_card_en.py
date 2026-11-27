@@ -200,13 +200,19 @@ def test_the_english_card_explains_citations_and_coordinates():
     assert "the centre coordinates of the scan window" in card
 
 
-def test_the_english_card_keeps_the_pairwise_rules_and_the_either_arm_rule():
+def test_the_english_card_keeps_the_pairwise_rules_and_the_line_direction_rule():
+    """P1 since 2026-11-27: one arm of the zigzag is one rotational domain (Barth et al. 1990), the truth is
+    the line direction at the reported place; an orientation claim without ``local`` keeps the either-arm rule."""
     p1 = R.rule_card(Scenario.load(SCEN / "P1_barth1990_au111.yaml"), "en")
-    assert "must differ by at least 30°" in p1 and "do not count as two domains" in p1
+    assert "must differ by at least 30°" in p1
+    assert "two places on one arm are one domain; two neighbouring arms of the zigzag are two domains" in p1
     # what counts as the true direction, not one more condition on the reported value
-    assert p1.count("the herringbone stripes are zigzag-shaped, so the direction of either of the two arms, "
-                    "or the mean direction of the two arms, is accepted as the true direction") == 3
+    assert p1.count("the true value is the direction in which the corrugation lines (the bright stripes) run at "
+                    "the reported place") == 3
+    assert "either of the two arms" not in p1
     assert "angles are taken modulo 180°" in p1
+    other = R._tolerance({"kind": "angle", "tol": {"abs": 6, "mod": 180}, "truth": "orientation_at"}, None, "en")
+    assert "the direction of either of the two arms, or the mean direction of the two arms, is accepted" in other
     p3 = R.rule_card(Scenario.load(SCEN / "P3_corral_cu111.yaml"), "en")
     assert "It must correspond to a different true level than peak_lo_mev" in p3
     assert "The value must be greater than peak_lo_mev" in p3

@@ -87,6 +87,8 @@ notes: |
   claim 1 on 13.4 % and claim 2 on 13.0 % of the seeds; both at once on 4.3 % in-sample (sheet
   chosen and scored on all 2000) and 3.2 % held out (chosen on seeds 0-999, scored on 1000-1999:
   32/1000, Wilson 95 % 2.3-4.5 %). At 12 % the held-out figure is 4.9 % (3.7-6.4 %), at 8 % 1.9 %.
+  Re-run 2026-11-27 (code efbf454, khwu), after the audit's search began to keep the first of
+  equally good sheets in index order: every figure unchanged, at 8, 10 and 12 %.
 
   Reference (2026-11-17, etched tip, seeds 0-29, 32 drags per atom, fit-guided design at 2 mV, on
   the desktop; docs/results/p7_reference_seeds_0-29.json): |R-hat / R½ - 1| p50 1.6 %, p90 5.1 %,
