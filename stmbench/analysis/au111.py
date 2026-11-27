@@ -151,3 +151,54 @@ def clean_windows(dm: DirectionMap, *, min_snr: float = 8.0, max_masked: float =
                 r += 1
             out[i, j] = r
     return out
+
+
+# ── the continuous zigzag: where an arm is uniform ────────────────────────────
+@dataclass
+class LineMap:
+    """The direction of the stripes at each node of a grid over a frame (structure tensor of the levelled
+    image), how coherent it is there, and how large a disc around the node holds one direction and no
+    step: the place to read an arm at is the node whose disc is largest."""
+    xs: np.ndarray            # node columns (pixels)
+    ys: np.ndarray            # node rows (pixels)
+    deg: np.ndarray           # line direction, ccw from +x with y up, mod 180
+    coh: np.ndarray           # 0-1
+    radius_nm: np.ndarray     # radius of the largest disc around the node that is one arm (0: none)
+    nm_per_px: float
+
+
+def line_map(z: np.ndarray, nm_per_px: float, *, grad_nm: float = 1.5, smooth_nm: float = 3.0,
+             stride_nm: float = 3.0, max_radius_nm: float = 14.0, agree_deg: float = 10.0,
+             min_coh: float = 0.75) -> LineMap:
+    z = _filled(z)
+    mask = step_mask(z, nm_per_px, grow_nm=4.0)
+    hp = highpass(z, nm_per_px, sigma_nm=4.0)
+    scale = 1.4826 * float(np.median(np.abs(hp - np.median(hp)))) or 1.0
+    hp = np.where(mask, 0.0, np.clip(hp, -4 * scale, 4 * scale))        # atoms and step ridges do not set it
+    gy, gx = np.gradient(gaussian_filter(hp, max(0.8, grad_nm / nm_per_px)))
+    gy = -gy                                                            # image rows run down, y up
+    s = max(1.0, smooth_nm / nm_per_px)
+    Jxx, Jyy, Jxy = (gaussian_filter(a, s) for a in (gx * gx, gy * gy, gx * gy))
+    deg = (np.degrees(0.5 * np.arctan2(2 * Jxy, Jxx - Jyy)) + 90.0) % 180.0
+    coh = np.hypot(Jxx - Jyy, 2 * Jxy) / (Jxx + Jyy + 1e-30)
+    st = max(1, int(round(stride_nm / nm_per_px)))
+    ny, nx = hp.shape
+    rows, cols = np.arange(0, ny, st), np.arange(0, nx, st)
+    d, c = deg[::st, ::st], coh[::st, ::st]
+    ok = (c >= min_coh) & ~mask[::st, ::st]
+    n_r = int(round(max_radius_nm / stride_nm))
+    rad = np.zeros(d.shape)
+    for i in range(d.shape[0]):
+        for j in range(d.shape[1]):
+            if not ok[i, j]:
+                continue
+            r = 0
+            while r < n_r:
+                i0, i1, j0, j1 = i - r - 1, i + r + 2, j - r - 1, j + r + 2
+                if i0 < 0 or j0 < 0 or i1 > d.shape[0] or j1 > d.shape[1]:
+                    break
+                if not ok[i0:i1, j0:j1].all() or np.abs(circ_diff(d[i0:i1, j0:j1], d[i, j])).max() > agree_deg:
+                    break
+                r += 1
+            rad[i, j] = (r + 0.5) * stride_nm if r else 0.0
+    return LineMap(cols, rows, d, c, rad, nm_per_px)
