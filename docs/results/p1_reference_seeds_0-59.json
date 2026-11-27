@@ -1,0 +1,4773 @@
+{
+ "summary": {
+  "n": 60,
+  "errors": [],
+  "success_rate": 1.0,
+  "claims": {
+   "domain_a_orientation_deg": {
+    "relative": false,
+    "pass_rate": 1.0,
+    "err_median": 0.6397027831471576,
+    "err_p90": 1.2298647786641936,
+    "err_max": 1.8519196324232041,
+    "signed_median": 0.6397027831471576
+   },
+   "domain_b_orientation_deg": {
+    "relative": false,
+    "pass_rate": 1.0,
+    "err_median": 0.46716709171105464,
+    "err_p90": 1.1038328405190159,
+    "err_max": 1.6945595959631419,
+    "signed_median": 0.46716709171105464
+   },
+   "stripe_orientation_deg": {
+    "relative": false,
+    "pass_rate": 1.0,
+    "err_median": 0.6397027831471576,
+    "err_p90": 1.2298647786641936,
+    "err_max": 1.8519196324232041,
+    "signed_median": 0.6397027831471576
+   },
+   "stripe_period_nm": {
+    "relative": false,
+    "pass_rate": 1.0,
+    "err_median": 0.007926861404047969,
+    "err_p90": 0.021411693134176703,
+    "err_max": 0.03673137150088124,
+    "signed_median": 0.001390921105993037
+   }
+  },
+  "instrument_s": {
+   "median": 722.6840262401215,
+   "p90": 1137.0462590624088
+  }
+ },
+ "runs": [
+  {
+   "paper": "P1",
+   "seed": 0,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.4986484931983775,
+    "stripe_orientation_deg": 161.6653586765719,
+    "domain_a_orientation_deg": 161.6653586765719,
+    "domain_b_orientation_deg": 102.41572047246764
+   },
+   "instrument_s": 736.5854923632182,
+   "budget_s": 10800.0,
+   "actions": 22,
+   "tip_condition": "blunt",
+   "tip_rounds": 3,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.13261850031179634
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 21.8,
+    "move": 300.9,
+    "drift": 162.6,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -83.72467325905293,
+     "y_nm": 83.71479526462396,
+     "clearance_nm": 12.208054618501672,
+     "spread_deg": 1.2238624165992111,
+     "coherence": 0.9364907567261512
+    },
+    {
+     "x_nm": -200.32634456824513,
+     "y_nm": 21.319252089136498,
+     "clearance_nm": 11.309187999999999,
+     "spread_deg": 1.2276497232249657,
+     "coherence": 0.9716886734514978
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.014562311621678425,
+    "stripe_orientation_deg": 0.2423586765719108,
+    "domain_a_orientation_deg": 0.2423586765719108,
+    "domain_b_orientation_deg": 0.08272047246764203
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 1,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.035288532667906,
+    "stripe_orientation_deg": 33.71323345102519,
+    "domain_a_orientation_deg": 33.71323345102519,
+    "domain_b_orientation_deg": 153.52949720203952
+   },
+   "instrument_s": 664.0533318222256,
+   "budget_s": 10800.0,
+   "actions": 19,
+   "tip_condition": "blunt",
+   "tip_rounds": 2,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.1391625337117482
+   ],
+   "frame_nm": 120.0,
+   "phase_s": {
+    "tip": 15.8,
+    "move": 300.8,
+    "drift": 162.6,
+    "frame": 184.8,
+    "analysis": 0.0
+   },
+   "windows": 9,
+   "measured_windows": 9,
+   "window_verdicts": {
+    "ok": 9
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 154.12116623376625,
+     "y_nm": 280.239361038961,
+     "clearance_nm": 12.077910000000001,
+     "spread_deg": 1.6942568790314085,
+     "coherence": 0.9847336321095131
+    },
+    {
+     "x_nm": 130.74454285714285,
+     "y_nm": 222.96663376623377,
+     "clearance_nm": 10.12986,
+     "spread_deg": 0.7654082650925089,
+     "coherence": 0.9528840442869775
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.0026521406724588914,
+    "stripe_orientation_deg": 1.0167665489748003,
+    "domain_a_orientation_deg": 1.0167665489748003,
+    "domain_b_orientation_deg": 0.38549720203951665
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 2,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.23086154986011,
+    "stripe_orientation_deg": 135.9605806940922,
+    "domain_a_orientation_deg": 135.9605806940922,
+    "domain_b_orientation_deg": 74.76289022065387
+   },
+   "instrument_s": 715.1674656365652,
+   "budget_s": 10800.0,
+   "actions": 13,
+   "tip_condition": "dirty",
+   "tip_rounds": 0,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.05031131046121711
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 0.0,
+    "move": 301.2,
+    "drift": 162.6,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 311.5671027855153,
+     "y_nm": 14.566673259052934,
+     "clearance_nm": 15.700913942534173,
+     "spread_deg": 0.7946285436558742,
+     "coherence": 0.9303239389227038
+    },
+    {
+     "x_nm": 331.8456543175488,
+     "y_nm": 53.95385988857939,
+     "clearance_nm": 10.500317450839283,
+     "spread_deg": 0.6726195219893943,
+     "coherence": 0.9805092980682961
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.00016666230432615947,
+    "stripe_orientation_deg": 0.774419305907827,
+    "domain_a_orientation_deg": 0.774419305907827,
+    "domain_b_orientation_deg": 0.5198902206538776
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 3,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.063772442576829,
+    "stripe_orientation_deg": 37.82000196806834,
+    "domain_a_orientation_deg": 37.82000196806834,
+    "domain_b_orientation_deg": 94.98131650750145
+   },
+   "instrument_s": 1267.0534748209218,
+   "budget_s": 10800.0,
+   "actions": 81,
+   "tip_condition": "blunt",
+   "tip_rounds": 19,
+   "frames": 2,
+   "retakes": 1,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.054220651465490495,
+    0.0468308008364083
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 138.4,
+    "move": 300.9,
+    "drift": 325.2,
+    "frame": 502.6,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 2.621569080779942,
+     "y_nm": -287.89806740947074,
+     "clearance_nm": 10.81425474283346,
+     "spread_deg": 0.7924920936167942,
+     "coherence": 0.9213963360768302
+    },
+    {
+     "x_nm": 51.758059331476325,
+     "y_nm": -287.50809526462393,
+     "clearance_nm": 9.942374188774027,
+     "spread_deg": 0.9745474001713749,
+     "coherence": 0.886245830992114
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.018147594389725796,
+    "stripe_orientation_deg": 1.1970019680683492,
+    "domain_a_orientation_deg": 1.1970019680683492,
+    "domain_b_orientation_deg": 0.8076834924985548
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 4,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.354690668548244,
+    "stripe_orientation_deg": 6.428205787042982,
+    "domain_a_orientation_deg": 6.428205787042982,
+    "domain_b_orientation_deg": 68.84933802078095
+   },
+   "instrument_s": 738.4958470257365,
+   "budget_s": 10800.0,
+   "actions": 23,
+   "tip_condition": "blunt",
+   "tip_rounds": 3,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.20814460237514426
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 23.6,
+    "move": 300.9,
+    "drift": 162.7,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 262.0588158774373,
+     "y_nm": -261.49077325905296,
+     "clearance_nm": 10.926177566534419,
+     "spread_deg": 0.6866176516060223,
+     "coherence": 0.9717450048195501
+    },
+    {
+     "x_nm": 291.30672674094706,
+     "y_nm": -261.49077325905296,
+     "clearance_nm": 10.608385314465156,
+     "spread_deg": 1.6894398934642918,
+     "coherence": 0.89537598963363
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.015418270848718052,
+    "stripe_orientation_deg": 0.3782057870429867,
+    "domain_a_orientation_deg": 0.3782057870429867,
+    "domain_b_orientation_deg": 0.21933802078095255
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 5,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 5.941364406609803,
+    "stripe_orientation_deg": 38.51835875812384,
+    "domain_a_orientation_deg": 38.51835875812384,
+    "domain_b_orientation_deg": 100.56873404768048
+   },
+   "instrument_s": 946.7118171212137,
+   "budget_s": 10800.0,
+   "actions": 29,
+   "tip_condition": "double",
+   "tip_rounds": 1,
+   "frames": 2,
+   "retakes": 1,
+   "drift_rounds": 4,
+   "residual_nm_min": [
+    0.2187220077273329,
+    0.18708390663638408
+   ],
+   "frame_nm": 110.0,
+   "phase_s": {
+    "tip": 9.2,
+    "move": 300.8,
+    "drift": 325.3,
+    "frame": 311.3,
+    "analysis": 0.0
+   },
+   "windows": 4,
+   "measured_windows": 4,
+   "window_verdicts": {
+    "ok": 4
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 345.9298713780919,
+     "y_nm": 65.36840883392226,
+     "clearance_nm": 11.647826360639225,
+     "spread_deg": 0.48205712990696864,
+     "coherence": 0.9313018408598939
+    },
+    {
+     "x_nm": 400.3468325088339,
+     "y_nm": 67.70056431095406,
+     "clearance_nm": 11.431804089267144,
+     "spread_deg": 0.5274469505487059,
+     "coherence": 0.9168744699438804
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.006034670813226839,
+    "stripe_orientation_deg": 0.9063587581238437,
+    "domain_a_orientation_deg": 0.9063587581238437,
+    "domain_b_orientation_deg": 0.24673404768047646
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 6,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.40819977620029,
+    "stripe_orientation_deg": 158.58648461599827,
+    "domain_a_orientation_deg": 158.58648461599827,
+    "domain_b_orientation_deg": 39.18273355661684
+   },
+   "instrument_s": 715.1577416022891,
+   "budget_s": 10800.0,
+   "actions": 14,
+   "tip_condition": "good",
+   "tip_rounds": 0,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.20344847117720882
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 0.0,
+    "move": 301.2,
+    "drift": 162.7,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 208.24724206128133,
+     "y_nm": 237.69769498607243,
+     "clearance_nm": 9.942374188774027,
+     "spread_deg": 1.1988562466001846,
+     "coherence": 0.9550938774177192
+    },
+    {
+     "x_nm": 188.7486348189415,
+     "y_nm": 194.41078690807802,
+     "clearance_nm": 9.686703526160382,
+     "spread_deg": 1.124154184931418,
+     "coherence": 0.9560881238555906
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -6.571097169505435e-05,
+    "stripe_orientation_deg": 0.9214846159982812,
+    "domain_a_orientation_deg": 0.9214846159982812,
+    "domain_b_orientation_deg": 1.0132664433831593
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 7,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.605678596633414,
+    "stripe_orientation_deg": 167.66812785171317,
+    "domain_a_orientation_deg": 167.66812785171317,
+    "domain_b_orientation_deg": 44.69144040403687
+   },
+   "instrument_s": 736.8399961437209,
+   "budget_s": 10800.0,
+   "actions": 22,
+   "tip_condition": "blunt",
+   "tip_rounds": 3,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.0882680368049533
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 22.0,
+    "move": 300.9,
+    "drift": 162.6,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -181.7017044568245,
+     "y_nm": 34.33617325905294,
+     "clearance_nm": 9.37556275287793,
+     "spread_deg": 1.3716687016286653,
+     "coherence": 0.9476160679791925
+    },
+    {
+     "x_nm": -135.2950192200557,
+     "y_nm": 99.46152144846798,
+     "clearance_nm": 8.82405906153217,
+     "spread_deg": 1.435481085757693,
+     "coherence": 0.9419858421268495
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.015073147015518984,
+    "stripe_orientation_deg": 1.0141278517131695,
+    "domain_a_orientation_deg": 1.0141278517131695,
+    "domain_b_orientation_deg": 1.6945595959631419
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 8,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.0698898968421275,
+    "stripe_orientation_deg": 1.1207387091460201,
+    "domain_a_orientation_deg": 1.1207387091460201,
+    "domain_b_orientation_deg": 119.61888090418731
+   },
+   "instrument_s": 729.6969712301847,
+   "budget_s": 10800.0,
+   "actions": 19,
+   "tip_condition": "unstable",
+   "tip_rounds": 3,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.06898470792368709
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 14.9,
+    "move": 300.9,
+    "drift": 162.6,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -182.06352674094708,
+     "y_nm": -252.4935782729805,
+     "clearance_nm": 13.604378768401299,
+     "spread_deg": 0.33378099843890224,
+     "coherence": 0.9963282105376184
+    },
+    {
+     "x_nm": -89.64012841225627,
+     "y_nm": -252.88355041782728,
+     "clearance_nm": 10.644164118618239,
+     "spread_deg": 1.180138104481987,
+     "coherence": 0.8999316113756051
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.02308105826251161,
+    "stripe_orientation_deg": 0.06273870914601787,
+    "domain_a_orientation_deg": 0.06273870914601787,
+    "domain_b_orientation_deg": 0.026119095812688897
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 9,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.432656065138918,
+    "stripe_orientation_deg": 136.5020803675768,
+    "domain_a_orientation_deg": 136.5020803675768,
+    "domain_b_orientation_deg": 75.97726422512477
+   },
+   "instrument_s": 670.4031897245346,
+   "budget_s": 10800.0,
+   "actions": 22,
+   "tip_condition": "blunt",
+   "tip_rounds": 3,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.05354982861972727
+   ],
+   "frame_nm": 120.0,
+   "phase_s": {
+    "tip": 22.2,
+    "move": 300.8,
+    "drift": 162.6,
+    "frame": 184.8,
+    "analysis": 0.0
+   },
+   "windows": 9,
+   "measured_windows": 9,
+   "window_verdicts": {
+    "ok": 9
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -166.88214935064934,
+     "y_nm": 139.86684805194804,
+     "clearance_nm": 8.961030000000001,
+     "spread_deg": 1.641008810456391,
+     "coherence": 0.9464267615789105
+    },
+    {
+     "x_nm": -223.76526623376623,
+     "y_nm": 185.45126363636362,
+     "clearance_nm": 8.790002253634524,
+     "spread_deg": 1.475670785682146,
+     "coherence": 0.9002397630508399
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.018582709391147922,
+    "stripe_orientation_deg": 1.8519196324232041,
+    "domain_a_orientation_deg": 1.8519196324232041,
+    "domain_b_orientation_deg": 0.028264225124772224
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 10,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.324500454194397,
+    "stripe_orientation_deg": 98.27363698478734,
+    "domain_a_orientation_deg": 98.27363698478734,
+    "domain_b_orientation_deg": 157.2331106796626
+   },
+   "instrument_s": 729.1002373947659,
+   "budget_s": 10800.0,
+   "actions": 19,
+   "tip_condition": "unstable",
+   "tip_rounds": 3,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.08291111103083158
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 14.3,
+    "move": 300.9,
+    "drift": 162.6,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -163.46885459610027,
+     "y_nm": 126.99067883008357,
+     "clearance_nm": 12.863165976266963,
+     "spread_deg": 1.652273364445994,
+     "coherence": 0.97602225792273
+    },
+    {
+     "x_nm": -154.49949526462396,
+     "y_nm": 96.18287938718663,
+     "clearance_nm": 12.43637766865127,
+     "spread_deg": 0.8197651708758876,
+     "coherence": 0.9304915396251124
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.0003138625258376493,
+    "stripe_orientation_deg": 1.6083630152126602,
+    "domain_a_orientation_deg": 1.6083630152126602,
+    "domain_b_orientation_deg": 0.29611067966257565
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 11,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.541921874037252,
+    "stripe_orientation_deg": 24.87848903638547,
+    "domain_a_orientation_deg": 24.87848903638547,
+    "domain_b_orientation_deg": 79.51006030967697
+   },
+   "instrument_s": 605.1951800089853,
+   "budget_s": 10800.0,
+   "actions": 17,
+   "tip_condition": "double",
+   "tip_rounds": 1,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.24663747546103248
+   ],
+   "frame_nm": 102.0,
+   "phase_s": {
+    "tip": 8.1,
+    "move": 300.8,
+    "drift": 162.7,
+    "frame": 133.6,
+    "analysis": 0.0
+   },
+   "windows": 4,
+   "measured_windows": 4,
+   "window_verdicts": {
+    "ok": 4
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -399.41163053435116,
+     "y_nm": 230.47290610687025,
+     "clearance_nm": 12.63319185334241,
+     "spread_deg": 0.5105259007633006,
+     "coherence": 0.9397831804144537
+    },
+    {
+     "x_nm": -437.95361526717556,
+     "y_nm": 227.74771526717558,
+     "clearance_nm": 10.482573332799776,
+     "spread_deg": 0.828792913583486,
+     "coherence": 0.9439574789162865
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.0022242619299301936,
+    "stripe_orientation_deg": 0.6694890363854711,
+    "domain_a_orientation_deg": 0.6694890363854711,
+    "domain_b_orientation_deg": 1.19593969032303
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 12,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.0049410396777265,
+    "stripe_orientation_deg": 166.18956302444536,
+    "domain_a_orientation_deg": 166.18956302444536,
+    "domain_b_orientation_deg": 104.93701440631743
+   },
+   "instrument_s": 1150.9392996879142,
+   "budget_s": 10800.0,
+   "actions": 33,
+   "tip_condition": "double",
+   "tip_rounds": 3,
+   "frames": 2,
+   "retakes": 1,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.061918165709787656,
+    0.07752897019320544
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 22.2,
+    "move": 300.9,
+    "drift": 325.3,
+    "frame": 502.6,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -261.6571331476323,
+     "y_nm": 79.87027325905294,
+     "clearance_nm": 13.259048,
+     "spread_deg": 0.6009200143053314,
+     "coherence": 0.967844094593093
+    },
+    {
+     "x_nm": -224.60977938718665,
+     "y_nm": 82.60007827298051,
+     "clearance_nm": 10.139272,
+     "spread_deg": 1.0311593060659852,
+     "coherence": 0.8804624098274819
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.009877284235599859,
+    "stripe_orientation_deg": 0.13456302444535595,
+    "domain_a_orientation_deg": 0.13456302444535595,
+    "domain_b_orientation_deg": 0.0560144063174306
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 13,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.456623424024624,
+    "stripe_orientation_deg": 20.73148391041989,
+    "domain_a_orientation_deg": 20.73148391041989,
+    "domain_b_orientation_deg": 146.35025628338116
+   },
+   "instrument_s": 714.5386886693894,
+   "budget_s": 10800.0,
+   "actions": 14,
+   "tip_condition": "good",
+   "tip_rounds": 0,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.2112652033939429
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 0.0,
+    "move": 300.6,
+    "drift": 162.7,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 143.40052674094704,
+     "y_nm": -147.85876518105852,
+     "clearance_nm": 10.25856165661288,
+     "spread_deg": 1.520994849327204,
+     "coherence": 0.9797190806001811
+    },
+    {
+     "x_nm": 28.748716155988852,
+     "y_nm": -173.59692674094708,
+     "clearance_nm": 8.14285441978573,
+     "spread_deg": 2.0395954012855175,
+     "coherence": 0.864412327556747
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.02079458108421406,
+    "stripe_orientation_deg": 1.1575160895801133,
+    "domain_a_orientation_deg": 1.1575160895801133,
+    "domain_b_orientation_deg": 0.9342562833811598
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 14,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.114409297517492,
+    "stripe_orientation_deg": 156.03145966125663,
+    "domain_a_orientation_deg": 156.03145966125663,
+    "domain_b_orientation_deg": 101.71838476734817
+   },
+   "instrument_s": 1144.9475568175867,
+   "budget_s": 10800.0,
+   "actions": 30,
+   "tip_condition": "double",
+   "tip_rounds": 2,
+   "frames": 2,
+   "retakes": 1,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.07338182192820793,
+    0.07473636364456909
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 16.2,
+    "move": 300.9,
+    "drift": 325.2,
+    "frame": 502.6,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 252.2303754874652,
+     "y_nm": 39.36720306406685,
+     "clearance_nm": 11.69916,
+     "spread_deg": 0.4901934174595461,
+     "coherence": 0.9834696087674099
+    },
+    {
+     "x_nm": 307.6064200557103,
+     "y_nm": -14.838925069637886,
+     "clearance_nm": 10.608385314465156,
+     "spread_deg": 0.7732316408554851,
+     "coherence": 0.9787047884824387
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.010808316147202568,
+    "stripe_orientation_deg": 0.8315403387433662,
+    "domain_a_orientation_deg": 0.8315403387433662,
+    "domain_b_orientation_deg": 0.9993847673481753
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 15,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.341041348911015,
+    "stripe_orientation_deg": 91.31758334846212,
+    "domain_a_orientation_deg": 91.31758334846212,
+    "domain_b_orientation_deg": 149.77843850493207
+   },
+   "instrument_s": 715.109419253911,
+   "budget_s": 10800.0,
+   "actions": 14,
+   "tip_condition": "good",
+   "tip_rounds": 0,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.3057483929807084
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 0.0,
+    "move": 301.1,
+    "drift": 162.7,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 83.67195654596101,
+     "y_nm": -233.3086732590529,
+     "clearance_nm": 11.51573515689068,
+     "spread_deg": 0.5539154604966295,
+     "coherence": 0.9827527569857318
+    },
+    {
+     "x_nm": 110.97000668523677,
+     "y_nm": -250.85741977715875,
+     "clearance_nm": 11.248512335961943,
+     "spread_deg": 0.5066703296699093,
+     "coherence": 0.9815666339619696
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.0037477752048111768,
+    "stripe_orientation_deg": 0.615583348462124,
+    "domain_a_orientation_deg": 0.615583348462124,
+    "domain_b_orientation_deg": 0.7855614950679239
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 16,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.085740890630369,
+    "stripe_orientation_deg": 16.610053592687187,
+    "domain_a_orientation_deg": 16.610053592687187,
+    "domain_b_orientation_deg": 79.61424647419916
+   },
+   "instrument_s": 1482.1312428282254,
+   "budget_s": 10800.0,
+   "actions": 47,
+   "tip_condition": "blunt",
+   "tip_rounds": 7,
+   "frames": 2,
+   "retakes": 1,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.09147912042688144,
+    0.10351759286784176
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 37.3,
+    "move": 617.0,
+    "drift": 325.2,
+    "frame": 502.6,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 20.678954596100283,
+     "y_nm": 297.07735710306406,
+     "clearance_nm": 11.581577518260971,
+     "spread_deg": 1.063494945678552,
+     "coherence": 0.9719858854957404
+    },
+    {
+     "x_nm": 20.678954596100283,
+     "y_nm": 262.3698362116992,
+     "clearance_nm": 10.87735303692732,
+     "spread_deg": 0.5838339678223525,
+     "coherence": 0.9718980981159901
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.004539743899763415,
+    "stripe_orientation_deg": 0.023946407312820384,
+    "domain_a_orientation_deg": 0.023946407312820384,
+    "domain_b_orientation_deg": 0.408753525800833
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 17,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.286200267802724,
+    "stripe_orientation_deg": 2.202659015254957,
+    "domain_a_orientation_deg": 2.202659015254957,
+    "domain_b_orientation_deg": 57.59359627969276
+   },
+   "instrument_s": 634.2822857177578,
+   "budget_s": 10800.0,
+   "actions": 29,
+   "tip_condition": "blunt",
+   "tip_rounds": 5,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.32358662953024403
+   ],
+   "frame_nm": 102.0,
+   "phase_s": {
+    "tip": 37.2,
+    "move": 300.8,
+    "drift": 162.7,
+    "frame": 133.6,
+    "analysis": 0.0
+   },
+   "windows": 4,
+   "measured_windows": 4,
+   "window_verdicts": {
+    "ok": 4
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -42.47725801526718,
+     "y_nm": -291.5224114503817,
+     "clearance_nm": 17.49744313256597,
+     "spread_deg": 1.3880980881427256,
+     "coherence": 0.9682120454502007
+    },
+    {
+     "x_nm": -16.003975572519085,
+     "y_nm": -266.2170679389313,
+     "clearance_nm": 12.941363769933407,
+     "spread_deg": 0.22020801974886817,
+     "coherence": 0.9809915701155308
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.02664281655014733,
+    "stripe_orientation_deg": 1.2676590152549636,
+    "domain_a_orientation_deg": 1.2676590152549636,
+    "domain_b_orientation_deg": 0.4724037203072413
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 18,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.0440122501255455,
+    "stripe_orientation_deg": 153.63209022495346,
+    "domain_a_orientation_deg": 153.63209022495346,
+    "domain_b_orientation_deg": 93.41610830669272
+   },
+   "instrument_s": 699.2167690671993,
+   "budget_s": 10800.0,
+   "actions": 56,
+   "tip_condition": "blunt",
+   "tip_rounds": 14,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.23280225253790188
+   ],
+   "frame_nm": 102.0,
+   "phase_s": {
+    "tip": 102.1,
+    "move": 300.9,
+    "drift": 162.7,
+    "frame": 133.6,
+    "analysis": 0.0
+   },
+   "windows": 4,
+   "measured_windows": 4,
+   "window_verdicts": {
+    "ok": 4
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 6.674080152671756,
+     "y_nm": 201.97617557251908,
+     "clearance_nm": 11.685876748625626,
+     "spread_deg": 0.5570689396059466,
+     "coherence": 0.9806531825485515
+    },
+    {
+     "x_nm": 60.00995801526718,
+     "y_nm": 206.64793129770993,
+     "clearance_nm": 10.970063896960037,
+     "spread_deg": 0.6998286230488611,
+     "coherence": 0.9781546337908532
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.006609914789760474,
+    "stripe_orientation_deg": 0.9009097750465287,
+    "domain_a_orientation_deg": 0.9009097750465287,
+    "domain_b_orientation_deg": 0.18210830669272582
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 19,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.380764234860892,
+    "stripe_orientation_deg": 10.919302261680993,
+    "domain_a_orientation_deg": 10.919302261680993,
+    "domain_b_orientation_deg": 133.60098214362029
+   },
+   "instrument_s": 664.3584894004422,
+   "budget_s": 10800.0,
+   "actions": 20,
+   "tip_condition": "blunt",
+   "tip_rounds": 2,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.18364338975839006
+   ],
+   "frame_nm": 120.0,
+   "phase_s": {
+    "tip": 16.0,
+    "move": 300.8,
+    "drift": 162.7,
+    "frame": 184.8,
+    "analysis": 0.0
+   },
+   "windows": 9,
+   "measured_windows": 9,
+   "window_verdicts": {
+    "ok": 9
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 110.20173376623376,
+     "y_nm": 319.50184935064937,
+     "clearance_nm": 10.598537849816832,
+     "spread_deg": 1.0198149351481662,
+     "coherence": 0.9849951214930605
+    },
+    {
+     "x_nm": 173.31861688311687,
+     "y_nm": 290.6706805194805,
+     "clearance_nm": 9.771369088868767,
+     "spread_deg": 0.7998012834250265,
+     "coherence": 0.9495091079266067
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.002775778693548503,
+    "stripe_orientation_deg": 0.8296977383190125,
+    "domain_a_orientation_deg": 0.8296977383190125,
+    "domain_b_orientation_deg": 0.9489821436202988
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 20,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.078976288722685,
+    "stripe_orientation_deg": 36.21109976514876,
+    "domain_a_orientation_deg": 36.21109976514876,
+    "domain_b_orientation_deg": 153.72430971921602
+   },
+   "instrument_s": 967.5437681045393,
+   "budget_s": 10800.0,
+   "actions": 38,
+   "tip_condition": "double",
+   "tip_rounds": 4,
+   "frames": 2,
+   "retakes": 1,
+   "drift_rounds": 4,
+   "residual_nm_min": [
+    0.2792929574376163,
+    0.2793998489070136
+   ],
+   "frame_nm": 110.0,
+   "phase_s": {
+    "tip": 30.1,
+    "move": 300.8,
+    "drift": 325.4,
+    "frame": 311.3,
+    "analysis": 0.0
+   },
+   "windows": 4,
+   "measured_windows": 4,
+   "window_verdicts": {
+    "ok": 4
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 130.68573180212013,
+     "y_nm": 235.70020318021201,
+     "clearance_nm": 12.27310072900296,
+     "spread_deg": 1.4951279092994145,
+     "coherence": 0.9844449558959187
+    },
+    {
+     "x_nm": 101.53378833922261,
+     "y_nm": 220.9298851590106,
+     "clearance_nm": 11.537047313215327,
+     "spread_deg": 0.4211755723221269,
+     "coherence": 0.9770218061728332
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.008146555577423165,
+    "stripe_orientation_deg": 0.8849002348512442,
+    "domain_a_orientation_deg": 0.8849002348512442,
+    "domain_b_orientation_deg": 0.10030971921602827
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 21,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.462101991407291,
+    "stripe_orientation_deg": 75.53278592643703,
+    "domain_a_orientation_deg": 75.53278592643703,
+    "domain_b_orientation_deg": 130.81756781961928
+   },
+   "instrument_s": 607.7915867629854,
+   "budget_s": 10800.0,
+   "actions": 17,
+   "tip_condition": "unstable",
+   "tip_rounds": 2,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.05937488321886104
+   ],
+   "frame_nm": 102.0,
+   "phase_s": {
+    "tip": 10.7,
+    "move": 300.8,
+    "drift": 162.6,
+    "frame": 133.6,
+    "analysis": 0.0
+   },
+   "windows": 4,
+   "measured_windows": 4,
+   "window_verdicts": {
+    "ok": 4
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 209.58227175572517,
+     "y_nm": 129.47894198473284,
+     "clearance_nm": 10.576137462851076,
+     "spread_deg": 0.9115995109147403,
+     "coherence": 0.9798047926256476
+    },
+    {
+     "x_nm": 201.01738625954198,
+     "y_nm": 154.7842854961832,
+     "clearance_nm": 9.925572919476739,
+     "spread_deg": 1.058669962225862,
+     "coherence": 0.9663181611378309
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.013648612124241843,
+    "stripe_orientation_deg": 0.5657859264370302,
+    "domain_a_orientation_deg": 0.5657859264370302,
+    "domain_b_orientation_deg": 0.8114321803807059
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 22,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.227430331655836,
+    "stripe_orientation_deg": 165.56474377837304,
+    "domain_a_orientation_deg": 165.56474377837304,
+    "domain_b_orientation_deg": 48.017645160341196
+   },
+   "instrument_s": 714.7191976149102,
+   "budget_s": 10800.0,
+   "actions": 13,
+   "tip_condition": "dirty",
+   "tip_rounds": 0,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.08431824380949701
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 0.0,
+    "move": 300.8,
+    "drift": 162.6,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 278.07262674094704,
+     "y_nm": -45.081350974930366,
+     "clearance_nm": 15.143773191060147,
+     "spread_deg": 1.0186238228866358,
+     "coherence": 0.9920306415326551
+    },
+    {
+     "x_nm": 244.92499442896937,
+     "y_nm": -50.540961002785515,
+     "clearance_nm": 11.841286426856163,
+     "spread_deg": 0.4533307548597266,
+     "coherence": 0.9127221221351358
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.011934480579095741,
+    "stripe_orientation_deg": 0.24474377837304928,
+    "domain_a_orientation_deg": 0.24474377837304928,
+    "domain_b_orientation_deg": 0.23464516034118788
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 23,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.127538474266423,
+    "stripe_orientation_deg": 9.461952920535243,
+    "domain_a_orientation_deg": 9.461952920535243,
+    "domain_b_orientation_deg": 134.12415774979883
+   },
+   "instrument_s": 721.5379936260077,
+   "budget_s": 10800.0,
+   "actions": 16,
+   "tip_condition": "unstable",
+   "tip_rounds": 1,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.2590048609686215
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 6.7,
+    "move": 300.9,
+    "drift": 162.7,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 396.7391509749304,
+     "y_nm": -78.8558791086351,
+     "clearance_nm": 13.848124809829812,
+     "spread_deg": 0.23348513888150896,
+     "coherence": 0.9463651001221275
+    },
+    {
+     "x_nm": 400.24890027855156,
+     "y_nm": -154.12050306406684,
+     "clearance_nm": 11.69916,
+     "spread_deg": 0.6448909056595429,
+     "coherence": 0.8974709014458836
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.006000232874341371,
+    "stripe_orientation_deg": 0.006952920535240992,
+    "domain_a_orientation_deg": 0.006952920535240992,
+    "domain_b_orientation_deg": 1.4171577497988324
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 24,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.143854477230839,
+    "stripe_orientation_deg": 123.89706065485956,
+    "domain_a_orientation_deg": 123.89706065485956,
+    "domain_b_orientation_deg": 179.5886214466048
+   },
+   "instrument_s": 722.9594945411816,
+   "budget_s": 10800.0,
+   "actions": 16,
+   "tip_condition": "blunt",
+   "tip_rounds": 1,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.07714711604761373
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 8.2,
+    "move": 300.9,
+    "drift": 162.6,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -24.515126740947075,
+     "y_nm": -78.52448718662953,
+     "clearance_nm": 17.269200134847704,
+     "spread_deg": 0.6343630900780324,
+     "coherence": 0.9026986569274577
+    },
+    {
+     "x_nm": -10.866101671309188,
+     "y_nm": -131.17072674094706,
+     "clearance_nm": 15.988852,
+     "spread_deg": 0.3070956860812955,
+     "coherence": 0.9720971614543973
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.0005575802820558806,
+    "stripe_orientation_deg": 0.3740606548595622,
+    "domain_a_orientation_deg": 0.3740606548595622,
+    "domain_b_orientation_deg": 0.40837855339520956
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 25,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.731303393106117,
+    "stripe_orientation_deg": 5.127822217832187,
+    "domain_a_orientation_deg": 5.127822217832187,
+    "domain_b_orientation_deg": 59.951325643004694
+   },
+   "instrument_s": 597.3762271657585,
+   "budget_s": 10800.0,
+   "actions": 13,
+   "tip_condition": "dirty",
+   "tip_rounds": 0,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.09346114277268444
+   ],
+   "frame_nm": 102.0,
+   "phase_s": {
+    "tip": 0.0,
+    "move": 301.1,
+    "drift": 162.6,
+    "frame": 133.6,
+    "analysis": 0.0
+   },
+   "windows": 4,
+   "measured_windows": 4,
+   "window_verdicts": {
+    "ok": 4
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 90.1298419847328,
+     "y_nm": -278.59560458015267,
+     "clearance_nm": 11.148227743214614,
+     "spread_deg": 0.6833922754623386,
+     "coherence": 0.9865714598149363
+    },
+    {
+     "x_nm": 148.13747557251907,
+     "y_nm": -315.96965038167934,
+     "clearance_nm": 10.900764,
+     "spread_deg": 0.6965106371398824,
+     "coherence": 0.9665590459651419
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.03673137150088124,
+    "stripe_orientation_deg": 0.6638222178321911,
+    "domain_a_orientation_deg": 0.6638222178321911,
+    "domain_b_orientation_deg": 0.7176743569953032
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 26,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.066443973372428,
+    "stripe_orientation_deg": 65.90965874759624,
+    "domain_a_orientation_deg": 65.90965874759624,
+    "domain_b_orientation_deg": 130.10502344737407
+   },
+   "instrument_s": 714.7875443467099,
+   "budget_s": 10800.0,
+   "actions": 13,
+   "tip_condition": "good",
+   "tip_rounds": 0,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.09568763870375997
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 0.0,
+    "move": 300.9,
+    "drift": 162.6,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -174.1413818941504,
+     "y_nm": -107.52695598885794,
+     "clearance_nm": 13.699067501383297,
+     "spread_deg": 0.43040889035998886,
+     "coherence": 0.9709454350848588
+    },
+    {
+     "x_nm": -227.17759359331478,
+     "y_nm": -30.702443454039,
+     "clearance_nm": 12.089132,
+     "spread_deg": 0.44710698836214646,
+     "coherence": 0.9836030455388971
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.00010889491448740074,
+    "stripe_orientation_deg": 0.6923412524037644,
+    "domain_a_orientation_deg": 0.6923412524037644,
+    "domain_b_orientation_deg": 0.25797655262593366
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 27,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.527001676917598,
+    "stripe_orientation_deg": 44.74086208022206,
+    "domain_a_orientation_deg": 44.74086208022206,
+    "domain_b_orientation_deg": 104.7738814670884
+   },
+   "instrument_s": 773.2851768054875,
+   "budget_s": 10800.0,
+   "actions": 38,
+   "tip_condition": "blunt",
+   "tip_rounds": 8,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.2094888901883358
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 58.4,
+    "move": 300.9,
+    "drift": 162.7,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -54.35024428969359,
+     "y_nm": 115.38925598885794,
+     "clearance_nm": 12.331997436911832,
+     "spread_deg": 0.31683161647366204,
+     "coherence": 0.9830247792336875
+    },
+    {
+     "x_nm": -114.79592674094708,
+     "y_nm": 106.41989665738161,
+     "clearance_nm": 10.12426196660359,
+     "spread_deg": 1.0188801786387105,
+     "coherence": 0.9351025698391482
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.006383474982208703,
+    "stripe_orientation_deg": 0.3298620802220569,
+    "domain_a_orientation_deg": 0.3298620802220569,
+    "domain_b_orientation_deg": 0.38688146708840065
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 28,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.290924093631364,
+    "stripe_orientation_deg": 60.58423848492219,
+    "domain_a_orientation_deg": 60.58423848492219,
+    "domain_b_orientation_deg": 121.0312136703765
+   },
+   "instrument_s": 722.5447082225033,
+   "budget_s": 10800.0,
+   "actions": 17,
+   "tip_condition": "double",
+   "tip_rounds": 1,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.16321766096450369
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 7.7,
+    "move": 300.9,
+    "drift": 162.7,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -138.76898579387188,
+     "y_nm": -120.15899721448469,
+     "clearance_nm": 11.69916,
+     "spread_deg": 0.49072736612863904,
+     "coherence": 0.9656968575406133
+    },
+    {
+     "x_nm": -125.11996072423399,
+     "y_nm": -93.25091922005572,
+     "clearance_nm": 10.919215999999999,
+     "spread_deg": 0.3939328620200011,
+     "coherence": 0.9642987044158559
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.00496006850931785,
+    "stripe_orientation_deg": 0.07523848492218121,
+    "domain_a_orientation_deg": 0.07523848492218121,
+    "domain_b_orientation_deg": 0.14978632962349536
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 29,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.068218207472879,
+    "stripe_orientation_deg": 118.84252871349514,
+    "domain_a_orientation_deg": 118.84252871349514,
+    "domain_b_orientation_deg": 62.63666577721602
+   },
+   "instrument_s": 655.8920127409615,
+   "budget_s": 10800.0,
+   "actions": 16,
+   "tip_condition": "double",
+   "tip_rounds": 1,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.1042304845532153
+   ],
+   "frame_nm": 120.0,
+   "phase_s": {
+    "tip": 7.6,
+    "move": 300.8,
+    "drift": 162.6,
+    "frame": 184.8,
+    "analysis": 0.0
+   },
+   "windows": 9,
+   "measured_windows": 9,
+   "window_verdicts": {
+    "ok": 9
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -93.07182207792206,
+     "y_nm": 19.950758441558442,
+     "clearance_nm": 12.077910000000001,
+     "spread_deg": 1.077100289053724,
+     "coherence": 0.9355511433350862
+    },
+    {
+     "x_nm": -96.1887051948052,
+     "y_nm": -8.10118961038961,
+     "clearance_nm": 9.771369088868767,
+     "spread_deg": 1.0492655099757764,
+     "coherence": 0.9553738749390306
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.00458723006953754,
+    "stripe_orientation_deg": 0.8414712865048557,
+    "domain_a_orientation_deg": 0.8414712865048557,
+    "domain_b_orientation_deg": 0.5236657772160243
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 30,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 5.959978384657205,
+    "stripe_orientation_deg": 174.66003080380887,
+    "domain_a_orientation_deg": 174.66003080380887,
+    "domain_b_orientation_deg": 55.51453385318706
+   },
+   "instrument_s": 648.4637484727727,
+   "budget_s": 10800.0,
+   "actions": 13,
+   "tip_condition": "good",
+   "tip_rounds": 0,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.015885148254517048
+   ],
+   "frame_nm": 120.0,
+   "phase_s": {
+    "tip": 0.0,
+    "move": 301.1,
+    "drift": 162.6,
+    "frame": 184.8,
+    "analysis": 0.0
+   },
+   "windows": 9,
+   "measured_windows": 9,
+   "window_verdicts": {
+    "ok": 9
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 6.403166233766235,
+     "y_nm": -324.41843376623376,
+     "clearance_nm": 12.375868279393572,
+     "spread_deg": 0.5476822586398434,
+     "coherence": 0.9504775147683917
+    },
+    {
+     "x_nm": 6.403166233766235,
+     "y_nm": -267.92492727272725,
+     "clearance_nm": 11.675305776972182,
+     "spread_deg": 0.5086596359822144,
+     "coherence": 0.9466117292565759
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.021226208119917267,
+    "stripe_orientation_deg": 0.06803080380885262,
+    "domain_a_orientation_deg": 0.06803080380885262,
+    "domain_b_orientation_deg": 1.010466146812945
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 31,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.08791656169703,
+    "stripe_orientation_deg": 145.94800150750018,
+    "domain_a_orientation_deg": 145.94800150750018,
+    "domain_b_orientation_deg": 85.9236370866728
+   },
+   "instrument_s": 1144.4978595679381,
+   "budget_s": 10800.0,
+   "actions": 32,
+   "tip_condition": "blunt",
+   "tip_rounds": 2,
+   "frames": 2,
+   "retakes": 1,
+   "drift_rounds": 4,
+   "residual_nm_min": [
+    0.18663529921215508,
+    0.1844903140365984
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 15.7,
+    "move": 300.9,
+    "drift": 325.3,
+    "frame": 502.6,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 130.03138997214486,
+     "y_nm": 67.09690863509749,
+     "clearance_nm": 11.686153703594352,
+     "spread_deg": 0.4612796251649508,
+     "coherence": 0.9698200967824941
+    },
+    {
+     "x_nm": 161.6191337047354,
+     "y_nm": -6.607826740947061,
+     "clearance_nm": 11.173905763145846,
+     "spread_deg": 0.5454434055117372,
+     "coherence": 0.9666922195318584
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.00618936189531194,
+    "stripe_orientation_deg": 0.9579984924998257,
+    "domain_a_orientation_deg": 0.9579984924998257,
+    "domain_b_orientation_deg": 0.21263708667279957
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 32,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.29874259051354,
+    "stripe_orientation_deg": 63.031986468630635,
+    "domain_a_orientation_deg": 63.031986468630635,
+    "domain_b_orientation_deg": 122.66223537269342
+   },
+   "instrument_s": 1004.2565969171517,
+   "budget_s": 10800.0,
+   "actions": 27,
+   "tip_condition": "blunt",
+   "tip_rounds": 1,
+   "frames": 2,
+   "retakes": 1,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.11305037458840879,
+    0.13952318718893442
+   ],
+   "frame_nm": 120.0,
+   "phase_s": {
+    "tip": 8.6,
+    "move": 300.8,
+    "drift": 325.3,
+    "frame": 369.6,
+    "analysis": 0.0
+   },
+   "windows": 9,
+   "measured_windows": 9,
+   "window_verdicts": {
+    "ok": 9
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -53.9618051948052,
+     "y_nm": 337.31117532467533,
+     "clearance_nm": 8.606766211812658,
+     "spread_deg": 1.353384849161329,
+     "coherence": 0.9243421793946363
+    },
+    {
+     "x_nm": -54.35141558441559,
+     "y_nm": 317.83065584415584,
+     "clearance_nm": 7.801934169941452,
+     "spread_deg": 2.1085978865149384,
+     "coherence": 0.9000402621935872
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.016630774711773988,
+    "stripe_orientation_deg": 0.8639864686306282,
+    "domain_a_orientation_deg": 0.8639864686306282,
+    "domain_b_orientation_deg": 1.5477646273065773
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 33,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.5938205290204515,
+    "stripe_orientation_deg": 32.14401245530344,
+    "domain_a_orientation_deg": 32.14401245530344,
+    "domain_b_orientation_deg": 89.87093147041932
+   },
+   "instrument_s": 714.8863545484863,
+   "budget_s": 10800.0,
+   "actions": 13,
+   "tip_condition": "dirty",
+   "tip_rounds": 0,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.11913979907463089
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 0.0,
+    "move": 300.9,
+    "drift": 162.6,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -33.43543704735376,
+     "y_nm": 302.2152445682451,
+     "clearance_nm": 10.86336286646009,
+     "spread_deg": 0.4568904557010421,
+     "coherence": 0.9631743270283111
+    },
+    {
+     "x_nm": -90.76134233983286,
+     "y_nm": 308.06482674094707,
+     "clearance_nm": 10.708264716149671,
+     "spread_deg": 0.8279386121631042,
+     "coherence": 0.981076859553294
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.008225552411264658,
+    "stripe_orientation_deg": 1.061012455303441,
+    "domain_a_orientation_deg": 1.061012455303441,
+    "domain_b_orientation_deg": 0.03693147041931866
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 34,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.341680059209085,
+    "stripe_orientation_deg": 28.82138481719336,
+    "domain_a_orientation_deg": 28.82138481719336,
+    "domain_b_orientation_deg": 146.36759874609635
+   },
+   "instrument_s": 656.2460117124523,
+   "budget_s": 10800.0,
+   "actions": 16,
+   "tip_condition": "blunt",
+   "tip_rounds": 1,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.09614070289158168
+   ],
+   "frame_nm": 120.0,
+   "phase_s": {
+    "tip": 8.0,
+    "move": 300.8,
+    "drift": 162.6,
+    "frame": 184.8,
+    "analysis": 0.0
+   },
+   "windows": 9,
+   "measured_windows": 9,
+   "window_verdicts": {
+    "ok": 9
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -149.9343142857143,
+     "y_nm": 234.25117792207794,
+     "clearance_nm": 12.227796727886018,
+     "spread_deg": 1.107795807687891,
+     "coherence": 0.920178518813899
+    },
+    {
+     "x_nm": -84.86937922077922,
+     "y_nm": 200.74468441558443,
+     "clearance_nm": 9.583138891850625,
+     "spread_deg": 1.259934469644595,
+     "coherence": 0.946660316179912
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.01692899351706245,
+    "stripe_orientation_deg": 0.19138481719335232,
+    "domain_a_orientation_deg": 0.19138481719335232,
+    "domain_b_orientation_deg": 1.0935987460963474
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 35,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.369810997996176,
+    "stripe_orientation_deg": 162.29638156990765,
+    "domain_a_orientation_deg": 162.29638156990765,
+    "domain_b_orientation_deg": 104.46680711692639
+   },
+   "instrument_s": 1550.2156396939831,
+   "budget_s": 10800.0,
+   "actions": 38,
+   "tip_condition": "double",
+   "tip_rounds": 1,
+   "frames": 3,
+   "retakes": 2,
+   "drift_rounds": 3,
+   "residual_nm_min": [
+    0.14937989314806446,
+    0.06712262424206213,
+    0.0634368065906574
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 7.6,
+    "move": 300.9,
+    "drift": 487.8,
+    "frame": 753.9,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -63.862073259052934,
+     "y_nm": -100.01208440111421,
+     "clearance_nm": 13.51465393939423,
+     "spread_deg": 1.2405704041380416,
+     "coherence": 0.9924198218347358
+    },
+    {
+     "x_nm": -109.48881420612813,
+     "y_nm": -16.168073259052917,
+     "clearance_nm": 12.654576377957186,
+     "spread_deg": 0.8517157393893973,
+     "coherence": 0.9916548360598622
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.0053203787440487815,
+    "stripe_orientation_deg": 0.39438156990766515,
+    "domain_a_orientation_deg": 0.39438156990766515,
+    "domain_b_orientation_deg": 0.05319288307360637
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 36,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.2750604777623025,
+    "stripe_orientation_deg": 13.74952805968934,
+    "domain_a_orientation_deg": 13.74952805968934,
+    "domain_b_orientation_deg": 135.76993046311486
+   },
+   "instrument_s": 714.8613712453748,
+   "budget_s": 10800.0,
+   "actions": 13,
+   "tip_condition": "good",
+   "tip_rounds": 0,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.01684641179899481
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 0.0,
+    "move": 300.9,
+    "drift": 162.6,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 14.347827576601674,
+     "y_nm": 263.1391715877437,
+     "clearance_nm": 13.080058519823218,
+     "spread_deg": 0.3264566052411224,
+     "coherence": 0.9347911679361638
+    },
+    {
+     "x_nm": 14.737799721448468,
+     "y_nm": 176.17538328690807,
+     "clearance_nm": 12.869076,
+     "spread_deg": 0.5302660736452776,
+     "coherence": 0.95813900569108
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.011504559690838079,
+    "stripe_orientation_deg": 0.03852805968934092,
+    "domain_a_orientation_deg": 0.03852805968934092,
+    "domain_b_orientation_deg": 0.46193046311486796
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 37,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.3031223413449995,
+    "stripe_orientation_deg": 164.14716763651995,
+    "domain_a_orientation_deg": 164.14716763651995,
+    "domain_b_orientation_deg": 44.36295030136386
+   },
+   "instrument_s": 737.3537124613075,
+   "budget_s": 10800.0,
+   "actions": 23,
+   "tip_condition": "blunt",
+   "tip_rounds": 3,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.20878048172654082
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 22.5,
+    "move": 300.9,
+    "drift": 162.7,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 52.03782674094707,
+     "y_nm": -106.99863927576601,
+     "clearance_nm": 12.31348554641,
+     "spread_deg": 0.8322004270439479,
+     "coherence": 0.8973946755625748
+    },
+    {
+     "x_nm": 42.67849526462396,
+     "y_nm": -169.0042103064067,
+     "clearance_nm": 7.838340191439511,
+     "spread_deg": 2.9853342274900356,
+     "coherence": 0.9200478041965974
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.028942792963404962,
+    "stripe_orientation_deg": 0.09083236348004675,
+    "domain_a_orientation_deg": 0.09083236348004675,
+    "domain_b_orientation_deg": 1.4030496986361385
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 38,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.35295228229209,
+    "stripe_orientation_deg": 29.592276216434975,
+    "domain_a_orientation_deg": 29.592276216434975,
+    "domain_b_orientation_deg": 90.71187829252564
+   },
+   "instrument_s": 723.0039849472016,
+   "budget_s": 10800.0,
+   "actions": 16,
+   "tip_condition": "double",
+   "tip_rounds": 1,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.13225058735155243
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 8.2,
+    "move": 300.9,
+    "drift": 162.6,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 63.89474066852367,
+     "y_nm": -95.53847242339833,
+     "clearance_nm": 14.301927361529984,
+     "spread_deg": 0.31646106095499665,
+     "coherence": 0.973321389971007
+    },
+    {
+     "x_nm": 118.880813091922,
+     "y_nm": -93.97858384401115,
+     "clearance_nm": 13.109093091664272,
+     "spread_deg": 0.1956964250584453,
+     "coherence": 0.9432516871006555
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.007507622795177582,
+    "stripe_orientation_deg": 0.7232762164349822,
+    "domain_a_orientation_deg": 0.7232762164349822,
+    "domain_b_orientation_deg": 0.30387829252563847
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 39,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.230287921656514,
+    "stripe_orientation_deg": 50.60639771687645,
+    "domain_a_orientation_deg": 50.60639771687645,
+    "domain_b_orientation_deg": 106.59203687229392
+   },
+   "instrument_s": 686.251374462225,
+   "budget_s": 10800.0,
+   "actions": 28,
+   "tip_condition": "blunt",
+   "tip_rounds": 5,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.11202566931887105
+   ],
+   "frame_nm": 120.0,
+   "phase_s": {
+    "tip": 38.0,
+    "move": 300.9,
+    "drift": 162.6,
+    "frame": 184.8,
+    "analysis": 0.0
+   },
+   "windows": 9,
+   "measured_windows": 9,
+   "window_verdicts": {
+    "ok": 9
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 252.4359948051948,
+     "y_nm": -336.92846623376624,
+     "clearance_nm": 10.159785796364018,
+     "spread_deg": 1.6311840839633704,
+     "coherence": 0.974185103222069
+    },
+    {
+     "x_nm": 217.37105974025974,
+     "y_nm": -304.9804142857143,
+     "clearance_nm": 10.159785796364018,
+     "spread_deg": 0.8096680555141859,
+     "coherence": 0.9657258127895888
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.00019412991206735342,
+    "stripe_orientation_deg": 1.7323977168764486,
+    "domain_a_orientation_deg": 1.7323977168764486,
+    "domain_b_orientation_deg": 0.26696312770607733
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 40,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.159338683722828,
+    "stripe_orientation_deg": 21.9687366910573,
+    "domain_a_orientation_deg": 21.9687366910573,
+    "domain_b_orientation_deg": 83.9635838365463
+   },
+   "instrument_s": 665.6107670894714,
+   "budget_s": 10800.0,
+   "actions": 19,
+   "tip_condition": "double",
+   "tip_rounds": 2,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.09965515952679915
+   ],
+   "frame_nm": 120.0,
+   "phase_s": {
+    "tip": 17.3,
+    "move": 300.8,
+    "drift": 162.7,
+    "frame": 184.8,
+    "analysis": 0.0
+   },
+   "windows": 9,
+   "measured_windows": 9,
+   "window_verdicts": {
+    "ok": 9
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 510.1244454545454,
+     "y_nm": 408.59393376623376,
+     "clearance_nm": 12.720632253885812,
+     "spread_deg": 0.8747921109917468,
+     "coherence": 0.9312124216742145
+    },
+    {
+     "x_nm": 472.72184805194803,
+     "y_nm": 410.1523753246753,
+     "clearance_nm": 9.74025,
+     "spread_deg": 1.254700770785886,
+     "coherence": 0.8661990813926426
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.010017122805839662,
+    "stripe_orientation_deg": 0.5507366910572955,
+    "domain_a_orientation_deg": 0.5507366910572955,
+    "domain_b_orientation_deg": 0.2535838365463121
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 41,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.40768846240792,
+    "stripe_orientation_deg": 81.10219834036475,
+    "domain_a_orientation_deg": 81.10219834036475,
+    "domain_b_orientation_deg": 137.16860025890247
+   },
+   "instrument_s": 725.68385733213,
+   "budget_s": 10800.0,
+   "actions": 18,
+   "tip_condition": "unstable",
+   "tip_rounds": 2,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.2405910819757641
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 10.8,
+    "move": 300.9,
+    "drift": 162.7,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -41.43065515320334,
+     "y_nm": 341.6661732590529,
+     "clearance_nm": 16.28570883957146,
+     "spread_deg": 0.7624524790042028,
+     "coherence": 0.9626825195237034
+    },
+    {
+     "x_nm": 38.12366239554318,
+     "y_nm": 341.6661732590529,
+     "clearance_nm": 14.560115251360342,
+     "spread_deg": 0.6920991613971419,
+     "coherence": 0.9097952423183324
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.011885430909615025,
+    "stripe_orientation_deg": 0.3851983403647523,
+    "domain_a_orientation_deg": 0.3851983403647523,
+    "domain_b_orientation_deg": 0.9413997410975412
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 42,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.2889372868790945,
+    "stripe_orientation_deg": 43.074764758475034,
+    "domain_a_orientation_deg": 43.074764758475034,
+    "domain_b_orientation_deg": 162.67302560032508
+   },
+   "instrument_s": 736.8628509668642,
+   "budget_s": 10800.0,
+   "actions": 23,
+   "tip_condition": "double",
+   "tip_rounds": 3,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.19870215165136038
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 22.0,
+    "move": 300.9,
+    "drift": 162.7,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -291.59201615598886,
+     "y_nm": 124.04018579387187,
+     "clearance_nm": 12.013416440963661,
+     "spread_deg": 0.6192535387952857,
+     "coherence": 0.9390517148789563
+    },
+    {
+     "x_nm": -303.2911805013927,
+     "y_nm": 53.45522757660167,
+     "clearance_nm": 9.367448893501795,
+     "spread_deg": 1.6170561608226546,
+     "coherence": 0.9116396921294433
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.007707167230672773,
+    "stripe_orientation_deg": 0.95223524152496,
+    "domain_a_orientation_deg": 0.95223524152496,
+    "domain_b_orientation_deg": 1.493025600325069
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 43,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.057614182722724,
+    "stripe_orientation_deg": 24.731276890998863,
+    "domain_a_orientation_deg": 24.731276890998863,
+    "domain_b_orientation_deg": 83.67504945277156
+   },
+   "instrument_s": 725.426251307515,
+   "budget_s": 10800.0,
+   "actions": 17,
+   "tip_condition": "unstable",
+   "tip_rounds": 2,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.0878691096907757
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 10.6,
+    "move": 300.9,
+    "drift": 162.6,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 60.62295292479109,
+     "y_nm": 243.91347325905292,
+     "clearance_nm": 9.942374188774027,
+     "spread_deg": 1.1158985220837565,
+     "coherence": 0.9238861419871
+    },
+    {
+     "x_nm": 94.94050167130919,
+     "y_nm": 243.91347325905292,
+     "clearance_nm": 9.631597898492233,
+     "spread_deg": 1.4479943899095762,
+     "coherence": 0.8550095081161779
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.007508649039270843,
+    "stripe_orientation_deg": 1.5742768909988598,
+    "domain_a_orientation_deg": 1.5742768909988598,
+    "domain_b_orientation_deg": 0.023950547228437813
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 44,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.282773056055797,
+    "stripe_orientation_deg": 161.60090615861284,
+    "domain_a_orientation_deg": 161.60090615861284,
+    "domain_b_orientation_deg": 105.93045679578081
+   },
+   "instrument_s": 664.3261828943592,
+   "budget_s": 10800.0,
+   "actions": 19,
+   "tip_condition": "blunt",
+   "tip_rounds": 2,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.08068342795592512
+   ],
+   "frame_nm": 120.0,
+   "phase_s": {
+    "tip": 16.1,
+    "move": 300.8,
+    "drift": 162.6,
+    "frame": 184.8,
+    "analysis": 0.0
+   },
+   "windows": 9,
+   "measured_windows": 9,
+   "window_verdicts": {
+    "ok": 9
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 269.0768038961039,
+     "y_nm": -57.1535038961039,
+     "clearance_nm": 11.019834920723632,
+     "spread_deg": 0.6036025247788643,
+     "coherence": 0.9581048392869386
+    },
+    {
+     "x_nm": 238.29758311688312,
+     "y_nm": -54.42623116883118,
+     "clearance_nm": 9.366859682615086,
+     "spread_deg": 1.5533706107160468,
+     "coherence": 0.882883504934105
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.02444895083984555,
+    "stripe_orientation_deg": 0.9790938413871686,
+    "domain_a_orientation_deg": 0.9790938413871686,
+    "domain_b_orientation_deg": 0.9094567957808124
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 45,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 5.968435128384812,
+    "stripe_orientation_deg": 12.989265333173437,
+    "domain_a_orientation_deg": 12.989265333173437,
+    "domain_b_orientation_deg": 130.4873728761355
+   },
+   "instrument_s": 737.1865375207841,
+   "budget_s": 10800.0,
+   "actions": 23,
+   "tip_condition": "blunt",
+   "tip_rounds": 3,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.31272847766793144
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 22.3,
+    "move": 300.9,
+    "drift": 162.7,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -493.23252674094704,
+     "y_nm": -173.46939164345403,
+     "clearance_nm": 14.060640419952428,
+     "spread_deg": 0.9561719436750545,
+     "coherence": 0.9868277317016422
+    },
+    {
+     "x_nm": -370.7812732590529,
+     "y_nm": -97.42482339832867,
+     "clearance_nm": 13.935702756630825,
+     "spread_deg": 0.8156568122503267,
+     "coherence": 0.9075079498609027
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.0033820646116318187,
+    "stripe_orientation_deg": 0.4577346668265676,
+    "domain_a_orientation_deg": 0.4577346668265676,
+    "domain_b_orientation_deg": 0.9153728761355069
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 46,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.054530952131705,
+    "stripe_orientation_deg": 1.5755456363423415,
+    "domain_a_orientation_deg": 1.5755456363423415,
+    "domain_b_orientation_deg": 120.77763961849858
+   },
+   "instrument_s": 714.8245706297632,
+   "budget_s": 10800.0,
+   "actions": 14,
+   "tip_condition": "good",
+   "tip_rounds": 0,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.24395774717856042
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 0.0,
+    "move": 300.8,
+    "drift": 162.7,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 16.828973259052916,
+     "y_nm": -201.2552114206128,
+     "clearance_nm": 14.301927361529984,
+     "spread_deg": 0.26783976820547,
+     "coherence": 0.9942763720686539
+    },
+    {
+     "x_nm": 108.47242729805014,
+     "y_nm": -214.9042364902507,
+     "clearance_nm": 12.387367122639741,
+     "spread_deg": 0.2987485477387923,
+     "coherence": 0.9885936633047964
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.004366387875438527,
+    "stripe_orientation_deg": 0.15754563634234842,
+    "domain_a_orientation_deg": 0.15754563634234842,
+    "domain_b_orientation_deg": 0.6066396184985763
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 47,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.193977640471678,
+    "stripe_orientation_deg": 29.29889983594498,
+    "domain_a_orientation_deg": 29.29889983594498,
+    "domain_b_orientation_deg": 150.62555492637904
+   },
+   "instrument_s": 722.8233442577397,
+   "budget_s": 10800.0,
+   "actions": 16,
+   "tip_condition": "double",
+   "tip_rounds": 1,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.08882394948904766
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 8.0,
+    "move": 300.9,
+    "drift": 162.6,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -56.259372423398325,
+     "y_nm": 43.231655988857945,
+     "clearance_nm": 12.013416440963661,
+     "spread_deg": 0.4859821538510462,
+     "coherence": 0.890157467820224
+    },
+    {
+     "x_nm": 20.56514011142061,
+     "y_nm": 22.953104456824512,
+     "clearance_nm": 11.594701123058584,
+     "spread_deg": 0.5380645733300321,
+     "coherence": 0.9525880944848704
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.009621238985296543,
+    "stripe_orientation_deg": 0.3641001640550172,
+    "domain_a_orientation_deg": 0.3641001640550172,
+    "domain_b_orientation_deg": 0.3965549263790251
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 48,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.4795851802983755,
+    "stripe_orientation_deg": 52.81879429526208,
+    "domain_a_orientation_deg": 52.81879429526208,
+    "domain_b_orientation_deg": 113.12312412656507
+   },
+   "instrument_s": 946.0392506017929,
+   "budget_s": 10800.0,
+   "actions": 29,
+   "tip_condition": "double",
+   "tip_rounds": 1,
+   "frames": 2,
+   "retakes": 1,
+   "drift_rounds": 4,
+   "residual_nm_min": [
+    0.2520594058514394,
+    0.23256785056740553
+   ],
+   "frame_nm": 110.0,
+   "phase_s": {
+    "tip": 8.6,
+    "move": 300.8,
+    "drift": 325.3,
+    "frame": 311.3,
+    "analysis": 0.0
+   },
+   "windows": 4,
+   "measured_windows": 4,
+   "window_verdicts": {
+    "ok": 4
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 119.00631943462898,
+     "y_nm": 134.52556431095405,
+     "clearance_nm": 13.62644792666163,
+     "spread_deg": 0.46735050879687934,
+     "coherence": 0.9479969602023927
+    },
+    {
+     "x_nm": 164.48335123674912,
+     "y_nm": 204.87892120141342,
+     "clearance_nm": 10.890342734527,
+     "spread_deg": 0.5083869988699474,
+     "coherence": 0.9479740376638776
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.02102449726234834,
+    "stripe_orientation_deg": 0.5607942952620704,
+    "domain_a_orientation_deg": 0.5607942952620704,
+    "domain_b_orientation_deg": 0.16087587343493226
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 49,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.021651679316432,
+    "stripe_orientation_deg": 7.735289510107773,
+    "domain_a_orientation_deg": 7.735289510107773,
+    "domain_b_orientation_deg": 125.38217406822747
+   },
+   "instrument_s": 909.7015669726628,
+   "budget_s": 10800.0,
+   "actions": 30,
+   "tip_condition": "double",
+   "tip_rounds": 2,
+   "frames": 2,
+   "retakes": 1,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.07070545101372874,
+    0.08963199343897973
+   ],
+   "frame_nm": 102.0,
+   "phase_s": {
+    "tip": 16.4,
+    "move": 300.8,
+    "drift": 325.2,
+    "frame": 267.2,
+    "analysis": 0.0
+   },
+   "windows": 4,
+   "measured_windows": 4,
+   "window_verdicts": {
+    "ok": 4
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 336.5073419847328,
+     "y_nm": -122.46953664122137,
+     "clearance_nm": 16.425133463835845,
+     "spread_deg": 0.5097840546682121,
+     "coherence": 0.9931957395603692
+    },
+    {
+     "x_nm": 345.072227480916,
+     "y_nm": -193.71381145038168,
+     "clearance_nm": 12.847329,
+     "spread_deg": 0.23834410306164558,
+     "coherence": 0.9842200788298431
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.000554961130842635,
+    "stripe_orientation_deg": 0.13971048989222368,
+    "domain_a_orientation_deg": 0.13971048989222368,
+    "domain_b_orientation_deg": 0.49417406822746557
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 50,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.0867269333273555,
+    "stripe_orientation_deg": 158.962334580957,
+    "domain_a_orientation_deg": 158.962334580957,
+    "domain_b_orientation_deg": 102.09995446108437
+   },
+   "instrument_s": 967.0154206727358,
+   "budget_s": 10800.0,
+   "actions": 38,
+   "tip_condition": "blunt",
+   "tip_rounds": 4,
+   "frames": 2,
+   "retakes": 1,
+   "drift_rounds": 4,
+   "residual_nm_min": [
+    0.25150561274688576,
+    0.2503828044179094
+   ],
+   "frame_nm": 110.0,
+   "phase_s": {
+    "tip": 29.5,
+    "move": 300.8,
+    "drift": 325.4,
+    "frame": 311.3,
+    "analysis": 0.0
+   },
+   "windows": 4,
+   "measured_windows": 4,
+   "window_verdicts": {
+    "ok": 4
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -128.01252508833923,
+     "y_nm": -230.7212512367491,
+     "clearance_nm": 10.202728509744881,
+     "spread_deg": 0.6519991291379279,
+     "coherence": 0.956867844006412
+    },
+    {
+     "x_nm": -121.79344381625441,
+     "y_nm": -258.70711696113074,
+     "clearance_nm": 8.560075373544615,
+     "spread_deg": 1.8957206889066163,
+     "coherence": 0.9569673045326219
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.0026292386225303943,
+    "stripe_orientation_deg": 1.225665419042997,
+    "domain_a_orientation_deg": 1.225665419042997,
+    "domain_b_orientation_deg": 0.8899544610843719
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 51,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.3599718917324175,
+    "stripe_orientation_deg": 166.31932188038792,
+    "domain_a_orientation_deg": 166.31932188038792,
+    "domain_b_orientation_deg": 108.17060917049784
+   },
+   "instrument_s": 714.5538855041696,
+   "budget_s": 10800.0,
+   "actions": 13,
+   "tip_condition": "good",
+   "tip_rounds": 0,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.08790427312360465
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 0.0,
+    "move": 300.6,
+    "drift": 162.6,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 108.97630974930361,
+     "y_nm": -55.64231671309193,
+     "clearance_nm": 10.206543985945487,
+     "spread_deg": 1.068215791204652,
+     "coherence": 0.9552433355719616
+    },
+    {
+     "x_nm": 138.22422061281335,
+     "y_nm": -53.30248384401115,
+     "clearance_nm": 8.89272981753522,
+     "spread_deg": 1.7536410964328035,
+     "coherence": 0.8473265641824524
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.01952650977564563,
+    "stripe_orientation_deg": 0.5486781196120774,
+    "domain_a_orientation_deg": 0.5486781196120774,
+    "domain_b_orientation_deg": 0.8156091704978365
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 52,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 5.906645098124562,
+    "stripe_orientation_deg": 76.80041506130783,
+    "domain_a_orientation_deg": 76.80041506130783,
+    "domain_b_orientation_deg": 137.2336327929098
+   },
+   "instrument_s": 627.792695410464,
+   "budget_s": 10800.0,
+   "actions": 16,
+   "tip_condition": "double",
+   "tip_rounds": 1,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.07369945118441489
+   ],
+   "frame_nm": 110.0,
+   "phase_s": {
+    "tip": 8.7,
+    "move": 300.8,
+    "drift": 162.6,
+    "frame": 155.7,
+    "analysis": 0.0
+   },
+   "windows": 4,
+   "measured_windows": 4,
+   "window_verdicts": {
+    "ok": 4
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 230.10784346289753,
+     "y_nm": 97.95318303886927,
+     "clearance_nm": 12.920754014961549,
+     "spread_deg": 1.1957348579240994,
+     "coherence": 0.9216859999578528
+    },
+    {
+     "x_nm": 229.33045830388693,
+     "y_nm": 190.07332438162547,
+     "clearance_nm": 11.847168802010083,
+     "spread_deg": 1.4599668352357849,
+     "coherence": 0.9855977754134871
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.02049749239794174,
+    "stripe_orientation_deg": 0.7164150613078277,
+    "domain_a_orientation_deg": 0.7164150613078277,
+    "domain_b_orientation_deg": 1.0833672070902196
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 53,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.275057132784305,
+    "stripe_orientation_deg": 29.819526718934945,
+    "domain_a_orientation_deg": 29.819526718934945,
+    "domain_b_orientation_deg": 153.7458117493724
+   },
+   "instrument_s": 714.6338863407422,
+   "budget_s": 10800.0,
+   "actions": 13,
+   "tip_condition": "good",
+   "tip_rounds": 0,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.06917068050446616
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 0.0,
+    "move": 300.7,
+    "drift": 162.6,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -135.50737325905294,
+     "y_nm": -5.4619894150417885,
+     "clearance_nm": 14.428963999999999,
+     "spread_deg": 1.763477061122567,
+     "coherence": 0.9898252363450099
+    },
+    {
+     "x_nm": -222.86113370473538,
+     "y_nm": 81.11182674094708,
+     "clearance_nm": 10.139272,
+     "spread_deg": 1.3636151664410212,
+     "coherence": 0.9720294680193303
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.0027545374477284668,
+    "stripe_orientation_deg": 1.0664732810650577,
+    "domain_a_orientation_deg": 1.0664732810650577,
+    "domain_b_orientation_deg": 0.4361882506275947
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 54,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.1313828303923135,
+    "stripe_orientation_deg": 71.77891283527589,
+    "domain_a_orientation_deg": 71.77891283527589,
+    "domain_b_orientation_deg": 129.05314231873373
+   },
+   "instrument_s": 1136.2183034506834,
+   "budget_s": 10800.0,
+   "actions": 27,
+   "tip_condition": "double",
+   "tip_rounds": 1,
+   "frames": 2,
+   "retakes": 1,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.13896048389882806,
+    0.1411866717472687
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 7.5,
+    "move": 300.9,
+    "drift": 325.2,
+    "frame": 502.6,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -208.81962311977716,
+     "y_nm": -108.96178384401115,
+     "clearance_nm": 14.824066322466315,
+     "spread_deg": 0.10448639347314931,
+     "coherence": 0.9576046613407492
+    },
+    {
+     "x_nm": -103.52714401114206,
+     "y_nm": -116.76122674094707,
+     "clearance_nm": 14.00102672130069,
+     "spread_deg": 0.9296969343549092,
+     "coherence": 0.9558605694915548
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.0006265550442998702,
+    "stripe_orientation_deg": 0.3460871647241106,
+    "domain_a_orientation_deg": 0.3460871647241106,
+    "domain_b_orientation_deg": 0.9858576812662534
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 55,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.079234496082443,
+    "stripe_orientation_deg": 7.418764743989096,
+    "domain_a_orientation_deg": 7.418764743989096,
+    "domain_b_orientation_deg": 131.10386455824786
+   },
+   "instrument_s": 685.1165236428327,
+   "budget_s": 10800.0,
+   "actions": 29,
+   "tip_condition": "blunt",
+   "tip_rounds": 5,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.2350031088780325
+   ],
+   "frame_nm": 120.0,
+   "phase_s": {
+    "tip": 36.8,
+    "move": 300.8,
+    "drift": 162.7,
+    "frame": 184.8,
+    "analysis": 0.0
+   },
+   "windows": 9,
+   "measured_windows": 9,
+   "window_verdicts": {
+    "ok": 9
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -96.06356623376624,
+     "y_nm": -105.87376883116883,
+     "clearance_nm": 15.129715653864748,
+     "spread_deg": 0.2225460105468166,
+     "coherence": 0.992386110036891
+    },
+    {
+     "x_nm": -27.49213766233766,
+     "y_nm": -179.89974285714285,
+     "clearance_nm": 11.849525547147447,
+     "spread_deg": 0.26154517209439326,
+     "coherence": 0.9728615841621067
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.0025421014620166105,
+    "stripe_orientation_deg": 0.09676474398909818,
+    "domain_a_orientation_deg": 0.09676474398909818,
+    "domain_b_orientation_deg": 0.40586455824785617
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 56,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.568450253617829,
+    "stripe_orientation_deg": 24.422029898032406,
+    "domain_a_orientation_deg": 24.422029898032406,
+    "domain_b_orientation_deg": 81.96099818732672
+   },
+   "instrument_s": 714.7045297475414,
+   "budget_s": 10800.0,
+   "actions": 14,
+   "tip_condition": "good",
+   "tip_rounds": 0,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.17428119976945933
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 0.0,
+    "move": 300.7,
+    "drift": 162.7,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -156.72749916434543,
+     "y_nm": 91.97189582172702,
+     "clearance_nm": 9.772670309201677,
+     "spread_deg": 0.9751657788171997,
+     "coherence": 0.9504888487477773
+    },
+    {
+     "x_nm": -159.45730417827298,
+     "y_nm": 9.687773259052932,
+     "clearance_nm": 9.129010467166307,
+     "spread_deg": 1.1775671214228334,
+     "coherence": 0.9190249581116803
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": 0.010380061666483087,
+    "stripe_orientation_deg": 1.4840298980324036,
+    "domain_a_orientation_deg": 1.4840298980324036,
+    "domain_b_orientation_deg": 0.9470018126732782
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 57,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.15677148838609,
+    "stripe_orientation_deg": 173.18545160773098,
+    "domain_a_orientation_deg": 173.18545160773098,
+    "domain_b_orientation_deg": 52.64689881450323
+   },
+   "instrument_s": 730.9845651180401,
+   "budget_s": 10800.0,
+   "actions": 19,
+   "tip_condition": "blunt",
+   "tip_rounds": 2,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 1,
+   "residual_nm_min": [
+    0.08567893721492548
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 16.2,
+    "move": 300.9,
+    "drift": 162.6,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 261.887026740947,
+     "y_nm": 261.7163969359332,
+     "clearance_nm": 13.429992505203566,
+     "spread_deg": 0.8274882982084629,
+     "coherence": 0.9912345594965567
+    },
+    {
+     "x_nm": 258.3772774373259,
+     "y_nm": 336.59104874651814,
+     "clearance_nm": 10.729546482190568,
+     "spread_deg": 0.7207086722420529,
+     "coherence": 0.9857953095320166
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.03000334534587701,
+    "stripe_orientation_deg": 0.5114516077309759,
+    "domain_a_orientation_deg": 0.5114516077309759,
+    "domain_b_orientation_deg": 0.8311011854967774
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 58,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 5.973132086438158,
+    "stripe_orientation_deg": 108.19320142385715,
+    "domain_a_orientation_deg": 108.19320142385715,
+    "domain_b_orientation_deg": 44.77152786696883
+   },
+   "instrument_s": 729.527928805907,
+   "budget_s": 10800.0,
+   "actions": 20,
+   "tip_condition": "double",
+   "tip_rounds": 2,
+   "frames": 1,
+   "retakes": 0,
+   "drift_rounds": 2,
+   "residual_nm_min": [
+    0.1681275552214039
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 14.7,
+    "move": 300.9,
+    "drift": 162.7,
+    "frame": 251.3,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": -236.33819805013928,
+     "y_nm": 144.7866267409471,
+     "clearance_nm": 15.143773191060147,
+     "spread_deg": 0.86563623305295,
+     "coherence": 0.9956864314189016
+    },
+    {
+     "x_nm": -194.61117855153202,
+     "y_nm": 98.76991364902509,
+     "clearance_nm": 13.621136375371915,
+     "spread_deg": 0.2744029817656218,
+     "coherence": 0.9848182024782712
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.016995231623670115,
+    "stripe_orientation_deg": 0.3007985761428529,
+    "domain_a_orientation_deg": 0.3007985761428529,
+    "domain_b_orientation_deg": 0.1595278669688298
+   }
+  },
+  {
+   "paper": "P1",
+   "seed": 59,
+   "success": true,
+   "partial": 1.0,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "values": {
+    "stripe_period_nm": 6.0540137643960605,
+    "stripe_orientation_deg": 160.65518212100386,
+    "domain_a_orientation_deg": 160.65518212100386,
+    "domain_b_orientation_deg": 97.65646849340462
+   },
+   "instrument_s": 1129.1222044186388,
+   "budget_s": 10800.0,
+   "actions": 26,
+   "tip_condition": "dirty",
+   "tip_rounds": 0,
+   "frames": 2,
+   "retakes": 1,
+   "drift_rounds": 4,
+   "residual_nm_min": [
+    0.2200452215583895,
+    0.20053687995692618
+   ],
+   "frame_nm": 140.0,
+   "phase_s": {
+    "tip": 0.0,
+    "move": 301.2,
+    "drift": 325.4,
+    "frame": 502.6,
+    "analysis": 0.0
+   },
+   "windows": 16,
+   "measured_windows": 16,
+   "window_verdicts": {
+    "ok": 16
+   },
+   "window_arms": [
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2
+   ],
+   "places": [
+    {
+     "x_nm": 97.32462367688022,
+     "y_nm": -354.53755097493035,
+     "clearance_nm": 14.060640419952428,
+     "spread_deg": 0.31073311909277584,
+     "coherence": 0.9845389992403643
+    },
+    {
+     "x_nm": 51.69788272980501,
+     "y_nm": -354.53755097493035,
+     "clearance_nm": 12.43637766865127,
+     "spread_deg": 0.2872643197418685,
+     "coherence": 0.944679723727731
+    }
+   ],
+   "abs_err": {
+    "stripe_period_nm": -0.003686696714841453,
+    "stripe_orientation_deg": 0.5948178789961389,
+    "domain_a_orientation_deg": 0.5948178789961389,
+    "domain_b_orientation_deg": 0.24046849340462018
+   }
+  }
+ ]
+}

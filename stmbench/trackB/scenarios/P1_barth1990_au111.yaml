@@ -153,7 +153,7 @@ notes: |
   periods, so one FFT bin is a third of a nanometre and a reading can snap to a bin. On the
   paper's zigzag each arm is a comb of lines 1/L apart whose strongest line is off the arm period
   by up to ~0.2 nm (p90 0.13–0.21 nm on pure fields); the reference and the baseline read the
-  power-weighted centroid of each comb, the median over windows (|error| at most 0.037 and 0.090
+  power-weighted centroid of each comb, the median over windows (|error| at most 0.037 and 0.088
   nm), with adsorbates masked first (``stmbench/analysis/herringbone.py``).
 
   **Distinctness criterion (since 2026-11-27).** One arm is one rotational domain. Two places
