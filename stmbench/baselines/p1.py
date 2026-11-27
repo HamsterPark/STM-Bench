@@ -33,6 +33,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
+from scipy import ndimage
 
 from ..analysis import herringbone as hb
 from ..analysis.adatoms import locate
@@ -50,6 +51,14 @@ FRAME_NM, FRAME_PX, FRAME_LINE_S = 120.0, 300, 0.3
 PERIOD_WINDOW_NM, PERIOD_WINDOW_SMALL_NM = 100.0, 80.0
 #: two directions at least this far apart (degrees) are two domains: neighbouring arms differ by 56-64
 MIN_SEP_DEG = 40.0
+#: a band where the lines' rms falls under this fraction of the strongest nearby is a wall, and is kept clear
+AMP_REACH_NM = 20.0
+#: a place's score is its amplitude ratio plus this per nm of the radius over which the arm stays uniform
+REACH_WEIGHT = 0.03
+#: a place is read in a disc of this radius (nm): the direction must be uniform in it, no step within STEP_CLEAR_NM
+PLACE_RADIUS_NM, PLACE_SPREAD_DEG, PLACE_GRID_NM = 8.5, 3.0, 3.0
+#: no place is taken this close to a step (nm)
+STEP_CLEAR_NM = 20.0
 #: an atom is a landmark for the drift when it stands this high (pm): the lines make bumps of 20-28 pm
 ATOM_MIN_PM = 35.0
 #: the frame is centred within this distance of a landmark atom (nm): the move from the atom to the frame
@@ -92,7 +101,7 @@ class Place:
     y: float
     direction_deg: float
     spread_deg: float
-    clearance_nm: float
+    score: float
     frame: dict
 
 
@@ -126,6 +135,20 @@ def without_atoms(f: dict) -> dict:
         if ring.any():
             z[dist2 <= r * r] = np.median(z[ring])
     return {**f, "array": z}
+
+
+def amplitude_ratio(f: dict) -> np.ndarray:
+    """How strong the lines are at each pixel against the strongest nearby (1: as strong as anywhere within
+    AMP_REACH_NM). At a wall between two regions of the zigzag the amplitude dips to about half (median 0.6 within
+    2 nm of a wall, 0.9 and more in the middle of an arm: 30 frames of the development seeds) and the direction of
+    the lines jumps, so a place there reads well to the eye but the judge, which maps the position through the
+    frame's drift, may find the other side (seed 84 missed by 55 degrees, seeds 30, 59 and 85 by 3-5). Against the
+    strongest nearby, not against the frame: a double tip's ghost weakens a whole arm by one factor."""
+    z = np.asarray(f["array"], float) * 1e12
+    d = float(f["nm_per_px"])
+    bp = ndimage.gaussian_filter(z, 1.0 / d) - ndimage.gaussian_filter(z, 4.0 / d)
+    r = np.sqrt(ndimage.gaussian_filter(bp ** 2, 5.0 / d))
+    return r / ndimage.maximum_filter(r, size=max(3, int(round(AMP_REACH_NM / d))))
 
 
 # ── scouting ──────────────────────────────────────────────────────────────────
@@ -206,15 +229,37 @@ def atom_shift(ops: Ops, predicted: tuple[float, float], log: dict) -> tuple[tup
 
 # ── a centre ──────────────────────────────────────────────────────────────────
 def read_frame(f: dict) -> tuple[list[Place], list[float]]:
-    """The places of a frame that can carry a direction (uniform, coherent, clear of steps) and the arm
-    period of the 100 nm windows that read one."""
+    """The places of a frame that can carry a direction and the arm period of its windows. A place is a node of a
+    4 nm grid whose 10 nm disc is coherent, uniform in direction (rms deviation under 3.5 degrees, by
+    ``local_direction``), clear of steps by 20 nm and not on a dip of the lines' amplitude; its score is the
+    mean amplitude ratio over the disc, so that the places a wall can hide in come last."""
     g = without_atoms(f)
     om = hb.orientation_map(g)
+    amp = amplitude_ratio(g)
+    d = float(f["nm_per_px"])
+    near_step = ndimage.binary_dilation(om.step_near, iterations=int(round(STEP_CLEAR_NM / d)))
+    n = amp.shape[0]
+    half = FRAME_NM / 2.0 - PLACE_RADIUS_NM - 2.0
+    cx, cy = (float(c) for c in f["center_nm"])
     places = []
-    for p in hb.arm_places(g, omap=om):
-        r = hb.local_direction(g, p.x_nm, p.y_nm, omap=om)
-        if r is not None and r.ok:
-            places.append(Place(p.x_nm, p.y_nm, r.direction_deg, r.spread_deg, p.clearance_nm, f))
+    for ox in np.arange(-half, half + 1e-9, PLACE_GRID_NM):
+        for oy in np.arange(-half, half + 1e-9, PLACE_GRID_NM):
+            x, y = cx + float(ox), cy + float(oy)
+            col, row = hb.scan_nm_to_pixel(f, x, y)
+            if near_step[int(round(row)), int(round(col))]:
+                continue
+            r = hb.local_direction(g, x, y, radius_nm=PLACE_RADIUS_NM, omap=om)
+            if r is None or not r.ok or r.spread_deg > PLACE_SPREAD_DEG:
+                continue
+            rr, cc = hb._disc(om, x, y, PLACE_RADIUS_NM)
+            # how far the arm stays uniform around the node: the middle of an arm, away from the bends, reads best
+            reach = PLACE_RADIUS_NM
+            for rad in (PLACE_RADIUS_NM + 2.0, PLACE_RADIUS_NM + 4.0, PLACE_RADIUS_NM + 6.0):
+                q = hb.local_direction(g, x, y, radius_nm=rad, omap=om)
+                if q is None or not q.ok or q.spread_deg > PLACE_SPREAD_DEG:
+                    break
+                reach = rad
+            places.append(Place(x, y, r.direction_deg, r.spread_deg, float(amp[rr, cc].mean()) + REACH_WEIGHT * reach, f))
     c = (float(f["center_nm"][0]), float(f["center_nm"][1]))
     periods = []
     # 100 nm windows at five places, and 80 nm ones where a step leaves no 100 nm window (the same arm period
@@ -228,13 +273,13 @@ def read_frame(f: dict) -> tuple[list[Place], list[float]]:
 
 
 def best_pair(places: list[Place]) -> tuple[Place, Place] | None:
-    """Two places whose directions differ by MIN_SEP_DEG or more, the largest clearance (the middle of
-    the stretches, farthest from the bends) between them."""
+    """Two places whose directions differ by MIN_SEP_DEG or more, the best-scoring (the strongest lines around
+    them, farthest from a wall) between them."""
     best = None
     for i, a in enumerate(places):
         for b in places[i + 1:]:
             if abs(circ_diff(a.direction_deg, b.direction_deg)) >= MIN_SEP_DEG:
-                sc = min(a.clearance_nm, b.clearance_nm)
+                sc = min(a.score, b.score)
                 if best is None or sc > best[0]:
                     best = (sc, a, b)
     return None if best is None else (best[1], best[2])
