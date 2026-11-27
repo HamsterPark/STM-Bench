@@ -60,11 +60,20 @@ FLATTEN_NOTE: Pair = (
 )
 
 
-def with_console_notes(manual: str, lang: str = "en") -> str:
+#: Said in the Manual tab only when the console was started with --data-dir; the directory is the one given. Facts only.
+DATA_NOTE: Pair = (
+    "Saved frames, spectra and move traces are also written as plain-text CSV to {dir} (one file per spectrum or trace; one "
+    "per frame channel and direction).",
+    "保存的扫描帧、谱和移动轨迹还会以纯文本 CSV 写到 {dir}（每条谱或轨迹一个文件；每帧的每个通道和方向一个文件）。",
+)
+
+
+def with_console_notes(manual: str, lang: str = "en", data_dir=None) -> str:
     """The manual the Manual tab shows: the console's notes in the window's language, then the instrument's manual byte for
     byte. The notes come first because the reader of screen trial 22 never scrolled to the end of the manual to find them."""
     i = 0 if lang == "en" else 1
-    return "\n\n".join([MOVE_NOTE[i], FLATTEN_NOTE[i], manual])
+    notes = [MOVE_NOTE[i], FLATTEN_NOTE[i]] + ([DATA_NOTE[i].format(dir=data_dir)] if data_dir else [])
+    return "\n\n".join([*notes, manual])
 
 
 S: dict[str, Pair] = {
@@ -188,7 +197,7 @@ S: dict[str, Pair] = {
     # the readout line's usage hints, shown while it has no reading: how the viewer works, never about the experiment
     # each says what the pointer does with the tool picked, and that the wheel zooms about the pointer (p3check1, finding 1:
     # a sighted agent zoomed about the centre with the buttons and then had to pan to a ring at the edge)
-    "hint_image": ("Hover to read; click to mark, drag to pan; wheel to zoom about the pointer",
+    "hint_image": ("Hover: read; click: mark; zoomed: drag to pan; wheel: zoom about the pointer",
                    "悬停读数，单击放标记，放大后拖动平移，滚轮以指针处为中心缩放"),
     "hint_image_profile": ("Hover to read; drag a line to plot along it; wheel to zoom about the pointer",
                            "悬停读坐标和数值，拖动画剖面线，滚轮以指针处为中心缩放"),
