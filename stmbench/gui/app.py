@@ -36,11 +36,12 @@ from typing import TextIO
 
 from PySide6.QtCore import QSize, Qt, QTimer, Signal
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QTabBar, QVBoxLayout, QWidget
 
 from . import fmt, jobs, layout, style
 from .center import THUMB_PX, CenterColumn, thumb_pixmap
 from .controls import ElidedLabel, Tabs
+from .datacopy import DataCopier
 from .labels import one, two_lines, tr, with_console_notes
 from .panels import ActionPanel
 from .recent import RecentList
@@ -84,9 +85,11 @@ def column_widths(sidebar_need: int, right_need: int) -> tuple[int, int]:
 class MainWindow(QMainWindow):
     _turned_away = Signal(object)                        # clicks the worker did not accept, to be told in order
 
-    def __init__(self, session: GuiSession, *, lang: str = "zh", sealed: bool = False):
+    def __init__(self, session: GuiSession, *, lang: str = "zh", sealed: bool = False, data_dir: str | Path | None = None):
         super().__init__()
         self.session = session
+        # with --data-dir: plain-text copies of what the Data tab lists (stmbench.gui.datacopy); without it nothing is written
+        self._copier = DataCopier(session, data_dir) if data_dir else None
         self.lang = lang
         self.sealed = sealed
         self.setWindowTitle(f"{tr('app', lang)} · {session.scenario_id}")
@@ -119,7 +122,7 @@ class MainWindow(QMainWindow):
         col.addLayout(row, 1)
         self._row = row
 
-        self.sidebar = Sidebar(session.task_text(), with_console_notes(session.manual(), lang), session.claims(), lang)
+        self.sidebar = Sidebar(session.task_text(), with_console_notes(session.manual(), lang, data_dir), session.claims(), lang)
         self.center = CenterColumn(lang)
         self.operate = ActionPanel(layout.OPERATE, self.run_action, lang, submit_move=self.run_move_during)
         self.spectroscopy = ActionPanel(layout.SPECTROSCOPY, self.run_action, lang)
@@ -202,16 +205,21 @@ class MainWindow(QMainWindow):
         self.field_help.set_full_text("")
 
     def _focus_changed(self, old: QWidget | None, new: QWidget | None) -> None:
-        """Focus left the described field for another widget of this window outside the action panels (a report field, a
-        viewer control): the line is cleared. Another numeric field shows its own range as it is entered, and a button of the
-        panels (Set setpoint after a refusal) leaves the line on the field it belongs to. Focus that leaves the window
-        (deactivation) or goes to a popup is not a move to another widget of this window, and the line stays."""
-        if self._help_field is None or old is not self._help_field or new is None or new is old:
+        """Focus is now on a widget of this window outside the action panels (a report field, a viewer control), whatever it
+        was on before: the line is cleared (screen trial 25: after a field and then a panel button the line stayed up through
+        the Report steps, because the old widget was the button, not the field). Inside the panels the line stays: another
+        numeric field shows its own range as it is entered, and a button of the panels (Set setpoint after a refusal) leaves
+        the line on the field it belongs to. Focus that leaves the window (deactivation) or goes to a popup is not a move to
+        another widget of this window, and the line stays."""
+        if self._help_field is None or new is None or new is old:
             return
         if new.window() is not self.window() or new.window() is not self:
             return
-        if self.operate.isAncestorOf(new) or self.spectroscopy.isAncestorOf(new):
-            return                                       # a field of the panels sets the line itself; a button of theirs keeps it
+        if self.operate.isAncestorOf(new) or self.spectroscopy.isAncestorOf(new) or self.status.isAncestorOf(new):
+            return          # a field of the panels sets the line itself; a button of theirs, or of the status strip (the band's
+            #                 Acknowledge, Cancel queued), is part of the call that line belongs to
+        if isinstance(new, QTabBar):
+            return          # a tab bar takes the focus when the widget that had it is hidden (the band after Acknowledge)
         self._clear_field_help()
 
     # ── jobs ──
@@ -454,6 +462,8 @@ class MainWindow(QMainWindow):
             lists = fmt.numeric_lists(out.reply)
             if lists:
                 self.center.show_trace(job.label, lists)
+            if self._copier is not None:                      # what the action saved, as text, written off this thread
+                self._copier.save(out.reply, self._junction)
             if out.text:                                      # a read after the action failed
                 self._fail(out.text)
         elif out.kind == "report":
@@ -609,6 +619,8 @@ class MainWindow(QMainWindow):
 
     def shutdown(self, finish: bool = False) -> None:
         """Stop the worker after the jobs already queued; with ``finish`` end the episode first."""
+        if self._copier is not None:                        # the copies of what was saved are written before the end
+            self._copier.close()
         if not self.worker.isRunning():
             return
         for sig in (self.worker.started_job, self.worker.finished_job, self.worker.queue_changed, self.worker.dropped):
@@ -728,7 +740,7 @@ def announce_when_shown(win: MainWindow, path: str | Path, *, poll_ms: int = 50,
 def run(*, scenario: str | None = None, seed: int = 0, out: str | Path | None = None, lang: str = "zh",
         ui_scale: float = 1.0, sealed: bool = False, private_dir: str | Path | None = None,
         export_dir: str | Path | None = None, stdin: TextIO | None = None,
-        ready_file: str | Path | None = None) -> int:
+        ready_file: str | Path | None = None, data_dir: str | Path | None = None) -> int:
     """Open the window and run until it is closed (dev) or the process is killed (sealed). With ``ready_file``
     that file is written once the window is exposed (see :func:`announce_when_shown`)."""
     session = _open_session(scenario, seed, out, lang, sealed, private_dir, export_dir, stdin)
@@ -740,7 +752,7 @@ def run(*, scenario: str | None = None, seed: int = 0, out: str | Path | None = 
     # is left of it, less its own title bar
     fit_scale(app, lang, ui_scale, (screen.geometry() if sealed else screen.availableGeometry()).size(),
               0 if sealed else FRAME_PX)
-    win = MainWindow(session, lang=lang, sealed=sealed)
+    win = MainWindow(session, lang=lang, sealed=sealed, data_dir=data_dir)
     if not sealed:
         signal.signal(signal.SIGINT, lambda *_: app.quit())
         ticker = QTimer()                                # lets Python see Ctrl-C while Qt's loop runs

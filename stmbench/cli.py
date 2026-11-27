@@ -10,7 +10,7 @@
     python -m stmbench.cli agent --scenario P4_atom_positioning_cu111 --seed 0 --out <run dir> \
                                  [--provider anthropic|openai] [--model ID]                    # a model alone
     python -m stmbench.cli console --scenario P4_atom_positioning_cu111 --seed 0 --out <run dir> [--port 8765]
-    python -m stmbench.cli gui --scenario P4_atom_positioning_cu111 --seed 0 --out <run dir> [--lang zh|en]
+    python -m stmbench.cli gui --scenario P4_atom_positioning_cu111 --seed 0 --out <run dir> [--lang zh|en] [--data-dir DIR]
     python -m stmbench.cli gui --sealed --private-dir <dir> --export-dir <dir>      # the seed on stdin, as one JSON line
 
 Data roots default to ``$STM_BENCH_DATA`` (see ``stmbench.paths``)."""
@@ -212,6 +212,11 @@ def cmd_gui(a) -> int:
             raise SystemExit("gui needs --scenario and --out (or --sealed with --private-dir and --export-dir)")
         if a.private_dir or a.export_dir:
             raise SystemExit("--private-dir and --export-dir belong to --sealed")
+    if a.data_dir:                                       # the copies are not part of the record: never inside one
+        data = Path(a.data_dir).resolve()
+        for other in (a.out, a.private_dir, a.export_dir):
+            if other and (data == Path(other).resolve() or Path(other).resolve() in data.parents or data in Path(other).resolve().parents):
+                raise SystemExit("--data-dir must be a directory of its own, not the run directory, the private directory or the export")
     try:
         from .gui.app import run
     except ModuleNotFoundError as exc:
@@ -220,7 +225,7 @@ def cmd_gui(a) -> int:
         raise SystemExit('the desktop console needs Qt: pip install "stm-bench[gui]"') from exc
     return run(scenario=a.scenario, seed=0 if a.seed is None else a.seed, out=a.out, lang=a.lang,
                ui_scale=a.ui_scale, sealed=a.sealed, private_dir=a.private_dir, export_dir=a.export_dir,
-               ready_file=a.ready_file)
+               ready_file=a.ready_file, data_dir=a.data_dir)
 
 
 # ── argparse ────────────────────────────────────────────────────────────────
@@ -352,6 +357,10 @@ def main(argv=None) -> int:
     gu.add_argument("--export-dir", default=None, help="with --sealed: where the agent-visible export is written")
     gu.add_argument("--ready-file", default=None,
                     help="write this file (one line, 0644) once the window is on screen: a launcher waits for it")
+    gu.add_argument("--data-dir", default=None,
+                    help="also write the saved frames, spectra and move traces as plain-text CSV (one file per spectrum or "
+                         "trace, one per frame channel and direction) to this directory, readable by every account; "
+                         "without it nothing is written")
     gu.set_defaults(fn=cmd_gui)
     a = ap.parse_args(argv)
     return a.fn(a)
