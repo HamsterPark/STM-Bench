@@ -26,6 +26,7 @@ from ..modules.signals import sxm_channel_name
 def write_sxm(path: str | Path, frame, world, *, channels: list[int] | None = None) -> Path:
     st = frame.settings
     chans = channels or list(st.channels)
+    world.sync_loop()                      # the header's Z is the loop's Z now, not a cached one
     rec = world.clock.sim_datetime(frame.rec_sim_s)
     ny, nx = st.ny, st.nx
     lines = [

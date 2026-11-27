@@ -1122,6 +1122,10 @@ def _portable_events(events: list[dict]) -> list[dict]:
             # a judge-only flag added after ledgers existed: left out so their events digest still
             # matches a replay (the verdict comparison covers what the flag decides)
             d.pop("oscillating", None)
+            # the loop's Z at the start, recorded from a cache that an earlier ledger read before
+            # refreshing it (so it followed whoever polled the status; screen trial 26). Nothing
+            # judges it and no array depends on it: left out so those ledgers still replay
+            d.pop("z0_n_m", None)
         if d.get("path"):
             # either separator: a ledger written on Windows is read on Linux, where Path() would keep
             # "D:\run\x.sxm" whole (the digest of its events was computed from the bare file name)
