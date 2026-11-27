@@ -291,7 +291,7 @@ def main(argv=None) -> int:
     f.set_defaults(fn=cmd_reference)
     b = sub.add_parser("baseline", help="scripted baselines: the instrument an agent gets and nothing else "
                                         "(no truth); reports success by the tip's state and instrument time")
-    b.add_argument("--paper", required=True, help="P3, P3R (P3's repair variant), P4 or P7")
+    b.add_argument("--paper", required=True, help="P2, P3, P3R (P3's repair variant), P4 or P7")
     b.add_argument("--seeds", type=int, default=30, help="number of seeds")
     b.add_argument("--first-seed", type=int, default=0)
     b.add_argument("--jobs", type=int, default=1, help="processes in parallel")

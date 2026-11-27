@@ -6,6 +6,7 @@ The privileged reference solutions (:mod:`stmbench.reference`) navigate by the t
 what a careful measurement can reach; a baseline is what a script reaches from the observations
 alone, which is the bar an agent should clear.
 
+    python -m stmbench.cli baseline --paper P2 --seeds 30 --jobs 2
     python -m stmbench.cli baseline --paper P4 --seeds 30 --jobs 4
 """
 from __future__ import annotations
@@ -14,9 +15,9 @@ import statistics
 from collections import Counter
 from concurrent.futures import ProcessPoolExecutor
 
-from . import p3, p3_repair, p4, p7
+from . import p2, p3, p3_repair, p4, p7
 
-PAPERS = {"P3": p3.run, "P3R": p3_repair.run, "P4": p4.run, "P7": p7.run}
+PAPERS = {"P2": p2.run, "P3": p3.run, "P3R": p3_repair.run, "P4": p4.run, "P7": p7.run}
 
 
 def _one(args: tuple[str, int]) -> dict:
