@@ -42,6 +42,10 @@ from pathlib import Path
 #: a task id: lower case, digits and underscores, starting with a letter (the dataset's ids look like this)
 TASK_ID = re.compile(r"[a-z][a-z0-9_]{0,47}")
 MAX_REQUEST_BYTES = 256
+#: the console's option that names the directory it writes plain-text (CSV) copies of its images, spectra and move
+#: traces to. The one place that spells it: the console side (branch bench/console-manip) had not fixed the name
+#: when this was written, so change it here only.
+DATA_DIR_OPTION = "--data-dir"
 #: environment variables the console may inherit from this service (everything else is dropped)
 PASS_ENV = ("DISPLAY", "XAUTHORITY", "QT_QPA_PLATFORM", "QT_QPA_FONTDIR", "LIBGL_ALWAYS_SOFTWARE", "LANG",
             "LC_ALL", "OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS")
@@ -110,6 +114,10 @@ class Config:
     private_dir: Path = Path("/var/lib/stm-bench/private")
     export_dir: Path = Path("/var/lib/stm-bench/export")
     home: Path = Path("/var/lib/stm-bench/home")
+    #: where the console writes its plain-text copy of the data (owned by stm, 0755, files 0644: the agent's account
+    #: reads it). It is evidence like the export: emptied before a task starts, never after the agent has seen a run.
+    #: None: no copy, and the console is not given the option.
+    data_dir: Path | None = Path("/srv/stm-data")
     #: how the console is started (the interpreter that runs this file, so the venv's)
     console_cmd: list[str] = field(default_factory=lambda: [sys.executable, "-m", "stmbench.cli", "gui"])
     #: environment given to the console on top of PASS_ENV
@@ -170,9 +178,23 @@ class Launcher:
         # O_RDWR keeps one reader open for ever, so that a writer never blocks or sees a broken pipe
         self._fifo_fd = os.open(cfg.fifo, os.O_RDWR | os.O_NONBLOCK)
         cfg.home.mkdir(parents=True, exist_ok=True)
+        try:
+            self._ensure_data_dir()
+        except OSError:
+            # /srv is root's: install.sh makes the directory. Said again, with the reason, when a task is requested.
+            print("stm-bench launcher: the data directory is missing and cannot be created", flush=True)
         qt_dir = cfg.run_dir / "qt"
         qt_dir.mkdir(exist_ok=True)
         os.chmod(qt_dir, 0o700)
+
+    def _ensure_data_dir(self) -> None:
+        """Make the data directory if it is missing (the account `stm` may do so only where its parent allows)."""
+        d = self.cfg.data_dir
+        if d is None:
+            return
+        if not d.is_dir():
+            d.mkdir(parents=True, exist_ok=True)
+        os.chmod(d, 0o755)                       # the agent's account must be able to list and read it
 
     def close(self) -> None:
         if self._fifo_fd is not None:
@@ -223,11 +245,19 @@ class Launcher:
         cfg.error.unlink(missing_ok=True)
         cfg.ready.unlink(missing_ok=True)
         # a failed earlier attempt left nothing the agent has seen: start from empty directories
+        try:
+            self._ensure_data_dir()
+        except OSError:
+            raise RequestError("the data directory cannot be created") from None
         _empty(cfg.export_dir)
+        if cfg.data_dir is not None:
+            _empty(cfg.data_dir)
         if cfg.episode_dir.exists():
             shutil.rmtree(cfg.episode_dir, ignore_errors=True)
         argv = [*cfg.console_cmd, "--sealed", "--private-dir", str(cfg.episode_dir), "--export-dir",
                 str(cfg.export_dir), "--lang", "en", "--ready-file", str(cfg.ready)]
+        if cfg.data_dir is not None:
+            argv += [DATA_DIR_OPTION, str(cfg.data_dir)]
         env = {k: os.environ[k] for k in PASS_ENV if k in os.environ}
         env.update({"PATH": os.environ.get("PATH", "/usr/bin:/bin"), "HOME": str(cfg.home),
                     "XDG_RUNTIME_DIR": str(cfg.run_dir / "qt"), "NO_AT_BRIDGE": "1", "QT_ACCESSIBILITY": "0",
@@ -278,6 +308,8 @@ class Launcher:
             self.cfg.task.unlink(missing_ok=True)
             self.task_id = None
             _empty(self.cfg.export_dir)
+            if self.cfg.data_dir is not None:
+                _empty(self.cfg.data_dir)
             shutil.rmtree(self.cfg.episode_dir, ignore_errors=True)
             self._fail(f"the console ended before its window was shown (exit {code}); see the console log of "
                        "the service account")
@@ -319,10 +351,13 @@ def _config_from_args(argv: list[str] | None) -> Config:
     ap.add_argument("--private-dir", type=Path, default=d.private_dir)
     ap.add_argument("--export-dir", type=Path, default=d.export_dir)
     ap.add_argument("--home", type=Path, default=d.home)
+    ap.add_argument("--data-dir", type=Path, default=d.data_dir,
+                    help="where the console writes the plain-text copy of its data (default: %(default)s)")
+    ap.add_argument("--no-data-dir", action="store_true", help="write no plain-text copy (the option is not passed on)")
     ap.add_argument("--console-cmd", default=None,
                     help="the console's command up to its option list (default: this interpreter -m stmbench.cli gui)")
     a = ap.parse_args(argv)
-    cfg = Config(a.run_dir, a.private_dir, a.export_dir, a.home)
+    cfg = Config(a.run_dir, a.private_dir, a.export_dir, a.home, None if a.no_data_dir else a.data_dir)
     if a.console_cmd:
         import shlex
         cfg.console_cmd = shlex.split(a.console_cmd)

@@ -337,6 +337,7 @@ class World:
         is entering the over-range condition; a range raised past it, leaving it (the loop
         pulls back from contact)."""
         with self.lock:
+            self.sync_loop()                # the transient below starts from the loop's Z before the change
             was = self.over_range()
             self.preamp.gain_index = int(gain_index)
             self.preamp.full_scale_a = 10.0 / (10.0 ** (6 + int(gain_index)))
@@ -462,6 +463,20 @@ class World:
         if self._coarse_creep_v and dt > 0:
             self.coarse.coarse_gap_m = self.coarse.coarse_gap_m - self._coarse_creep_v * dt
 
+    def sync_loop(self) -> None:
+        """Bring the cached loop Z (``zctrl.z_n``) to the equilibrium at the tip's present position
+        and time, when the loop is closed and nothing else (an approach, a transient) drives Z.
+
+        ``z_n`` is a cache of a pure function of the world's state (drift at the virtual clock, the
+        tip position, the setpoint), so refreshing it is idempotent and has no memory: refreshing
+        at t1 and then t2 gives what refreshing at t2 alone gives. Whoever *reads* the cache (a
+        record, a file header, the start of a transient) calls this first, so that what is
+        recorded does not depend on whether a client happened to poll the status in between
+        (screen trial 26)."""
+        if self.zctrl.on and not self.withdrawn and not self.approach.running \
+                and self._active_transient() is None:
+            self.achievable_z_tip()
+
     def achievable_z_tip(self) -> float:
         """Where the tip actually is: the loop's target, pinned by the Z range if unreachable."""
         self._tick_slow()
@@ -558,6 +573,7 @@ class World:
 
     def set_setpoint(self, i: float) -> None:
         with self.lock:
+            self.sync_loop()                # the transient below starts from the Z of the old setpoint
             old = self.zctrl.setpoint_a
             self.zctrl.setpoint_a = float(i)
             if self.zctrl.on and not self.withdrawn and old != i:
@@ -1071,6 +1087,7 @@ class World:
         ``−sweep``."""
         from .forces import averaged_current_factor
         with self.lock:
+            self.sync_loop()                # z0_n_m below, and the contact transient, start from the loop's Z now
             n = max(int(n), 2)
             es = self._extend_sign
             h = self.surface_height_here()
@@ -1209,6 +1226,7 @@ class World:
         """
         with self.lock:
             tx, ty = float(tilt_x_deg), float(tilt_y_deg)
+            self.sync_loop()                # the tilt transient starts from the loop's Z before the step
             h_old = self.surface_height_here()
             self.piezo_tilt_deg = (tx, ty)
             es = float(self._extend_sign)
@@ -1589,6 +1607,7 @@ class World:
     # ── coarse motion / approach ──
     def motor_move(self, direction: str, steps: int) -> None:
         with self.lock:
+            self.sync_loop()
             if direction in ("Z-", "Z+"):
                 if direction == "Z-" and not self.withdrawn and self.zctrl.on:
                     # stepping the sample into a tip in tunnelling = crash
@@ -1702,6 +1721,7 @@ class World:
         'Z at +169.5 nm, I = 10 nA' signature of the range being eaten (not a crash)."""
         if self.withdrawn or not self.zctrl.on:
             return False
+        self.sync_loop()
         z_n = float(self.zctrl.z_n)
         return z_n >= 0.98 * self.zctrl.limit_high_m or z_n <= 0.98 * self.zctrl.limit_low_m
 

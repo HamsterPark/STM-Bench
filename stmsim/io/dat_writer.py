@@ -55,6 +55,7 @@ def write_dat(path: str | Path, *, header: dict, names: list[str],
 
 def common_header(world, *, experiment: str) -> dict:
     """The header keys both readers actually branch on, plus the ones the corpus carries."""
+    world.sync_loop()                        # the header's Z is the loop's Z now, not a cached one
     rec = world.clock.sim_datetime(world.clock.sim())
     stamp = f"{rec.day:02d}.{rec.month:02d}.{rec.year:04d} {rec:%H:%M:%S}"
     sx, sy = world.sample_xy()

@@ -597,7 +597,7 @@ computed by `stmbench.analysis`. Over many seeds it shows whether a paper is
 solvable, the error spread of a careful measurement (tolerances are set at about twice its
 p90) and the instrument time it takes. P5 (2026-10-13, seeds 0–29): 30/30 reproduced, |error|
 p90 5.9 % (F_min), 3.7 % (decay length), 8.7 % (E_b), 354 s of instrument time. P3 (seeds
-0–29, re-run 2026-11-24 on the current code): 30/30; |error| p90 2.7 / 2.5 meV (the two resonances),
+0–29, re-run 2026-11-27 on 0f4e8f8; the same figures as the 2026-11-24 re-run): 30/30; |error| p90 2.7 / 2.5 meV (the two resonances),
 0.037 nm (the ring's radius), 485 s. P4 (seeds 0–149): 150/150 — no atom's threshold read (a resistance ladder from
 400 kΩ down), the goal site computed from the lattice the other atoms in a survey give
 (`stmbench.analysis.adatoms`); the reported place |error| p90 0.016 nm against the judge's

@@ -168,6 +168,42 @@ runs it. Pins are in `pins.sh`, packages in `apt-packages.txt`.
 - Modes: code and venv in `/opt/stm-bench` (root, world-readable); `/var/lib/stm-bench/private` 0700 `stm`;
   `/var/lib/stm-bench/export` 0755 `stm`, files 0644.
 
+### The evaluation guest: a data copy and the model's own Python
+
+The internal evaluation version (`deploy/eval/`) adds two things the model sees, and one check that they work:
+
+- **`/srv/stm-data`**, the console's plain-text copy of what it saves (a CSV per image, spectrum and move trace). It is
+  made by `install.sh` (owner `stm:stm`, mode 0755, outside `/var/lib/stm-bench` so that the private directory's parent
+  keeps its mode) and handed to the console as its `--data-dir` option (the spelling is one constant of
+  `stm_launcher.py`, `DATA_DIR_OPTION`; the launcher's own `--data-dir DIR` or `--no-data-dir` change the place). The
+  console writes files 0644; the agent's account reads them and cannot write or remove anything there. The launcher makes
+  the directory when it is missing, **empties it before a task starts** (where it empties the export), empties it again
+  when a console dies before its window was shown, and **never after the agent has seen a run**: like the export it is
+  evidence. `stm-bench-reset` empties it too (build and test only). What goes into the files is the console's business
+  (a fixed set of columns, no seed, no truth); this launcher only provides the place.
+- **System Python with numpy and scipy**: `python3-numpy` and `python3-scipy` in `apt-packages.txt`, which on Ubuntu 22.04
+  is `/usr/bin/python3` 3.10. The agent opens a terminal (Ctrl+Alt+T) and uses it. The console keeps its own Python 3.13
+  in `/opt/stm-bench`, which the agent's account cannot reach, so neither interpreter touches the other.
+- **What stays locked, and by what.** `stm-lockdown` takes the agent's administrative rights away (sudoers, polkit, groups)
+  and nothing else: it changes no path, mode or interpreter, so it leaves the terminal, `/usr/bin/python3` and the data copy
+  alone (a test checks that its code names none of them). The **closing of `/opt/stm-bench`** (scenario files, physics, the
+  reference solutions) is the task's own `config` step, `chgrp -R stm /opt/stm-bench && chmod -R o-rwx /opt/stm-bench`,
+  not `install.sh` and not `stm-lockdown`; it is the same for every scenario, because `/opt/stm-bench` holds all of them.
+  `/var/lib/stm-bench/private` (0700) and the task list need no step: they are closed from the install on.
+- **The check**, `check_eval_guest.sh <task id>` (with `--stage`, the three steps of a task's config first), run in the built
+  machine as the agent's account, prints one `PASS`, `FAIL` or `NOT-RUN` line per check and a `RESULT` line: the console
+  is up; `/usr/bin/python3` imports numpy and scipy; `/srv/stm-data` is stm's 0755, readable and not writable, its files
+  are readable and not writable by others; after a scan saved in the console it holds a new `<name>_z_forward.csv`, mode 644, whose text
+  names neither a seed nor the truth (`--scan-click X,Y` makes that step; without it it is `NOT-RUN`, which does not pass);
+  `/opt/stm-bench`, `/var/lib/stm-bench/private`, `tasks.json` and the episode's private run directory cannot be read;
+  `sudo -n true` and `sudo -S` with the image's password are refused; the account is in neither the `sudo` nor the `admin`
+  group; and the keyboard part, `check_eval_keyboard.py`: the console is the full-screen active window, Ctrl+Alt+T opens a
+  terminal in front of it, the terminal runs `python3 -c "import numpy, scipy"` (a marker file proves it), Alt+Tab returns
+  to the console, Alt+Tab again returns to the terminal, which is closed by `exit`. A screenshot follows every keyboard step
+  (`--shots DIR`). The script reads no task list, prints no seed, and shows no content of the data files. It needs the
+  KVM-booted machine: `deploy/eval/build_image.sh` runs it ([`deploy/eval/IMAGE.md`](../eval/IMAGE.md)).
+
 Tests: `tests/test_osworld_guest.py` (id parsing, the FIFO protocol, the seed's absence from arguments,
-environment, messages and files, `stm-start`'s exit statuses, the real console offscreen; POSIX only). Not covered by
+environment, messages and files, `stm-start`'s exit statuses, the data directory's making, emptying and option, the
+reset script's emptying, the real console offscreen; POSIX only). Not covered by
 anything in this repository's CI: systemd, real ownership between two accounts, the GNOME session.

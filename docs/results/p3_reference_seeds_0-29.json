@@ -23,15 +23,15 @@
    "radius_nm": {
     "relative": false,
     "pass_rate": 1.0,
-    "err_median": 0.014296761357592835,
-    "err_p90": 0.03689997465904718,
-    "err_max": 0.1206601291583631,
-    "signed_median": -0.0007717657532095856
+    "err_median": 0.014367189757653609,
+    "err_p90": 0.03691005852517995,
+    "err_max": 0.120836232701933,
+    "signed_median": -0.0011596022828666008
    }
   },
   "instrument_s": {
-   "median": 485.0058684659774,
-   "p90": 512.8314121068149
+   "median": 485.0058683662818,
+   "p90": 512.831412099228
   }
  },
  "runs": [
@@ -43,7 +43,7 @@
    "values": {
     "peak_lo_mev": -394.0,
     "peak_hi_mev": -290.00000000000006,
-    "radius_nm": 6.729583933096872
+    "radius_nm": 6.729407829553302
    },
    "truth": {
     "peak_lo_mev": -392.3087496510669,
@@ -53,7 +53,7 @@
    "abs_err": {
     "peak_lo_mev": -1.6912503489331243,
     "peak_hi_mev": 2.308749651066762,
-    "radius_nm": -0.1206601291583631
+    "radius_nm": -0.120836232701933
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -61,15 +61,15 @@
     "radius_nm": true
    },
    "radius_nm": 6.850244062255235,
-   "instrument_s": 490.1213186105299,
+   "instrument_s": 490.1213193673639,
    "tip_rounds": 2,
-   "e0_mev": -465.4037257101219,
-   "radius_measured_nm": 6.729583933096872,
+   "e0_mev": -465.40410760049093,
+   "radius_measured_nm": 6.729407829553302,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.1775427819475799,
-    -0.21181444356727047
+    -0.17938897542083523,
+    -0.21275360625865572
    ],
    "tip_condition": "blunt"
   },
@@ -81,7 +81,7 @@
    "values": {
     "peak_lo_mev": -368.00000000000006,
     "peak_hi_mev": -294.00000000000006,
-    "radius_nm": 8.26031280128866
+    "radius_nm": 8.26020534201556
    },
    "truth": {
     "peak_lo_mev": -366.4232882053945,
@@ -91,7 +91,7 @@
    "abs_err": {
     "peak_lo_mev": -1.5767117946055578,
     "peak_hi_mev": 0.4232882053943854,
-    "radius_nm": 0.006871695096677399
+    "radius_nm": 0.006764235823577991
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -99,15 +99,15 @@
     "radius_nm": true
    },
    "radius_nm": 8.253441106191982,
-   "instrument_s": 482.7783075880222,
+   "instrument_s": 482.7783076450058,
    "tip_rounds": 1,
-   "e0_mev": -419.58914953816117,
-   "radius_measured_nm": 8.26031280128866,
+   "e0_mev": -419.5891478712008,
+   "radius_measured_nm": 8.26020534201556,
    "peaks_found": 6,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    1.0457086328834093,
-    0.07629939201177498
+    1.045698011237945,
+    0.07635320332848088
    ],
    "tip_condition": "double"
   },
@@ -119,7 +119,7 @@
    "values": {
     "peak_lo_mev": -370.00000000000006,
     "peak_hi_mev": -260.00000000000006,
-    "radius_nm": 6.667718849082087
+    "radius_nm": 6.6677326160938515
    },
    "truth": {
     "peak_lo_mev": -368.87730440393835,
@@ -129,7 +129,7 @@
    "abs_err": {
     "peak_lo_mev": -1.1226955960617033,
     "peak_hi_mev": 2.877304403938183,
-    "radius_nm": 0.0018419370280655656
+    "radius_nm": 0.0018557040398299307
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -137,15 +137,15 @@
     "radius_nm": true
    },
    "radius_nm": 6.6658769120540216,
-   "instrument_s": 482.78194348615034,
+   "instrument_s": 482.7819434633967,
    "tip_rounds": 1,
-   "e0_mev": -444.6805729414139,
-   "radius_measured_nm": 6.667718849082087,
+   "e0_mev": -444.6807356118075,
+   "radius_measured_nm": 6.6677326160938515,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.0887570428131554,
-    -0.8130901250149533
+    0.08877264630178953,
+    -0.8130889215701118
    ],
    "tip_condition": "double"
   },
@@ -157,7 +157,7 @@
    "values": {
     "peak_lo_mev": -370.00000000000006,
     "peak_hi_mev": -272.0,
-    "radius_nm": 6.828612718348326
+    "radius_nm": 6.828791924166639
    },
    "truth": {
     "peak_lo_mev": -369.0104193926886,
@@ -167,7 +167,7 @@
    "abs_err": {
     "peak_lo_mev": -0.9895806073114386,
     "peak_hi_mev": 1.0104193926885614,
-    "radius_nm": -0.02286454915893188
+    "radius_nm": -0.022685343340619113
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -175,15 +175,15 @@
     "radius_nm": true
    },
    "radius_nm": 6.851477267507258,
-   "instrument_s": 614.5897931669385,
+   "instrument_s": 614.589792803036,
    "tip_rounds": 19,
-   "e0_mev": -438.18251386479903,
-   "radius_measured_nm": 6.828612718348326,
+   "e0_mev": -438.1877068538666,
+   "radius_measured_nm": 6.828791924166639,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.2503058173087955,
-    -0.4902211553342493
+    -0.25003014956780234,
+    -0.4904062179150911
    ],
    "tip_condition": "blunt"
   },
@@ -195,7 +195,7 @@
    "values": {
     "peak_lo_mev": -338.00000000000006,
     "peak_hi_mev": -166.00000000000003,
-    "radius_nm": 5.208547851019933
+    "radius_nm": 5.208548768150228
    },
    "truth": {
     "peak_lo_mev": -336.16266024865024,
@@ -205,7 +205,7 @@
    "abs_err": {
     "peak_lo_mev": -1.8373397513498162,
     "peak_hi_mev": 0.1626602486500417,
-    "radius_nm": 0.006281600072629345
+    "radius_nm": 0.006282517202924609
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -213,15 +213,15 @@
     "radius_nm": true
    },
    "radius_nm": 5.202266250947304,
-   "instrument_s": 490.35762047573974,
+   "instrument_s": 490.3576192017896,
    "tip_rounds": 2,
-   "e0_mev": -456.211995442969,
-   "radius_measured_nm": 5.208547851019933,
+   "e0_mev": -456.21204026601004,
+   "radius_measured_nm": 5.208548768150228,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.7121233316244757,
-    0.38843619688024383
+    -0.7114322960891463,
+    0.38846485259867436
    ],
    "tip_condition": "double"
   },
@@ -233,7 +233,7 @@
    "values": {
     "peak_lo_mev": -344.0,
     "peak_hi_mev": -188.00000000000006,
-    "radius_nm": 5.553494524000493
+    "radius_nm": 5.553360570236533
    },
    "truth": {
     "peak_lo_mev": -342.10279462130757,
@@ -243,7 +243,7 @@
    "abs_err": {
     "peak_lo_mev": -1.8972053786924334,
     "peak_hi_mev": 2.1027946213073676,
-    "radius_nm": -0.001775395200784402
+    "radius_nm": -0.001909348964744595
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -251,15 +251,15 @@
     "radius_nm": true
    },
    "radius_nm": 5.555269919201278,
-   "instrument_s": 504.743977180563,
+   "instrument_s": 504.7439715313377,
    "tip_rounds": 4,
-   "e0_mev": -453.4489183626195,
-   "radius_measured_nm": 5.553494524000493,
+   "e0_mev": -453.4402980862062,
+   "radius_measured_nm": 5.553360570236533,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.09336089286322116,
-    0.6436223301350237
+    -0.09121667455571927,
+    0.6441857783613665
    ],
    "tip_condition": "blunt"
   },
@@ -271,7 +271,7 @@
    "values": {
     "peak_lo_mev": -374.00000000000006,
     "peak_hi_mev": -272.0,
-    "radius_nm": 6.7162526138689
+    "radius_nm": 6.7159177601157785
    },
    "truth": {
     "peak_lo_mev": -376.17690138468157,
@@ -281,7 +281,7 @@
    "abs_err": {
     "peak_lo_mev": 2.176901384681514,
     "peak_hi_mev": -1.8230986153185427,
-    "radius_nm": 0.01172308653993337
+    "radius_nm": 0.011388232786812225
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -289,15 +289,15 @@
     "radius_nm": true
    },
    "radius_nm": 6.704529527328966,
-   "instrument_s": 490.0246448278522,
+   "instrument_s": 490.0246550158775,
    "tip_rounds": 2,
-   "e0_mev": -450.79989203602975,
-   "radius_measured_nm": 6.7162526138689,
+   "e0_mev": -450.80198903099966,
+   "radius_measured_nm": 6.7159177601157785,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.6923897070513492,
-    0.09947410283419603
+    0.6836949258217107,
+    0.09946756006423689
    ],
    "tip_condition": "blunt"
   },
@@ -309,7 +309,7 @@
    "values": {
     "peak_lo_mev": -300.00000000000006,
     "peak_hi_mev": -108.00000000000004,
-    "radius_nm": 4.800285686092596
+    "radius_nm": 4.799419510341426
    },
    "truth": {
     "peak_lo_mev": -301.20791333644064,
@@ -319,7 +319,7 @@
    "abs_err": {
     "peak_lo_mev": 1.2079133364405834,
     "peak_hi_mev": 1.207913336440427,
-    "radius_nm": 0.02299860178657287
+    "radius_nm": 0.02213242603540344
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -327,15 +327,15 @@
     "radius_nm": true
    },
    "radius_nm": 4.777287084306023,
-   "instrument_s": 497.55337806200686,
+   "instrument_s": 497.55329306466945,
    "tip_rounds": 3,
-   "e0_mev": -438.351402320401,
-   "radius_measured_nm": 4.800285686092596,
+   "e0_mev": -438.3511739781789,
+   "radius_measured_nm": 4.799419510341426,
    "peaks_found": 3,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.6112450706494836,
-    0.5568299880600341
+    0.6350662095658528,
+    0.5562827557306679
    ],
    "tip_condition": "blunt"
   },
@@ -347,7 +347,7 @@
    "values": {
     "peak_lo_mev": -344.0,
     "peak_hi_mev": -242.00000000000006,
-    "radius_nm": 7.065823502578406
+    "radius_nm": 7.065742843568261
    },
    "truth": {
     "peak_lo_mev": -342.834022281787,
@@ -357,7 +357,7 @@
    "abs_err": {
     "peak_lo_mev": -1.1659777182130142,
     "peak_hi_mev": 2.8340222817868437,
-    "radius_nm": -0.014396371643393024
+    "radius_nm": -0.01447703065353867
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -365,15 +365,15 @@
     "radius_nm": true
    },
    "radius_nm": 7.080219874221799,
-   "instrument_s": 482.6955148073274,
+   "instrument_s": 482.69551526368906,
    "tip_rounds": 1,
-   "e0_mev": -415.5811019108031,
-   "radius_measured_nm": 7.065823502578406,
+   "e0_mev": -415.5774184823476,
+   "radius_measured_nm": 7.065742843568261,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.24232182309492917,
-    -0.557596888535284
+    0.24227440531073546,
+    -0.5581878175203786
    ],
    "tip_condition": "double"
   },
@@ -385,7 +385,7 @@
    "values": {
     "peak_lo_mev": -372.00000000000006,
     "peak_hi_mev": -290.00000000000006,
-    "radius_nm": 7.529339783401772
+    "radius_nm": 7.529350891524851
    },
    "truth": {
     "peak_lo_mev": -369.55229877471163,
@@ -395,7 +395,7 @@
    "abs_err": {
     "peak_lo_mev": -2.4477012252884265,
     "peak_hi_mev": -0.44770122528848333,
-    "radius_nm": -0.036074196874183784
+    "radius_nm": -0.036063088751104644
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -403,15 +403,15 @@
     "radius_nm": true
    },
    "radius_nm": 7.565413980275956,
-   "instrument_s": 485.093058408993,
+   "instrument_s": 485.09305820960185,
    "tip_rounds": 2,
-   "e0_mev": -425.1689268011563,
-   "radius_measured_nm": 7.529339783401772,
+   "e0_mev": -425.16777819220755,
+   "radius_measured_nm": 7.529350891524851,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.4464403565928546,
-    0.21686798787829603
+    -0.44619057504196824,
+    0.21669533329573554
    ],
    "tip_condition": "unstable"
   },
@@ -461,7 +461,7 @@
    "values": {
     "peak_lo_mev": -392.0,
     "peak_hi_mev": -318.00000000000006,
-    "radius_nm": 8.282550318059004
+    "radius_nm": 8.282439381965064
    },
    "truth": {
     "peak_lo_mev": -388.3030019583082,
@@ -471,7 +471,7 @@
    "abs_err": {
     "peak_lo_mev": -3.6969980416918133,
     "peak_hi_mev": -1.696998041691927,
-    "radius_nm": 0.014145340476968471
+    "radius_nm": 0.014034404383028942
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -479,15 +479,15 @@
     "radius_nm": true
    },
    "radius_nm": 8.268404977582035,
-   "instrument_s": 490.18813441234016,
+   "instrument_s": 490.18813307007747,
    "tip_rounds": 2,
-   "e0_mev": -440.2806400228035,
-   "radius_measured_nm": 8.282550318059004,
+   "e0_mev": -440.2804473293379,
+   "radius_measured_nm": 8.282439381965064,
    "peaks_found": 6,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.7946520919020672,
-    -0.8016462328792294
+    -0.7940697207853572,
+    -0.801652669003372
    ],
    "tip_condition": "blunt"
   },
@@ -499,7 +499,7 @@
    "values": {
     "peak_lo_mev": -404.0,
     "peak_hi_mev": -356.00000000000006,
-    "radius_nm": 9.923504230100985
+    "radius_nm": 9.92287890019052
    },
    "truth": {
     "peak_lo_mev": -403.5326288357868,
@@ -509,7 +509,7 @@
    "abs_err": {
     "peak_lo_mev": -0.4673711642132048,
     "peak_hi_mev": -0.4673711642133185,
-    "radius_nm": 0.054282991604143405
+    "radius_nm": 0.053657661693678804
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -517,15 +517,15 @@
     "radius_nm": true
    },
    "radius_nm": 9.869221238496841,
-   "instrument_s": 490.3455251500408,
+   "instrument_s": 490.34552244365756,
    "tip_rounds": 2,
-   "e0_mev": -437.91612531485174,
-   "radius_measured_nm": 9.923504230100985,
+   "e0_mev": -437.915857557594,
+   "radius_measured_nm": 9.92287890019052,
    "peaks_found": 6,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.07507330208974096,
-    -0.805765134664412
+    0.0751632819944483,
+    -0.8081224657134026
    ],
    "tip_condition": "double"
   },
@@ -613,7 +613,7 @@
    "values": {
     "peak_lo_mev": -426.00000000000006,
     "peak_hi_mev": -372.00000000000006,
-    "radius_nm": 8.88584014029645
+    "radius_nm": 8.884502275313425
    },
    "truth": {
     "peak_lo_mev": -427.7721328100613,
@@ -623,7 +623,7 @@
    "abs_err": {
     "peak_lo_mev": 1.7721328100612368,
     "peak_hi_mev": -2.22786718993882,
-    "radius_nm": -0.012424560473196067
+    "radius_nm": -0.013762425456221195
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -631,15 +631,15 @@
     "radius_nm": true
    },
    "radius_nm": 8.898264700769646,
-   "instrument_s": 174.5165174188731,
+   "instrument_s": 174.51651862182794,
    "tip_rounds": 0,
-   "e0_mev": -468.4488270016997,
-   "radius_measured_nm": 8.88584014029645,
+   "e0_mev": -468.4477282362918,
+   "radius_measured_nm": 8.884502275313425,
    "peaks_found": 6,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.2964478857934746,
-    0.4886272951125486
+    0.2968657535785729,
+    0.48559184833982116
    ],
    "tip_condition": "good"
   },
@@ -651,7 +651,7 @@
    "values": {
     "peak_lo_mev": -362.00000000000006,
     "peak_hi_mev": -252.00000000000006,
-    "radius_nm": 6.248158842509391
+    "radius_nm": 6.247413934726293
    },
    "truth": {
     "peak_lo_mev": -363.4763800207323,
@@ -661,7 +661,7 @@
    "abs_err": {
     "peak_lo_mev": 1.476380020732222,
     "peak_hi_mev": 1.4763800207321367,
-    "radius_nm": 0.0002318636943652308
+    "radius_nm": -0.0005130440887333165
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -669,15 +669,15 @@
     "radius_nm": true
    },
    "radius_nm": 6.247926978815026,
-   "instrument_s": 480.1752733678312,
+   "instrument_s": 480.17527388959087,
    "tip_rounds": 1,
-   "e0_mev": -442.694252167521,
-   "radius_measured_nm": 6.248158842509391,
+   "e0_mev": -442.69417287111816,
+   "radius_measured_nm": 6.247413934726293,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.8007775738555056,
-    0.4038907180034032
+    0.8006951795001799,
+    0.4032954350236864
    ],
    "tip_condition": "dirty"
   },
@@ -727,7 +727,7 @@
    "values": {
     "peak_lo_mev": -242.00000000000006,
     "peak_hi_mev": -4.0000000000000036,
-    "radius_nm": 4.339150756973762
+    "radius_nm": 4.339210954763738
    },
    "truth": {
     "peak_lo_mev": -242.33361832024102,
@@ -737,7 +737,7 @@
    "abs_err": {
     "peak_lo_mev": 0.3336183202409586,
     "peak_hi_mev": 0.33361832024081384,
-    "radius_nm": 0.014197151071792646
+    "radius_nm": 0.014257348861768548
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -745,15 +745,15 @@
     "radius_nm": true
    },
    "radius_nm": 4.324953605901969,
-   "instrument_s": 526.828596895505,
+   "instrument_s": 526.82859689705,
    "tip_rounds": 7,
-   "e0_mev": -411.93672838112974,
-   "radius_measured_nm": 4.339150756973762,
+   "e0_mev": -411.9385739064429,
+   "radius_measured_nm": 4.339210954763738,
    "peaks_found": 3,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.5042485975383988,
-    -0.5704359294267582
+    0.5042425234640399,
+    -0.5704598364728942
    ],
    "tip_condition": "blunt"
   },
@@ -765,7 +765,7 @@
    "values": {
     "peak_lo_mev": -392.0,
     "peak_hi_mev": -330.00000000000006,
-    "radius_nm": 8.401163825935818
+    "radius_nm": 8.401021920448109
    },
    "truth": {
     "peak_lo_mev": -391.8046000254249,
@@ -775,7 +775,7 @@
    "abs_err": {
     "peak_lo_mev": -0.19539997457508207,
     "peak_hi_mev": -0.19539997457519576,
-    "radius_nm": -0.0027581613749987355
+    "radius_nm": -0.0029000668627077175
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -783,15 +783,15 @@
     "radius_nm": true
    },
    "radius_nm": 8.403921987310817,
-   "instrument_s": 174.50156415166694,
+   "instrument_s": 174.50156972895067,
    "tip_rounds": 0,
-   "e0_mev": -438.73782846004485,
-   "radius_measured_nm": 8.401163825935818,
+   "e0_mev": -438.74214052153286,
+   "radius_measured_nm": 8.401021920448109,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    1.0037057839573753,
-    -0.4910544753437973
+    1.002090128943925,
+    -0.4917637308408653
    ],
    "tip_condition": "good"
   },
@@ -803,7 +803,7 @@
    "values": {
     "peak_lo_mev": -198.00000000000006,
     "peak_hi_mev": 105.99999999999999,
-    "radius_nm": 4.022454715227931
+    "radius_nm": 4.0225892820316655
    },
    "truth": {
     "peak_lo_mev": -196.98133592245466,
@@ -813,7 +813,7 @@
    "abs_err": {
     "peak_lo_mev": -1.0186640775453952,
     "peak_hi_mev": 0.9813359224543632,
-    "radius_nm": 0.02000407950538552
+    "radius_nm": 0.02013864630912021
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -821,15 +821,15 @@
     "radius_nm": true
    },
    "radius_nm": 4.002450635722545,
-   "instrument_s": 480.11650001778366,
+   "instrument_s": 480.1164997955536,
    "tip_rounds": 1,
-   "e0_mev": -411.07769663938547,
-   "radius_measured_nm": 4.022454715227931,
+   "e0_mev": -411.11030658994116,
+   "radius_measured_nm": 4.0225892820316655,
    "peaks_found": 3,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.22082762174443274,
-    -1.167168362105856
+    0.22089463685027208,
+    -1.1672673966948852
    ],
    "tip_condition": "dirty"
   },
@@ -841,7 +841,7 @@
    "values": {
     "peak_lo_mev": -358.00000000000006,
     "peak_hi_mev": -274.0,
-    "radius_nm": 7.6379500158180695
+    "radius_nm": 7.637994427448168
    },
    "truth": {
     "peak_lo_mev": -356.3697759744257,
@@ -851,7 +851,7 @@
    "abs_err": {
     "peak_lo_mev": -1.630224025574364,
     "peak_hi_mev": 0.3697759744256359,
-    "radius_nm": -0.0018505721070987136
+    "radius_nm": -0.0018061604769998851
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -859,15 +859,15 @@
     "radius_nm": true
    },
    "radius_nm": 7.639800587925168,
-   "instrument_s": 174.4592872914764,
+   "instrument_s": 174.4592805487164,
    "tip_rounds": 0,
-   "e0_mev": -413.0489424948051,
-   "radius_measured_nm": 7.6379500158180695,
+   "e0_mev": -413.04693664099403,
+   "radius_measured_nm": 7.637994427448168,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.21033046919864198,
-    0.4596717318330733
+    -0.2065499303234636,
+    0.4589958387271802
    ],
    "tip_condition": "good"
   },
@@ -879,7 +879,7 @@
    "values": {
     "peak_lo_mev": -348.00000000000006,
     "peak_hi_mev": -232.00000000000003,
-    "radius_nm": 6.0880433412062285
+    "radius_nm": 6.088144179867556
    },
    "truth": {
     "peak_lo_mev": -350.53285032810265,
@@ -889,7 +889,7 @@
    "abs_err": {
     "peak_lo_mev": 2.5328503281025974,
     "peak_hi_mev": 0.5328503281025405,
-    "radius_nm": 0.03829638137267111
+    "radius_nm": 0.03839722003399881
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -897,15 +897,15 @@
     "radius_nm": true
    },
    "radius_nm": 6.049746959833557,
-   "instrument_s": 519.3239920786631,
+   "instrument_s": 519.3239920027933,
    "tip_rounds": 6,
-   "e0_mev": -432.5836175583103,
-   "radius_measured_nm": 6.0880433412062285,
+   "e0_mev": -432.58350829981623,
+   "radius_measured_nm": 6.088144179867556,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.39465843112678184,
-    -0.3800136092212073
+    0.39465522939607484,
+    -0.3801148268106297
    ],
    "tip_condition": "blunt"
   },
@@ -917,7 +917,7 @@
    "values": {
     "peak_lo_mev": -414.00000000000006,
     "peak_hi_mev": -344.0,
-    "radius_nm": 8.41597425713359
+    "radius_nm": 8.416064665060942
    },
    "truth": {
     "peak_lo_mev": -411.25506072025513,
@@ -927,7 +927,7 @@
    "abs_err": {
     "peak_lo_mev": -2.7449392797449264,
     "peak_hi_mev": 1.2550607202550736,
-    "radius_nm": -0.02768459852599925
+    "radius_nm": -0.02759419059864676
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -935,15 +935,15 @@
     "radius_nm": true
    },
    "radius_nm": 8.443658855659589,
-   "instrument_s": 489.7681085543543,
+   "instrument_s": 489.76810846876765,
    "tip_rounds": 3,
-   "e0_mev": -462.30572855145715,
-   "radius_measured_nm": 8.41597425713359,
+   "e0_mev": -462.30529954969967,
+   "radius_measured_nm": 8.416064665060942,
    "peaks_found": 10,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.11971327753633657,
-    0.4847239066523673
+    0.11959730364520899,
+    0.484995891118106
    ],
    "tip_condition": "unstable"
   },
@@ -993,7 +993,7 @@
    "values": {
     "peak_lo_mev": -366.00000000000006,
     "peak_hi_mev": -276.0,
-    "radius_nm": 6.821838407621168
+    "radius_nm": 6.822823399506925
    },
    "truth": {
     "peak_lo_mev": -367.7448933331099,
@@ -1003,7 +1003,7 @@
    "abs_err": {
     "peak_lo_mev": 1.7448933331098715,
     "peak_hi_mev": -0.2551066668901285,
-    "radius_nm": 0.02392072090253361
+    "radius_nm": 0.024905712788290124
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -1011,15 +1011,15 @@
     "radius_nm": true
    },
    "radius_nm": 6.797917686718635,
-   "instrument_s": 174.45456181467338,
+   "instrument_s": 174.45455435817033,
    "tip_rounds": 0,
-   "e0_mev": -432.41898508919286,
-   "radius_measured_nm": 6.821838407621168,
+   "e0_mev": -432.41894257188795,
+   "radius_measured_nm": 6.822823399506925,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.4033768187432369,
-    -0.4923253652079516
+    -0.4022183024667556,
+    -0.4860750301917672
    ],
    "tip_condition": "good"
   },
@@ -1031,7 +1031,7 @@
    "values": {
     "peak_lo_mev": -290.00000000000006,
     "peak_hi_mev": -60.00000000000006,
-    "radius_nm": 4.444100171245479
+    "radius_nm": 4.445101729815272
    },
    "truth": {
     "peak_lo_mev": -289.1455733154077,
@@ -1041,7 +1041,7 @@
    "abs_err": {
     "peak_lo_mev": -0.8544266845923403,
     "peak_hi_mev": -2.8544266845925748,
-    "radius_nm": 0.0031249660359753406
+    "radius_nm": 0.0041265246057689
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -1049,15 +1049,15 @@
     "radius_nm": true
    },
    "radius_nm": 4.4409752052095035,
-   "instrument_s": 480.153456062372,
+   "instrument_s": 480.153456919539,
    "tip_rounds": 1,
-   "e0_mev": -454.32649729531937,
-   "radius_measured_nm": 4.444100171245479,
+   "e0_mev": -454.3237876049637,
+   "radius_measured_nm": 4.445101729815272,
    "peaks_found": 3,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.20815858545615018,
-    -0.057729290645655594
+    0.20793899614022998,
+    -0.05804827080087499
    ],
    "tip_condition": "dirty"
   },
@@ -1107,7 +1107,7 @@
    "values": {
     "peak_lo_mev": -346.00000000000006,
     "peak_hi_mev": -214.00000000000003,
-    "radius_nm": 5.694344410131616
+    "radius_nm": 5.694439443725118
    },
    "truth": {
     "peak_lo_mev": -344.86822395887305,
@@ -1117,7 +1117,7 @@
    "abs_err": {
     "peak_lo_mev": -1.1317760411270115,
     "peak_hi_mev": -1.1317760411270683,
-    "radius_nm": -0.02256448992720106
+    "radius_nm": -0.0224694563336989
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -1125,15 +1125,15 @@
     "radius_nm": true
    },
    "radius_nm": 5.716908900058817,
-   "instrument_s": 482.7030546610391,
+   "instrument_s": 482.70305219685787,
    "tip_rounds": 1,
-   "e0_mev": -438.4452388349232,
-   "radius_measured_nm": 5.694344410131616,
+   "e0_mev": -438.44454092765574,
+   "radius_measured_nm": 5.694439443725118,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.4312329355541852,
-    0.5410175618781616
+    -0.43016028902657044,
+    0.5414119157060561
    ],
    "tip_condition": "double"
   },
@@ -1145,7 +1145,7 @@
    "values": {
     "peak_lo_mev": -366.00000000000006,
     "peak_hi_mev": -294.00000000000006,
-    "radius_nm": 7.743913464858666
+    "radius_nm": 7.743987849170898
    },
    "truth": {
     "peak_lo_mev": -369.23118112986907,
@@ -1155,7 +1155,7 @@
    "abs_err": {
     "peak_lo_mev": 3.2311811298690145,
     "peak_hi_mev": -0.7688188701310423,
-    "radius_nm": -0.0028925297695687746
+    "radius_nm": -0.0028181454573372733
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -1163,15 +1163,15 @@
     "radius_nm": true
    },
    "radius_nm": 7.746805994628235,
-   "instrument_s": 489.5949731019147,
+   "instrument_s": 489.5949721033082,
    "tip_rounds": 3,
-   "e0_mev": -423.96332612365427,
-   "radius_measured_nm": 7.743913464858666,
+   "e0_mev": -423.9650779613913,
+   "radius_measured_nm": 7.743987849170898,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.7993053747970166,
-    -0.2787763686421174
+    -0.7996833620011135,
+    -0.2784349605570222
    ],
    "tip_condition": "unstable"
   }
