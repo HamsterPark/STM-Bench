@@ -60,11 +60,20 @@ FLATTEN_NOTE: Pair = (
 )
 
 
-def with_console_notes(manual: str, lang: str = "en") -> str:
+#: Said in the Manual tab only when the console was started with --data-dir; the directory is the one given. Facts only.
+DATA_NOTE: Pair = (
+    "Saved frames, spectra and move traces are also written as plain-text CSV to {dir} (one file per spectrum or trace; one "
+    "per frame channel and direction).",
+    "保存的扫描帧、谱和移动轨迹还会以纯文本 CSV 写到 {dir}（每条谱或轨迹一个文件；每帧的每个通道和方向一个文件）。",
+)
+
+
+def with_console_notes(manual: str, lang: str = "en", data_dir=None) -> str:
     """The manual the Manual tab shows: the console's notes in the window's language, then the instrument's manual byte for
     byte. The notes come first because the reader of screen trial 22 never scrolled to the end of the manual to find them."""
     i = 0 if lang == "en" else 1
-    return "\n\n".join([MOVE_NOTE[i], FLATTEN_NOTE[i], manual])
+    notes = [MOVE_NOTE[i], FLATTEN_NOTE[i]] + ([DATA_NOTE[i].format(dir=data_dir)] if data_dir else [])
+    return "\n\n".join([*notes, manual])
 
 
 S: dict[str, Pair] = {
