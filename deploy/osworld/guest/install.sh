@@ -18,7 +18,7 @@
 #   PIP_NO_INDEX=1 PIP_FIND_LINKS=<dir>   pip's own variables: install from a directory of wheels (offline test)
 #
 # Result (the shared contract of deploy/osworld/README.md): code and venv in /opt/stm-bench (root-owned, world-readable),
-# the service account `stm` (no password login), /var/lib/stm-bench/{private 0700, export 0755, home 0700} owned by stm,
+# the service account `stm` (no password login), /var/lib/stm-bench/{private 0700, export 0755, home 0700} and /srv/stm-data (0755, the plain-text data copy) owned by stm,
 # the service /etc/systemd/system/stm-bench.service, /usr/local/bin/stm-start, /usr/local/sbin/stm-bench-reset and
 # stm-lockdown. Safe to run again on a machine that already has it (also on a shared image: it adds files of its
 # own and touches no other software's configuration, except that apt installs missing libraries).
@@ -44,7 +44,7 @@ if [ -z "${STM_SRC_TARBALL:-}" ]; then
 fi
 
 # ── packages ──
-say "apt: Qt's xcb platform libraries, fonts, xhost, curl, git (apt-packages.txt)"
+say "apt: Qt's xcb platform libraries, fonts, xhost, curl, git, the system numpy and scipy (apt-packages.txt)"
 # shellcheck disable=SC2086
 APT="apt-get -o DPkg::Lock::Timeout=180 ${APT_OPTS:-}"
 if [ "${STM_SKIP_APT_UPDATE:-0}" != 1 ]; then
@@ -64,7 +64,10 @@ passwd -l "$STM_USER" >/dev/null 2>&1 || true
 install -d -m 0755 /opt/stm-bench /opt/stm-bench/guest /var/lib/stm-bench
 install -d -m 0700 /var/lib/stm-bench/private /var/lib/stm-bench/home
 install -d -m 0755 /var/lib/stm-bench/export
-own "$STM_USER:$STM_USER" /var/lib/stm-bench/private /var/lib/stm-bench/home /var/lib/stm-bench/export
+# The console's plain-text copy of its data, which the agent's account reads. Outside /var/lib/stm-bench so that the
+# private directory's parent keeps its mode; writable by nobody but stm.
+install -d -m 0755 /srv /srv/stm-data
+own "$STM_USER:$STM_USER" /var/lib/stm-bench/private /var/lib/stm-bench/home /var/lib/stm-bench/export /srv/stm-data
 
 # ── Python 3.13 (pinned, checksum-verified) ──
 say "python $PY_VERSION (python-build-standalone $PY_RELEASE)"
