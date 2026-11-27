@@ -42,7 +42,7 @@ from ._common import Blind, Ops
 
 SCENARIO = "P1_barth1990_au111"
 
-#: the scouting frame: 200 nm at 0.8 nm/px, 0.5 s/line (a 6.5 nm line is eight pixels wide there)
+#: the scouting frame: 240 nm at 0.8 nm/px, 0.6 s/line (a 6.5 nm line is eight pixels wide there)
 SCOUT_NM, SCOUT_PX, SCOUT_LINE_S = 240.0, 300, 0.6
 #: where the next scouting frame is centred when the one before gave no place to measure (nm from home)
 SCOUT_CENTRES = ((0.0, 0.0), (160.0, 0.0), (-160.0, 0.0), (0.0, 160.0), (0.0, -160.0))
