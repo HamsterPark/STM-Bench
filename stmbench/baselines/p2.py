@@ -552,6 +552,19 @@ class Standing:
         y = (np.array(ys) * w).sum(axis=0) / w.sum(axis=0)
         sem = 1.0 / np.sqrt(w.sum(axis=0))
         fit = fit_step_wave(grid, y, k_guess=k_guess(m["bias_v"]), sem=sem)
+        # Tilt: the standing wave depends on the distance perpendicular to the local step, and a row
+        # that crosses the edge at alpha to its normal measures s = d / cos(alpha) along itself, so
+        # the fitted k is k * cos(alpha). alpha is the edge's slope in this frame, atan(nm per row /
+        # row spacing). That slope is the step's own direction plus the shear of the sample's drift
+        # along the normal during the frame (rows are 2 line times apart); with the drift
+        # compensation on, as it is for the series, the shear is a degree or two and is left in:
+        # taking it out would need the drift, which is only known from these same slopes.
+        alpha = math.atan(float(pairs[0][2]["slope_nm_per_row"]) / npx)
+        fit["tilt_deg"] = math.degrees(alpha)
+        if math.isfinite(fit.get("k", float("nan"))):
+            fit["k"] = float(fit["k"]) / math.cos(alpha)
+            if math.isfinite(fit.get("k_err", float("nan"))):
+                fit["k_err"] = float(fit["k_err"]) / math.cos(alpha)
         fit["n_rows"] = int(sum(ns))
         fit["edge"] = pairs[0][2]
         fit["d_nm"], fit["y"], fit["sem"] = grid, y, sem
@@ -814,7 +827,7 @@ def _nan(x) -> float:
 def _map_log(m: dict) -> dict:
     f = m["fit"]
     return {"bias_v": m["bias_v"], "k": round(_nan(f.get("k")), 4), "k_err": round(_nan(f.get("k_err")), 4), "n_rows": f.get("n_rows"),
-            "chi2_red": round(_nan(f.get("chi2_red")), 2), "slope_deg": round(m.get("slope_deg", float("nan")), 2),
+            "chi2_red": round(_nan(f.get("chi2_red")), 2), "slope_deg": round(m.get("slope_deg", float("nan")), 2), "tilt_deg": round(_nan(f.get("tilt_deg")), 2),
             "x_e": round(m.get("x_e", float("nan")), 2)}
 
 
