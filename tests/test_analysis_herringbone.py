@@ -193,3 +193,25 @@ def test_an_adsorbate_in_the_window_does_not_move_the_arm_period():
     assert a.verdict == "ok" and abs(a.period_along_arm_nm - pa) < 0.04
     clean = zigzag(n=200, noise=3e-12, T=7.2, alpha_deg=30.0)[0]
     assert np.allclose(hb.suppress_blobs(clean, 0.4), clean)             # nothing to suppress
+
+
+@pytest.mark.parametrize("heights_pm", [(80.0, 180.0), (180.0, 82.0)])
+def test_two_tall_bumps_do_not_move_the_period_or_the_local_direction(heights_pm):
+    """Two Gaussian bumps of 80-180 pm (1-2 nm wide, against 8-15 pm lines): the period comes back
+    within the clean field's error, the masked pixels are counted, the local direction between the
+    bumps is the arm's."""
+    z, loc, pa, X, Y = zigzag(n=250, noise=3e-12, T=7.2, alpha_deg=30.0, stripe_deg=25.0)
+    zb = z + heights_pm[0] * 1e-12 * np.exp(-((X - 12.0) ** 2 + (Y - 5.0) ** 2) / (2 * 1.2 ** 2)) \
+        + heights_pm[1] * 1e-12 * np.exp(-((X + 20.0) ** 2 + (Y + 15.0) ** 2) / (2 * 1.9 ** 2))
+    clean = hb.assess_window(z, 0.4)
+    a = hb.assess_window(zb, 0.4)
+    assert a.verdict == "ok" and a.masked_px > 500 and clean.masked_px < 50      # noise alone masks next to nothing
+    assert abs(a.period_along_arm_nm - pa) < abs(clean.period_along_arm_nm - pa) + 0.02
+    fr = frame_of(zb)
+    om = hb.orientation_map(fr)
+    assert om.masked_px > 0
+    places = hb.arm_places(fr, omap=om)
+    assert len(places) >= 2
+    for p in places[:2]:
+        col, row = hb.scan_nm_to_pixel(fr, p.x_nm, p.y_nm)
+        assert angle_err(p.direction_deg, loc[int(round(row)), int(round(col))]) < 4.0
