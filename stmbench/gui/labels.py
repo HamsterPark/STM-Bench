@@ -197,7 +197,7 @@ S: dict[str, Pair] = {
     # the readout line's usage hints, shown while it has no reading: how the viewer works, never about the experiment
     # each says what the pointer does with the tool picked, and that the wheel zooms about the pointer (p3check1, finding 1:
     # a sighted agent zoomed about the centre with the buttons and then had to pan to a ring at the edge)
-    "hint_image": ("Hover to read; click to mark, drag to pan; wheel to zoom about the pointer",
+    "hint_image": ("Hover: read; click: mark; zoomed: drag to pan; wheel: zoom about the pointer",
                    "悬停读数，单击放标记，放大后拖动平移，滚轮以指针处为中心缩放"),
     "hint_image_profile": ("Hover to read; drag a line to plot along it; wheel to zoom about the pointer",
                            "悬停读坐标和数值，拖动画剖面线，滚轮以指针处为中心缩放"),
