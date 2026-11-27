@@ -332,3 +332,28 @@ The secrets are `STM_EVAL_TASKS_JSON` and `HF_EVAL_VM_TOKEN` (for the Google Dri
 `GDRIVE_EVAL_CLIENT_ID`, `GDRIVE_EVAL_CLIENT_SECRET`, `GDRIVE_EVAL_TOKEN`, with `-f destination=gdrive -f gdrive_folder=<name>`).
 `scan_click` is read off a screenshot of the console first (see "Build"); without it the check's CSV step is `NOT-RUN`
 and the check does not pass.
+
+## The dataset tree goes to the same repository, by hand
+
+The collaborators are the grading party: they need the dataset tree with its private `gt.json` files (the seeds and the
+grader image's name) beside the images. Whoever holds the tree or the image can read the seeds; the evaluated model inside the
+VM cannot. The image's `tasks.json` holds the seeds anyway, so keeping the tree elsewhere would add a hand-over without adding
+safety.
+
+The tree is **not** uploaded by the workflow: it holds seeds, so it cannot go through the public fork, and a GitHub secret is
+limited to 48 KB. It is a separate step at delivery time, done from the desktop that holds the validated tree, with the user's
+write token for the repository. Not run:
+
+```bash
+# one tarball of the exact tree that was validated, and its checksum
+tar -C output/internal-eval -cf tree9-6aa2b19.tar tree9-6aa2b19      # after the grader fixtures have been added to the tree
+sha256sum tree9-6aa2b19.tar > tree9-6aa2b19.tar.sha256
+# the user's fine-grained write token for HamsterPark/stm-bench-eval-vm, in the environment and not on the command line
+export HF_TOKEN=<token>
+hf upload HamsterPark/stm-bench-eval-vm tree9-6aa2b19.tar          tree/tree9-6aa2b19.tar          --repo-type dataset
+hf upload HamsterPark/stm-bench-eval-vm tree9-6aa2b19.tar.sha256   tree/tree9-6aa2b19.tar.sha256   --repo-type dataset
+```
+
+The repository must be private (and the tree's sha256 is then given to the collaborators in their notes). Check that the
+repository is private on its Hugging Face settings page before uploading; `upload_products.py` does that check for the
+images, this step does not.
