@@ -152,3 +152,14 @@ def test_frames_of_a_p1_world_agree_with_its_truth():
         # the frame is uncompensated: the drift (~1 nm/min here) smears it, hence 0.4 nm
         assert abs(a.period_along_arm_nm - truth_p) < 0.4
     assert measured >= 3
+
+
+def test_strong_chevron_sidebands_are_not_another_domain():
+    """A short chevron with wide arms (alpha 16, chevron 23 nm) puts sidebands at 55-75 % of an arm
+    10-16 degrees outside it: the window is still one domain."""
+    for phase in (0.3, 1.7, 3.1, 4.4):
+        z = grating(T=6.51, stripe_deg=47.0, alpha_deg=16.0, chev=23.3, amp=11e-12, noise=3e-12, phase=phase)
+        a = hb.assess_window(z, 0.4)
+        assert a.verdict == "ok", (phase, a.reason)
+        assert abs(a.period_along_arm_nm - 6.51 * math.cos(math.radians(16.0))) < 0.03
+        assert angle_err(a.mean_deg, [47.0]) < 1.5

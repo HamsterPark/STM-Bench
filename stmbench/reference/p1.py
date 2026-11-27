@@ -44,7 +44,7 @@ SCENARIO = "P1_barth1990_au111"
 #: the area scanned in each domain (nm): the period claim wants a frame of at least 100 nm; the
 #: larger frames hold more windows and cost 4-5 minutes each at SPEED_NM_S
 FRAME_NM = 140.0
-FRAME_LADDER_NM = (140.0, 120.0, 110.0)
+FRAME_LADDER_NM = (140.0, 120.0, 110.0, 102.0)
 #: 0.39 instead of the claim's 0.4 nm/px so that rounding the pixel count never exceeds the limit
 NM_PER_PX = 0.39
 #: under the 450 nm/s above which a tip of radius > 1.5 nm scratches the surface (world.maybe_scratch)
@@ -54,7 +54,9 @@ WINDOW_NM, STRIDE_NM = 80.0, 20.0
 #: the frame by a few nm during it
 WALL_CLEAR_NM = 12.0
 CONDITION_CLEAR_NM = 170.0
-SEARCH_NM, SEARCH_STEP_NM = 420.0, 20.0
+#: how far from the origin to look for the areas: the near range first (a short move creeps less),
+#: then the far one (within +-600 nm of the origin there are always two domains of different direction)
+SEARCH_NM, SEARCH_FAR_NM, SEARCH_STEP_NM = 420.0, 700.0, 20.0
 DRIFT_FRAME_NM = 12.0
 #: one extra look at the drift after programming it; stop when the residual is below this (nm/min)
 RESIDUAL_OK_NM_MIN = 0.15
@@ -87,11 +89,11 @@ def _area_ok(w, cx: float, cy: float, size_nm: float):
     return label
 
 
-def find_areas(w, size_nm: float):
+def find_areas(w, size_nm: float, reach_nm: float = SEARCH_NM):
     """The two nearest-to-the-origin areas of ``size_nm`` in different domains: ((cx, cy, label), (cx, cy, label))
     in sample-frame nm, or None."""
     found = []
-    g = np.arange(-SEARCH_NM, SEARCH_NM + 1e-9, SEARCH_STEP_NM)
+    g = np.arange(-reach_nm, reach_nm + 1e-9, SEARCH_STEP_NM)
     for cx in g:
         for cy in g:
             lab = _area_ok(w, float(cx), float(cy), size_nm)
@@ -204,8 +206,11 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
         mark["t"] = inst.used_s
 
     size, areas = None, None
-    for size in FRAME_LADDER_NM:
-        areas = find_areas(w, size)
+    for reach in (SEARCH_NM, SEARCH_FAR_NM):
+        for size in FRAME_LADDER_NM:
+            areas = find_areas(w, size, reach)
+            if areas is not None:
+                break
         if areas is not None:
             break
     if areas is None:

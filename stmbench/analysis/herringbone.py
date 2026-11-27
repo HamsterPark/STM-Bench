@@ -69,6 +69,12 @@ ARM_K_TOL = 0.012
 MAJOR_FRAC = 0.65
 #: the mean-direction peak sits within this angle of the bisector of the two arms
 MEAN_PEAK_TOL_DEG = 3.0
+#: peaks below this fraction of the strongest are not candidates for the arm group
+GROUP_FRAC = 0.3
+#: a peak this close to a peak of the group is a sideband of it, not another domain: the sidebands
+#: sit 10-16 degrees from an arm (chevron 22-34 nm, |k| 0.16/nm), the arms of an adjacent domain
+#: at least 60 - 2 * 18 = 24 degrees
+SIDEBAND_REACH_DEG = 20.0
 
 
 @dataclass
@@ -322,56 +328,69 @@ def assess_window(z: np.ndarray, nm_per_px: float, *, angle_deg: float = 0.0,
     out.peaks = strong
     out.n_peaks = len(strong)
     out.quality = strong[0].quality
-    # The zigzag's own structure puts weaker peaks (sidebands from the chevron modulation, up to
-    # ~40 % of an arm in a 120 nm window) around the arms, so only the major peaks count. The
-    # phase jump at each elbow also leaves a peak on the *mean* direction, at the period T (longer
-    # than the arms' by 1 / cos alpha) and about as strong as an arm: the arms are the outer two
-    # of three peaks that sit symmetrically about the middle one.
-    major = [p for p in strong if p.power >= MAJOR_FRAC * strong[0].power]
-    out.n_peaks = len(major)
+    # What the spectrum of one domain holds (measured on gratings built from the simulator's height
+    # expression): the two arm peaks at the period T cos(alpha); a peak on the mean direction, at
+    # the longer period T and about as strong as an arm; and sidebands of the chevron modulation
+    # (a shorter period, 10-16 degrees from an arm, up to ~75 % of an arm when the chevron is short
+    # and alpha large). The arms are the best pair of equal-period peaks, with the mean peak
+    # between them when there is one; a further peak that is not a sideband (more than
+    # SIDEBAND_REACH_DEG from every peak of the group) and about as strong as the weaker arm
+    # belongs to another domain.
+    top = strong[0].power
+    pool = [p for p in strong if p.power >= GROUP_FRAC * top]
 
-    def arms_pair(a: Peak, b: Peak) -> None:
-        out.verdict = "ok"
-        out.arm_deg = [a.stripe_deg, b.stripe_deg]
-        out.mean_deg, out.half_angle_deg = _mean_direction(a.stripe_deg, b.stripe_deg)
-        out.period_along_arm_nm = 0.5 * (a.period_nm + b.period_nm)
-        out.period_mean_nm = out.period_along_arm_nm / math.cos(math.radians(out.half_angle_deg))
+    def equal_period(x: Peak, y: Peak) -> bool:
+        return abs(x.period_nm - y.period_nm) <= ARM_K_TOL * min(x.period_nm, y.period_nm)
 
-    def one_arm(a: Peak, why: str) -> None:
-        out.verdict = "one_arm"
-        out.reason = why
-        out.period_along_arm_nm = a.period_nm
-        out.arm_deg = [a.stripe_deg]
-
-    def same_domain(group: list[Peak]) -> bool:
-        return all(_fold180(x.stripe_deg - y.stripe_deg) <= ARM_MAX_SEP_DEG for x in group for y in group)
-
-    if len(major) == 1:
-        one_arm(major[0], "one stripe peak: an arm of the zigzag (or the arms are not resolved)")
-        return out
-    if not same_domain(major):
+    best = None                                    # (score, lo, hi, mid | None)
+    for i, x in enumerate(pool):
+        for y in pool[i + 1:]:
+            if not equal_period(x, y) or _fold180(x.stripe_deg - y.stripe_deg) > ARM_MAX_SEP_DEG:
+                continue
+            centre, _ = _mean_direction(x.stripe_deg, y.stripe_deg)
+            mids = [m for m in pool if m is not x and m is not y
+                    and _fold180(m.stripe_deg - centre) <= MEAN_PEAK_TOL_DEG
+                    and m.period_nm >= 0.995 * min(x.period_nm, y.period_nm)]
+            mid = max(mids, key=lambda m: m.power) if mids else None
+            score = x.power + y.power + (mid.power if mid else 0.0) * 0.5
+            if best is None or score > best[0]:
+                best = (score, x, y, mid)
+    if best is not None:
+        _, x, y, mid = best
+        group = [x, y] + ([mid] if mid else [])
+        weakest = min(x.power, y.power)
+    else:
+        p = strong[0]
+        partner = None
+        for q in strong[1:]:
+            ratio = max(p.period_nm, q.period_nm) / min(p.period_nm, q.period_nm)
+            if q.power >= MAJOR_FRAC * p.power and _fold180(p.stripe_deg - q.stripe_deg) <= ARM_MAX_SEP_DEG                     and 1.003 <= ratio <= 1.07:
+                partner = q               # an arm and the mean-direction peak (the longer period)
+                break
+        group = [p] + ([partner] if partner else [])
+        weakest = p.power
+    extras = [q for q in strong if q not in group and q.power >= MAJOR_FRAC * weakest
+              and min(_fold180(q.stripe_deg - g.stripe_deg) for g in group) > SIDEBAND_REACH_DEG]
+    out.n_peaks = len(group)
+    if extras:
         out.verdict = "mixed"
-        out.reason = f"{len(major)} major stripe peaks, some more than {ARM_MAX_SEP_DEG:.0f} deg apart: more than one rotational domain"
+        out.reason = (f"{len(extras)} further stripe peak(s) as strong as the arms and "
+                      f"more than {SIDEBAND_REACH_DEG:.0f} deg from them: more than one rotational domain")
         return out
-    if len(major) == 2:
-        a, b = major
-        if abs(a.period_nm - b.period_nm) <= ARM_K_TOL * min(a.period_nm, b.period_nm):
-            arms_pair(a, b)
-        else:
-            # an arm and the mean-direction peak: the arm is the one with the shorter period
-            one_arm(min(major, key=lambda p: p.period_nm),
-                    "two peaks of different period: one arm and the mean-direction peak")
+    if best is not None:
+        _, x, y, mid = best
+        out.verdict = "ok"
+        out.arm_deg = [x.stripe_deg, y.stripe_deg]
+        out.mean_deg, out.half_angle_deg = _mean_direction(x.stripe_deg, y.stripe_deg)
+        out.period_along_arm_nm = 0.5 * (x.period_nm + y.period_nm)
+        out.period_mean_nm = out.period_along_arm_nm / math.cos(math.radians(out.half_angle_deg))
         return out
-    if len(major) == 3:
-        order = sorted(major, key=lambda p: ((p.stripe_deg - major[0].stripe_deg + 90.0) % 180.0) - 90.0)
-        lo, mid, hi = order
-        centre, _ = _mean_direction(lo.stripe_deg, hi.stripe_deg)
-        equal = abs(lo.period_nm - hi.period_nm) <= ARM_K_TOL * min(lo.period_nm, hi.period_nm)
-        if _fold180(mid.stripe_deg - centre) <= MEAN_PEAK_TOL_DEG and equal:
-            arms_pair(lo, hi)
-            return out
-    out.verdict = "mixed"
-    out.reason = f"{len(major)} major stripe peaks that are not one domain's two arms and mean-direction peak"
+    arm = min(group, key=lambda g: g.period_nm)
+    out.verdict = "one_arm"
+    out.reason = ("two peaks of different period: one arm and the mean-direction peak" if len(group) == 2
+                  else "one stripe peak: an arm of the zigzag (or the arms are not resolved)")
+    out.period_along_arm_nm = arm.period_nm
+    out.arm_deg = [arm.stripe_deg]
     return out
 
 
