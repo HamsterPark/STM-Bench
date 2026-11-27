@@ -452,7 +452,8 @@ UNITS = {"f_min_pn": "pN", "f_decay_pm": "pm", "e_bind_mev": "meV"}
 
 def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARIO) -> dict:
     """One P5 episode by the baseline; what it reported and how the judge scored it (the truth is
-    read after the episode only, for the summary row)."""
+    read after the episode only, for the summary row: ``draw_hidden`` (the tip category), the judge's record
+    and the world's zspec records are read after ``finish()`` and never feed back into a decision)."""
     inst = Instrument(scenario, seed, out_dir)
     log: dict = {}
     got, values, error = None, None, None

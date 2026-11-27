@@ -107,3 +107,14 @@ def test_the_baseline_names_neither_the_simulator_nor_its_truth():
             assert not names & forbidden, (mod.__name__, getattr(node, "name", None), names & forbidden)
     imported = {a.module for a in ast.walk(ast.parse(inspect.getsource(p5))) if isinstance(a, ast.ImportFrom) and a.module}
     assert not any("reference" in m for m in imported), imported          # the privileged package stays out
+
+
+def test_a_shallow_bond_is_centred_by_the_fit_against_the_bare_curve():
+    """Seed 446 has the weakest bond of the ranges tried (a dip of 0.8 Hz). The minimum of the raw coarse
+    curves is dominated by the van der Waals part and the fit failed there (se 0.15 nm); against the bare
+    curve at equal loop Z the fit is accepted by its standard error and the tip ends on the atom."""
+    r = p5.run(446)
+    assert r["success"], r
+    assert max(r["centre"][0]["se_nm"]) < p5.CENTRE_MAX_SE_NM
+    assert r["centre_delta_nm"] != [0.0, 0.0]
+    assert all(x < 0.05 for x in r["near_nm"][1:6:2])               # the three atom curves
