@@ -10,7 +10,7 @@ an arm, away from the bends. The protocol:
   poke stabilises it; blunt and double tips still show the lines);
 * **a scouting frame**: 200 nm at 0.8 nm/px (250 s) at home. It gives the steps and the adatoms; a 120 nm
   square without a step and with an adatom near its centre is where the measurement goes;
-  the adatoms are taken out of every frame before it is read (they bias the arm period);
+  the stripe analysis masks the adatoms (they biased the arm period by up to 0.5 nm);
   ;
 * **the drift**: a long move leaves creep, 1-3 nm/min for minutes, which stretches the image across the
   slow axis (a few percent: 0.2 nm of period) and shears it (a few degrees). The frame is therefore entered
@@ -43,7 +43,7 @@ from ._common import Blind, Ops
 SCENARIO = "P1_barth1990_au111"
 
 #: the scouting frame: 200 nm at 0.8 nm/px, 0.5 s/line (a 6.5 nm line is eight pixels wide there)
-SCOUT_NM, SCOUT_PX, SCOUT_LINE_S = 200.0, 250, 0.5
+SCOUT_NM, SCOUT_PX, SCOUT_LINE_S = 240.0, 300, 0.6
 #: where the next scouting frame is centred when the one before gave no place to measure (nm from home)
 SCOUT_CENTRES = ((0.0, 0.0), (160.0, 0.0), (-160.0, 0.0), (0.0, 160.0), (0.0, -160.0))
 #: the measurement frame: 120 nm at 0.4 nm/px (the period claim wants >= 100 nm at <= 0.4)
@@ -55,6 +55,11 @@ MIN_SEP_DEG = 40.0
 AMP_REACH_NM = 20.0
 #: a place's score is its amplitude ratio plus this per nm of the radius over which the arm stays uniform
 REACH_WEIGHT = 0.03
+#: and minus this per degree of spread of the direction in the disc: the reading's error grows with it (median 0.5
+#: deg at a spread under 1 deg, 1.65 deg at 2.5-3 deg; 835 candidate places of 30 dev seeds)
+SPREAD_WEIGHT = 0.25
+#: frames are added at offsets until the pair of places is this uniform (spread, deg), or the offsets are used up
+GOOD_SPREAD_DEG = 1.8
 #: a place is read in a disc of this radius (nm): the direction must be uniform in it, no step within STEP_CLEAR_NM
 PLACE_RADIUS_NM, PLACE_SPREAD_DEG, PLACE_GRID_NM = 8.5, 3.0, 3.0
 #: no place is taken this close to a step (nm)
@@ -63,7 +68,7 @@ STEP_CLEAR_NM = 20.0
 ATOM_MIN_PM = 35.0
 #: the frame is centred within this distance of a landmark atom (nm): the move from the atom to the frame
 #: starts its own creep (5 % of the distance, over minutes), which the drift measured on the atom does not hold
-ATOM_NEAR_NM = 60.0
+ATOM_NEAR_NM = 25.0
 #: when the nearest atom cannot be used, the next ones within this distance are tried (nm)
 FALLBACK_ATOM_NM = 120.0
 #: a drift faster than this (nm/min) is a misread (the wrong atom), not used
@@ -182,7 +187,7 @@ def centres_of(sc: Scout, home: tuple[float, float]) -> list[Centre]:
             near = sorted((math.hypot(ax - x, ay - y), ax, ay) for ax, ay, _ in sc.atoms)
             atoms = [(ax, ay) for dd, ax, ay in near if dd <= FALLBACK_ATOM_NM][:3]
             dist = near[0][0] if near else 1e3
-            out.append(Centre(x, y, -4.0 * frac - min(dist, 120.0) / ATOM_NEAR_NM, atoms, frac))
+            out.append(Centre(x, y, -4.0 * frac - min(dist, 120.0) / 20.0, atoms, frac))
     out.sort(key=lambda c: -c.score)
     return out
 
@@ -233,9 +238,11 @@ def read_frame(f: dict) -> tuple[list[Place], list[float]]:
     4 nm grid whose 10 nm disc is coherent, uniform in direction (rms deviation under 3.5 degrees, by
     ``local_direction``), clear of steps by 20 nm and not on a dip of the lines' amplitude; its score is the
     mean amplitude ratio over the disc, so that the places a wall can hide in come last."""
-    g = without_atoms(f)
+    # everything reported is read from the frame as the instrument gave it: the stripe analysis masks the adatoms
+    # itself; only the amplitude map that ranks places is computed on a copy without them
+    g = f
     om = hb.orientation_map(g)
-    amp = amplitude_ratio(g)
+    amp = amplitude_ratio(without_atoms(f))
     d = float(f["nm_per_px"])
     near_step = ndimage.binary_dilation(om.step_near, iterations=int(round(STEP_CLEAR_NM / d)))
     n = amp.shape[0]
@@ -259,7 +266,7 @@ def read_frame(f: dict) -> tuple[list[Place], list[float]]:
                 if q is None or not q.ok or q.spread_deg > PLACE_SPREAD_DEG:
                     break
                 reach = rad
-            places.append(Place(x, y, r.direction_deg, r.spread_deg, float(amp[rr, cc].mean()) + REACH_WEIGHT * reach, f))
+            places.append(Place(x, y, r.direction_deg, r.spread_deg, float(amp[rr, cc].mean()) + REACH_WEIGHT * reach - SPREAD_WEIGHT * r.spread_deg, f))
     c = (float(f["center_nm"][0]), float(f["center_nm"][1]))
     periods = []
     # 100 nm windows at five places, and 80 nm ones where a step leaves no 100 nm window (the same arm period
@@ -302,7 +309,9 @@ def measure_centre(ops: Ops, c: Centre, log: dict) -> dict:
     periods: list[float] = []
     frames: list[dict] = []
     for k, (ox, oy) in enumerate(((0.0, 0.0),) + EXTRA_OFFSETS_NM):
-        if k and best_pair(places) is not None and len(periods) >= MIN_PERIOD_WINDOWS:
+        pair = best_pair(places)
+        if (k and pair is not None and len(periods) >= MIN_PERIOD_WINDOWS
+                and max(pair[0].spread_deg, pair[1].spread_deg) <= GOOD_SPREAD_DEG):
             break
         if ops.budget_s - ops.now() < RESERVE_S:
             break
