@@ -49,6 +49,33 @@ K_CONST = 1.0 / math.sqrt(HBAR2_OVER_2M_EV_NM2)      # 5.123 nm⁻¹ per sqrt(eV
 KB_EV_PER_K = 8.617333e-5
 THERMAL_FWHM = 3.5                   # the usual 3.5 k_B T instrumental width
 
+#: how far the argument moves where ``special.struve(0, z)`` is not finite. scipy 1.18.1 returns
+#: NaN on an interval about 2.5e-5 wide at z = 25.76535–25.76538 (found 2026-11-27: one point of
+#: 2e6 on [0.001, 200], 2484 of 70001 on [25.7650, 25.7657]; ``struve(1, z)`` has no such hole).
+#: One pixel of a dI/dV map whose 2kd fell there blanked the whole map, whose lock-in reference
+#: is the frame mean. 1e-4 is four widths of the hole and changes H0 by ~1e-5.
+STRUVE_NUDGE = 1e-4
+
+
+def _struve0(z):
+    """``special.struve(0, z)``, finite everywhere: where it is not, the value 1e-4 further out
+    (or, failing that, 1e-4 further in). Every point where scipy's value is finite keeps it."""
+    h = special.struve(0, z)
+    if np.all(np.isfinite(h)):
+        return h
+    zz = np.asarray(z, float)
+    if np.ndim(h) == 0:
+        v = special.struve(0, float(zz) + STRUVE_NUDGE)
+        return v if np.isfinite(v) else special.struve(0, float(zz) - STRUVE_NUDGE)
+    h = np.array(h, dtype=float, copy=True)
+    zb = np.broadcast_to(zz, h.shape)
+    bad = ~np.isfinite(h)
+    h[bad] = special.struve(0, zb[bad] + STRUVE_NUDGE)
+    still = ~np.isfinite(h)
+    if np.any(still):
+        h[still] = special.struve(0, zb[still] - STRUVE_NUDGE)
+    return h
+
 # literature defaults; a scenario's ``hidden`` block draws around them per seed
 SURFACE_STATE_DEFAULTS: dict[str, dict[str, float]] = {
     "Cu(111)": {"e0_ev": -0.44, "m_star": 0.38, "gamma_f_ev": 0.006, "gamma_0_ev": 0.018},
@@ -155,7 +182,7 @@ class SurfaceState:
         k = self.k_of_e(e_ev)
         z = 2 * k * d_nm
         damp = np.exp(-2 * d_nm / np.maximum(self.l_phi_nm(e_ev), 1e-6))
-        return r * (math.cos(phi) * special.j0(z) + math.sin(phi) * special.struve(0, z)) * damp
+        return r * (math.cos(phi) * special.j0(z) + math.sin(phi) * _struve0(z)) * damp
 
     @staticmethod
     def _c_of(delta: float, alpha: float) -> complex:

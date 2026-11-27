@@ -240,3 +240,113 @@ def test_a_small_corrals_lowest_resonance_is_counted():
         c = w.surface.corral_snapshot()
         hw1 = c["hard_wall_ev"][0] * 1e3
         assert c["peaks_mev"][0] - hw1 < 25.0, (seed, c["radius_nm"], c["peaks_mev"][:2], hw1)
+
+
+def test_the_struve_hole_leaves_a_finite_wave_and_every_other_value_as_it_was():
+    """scipy 1.18.1's struve(0, z) is NaN on ~2.5e-5 around z = 25.765, and one pixel of a dI/dV
+    map whose 2kd fell there blanked the whole map (2026-11-27). A step's wave is finite there
+    now, continuous with its neighbours, and wherever scipy's value is finite it is the value it
+    was, bit for bit."""
+    ss = SurfaceState(CU)
+    e, r, phi = 0.0, 0.5, 3.0
+    k = float(ss.k_of_e(e))
+    z = np.concatenate([np.linspace(25.7650, 25.7657, 7001), np.linspace(0.05, 60.0, 4001)])
+    d_m = z / (2.0 * k) * 1e-9
+    got = ss.line_modulation(d_m, e, r, phi)
+    assert np.isfinite(got).all()
+    # the expression as it was, evaluated the same way
+    d_nm = np.abs(np.asarray(d_m, float)) * 1e9
+    zz = 2 * ss.k_of_e(e) * d_nm
+    damp = np.exp(-2 * d_nm / np.maximum(ss.l_phi_nm(e), 1e-6))
+    raw = special.struve(0, zz)
+    before = r * (math.cos(phi) * special.j0(zz) + math.sin(phi) * raw) * damp
+    fin = np.isfinite(raw)
+    assert np.array_equal(got[fin], before[fin])
+    hole = np.flatnonzero(~fin)
+    if hole.size:                                   # the hole this scipy has; a fixed one has none
+        assert np.max(np.abs(got[hole] - got[hole.min() - 1])) < 1e-4
+        one = ss.line_modulation(float(d_m[hole[0]]), e, r, phi)      # a scalar argument too
+        assert np.isfinite(one) and abs(float(one) - float(got[hole[0]])) < 1e-12
+
+
+def _edge_k(d_nm: np.ndarray, y: np.ndarray, k0: float, span: float = 0.08) -> float:
+    """k of one edge's wave, c + A[cos φ J0(2kd) + sin φ H0(2kd)]·exp(-2d/L), on a grid in k and L
+    with (c, A cos φ, A sin φ) solved linearly at every node (H0 through the simulator's own
+    hole-free struve, since a k grid this fine lands on scipy's NaN at z = 25.765)."""
+    from stmsim.physics.surface_state import _struve0
+
+    best = (np.inf, k0)
+    for lam in (20.0, 40.0, 80.0, 160.0, 400.0):
+        damp = np.exp(-2.0 * d_nm / lam)
+        for k in k0 * np.linspace(1.0 - span, 1.0 + span, 2001):
+            z = 2.0 * k * d_nm
+            B = np.column_stack([np.ones_like(d_nm), special.j0(z) * damp, _struve0(z) * damp])
+            coef, *_ = np.linalg.lstsq(B, y, rcond=None)
+            r = float(np.sum((B @ coef - y) ** 2))
+            if r < best[0]:
+                best = (r, float(k))
+    return best[1]
+
+
+def _wander_slope(site, v: float) -> float:
+    a, p = site.wander_amp, site.wander_period
+    return float(a * 2 * math.pi / p * math.cos(2 * math.pi * v / p)
+                 + 0.4 * a * 2 * math.pi / (0.37 * p) * math.cos(2 * math.pi * v / (0.37 * p) + 1.3))
+
+
+def test_a_bent_step_shows_its_true_wavelength_across_the_local_edge():
+    """Where a step bends, its ripples follow it: a profile across the local edge reads the band's
+    k, and so does the line term a spectrum uses (2026-11-27). Before, the waves were laid out along
+    the staircase's mean normal and such a profile read k high by sqrt(1 + w'^2) - 1."""
+    e = -0.10
+    for seed in range(60):
+        surf = Surface("Cu(111)", seed=seed, adsorbate_density_per_um2=0.0, surface_state=CU,
+                       terrace_median_m=150e-9)
+        site = surf.site
+        b = np.asarray(site.boundaries)
+        j = int(np.searchsorted(b, 0.0))
+        if j + 1 >= b.size or b[j + 1] - b[j] < 60e-9:
+            continue
+        vs = np.linspace(-400e-9, 400e-9, 1601)
+        slopes = np.array([_wander_slope(site, v) for v in vs])
+        i = int(np.argmax(np.abs(slopes)))
+        if abs(slopes[i]) >= 0.2:
+            break
+    else:
+        raise AssertionError("no seed with a bend of 11 degrees or more")
+    v, wp = float(vs[i]), float(slopes[i])
+    assert math.sqrt(1 + wp ** 2) - 1 > 0.019            # what the old layout would have read high
+    a = site.step_angle
+    n = np.array([math.cos(a), math.sin(a)])
+    t = np.array([-math.sin(a), math.cos(a)])
+    wander = float(surf._staircase_u(np.array([v * t[0]]), np.array([v * t[1]]))[0])   # t is normal to n
+    p0 = (b[j] - wander) * n + v * t                       # on the edge, at the bend
+    normal = (n + wp * t) / math.hypot(1.0, wp)            # across the local edge, into the terrace
+    s = np.arange(0.6, 16.0, 0.2)
+    pts = p0[None, :] + (s * 1e-9)[:, None] * normal[None, :]
+    y = surf.ldos_map(pts[:, 0], pts[:, 1], e)
+    y = y / np.mean(y)
+    k_true = float(surf.surface_state.k_of_e(e))
+    k = _edge_k(s, y, k_true)
+    assert abs(k / k_true - 1.0) < 0.005, (seed, math.degrees(math.atan(wp)), k / k_true - 1.0)
+    # the spectrum's line term: 5 nm across the edge is 5 nm away
+    x5, y5 = p0 + 5e-9 * normal
+    dists = [float(ln.distance_m) for ln in surf._line_terms(float(x5), float(y5))]
+    assert min(abs(d - 5e-9) for d in dists) < 0.03e-9, dists
+
+
+def test_scenarios_without_a_surface_state_never_reach_the_step_stretch(monkeypatch):
+    """The distance across the local edge only exists where a surface state does: P4, P7 and
+    every scenario without one never call it, so their worlds are what they were, bit for bit."""
+    from stmbench.instrument import Instrument
+
+    def refuse(self, *a, **k):
+        raise AssertionError("_staircase_stretch called without a surface state")
+
+    monkeypatch.setattr(Surface, "_staircase_stretch", refuse)
+    for scenario in ("P4_atom_positioning_cu111", "P7_pull_threshold_cu111"):
+        inst = Instrument(scenario, 0)
+        assert inst.world.surface.surface_state is None
+        inst.act("lockin", on=True, amplitude_mv=10.0)
+        inst.act("scan", center_x_nm=0.0, center_y_nm=0.0, size_nm=20.0, pixels=48, line_time_s=0.1)
+        inst.act("sts", v_start=-0.5, v_end=0.1, points=41, backward=False)
