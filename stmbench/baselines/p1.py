@@ -166,18 +166,26 @@ def _score(s: Site, here: tuple[float, float]) -> float:
             - math.hypot(s.x - here[0], s.y - here[1]) / 400.0)
 
 
-def choose_pair(sites: list[Site], here: tuple[float, float]) -> tuple[Site, Site] | None:
-    """The best site, and the best one whose direction differs from it by MIN_SEP_DEG or more."""
-    good = [s for s in sites if s.atom is not None and s.atom_nm <= ATOM_NEAR_NM] or sites
+def _best_pair(pool: list[Site], here: tuple[float, float]) -> tuple[Site, Site] | None:
+    """The best pair within one survey (the surveys' scan coordinates are not one frame), over all surveys."""
     best = None
-    for a in sorted(good, key=lambda s: -_score(s, here))[:60]:
-        for b in sorted(good, key=lambda s: -_score(s, (a.x, a.y))):
-            if abs(circ_diff(a.psi, b.psi)) >= MIN_SEP_DEG and a.survey == b.survey:
-                sc = _score(a, here) + _score(b, (a.x, a.y))
-                if best is None or sc > best[0]:
-                    best = (sc, a, b)
-                break
+    for idx in sorted({s.survey for s in pool}):
+        mine = [s for s in pool if s.survey == idx]
+        for a in sorted(mine, key=lambda s: -_score(s, here))[:60]:
+            for b in sorted(mine, key=lambda s: -_score(s, (a.x, a.y))):
+                if abs(circ_diff(a.psi, b.psi)) >= MIN_SEP_DEG:
+                    sc = _score(a, here) + _score(b, (a.x, a.y))
+                    if best is None or sc > best[0]:
+                        best = (sc, a, b)
+                    break
     return None if best is None else (best[1], best[2])
+
+
+def choose_pair(sites: list[Site], here: tuple[float, float]) -> tuple[Site, Site] | None:
+    """The best site, and the best one whose direction differs from it by MIN_SEP_DEG or more. Sites with a
+    landmark atom near are tried first; when they hold no pair, all of them (the drift is then measured on a
+    farther atom, or the site's frames count less for the period)."""
+    return _best_pair([s for s in sites if s.atom is not None and s.atom_nm <= ATOM_NEAR_NM], here) or _best_pair(sites, here)
 
 
 # ── drift ─────────────────────────────────────────────────────────────────────
