@@ -56,8 +56,10 @@ STEP_PM = 100.0
 ATOM_OFFSET_NM, ATOM_SWEEP_NM = 0.75, 0.95
 BG_OFFSET_NM, BG_SWEEP_NM = 0.95, 1.10
 POINTS, SWEEPS, REPEATS, AMPLITUDE_PM = 512, 4, 3, 100.0
-#: a curve over the atom must differ from the bare curves by this many pm of Δf noise... see _dip
-MIN_DIP_HZ = 1.0
+#: a curve over the atom must run below the bare curves, at equal height, by more than this (Hz) and
+#: by more than this many times the scatter of the difference far from the surface (see _dip_hz): a
+#: physisorbed bond is a Hz deep or less
+MIN_DIP_HZ, MIN_DIP_SIGMAS = 0.3, 6.0
 #: frame that places the tip on the atom
 FINE_NM, FINE_PX, FINE_LINE_S = 5.0, 50, 0.05
 #: the grid (nm, both axes) of coarse curves that finds the bond's centre, and their points
@@ -66,6 +68,8 @@ CENTRE_GRID, CENTRE_POINTS = tuple(np.arange(-0.24, 0.241, 0.08)), 96
 #: Jacobian and residuals) in each direction, else the image's place stands: a bond too weak to
 #: see in the grid (a physisorbed one, ~0.5 Hz deep) is fitted to the bounds
 CENTRE_MAX_SE_NM = 0.03
+#: sweeps averaged per point of the coarse grid: one, then eight for a bond too shallow for one
+CENTRE_SWEEPS = (1, 8)
 CENTRE_FINE = tuple(np.arange(-0.12, 0.121, 0.06))
 SPOT_SHIFT_MAX_NM = 1.5
 #: how long the atom is watched to find the drift the survey's measurement left
@@ -201,10 +205,11 @@ class Rig:
             return None                                  # not the same bump: a tip change or a neighbour
         return float(np.mean([p[0] for p in seen])), float(np.mean([p[1] for p in seen])), float(t_mid)
 
-    def _depths(self, here, offsets, sweeps: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def _depths(self, here, offsets, sweeps: int, bare: Curve) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Coarse Δf(z) at every point of a grid around ``here``: ``(tip positions, depth, times)``, the
-        depth being the deepest point of the attractive well, lightly smoothed (the sweep ends on the
-        repulsive wall, which says little about where the tip is)."""
+        depth being how far the curve runs below the bare curve ``bare`` at equal loop Z (the analysis's
+        own background subtraction, which takes the van der Waals part and the atom's height out of
+        the comparison), at its deepest, lightly smoothed."""
         from scipy.signal import savgol_filter
 
         pts, depth, times = [], [], []
@@ -214,18 +219,24 @@ class Rig:
                 r = self.v.act("zspec", sweep_nm=ATOM_SWEEP_NM, z_offset_nm=ATOM_OFFSET_NM, points=CENTRE_POINTS,
                                sweeps=sweeps, backward=False)
                 sp = self.v.spectrum(r["spectrum"])
-                df = np.asarray(sp["df"], float)
-                ok = np.isfinite(df)
-                if ok.sum() >= 40:
-                    pts.append((here[0] + gx, here[1] + gy))
-                    depth.append(float(np.min(savgol_filter(df[ok], 9, 2))))
-                    times.append(float(sp["t_s"]))
+                h, df = Curve.from_spectrum(sp).height()
+                hb, _ = bare.height()
+                lo, hi = max(float(h[0]), float(hb[0])), min(float(h[-1]), float(hb[-1]))
+                if hi - lo > 0.2e-9 and h.size >= 40:
+                    grid = np.linspace(lo, hi, 150)
+                    diff = np.interp(grid, h, df) - combine([bare], grid)
+                    ok = np.isfinite(diff)
+                    if ok.sum() >= 40:
+                        pts.append((here[0] + gx, here[1] + gy))
+                        depth.append(float(np.min(savgol_filter(diff[ok], 9, 2))))
+                        times.append(float(sp["t_s"]))
         return np.asarray(pts), np.asarray(depth), np.asarray(times)
 
-    def centre(self, first: tuple[float, float, float]) -> tuple[float, float] | None:
+    def centre(self, first: tuple[float, float, float], bare: Curve) -> tuple[float, float] | None:
         """How far the bond's centre is from where an image puts the atom (scan nm), found with the
-        force itself. ``first`` is the atom from a frame (x, y, time). A coarse Δf(z) at every point
-        of a grid, its deepest end compared across the grid, a Gaussian fitted to it; then again on a
+        force itself. ``first`` is the atom from a frame (x, y, time), ``bare`` a curve over bare surface.
+        A coarse Δf(z) at every point of a grid, its depth against the bare curve compared across the
+        grid, a Gaussian fitted to it; then again on a
         finer grid around the first estimate with the width held. The sample drifts a little while
         the grid is taken (the compensation leaves some), so the atom is modelled as moving at the
         velocity two frames around the grid give. The image places the atom for the tip's leading
@@ -262,24 +273,31 @@ class Rig:
             dt = max(b[2] - a[2], 1.0)
             return ((b[0] - a[0]) / dt, (b[1] - a[1]) / dt)
 
-        p, d, t = self._depths(first[:2], CENTRE_GRID, 1)
-        if len(p) < 20:
-            return None
-        second = self.atom_here(first[:2])
-        if second is None:
-            return None
-        f1 = fit(p, d, t, first, moved(first, second), None)
-        rms1, q1 = float(np.sqrt(2 * f1.cost / len(d))), f1.x
-        rec = {"bx": round(float(q1[2]), 3), "by": round(float(q1[3]), 3), "sigma": round(float(q1[4]), 3),
-               "span_hz": round(float(np.max(d) - np.min(d)), 2), "rms_hz": round(rms1, 3),
-               "v_nm_min": [round(60.0 * c, 3) for c in moved(first, second)]}
-        self.log.setdefault("centre", []).append(rec)
-        se1 = se_xy(f1, [0, 1, 2, 3, 4])
-        rec["se_nm"] = [round(se1[0], 3), round(se1[1], 3)]
+        for sweeps in CENTRE_SWEEPS:
+            p, d, t = self._depths(first[:2], CENTRE_GRID, sweeps, bare)
+            if len(p) < 20:
+                return None
+            second = self.atom_here(first[:2])
+            if second is None:
+                return None
+            f1 = fit(p, d, t, first, moved(first, second), None)
+            rms1, q1 = float(np.sqrt(2 * f1.cost / len(d))), f1.x
+            se1 = se_xy(f1, [0, 1, 2, 3, 4])
+            rec = {"sweeps": sweeps, "bx": round(float(q1[2]), 3), "by": round(float(q1[3]), 3), "sigma": round(float(q1[4]), 3),
+                   "span_hz": round(float(np.max(d) - np.min(d)), 2), "rms_hz": round(rms1, 3),
+                   "se_nm": [round(se1[0], 3), round(se1[1], 3)],
+                   "v_nm_min": [round(60.0 * c, 3) for c in moved(first, second)]}
+            self.log.setdefault("centre", []).append(rec)
+            if max(se1) <= CENTRE_MAX_SE_NM:
+                break
+            # a bond that is there (a well, deeper than the scatter) but too shallow for one sweep a
+            # point: average more before giving up on the force
+            if not (q1[1] < 0.0 and float(np.max(d) - np.min(d)) > 2.5 * rms1):
+                return None
         if abs(q1[2]) > 0.3 or abs(q1[3]) > 0.3 or q1[1] >= 0.0 or max(se1) > CENTRE_MAX_SE_NM:
             return None
         mid = (second[0] + float(q1[2]), second[1] + float(q1[3]))
-        p2, d2, t2 = self._depths(mid, CENTRE_FINE, 2)
+        p2, d2, t2 = self._depths(mid, CENTRE_FINE, 2 * sweeps, bare)
         third = self.atom_here(second[:2])
         if len(p2) < 15 or third is None:
             return float(q1[2]), float(q1[3])
@@ -297,17 +315,21 @@ class Rig:
         return r["spectrum"], self.v.spectrum(r["spectrum"])
 
 
-def _dip_hz(atom: Curve, bare: list[Curve]) -> float:
-    """How far the atom's curve runs below the bare curves, in Δf at equal loop Z (Hz): the
-    short-range attraction the tip over an atom adds. A tip beside the atom adds less."""
+def _dip_hz(atom: Curve, bare: list[Curve]) -> tuple[float, float]:
+    """``(dip, noise)`` in Hz: how far the atom's curve runs below the bare curves, in Δf at equal loop Z
+    (the short-range attraction the tip over an atom adds; a tip beside it adds less), and the scatter
+    of that difference over the farthest quarter of the heights, where the bond is negligible."""
     if not bare:
-        return float("nan")
+        return float("nan"), float("nan")
     h, df = atom.height()
     grid = np.linspace(h[0], h[-1], 200)
-    a = np.interp(grid, h, df)
-    b = combine(bare, grid)
-    ok = np.isfinite(b)
-    return float(np.min((a - b)[ok])) if ok.any() else float("nan")
+    diff = np.interp(grid, h, df) - combine(bare, grid)
+    ok = np.isfinite(diff)
+    if not ok.any():
+        return float("nan"), float("nan")
+    far = diff[ok][-50:]
+    noise = float(np.std(far - np.polyval(np.polyfit(np.arange(far.size), far, 1), np.arange(far.size))))
+    return float(np.min(diff[ok])), noise
 
 
 def play(v: Blind, log: dict) -> dict:
@@ -403,7 +425,7 @@ def play(v: Blind, log: dict) -> dict:
                 raise RuntimeError("the atom moved more than the spots can follow")
             shift = new
             if delta is None:
-                delta = rig.centre(here) or (0.0, 0.0)
+                delta = rig.centre(here, bare_c[0]) or (0.0, 0.0)
                 log["centre_delta_nm"] = [round(delta[0], 3), round(delta[1], 3)]
                 here = rig.atom_here(here[:2])
                 if here is None:
@@ -414,7 +436,8 @@ def play(v: Blind, log: dict) -> dict:
             c = Curve.from_spectrum(sp)
             names.append(n)
             amp_m = float(np.nanmedian(sp["amp"]))
-            if _dip_hz(c, bare_c) <= -MIN_DIP_HZ:
+            dip, noise = _dip_hz(c, bare_c)
+            if dip <= -max(MIN_DIP_HZ, MIN_DIP_SIGMAS * noise):
                 atom_c.append(c)
                 break
             log["retries"] = log.get("retries", 0) + 1
