@@ -283,7 +283,7 @@ def main(argv=None) -> int:
 
     f = sub.add_parser("reference", help="privileged reference solutions: the truth navigates, every reported "
                                          "number is measured; reports success, error spread and instrument time")
-    f.add_argument("--paper", required=True, help="P3, P3R (P3's repair variant), P4, P5 or P7")
+    f.add_argument("--paper", required=True, help="P2, P3, P3R (P3's repair variant), P4, P5 or P7")
     f.add_argument("--seeds", type=int, default=30, help="number of seeds")
     f.add_argument("--first-seed", type=int, default=0)
     f.add_argument("--jobs", type=int, default=1, help="processes in parallel")
