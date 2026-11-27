@@ -60,10 +60,23 @@ LOBE_MIN_SEP_DEG = 35.0
 #: radius (cycles/nm) of the disc around an arm's wavevector over which its comb is summed, and
 #: the estimator: the power-weighted mean of |k| in the disc. Chosen on 30 synthetic continuous
 #: zigzags of the P1 ranges (120 nm windows, 0.4 nm/px, 3 pm noise), against 0.03 / 0.06 and the
-#: length of the vector centroid: this one has p90 0.045 nm and max 0.052 nm error (a steady
-#: +0.03 nm); 0.03 gives max 0.097, 0.06 a +0.05 bias, the vector centroid +0.05 (it is shortened
-#: by the comb's angular spread)
+#: length of the vector centroid: before the bias correction below this one had max 0.052 nm error
+#: (a steady +0.03 nm); 0.03 gave max 0.097, 0.06 a +0.05 bias, the vector centroid +0.05
 COMB_RADIUS = 0.045
+#: the comb is not symmetric about its arm's wavevector: the continuous bend sends the line's
+#: wavevector through the values between the two arms at every elbow, which leaves a skirt of power
+#: on the side of the mean direction (the comb's centroid sits ~0.002 /nm short of the arm along the
+#: stripes, 0.5 % of |k| after the geometry). The skirt makes the |k| centroid short. Measured on 80
+#: synthetic zigzags of P1's ranges (the field's own height expression, 120 nm windows, 0.4 nm/px,
+#: 3 pm noise, 2026-11-27): true |k| over the centroid's is 1 + mean 0.49 %, std 0.14 %, range
+#: 0.25..0.90 % (larger as the chevron gets shorter). It is a property of the estimator on this kind
+#: of field, not of a seed; correcting it takes 0.03 nm out of the period (synthetic error then p90
+#: 0.014 nm, max 0.021). A mode or a smoothed-envelope peak was tried and is worse (+0.05 nm bias,
+#: p90 0.09-0.19 nm); the vector centroid is +0.05 nm. The Parseval estimator 1 / sqrt(<|k|^2>) over the band
+#: (power-weighted second moment, noise floor and the Hann window's own moment subtracted) was tried on the
+#: same 40 zigzags: +0.04 nm signed, p90 0.047-0.057 in a 4.5-9.5 or 4.8-8.2 nm band, worse than this one
+#: (-0.001, p90 0.014): the band cuts part of the skirt, which the identity needs whole
+COMB_K_BIAS = 0.0049
 #: an arm counts when its comb holds this fraction of the strongest comb's power, and its mean
 #: power density is this many times the median of the band
 ARM_REL_POWER_MIN = 0.12
@@ -73,6 +86,13 @@ STEP_SIGMA_PERIODS = 1.0
 #: peak-to-peak (pm) of the quadratic-levelled low-pass above which a window is called stepped
 #: (steps 100-250 pm, step-free up to 25 pm: seed-6 windows of the first calibration, 2026-11-27)
 STEP_PP_PM = 45.0
+#: adsorbates (tens of pm tall, ~1.6 nm sigma) put broadband power into the stripe band and bend a comb's
+#: centroid (a 54 pm adsorbate at the centre of a 140 nm frame read the period 0.3 nm long in every 80 nm
+#: window of three calibration seeds). A pixel is part of a blob when the 2.5 nm low-pass (which has
+#: averaged the 6 nm lines away) stands this far above the 12 nm one; blobs are grown by BLOB_GROW_NM and
+#: replaced by the 12 nm low-pass (the lines inside the hole are lost: ~10 nm across)
+BLOB_PM = 8.0   # 4.0 masked 0.5 % of a clean noisy window; an 54 pm adsorbate stands ~15 pm above the 12 nm low-pass
+BLOB_GROW_NM = 3.0
 #: structure-tensor scales (nm): the band-pass keeps the lines (period ~6.3 nm) and drops steps,
 #: tilt and adsorbates; the integration scale sets how locally the direction is read (an arm is
 #: 20-30 nm wide)
@@ -110,6 +130,7 @@ class Assessment:
     arms: list[Arm] = field(default_factory=list)
     quality: float = 0.0
     step_pp_pm: float = 0.0
+    masked_px: int = 0           # pixels replaced as adsorbate blobs before the spectrum
     centre_nm: tuple[float, float] | None = None  # scan frame, set by the frame-level helpers
 
     @property
@@ -251,6 +272,32 @@ def step_score_pm(z: np.ndarray, nm_per_px: float, period_nm: float = 6.3) -> fl
     return float(np.ptp(low.ravel() - X @ coef))
 
 
+def blob_mask(z: np.ndarray, nm_per_px: float) -> np.ndarray:
+    """Boolean mask of the adsorbate-like blobs of ``z`` (metres): pixels where the 2.5 nm Gaussian
+    low-pass exceeds the 12 nm one by ``BLOB_PM`` pm (the 6 nm lines are averaged away by the first,
+    steps and tilt are in both), grown by ``BLOB_GROW_NM``."""
+    a = _clean(z) * 1e12
+    d = float(nm_per_px)
+    small = ndimage.gaussian_filter(a, 2.5 / d, mode="nearest")
+    large = ndimage.gaussian_filter(a, 12.0 / d, mode="nearest")
+    blob = (small - large) > BLOB_PM
+    if blob.any():
+        blob = ndimage.binary_dilation(blob, iterations=max(1, int(round(BLOB_GROW_NM / d))))
+    return blob
+
+
+def suppress_blobs(z: np.ndarray, nm_per_px: float) -> np.ndarray:
+    """``z`` (metres) with its blobs (:func:`blob_mask`) replaced by the 12 nm low-pass around them, so
+    that adsorbates (tens to hundreds of pm tall, against 8-15 pm lines) do not leak into the stripe
+    spectrum or the structure tensor. The lines inside the hole (~10 nm across) are lost."""
+    blob = blob_mask(z, nm_per_px)
+    if not blob.any():
+        return _clean(z)
+    a = _clean(z) * 1e12
+    large = ndimage.gaussian_filter(a, 12.0 / float(nm_per_px), mode="nearest")
+    return np.where(blob, large, a) * 1e-12
+
+
 # ── spectrum: the arms of a window ─────────────────────────────────────────────
 def _window2d(ny: int, nx: int) -> np.ndarray:
     return np.outer(np.hanning(ny + 2)[1:-1], np.hanning(nx + 2)[1:-1])
@@ -332,7 +379,7 @@ def find_arms(z: np.ndarray, nm_per_px: float, *, band_period_nm: tuple[float, f
         if pw < ARM_REL_POWER_MIN * top or q < ARM_QUALITY_MIN:
             continue
         arms.append(Arm(direction_deg=(math.degrees(math.atan2(ky, kx)) + 90.0) % 180.0,
-                        period_nm=1.0 / kabs, power=pw / top, quality=q, kx=kx, ky=ky))
+                        period_nm=1.0 / (kabs * (1.0 + COMB_K_BIAS)), power=pw / top, quality=q, kx=kx, ky=ky))
     return arms, background
 
 
@@ -352,7 +399,8 @@ def assess_window(z: np.ndarray, nm_per_px: float, *, angle_deg: float = 0.0,
         out.verdict = "step"
         out.reason = f"a step edge or a jump of rows crosses the window (levelled low-pass {out.step_pp_pm:.0f} pm)"
         return out
-    arms, _ = find_arms(a, nm_per_px)
+    out.masked_px = int(blob_mask(a, nm_per_px).sum())
+    arms, _ = find_arms(suppress_blobs(a, nm_per_px), nm_per_px)
     if not arms:
         out.reason = "no stripe comb above the background in the band"
         return out
@@ -430,6 +478,7 @@ class OrientationMap:
     direction_deg: np.ndarray     # scan frame, mod 180, same shape as the frame
     coherence: np.ndarray         # structure-tensor coherence, 0-1
     step_near: np.ndarray         # bool: a step or a jump of rows is here (low-pass slope)
+    masked_px: int            # pixels replaced as adsorbate blobs before the tensor
     nm_per_px: float
     geom: dict
 
@@ -439,15 +488,17 @@ def orientation_map(frame: dict, *, sigma_nm: float = TENSOR_SIGMA_NM,
     """Structure-tensor orientation of the whole frame. The frame is band-passed (a Gaussian of
     ``bandpass_nm[0]`` minus one of ``bandpass_nm[1]``: the 6 nm lines stay, steps, tilt and
     adsorbates go), its gradient tensor is averaged with a Gaussian of ``sigma_nm``, and the lines
-    run perpendicular to the dominant gradient. ``step_near`` marks where the frame's low-pass slope
+    run perpendicular to the dominant gradient. Adsorbate blobs are replaced before the tensor (:func:`suppress_blobs`; ``masked_px`` counts them). ``step_near`` marks where the frame's low-pass slope
     exceeds its median by ``STEP_SLOPE_PM_NM`` (a step, a row jump or a tall cluster), dilated by
     the tensor's reach, so that a reading there can be refused."""
     z = np.asarray(frame["array"], float)
     d = float(frame["nm_per_px"])
     angle = float(frame.get("angle_deg", 0.0) or 0.0)
     a = _clean(z) * 1e12
-    bp = ndimage.gaussian_filter(a, bandpass_nm[0] / d, mode="nearest") \
-        - ndimage.gaussian_filter(a, bandpass_nm[1] / d, mode="nearest")
+    masked = int(blob_mask(z, d).sum())
+    ab = suppress_blobs(z, d) * 1e12                  # adsorbates would bend the field around them
+    bp = ndimage.gaussian_filter(ab, bandpass_nm[0] / d, mode="nearest") \
+        - ndimage.gaussian_filter(ab, bandpass_nm[1] / d, mode="nearest")
     gy, gx = np.gradient(bp)
     gy = -gy                                          # array rows run down, y runs up
     s = sigma_nm / d
@@ -463,7 +514,8 @@ def orientation_map(frame: dict, *, sigma_nm: float = TENSOR_SIGMA_NM,
     slope = np.hypot(lx, ly)
     near = slope > np.median(slope) + STEP_SLOPE_PM_NM
     near = ndimage.binary_dilation(near, iterations=max(1, int(round(sigma_nm / d))))
-    return OrientationMap(direction_deg=direction, coherence=coh, step_near=near, nm_per_px=d, geom=dict(frame))
+    return OrientationMap(direction_deg=direction, coherence=coh, step_near=near, masked_px=masked, nm_per_px=d,
+                          geom=dict(frame))
 
 
 def _disc(omap: OrientationMap, x_nm: float, y_nm: float, radius_nm: float):

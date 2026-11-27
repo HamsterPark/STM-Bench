@@ -54,7 +54,7 @@ def test_a_window_reads_both_arms_with_the_arm_period_at_the_corners_of_the_rang
     z, _, pa, _, _ = zigzag(T=T, alpha_deg=alpha, L=L, stripe_deg=sd, noise=3e-12, amp=10e-12, pv=0.4)
     a = hb.assess_window(z, 0.4)
     assert a.verdict == "ok" and a.n_arms == 2, a.reason
-    assert abs(a.period_along_arm_nm - pa) < 0.08                 # the claim allows 0.15
+    assert abs(a.period_along_arm_nm - pa) < 0.04                 # the claim allows 0.15
     arms = sorted(arm.direction_deg for arm in a.arms)
     want = sorted([(sd + alpha) % 180.0, (sd - alpha) % 180.0])
     assert all(angle_err(x, y) < 2.5 for x, y in zip(arms, want))
@@ -74,7 +74,7 @@ def test_random_draws_of_the_ranges_give_period_and_directions():
         errs.append(abs(a.period_along_arm_nm - pa))
         want = [(sd + al) % 180.0, (sd - al) % 180.0]
         derrs += [min(angle_err(arm.direction_deg, t) for t in want) for arm in a.arms]
-    assert max(errs) < 0.08 and max(derrs) < 2.5
+    assert max(errs) < 0.04 and max(derrs) < 2.5
 
 
 def test_a_step_a_row_jump_and_noise():
@@ -182,3 +182,36 @@ def test_a_frame_at_a_scan_angle_gives_directions_in_the_scan_frame():
     turned = hb.arm_places(frame_of(z, angle=30.0))
     for p in plain:
         assert min(angle_err(q.direction_deg, (p.direction_deg - 30.0) % 180.0) for q in turned) < 2.0
+
+
+def test_an_adsorbate_in_the_window_does_not_move_the_arm_period():
+    """Adsorbates (tens of pm, ~1.6 nm) leak broadband power into the stripe band; the world's image
+    of one at a frame's centre read the period 0.3 nm long before blobs were suppressed."""
+    z, _, pa, X, Y = zigzag(n=200, noise=3e-12, T=7.2, alpha_deg=30.0)
+    z = z + 150e-12 * np.exp(-((X - 3.0) ** 2 + (Y + 2.0) ** 2) / (2 * 1.6 ** 2))
+    a = hb.assess_window(z, 0.4)
+    assert a.verdict == "ok" and abs(a.period_along_arm_nm - pa) < 0.04
+    clean = zigzag(n=200, noise=3e-12, T=7.2, alpha_deg=30.0)[0]
+    assert np.allclose(hb.suppress_blobs(clean, 0.4), clean)             # nothing to suppress
+
+
+@pytest.mark.parametrize("heights_pm", [(80.0, 180.0), (180.0, 82.0)])
+def test_two_tall_bumps_do_not_move_the_period_or_the_local_direction(heights_pm):
+    """Two Gaussian bumps of 80-180 pm (1-2 nm wide, against 8-15 pm lines): the period comes back
+    within the clean field's error, the masked pixels are counted, the local direction between the
+    bumps is the arm's."""
+    z, loc, pa, X, Y = zigzag(n=250, noise=3e-12, T=7.2, alpha_deg=30.0, stripe_deg=25.0)
+    zb = z + heights_pm[0] * 1e-12 * np.exp(-((X - 12.0) ** 2 + (Y - 5.0) ** 2) / (2 * 1.2 ** 2)) \
+        + heights_pm[1] * 1e-12 * np.exp(-((X + 20.0) ** 2 + (Y + 15.0) ** 2) / (2 * 1.9 ** 2))
+    clean = hb.assess_window(z, 0.4)
+    a = hb.assess_window(zb, 0.4)
+    assert a.verdict == "ok" and a.masked_px > 500 and clean.masked_px < 50      # noise alone masks next to nothing
+    assert abs(a.period_along_arm_nm - pa) < abs(clean.period_along_arm_nm - pa) + 0.02
+    fr = frame_of(zb)
+    om = hb.orientation_map(fr)
+    assert om.masked_px > 0
+    places = hb.arm_places(fr, omap=om)
+    assert len(places) >= 2
+    for p in places[:2]:
+        col, row = hb.scan_nm_to_pixel(fr, p.x_nm, p.y_nm)
+        assert angle_err(p.direction_deg, loc[int(round(row)), int(round(col))]) < 4.0
