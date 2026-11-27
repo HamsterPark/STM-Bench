@@ -121,6 +121,41 @@ def test_four_claims_give_a_lower_bound_on_the_best_sheet():
         assert A.joint_pass(grids, choice).mean() == pytest.approx(val)
 
 
+class _TiesReversed:
+    """numpy, except that a sort not asked to be stable returns equal keys in reverse index order:
+    a valid order for numpy's default sort, and the kind of difference two machines' sorts show."""
+
+    def __getattr__(self, name):
+        if name != "argsort":
+            return getattr(np, name)
+
+        def argsort(a, *args, kind=None, **kw):
+            if kind == "stable":
+                return np.argsort(a, *args, kind="stable", **kw)
+            a = np.asarray(a)
+            return a.size - 1 - np.argsort(a[::-1], kind="stable")
+        return argsort
+
+
+def _tied_grids(linked: bool) -> list[A.ClaimGrid]:
+    """Answers 0 and 1 to the free claim pass three seeds each, and each makes a sheet of three."""
+    free = _grid("f", np.array([[1, 1, 1, 0, 0, 0], [0, 0, 0, 1, 1, 1], [1, 0, 0, 0, 0, 0], [0] * 6], bool))
+    a = _grid("a", np.array([[1] * 6, [0] * 6], bool))
+    b = _grid("b", np.array([[0] * 6, [1] * 6], bool), **({"greater_than": "a"} if linked else {}))
+    return [free, a, b]
+
+
+@pytest.mark.parametrize("linked", [False, True])
+def test_of_tied_sheets_the_search_keeps_the_same_one_whatever_order_a_sort_gives_ties(linked, monkeypatch):
+    """Which of several equally good sheets is kept decides the hold-out estimate (the sheet chosen
+    on one half is scored on the other): it must not depend on the machine's sort (2026-11-27: P1
+    held out 1/1000 on one machine, 2/1000 on another). The first in index order is kept."""
+    choice, val = A.best_joint(_tied_grids(linked))
+    assert (choice, val) == ([0, 0, 1], 0.5)
+    monkeypatch.setattr(A, "np", _TiesReversed())
+    assert A.best_joint(_tied_grids(linked)) == (choice, val)
+
+
 # ── on the real scenarios (few seeds: the machinery, not the numbers) ──
 def test_p2_has_nothing_to_gate_and_its_constants_are_recorded():
     res = A.audit_scenario(SCEN / "P2_standing_waves_cu111.yaml", 30)

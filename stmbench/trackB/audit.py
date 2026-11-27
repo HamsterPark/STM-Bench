@@ -302,7 +302,7 @@ def _best_pair_plus_one(grids: Sequence[ClaimGrid], free: int) -> tuple[list[int
     n = g.passes.shape[1]
     marg = g.passes.sum(axis=1)
     best_val, best = -1.0, [0, 0, 0]
-    for i in np.argsort(-marg):
+    for i in np.argsort(-marg, kind="stable"):         # ties in index order (see best_joint)
         if marg[i] <= best_val:
             break
         counts = _pair_counts(_masked(grids[a], g.passes[i]), _masked(grids[b], g.passes[i]))
@@ -324,7 +324,7 @@ def _best_triple(grids: Sequence[ClaimGrid]) -> tuple[list[int], float]:
     p2t = g2.passes.astype(np.float32).T
     marg = g0.passes.sum(axis=1)
     best_val, best = -1.0, [0, 0, 0]
-    for i in np.argsort(-marg):
+    for i in np.argsort(-marg, kind="stable"):         # ties in index order (see best_joint)
         if marg[i] <= best_val:
             break
         m = (p1 * g0.passes[i][None, :]) @ p2t
@@ -342,7 +342,14 @@ def best_joint(grids: Sequence[ClaimGrid], *, sweeps: int = 8, restarts: int = 5
     (:func:`_best_pair_plus_one`). Otherwise coordinate ascent, each
     step exact, from the per-claim optima and from the next-best candidates of each claim; the
     result is then a lower bound on the best sheet (on P5, before the exact search, ascent
-    reported 4.0 % at a looser tolerance and 4.3 % at a tighter one)."""
+    reported 4.0 % at a looser tolerance and 4.3 % at a tighter one).
+
+    Several sheets can pass the same number of seeds. The searches visit candidates in decreasing
+    order of their own pass count and keep the first strict improvement, so which of the tied
+    sheets is kept depends on the order of equal counts: a stable sort keeps index order on every
+    machine. numpy's default sort does not, and the hold-out estimate (the sheet chosen on one
+    half, scored on the other) differed between two machines because of it (P1 at 3 degrees,
+    2026-11-27: 1/1000 and 2/1000 held out, the same 14/2000 in-sample)."""
     if not grids:
         return [], 0.0
     n = grids[0].passes.shape[1]
@@ -365,7 +372,7 @@ def best_joint(grids: Sequence[ClaimGrid], *, sweeps: int = 8, restarts: int = 5
     base = [int(np.argmax(m)) for m in marg]
     starts = [base]
     for c, m in enumerate(marg):
-        for i in np.argsort(-m)[1:restarts]:
+        for i in np.argsort(-m, kind="stable")[1:restarts]:
             starts.append(base[:c] + [int(i)] + base[c + 1:])
     best_choice, best_val = list(base), float(joint_pass(grids, base).mean())
     for start in starts:
