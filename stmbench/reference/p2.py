@@ -9,8 +9,9 @@ Protocol:
 
 1. a tip that is unstable, carries an adsorbate, or is blunt or multiple (a double tip puts a
    ghost of the edge into every map) is conditioned >= 150 nm from the work area: a 4 V pulse
-   sprays clusters ~40 nm around. Back at the work area, five minutes for the creep of that long
-   move to settle;
+   sprays clusters ~40 nm around. Back at the work area it waits only 30 s: every frame is
+   centred on the drift predicted for its middle (read from the world), and the alignment of
+   each row at its own edge absorbs what the creep of the long move adds;
 2. the work area is chosen after the conditioning, on the sample as it then is: a step edge
    with a terrace >= 60 nm wide on the side the ripples run into (a narrower terrace puts the
    next edge's ripples into the profile and biases m*), at a bend of the edge where it runs
@@ -24,8 +25,9 @@ Protocol:
    phase. A second pass refits each k around the dispersion the first pass found;
 5. a straight line in k^2 against E gives E0 and m*.
 
-A tip changes spontaneously during a session (a good tip turned double within ~700 s on seed 0,
-and a double tip puts a ghost of the edge into the maps, which read k 1 % high): after every
+A tip changes spontaneously during a session (on seed 0 the conditioned single apex turned
+double within ~700 s, and a double tip puts a ghost of the edge into the maps, which read k 1 %
+high): after every
 frame the tip is checked and a frame taken with a changed tip is retaken after conditioning.
 Only the forward lines are used (:func:`_profile`). A frame whose dI/dV channel is blank is
 retaken.
@@ -59,6 +61,7 @@ D_MAX_NM = 17.0
 LOCKIN_MV = 10.0
 #: after a long move: only the drift prediction matters (it is read from the world), not the creep
 SETTLE_S = 30.0
+#: blank or edgeless maps retaken in one run, over all its energies together
 MAX_RETAKES = 2
 
 
@@ -193,8 +196,8 @@ def run(seed: int, out_dir: str | Path | None = None) -> dict:
             # it is capped so that a map that is bad for another reason cannot loop.
             blank += 1
             if blank > MAX_RETAKES:
-                raise RuntimeError(f"map at {e:+.2f} V unusable after {MAX_RETAKES} retakes "
-                                   "(blank dI/dV channel or no step edge found)")
+                raise RuntimeError(f"map at {e:+.2f} V unusable: {blank} blank or edgeless maps in "
+                                   f"this run, more than the {MAX_RETAKES} retakes allowed")
             continue
         maps[e] = (r["frame"], prof)
         pending.pop(0)
