@@ -36,7 +36,7 @@ from typing import TextIO
 
 from PySide6.QtCore import QSize, Qt, QTimer, Signal
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QApplication, QHBoxLayout, QMainWindow, QTabBar, QVBoxLayout, QWidget
 
 from . import fmt, jobs, layout, style
 from .center import THUMB_PX, CenterColumn, thumb_pixmap
@@ -205,16 +205,21 @@ class MainWindow(QMainWindow):
         self.field_help.set_full_text("")
 
     def _focus_changed(self, old: QWidget | None, new: QWidget | None) -> None:
-        """Focus left the described field for another widget of this window outside the action panels (a report field, a
-        viewer control): the line is cleared. Another numeric field shows its own range as it is entered, and a button of the
-        panels (Set setpoint after a refusal) leaves the line on the field it belongs to. Focus that leaves the window
-        (deactivation) or goes to a popup is not a move to another widget of this window, and the line stays."""
-        if self._help_field is None or old is not self._help_field or new is None or new is old:
+        """Focus is now on a widget of this window outside the action panels (a report field, a viewer control), whatever it
+        was on before: the line is cleared (screen trial 25: after a field and then a panel button the line stayed up through
+        the Report steps, because the old widget was the button, not the field). Inside the panels the line stays: another
+        numeric field shows its own range as it is entered, and a button of the panels (Set setpoint after a refusal) leaves
+        the line on the field it belongs to. Focus that leaves the window (deactivation) or goes to a popup is not a move to
+        another widget of this window, and the line stays."""
+        if self._help_field is None or new is None or new is old:
             return
         if new.window() is not self.window() or new.window() is not self:
             return
-        if self.operate.isAncestorOf(new) or self.spectroscopy.isAncestorOf(new):
-            return                                       # a field of the panels sets the line itself; a button of theirs keeps it
+        if self.operate.isAncestorOf(new) or self.spectroscopy.isAncestorOf(new) or self.status.isAncestorOf(new):
+            return          # a field of the panels sets the line itself; a button of theirs, or of the status strip (the band's
+            #                 Acknowledge, Cancel queued), is part of the call that line belongs to
+        if isinstance(new, QTabBar):
+            return          # a tab bar takes the focus when the widget that had it is hidden (the band after Acknowledge)
         self._clear_field_help()
 
     # ── jobs ──
