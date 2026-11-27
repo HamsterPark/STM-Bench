@@ -83,6 +83,13 @@ STEP_SIGMA_PERIODS = 1.0
 #: peak-to-peak (pm) of the quadratic-levelled low-pass above which a window is called stepped
 #: (steps 100-250 pm, step-free up to 25 pm: seed-6 windows of the first calibration, 2026-11-27)
 STEP_PP_PM = 45.0
+#: adsorbates (tens of pm tall, ~1.6 nm sigma) put broadband power into the stripe band and bend a comb's
+#: centroid (a 54 pm adsorbate at the centre of a 140 nm frame read the period 0.3 nm long in every 80 nm
+#: window of three calibration seeds). A pixel is part of a blob when the 2.5 nm low-pass (which has
+#: averaged the 6 nm lines away) stands this far above the 12 nm one; blobs are grown by BLOB_GROW_NM and
+#: replaced by the 12 nm low-pass (the lines inside the hole are lost: ~10 nm across)
+BLOB_PM = 4.0
+BLOB_GROW_NM = 3.0
 #: structure-tensor scales (nm): the band-pass keeps the lines (period ~6.3 nm) and drops steps,
 #: tilt and adsorbates; the integration scale sets how locally the direction is read (an arm is
 #: 20-30 nm wide)
@@ -261,6 +268,23 @@ def step_score_pm(z: np.ndarray, nm_per_px: float, period_nm: float = 6.3) -> fl
     return float(np.ptp(low.ravel() - X @ coef))
 
 
+def suppress_blobs(z: np.ndarray, nm_per_px: float) -> np.ndarray:
+    """``z`` (metres) with its adsorbate-like blobs replaced by the smooth background around them, so
+    that they do not leak into the stripe spectrum. A blob is a pixel where the 2.5 nm Gaussian low-pass
+    exceeds the 12 nm one by ``BLOB_PM`` pm (the 6 nm lines are averaged away by the first, steps and
+    tilt are in both), grown by ``BLOB_GROW_NM``."""
+    a = _clean(z) * 1e12
+    d = float(nm_per_px)
+    small = ndimage.gaussian_filter(a, 2.5 / d, mode="nearest")
+    large = ndimage.gaussian_filter(a, 12.0 / d, mode="nearest")
+    blob = (small - large) > BLOB_PM
+    if not blob.any():
+        return _clean(z)
+    blob = ndimage.binary_dilation(blob, iterations=max(1, int(round(BLOB_GROW_NM / d))))
+    out = np.where(blob, large, a)
+    return out * 1e-12
+
+
 # ── spectrum: the arms of a window ─────────────────────────────────────────────
 def _window2d(ny: int, nx: int) -> np.ndarray:
     return np.outer(np.hanning(ny + 2)[1:-1], np.hanning(nx + 2)[1:-1])
@@ -362,7 +386,7 @@ def assess_window(z: np.ndarray, nm_per_px: float, *, angle_deg: float = 0.0,
         out.verdict = "step"
         out.reason = f"a step edge or a jump of rows crosses the window (levelled low-pass {out.step_pp_pm:.0f} pm)"
         return out
-    arms, _ = find_arms(a, nm_per_px)
+    arms, _ = find_arms(suppress_blobs(a, nm_per_px), nm_per_px)
     if not arms:
         out.reason = "no stripe comb above the background in the band"
         return out

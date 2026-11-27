@@ -182,3 +182,14 @@ def test_a_frame_at_a_scan_angle_gives_directions_in_the_scan_frame():
     turned = hb.arm_places(frame_of(z, angle=30.0))
     for p in plain:
         assert min(angle_err(q.direction_deg, (p.direction_deg - 30.0) % 180.0) for q in turned) < 2.0
+
+
+def test_an_adsorbate_in_the_window_does_not_move_the_arm_period():
+    """Adsorbates (tens of pm, ~1.6 nm) leak broadband power into the stripe band; the world's image
+    of one at a frame's centre read the period 0.3 nm long before blobs were suppressed."""
+    z, _, pa, X, Y = zigzag(n=200, noise=3e-12, T=7.2, alpha_deg=30.0)
+    z = z + 150e-12 * np.exp(-((X - 3.0) ** 2 + (Y + 2.0) ** 2) / (2 * 1.6 ** 2))
+    a = hb.assess_window(z, 0.4)
+    assert a.verdict == "ok" and abs(a.period_along_arm_nm - pa) < 0.04
+    clean = zigzag(n=200, noise=3e-12, T=7.2, alpha_deg=30.0)[0]
+    assert np.allclose(hb.suppress_blobs(clean, 0.4), clean)             # nothing to suppress
