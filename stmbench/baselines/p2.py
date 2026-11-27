@@ -16,10 +16,10 @@ E(k) = E0 + (hbar^2 / 2 m*) k^2 of the maps gives E0 and m*. The protocol:
   staircase (:func:`survey_adatoms`);
 * **where**: the terrace on the side the profile is taken must be wide (the other edge's standing
   wave would otherwise be part of the profile: at 30-40 nm it biases m* by several percent), the
-  edge locally parallel to the mean direction (the rows then cross it along the mean normal,
-  which is what a profile along the normal means for a curved step too), and no adatom within
+  edge locally parallel to the mean direction (the rows, along the mean normal, then cross it
+  along its local normal too, the direction its standing wave runs in), and no adatom within
   25 nm (:func:`pick_site`). The direction measurement is one function (:func:`measure_axis`) so a
-  different rule for it can replace it. A 60 nm frame at the place finds the staircase again
+  different rule for it can replace it. A 100 nm frame at the place finds the staircase again
   (the sample has crept: the pattern of steps of the survey is matched, :func:`match_steps`) and
   looks for adatoms the survey missed; a place with one near is given up for the next;
 * **drift**: the sample creeps and drifts by one to three nm a minute after a long move, and
@@ -37,12 +37,17 @@ E(k) = E0 + (hbar^2 / 2 m*) k^2 of the maps gives E0 and m*. The protocol:
   once more when they are all in (:meth:`Standing.quality`: one tip and one straight edge give k on one
   parabola and a wave of one amplitude and phase at every energy; a second apex that the trial
   map did not show makes them turn with k), and the maps are taken again after a repair if not;
-* **maps**: the fast axis along the step normal (``angle_deg``), 24 nm at 0.2 nm/px, lock-in on,
-  eight energies from -0.30 V to +0.12 V, the edge 8 nm from the centre on the side away from the
-  wide terrace;
-* **analysis**: each row aligned on its own edge, normalised by its own mean and averaged, one
+* **maps**: the fast axis along the mean step normal (``angle_deg``), 24 nm at 0.2 nm/px, lock-in
+  on, eight energies from -0.30 V to +0.12 V, the edge 7 nm from the centre (the rule asks for
+  10 nm) on the side away from the wide terrace;
+* **analysis**: the forward rows only (the backward ones carry the scanner's hysteresis, up to
+  ~0.3 nm along a row), each aligned on its own edge, normalised by its own mean and averaged, one
   profile per energy fitted with the standing wave of one straight edge with a complex reflection
-  (:mod:`stmbench.analysis.standing_waves`); the maps' k against E gives the dispersion.
+  (:mod:`stmbench.analysis.standing_waves`); the maps' k against E gives the dispersion. The
+  sample's drift along the steps carries the place through the twenty minutes of the series, now
+  and then onto a stretch where the edge is bent by ten or twenty degrees: the wave is a function
+  of the distance across the local edge, a row at alpha to the local normal fits k cos(alpha), and
+  each map's k is divided by cos(alpha) of its own edge's slope (:meth:`Standing.fit_map`).
 
 What the baseline reaches is what a script reaches from the observations alone
 (``stmbench.cli baseline --paper P2``).
@@ -521,9 +526,10 @@ class Standing:
                 "df": df["array"], "db": db["array"], "npx": float(zf["nm_per_px"]), "x_expect": float(x_expect)}
 
     def fit_map(self, m: dict, side_col: int, slope_prior: float = 0.0) -> dict:
-        """The standing wave of a map: each row aligned on its own edge, normalised, averaged (both
-        scan directions), and fitted. The profile reaches as far from the edge as the frame
-        allows (the edge drifts towards the middle of the frame while the series runs)."""
+        """The standing wave of a map: each forward row aligned on its own edge, normalised,
+        averaged, and fitted, and k corrected for the tilt of the edge. The profile reaches as far
+        from the edge as the frame allows (the edge drifts towards the middle of the frame while
+        the series runs)."""
         npx = m["npx"]
         pairs = []
         # forward rows only: the backward ones carry the scanner's hysteresis, up to ~0.3 nm along the row,
