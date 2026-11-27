@@ -59,6 +59,7 @@ D_MAX_NM = 17.0
 LOCKIN_MV = 10.0
 #: after a long move: only the drift prediction matters (it is read from the world), not the creep
 SETTLE_S = 30.0
+MAX_RETAKES = 2
 
 
 def _wander(site, v):
@@ -185,8 +186,15 @@ def run(seed: int, out_dir: str | Path | None = None) -> dict:
             tip_changes += 1
             continue
         prof = _profile(inst, r["frame"], nm_per_px)
-        if prof is None:                             # blank map, or the edge was not found: retake
+        if prof is None:
+            # A blank (NaN) map: scipy 1.18.1's struve(0, z) has a numerical hole at z = 25.765
+            # and one pixel landing on it blanks the whole channel (the lock-in reference is the
+            # frame mean). Retaking moves the pixels. Once the hole is fixed this never fires;
+            # it is capped so that a map that is bad for another reason cannot loop.
             blank += 1
+            if blank > MAX_RETAKES:
+                raise RuntimeError(f"map at {e:+.2f} V unusable after {MAX_RETAKES} retakes "
+                                   "(blank dI/dV channel or no step edge found)")
             continue
         maps[e] = (r["frame"], prof)
         pending.pop(0)
