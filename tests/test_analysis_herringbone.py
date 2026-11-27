@@ -150,7 +150,7 @@ def test_frames_of_a_p1_world_agree_with_its_truth():
         accepted = [t["stripe_deg"], *t["arms_deg"]]
         assert angle_err(a.direction_deg, accepted) < 6.0, (a.centre_nm, a.arm_deg, accepted)
         # the frame is uncompensated: the drift (~1 nm/min here) smears it, hence 0.4 nm
-        assert abs(a.period_along_arm_nm - truth_p) < 0.4
+        assert a.period_along_arm_nm is None or abs(a.period_along_arm_nm - truth_p) < 0.4
     assert measured >= 3
 
 
@@ -188,3 +188,21 @@ def test_a_bow_is_not_a_step_and_a_jump_of_whole_rows_is():
     jump[150:] = 100e-12
     a = hb.assess_window(grating(noise=3e-12) + jump, 0.4)
     assert a.verdict == "step" and a.step_pp_pm > hb.STEP_PP_PM
+
+
+def test_a_lone_peak_gives_a_direction_but_no_period():
+    """A single strong peak (here a straight grating of period T: what the mean-direction peak alone
+    looks like) may be the mean peak, whose period T is not the along-arm period: no period."""
+    z = grating(T=6.5, stripe_deg=70.0, alpha_deg=0.0, noise=3e-12)
+    a = hb.assess_window(z, 0.4)
+    assert a.verdict == "one_arm" and a.period_along_arm_nm is None
+    assert angle_err(a.direction_deg, [70.0]) < 2.0
+    assert hb.median_period_nm([a]) is None
+    # an arm and the mean peak both seen: the arm's period is given
+    for i in range(24):
+        rng = np.random.default_rng(300 + i)
+        z = grating(T=6.3, stripe_deg=20.0, alpha_deg=rng.uniform(12, 18), chev=rng.uniform(22, 34),
+                    noise=8e-12, amp=8e-12, seed=i, phase=rng.uniform(0, 6.28))
+        b = hb.assess_window(z, 0.4)
+        if b.verdict == "one_arm" and b.period_along_arm_nm is not None:
+            assert b.period_along_arm_nm < 6.3 * 0.99

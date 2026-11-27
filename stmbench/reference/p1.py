@@ -271,6 +271,7 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
     period = hb.median_period_nm(all_windows)
     if period is None:
         raise RuntimeError("no window measured a stripe period")
+    naive = float(np.median([a_.peaks[0].period_nm for a_ in all_windows if a_.peaks]))
     picks = [_best_window(res) for res in windows]
     if any(p is None for p in picks):
         raise RuntimeError("no window of a frame measured a stripe direction")
@@ -299,12 +300,16 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
                  "measured_windows": sum(1 for a_ in all_windows if a_.measurable),
                  "window_verdicts": {v: sum(1 for a_ in all_windows if a_.verdict == v)
                                      for v in sorted({a_.verdict for a_ in all_windows})},
-                 "picked_verdicts": [p.verdict for p in picks]}
+                 "picked_verdicts": [p.verdict for p in picks],
+                 # what reading the strongest peak of every window would give (the mean-direction peak
+                 # is often the strongest): for counting the seeds where that would fail
+                 "naive_period_nm": naive}
     # errors against the truth the judge used, for the summary only
     abs_err: dict = {}
     pt = det.get("stripe_period_nm", {}).get("truth")
     if pt is not None:
         abs_err["stripe_period_nm"] = float(period - pt)
+        row["naive_period_err_nm"] = float(naive - pt)
     for cid in ("stripe_orientation_deg", "domain_a_orientation_deg", "domain_b_orientation_deg"):
         d = det.get(cid, {})
         acc = d.get("accept_deg")

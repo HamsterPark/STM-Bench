@@ -94,9 +94,11 @@ class Peak:
 
 @dataclass
 class Assessment:
-    """Reading of one square window. ``verdict`` is ``ok`` (two arms), ``one_arm`` (a single
-    peak: an arm direction and a period, no mean) or the reason nothing can be said
-    (``step``, ``no_stripe``, ``mixed`` (several domains or an unresolved set of peaks))."""
+    """Reading of one square window. ``verdict`` is ``ok`` (two arms), ``one_arm`` (a
+    direction that is an arm or the mean, both accepted by the judge; a period only when an arm and
+    the mean-direction peak were both seen, never from a lone peak, which may be the mean one) or
+    the reason nothing can be said (``step``, ``no_stripe``, ``mixed`` (several domains or an
+    unresolved set of peaks))."""
     verdict: str
     reason: str = ""
     size_nm: float = 0.0
@@ -403,7 +405,10 @@ def assess_window(z: np.ndarray, nm_per_px: float, *, angle_deg: float = 0.0,
     out.verdict = "one_arm"
     out.reason = ("two peaks of different period: one arm and the mean-direction peak" if len(group) == 2
                   else "one stripe peak: an arm of the zigzag (or the arms are not resolved)")
-    out.period_along_arm_nm = arm.period_nm
+    # a lone peak may be the mean-direction peak (period T, up to 5 % above the arms'): its direction is
+    # accepted either way, its period is not the along-arm period, so none is given. With an arm and
+    # the mean peak both seen, the arm is the one with the shorter period and the period is its own.
+    out.period_along_arm_nm = arm.period_nm if len(group) == 2 else None
     out.arm_deg = [arm.stripe_deg]
     return out
 
