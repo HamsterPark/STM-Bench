@@ -1,27 +1,27 @@
 """P1 scripted baseline: the Au(111) herringbone, with nothing but what the instrument shows — no truth.
 
-The task: the stripe period, the stripe direction at one place, and two rotational domains whose
-directions differ. Reproducing it from observations means finding two domains without knowing where
-they are. The protocol:
+The task: the stripe period, and the direction of the stripe lines at three places, two of them in
+different rotational domains. In the paper's geometry (Barth et al. 1990) the lines bend by about 60
+degrees every 20-30 nm: each stretch between two bends is one domain, and neighbouring stretches are 60
+degrees apart, so a single frame holds many domains and the work is to read the direction in the middle of
+an arm, away from the bends. The protocol:
 
-* **the tip**: three shallow pokes first whatever it shows (an unstable tip changes every few
-  minutes, a poke stabilises it; blunt and double tips still show the stripes, so a tip that cannot
-  show them is only conditioned when a survey finds no stripe at all);
-* **a survey**: 400 nm at 1.0 nm/px (800 s). A 6.3 nm stripe is six pixels wide there. The survey's
-  windows give each place's mean stripe direction (:mod:`stmbench.analysis.au111`); steps are
-  masked, a tip change in the frame only costs the rows it touches. Where a block of neighbouring
-  windows agrees on one direction the place is well inside a rotational domain. Two such places whose
-  directions differ by 40 degrees or more are two domains (the true means differ by 60). When the
-  survey holds only one, the next survey is taken 300 nm away;
-* **the drift**: a long move leaves creep, 1-3 nm/min for minutes, which stretches the image across
-  the slow axis (a few percent: 0.2 nm of period) and shears it (a few degrees). Each site is therefore
-  entered through an atom near it: found again (the survey's atoms are the landmarks, 150/um^2), two small
-  frames of it 40 s apart give the drift, the compensation is switched on, and the site's window
-  is placed by where the atom was found;
-* **the measurement**: a 120 nm frame at 0.4 nm/px on each site, read by the shared stripe analysis
-  (:mod:`stmbench.analysis.herringbone`): 100 nm windows for the period (the median over all
-  windows of all frames), 64 nm windows for the direction (the mean of the two arms, the best window,
-  reported at its centre in the scan coordinates of the frame that is cited).
+* **the tip**: three shallow pokes first whatever it shows (an unstable tip changes every few minutes, a
+  poke stabilises it; blunt and double tips still show the lines);
+* **a scouting frame**: 200 nm at 0.8 nm/px (250 s) at home. It gives the steps and the adatoms; a 120 nm
+  square without a step and with an adatom near its centre is where the measurement goes;
+  the adatoms are taken out of every frame before it is read (they bias the arm period);
+  ;
+* **the drift**: a long move leaves creep, 1-3 nm/min for minutes, which stretches the image across the
+  slow axis (a few percent: 0.2 nm of period) and shears it (a few degrees). The frame is therefore entered
+  through the adatom: found again, two small frames of it 40 s apart give the drift, the compensation is
+  switched on, and the frame is placed by where the atom was found;
+* **the measurement**: a 120 nm frame at 0.4 nm/px, read by the shared stripe analysis
+  (:mod:`stmbench.analysis.herringbone`): the places in the middle of a stretch of uniform direction
+  (``arm_places``) with their local direction and how uniform it is (``local_direction``); two of them at
+  least 40 degrees apart are the two domains, each reported at its place in the scan coordinates of the frame
+  that is cited. The period is the median of the arm period (the comb centroid) over 100 nm windows; frames
+  are added at offsets until a pair of places and a few windows are in hand.
 
 What the baseline reaches is what a script reaches from the observations alone
 (``stmbench.cli baseline --paper P1``).
@@ -35,162 +35,138 @@ from pathlib import Path
 import numpy as np
 
 from ..analysis import herringbone as hb
-from ..analysis.adatoms import locate, row_jumps, to_scan_nm
-from ..analysis.au111 import circ_diff, clean_windows, direction_map
+from ..analysis.adatoms import locate
 from ..instrument import Instrument
 from ._common import Blind, Ops
 
 SCENARIO = "P1_barth1990_au111"
 
-#: the survey: 400 nm at 1.0 nm/px, 1 s/line (400 nm/s is the fastest line the baselines use)
-SURVEY_NM, SURVEY_PX, SURVEY_LINE_S = 400.0, 400, 1.0
-#: where the next survey is centred when the one before did not hold two domains (nm from home)
-SURVEY_CENTRES = ((0.0, 0.0), (300.0, 0.0), (-300.0, 0.0), (0.0, 300.0), (0.0, -300.0),
-                  (300.0, 300.0), (-300.0, -300.0))
-#: the measurement frame on a site: 120 nm at 0.4 nm/px (the period claim wants >= 100 nm at <= 0.4)
+#: the scouting frame: 200 nm at 0.8 nm/px, 0.5 s/line (a 6.5 nm line is eight pixels wide there)
+SCOUT_NM, SCOUT_PX, SCOUT_LINE_S = 200.0, 250, 0.5
+#: where the next scouting frame is centred when the one before gave no place to measure (nm from home)
+SCOUT_CENTRES = ((0.0, 0.0), (160.0, 0.0), (-160.0, 0.0), (0.0, 160.0), (0.0, -160.0))
+#: the measurement frame: 120 nm at 0.4 nm/px (the period claim wants >= 100 nm at <= 0.4)
 FRAME_NM, FRAME_PX, FRAME_LINE_S = 120.0, 300, 0.3
-PERIOD_WINDOW_NM = 100.0
-DIRECTION_WINDOW_NM = 64.0
-#: two directions at least this far apart (degrees) are two domains: the true means differ by 60, a
-#: survey window's mean is good to ~10
+PERIOD_WINDOW_NM, PERIOD_WINDOW_SMALL_NM = 100.0, 80.0
+#: two directions at least this far apart (degrees) are two domains: neighbouring arms differ by 56-64
 MIN_SEP_DEG = 40.0
-#: an atom is a landmark for the drift when it stands this high (pm): the stripes make bumps of 20-28 pm
+#: an atom is a landmark for the drift when it stands this high (pm): the lines make bumps of 20-28 pm
 ATOM_MIN_PM = 35.0
-#: landmark atoms are taken within this distance of a site (nm): the move from the atom to the site
+#: the frame is centred within this distance of a landmark atom (nm): the move from the atom to the frame
 #: starts its own creep (5 % of the distance, over minutes), which the drift measured on the atom does not hold
-ATOM_NEAR_NM = 70.0
+ATOM_NEAR_NM = 60.0
 #: when the nearest atom cannot be used, the next ones within this distance are tried (nm)
-FALLBACK_ATOM_NM = 140.0
-#: a drift faster than this (nm/min) is a misread (a lattice mismatch, the wrong atom), not used
+FALLBACK_ATOM_NM = 120.0
+#: a drift faster than this (nm/min) is a misread (the wrong atom), not used
 DRIFT_MAX_NM_MIN = 6.0
 RESERVE_S = 600.0
-#: no further survey is taken when less than this is left (s): a survey is 800 s and the sites need ~1500
-SURVEY_RESERVE_S = 3600.0
-#: Ops.poke_near puts its pokes 60 nm below home; no site is taken within this distance of them (nm)
-POKE_DOWN_NM, POKE_AVOID_NM = 60.0, 45.0
-#: pairs of sites tried, and the distance within which a site that could not be read rules out its neighbours (nm)
-MAX_ATTEMPTS = 3
-#: surveys taken at most: the first, one more, a third and a fourth only while the budget leaves 3600 s
-MAX_SURVEYS = 4
-FAILED_NM = 50.0
-#: frames are added on a site (offsets from its first, nm) until this many two-arm windows give a period
-MIN_PERIODS = 8
-EXTRA_OFFSETS_NM = ((45.0, 0.0), (-45.0, 0.0), (0.0, 45.0), (0.0, -45.0))
+#: Ops.poke_near puts its pokes 60 nm below home; no frame is centred within this distance of them (nm)
+POKE_DOWN_NM, POKE_AVOID_NM = 60.0, 50.0
+#: frames on one centre: the first, then offsets from it (nm), added while no pair of places or too few
+#: period windows are in hand
+EXTRA_OFFSETS_NM = ((40.0, 0.0), (-40.0, 0.0), (0.0, 40.0), (0.0, -40.0))
+MIN_PERIOD_WINDOWS = 5
+#: scouting frames at most before the session gives up
+MAX_SCOUTS = 4
 
 
 @dataclass
-class Survey:
+class Scout:
     frame: dict
     atoms: list
-    dm: object
-    radius: np.ndarray
-    t_s: float
 
 
 @dataclass
-class Site:
-    """A place in a survey's scan coordinates that sits well inside one domain."""
+class Centre:
     x: float
     y: float
-    psi: float
-    radius: int
-    masked: float
-    atom: tuple[float, float] | None = None       # the nearest landmark atom, survey coordinates
-    atom_nm: float = 1e9
-    atoms: list = field(default_factory=list)       # landmark atoms within FALLBACK_ATOM_NM, nearest first
-    survey: int = 0
+    score: float
+    atoms: list = field(default_factory=list)       # landmark atoms nearest first, scan coordinates
+    masked: float = 0.0
 
 
 @dataclass
-class Reading:
-    """What a site's frame gave: the frame, the direction window, the period windows."""
-    frame: dict
+class Place:
+    """A place read in a measurement frame: where, what direction, how uniform, in which frame."""
+    x: float
+    y: float
     direction_deg: float
-    arms_deg: list[float]
-    centre_nm: tuple[float, float]
-    quality: float
-    periods: list[float]
-    site: Site
-    drift: tuple[float, float] | None = None
-    notes: dict = field(default_factory=dict)
-    frames: list = field(default_factory=list)      # every frame taken on the site (the period's evidence)
+    spread_deg: float
+    clearance_nm: float
+    frame: dict
+
+
+def circ_diff(a, b):
+    """Signed difference of two directions (degrees, modulo 180), in (-90, 90]."""
+    return (a - b + 90.0) % 180.0 - 90.0
 
 
 # ── atoms ─────────────────────────────────────────────────────────────────────
 def find_atoms(frame: dict, *, coarse: bool = False) -> list[tuple[float, float, float]]:
-    """Adatoms of a frame, highest first: round bumps 1-2 nm wide and 35 pm and more high (the stripes make
+    """Adatoms of a frame, highest first: round bumps 1-2 nm wide and 35 pm and more high (the lines make
     bumps of 20-28 pm, a step's ridge is not compact)."""
     kw = dict(background_nm=8.0, compact_r_nm=3.0, min_sep_nm=3.0, window_nm=2.0,
               border_nm=3.0 if coarse else 1.5, min_height_m=ATOM_MIN_PM * 1e-12)
     return locate(frame, **kw)
 
 
-# ── survey ────────────────────────────────────────────────────────────────────
-def take_survey(ops: Ops, cx: float, cy: float, log: dict) -> Survey:
+def without_atoms(f: dict) -> dict:
+    """The frame with its adatoms taken out: each (100-260 pm high and 1-2 nm wide, against lines of 8-15 pm)
+    is replaced by the median of a ring around it. Left in, an atom puts broadband power under the combs and
+    moved a window's arm period by up to 0.5 nm (the frame of a development seed, 2 atoms in 100 nm)."""
+    z = np.array(f["array"], float)
+    n = z.shape[0]
+    d = float(f["nm_per_px"])
+    yy, xx = np.mgrid[0:n, 0:z.shape[1]]
+    for ax, ay, h in find_atoms(f):
+        col, row = hb.scan_nm_to_pixel(f, ax, ay)
+        r = min(9.0, 5.0 + 2.0 * h * 1e10) / d                  # wider the taller the atom
+        dist2 = (yy - row) ** 2 + (xx - col) ** 2
+        ring = (dist2 <= (r + 3.0 / d) ** 2) & (dist2 > r * r)
+        if ring.any():
+            z[dist2 <= r * r] = np.median(z[ring])
+    return {**f, "array": z}
+
+
+# ── scouting ──────────────────────────────────────────────────────────────────
+def take_scout(ops: Ops, cx: float, cy: float) -> Scout:
     v = ops.v
-    r = v.act("scan", center_x_nm=cx, center_y_nm=cy, size_nm=SURVEY_NM, pixels=SURVEY_PX, line_time_s=SURVEY_LINE_S)
+    r = v.act("scan", center_x_nm=cx, center_y_nm=cy, size_nm=SCOUT_NM, pixels=SCOUT_PX, line_time_s=SCOUT_LINE_S)
     f = v.frame(r["frame"])
-    rows = tuple(row_jumps(f["array"]))
-    if rows:
-        log.setdefault("survey_jumps", []).append(len(rows))
-        ops.jumps.append(float(f["t_start_s"]) + 0.5 * float(r["duration_s"]))
-    dm = direction_map(f["array"], float(f["nm_per_px"]), bad_rows=rows)
-    cw = clean_windows(dm)
-    return Survey(f, find_atoms(f, coarse=True), dm, cw, float(f["t_start_s"]))
+    return Scout(f, find_atoms(f, coarse=True))
 
 
-def sites_of(sv: Survey, idx: int, ops_home: tuple[float, float] = (0.0, 0.0)) -> list[Site]:
-    """Windows of a survey that sit well inside one domain, with the landmark atom nearest each."""
-    dm, cw = sv.dm, sv.radius
+def centres_of(sc: Scout, home: tuple[float, float]) -> list[Centre]:
+    """Squares of the measurement frame's size inside the scouting frame, best first: no step in it, an
+    adatom near its centre, away from the pokes' clusters."""
+    f = sc.frame
+    cx, cy = (float(c) for c in f["center_nm"])
+    d = float(f["nm_per_px"])
+    half = FRAME_NM / 2.0
+    reach = SCOUT_NM / 2.0 - half
+    m = int(round(FRAME_NM / d))
     out = []
-    for i in range(cw.shape[0]):
-        for j in range(cw.shape[1]):
-            if cw[i, j] < 1:
+    for ox in np.arange(-reach, reach + 1e-9, 20.0):
+        for oy in np.arange(-reach, reach + 1e-9, 20.0):
+            x, y = cx + float(ox), cy + float(oy)
+            if math.hypot(x - home[0], y - (home[1] - POKE_DOWN_NM)) < POKE_AVOID_NM:
                 continue
-            x, y = to_scan_nm(sv.frame, float(dm.cols[j]) - 0.5, float(dm.rows[i]) - 0.5)
-            if math.hypot(x - ops_home[0], y - (ops_home[1] - POKE_DOWN_NM)) < POKE_AVOID_NM:
-                continue                     # the pokes' clusters (Ops.poke_near) are there
-            s = Site(x, y, float(dm.psi_deg[i, j]), int(cw[i, j]), float(dm.masked[i, j]), survey=idx)
-            near = sorted((math.hypot(ax - x, ay - y), ax, ay) for ax, ay, _ in sv.atoms)
-            if near:
-                d, ax, ay = near[0]
-                s.atom, s.atom_nm = (ax, ay), d
-                s.atoms = [(ax_, ay_) for d_, ax_, ay_ in near if d_ <= FALLBACK_ATOM_NM][:3]
-            out.append(s)
+            c0 = int(round((x - half - (cx - SCOUT_NM / 2)) / d))
+            r0 = int(round(((cy + SCOUT_NM / 2) - (y + half)) / d))
+            crop = np.asarray(f["array"])[max(r0, 0):r0 + m, max(c0, 0):c0 + m]
+            # the stripe analysis's own step score of the square: ~0-25 pm without a step, 100 pm and more across one
+            frac = hb.step_score_pm(crop, d) / hb.STEP_PP_PM if crop.shape[0] >= m - 2 and crop.shape[1] >= m - 2 else 9.0
+            near = sorted((math.hypot(ax - x, ay - y), ax, ay) for ax, ay, _ in sc.atoms)
+            atoms = [(ax, ay) for dd, ax, ay in near if dd <= FALLBACK_ATOM_NM][:3]
+            dist = near[0][0] if near else 1e3
+            out.append(Centre(x, y, -4.0 * frac - min(dist, 120.0) / ATOM_NEAR_NM, atoms, frac))
+    out.sort(key=lambda c: -c.score)
     return out
-
-
-def _score(s: Site, here: tuple[float, float]) -> float:
-    """Deep inside a domain, a landmark atom near, little step in the window, near where the tip is."""
-    return (min(s.radius, 4) + 3.0 * max(0.0, 1.0 - s.atom_nm / ATOM_NEAR_NM) - 2.0 * s.masked
-            - math.hypot(s.x - here[0], s.y - here[1]) / 400.0)
-
-
-def _best_pair(pool: list[Site], here: tuple[float, float]) -> tuple[Site, Site] | None:
-    """The best pair within one survey (the surveys' scan coordinates are not one frame), over all surveys."""
-    best = None
-    for idx in sorted({s.survey for s in pool}):
-        mine = [s for s in pool if s.survey == idx]
-        for a in sorted(mine, key=lambda s: -_score(s, here))[:60]:
-            for b in sorted(mine, key=lambda s: -_score(s, (a.x, a.y))):
-                if abs(circ_diff(a.psi, b.psi)) >= MIN_SEP_DEG:
-                    sc = _score(a, here) + _score(b, (a.x, a.y))
-                    if best is None or sc > best[0]:
-                        best = (sc, a, b)
-                    break
-    return None if best is None else (best[1], best[2])
-
-
-def choose_pair(sites: list[Site], here: tuple[float, float]) -> tuple[Site, Site] | None:
-    """The best site, and the best one whose direction differs from it by MIN_SEP_DEG or more. Sites with a
-    landmark atom near are tried first; when they hold no pair, all of them (the drift is then measured on a
-    farther atom, or the site's frames count less for the period)."""
-    return _best_pair([s for s in sites if s.atom is not None and s.atom_nm <= ATOM_NEAR_NM], here) or _best_pair(sites, here)
 
 
 # ── drift ─────────────────────────────────────────────────────────────────────
 def atom_shift(ops: Ops, predicted: tuple[float, float], log: dict) -> tuple[tuple[float, float], tuple[float, float]] | None:
-    """Find a landmark atom again near where the survey put it, measure the drift on it, switch the
+    """Find a landmark atom again near where the scout put it, measure the drift on it, switch the
     compensation on. Returns ((atom found at x, y), (vx, vy) nm/min) or ``None``.
 
     The two frames are 16 nm at 0.16 nm/px, taken 40 s apart with the compensation off (with it on they
@@ -228,93 +204,72 @@ def atom_shift(ops: Ops, predicted: tuple[float, float], log: dict) -> tuple[tup
     return (shots[1][0], shots[1][1]), (vx, vy)
 
 
-def next_centre(surveys: list[Survey], home: tuple[float, float]) -> tuple[float, float]:
-    """Where the next survey goes (offset from home): the first is at home. After that, 300 nm from the last
-    survey's centre towards the side of its frame where the windows disagree most (a band of windows that
-    are not clean is a domain wall, and the other domain is beyond it); the centre must not repeat one taken
-    and stays within 600 nm of home (the other direction is certain to be there)."""
-    if not surveys:
-        return SURVEY_CENTRES[0]
-    sv = surveys[-1]
-    cx, cy = (float(c) - h for c, h in zip(sv.frame["center_nm"], home))
-    cw = sv.radius
-    n_i, n_j = cw.shape
-    k = max(2, n_i // 5)
-    side = {(1.0, 0.0): cw[:, -k:], (-1.0, 0.0): cw[:, :k], (0.0, 1.0): cw[:k, :], (0.0, -1.0): cw[-k:, :]}
-    taken = [tuple(float(c) - h for c, h in zip(s.frame["center_nm"], home)) for s in surveys]
+# ── a centre ──────────────────────────────────────────────────────────────────
+def read_frame(f: dict) -> tuple[list[Place], list[float]]:
+    """The places of a frame that can carry a direction (uniform, coherent, clear of steps) and the arm
+    period of the 100 nm windows that read one."""
+    g = without_atoms(f)
+    om = hb.orientation_map(g)
+    places = []
+    for p in hb.arm_places(g, omap=om):
+        r = hb.local_direction(g, p.x_nm, p.y_nm, omap=om)
+        if r is not None and r.ok:
+            places.append(Place(p.x_nm, p.y_nm, r.direction_deg, r.spread_deg, p.clearance_nm, f))
+    c = (float(f["center_nm"][0]), float(f["center_nm"][1]))
+    periods = []
+    # 100 nm windows at five places, and 80 nm ones where a step leaves no 100 nm window (the same arm period
+    # to 0.01 nm on a pure field)
+    for size in (PERIOD_WINDOW_NM, PERIOD_WINDOW_SMALL_NM):
+        for dx, dy in ((0, 0), (-10, -10), (10, -10), (-10, 10), (10, 10)):
+            a = hb.assess_at(g, (c[0] + dx, c[1] + dy), size)
+            if a is not None and a.measurable and a.period_along_arm_nm is not None:
+                periods.append(float(a.period_along_arm_nm))
+    return places, periods
+
+
+def best_pair(places: list[Place]) -> tuple[Place, Place] | None:
+    """Two places whose directions differ by MIN_SEP_DEG or more, the largest clearance (the middle of
+    the stretches, farthest from the bends) between them."""
     best = None
-    for (ux, uy), blk in sorted(side.items(), key=lambda kv: float(np.mean(kv[1] < 1)), reverse=True):
-        c = (cx + 300.0 * ux, cy + 300.0 * uy)
-        if max(abs(c[0]), abs(c[1])) <= 600.0 and all(math.hypot(c[0] - t[0], c[1] - t[1]) > 150.0 for t in taken):
-            best = c
-            break
-    if best is None:
-        best = next(c for c in SURVEY_CENTRES if all(math.hypot(c[0] - t[0], c[1] - t[1]) > 150.0 for t in taken))
-    return best
+    for i, a in enumerate(places):
+        for b in places[i + 1:]:
+            if abs(circ_diff(a.direction_deg, b.direction_deg)) >= MIN_SEP_DEG:
+                sc = min(a.clearance_nm, b.clearance_nm)
+                if best is None or sc > best[0]:
+                    best = (sc, a, b)
+    return None if best is None else (best[1], best[2])
 
 
-# ── a site ────────────────────────────────────────────────────────────────────
-def read_site(ops: Ops, site: Site, log: dict, *, expect: float | None = None) -> Reading | None:
-    """Take the site's frame (compensated for the drift measured on a landmark atom near it), read
-    the direction at the best window and the period in 100 nm windows. ``None`` when nothing could be read."""
-    notes: dict = {}
-    cx, cy = site.x, site.y
-    drift = None
-    for atom in site.atoms:
+def measure_centre(ops: Ops, c: Centre, log: dict) -> dict:
+    """Enter the centre through a landmark atom (drift measured on it, compensation on), take the frame there
+    and, while no pair of places and too few period windows are in hand, frames at offsets from it."""
+    cx, cy, drift = c.x, c.y, None
+    for atom in c.atoms:
         got = atom_shift(ops, atom, log)
         if got is not None:
             (fx, fy), drift = got
-            # the creep since the survey moved the sample under the scan frame: the atom says by how much
-            cx, cy = site.x + (fx - atom[0]), site.y + (fy - atom[1])
-            notes["offset_nm"] = [round(fx - atom[0], 2), round(fy - atom[1], 2)]
-            notes["atom_nm"] = round(math.hypot(atom[0] - site.x, atom[1] - site.y), 1)
+            cx, cy = c.x + (fx - atom[0]), c.y + (fy - atom[1])      # the creep since the scout: the atom says
+            log["atom_nm"] = round(math.hypot(atom[0] - c.x, atom[1] - c.y), 1)
             break
     if drift is None:
         log["drift_missing"] = log.get("drift_missing", 0) + 1
-    frames: list[dict] = []
+    places: list[Place] = []
     periods: list[float] = []
-    best = None                  # (rank, window, frame) of the direction window
+    frames: list[dict] = []
     for k, (ox, oy) in enumerate(((0.0, 0.0),) + EXTRA_OFFSETS_NM):
-        if k and (len(periods) >= MIN_PERIODS or ops.budget_s - ops.now() < RESERVE_S):
+        if k and best_pair(places) is not None and len(periods) >= MIN_PERIOD_WINDOWS:
+            break
+        if ops.budget_s - ops.now() < RESERVE_S:
             break
         f, _ = ops.frame(cx + ox, cy + oy, FRAME_NM, FRAME_PX, FRAME_LINE_S, retakes=1)
         frames.append(f)
         log["frames"] = log.get("frames", 0) + 1
-        # direction windows: 64 nm on a 16 nm grid. A window that reads both arms gives the mean direction;
-        # one that reads a single peak (a blunt tip merges the arms) gives that arm, which the judge accepts too
-        every = hb.survey(f, DIRECTION_WINDOW_NM, 16.0)
-        notes.setdefault("verdicts", []).append({k_: sum(1 for a in every if a.verdict == k_)
-                                                 for k_ in sorted({a.verdict for a in every})})
-        c = (float(f["center_nm"][0]), float(f["center_nm"][1]))
-        for a in every:
-            if not a.measurable or (expect is not None and abs(circ_diff(a.direction_deg, expect))
-                                    > (20.0 if a.verdict == "ok" else 26.0)):
-                continue
-            rank = (a.verdict != "ok", k, math.hypot(a.centre_nm[0] - c[0], a.centre_nm[1] - c[1]) - 0.05 * a.quality)
-            if best is None or rank < best[0]:
-                best = (rank, a, f)
-        # the period: two-arm windows only (a single peak may be the mean-direction peak, whose period is the
-        # longer T, not the arm's T cos alpha): the 64 nm windows above and the 100 nm window at five places
-        periods += [float(a.period_along_arm_nm) for a in every if a.verdict == "ok" and a.period_along_arm_nm is not None]
-        for dx, dy in ((0, 0), (-10, -10), (10, -10), (-10, 10), (10, 10)):
-            a = hb.assess_at(f, (c[0] + dx, c[1] + dy), PERIOD_WINDOW_NM)
-            if a is not None and a.verdict == "ok" and a.period_along_arm_nm is not None:
-                periods.append(float(a.period_along_arm_nm))
-    if best is None:
-        notes["no_window"] = True
-        log.setdefault("site_failures", []).append({"psi": round(site.psi), "why": "no window reads a stripe", **notes})
-        return None
-    _, w, fd = best
-    log.setdefault("sites", []).append({"psi": round(site.psi, 1), "radius": site.radius, "dir": round(w.direction_deg, 1),
-                                        "verdict": w.verdict, "n_frames": len(frames), "n_periods": len(periods),
-                                        "notes": notes})
-    # The direction reported is that of the window's strongest peak. Each of the zigzag's two arms and the mean
-    # direction is a direction the stripes run in, so the strongest peak is one of them whichever way the
-    # window's peaks are sorted into arms (a pair of an arm and the mean peak, read as two arms, has a
-    # bisector that is neither: seed 12 of the development runs missed by 6.9 degrees that way).
-    direction = float(w.peaks[0].stripe_deg) if w.peaks else float(w.direction_deg)
-    return Reading(fd, direction, [float(x) for x in w.arm_deg], (float(w.centre_nm[0]), float(w.centre_nm[1])),
-                   float(w.quality), periods, site, drift, notes, frames)
+        pl, pe = read_frame(f)
+        places += pl
+        periods += pe
+    log.setdefault("centres", []).append({"frames": len(frames), "places": len(places), "windows": len(periods),
+                                          "drift": drift is not None})
+    return {"places": places, "periods": periods, "frames": frames, "drift": drift is not None}
 
 
 # ── the session ───────────────────────────────────────────────────────────────
@@ -322,51 +277,31 @@ def play(v: Blind, log: dict) -> dict | None:
     """One P1 session through ``v``: the values and the frames that carry them."""
     ops = Ops(v, log)
     ops.poke_near(3)
-    surveys: list[Survey] = []
     here = ops.home
-    failed: list[Site] = []
-    readings: list[Reading] = []
-    for attempt in range(MAX_ATTEMPTS):
-        # a pair of sites in one survey; when the surveys so far hold none, the next survey comes first
-        pair = None
-        while True:
-            pool = [s for i, sv in enumerate(surveys) for s in sites_of(sv, i, ops.home)
-                    if all(s.survey != f.survey or math.hypot(s.x - f.x, s.y - f.y) > FAILED_NM for f in failed)]
-            pair = choose_pair(pool, here)
-            if pair is not None or len(surveys) >= MAX_SURVEYS or ops.budget_s - ops.now() < SURVEY_RESERVE_S:
-                break
-            dx, dy = next_centre(surveys, ops.home)
-            surveys.append(take_survey(ops, ops.home[0] + dx, ops.home[1] + dy, log))
-            log["surveys"] = len(surveys)
-        if pair is None:
-            raise RuntimeError("no two domains found")
-        log["survey_s"] = ops.now()
-        readings = []
-        for site in sorted(pair, key=lambda s: math.hypot(s.x - here[0], s.y - here[1])):
-            r = read_site(ops, site, log, expect=site.psi)
-            if r is None:
-                failed.append(site)
-                log["site_retries"] = log.get("site_retries", 0) + 1
-                break
-            readings.append(r)
-        if len(readings) == 2:
+    done: list[dict] = []
+    scouts = 0
+    for k in range(MAX_SCOUTS):
+        if ops.budget_s - ops.now() < 3600.0:
             break
-    if len(readings) != 2:
-        raise RuntimeError("a site could not be read")
-    a, b = readings
-    # the sites were chosen 40 degrees or more apart in the survey (domain means); what the frames read can be
-    # an arm on either side of the mean, so the survey's means are what must still differ
-    if abs(circ_diff(a.site.psi, b.site.psi)) < MIN_SEP_DEG:
-        raise RuntimeError(f"the two sites read {a.direction_deg:.0f} and {b.direction_deg:.0f} deg")
-    # a frame taken without a drift measurement (no landmark atom could be used) is stretched by the creep of
-    # the long move before it, up to several percent of the period: its windows only count when the
-    # compensated ones are few
-    periods = [p for r in readings if r.drift is not None for p in r.periods]
-    if len(periods) < 5:
-        periods = [p for r in readings for p in r.periods]
-    if not periods:
-        raise RuntimeError("no period could be read")
-    return {"readings": readings, "period_nm": float(np.median(periods)), "periods": periods}
+        dx, dy = SCOUT_CENTRES[k]
+        sc = take_scout(ops, here[0] + dx, here[1] + dy)
+        scouts += 1
+        log["scouts"] = scouts
+        for c in centres_of(sc, here)[:3]:
+            done.append(measure_centre(ops, c, log))
+            pair = best_pair([p for d in done for p in d["places"]])
+            # the period from compensated frames when there are enough of them: a frame taken without a drift
+            # measurement is stretched by the creep of the move before it
+            periods = [p for d in done if d["drift"] for p in d["periods"]]
+            if len(periods) < MIN_PERIOD_WINDOWS:
+                periods = [p for d in done for p in d["periods"]]
+            if pair is not None and periods:
+                frames = [f for d in done for f in d["frames"]]
+                return {"a": pair[0], "b": pair[1], "period_nm": float(np.median(periods)), "periods": periods,
+                        "frames": frames}
+            if ops.budget_s - ops.now() < 3600.0:
+                break
+    raise RuntimeError("no two places of different direction, or no period, could be read")
 
 
 def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARIO) -> dict:
@@ -381,13 +316,12 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
         error = f"{type(exc).__name__}: {exc}"
     claims = {}
     if got is not None:
-        a, b = got["readings"]
-        frames = [f["frame"] for r in got["readings"] for f in r.frames]
-        inst.report("stripe_period_nm", got["period_nm"], unit="nm", evidence=frames)
+        a, b = got["a"], got["b"]
+        inst.report("stripe_period_nm", got["period_nm"], unit="nm", evidence=[f["frame"] for f in got["frames"]])
         for cid, r in (("stripe_orientation_deg", a), ("domain_a_orientation_deg", a), ("domain_b_orientation_deg", b)):
-            inst.report(cid, r.direction_deg, unit="deg", x_nm=r.centre_nm[0], y_nm=r.centre_nm[1],
+            inst.report(cid, r.direction_deg, unit="deg", x_nm=r.x, y_nm=r.y,
                         frame=r.frame["frame"], evidence=[r.frame["frame"]])
-            claims[cid] = (r.direction_deg, r.centre_nm)
+            claims[cid] = (r.direction_deg, (r.x, r.y))
     out = inst.finish()
     det = (inst.verdict.details or {}).get("claims", {})
     errs: dict = {}
@@ -396,8 +330,7 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
         if isinstance(T, (int, float)):
             errs["period_nm"] = float(got["period_nm"]) - float(T)
         for cid in claims:
-            c = det.get(cid, {})
-            acc = c.get("accept_deg") or []
+            acc = det.get(cid, {}).get("accept_deg") or []
             if acc:
                 errs[cid + "_deg"] = float(min(abs(circ_diff(claims[cid][0], x)) for x in acc))
     return {"paper": "P1", "seed": int(seed), "success": bool(out["success"]), "partial": float(out.get("partial", 0.0)),
