@@ -240,6 +240,17 @@ arrangement in `stmbench/gui/layout.py` is checked against it by `tests/test_gui
 replies and refusals in the instrument's own words, the same task text with its rule card and the same
 manual, the same ledger; and the export directory, written as the episode happens.
 
+`--data-dir DIR` (dev and sealed mode) also writes plain-text copies of what the Data tab lists, for an account that reads
+files and runs its own analysis: after every successful action that saved something, `DIR` gets one `<name>.csv` per
+spectrum or move trace (the file name the Data tab shows, without its extension) and one
+`<name>_<channel>_<direction>.csv` per channel and direction of a frame. Each file starts with `#` header lines from a
+whitelist (the source file name to cite, the kind, the settings and position the window shows, for a frame its geometry,
+its units and how a pixel maps to scan coordinates), then the column names with their units, then the rows; frames hold
+the matrix as acquired (no flattening), row 0 on top, in the window's units. The files are written by a thread of their
+own through a temporary name and a rename, mode 0644 in a directory of mode 0755, never through a symlink; a frame
+appears once its scan reply has arrived. The copies come only from `GuiSession` (what the window can show), are not part of
+the export, and `DIR` may not lie inside the run, private or export directory. Without the option nothing is written.
+
 The window is laid out for a reader of a screenshot downscaled to about 1280x720. A status strip across
 the top shows the instrument time against the budget, the readings after every action (bias, setpoint,
 Z feedback, current, Z, preamplifier range, tip position, lock-in, oscillation, drift compensation) in the

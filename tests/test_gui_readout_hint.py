@@ -42,7 +42,7 @@ def test_the_hint_shows_at_start_gives_way_to_the_reading_and_returns_when_the_p
     assert c.readout.full_text() == "" and not c.readout.property("tone")     # no frame yet: a click marks nothing
     scan(win)
     assert c.readout.full_text() == ("悬停读数，单击放标记，放大后拖动平移，滚轮以指针处为中心缩放" if lang == "zh" else
-                                     "Hover to read; click to mark, drag to pan; wheel to zoom about the pointer")
+                                     "Hover: read; click: mark; zoomed: drag to pan; wheel: zoom about the pointer")
     assert is_hint(win)                                                  # with the first frame, and again with a new one
     height = c.readout.height()
     QTest.mouseMove(c.frame_view, pixel_point(win, 10, 12))
