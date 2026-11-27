@@ -193,8 +193,9 @@ class Surface:
     # ── height field ──
     def _staircase_u(self, x: np.ndarray, y: np.ndarray, site: Site | None = None) -> np.ndarray:
         """Coordinate along the staircase axis, with the step lines' wander folded in, so that
-        ``searchsorted(boundaries, u)`` is the terrace index and ``u − boundary`` is the
-        distance to a step edge (what the surface state scatters off)."""
+        ``searchsorted(boundaries, u)`` is the terrace index and ``u − boundary`` the distance to
+        a step edge along the staircase's mean normal. The surface state's waves use it divided
+        by :meth:`_staircase_stretch`: the distance across the local edge."""
         s = site or self.site
         c, sn = math.cos(s.step_angle), math.sin(s.step_angle)
         u = x * c + y * sn
@@ -202,6 +203,25 @@ class Surface:
         wander = s.wander_amp * np.sin(2 * np.pi * v / s.wander_period) \
             + 0.4 * s.wander_amp * np.sin(2 * np.pi * v / (0.37 * s.wander_period) + 1.3)
         return u + wander
+
+    def _staircase_stretch(self, x: np.ndarray, y: np.ndarray, site: Site | None = None) -> np.ndarray:
+        """|∇u| = √(1 + w′(v)²), w′ the slope of the step lines' wander: how much faster ``u``
+        grows than the distance along the local normal of an edge. ``(u − boundary) / |∇u|`` is
+        the perpendicular distance to the edge where it runs straight over that distance, and it
+        is what a standing wave off the edge depends on.
+
+        Until 2026-11-27 the waves used ``u − boundary`` itself, a distance along the staircase's
+        mean normal: where an edge bends by θ its ripples came out compressed by cos θ across it,
+        so a profile taken across the local edge read k too high by √(1 + w′²) − 1 (+4 % at a
+        16.5° bend; in 19 % of 42 places on six P2 worlds by more than 1 %, outside P2's 2 % on
+        m*). Deterministic: no random number is drawn."""
+        s = site or self.site
+        c, sn = math.cos(s.step_angle), math.sin(s.step_angle)
+        v = -x * sn + y * c
+        p = s.wander_period
+        slope = s.wander_amp * (2 * np.pi / p) * np.cos(2 * np.pi * v / p) \
+            + 0.4 * s.wander_amp * (2 * np.pi / (0.37 * p)) * np.cos(2 * np.pi * v / (0.37 * p) + 1.3)
+        return np.sqrt(1.0 + slope ** 2)
 
     def terrace_level(self, x: np.ndarray, y: np.ndarray, site: Site | None = None) -> np.ndarray:
         """Integer terrace index under each (x, y) — the staircase without step height or tilt."""
@@ -369,11 +389,13 @@ class Surface:
             return ()
         p = self.surface_state.p
         left, right = self._step_distances(x, y, site)
+        # the wave depends on the distance across the local edge, not along the staircase axis
+        g = float(self._staircase_stretch(np.array([x], float), np.array([y], float), site)[0])
         out = []
-        if right is not None and abs(right) < p.cutoff_m:
-            out.append(LineScatterer(np.array(abs(right)), p.step_r_up, p.step_phi_up_rad))
-        if left is not None and abs(left) < p.cutoff_m:
-            out.append(LineScatterer(np.array(abs(left)), p.step_r_down, p.step_phi_down_rad))
+        if right is not None and abs(right) / g < p.cutoff_m:
+            out.append(LineScatterer(np.array(abs(right) / g), p.step_r_up, p.step_phi_up_rad))
+        if left is not None and abs(left) / g < p.cutoff_m:
+            out.append(LineScatterer(np.array(abs(left) / g), p.step_r_down, p.step_phi_down_rad))
         return tuple(out)
 
     def scatterers_near(self, x: float, y: float, radius: float | None = None):
@@ -448,13 +470,15 @@ class Surface:
         s = np.zeros_like(x)
         for ln in self._line_terms(cx, cy):
             pass
-        # step distance is position-dependent across a map, so recompute it per point
+        # step distance is position-dependent across a map, so recompute it per point; across
+        # the local edge (_staircase_stretch), not along the staircase axis
         u = self._staircase_u(x, y)
         b = self.site.boundaries
         if b.size:
+            g = self._staircase_stretch(x, y)
             idx = np.searchsorted(b, u)
-            right = np.where(idx < b.size, b[np.clip(idx, 0, b.size - 1)] - u, np.inf)
-            left = np.where(idx > 0, u - b[np.clip(idx - 1, 0, b.size - 1)], np.inf)
+            right = np.where(idx < b.size, (b[np.clip(idx, 0, b.size - 1)] - u) / g, np.inf)
+            left = np.where(idx > 0, (u - b[np.clip(idx - 1, 0, b.size - 1)]) / g, np.inf)
             p = ss.p
             s = s + ss.line_modulation(np.where(np.isfinite(right), right, 1.0), e_ev,
                                        p.step_r_up, p.step_phi_up_rad) * np.isfinite(right)
@@ -543,9 +567,11 @@ class Surface:
         b = s.boundaries
         acc = np.zeros_like(x)
         if b.size:
+            # across the local edge, as in ldos_map (_staircase_stretch)
+            g = self._staircase_stretch(x, y, s)
             idx = np.searchsorted(b, u)
-            right = np.where(idx < b.size, b[np.clip(idx, 0, b.size - 1)] - u, np.inf)
-            left = np.where(idx > 0, u - b[np.clip(idx - 1, 0, b.size - 1)], np.inf)
+            right = np.where(idx < b.size, (b[np.clip(idx, 0, b.size - 1)] - u) / g, np.inf)
+            left = np.where(idx > 0, (u - b[np.clip(idx - 1, 0, b.size - 1)]) / g, np.inf)
             p = ss.p
             fin_r = np.isfinite(right) & (right < p.cutoff_m)
             fin_l = np.isfinite(left) & (left < p.cutoff_m)
