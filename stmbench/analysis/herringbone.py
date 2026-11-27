@@ -61,7 +61,11 @@ STEP_PP_PM = 45.0
 #: two peaks are the two arms of one domain when their stripe directions are within this angle
 #: (2 alpha <= 36 deg) and their |k| within ARM_K_TOL
 ARM_MAX_SEP_DEG = 40.0
-ARM_K_TOL = 0.012
+#: 0.6 %: the mean-direction peak's period is that of the arms times 1 / cos(alpha), 1.0 % at the
+#: smallest alpha (8 degrees), so a tolerance above half of that takes an arm and the mean peak for
+#: the two arms (seed 24 of the P1 calibration: mean read 3.7 degrees off); two true arms agree to
+#: about 0.2 % on synthetic windows
+ARM_K_TOL = 0.006
 #: peaks weaker than this fraction of the strongest are the zigzag's sidebands, not arms. Chosen on
 #: 120 synthetic 120 nm windows (the simulator's height expression, 3 pm noise): at 0.55 nine percent
 #: of two-arm windows are called mixed (a sideband counts), at 0.65 two percent, at 0.75 a weak arm
@@ -364,7 +368,8 @@ def assess_window(z: np.ndarray, nm_per_px: float, *, angle_deg: float = 0.0,
         partner = None
         for q in strong[1:]:
             ratio = max(p.period_nm, q.period_nm) / min(p.period_nm, q.period_nm)
-            if q.power >= MAJOR_FRAC * p.power and _fold180(p.stripe_deg - q.stripe_deg) <= ARM_MAX_SEP_DEG                     and 1.003 <= ratio <= 1.07:
+            near = _fold180(p.stripe_deg - q.stripe_deg) <= ARM_MAX_SEP_DEG
+            if q.power >= MAJOR_FRAC * p.power and near and 1.006 <= ratio <= 1.07:
                 partner = q               # an arm and the mean-direction peak (the longer period)
                 break
         group = [p] + ([partner] if partner else [])

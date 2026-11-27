@@ -163,3 +163,14 @@ def test_strong_chevron_sidebands_are_not_another_domain():
         assert a.verdict == "ok", (phase, a.reason)
         assert abs(a.period_along_arm_nm - 6.51 * math.cos(math.radians(16.0))) < 0.03
         assert angle_err(a.mean_deg, [47.0]) < 1.5
+
+
+def test_a_small_arm_angle_does_not_make_an_arm_and_the_mean_peak_a_pair():
+    """At alpha = 8.6 degrees the mean-direction peak's period is only 1.1 % longer than the arms'
+    (seed 24 of the P1 calibration read the mean 3.7 degrees off when the tolerance was 1.2 %)."""
+    for i, phase in enumerate((0.3, 1.1, 2.0, 2.9, 3.8, 4.7, 5.6)):
+        z = grating(T=6.06, stripe_deg=159.2, alpha_deg=8.6, chev=33.4, amp=13e-12, noise=3e-12, seed=i, phase=phase)
+        a = hb.assess_window(z, 0.4)
+        assert a.measurable, (phase, a.reason)
+        assert abs(a.period_along_arm_nm - 6.06 * math.cos(math.radians(8.6))) < 0.03, (phase, a.verdict)
+        assert angle_err(a.direction_deg, [159.2, 159.2 + 8.6, 159.2 - 8.6]) < 2.0, (phase, a.verdict, a.arm_deg)
