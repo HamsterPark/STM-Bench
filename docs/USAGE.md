@@ -595,7 +595,7 @@ the atom is, which nearby spot is bare surface, how far the sample has drifted, 
 tip needs a poke — but every number it reports is measured through the instrument and
 computed by `stmbench.analysis`. Over many seeds it shows whether a paper is
 solvable, the error spread of a careful measurement (tolerances are set at about twice its
-p90) and the instrument time it takes. P5 (2026-10-13, seeds 0–29): 30/30 reproduced, |error|
+p90) and the instrument time it takes. P5 (2026-10-13, seeds 0–29; re-run 2026-11-27 on 539e5e3: the same figures): 30/30 reproduced, |error|
 p90 5.9 % (F_min), 3.7 % (decay length), 8.7 % (E_b), 354 s of instrument time. P3 (seeds
 0–29, re-run 2026-11-27 on 0f4e8f8; the same figures as the 2026-11-24 re-run): 30/30; |error| p90 2.7 / 2.5 meV (the two resonances),
 0.037 nm (the ring's radius), 485 s. P4 (seeds 0–149): 150/150 — no atom's threshold read (a resistance ladder from
@@ -605,7 +605,7 @@ p90 5.9 % (F_min), 3.7 % (decay length), 8.7 % (E_b), 354 s of instrument time. 
 879 s median, 1428 s p90. P1 (2026-11-27, seeds 0–59, the zigzag of Barth et al. 1990): 60/60; |error| p90
 0.021 nm (the period) and 1.23° (the line direction at the reported place, against 3°); 723 s median; two places
 in the middle of neighbouring arms, found in one frame by `stmbench.analysis.herringbone`. Per-seed results:
-`docs/results/` (P3, P4, P5, P7).
+`docs/results/`.
 
 ### Scripted baselines
 
@@ -629,9 +629,10 @@ atoms (`stmbench.analysis.corral`: ring width, ghost ring), the drift from two f
 from a bare-terrace spectrum; results and per-seed records: `docs/results/p3_baseline_seeds_0-199.json`.
 P1 (DESIGN §9.11): a survey, a step-free square with an adatom for the drift, one measurement frame; two places in
 the middle of neighbouring arms chosen by the strength of the lines around them (a region wall, where the true
-direction jumps, weakens them); 99/100 on seeds 0–99, 29/30 on the held-out 430–459 (run once). P5 (DESIGN §9.10): the
-tip placed on an adatom from its images and from the force itself, then the reference's measurement; 100/100 on
-seeds 0–99, 30/30 on the held-out 460–489.
+direction jumps, weakens them); 99/100 on seeds 0–99, 29/30 on the held-out 430–459 (run once); per-seed records:
+`docs/results/p1_baseline_seeds_0-99.json`, `…_430-459.json`. P5 (DESIGN §9.10): the tip placed on an adatom from its
+images and from the force itself, then the reference's measurement; 100/100 on seeds 0–99, 30/30 on the held-out
+460–489; per-seed records: `docs/results/p5_baseline_seeds_0-99.json`, `…_460-489.json`.
 
 ### Run directory
 
