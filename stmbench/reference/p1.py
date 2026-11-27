@@ -23,7 +23,7 @@ Protocol:
    modulo a period), the compensation is programmed and checked once more by the same two frames;
 4. the area is scanned at ``NM_PER_PX`` nm/px and at ``SPEED_NM_S`` or slower: a faster scan with
    a tip of radius above 1.5 nm scratches the surface (``World.maybe_scratch``). A frame in which
-   the tip needed conditioning again is taken again;
+   the tip changed (a jump of whole rows) or needed conditioning again is taken again;
 5. windows of ``WINDOW_NM`` on a ``STRIDE_NM`` grid over each frame are assessed. The period is the
    median of the along-arm period over every window that measured one, both frames together. The
    direction of each domain is that of the window with two resolved arms and the highest peak
@@ -61,6 +61,8 @@ DRIFT_FRAME_NM = 12.0
 #: one extra look at the drift after programming it; stop when the residual is below this (nm/min)
 RESIDUAL_OK_NM_MIN = 0.15
 CREEP_WAIT_S = 300.0
+#: takes of one area (a tip change during a frame costs a retake)
+MAX_TAKES = 4
 
 
 def _domain_grid(w, cx: float, cy: float, size_nm: float, n: int = 9):
@@ -235,24 +237,32 @@ def run(seed: int, *, out_dir: str | Path | None = None, scenario: str = SCENARI
     frames, windows = [], []
     for area in (a, b):
         cx, cy, _label = area
-        for attempt in range(3):
-            s.go(cx * 1e-9, cy * 1e-9)
-            inst.act("wait", seconds=CREEP_WAIT_S)
-            ads = _adsorbate_near(w, cx, cy)
-            if ads is None:
-                raise RuntimeError("no isolated adsorbate near the area to register the drift on")
-            phase("move")
-            _register_drift(s, ads, log)
-            phase("drift")
+        full = True                       # move, wait for the creep, register the drift
+        for attempt in range(MAX_TAKES):
+            if full:
+                s.go(cx * 1e-9, cy * 1e-9)
+                inst.act("wait", seconds=CREEP_WAIT_S)
+                ads = _adsorbate_near(w, cx, cy)
+                if ads is None:
+                    raise RuntimeError("no isolated adsorbate near the area to register the drift on")
+                phase("move")
+                _register_drift(s, ads, log)
+                phase("drift")
             fr = _scan_area(s, cx, cy, size)
             log["frames"] += 1
             phase("frame")
-            if tip_needs_poke(w, imaging=True):
-                # the tip changed during the frame: condition it and take the area again
-                log["retakes"] += 1
+            # a tip change during the frame leaves a jump of whole rows in it (the world records
+            # which rows; an operator sees the jump): take the area again. A tip that is no longer
+            # fit to image is conditioned first, which takes the tip away, so the drift is
+            # registered again; after a change that left it fit, the compensation still runs
+            changed = bool(getattr(w.frame, "tip_change_rows", None))
+            unfit = tip_needs_poke(w, imaging=True)
+            if not (changed or unfit):
+                break
+            log["retakes"] += 1
+            full = unfit
+            if unfit:
                 _condition(s, spot[0], spot[1], log)
-                continue
-            break
         res = hb.survey(fr, WINDOW_NM, STRIDE_NM)
         frames.append(fr)
         windows.append(res)

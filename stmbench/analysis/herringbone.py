@@ -54,9 +54,10 @@ QUALITY_MIN = 12.0
 #: Gaussian sigma of the step detector's low-pass, in stripe periods (stripes are averaged to
 #: exp(-2 pi^2 sigma^2 / T^2) of their height, 1e-9 at sigma = T): a 235 pm step survives
 STEP_SIGMA_PERIODS = 1.0
-#: levelled low-pass peak-to-peak (pm) above which a window is called stepped. A step at the
-#: window's centre leaves ~100 pm after the plane fit; one at 10 % of its width ~20 pm, which
-#: the Hann window already suppresses. Native adsorbates (tens of pm, ~1 nm wide) stay below it.
+#: peak-to-peak (pm) of the quadratic-levelled low-pass above which a window is called stepped. Seed 6's
+#: 80-100 nm windows (measured 2026-11-27): the ones a step crosses score 100-250 pm, the step-free
+#: ones up to 25 pm; Hann-windowed stripes do not care about a step in the outer 10 % of a window.
+#: Native adsorbates (tens of pm, ~1 nm wide) stay below it.
 STEP_PP_PM = 45.0
 #: two peaks are the two arms of one domain when their stripe directions are within this angle
 #: (2 alpha <= 36 deg) and their |k| within ARM_K_TOL
@@ -191,8 +192,9 @@ def level_plane(z: np.ndarray) -> np.ndarray:
 
 
 def step_score_pm(z: np.ndarray, nm_per_px: float, period_nm: float = 6.3) -> float:
-    """Peak-to-peak (pm) of the plane-levelled low-pass of the window, edges excluded: ~0 for a
-    flat or tilted terrace with stripes and adsorbates on it, ~100 pm and more for a step."""
+    """Peak-to-peak (pm) of the quadratic-levelled low-pass of the window, edges excluded: ~0 for a
+    flat, tilted or bowed terrace with stripes and adsorbates on it, ~100 pm and more for a step
+    (or for a jump of whole rows, which a tip change leaves in a frame)."""
     a = _clean(z) * 1e12
     sigma_px = STEP_SIGMA_PERIODS * period_nm / nm_per_px
     low = ndimage.gaussian_filter(a, sigma_px, mode="nearest")
@@ -201,8 +203,15 @@ def step_score_pm(z: np.ndarray, nm_per_px: float, period_nm: float = 6.3) -> fl
     if ny - 2 * m < 8 or nx - 2 * m < 8:
         m = 0
     low = low[m:ny - m, m:nx - m]
-    low = level_plane(low)
-    return float(np.ptp(low))
+    # a quadratic, not a plane: the Z loop's creep and the scanner's bow curve a window by tens of pm
+    # (seed 55 of the P1 calibration: a step-free frame scored 50 pm after a plane), a step is not
+    # a quadratic
+    ny2, nx2 = low.shape
+    yy, xx = np.mgrid[0:ny2, 0:nx2]
+    u, v = xx.ravel() / nx2 - 0.5, yy.ravel() / ny2 - 0.5
+    X = np.column_stack([np.ones(u.size), u, v, u * u, u * v, v * v])
+    coef, *_ = np.linalg.lstsq(X, low.ravel(), rcond=None)
+    return float(np.ptp(low.ravel() - X @ coef))
 
 
 # ── spectrum ──────────────────────────────────────────────────────────────────

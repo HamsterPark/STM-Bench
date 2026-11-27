@@ -174,3 +174,17 @@ def test_a_small_arm_angle_does_not_make_an_arm_and_the_mean_peak_a_pair():
         assert a.measurable, (phase, a.reason)
         assert abs(a.period_along_arm_nm - 6.06 * math.cos(math.radians(8.6))) < 0.03, (phase, a.verdict)
         assert angle_err(a.direction_deg, [159.2, 159.2 + 8.6, 159.2 - 8.6]) < 2.0, (phase, a.verdict, a.arm_deg)
+
+
+def test_a_bow_is_not_a_step_and_a_jump_of_whole_rows_is():
+    """The Z loop's creep curves a window by tens of pm (seed 55 of the P1 calibration scored 50 pm
+    after a plane fit and was called stepped); a tip change leaves a jump of whole rows, which
+    looks like a step edge and is called one."""
+    n = 300
+    yy = (np.arange(n) - n / 2) / (n / 2)
+    bow = 60e-12 * np.outer(yy ** 2, np.ones(n))
+    assert hb.assess_window(grating(noise=3e-12) + bow, 0.4).verdict != "step"
+    jump = np.zeros((n, n))
+    jump[150:] = 100e-12
+    a = hb.assess_window(grating(noise=3e-12) + jump, 0.4)
+    assert a.verdict == "step" and a.step_pp_pm > hb.STEP_PP_PM
