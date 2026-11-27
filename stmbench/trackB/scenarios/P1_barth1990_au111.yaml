@@ -74,7 +74,8 @@ claims:
     say_en: "The direction in which the corrugation lines (the bright stripes) run at one place; give that place's position in x_nm and y_nm"
     kind: angle
     unit: deg
-    tol: {abs: 6, mod: 180}
+    # the reference's |error| p90 1.20, max 1.85 deg (2026-11-27): see notes, "Tolerances, re-derived"
+    tol: {abs: 3, mod: 180}
     truth: orientation_at
     local: true
     position: required
@@ -84,7 +85,7 @@ claims:
     say_en: "The direction in which the lines run in a first rotational domain; give the position of one place inside that domain in x_nm and y_nm"
     kind: angle
     unit: deg
-    tol: {abs: 6, mod: 180}
+    tol: {abs: 3, mod: 180}
     truth: orientation_at
     local: true
     position: required
@@ -94,7 +95,7 @@ claims:
     say_en: "The direction in which the lines run in a second rotational domain, whose lines run in a different direction from the first one's; give the position of one place inside it in x_nm and y_nm"
     kind: angle
     unit: deg
-    tol: {abs: 6, mod: 180}
+    tol: {abs: 3, mod: 180}
     truth: orientation_at
     local: true
     position: required
@@ -120,7 +121,22 @@ notes: |
   nm/px, the period taken as the median over the windows) across ten draws: |period error|
   had a median of 0.007 nm, a p90 of 0.063 nm and a worst case of 0.136 nm; the orientation
   error a median of 3.1° with the worst window at 6.6°, and under 1.4° on the 120 nm windows
-  the claim actually uses. The claims ask for 0.15 nm and 6°.
+  the claim actually uses. The claims then asked for 0.15 nm and 6°.
+
+  **Tolerances, re-derived 2026-11-27** for the paper's herringbone, from the privileged
+  reference (``stmbench/reference/p1.py``; khwu job 70257, code 0c01692, seeds 0–29, 30/30). It
+  reports at two places in the middle of neighbouring arms, found in one 102–140 nm frame by
+  ``stmbench/analysis/herringbone.py``. Against the line direction at the reported place, its 90
+  orientation reports had |error| p50 0.67°, p90 1.20°, max 1.85° (``stripe_orientation_deg`` and
+  ``domain_a_orientation_deg`` are one measurement). The tolerance is the smallest whole degree
+  that is at least twice the p90 and above the largest error: 3° (the 2026-09-07 calibration set
+  it above the worst window and about twice the p90; P7 used twice the p90). The period had
+  |error| p50 0.0065, p90 0.021, max 0.037 nm; its 0.15 nm tolerance is unchanged.
+  Chance audit at 3°, 2000 seeds (``audit chance --holdout``): the three orientations together
+  pass 0.70 % in-sample (Wilson 95 %: 0.42–1.17 %) and 1/1000 held out (0.02–0.56 %); a sheet that
+  also chooses where it reports (two claims at one place, the third at one of 48 layouts 10–90 nm
+  away) reaches 1.85 % in-sample and 8/1000 held out (0.41–1.57 %). On the physics before
+  2026-11-27 (6°, the mean direction or either arm accepted) the audit gave 4.3 % (300 seeds).
 
   The period tolerance is set by the frame, not by the physics: 120 nm holds nineteen stripe
   periods, so one FFT bin is a third of a nanometre and a reading can snap to a bin. Averaging
