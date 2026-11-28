@@ -674,9 +674,9 @@ class Standing:
         want = -plan["side_col"] * EDGE_FROM_CENTRE_NM
         centre = self.predict_centre(plan, MAP_PX * 2 * MAP_LINE_S)
         m = self.scan_map(bias_v, centre, plan["angle_deg"], want)
-        # a dI/dV map that is mostly NaN (a hole in a special function the simulator's step term uses, hit by
-        # a pixel, blanks the whole map) is taken again at the same place; once the simulator is fixed this
-        # never triggers
+        # a dI/dV map that is mostly NaN is taken again at the same place. The cause it was written for, a
+        # pixel on scipy 1.18.1's struve(0, z) hole in the step term, is gone: the simulator steps over the
+        # hole since 2026-11-27 (surface_state._struve0). It stays, capped, for a map blank for another reason
         for _ in range(2):
             if float(np.mean(~np.isfinite(m["df"]))) <= 0.2:
                 break
