@@ -92,7 +92,9 @@ SLOPE_HALF_NM = 12.0
 REPAIR_AWAY_NM, REPAIR_WAIT_S = 150.0, 450.0
 #: whole measurements at most (each after a repair of the tip but the first)
 MAX_ATTEMPTS = 3
-#: no further attempt is begun after this instrument time (s): the budget is 10800 s, an attempt ~2000 s
+#: no further attempt is begun after this instrument time (s). Set when the budget was 3 h (10800 s; an
+#: attempt takes ~2000 s) and kept, a fixed number rather than a share of the budget, when the budget
+#: became 5 h on 2026-11-28: every validated result stands as it was
 BUDGET_STOP_S = 6500.0
 #: the maps are suspect when their k scatters this much about one parabola (rms, relative) or a
 #: profile fit has a reduced chi-square above this: sound tips and clean edges stay below 0.3 % and 3

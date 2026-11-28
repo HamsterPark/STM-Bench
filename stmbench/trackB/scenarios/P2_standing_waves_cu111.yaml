@@ -33,7 +33,7 @@ task_en: >-
   fit the band bottom E0 (meV) and the effective mass m* (in units of the electron mass) of the
   surface state from the variation of the standing-wave wavelength with energy, and report them
   with ReportResult.
-budget: {sim_hours: 3.0, wire_cmds: 400000}
+budget: {sim_hours: 5.0, wire_cmds: 670000}
 hidden:
   surface:
     # dense enough that a 100 nm survey frame holds two to four isolated scatterers. The
@@ -158,9 +158,14 @@ notes: |
     and a set of maps mixed from two rounds across a bend of the edge.
   * The 2 % on m* is three times the reference's p90 and about twice the baseline's; it stays. The
     15 meV on E0 is seven times the reference's p90; it stays too (a material constant, knowledge
-    allowed, no chance gate). The 3 h budget is 7.7 times the reference's p90 but only 1.9-2.1
-    times the baseline's (P3, P4 and P3's repair variant sit at about 3 times theirs); no run
-    failed on it, the baseline starts no new round after 6500 s. Whether to raise it is open.
+    allowed, no chance gate). The budget was 3 h: 7.7 times the reference's p90 but only 1.9-2.1
+    times the baseline's; no run failed on it, and the baseline starts no new round after 6500 s.
+  * **Budget 3 h -> 5 h (2026-11-28)**, wire_cmds 400000 -> 670000 with it. A budget is set at
+    about three times the p90 of the instrument time of the truth-free baseline's successes (P3's
+    repair variant 3.05, P4 3.4, P3 2.9-3.3): 3 h was 1.9 times P2's held-out p90 of 5816 s, 5 h
+    is 3.1 times it. The budget is not drawn from the hidden block, so the worlds and the
+    fixed-answer audit are unchanged; the baseline's 6500 s cut-off is a fixed number, not a share
+    of the budget, and no run reached 3 h, so the results above hold under 5 h as they are.
   * Two simulator fixes came out of this work (docs/DESIGN.md section 9.3): scipy 1.18.1's
     struve(0, z) returns NaN on an interval at z = 25.765, which blanked whole dI/dV maps; and the
     step's standing wave is now a function of the distance across the local edge, where it was the
