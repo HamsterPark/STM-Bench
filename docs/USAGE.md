@@ -584,6 +584,7 @@ were 4.3 % each.
 python -m stmbench.cli reference --paper P5 --seeds 30 --jobs 4 --json p5.json
 python -m stmbench.cli reference --paper P3 --seeds 30 --jobs 4
 python -m stmbench.cli reference --paper P4 --seeds 30 --jobs 4
+python -m stmbench.cli reference --paper P2 --seeds 30 --jobs 4
 ```
 
 A privileged reference solution (`stmbench.reference`) may use the truth to navigate — where
@@ -598,13 +599,18 @@ p90 5.9 % (F_min), 3.7 % (decay length), 8.7 % (E_b), 354 s of instrument time. 
 400 kΩ down), the goal site computed from the lattice the other atoms in a survey give
 (`stmbench.analysis.adatoms`); the reported place |error| p90 0.016 nm against the judge's
 0.6 nm (0.16 nm before the judge mapped positions through the imaging apex, 2026-10-14);
-879 s median, 1428 s p90. Per-seed results: `docs/results/`.
+879 s median, 1428 s p90. P2 (seeds 0–29, 2026-11-28): 30/30 — the truth picks a straight step edge
+with a terrace ≥ 60 nm on the profile's side and predicts the drift; eight dI/dV maps across the edge,
+each row aligned at its own edge, a standing-wave fit with a free phase
+(`stmbench.analysis.standing_waves`); |error| p90 0.66 % (m*) and 2.0 meV (E0), 1213 s median.
+Per-seed results: `docs/results/`.
 
 ### Scripted baselines
 
 ```bash
 python -m stmbench.cli baseline --paper P4 --seeds 30 --jobs 4 --json p4-baseline.json
 python -m stmbench.cli baseline --paper P3 --seeds 200 --jobs 8 --json p3-baseline.json
+python -m stmbench.cli baseline --paper P2 --seeds 30 --first-seed 300 --jobs 4 --json p2-baseline.json
 ```
 
 A scripted baseline (`stmbench.baselines`) drives the instrument an agent gets over MCP and
@@ -618,6 +624,11 @@ the earlier held-out rounds: `docs/results/p4_baseline_seeds_*.json`, DESIGN §9
 P3 (corral, DESIGN §9.7): the ring is found in a 60 nm survey, the tip judged from the ring and the spare
 atoms (`stmbench.analysis.corral`: ring width, ghost ring), the drift from two frames of the ring, the band bottom
 from a bare-terrace spectrum; results and per-seed records: `docs/results/p3_baseline_seeds_0-199.json`.
+P2 (standing waves, DESIGN §9.10): the staircase from a 400 nm survey, a place with a wide terrace and a
+straight edge, the tip judged by steps drawn twice and by how one straight edge's wave fits a trial map,
+each map's k corrected for the tilt of its own edge; 66/70 on development seeds 0–69 and 30/30 on seeds
+300–329, held out until the code was final (2026-11-28); per-seed records:
+`docs/results/p2_baseline_seeds_*.json`.
 
 ### Run directory
 
