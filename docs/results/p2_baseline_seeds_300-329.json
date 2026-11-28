@@ -1,5 +1,5 @@
 {
- "note": "P2 scripted baseline (stmbench/baselines/p2.py, no truth), held-out seeds 300-329: no one ran them while the baseline was written; they were run once, on the final code, and nothing was changed after. code 6ea5e18 (bench/p2-reference), the simulator with both surface-state fixes of 2026-11-27 (scipy's struve(0) hole stepped over; the step's standing wave a function of the distance across the local edge); run on khwu, job 70512 (one node, 16 processes), 2026-11-28; judge run on every seed. Instrument-time percentiles as stmbench.baselines.summarize (p90 by nearest rank). See docs/DESIGN.md section 9.10.",
+ "note": "P2 scripted baseline (stmbench/baselines/p2.py, no truth), held-out seeds 300-329: no one ran them while the baseline was written; they were run once, on the final code, and nothing was changed after. code 6ea5e18 (bench/p2-reference), the simulator with both surface-state fixes of 2026-11-27 (scipy's struve(0) hole stepped over; the step's standing wave a function of the distance across the local edge); run on khwu, job 70512 (one node, 16 processes), 2026-11-28; judge run on every seed. Instrument-time percentiles as stmbench.baselines.summarize (p90 by nearest rank). See docs/DESIGN.md section 9.12.",
  "summary": {
   "n": 30,
   "success_rate": 1.0,

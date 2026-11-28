@@ -145,7 +145,7 @@ notes: |
   to +0.12 V, 24 nm at 0.2 nm/px, the fast axis across a step edge (found in the topograph) with a
   terrace >= 60 nm wide on the profile's side, every row aligned at its own edge, a standing-wave
   fit with a free phase (cos phi J0 + sin phi H0), k^2 against E (``stmbench.analysis.standing_waves``;
-  docs/DESIGN.md section 9.10). Code 6ea5e18 on khwu, job 70512:
+  docs/DESIGN.md section 9.12). Code 6ea5e18 on khwu, job 70512:
 
   * Reference (``reference --paper P2``, the truth navigates), seeds 0-29: 30/30; |m* error|
     median 0.28 %, p90 0.66 %, max 0.85 %; |E0 error| median 0.85, p90 2.0, max 2.3 meV;

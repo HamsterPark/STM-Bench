@@ -13,25 +13,40 @@ initial:
   bias_v: 0.1
   setpoint_a: 50.0e-12
   tip: {radius_nm: 1.5, apex_sigma_nm: 0.07, lambda_per_s: 2.0e-4}
-  surface: {contamination: 0.0, adsorbate_density_per_um2: 150.0, terrace_median_nm: 250.0}
+  surface:
+    contamination: 0.0
+    adsorbate_density_per_um2: 150.0
+    terrace_median_nm: 250.0
+    # the lines bend at the elbows without a jump, as in the paper (stmsim/physics/herringbone.py;
+    # a fixed choice, no random draw)
+    herringbone: {elbow: continuous}
 faults: []
 task: |
   样品是退火良好的 Au(111)/mica，已在隧穿态；请复现 Barth 等 1990 年对 Au(111) 22×√3 重构的
-  STM 观测：测出重构条纹的周期（垂直于条纹方向）与某一处的条纹取向（给出该处坐标），并找到至少
-  两个取向不同的旋转畴、分别报告其位置与取向。每个结果用 ReportResult 报告。
+  STM 观测。重构表现为起伏线（亮条纹），整组起伏线以锯齿形周期性地改变方向；按原文的说法，
+  起伏线朝同一方向延伸的一段区域是一个旋转畴，锯齿的每一条臂就是一个。请测出起伏线的周期
+  （同一个旋转畴内、相邻两条亮条纹之间垂直于线的距离）与某一处起伏线的方向（给出该处坐标），
+  并找到至少两个线方向不同的旋转畴、分别报告其位置与线方向。每个结果用 ReportResult 报告。
 task_en: >-
   The sample is well-annealed Au(111)/mica, and the instrument is already in the tunnelling
   state. Please reproduce the STM observations of Barth et al. (1990) on the 22×√3 reconstruction
-  of Au(111): measure the period of the reconstruction stripes (perpendicular to the stripe
-  direction) and the stripe orientation at one place (give the coordinates of that place), and
-  find at least two rotational domains with different orientations and report the position and
-  orientation of each. Report each result with ReportResult.
+  of Au(111). The reconstruction shows corrugation lines (bright stripes) whose whole sets change
+  their direction periodically in a zigzag; as the paper puts it, a stretch in which the lines run
+  in one direction is a rotational domain, each arm of the zigzag being one. Measure the period of
+  the lines (the distance between two adjacent bright stripes, perpendicular to them, within one
+  rotational domain) and the direction of the lines at one place (give the coordinates of that
+  place), and find at least two rotational domains whose lines run in different directions and
+  report the position and line direction of each. Report each result with ReportResult.
 budget: {sim_hours: 3.0, wire_cmds: 400000}
 hidden:
   herringbone:
-    period_nm: [6.0, 6.6]
-    chevron_period_nm: [22.0, 34.0]
-    arm_half_angle_deg: [8.0, 18.0]
+    # Barth et al. 1990: lines bending by +-120 deg (arms 60 deg apart: alpha = 30 deg, the rows of the
+    # top layer turned ~1.5-2 deg against the bulk, p. 9312), ~250 A between elbow lines (one arm; a
+    # full zigzag ~500 A, ~200 A in a less ordered area, p. 9311), 63 A between the lines of an arm
+    # (T cos alpha, p. 9310). Ranges set 2026-11-27; draws and their order unchanged.
+    period_nm: [6.9, 7.6]
+    chevron_period_nm: [40.0, 60.0]
+    arm_half_angle_deg: [28.0, 32.0]
     amp_pm: [8.0, 15.0]
     second_harmonic: [0.1, 0.4]
     domain_spacing_nm: [200.0, 500.0]
@@ -44,8 +59,8 @@ hidden:
     condition_angle_deg: [0.0, 360.0]
 claims:
   - id: stripe_period_nm
-    say: "重构条纹的周期：相邻两条亮条纹之间、垂直于条纹方向的距离（在锯齿的一条臂上量，即帧的傅里叶谱中条纹峰对应的周期）"
-    say_en: "Period of the reconstruction stripes: the distance between two adjacent bright stripes, perpendicular to the stripe direction (measured on one arm of the zigzag, i.e. the period corresponding to the stripe peak in the frame's Fourier spectrum)"
+    say: "起伏线的周期：同一个旋转畴（锯齿的一条臂）内，相邻两条亮条纹之间、垂直于线的距离"
+    say_en: "Period of the corrugation lines: the distance between two adjacent bright stripes, perpendicular to them, within one rotational domain (one arm of the zigzag)"
     kind: scalar
     unit: nm
     # a material constant: knowing it is part of the skill, so the chance audit records how
@@ -55,60 +70,97 @@ claims:
     truth: herringbone.period_along_arm_nm
     evidence: {kind: frame, min_fov_nm: 100, max_nm_per_px: 0.4}
   - id: stripe_orientation_deg
-    say: "某一处条纹的方向（亮条纹延伸的方向），并用 x_nm、y_nm 给出该处位置"
-    say_en: "Direction of the stripes at one place (the direction along which the bright stripes run); give that place's position in x_nm and y_nm"
+    say: "某一处起伏线（亮条纹）延伸的方向，并用 x_nm、y_nm 给出该处位置"
+    say_en: "The direction in which the corrugation lines (the bright stripes) run at one place; give that place's position in x_nm and y_nm"
     kind: angle
     unit: deg
-    tol: {abs: 6, mod: 180}
+    # the reference's |error| p90 1.20, max 1.85 deg (2026-11-27): see notes, "Tolerances, re-derived"
+    tol: {abs: 3, mod: 180}
     truth: orientation_at
+    local: true
     position: required
     evidence: {kind: frame_covers, min_fov_nm: 40, max_nm_per_px: 0.5}
   - id: domain_a_orientation_deg
-    say: "第一个旋转畴中条纹的方向，并用 x_nm、y_nm 给出该畴内一处位置"
-    say_en: "Direction of the stripes in the first rotational domain; give the position of one place inside that domain in x_nm and y_nm"
+    say: "第一个旋转畴中起伏线延伸的方向，并用 x_nm、y_nm 给出该畴内一处位置"
+    say_en: "The direction in which the lines run in a first rotational domain; give the position of one place inside that domain in x_nm and y_nm"
     kind: angle
     unit: deg
-    tol: {abs: 6, mod: 180}
+    tol: {abs: 3, mod: 180}
     truth: orientation_at
+    local: true
     position: required
     evidence: {kind: frame_covers, min_fov_nm: 40, max_nm_per_px: 0.5}
   - id: domain_b_orientation_deg
-    say: "第二个旋转畴中条纹的方向，并用 x_nm、y_nm 给出该畴内一处位置"
-    say_en: "Direction of the stripes in the second rotational domain; give the position of one place inside that domain in x_nm and y_nm"
+    say: "第二个旋转畴（线方向与第一个不同）中起伏线延伸的方向，并用 x_nm、y_nm 给出该畴内一处位置"
+    say_en: "The direction in which the lines run in a second rotational domain, whose lines run in a different direction from the first one's; give the position of one place inside it in x_nm and y_nm"
     kind: angle
     unit: deg
-    tol: {abs: 6, mod: 180}
+    tol: {abs: 3, mod: 180}
     truth: orientation_at
+    local: true
     position: required
     distinct_from: {claim: domain_a_orientation_deg, min_sep_deg: 30}
     evidence: {kind: frame_covers, min_fov_nm: 40, max_nm_per_px: 0.5}
 success: {kind: claims_verified}
 notes: |
-  **What is measured.** The claim is the stripe period *along the arm*, not the mean of the
-  zigzag: the stripes run at ±alpha to the mean direction, so an FFT of a frame sees a
-  wavevector longer by 1/cos(alpha). ``herringbone.period_along_arm_nm`` is that number, and
-  it is what any measurement of a frame returns. Orientation claims are judged the same way —
-  the mean direction or either arm counts, because the frame's spectrum has a peak on each
-  arm and never on the mean between them.
+  **What is measured (since 2026-11-27).** The surface follows Barth et al. (1990): corrugation
+  lines that bend by ±120° in a zigzag (unoriented lines 60° apart: alpha about 30°), about
+  250 Å between the elbow lines, 63 Å between the lines of an arm. As the paper says, each arm
+  is a rotational domain ("rotational domains are arranged in a zigzag pattern"). The period
+  claim is the distance between the lines of one arm, perpendicular to them
+  (``herringbone.period_along_arm_nm``, T·cos alpha). The orientation claims are judged on the
+  direction of the lines at the reported place (``local: true``: ``stripe_local_deg`` of
+  ``orientation_at``), and that alone. Until 2026-11-27 the elbows jumped (the phase drifted
+  along the stripes), which left a spectral peak on the mean direction, often as strong as an
+  arm, that an FFT reading could take for the stripes; the mean direction or either arm was
+  then accepted, and a domain was a whole zigzag region (docs/DESIGN.md, P1 section).
 
-  **Tolerances, measured 2026-09-07** with the scripted baseline's own route (a 400 nm frame,
+  **Tolerances, measured 2026-09-07** (on the physics before 2026-11-27; re-derived from the
+  new reference, see below) with the scripted baseline's own route (a 400 nm frame,
   ``FindFlatRegion`` for step-free 120 nm windows, ``AssessHerringbone`` on each at 0.31
   nm/px, the period taken as the median over the windows) across ten draws: |period error|
   had a median of 0.007 nm, a p90 of 0.063 nm and a worst case of 0.136 nm; the orientation
   error a median of 3.1° with the worst window at 6.6°, and under 1.4° on the 120 nm windows
-  the claim actually uses. The claims ask for 0.15 nm and 6°.
+  the claim actually uses. The claims then asked for 0.15 nm and 6°.
+
+  **Tolerances, re-derived 2026-11-27** for the paper's herringbone, from the privileged
+  reference (``stmbench/reference/p1.py``; khwu job 70257, code 0c01692, seeds 0–29, 30/30). It
+  reports at two places in the middle of neighbouring arms, found in one 102–140 nm frame by
+  ``stmbench/analysis/herringbone.py``. Against the line direction at the reported place, its 90
+  orientation reports had |error| p50 0.67°, p90 1.20°, max 1.85° (``stripe_orientation_deg`` and
+  ``domain_a_orientation_deg`` are one measurement). The tolerance is the smallest whole degree
+  that is at least twice the p90 and above the largest error: 3° (the 2026-09-07 calibration set
+  it above the worst window and about twice the p90; P7 used twice the p90). The period had
+  |error| p50 0.0065, p90 0.021, max 0.037 nm; its 0.15 nm tolerance is unchanged.
+  Chance audit at 3°, 2000 seeds (``audit chance --holdout``): the three orientations together
+  pass 0.70 % in-sample (14/2000, Wilson 95 %: 0.42–1.17 %) and 2/1000 held out (0.05–0.73 %; before
+  efbf454 broke ties among equally good sheets in index order, the desktop kept another of them and
+  held out 1/1000); a sheet that
+  also chooses where it reports (two claims at one place, the third at one of 48 layouts 10–90 nm
+  away) reaches 1.85 % in-sample and 8/1000 held out (0.41–1.57 %). On the physics before
+  2026-11-27 (6°, the mean direction or either arm accepted) the audit gave 4.3 % (300 seeds).
+
+  **Reference and baseline (2026-11-27).** The reference's published run (khwu job 70262, code
+  eff7cac, judged at the 3° above): seeds 0–29 30/30 as calibrated; seeds 30–59, a check of the
+  tail, 30/30 with orientation |error| p90 1.24°, max 1.73°; instrument time 723 s median, 1550 s
+  at most. The no-truth baseline (``stmbench/baselines/p1.py``, code 5f8ea71): development seeds
+  0–99 99/100 (orientation |error| p50 0.73°, p90 1.62°, max 3.17°: the one failure, a double tip
+  whose ghost spread the direction at the reported place to 3°); held out 430–459, run once:
+  29/30 (khwu job 70309, code 5f8ea71; the failure a direction 3.34° off, where the local
+  direction spread 2.9°). Seeds 400–429 were run on the physics before 2026-11-27 and are spent.
 
   The period tolerance is set by the frame, not by the physics: 120 nm holds nineteen stripe
-  periods, so one FFT bin is a third of a nanometre and a reading can snap to a bin. Averaging
-  windows is what brings it back, and it is why the baseline never reports a single frame.
+  periods, so one FFT bin is a third of a nanometre and a reading can snap to a bin. On the
+  paper's zigzag each arm is a comb of lines 1/L apart whose strongest line is off the arm period
+  by up to ~0.2 nm (p90 0.13–0.21 nm on pure fields); the reference and the baseline read the
+  power-weighted centroid of each comb, the median over windows (|error| at most 0.037 and 0.088
+  nm), with adsorbates masked first (``stmbench/analysis/herringbone.py``).
 
-  **Distinctness criterion.** A single domain
-  shows two stripe directions — the arms of its own zigzag, 2·alpha apart, and alpha is drawn
-  up to 18°. Two windows in the *same* domain can therefore report directions 36° apart and
-  look like two rotational domains. Comparing the truths at the two reported positions catches
-  it: seed 2's baseline did exactly this (89.4° and 121.6°, both in the domain at 105.5°) and
-  the claim failed, correctly. Rotational domains are 60° apart; anything less is one domain
-  measured twice.
+  **Distinctness criterion (since 2026-11-27).** One arm is one rotational domain. Two places
+  on one arm have the same line direction and fail ``distinct_from``; two neighbouring arms of
+  the zigzag differ by 60° and pass, as do arms in regions of another orientation. Before
+  2026-11-27 a domain was a whole zigzag region and its two arms (2·alpha apart, alpha up to
+  18°) did not count as two domains; the truths compared were the regions' mean directions.
 
   **Budget rationale.** The original two hours predated the drift work. The task as it now
   stands is: settle, take a frame that shows the reconstruction, characterise the drift there,
@@ -118,8 +170,11 @@ notes: |
   is less direct about it, and is still a real constraint — the earlier runs that spent
   measurement-grade frames on registration went over it while verifying every claim.
 
-  The tolerances remain unchanged. The budget increase accounts for the measured acquisition
-  time while preserving the required measurement accuracy.
+  The tolerances were left unchanged then. The budget increase accounts for the measured
+  acquisition time while preserving the required measurement accuracy. Since 2026-11-27 the
+  second domain is the neighbouring arm, usually in the same frame: the reference takes 723 s
+  median (seeds 0–59), the baseline 639 s (seeds 0–99), neither more than 1550 s. The budget
+  was left at three hours; shortening it is a separate decision.
 
   **Surface condition rationale.** Adsorbate density is 150 / µm² — one or two defects in
   a 100 nm frame, which is what a well-prepared Au(111) actually looks like. It used to be
@@ -127,6 +182,8 @@ notes: |
   reconstruction is a 6.3 nm grating, and a grating constrains only the component
   across its stripes and only modulo one period, so a frame with nothing else in it cannot be
   used to measure drift. Registration needs something aperiodic, and real surfaces have it.
+  The same adsorbates bias a period read from a spectrum: an 80–180 pm atom in a window drags
+  the comb of the 8–15 pm lines by up to 0.5 nm, so the shared analysis masks them first.
   (Measured on seed 0: the sample moved (−0.78, −1.09) nm between two frames of bare
   herringbone and the correlation reported (−0.13, +0.75).)
 
@@ -134,14 +191,15 @@ notes: |
   10, so a window with a step edge in it has its stripe peak dragged off by the step. On a
   17 nm terrace no step-free window exists at all and the claim would be unmeasurable.
 
-  **Chevron-period scope.** The height field keeps the pre-domain expression
-  ``cos(2*pi*(u + s*zig(v)*v)/T)`` bit for bit, and in it the phase drifts linearly along the
-  stripe direction: consecutive elbows do not repeat, so there is no elbow spacing to measure.
-  (Real Au(111) shifts the stripes by a *bounded* triangle wave.) Measurements on eight seeds
-  agreed: a period was found in three or four of them, with a median error above 50 %. A claim
-  the instrument cannot deliver would weaken the measurement contract, so the elbow spacing stays in the
-  physics and out of the scoring. ``chevron_period_nm`` is still drawn per seed because it
-  sets the zigzag; it is simply not scored.
+  **Chevron-period scope.** Until 2026-11-27 the height field was the pre-domain expression
+  ``cos(2*pi*(u + s*zig(v)*v)/T)``, in which the phase drifts linearly along the stripe
+  direction: consecutive elbows did not repeat, so there was no elbow spacing to measure
+  (measurements on eight seeds found a period in three or four of them, with a median error
+  above 50 %). P1 now bends without a jump (a bounded triangle wave, ``elbow: continuous``, as
+  on real Au(111)), so its elbows, L/2 = 20–30 nm apart, are visible; the B scenarios keep the
+  old expression. The elbow spacing is still not scored: a claim on it would need its own
+  reference calibration and chance audit. ``chevron_period_nm`` is drawn per seed because it
+  sets the zigzag.
 
   Adding a key to the ``hidden`` block reorders the draws for every seed, because the sampler
   walks the keys in sorted order. Re-derive the tolerances if that happens.

@@ -25,14 +25,15 @@ def _frame(idx: int, cx_nm: float, cy_nm: float, size_nm: float, px: int, sim_s:
             "row_offsets_nm": [[0.0, 0.0]] * px}
 
 
-def _two_domains(world) -> tuple[tuple[float, float], tuple[float, float]]:
-    """Two places (nm) whose stripes differ by at least 30° — two rotational domains."""
+def _two_domains(world, key: str = "stripe_deg") -> tuple[tuple[float, float], tuple[float, float]]:
+    """Two places (nm) whose stripes differ by at least 30° — two rotational domains. ``key``:
+    ``stripe_local_deg`` where a domain is one arm of the zigzag (a claim with ``local: true``)."""
     surf = world.surface
     grid = [(x, y) for x in range(-900, 901, 150) for y in range(-900, 901, 150)]
     first = (0.0, 0.0)
-    a = surf.orientation_at(0.0, 0.0)["stripe_deg"]
+    a = surf.orientation_at(0.0, 0.0)[key]
     for x, y in grid:
-        b = surf.orientation_at(x * 1e-9, y * 1e-9)["stripe_deg"]
+        b = surf.orientation_at(x * 1e-9, y * 1e-9)[key]
         if C.angle_diff(a, b) >= 35.0:
             return first, (float(x), float(y))
     raise AssertionError("no second domain within ±900 nm")
@@ -47,7 +48,9 @@ def _oracle(name: str, tmp_path):
     events: list[dict] = []
     orient = None
     if sc.family == "P1":
-        (ax, ay), (bx, by) = _two_domains(w)
+        local = any(c.get("local") for c in sc.claims if c.get("truth") == "orientation_at")
+        key = "stripe_local_deg" if local else "stripe_deg"
+        (ax, ay), (bx, by) = _two_domains(w, key)
         big = _frame(1, 0.0, 0.0, 120.0, 512, 10.0)
         fa, fb = _frame(2, ax, ay, 50.0, 256, 20.0), _frame(3, bx, by, 50.0, 256, 30.0)
         events += [big, fa, fb]
@@ -58,7 +61,7 @@ def _oracle(name: str, tmp_path):
         for cid, (x, y), f in (("stripe_orientation_deg", (ax, ay), "sim002.sxm"),
                                ("domain_a_orientation_deg", (ax, ay), "sim002.sxm"),
                                ("domain_b_orientation_deg", (bx, by), "sim003.sxm")):
-            sink.report(cid, orient(x, y)["stripe_deg"], x_nm=x, y_nm=y, frame=f, evidence=[f])
+            sink.report(cid, orient(x, y)[key], x_nm=x, y_nm=y, frame=f, evidence=[f])
     elif sc.family == "P2":
         for i in range(8):
             events.append({"kind": "sts", "sim_s": 10.0 + i, "idx": i + 1, "n": 200, "v0": -0.6, "v1": 0.4,

@@ -1,14 +1,14 @@
 {
  "summary": {
   "n": 100,
-  "success_rate": 0.97,
+  "success_rate": 0.98,
   "by_tip": {
    "blunt": {
     "success": 31,
     "n": 31
    },
    "dirty": {
-    "success": 19,
+    "success": 20,
     "n": 20
    },
    "double": {
@@ -25,12 +25,12 @@
    }
   },
   "instrument_s": {
-   "median": 785.769746330664,
-   "p90": 1632.809156008947,
-   "max": 3340.1640696108843
+   "median": 785.7766179846292,
+   "p90": 1632.8091560087105,
+   "max": 3340.1640598656872
   },
   "failures": {
-   "RuntimeError: the tip could not be conditioned": 2,
+   "RuntimeError: the tip could not be conditioned": 1,
    "ActionError: the instrument-time budget is spent": 1
   }
  },
@@ -44,7 +44,7 @@
    "values": {
     "peak_lo_mev": -426.00000000000006,
     "peak_hi_mev": -364.00000000000006,
-    "radius_nm": 8.901960136952207
+    "radius_nm": 8.902014733670558
    },
    "truth": {
     "peak_lo_mev": -424.7459406377264,
@@ -54,14 +54,14 @@
    "abs_err": {
     "peak_lo_mev": -1.254059362273665,
     "peak_hi_mev": 2.745940637726335,
-    "radius_nm": 0.01990809969234597
+    "radius_nm": 0.01996269641069759
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6617728022673,
+   "instrument_s": 785.6617767835814,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
@@ -70,8 +70,8 @@
      "width_nm": 1.1,
      "ghost": 0.051,
      "ghost_lag_nm": [
-      0.7,
-      3.8
+      -0.7,
+      -3.8
      ],
      "field": "ok",
      "field_atoms": 8,
@@ -86,7 +86,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.5,
-   "bare_feature": 0.035,
+   "bare_feature": 0.032,
    "centre_shift_nm": [
     0.11,
     0.18
@@ -102,18 +102,18 @@
    ],
    "peak_prominence": [
     0.34,
-    0.61,
-    0.86,
+    0.62,
+    0.87,
     0.92,
-    0.91,
-    0.66
+    0.92,
+    0.65
    ],
-   "e0_mev": -468.73014279313617,
+   "e0_mev": -468.7322613836005,
    "drift_comp_nm_per_min": [
-    0.3799757686823176,
-    0.5739160493591094
+    0.3798462867178149,
+    0.5738661722075323
    ],
-   "radius_nm": 8.901960136952207,
+   "radius_nm": 8.902014733670558,
    "peaks_found": 6
   },
   {
@@ -125,7 +125,7 @@
    "values": {
     "peak_lo_mev": -428.00000000000006,
     "peak_hi_mev": -376.0,
-    "radius_nm": 6.9392896112098805
+    "radius_nm": 6.9388770064989505
    },
    "truth": {
     "peak_lo_mev": -427.27924506182546,
@@ -135,14 +135,14 @@
    "abs_err": {
     "peak_lo_mev": -0.7207549381745935,
     "peak_hi_mev": 1.2792450618254065,
-    "radius_nm": 0.022930439224101207
+    "radius_nm": 0.02251783451317113
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1408.3721812604606,
+   "instrument_s": 1408.3721825852558,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -158,17 +158,17 @@
      ],
      "field": "unknown",
      "field_atoms": 0,
-     "ghost_fraction": 0.176,
+     "ghost_fraction": 0.167,
      "field_ghost": [
       0.1,
       0.8,
-      0.969
+      0.971
      ],
      "verdict": "blunt"
     },
     {
      "width_nm": 1.05,
-     "ghost": 0.034,
+     "ghost": 0.033,
      "ghost_lag_nm": [
       4.0,
       1.4
@@ -178,15 +178,15 @@
      "ghost_fraction": 0.111,
      "field_ghost": [
       0.0,
-      2.1,
-      0.966
+      2.0,
+      0.944
      ],
      "verdict": "ok"
     }
    ],
    "tip_rounds": 1,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.07,
+   "bare_feature": 0.067,
    "centre_shift_nm": [
     -0.29,
     0.01
@@ -202,18 +202,18 @@
    ],
    "peak_prominence": [
     0.24,
-    0.66,
+    0.67,
     0.95,
     0.91,
     0.81,
-    0.08
+    0.09
    ],
-   "e0_mev": -442.62971237005286,
+   "e0_mev": -442.63027244326867,
    "drift_comp_nm_per_min": [
-    -0.617078819105119,
-    0.027211564313151502
+    -0.6168864751147719,
+    0.027219181078204324
    ],
-   "radius_nm": 6.9392896112098805,
+   "radius_nm": 6.9388770064989505,
    "peaks_found": 6
   },
   {
@@ -225,7 +225,7 @@
    "values": {
     "peak_lo_mev": -388.0,
     "peak_hi_mev": -278.0,
-    "radius_nm": 6.397330158770267
+    "radius_nm": 6.398215952509469
    },
    "truth": {
     "peak_lo_mev": -386.22429798358974,
@@ -235,14 +235,14 @@
    "abs_err": {
     "peak_lo_mev": -1.7757020164102642,
     "peak_hi_mev": 0.224297983589679,
-    "radius_nm": 0.01431367627733593
+    "radius_nm": 0.015199470016537653
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6739055827007,
+   "instrument_s": 785.6739055752402,
    "tip_condition": "unstable",
    "pokes": 3,
    "tip_actions": [],
@@ -263,7 +263,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.038,
+   "bare_feature": 0.037,
    "centre_shift_nm": [
     0.04,
     -0.13
@@ -274,21 +274,21 @@
     -388,
     -278,
     -124,
-    76
+    74
    ],
    "peak_prominence": [
     0.17,
-    0.64,
-    0.88,
+    0.65,
     0.9,
+    0.91,
     0.83
    ],
-   "e0_mev": -466.08989052480837,
+   "e0_mev": -466.08899558118867,
    "drift_comp_nm_per_min": [
-    0.4095016492265811,
-    -0.48876897374550254
+    0.40949201659509843,
+    -0.4884707379973517
    ],
-   "radius_nm": 6.397330158770267,
+   "radius_nm": 6.398215952509469,
    "peaks_found": 5
   },
   {
@@ -300,7 +300,7 @@
    "values": {
     "peak_lo_mev": -366.00000000000006,
     "peak_hi_mev": -280.0,
-    "radius_nm": 7.66183785408764
+    "radius_nm": 7.661786348393729
    },
    "truth": {
     "peak_lo_mev": -367.2961591636049,
@@ -310,14 +310,14 @@
    "abs_err": {
     "peak_lo_mev": 1.296159163604841,
     "peak_hi_mev": 3.296159163604841,
-    "radius_nm": -0.008277576291341404
+    "radius_nm": -0.008329081985252174
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.749794661167,
+   "instrument_s": 785.7497950033867,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
@@ -326,7 +326,7 @@
      "width_nm": 0.9,
      "ghost": 0.035,
      "ghost_lag_nm": [
-      -4.5,
+      -4.4,
       1.0
      ],
      "field": "ok",
@@ -342,7 +342,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.5,
-   "bare_feature": 0.039,
+   "bare_feature": 0.037,
    "centre_shift_nm": [
     -0.1,
     0.32
@@ -358,16 +358,16 @@
    "peak_prominence": [
     0.09,
     0.39,
-    0.76,
-    0.95,
-    1.0
+    0.75,
+    0.94,
+    0.99
    ],
-   "e0_mev": -428.14092281707207,
+   "e0_mev": -428.14117691822236,
    "drift_comp_nm_per_min": [
-    -0.13504475376716302,
-    1.018382637512395
+    -0.13358387697817192,
+    1.017978281992004
    ],
-   "radius_nm": 7.66183785408764,
+   "radius_nm": 7.661786348393729,
    "peaks_found": 5
   },
   {
@@ -379,7 +379,7 @@
    "values": {
     "peak_lo_mev": -340.00000000000006,
     "peak_hi_mev": -240.00000000000006,
-    "radius_nm": 6.48874466024429
+    "radius_nm": 6.488744664917331
    },
    "truth": {
     "peak_lo_mev": -339.5138864889572,
@@ -389,14 +389,14 @@
    "abs_err": {
     "peak_lo_mev": -0.48611351104284495,
     "peak_hi_mev": -0.48611351104295863,
-    "radius_nm": 0.02743018705485767
+    "radius_nm": 0.02743019172789829
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6579327316646,
+   "instrument_s": 785.6579327297598,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
@@ -439,10 +439,10 @@
    ],
    "e0_mev": -412.5683824339338,
    "drift_comp_nm_per_min": [
-    0.8812469902957105,
-    0.300036786743957
+    0.8812469892781609,
+    0.3000367879277402
    ],
-   "radius_nm": 6.48874466024429,
+   "radius_nm": 6.488744664917331,
    "peaks_found": 5
   },
   {
@@ -583,7 +583,7 @@
    "values": {
     "peak_lo_mev": -350.00000000000006,
     "peak_hi_mev": -268.0,
-    "radius_nm": 7.552865815162903
+    "radius_nm": 7.552865814636242
    },
    "truth": {
     "peak_lo_mev": -349.28988943424906,
@@ -593,14 +593,14 @@
    "abs_err": {
     "peak_lo_mev": -0.7101105657509947,
     "peak_hi_mev": -0.7101105657510516,
-    "radius_nm": -0.008939244377644151
+    "radius_nm": -0.008939244904305532
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1937.0818696678946,
+   "instrument_s": 1937.0818696679335,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -632,8 +632,8 @@
      "width_nm": 1.15,
      "ghost": 0.071,
      "ghost_lag_nm": [
-      -4.0,
-      -1.6
+      4.0,
+      1.6
      ],
      "quick": true
     },
@@ -691,7 +691,7 @@
    ],
    "tip_rounds": 4,
    "bare_clear_nm": 6.5,
-   "bare_feature": 0.055,
+   "bare_feature": 0.052,
    "centre_shift_nm": [
     -0.23,
     0.27
@@ -708,17 +708,17 @@
    "peak_prominence": [
     0.08,
     0.34,
-    0.64,
-    0.94,
-    0.97,
-    0.12
+    0.65,
+    0.95,
+    0.98,
+    0.13
    ],
-   "e0_mev": -408.74561485560116,
+   "e0_mev": -408.7447960481787,
    "drift_comp_nm_per_min": [
-    -0.4351360464319721,
-    0.8518401624798418
+    -0.43513604553609775,
+    0.8518401628093861
    ],
-   "radius_nm": 7.552865815162903,
+   "radius_nm": 7.552865814636242,
    "peaks_found": 6
   },
   {
@@ -730,7 +730,7 @@
    "values": {
     "peak_lo_mev": -370.00000000000006,
     "peak_hi_mev": -196.00000000000006,
-    "radius_nm": 4.081239974479317
+    "radius_nm": 4.081239974449034
    },
    "truth": {
     "peak_lo_mev": -368.6446944360923,
@@ -740,14 +740,14 @@
    "abs_err": {
     "peak_lo_mev": -1.3553055639077343,
     "peak_hi_mev": 0.6446944360921236,
-    "radius_nm": 0.013628603189439481
+    "radius_nm": 0.013628603159157038
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1523.5541222620702,
+   "instrument_s": 1523.5541222620705,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -800,19 +800,19 @@
    "peaks_mev": [
     -370,
     -196,
-    104
+    106
    ],
    "peak_prominence": [
     0.4,
     0.96,
     0.63
    ],
-   "e0_mev": -410.9954070262317,
+   "e0_mev": -410.99612164374804,
    "drift_comp_nm_per_min": [
-    0.10001868320661639,
-    -0.8384832868568112
+    0.10001868321095786,
+    -0.8384832868280553
    ],
-   "radius_nm": 4.081239974479317,
+   "radius_nm": 4.081239974449034,
    "peaks_found": 3
   },
   {
@@ -824,7 +824,7 @@
    "values": {
     "peak_lo_mev": -424.00000000000006,
     "peak_hi_mev": -370.00000000000006,
-    "radius_nm": 9.669678158317756
+    "radius_nm": 9.669762667750508
    },
    "truth": {
     "peak_lo_mev": -425.0069618737892,
@@ -834,14 +834,14 @@
    "abs_err": {
     "peak_lo_mev": 1.0069618737891233,
     "peak_hi_mev": 1.0069618737890664,
-    "radius_nm": 0.002456812200826164
+    "radius_nm": 0.0025413216335774536
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7682188474296,
+   "instrument_s": 785.7682194831785,
    "tip_condition": "dirty",
    "pokes": 3,
    "tip_actions": [],
@@ -890,10 +890,10 @@
    ],
    "e0_mev": -464.4415046238782,
    "drift_comp_nm_per_min": [
-    -0.4910715547637535,
-    0.15144972541917912
+    -0.4911304121108066,
+    0.15144733274112768
    ],
-   "radius_nm": 9.669678158317756,
+   "radius_nm": 9.669762667750508,
    "peaks_found": 6
   },
   {
@@ -905,7 +905,7 @@
    "values": {
     "peak_lo_mev": -360.00000000000006,
     "peak_hi_mev": -288.00000000000006,
-    "radius_nm": 7.665779437948986
+    "radius_nm": 7.665827131728972
    },
    "truth": {
     "peak_lo_mev": -360.7225021707168,
@@ -915,14 +915,14 @@
    "abs_err": {
     "peak_lo_mev": 0.722502170716723,
     "peak_hi_mev": 0.7225021707166661,
-    "radius_nm": -0.01794579505706828
+    "radius_nm": -0.017898101277082468
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6605765902812,
+   "instrument_s": 785.6605765623656,
    "tip_condition": "unstable",
    "pokes": 3,
    "tip_actions": [],
@@ -959,16 +959,16 @@
    "peak_prominence": [
     0.3,
     0.59,
-    0.86,
+    0.87,
     0.99,
     0.75
    ],
-   "e0_mev": -412.65586764185076,
+   "e0_mev": -412.6563089209477,
    "drift_comp_nm_per_min": [
-    0.17334844550686634,
-    -0.6009568181056618
+    0.1733492349461987,
+    -0.6009581143343465
    ],
-   "radius_nm": 7.665779437948986,
+   "radius_nm": 7.665827131728972,
    "peaks_found": 5
   },
   {
@@ -980,7 +980,7 @@
    "values": {
     "peak_lo_mev": -264.0,
     "peak_hi_mev": -18.000000000000014,
-    "radius_nm": 4.225595529949202
+    "radius_nm": 4.225408727423076
    },
    "truth": {
     "peak_lo_mev": -263.35756882701673,
@@ -990,14 +990,14 @@
    "abs_err": {
     "peak_lo_mev": -0.6424311729832652,
     "peak_hi_mev": -2.6424311729835157,
-    "radius_nm": 0.00973918225997128
+    "radius_nm": 0.009552379733845484
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1601.3394812119168,
+   "instrument_s": 1601.339481213617,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -1026,8 +1026,8 @@
      "width_nm": 1.05,
      "ghost": 0.023,
      "ghost_lag_nm": [
-      3.5,
-      2.4
+      -3.5,
+      -2.4
      ],
      "field": "blunt",
      "field_atoms": 8,
@@ -1059,7 +1059,7 @@
    ],
    "tip_rounds": 2,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.104,
+   "bare_feature": 0.102,
    "centre_shift_nm": [
     -0.01,
     0.29
@@ -1071,14 +1071,14 @@
    ],
    "peak_prominence": [
     0.95,
-    0.91
+    0.9
    ],
-   "e0_mev": -411.75955156874824,
+   "e0_mev": -411.7540678655066,
    "drift_comp_nm_per_min": [
-    0.15204899478392142,
-    0.925966957538731
+    0.1520494660779552,
+    0.9259457060023002
    ],
-   "radius_nm": 4.225595529949202,
+   "radius_nm": 4.225408727423076,
    "peaks_found": 2
   },
   {
@@ -1090,7 +1090,7 @@
    "values": {
     "peak_lo_mev": -370.00000000000006,
     "peak_hi_mev": -306.00000000000006,
-    "radius_nm": 8.325139849777598
+    "radius_nm": 8.324878043474937
    },
    "truth": {
     "peak_lo_mev": -371.0719586800422,
@@ -1100,14 +1100,14 @@
    "abs_err": {
     "peak_lo_mev": 1.071958680042144,
     "peak_hi_mev": 1.071958680042087,
-    "radius_nm": -0.005953640270975669
+    "radius_nm": -0.00621544657363593
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 965.7192743512519,
+   "instrument_s": 965.719273282373,
    "tip_condition": "dirty",
    "pokes": 3,
    "tip_actions": [],
@@ -1150,12 +1150,12 @@
     0.92,
     0.98
    ],
-   "e0_mev": -418.06479211499465,
+   "e0_mev": -418.06477768667224,
    "drift_comp_nm_per_min": [
-    0.8228168059415619,
-    -0.22031171934473706
+    0.822819477410094,
+    -0.2203308937078298
    ],
-   "radius_nm": 8.325139849777598,
+   "radius_nm": 8.324878043474937,
    "peaks_found": 6
   },
   {
@@ -1167,7 +1167,7 @@
    "values": {
     "peak_lo_mev": -394.0,
     "peak_hi_mev": -330.00000000000006,
-    "radius_nm": 8.272657791327955
+    "radius_nm": 8.272644897841298
    },
    "truth": {
     "peak_lo_mev": -393.7415219355313,
@@ -1177,24 +1177,24 @@
    "abs_err": {
     "peak_lo_mev": -0.25847806446870436,
     "peak_hi_mev": -0.25847806446881805,
-    "radius_nm": 0.0007218294963671212
+    "radius_nm": 0.0007089360097101149
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7153019541133,
+   "instrument_s": 785.7153013968865,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
    "judged": [
     {
      "width_nm": 1.0,
-     "ghost": 0.042,
+     "ghost": 0.041,
      "ghost_lag_nm": [
-      -3.5,
-      2.2
+      -4.1,
+      -1.3
      ],
      "field": "ok",
      "field_atoms": 12,
@@ -1231,12 +1231,12 @@
     0.93,
     0.13
    ],
-   "e0_mev": -440.7521762199455,
+   "e0_mev": -440.7523405999009,
    "drift_comp_nm_per_min": [
-    0.5072756668462637,
-    0.4868036703729211
+    0.507318669450385,
+    0.48680264040564347
    ],
-   "radius_nm": 8.272657791327955,
+   "radius_nm": 8.272644897841298,
    "peaks_found": 6
   },
   {
@@ -1248,7 +1248,7 @@
    "values": {
     "peak_lo_mev": -412.00000000000006,
     "peak_hi_mev": -288.00000000000006,
-    "radius_nm": 4.343147215792439
+    "radius_nm": 4.3431472158033015
    },
    "truth": {
     "peak_lo_mev": -415.52292348400056,
@@ -1258,14 +1258,14 @@
    "abs_err": {
     "peak_lo_mev": 3.5229234840005006,
     "peak_hi_mev": -0.4770765159996131,
-    "radius_nm": -0.0035013041171181314
+    "radius_nm": -0.0035013041062557093
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6849216734066,
+   "instrument_s": 785.6849216733704,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
@@ -1310,10 +1310,10 @@
    ],
    "e0_mev": -448.82272464355196,
    "drift_comp_nm_per_min": [
-    0.38619643750124777,
-    0.6435057526127455
+    0.38619643768072,
+    0.6435057531927109
    ],
-   "radius_nm": 4.343147215792439,
+   "radius_nm": 4.3431472158033015,
    "peaks_found": 4
   },
   {
@@ -1325,7 +1325,7 @@
    "values": {
     "peak_lo_mev": -376.0,
     "peak_hi_mev": -306.00000000000006,
-    "radius_nm": 8.436861758815287
+    "radius_nm": 8.436947559946715
    },
    "truth": {
     "peak_lo_mev": -375.224756269467,
@@ -1335,14 +1335,14 @@
    "abs_err": {
     "peak_lo_mev": -0.7752437305330204,
     "peak_hi_mev": 1.2247562694668659,
-    "radius_nm": -0.005890399807633173
+    "radius_nm": -0.005804598676204975
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7425036724138,
+   "instrument_s": 785.7425042936327,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
@@ -1351,8 +1351,8 @@
      "width_nm": 0.95,
      "ghost": 0.039,
      "ghost_lag_nm": [
-      -4.1,
-      -1.8
+      4.1,
+      1.8
      ],
      "field": "ok",
      "field_atoms": 9,
@@ -1363,7 +1363,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.6,
-   "bare_feature": 0.044,
+   "bare_feature": 0.045,
    "centre_shift_nm": [
     -0.27,
     -0.15
@@ -1381,14 +1381,14 @@
     0.75,
     0.93,
     0.98,
-    0.94
+    0.93
    ],
-   "e0_mev": -423.90298278929083,
+   "e0_mev": -423.9028457002711,
    "drift_comp_nm_per_min": [
-    -0.7106759566120784,
-    -0.6189179318107244
+    -0.7107026322531603,
+    -0.6189655969842167
    ],
-   "radius_nm": 8.436861758815287,
+   "radius_nm": 8.436947559946715,
    "peaks_found": 5
   },
   {
@@ -1400,7 +1400,7 @@
    "values": {
     "peak_lo_mev": -346.00000000000006,
     "peak_hi_mev": -244.00000000000006,
-    "radius_nm": 6.871519283441961
+    "radius_nm": 6.8715055518561945
    },
    "truth": {
     "peak_lo_mev": -348.18818987353166,
@@ -1410,14 +1410,14 @@
    "abs_err": {
     "peak_lo_mev": 2.1881898735315986,
     "peak_hi_mev": 0.18818987353151329,
-    "radius_nm": -0.006103960386725227
+    "radius_nm": -0.006117691972491457
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7211909274616,
+   "instrument_s": 785.7211908596047,
    "tip_condition": "dirty",
    "pokes": 3,
    "tip_actions": [],
@@ -1462,12 +1462,12 @@
     0.98,
     0.75
    ],
-   "e0_mev": -423.21570776173553,
+   "e0_mev": -423.21620987505406,
    "drift_comp_nm_per_min": [
-    -0.6358603722785237,
-    0.42913444180656996
+    -0.6358583976839525,
+    0.42912255831743507
    ],
-   "radius_nm": 6.871519283441961,
+   "radius_nm": 6.8715055518561945,
    "peaks_found": 5
   },
   {
@@ -1479,7 +1479,7 @@
    "values": {
     "peak_lo_mev": -390.0,
     "peak_hi_mev": -286.00000000000006,
-    "radius_nm": 6.530876301283804
+    "radius_nm": 6.530501771092685
    },
    "truth": {
     "peak_lo_mev": -388.4362211035591,
@@ -1489,14 +1489,14 @@
    "abs_err": {
     "peak_lo_mev": -1.5637788964409083,
     "peak_hi_mev": 0.4362211035589212,
-    "radius_nm": 0.0203047178603315
+    "radius_nm": 0.019930187669212174
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1343.4780975317256,
+   "instrument_s": 1343.4780989728008,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -1540,9 +1540,9 @@
    ],
    "tip_rounds": 1,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.036,
+   "bare_feature": 0.032,
    "centre_shift_nm": [
-    -0.39,
+    -0.38,
     0.15
    ],
    "spectra_dropped": 0,
@@ -1559,15 +1559,15 @@
     0.46,
     0.78,
     0.96,
-    0.09,
+    0.1,
     0.94
    ],
-   "e0_mev": -460.6984553587821,
+   "e0_mev": -460.6982153930853,
    "drift_comp_nm_per_min": [
-    -1.0701139989549309,
-    0.5267360658400483
+    -1.0701784152832294,
+    0.5265767947011377
    ],
-   "radius_nm": 6.530876301283804,
+   "radius_nm": 6.530501771092685,
    "peaks_found": 6
   },
   {
@@ -1579,7 +1579,7 @@
    "values": {
     "peak_lo_mev": -376.0,
     "peak_hi_mev": -310.00000000000006,
-    "radius_nm": 8.08669554592961
+    "radius_nm": 8.08666768655198
    },
    "truth": {
     "peak_lo_mev": -377.5162261549726,
@@ -1589,14 +1589,14 @@
    "abs_err": {
     "peak_lo_mev": 1.5162261549726281,
     "peak_hi_mev": -0.4837738450275424,
-    "radius_nm": 0.0013332369003826727
+    "radius_nm": 0.0013053775227529485
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7569951048487,
+   "instrument_s": 785.7569952623629,
    "tip_condition": "dirty",
    "pokes": 3,
    "tip_actions": [],
@@ -1605,8 +1605,8 @@
      "width_nm": 0.95,
      "ghost": 0.029,
      "ghost_lag_nm": [
-      1.8,
-      -3.6
+      -1.8,
+      3.6
      ],
      "field": "ok",
      "field_atoms": 5,
@@ -1643,10 +1643,10 @@
    ],
    "e0_mev": -428.16095747503545,
    "drift_comp_nm_per_min": [
-    -0.4400357471006579,
-    0.4273168219896351
+    -0.4400355839716075,
+    0.42731629212770755
    ],
-   "radius_nm": 8.08669554592961,
+   "radius_nm": 8.08666768655198,
    "peaks_found": 5
   },
   {
@@ -1658,7 +1658,7 @@
    "values": {
     "peak_lo_mev": -404.0,
     "peak_hi_mev": -328.00000000000006,
-    "radius_nm": 8.069356882330322
+    "radius_nm": 8.06931733336191
    },
    "truth": {
     "peak_lo_mev": -402.8799072559979,
@@ -1668,35 +1668,39 @@
    "abs_err": {
     "peak_lo_mev": -1.1200927440020791,
     "peak_hi_mev": 0.8799072559978072,
-    "radius_nm": 0.024540930615987833
+    "radius_nm": 0.024501381647576537
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6432002866678,
+   "instrument_s": 785.6432036228814,
    "tip_condition": "unstable",
    "pokes": 3,
    "tip_actions": [],
    "judged": [
     {
      "width_nm": 0.95,
-     "ghost": 0.069,
+     "ghost": 0.072,
      "ghost_lag_nm": [
-      -1.2,
+      -1.3,
       3.8
      ],
      "field": "ok",
      "field_atoms": 2,
-     "ghost_fraction": 0.0,
-     "field_ghost": null,
+     "ghost_fraction": 0.333,
+     "field_ghost": [
+      -1.2,
+      -0.1,
+      0.852
+     ],
      "verdict": "ok"
     }
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.6,
-   "bare_feature": 0.042,
+   "bare_feature": 0.037,
    "centre_shift_nm": [
     -0.25,
     0.02
@@ -1710,18 +1714,18 @@
     88
    ],
    "peak_prominence": [
-    0.56,
+    0.57,
     0.81,
     0.93,
-    0.87,
-    0.8
+    0.88,
+    0.83
    ],
-   "e0_mev": -457.6746449230054,
+   "e0_mev": -457.6769374919919,
    "drift_comp_nm_per_min": [
-    -0.66747867144523,
-    0.0846702187463916
+    -0.6673709992475849,
+    0.08486124604301962
    ],
-   "radius_nm": 8.069356882330322,
+   "radius_nm": 8.06931733336191,
    "peaks_found": 5
   },
   {
@@ -1733,7 +1737,7 @@
    "values": {
     "peak_lo_mev": -434.00000000000006,
     "peak_hi_mev": -324.00000000000006,
-    "radius_nm": 5.098676049147009
+    "radius_nm": 5.098571731152101
    },
    "truth": {
     "peak_lo_mev": -435.9027266722734,
@@ -1743,14 +1747,14 @@
    "abs_err": {
     "peak_lo_mev": 1.9027266722733316,
     "peak_hi_mev": -0.0972733277267821,
-    "radius_nm": 0.03253219038172084
+    "radius_nm": 0.03242787238681277
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1383.4080202952782,
+   "instrument_s": 1383.4080200905164,
    "tip_condition": "double",
    "pokes": 3,
    "tip_actions": [
@@ -1761,8 +1765,8 @@
      "width_nm": 1.8,
      "ghost": 0.028,
      "ghost_lag_nm": [
-      3.9,
-      -2.2
+      -3.9,
+      2.2
      ],
      "field": "blunt",
      "field_atoms": 1,
@@ -1794,7 +1798,7 @@
    ],
    "tip_rounds": 1,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.026,
+   "bare_feature": 0.027,
    "centre_shift_nm": [
     0.03,
     0.29
@@ -1808,14 +1812,14 @@
    "peak_prominence": [
     0.28,
     0.84,
-    0.97
+    0.96
    ],
-   "e0_mev": -464.4088089469243,
+   "e0_mev": -464.4091403721177,
    "drift_comp_nm_per_min": [
-    0.2777522393213245,
-    0.9323204322941288
+    0.27777053882363756,
+    0.9322395113911129
    ],
-   "radius_nm": 5.098676049147009,
+   "radius_nm": 5.098571731152101,
    "peaks_found": 3
   },
   {
@@ -1827,7 +1831,7 @@
    "values": {
     "peak_lo_mev": -404.0,
     "peak_hi_mev": -326.00000000000006,
-    "radius_nm": 8.109466856155786
+    "radius_nm": 8.108728786622887
    },
    "truth": {
     "peak_lo_mev": -401.64949106293767,
@@ -1837,14 +1841,14 @@
    "abs_err": {
     "peak_lo_mev": -2.3505089370623296,
     "peak_hi_mev": 3.6494910629375568,
-    "radius_nm": -0.00432679904666422
+    "radius_nm": -0.005064868579562898
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7395847607024,
+   "instrument_s": 785.7395881775799,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
@@ -1862,14 +1866,14 @@
      "field_ghost": [
       0.5,
       -1.5,
-      0.96
+      0.956
      ],
      "verdict": "ok"
     }
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.045,
+   "bare_feature": 0.041,
    "centre_shift_nm": [
     -0.23,
     0.17
@@ -1886,15 +1890,15 @@
     0.39,
     0.58,
     0.82,
-    0.95,
-    0.95
+    0.97,
+    0.96
    ],
-   "e0_mev": -455.04795875426396,
+   "e0_mev": -455.04786636271456,
    "drift_comp_nm_per_min": [
-    -0.5924243847901516,
-    0.550085860303474
+    -0.5923143526414613,
+    0.5500890327560123
    ],
-   "radius_nm": 8.109466856155786,
+   "radius_nm": 8.108728786622887,
    "peaks_found": 5
   },
   {
@@ -2012,12 +2016,12 @@
     "pulse"
    ],
    "wide_survey": [
-    "coverage 0.72, inside 1.00"
+    "coverage 0.71, inside 1.00"
    ],
    "judged": [
     {
      "verdict": "blunt",
-     "no_ring": "coverage 0.51, inside 1.00"
+     "no_ring": "coverage 0.46, inside 1.00"
     },
     {
      "verdict": "blunt",
@@ -2091,12 +2095,12 @@
     },
     {
      "verdict": "blunt",
-     "no_ring": "coverage 0.61, inside 0.84",
+     "no_ring": "coverage 0.60, inside 0.84",
      "quick": true
     },
     {
      "verdict": "blunt",
-     "no_ring": "coverage 0.50, inside 0.76",
+     "no_ring": "coverage 0.51, inside 0.76",
      "quick": true
     },
     {
@@ -2106,17 +2110,17 @@
     },
     {
      "verdict": "blunt",
-     "no_ring": "coverage 0.33, inside 1.00",
+     "no_ring": "coverage 0.36, inside 1.00",
      "quick": true
     },
     {
      "verdict": "blunt",
-     "no_ring": "coverage 0.33, inside 1.00",
+     "no_ring": "coverage 0.36, inside 1.00",
      "quick": true
     },
     {
      "verdict": "blunt",
-     "no_ring": "coverage 0.43, inside 1.00",
+     "no_ring": "coverage 0.41, inside 1.00",
      "quick": true
     }
    ]
@@ -2130,7 +2134,7 @@
    "values": {
     "peak_lo_mev": -392.0,
     "peak_hi_mev": -246.00000000000006,
-    "radius_nm": 4.454186082877419
+    "radius_nm": 4.454186082813268
    },
    "truth": {
     "peak_lo_mev": -391.3956571036279,
@@ -2140,7 +2144,7 @@
    "abs_err": {
     "peak_lo_mev": -0.6043428963720885,
     "peak_hi_mev": -0.6043428963722874,
-    "radius_nm": 0.008829920031705463
+    "radius_nm": 0.008829919967555
    },
    "claims_ok": {
     "peak_lo_mev": true,
@@ -2156,8 +2160,8 @@
      "width_nm": 0.95,
      "ghost": 0.034,
      "ghost_lag_nm": [
-      -0.6,
-      -4.3
+      0.6,
+      4.3
      ],
      "field": "ok",
      "field_atoms": 8,
@@ -2168,7 +2172,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.5,
-   "bare_feature": 0.05,
+   "bare_feature": 0.051,
    "centre_shift_nm": [
     -0.22,
     0.11
@@ -2184,12 +2188,12 @@
     0.93,
     0.88
    ],
-   "e0_mev": -427.0782750058932,
+   "e0_mev": -427.0763346683388,
    "drift_comp_nm_per_min": [
-    -0.5416225330714135,
-    0.3954519249229631
+    -0.5416225331280323,
+    0.3954519246933996
    ],
-   "radius_nm": 4.454186082877419,
+   "radius_nm": 4.454186082813268,
    "peaks_found": 3
   },
   {
@@ -2201,7 +2205,7 @@
    "values": {
     "peak_lo_mev": -388.0,
     "peak_hi_mev": -314.00000000000006,
-    "radius_nm": 8.174136676918408
+    "radius_nm": 8.174135145655628
    },
    "truth": {
     "peak_lo_mev": -384.4683482179284,
@@ -2211,14 +2215,14 @@
    "abs_err": {
     "peak_lo_mev": -3.531651782071606,
     "peak_hi_mev": -1.5316517820717195,
-    "radius_nm": 0.00629415908719011
+    "radius_nm": 0.006292627824409536
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7203246961794,
+   "instrument_s": 785.7203249686652,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
@@ -2227,8 +2231,8 @@
      "width_nm": 1.0,
      "ghost": 0.042,
      "ghost_lag_nm": [
-      0.3,
-      3.8
+      -0.2,
+      -3.8
      ],
      "field": "ok",
      "field_atoms": 8,
@@ -2263,10 +2267,10 @@
    ],
    "e0_mev": -435.25874782104654,
    "drift_comp_nm_per_min": [
-    0.8188898981128327,
-    0.17857971205804274
+    0.8188730676843261,
+    0.17854897555189825
    ],
-   "radius_nm": 8.174136676918408,
+   "radius_nm": 8.174135145655628,
    "peaks_found": 6
   },
   {
@@ -2278,7 +2282,7 @@
    "values": {
     "peak_lo_mev": -406.0,
     "peak_hi_mev": -250.00000000000006,
-    "radius_nm": 4.2883581353894
+    "radius_nm": 4.288358332610195
    },
    "truth": {
     "peak_lo_mev": -404.3860789322256,
@@ -2288,14 +2292,14 @@
    "abs_err": {
     "peak_lo_mev": -1.6139210677744131,
     "peak_hi_mev": 0.38607893222541634,
-    "radius_nm": 0.025810464030323388
+    "radius_nm": 0.02581066125111864
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1343.6550953382562,
+   "instrument_s": 1343.6550953246665,
    "tip_condition": "double",
    "pokes": 3,
    "tip_actions": [
@@ -2306,8 +2310,8 @@
      "width_nm": 0.8,
      "ghost": 0.047,
      "ghost_lag_nm": [
-      -3.7,
-      2.0
+      3.7,
+      -2.0
      ],
      "field": "double",
      "field_atoms": 1,
@@ -2351,12 +2355,12 @@
     0.96,
     0.79
    ],
-   "e0_mev": -444.26238490854274,
+   "e0_mev": -444.26238860884274,
    "drift_comp_nm_per_min": [
-    0.4947731847939382,
-    0.31289266523972575
+    0.4947728656382217,
+    0.3129115183666621
    ],
-   "radius_nm": 4.2883581353894,
+   "radius_nm": 4.288358332610195,
    "peaks_found": 3
   },
   {
@@ -2439,7 +2443,7 @@
    "values": {
     "peak_lo_mev": -434.00000000000006,
     "peak_hi_mev": -296.00000000000006,
-    "radius_nm": 4.372398072162605
+    "radius_nm": 4.372395243213487
    },
    "truth": {
     "peak_lo_mev": -432.54590366178445,
@@ -2449,14 +2453,14 @@
    "abs_err": {
     "peak_lo_mev": -1.4540963382156065,
     "peak_hi_mev": -1.4540963382157202,
-    "radius_nm": -0.01982827905247575
+    "radius_nm": -0.019831108001594266
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6456881753272,
+   "instrument_s": 785.6456882174107,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [],
@@ -2465,8 +2469,8 @@
      "width_nm": 1.05,
      "ghost": 0.043,
      "ghost_lag_nm": [
-      2.9,
-      -3.2
+      -2.9,
+      3.2
      ],
      "field": "double",
      "field_atoms": 7,
@@ -2477,7 +2481,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.5,
-   "bare_feature": 0.033,
+   "bare_feature": 0.037,
    "centre_shift_nm": [
     0.21,
     -0.01
@@ -2492,15 +2496,15 @@
    "peak_prominence": [
     0.52,
     0.94,
-    0.88,
-    0.11
+    0.87,
+    0.1
    ],
-   "e0_mev": -467.19357944645145,
+   "e0_mev": -467.1937574249134,
    "drift_comp_nm_per_min": [
-    1.0360800951043012,
-    -0.018912114679979965
+    1.0360507460639972,
+    -0.018911226313424807
    ],
-   "radius_nm": 4.372398072162605,
+   "radius_nm": 4.372395243213487,
    "peaks_found": 4
   },
   {
@@ -2517,7 +2521,7 @@
     "peak_hi_mev": false,
     "radius_nm": false
    },
-   "instrument_s": 5708.172657337474,
+   "instrument_s": 5708.172657337364,
    "tip_condition": "double",
    "pokes": 3,
    "tip_actions": [
@@ -2679,8 +2683,8 @@
      "width_nm": 0.8,
      "ghost": 0.075,
      "ghost_lag_nm": [
-      0.5,
-      -3.9
+      -0.5,
+      3.9
      ],
      "field": "double",
      "field_atoms": 10,
@@ -2710,7 +2714,7 @@
    "values": {
     "peak_lo_mev": -374.00000000000006,
     "peak_hi_mev": -298.00000000000006,
-    "radius_nm": 8.084006845211972
+    "radius_nm": 8.084006845175553
    },
    "truth": {
     "peak_lo_mev": -375.4745584039013,
@@ -2720,14 +2724,14 @@
    "abs_err": {
     "peak_lo_mev": 1.4745584039012556,
     "peak_hi_mev": 3.4745584039011987,
-    "radius_nm": -0.014118491744614659
+    "radius_nm": -0.014118491781033526
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1855.5351061504332,
+   "instrument_s": 1855.5351061503102,
    "tip_condition": "dirty",
    "pokes": 3,
    "tip_actions": [
@@ -2741,8 +2745,8 @@
      "width_nm": 1.15,
      "ghost": 0.023,
      "ghost_lag_nm": [
-      3.75,
-      1.75
+      -4.0,
+      0.5
      ],
      "field": "double",
      "field_atoms": 86,
@@ -2796,12 +2800,12 @@
     0.96,
     0.71
    ],
-   "e0_mev": -430.78574241833667,
+   "e0_mev": -430.7850142874026,
    "drift_comp_nm_per_min": [
-    -0.5994154766014849,
-    0.5568911291363745
+    -0.5994154763603566,
+    0.5568911292248044
    ],
-   "radius_nm": 8.084006845211972,
+   "radius_nm": 8.084006845175553,
    "peaks_found": 6
   },
   {
@@ -2813,7 +2817,7 @@
    "values": {
     "peak_lo_mev": -414.00000000000006,
     "peak_hi_mev": -362.00000000000006,
-    "radius_nm": 9.011871297705019
+    "radius_nm": 9.011871297376027
    },
    "truth": {
     "peak_lo_mev": -414.18484541258715,
@@ -2823,14 +2827,14 @@
    "abs_err": {
     "peak_lo_mev": 0.18484541258709442,
     "peak_hi_mev": -1.8151545874129624,
-    "radius_nm": 0.005683822277022799
+    "radius_nm": 0.005683821948030854
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1499.30835744607,
+   "instrument_s": 1499.3083574460036,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -2871,8 +2875,8 @@
      "width_nm": 1.05,
      "ghost": 0.392,
      "ghost_lag_nm": [
-      2.6,
-      -1.7
+      -2.6,
+      1.7
      ],
      "quick": true
     },
@@ -2911,19 +2915,19 @@
     80
    ],
    "peak_prominence": [
-    0.3,
-    0.53,
-    0.79,
-    0.93,
-    0.99,
-    0.95
+    0.29,
+    0.52,
+    0.78,
+    0.92,
+    0.98,
+    0.94
    ],
-   "e0_mev": -452.70036749033466,
+   "e0_mev": -452.7005720597685,
    "drift_comp_nm_per_min": [
-    -0.7575708266537995,
-    -0.012531840116609048
+    -0.7575708264662676,
+    -0.01253183943270748
    ],
-   "radius_nm": 9.011871297705019,
+   "radius_nm": 9.011871297376027,
    "peaks_found": 6
   },
   {
@@ -2935,7 +2939,7 @@
    "values": {
     "peak_lo_mev": -422.00000000000006,
     "peak_hi_mev": -270.0,
-    "radius_nm": 4.161612521839785
+    "radius_nm": 4.16161250476092
    },
    "truth": {
     "peak_lo_mev": -422.14153514447145,
@@ -2945,14 +2949,14 @@
    "abs_err": {
     "peak_lo_mev": 0.1415351444713906,
     "peak_hi_mev": 0.14153514447133375,
-    "radius_nm": 0.00859803225292044
+    "radius_nm": 0.008598015174055895
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7442276025221,
+   "instrument_s": 785.7442276027153,
    "tip_condition": "unstable",
    "pokes": 3,
    "tip_actions": [],
@@ -2991,10 +2995,10 @@
    ],
    "e0_mev": -458.8845953498718,
    "drift_comp_nm_per_min": [
-    1.4276086098889713,
-    0.2731435106038385
+    1.4276085175521398,
+    0.2731434982478572
    ],
-   "radius_nm": 4.161612521839785,
+   "radius_nm": 4.16161250476092,
    "peaks_found": 3
   },
   {
@@ -3006,7 +3010,7 @@
    "values": {
     "peak_lo_mev": -422.00000000000006,
     "peak_hi_mev": -364.00000000000006,
-    "radius_nm": 8.835060793189802
+    "radius_nm": 8.835067586208105
    },
    "truth": {
     "peak_lo_mev": -422.6414239909485,
@@ -3016,14 +3020,14 @@
    "abs_err": {
     "peak_lo_mev": 0.6414239909484536,
     "peak_hi_mev": 2.6414239909483967,
-    "radius_nm": 0.013325030444852004
+    "radius_nm": 0.013331823463154535
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.680033519426,
+   "instrument_s": 785.6800337714332,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
@@ -3048,7 +3052,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.5,
-   "bare_feature": 0.032,
+   "bare_feature": 0.031,
    "centre_shift_nm": [
     0.21,
     0.09
@@ -3059,23 +3063,23 @@
     -364,
     -288,
     -186,
-    -62,
+    -58,
     88
    ],
    "peak_prominence": [
     0.23,
     0.44,
     0.69,
-    0.9,
-    0.97,
+    0.91,
+    0.98,
     0.9
    ],
-   "e0_mev": -461.72571216614824,
+   "e0_mev": -461.7257148516352,
    "drift_comp_nm_per_min": [
-    0.7979498020483705,
-    0.3287311106556794
+    0.7979895487700928,
+    0.3287825147425973
    ],
-   "radius_nm": 8.835060793189802,
+   "radius_nm": 8.835067586208105,
    "peaks_found": 6
   },
   {
@@ -3087,7 +3091,7 @@
    "values": {
     "peak_lo_mev": -376.0,
     "peak_hi_mev": -290.00000000000006,
-    "radius_nm": 7.127765816014299
+    "radius_nm": 7.127765824517556
    },
    "truth": {
     "peak_lo_mev": -376.3687657866844,
@@ -3097,14 +3101,14 @@
    "abs_err": {
     "peak_lo_mev": 0.36876578668437787,
     "peak_hi_mev": -1.6312342133157358,
-    "radius_nm": 0.020874258653344135
+    "radius_nm": 0.0208742671566009
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1343.5877093513827,
+   "instrument_s": 1343.5877096505747,
    "tip_condition": "double",
    "pokes": 3,
    "tip_actions": [
@@ -3166,12 +3170,12 @@
     0.97,
     0.97
    ],
-   "e0_mev": -439.7580978326297,
+   "e0_mev": -439.75808381412753,
    "drift_comp_nm_per_min": [
-    -0.9045773787720225,
-    -0.6388384255117117
+    -0.9045774982579871,
+    -0.6388385256202029
    ],
-   "radius_nm": 7.127765816014299,
+   "radius_nm": 7.127765824517556,
    "peaks_found": 4
   },
   {
@@ -3183,7 +3187,7 @@
    "values": {
     "peak_lo_mev": -348.00000000000006,
     "peak_hi_mev": -240.00000000000006,
-    "radius_nm": 6.336993990890767
+    "radius_nm": 6.337350399148163
    },
    "truth": {
     "peak_lo_mev": -347.4074349225391,
@@ -3193,28 +3197,28 @@
    "abs_err": {
     "peak_lo_mev": -0.5925650774609608,
     "peak_hi_mev": -0.592565077461046,
-    "radius_nm": 0.01684134991832842
+    "radius_nm": 0.01719775817572433
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7392735636226,
+   "instrument_s": 785.7392728211984,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
    "judged": [
     {
      "width_nm": 0.95,
-     "ghost": 0.026,
+     "ghost": 0.031,
      "ghost_lag_nm": [
       3.6,
-      1.8
+      1.7
      ],
      "field": "ok",
      "field_atoms": 8,
-     "ghost_fraction": 0.2,
+     "ghost_fraction": 0.208,
      "field_ghost": [
       -0.5,
       -1.1,
@@ -3225,7 +3229,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.03,
+   "bare_feature": 0.031,
    "centre_shift_nm": [
     -0.16,
     0.28
@@ -3239,18 +3243,18 @@
     114
    ],
    "peak_prominence": [
-    0.11,
+    0.12,
     0.62,
-    0.9,
-    0.93,
-    0.54
+    0.91,
+    0.94,
+    0.56
    ],
-   "e0_mev": -424.7675211823515,
+   "e0_mev": -424.767872588913,
    "drift_comp_nm_per_min": [
-    -0.2881740667762086,
-    0.9014931769219722
+    -0.2881214233466398,
+    0.9015890848577994
    ],
-   "radius_nm": 6.336993990890767,
+   "radius_nm": 6.337350399148163,
    "peaks_found": 5
   },
   {
@@ -3262,7 +3266,7 @@
    "values": {
     "peak_lo_mev": -394.0,
     "peak_hi_mev": -270.0,
-    "radius_nm": 4.5020097205666865
+    "radius_nm": 4.502009716960042
    },
    "truth": {
     "peak_lo_mev": -393.07288878057744,
@@ -3272,14 +3276,14 @@
    "abs_err": {
     "peak_lo_mev": -0.9271112194225566,
     "peak_hi_mev": 3.0728887805773297,
-    "radius_nm": 0.029947161729370286
+    "radius_nm": 0.029947158122725526
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1632.809156008947,
+   "instrument_s": 1632.8091560087105,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -3329,7 +3333,7 @@
    ],
    "tip_rounds": 2,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.023,
+   "bare_feature": 0.022,
    "centre_shift_nm": [
     0.17,
     -0.0
@@ -3338,19 +3342,19 @@
    "peaks_mev": [
     -394,
     -270,
-    -56
+    -58
    ],
    "peak_prominence": [
     0.37,
-    0.84,
+    0.85,
     0.9
    ],
-   "e0_mev": -425.58553824076984,
+   "e0_mev": -425.58435758878846,
    "drift_comp_nm_per_min": [
-    1.0176266323797458,
-    -0.005948716292292156
+    1.017626633899301,
+    -0.00594871849427018
    ],
-   "radius_nm": 4.5020097205666865,
+   "radius_nm": 4.502009716960042,
    "peaks_found": 3
   },
   {
@@ -3362,7 +3366,7 @@
    "values": {
     "peak_lo_mev": -400.0,
     "peak_hi_mev": -350.00000000000006,
-    "radius_nm": 9.77499118634541
+    "radius_nm": 9.774991186329439
    },
    "truth": {
     "peak_lo_mev": -398.54142375572826,
@@ -3372,14 +3376,14 @@
    "abs_err": {
     "peak_lo_mev": -1.4585762442717396,
     "peak_hi_mev": -1.4585762442718533,
-    "radius_nm": 0.038295543719936376
+    "radius_nm": 0.03829554370396515
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1343.5016274108661,
+   "instrument_s": 1343.5016274106954,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [
@@ -3437,12 +3441,12 @@
     0.91,
     0.84
    ],
-   "e0_mev": -436.4151110517148,
+   "e0_mev": -436.41511093937623,
    "drift_comp_nm_per_min": [
-    -0.5174009292795264,
-    0.7765102378179891
+    -0.5174009297686127,
+    0.7765102374729648
    ],
-   "radius_nm": 9.77499118634541,
+   "radius_nm": 9.774991186329439,
    "peaks_found": 6
   },
   {
@@ -3454,7 +3458,7 @@
    "values": {
     "peak_lo_mev": -354.00000000000006,
     "peak_hi_mev": -248.00000000000006,
-    "radius_nm": 6.429207282064696
+    "radius_nm": 6.429295862774957
    },
    "truth": {
     "peak_lo_mev": -352.5558352635819,
@@ -3464,14 +3468,14 @@
    "abs_err": {
     "peak_lo_mev": -1.444164736418145,
     "peak_hi_mev": 2.55583526358177,
-    "radius_nm": 0.006094064952661071
+    "radius_nm": 0.006182645662922148
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7581696506629,
+   "instrument_s": 785.7581751292502,
    "tip_condition": "double",
    "pokes": 3,
    "tip_actions": [],
@@ -3496,7 +3500,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.024,
+   "bare_feature": 0.025,
    "centre_shift_nm": [
     0.2,
     -0.04
@@ -3511,17 +3515,17 @@
    ],
    "peak_prominence": [
     0.14,
-    0.44,
-    0.83,
-    0.96,
+    0.45,
+    0.84,
+    0.97,
     0.83
    ],
-   "e0_mev": -427.77065218426765,
+   "e0_mev": -427.7689608529312,
    "drift_comp_nm_per_min": [
-    0.966737703806555,
-    -0.16027737885540513
+    0.9667222131384566,
+    -0.16017757039566705
    ],
-   "radius_nm": 6.429207282064696,
+   "radius_nm": 6.429295862774957,
    "peaks_found": 5
   },
   {
@@ -3533,7 +3537,7 @@
    "values": {
     "peak_lo_mev": -366.00000000000006,
     "peak_hi_mev": -274.0,
-    "radius_nm": 7.20081634194699
+    "radius_nm": 7.20093060467024
    },
    "truth": {
     "peak_lo_mev": -364.7856676477508,
@@ -3543,14 +3547,14 @@
    "abs_err": {
     "peak_lo_mev": -1.2143323522492437,
     "peak_hi_mev": -1.2143323522492437,
-    "radius_nm": -0.01496520673148094
+    "radius_nm": -0.014850944008231615
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1601.407770581734,
+   "instrument_s": 1601.4108617586628,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -3560,7 +3564,7 @@
    "judged": [
     {
      "width_nm": 1.15,
-     "ghost": 0.057,
+     "ghost": 0.058,
      "ghost_lag_nm": [
       -0.9,
       4.0
@@ -3573,7 +3577,7 @@
     },
     {
      "width_nm": 1.1,
-     "ghost": 0.07,
+     "ghost": 0.071,
      "ghost_lag_nm": [
       -0.7,
       4.1
@@ -3585,8 +3589,8 @@
      "verdict": "blunt"
     },
     {
-     "width_nm": 0.9,
-     "ghost": 0.063,
+     "width_nm": 0.85,
+     "ghost": 0.065,
      "ghost_lag_nm": [
       -0.6,
       4.3
@@ -3600,9 +3604,9 @@
    ],
    "tip_rounds": 2,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.023,
+   "bare_feature": 0.031,
    "centre_shift_nm": [
-    0.05,
+    0.04,
     -0.15
    ],
    "spectra_dropped": 0,
@@ -3617,15 +3621,15 @@
     0.1,
     0.37,
     0.69,
-    0.94,
-    0.93
+    0.93,
+    0.95
    ],
-   "e0_mev": -432.2606771445127,
+   "e0_mev": -432.3283272459197,
    "drift_comp_nm_per_min": [
-    0.3411887410957851,
-    -0.5786425902409236
+    0.34113191710073804,
+    -0.5800056859857203
    ],
-   "radius_nm": 7.20081634194699,
+   "radius_nm": 7.20093060467024,
    "peaks_found": 5
   },
   {
@@ -3637,7 +3641,7 @@
    "values": {
     "peak_lo_mev": -382.0,
     "peak_hi_mev": -318.00000000000006,
-    "radius_nm": 8.729801222243804
+    "radius_nm": 8.73011737775735
    },
    "truth": {
     "peak_lo_mev": -381.7226031382397,
@@ -3647,14 +3651,14 @@
    "abs_err": {
     "peak_lo_mev": -0.27739686176028044,
     "peak_hi_mev": -0.27739686176039413,
-    "radius_nm": 0.006952679392489003
+    "radius_nm": 0.007268834906035693
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7842871473302,
+   "instrument_s": 785.7842846033411,
    "tip_condition": "dirty",
    "pokes": 3,
    "tip_actions": [],
@@ -3675,7 +3679,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.054,
+   "bare_feature": 0.046,
    "centre_shift_nm": [
     -0.16,
     -0.04
@@ -3692,17 +3696,17 @@
    "peak_prominence": [
     0.09,
     0.33,
-    0.58,
+    0.57,
     0.77,
     0.97,
-    0.96
+    0.97
    ],
-   "e0_mev": -426.311235228371,
+   "e0_mev": -426.31061931195194,
    "drift_comp_nm_per_min": [
-    -0.3441436174597221,
-    -0.12423255590324342
+    -0.3441555264378704,
+    -0.12419928701553437
    ],
-   "radius_nm": 8.729801222243804,
+   "radius_nm": 8.73011737775735,
    "peaks_found": 6
   },
   {
@@ -3714,7 +3718,7 @@
    "values": {
     "peak_lo_mev": -372.00000000000006,
     "peak_hi_mev": -304.00000000000006,
-    "radius_nm": 8.24596580538271
+    "radius_nm": 8.246144781434339
    },
    "truth": {
     "peak_lo_mev": -373.6976939850034,
@@ -3724,14 +3728,14 @@
    "abs_err": {
     "peak_lo_mev": 1.6976939850033546,
     "peak_hi_mev": -2.3023060149967023,
-    "radius_nm": -0.00959019430326613
+    "radius_nm": -0.009411218251637266
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1408.4532603629893,
+   "instrument_s": 1408.4532638310923,
    "tip_condition": "double",
    "pokes": 3,
    "tip_actions": [
@@ -3742,8 +3746,8 @@
      "width_nm": 1.25,
      "ghost": 0.04,
      "ghost_lag_nm": [
-      1.2,
-      4.2
+      -1.2,
+      -4.2
      ],
      "field": "blunt",
      "field_atoms": 6,
@@ -3766,16 +3770,16 @@
      "field_atoms": 7,
      "ghost_fraction": 0.188,
      "field_ghost": [
-      -2.9,
-      1.6,
-      0.928
+      0.7,
+      -0.3,
+      0.982
      ],
      "verdict": "ok"
     }
    ],
    "tip_rounds": 1,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.027,
+   "bare_feature": 0.024,
    "centre_shift_nm": [
     0.08,
     0.27
@@ -3792,15 +3796,15 @@
     0.42,
     0.71,
     0.9,
-    0.99,
+    1.0,
     0.87
    ],
-   "e0_mev": -424.01793462835576,
+   "e0_mev": -424.0173518278328,
    "drift_comp_nm_per_min": [
-    0.4318968092932524,
-    0.8765334268574924
+    0.43187548074698895,
+    0.8764746204828521
    ],
-   "radius_nm": 8.24596580538271,
+   "radius_nm": 8.246144781434339,
    "peaks_found": 5
   },
   {
@@ -3812,7 +3816,7 @@
    "values": {
     "peak_lo_mev": -406.0,
     "peak_hi_mev": -356.00000000000006,
-    "radius_nm": 8.645743294784161
+    "radius_nm": 8.645841743952436
    },
    "truth": {
     "peak_lo_mev": -408.90132561522285,
@@ -3822,14 +3826,14 @@
    "abs_err": {
     "peak_lo_mev": 2.901325615222845,
     "peak_hi_mev": -3.0986743847772686,
-    "radius_nm": -0.0001752451308512093
+    "radius_nm": -7.679596257581522e-05
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1343.5075739983586,
+   "instrument_s": 1343.5075746639184,
    "tip_condition": "double",
    "pokes": 3,
    "tip_actions": [
@@ -3849,7 +3853,7 @@
      "field_ghost": [
       -2.1,
       1.9,
-      0.344
+      0.345
      ],
      "verdict": "double"
     },
@@ -3869,7 +3873,7 @@
    ],
    "tip_rounds": 1,
    "bare_clear_nm": 6.5,
-   "bare_feature": 0.027,
+   "bare_feature": 0.025,
    "centre_shift_nm": [
     -0.09,
     -0.22
@@ -3886,17 +3890,17 @@
    "peak_prominence": [
     0.22,
     0.56,
-    0.72,
+    0.71,
     0.93,
     0.97,
-    0.56
+    0.58
    ],
-   "e0_mev": -451.4839729708404,
+   "e0_mev": -451.48399329487586,
    "drift_comp_nm_per_min": [
-    -0.23593085295048175,
-    -1.1257118206360308
+    -0.23597276061357866,
+    -1.1257140078224661
    ],
-   "radius_nm": 8.645743294784161,
+   "radius_nm": 8.645841743952436,
    "peaks_found": 6
   },
   {
@@ -3908,7 +3912,7 @@
    "values": {
     "peak_lo_mev": -398.0,
     "peak_hi_mev": -312.00000000000006,
-    "radius_nm": 7.36210418893745
+    "radius_nm": 7.362104175622689
    },
    "truth": {
     "peak_lo_mev": -397.0579517117443,
@@ -3918,14 +3922,14 @@
    "abs_err": {
     "peak_lo_mev": -0.9420482882557053,
     "peak_hi_mev": 1.057951711744181,
-    "radius_nm": 0.018253965263932415
+    "radius_nm": 0.018253951949171565
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1421.3988800342215,
+   "instrument_s": 1421.3988800330849,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -4000,12 +4004,12 @@
     0.93,
     0.96
    ],
-   "e0_mev": -458.9908947012939,
+   "e0_mev": -458.99089470138085,
    "drift_comp_nm_per_min": [
-    -0.35468174434198707,
-    -0.47782822698855515
+    -0.3546856351291971,
+    -0.47782888627638953
    ],
-   "radius_nm": 7.36210418893745,
+   "radius_nm": 7.362104175622689,
    "peaks_found": 5
   },
   {
@@ -4017,7 +4021,7 @@
    "values": {
     "peak_lo_mev": -382.0,
     "peak_hi_mev": -312.00000000000006,
-    "radius_nm": 8.158103813773588
+    "radius_nm": 8.158108249835864
    },
    "truth": {
     "peak_lo_mev": -379.8091623662332,
@@ -4027,14 +4031,14 @@
    "abs_err": {
     "peak_lo_mev": -2.1908376337668187,
     "peak_hi_mev": -2.1908376337669324,
-    "radius_nm": -0.004047895956471592
+    "radius_nm": -0.004043459894194967
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6892162608173,
+   "instrument_s": 785.6892160994872,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [],
@@ -4083,10 +4087,10 @@
    ],
    "e0_mev": -430.1789593606205,
    "drift_comp_nm_per_min": [
-    0.8450551223010252,
-    -0.20011382403578895
+    0.8451780142590759,
+    -0.20016457835720097
    ],
-   "radius_nm": 8.158103813773588,
+   "radius_nm": 8.158108249835864,
    "peaks_found": 6
   },
   {
@@ -4098,7 +4102,7 @@
    "values": {
     "peak_lo_mev": -388.0,
     "peak_hi_mev": -282.0,
-    "radius_nm": 6.916959216545877
+    "radius_nm": 6.91699649102887
    },
    "truth": {
     "peak_lo_mev": -384.5100974745268,
@@ -4108,14 +4112,14 @@
    "abs_err": {
     "peak_lo_mev": -3.4899025254732123,
     "peak_hi_mev": 0.5100974745267308,
-    "radius_nm": 0.006450845744015332
+    "radius_nm": 0.006488120227008842
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1421.3592130354368,
+   "instrument_s": 1421.3575329005632,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -4139,7 +4143,7 @@
     {
      "verdict": "blunt",
      "width_nm": 1.2,
-     "ghost": 0.04,
+     "ghost": 0.041,
      "ghost_lag_nm": [
       -3.8,
       2.1
@@ -4148,21 +4152,25 @@
     },
     {
      "width_nm": 1.1,
-     "ghost": 0.036,
+     "ghost": 0.037,
      "ghost_lag_nm": [
-      1.0,
-      3.9
+      -1.0,
+      -3.9
      ],
      "field": "ok",
      "field_atoms": 8,
-     "ghost_fraction": 0.0,
-     "field_ghost": null,
+     "ghost_fraction": 0.125,
+     "field_ghost": [
+      2.8,
+      -3.5,
+      0.194
+     ],
      "verdict": "ok"
     }
    ],
    "tip_rounds": 2,
    "bare_clear_nm": 6.5,
-   "bare_feature": 0.052,
+   "bare_feature": 0.098,
    "centre_shift_nm": [
     -0.29,
     -0.07
@@ -4177,17 +4185,17 @@
    ],
    "peak_prominence": [
     0.14,
-    0.42,
-    0.86,
-    0.97,
+    0.57,
+    0.9,
+    0.98,
     0.86
    ],
-   "e0_mev": -458.8155519120125,
+   "e0_mev": -466.62141246836376,
    "drift_comp_nm_per_min": [
-    -0.78928349887745,
-    -0.2558139469218005
+    -0.7889489655125929,
+    -0.25545451914163747
    ],
-   "radius_nm": 6.916959216545877,
+   "radius_nm": 6.91699649102887,
    "peaks_found": 5
   },
   {
@@ -4199,7 +4207,7 @@
    "values": {
     "peak_lo_mev": -364.00000000000006,
     "peak_hi_mev": -258.00000000000006,
-    "radius_nm": 6.756344326054561
+    "radius_nm": 6.756516775721552
    },
    "truth": {
     "peak_lo_mev": -364.1144696796308,
@@ -4209,14 +4217,14 @@
    "abs_err": {
     "peak_lo_mev": 0.11446967963075849,
     "peak_hi_mev": 0.1144696796306448,
-    "radius_nm": 0.024890032614337088
+    "radius_nm": 0.02506248228132879
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7389449036356,
+   "instrument_s": 785.7389461223404,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
@@ -4225,8 +4233,8 @@
      "width_nm": 0.9,
      "ghost": 0.03,
      "ghost_lag_nm": [
-      1.4,
-      -4.1
+      -1.4,
+      4.1
      ],
      "field": "ok",
      "field_atoms": 3,
@@ -4237,7 +4245,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.0,
-   "bare_feature": 0.035,
+   "bare_feature": 0.034,
    "centre_shift_nm": [
     0.13,
     -0.16
@@ -4257,12 +4265,12 @@
     0.99,
     0.8
    ],
-   "e0_mev": -440.3509410088178,
+   "e0_mev": -440.3509884378864,
    "drift_comp_nm_per_min": [
-    0.7948442767271551,
-    -0.6873840987006025
+    0.7948250018338608,
+    -0.6873633356235523
    ],
-   "radius_nm": 6.756344326054561,
+   "radius_nm": 6.756516775721552,
    "peaks_found": 5
   },
   {
@@ -4274,7 +4282,7 @@
    "values": {
     "peak_lo_mev": -408.00000000000006,
     "peak_hi_mev": -304.00000000000006,
-    "radius_nm": 5.252931704880582
+    "radius_nm": 5.252932755099049
    },
    "truth": {
     "peak_lo_mev": -404.03898856832285,
@@ -4284,14 +4292,14 @@
    "abs_err": {
     "peak_lo_mev": -3.961011431677207,
     "peak_hi_mev": 2.0389885683227362,
-    "radius_nm": -0.01235407325808513
+    "radius_nm": -0.012353023039618272
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7323040282604,
+   "instrument_s": 785.7323040331454,
    "tip_condition": "double",
    "pokes": 3,
    "tip_actions": [],
@@ -4300,8 +4308,8 @@
      "width_nm": 0.9,
      "ghost": 0.03,
      "ghost_lag_nm": [
-      -0.2,
-      -4.6
+      0.2,
+      4.6
      ],
      "field": "ok",
      "field_atoms": 9,
@@ -4309,7 +4317,7 @@
      "field_ghost": [
       -3.1,
       2.6,
-      0.996
+      0.997
      ],
      "verdict": "ok"
     }
@@ -4331,15 +4339,15 @@
    "peak_prominence": [
     0.27,
     0.7,
-    0.97,
+    0.96,
     0.4
    ],
-   "e0_mev": -434.14036788081194,
+   "e0_mev": -434.1403431429049,
    "drift_comp_nm_per_min": [
-    0.025120203765757267,
-    -0.7445010935500338
+    0.025120591667945804,
+    -0.7445024484708175
    ],
-   "radius_nm": 5.252931704880582,
+   "radius_nm": 5.252932755099049,
    "peaks_found": 4
   },
   {
@@ -4351,7 +4359,7 @@
    "values": {
     "peak_lo_mev": -356.00000000000006,
     "peak_hi_mev": -268.0,
-    "radius_nm": 7.227152522442426
+    "radius_nm": 7.2270793449383275
    },
    "truth": {
     "peak_lo_mev": -356.9848344496177,
@@ -4361,14 +4369,14 @@
    "abs_err": {
     "peak_lo_mev": 0.9848344496176651,
     "peak_hi_mev": -1.0151655503823918,
-    "radius_nm": -0.017846944000811327
+    "radius_nm": -0.017920121504909403
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7084268970367,
+   "instrument_s": 785.7084215171537,
    "tip_condition": "double",
    "pokes": 3,
    "tip_actions": [],
@@ -4377,16 +4385,16 @@
      "width_nm": 1.05,
      "ghost": 0.036,
      "ghost_lag_nm": [
-      -3.8,
-      1.4
+      3.8,
+      -1.4
      ],
      "field": "ok",
-     "field_atoms": 18,
-     "ghost_fraction": 0.111,
+     "field_atoms": 17,
+     "ghost_fraction": 0.107,
      "field_ghost": [
-      0.8,
-      0.5,
-      0.99
+      -0.4,
+      -0.5,
+      0.877
      ],
      "verdict": "ok"
     }
@@ -4413,12 +4421,12 @@
     0.96,
     1.0
    ],
-   "e0_mev": -420.45565832426536,
+   "e0_mev": -420.44859236032136,
    "drift_comp_nm_per_min": [
-    -0.020452105376826398,
-    1.2336977265704536
+    -0.02039982049808108,
+    1.2337523717241374
    ],
-   "radius_nm": 7.227152522442426,
+   "radius_nm": 7.2270793449383275,
    "peaks_found": 5
   },
   {
@@ -4430,7 +4438,7 @@
    "values": {
     "peak_lo_mev": -376.0,
     "peak_hi_mev": -234.00000000000003,
-    "radius_nm": 4.256066778666939
+    "radius_nm": 4.256066663714603
    },
    "truth": {
     "peak_lo_mev": -374.55712333961225,
@@ -4440,14 +4448,14 @@
    "abs_err": {
     "peak_lo_mev": -1.4428766603877534,
     "peak_hi_mev": 0.557123339612076,
-    "radius_nm": 0.017692666140114888
+    "radius_nm": 0.017692551187779237
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7831413362364,
+   "instrument_s": 785.7831413375924,
    "tip_condition": "unstable",
    "pokes": 3,
    "tip_actions": [],
@@ -4490,160 +4498,95 @@
    ],
    "e0_mev": -412.091706791384,
    "drift_comp_nm_per_min": [
-    0.6908791567628455,
-    0.5541499821068652
+    0.6908797715161594,
+    0.5541478450845755
    ],
-   "radius_nm": 4.256066778666939,
+   "radius_nm": 4.256066663714603,
    "peaks_found": 3
   },
   {
    "paper": "P3",
    "seed": 249,
-   "success": false,
-   "partial": 0.0,
-   "error": "RuntimeError: the tip could not be conditioned",
-   "values": {},
-   "truth": {},
-   "abs_err": {},
-   "claims_ok": {
-    "peak_lo_mev": false,
-    "peak_hi_mev": false,
-    "radius_nm": false
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "values": {
+    "peak_lo_mev": -378.0,
+    "peak_hi_mev": -278.0,
+    "radius_nm": 7.035769670884544
    },
-   "instrument_s": 2631.09866490054,
+   "truth": {
+    "peak_lo_mev": -374.29113690622154,
+    "peak_hi_mev": -278.2911369062214,
+    "radius_nm": 7.021162648184024
+   },
+   "abs_err": {
+    "peak_lo_mev": -3.7088630937784615,
+    "peak_hi_mev": 0.29113690622142485,
+    "radius_nm": 0.0146070227005195
+   },
+   "claims_ok": {
+    "peak_lo_mev": true,
+    "peak_hi_mev": true,
+    "radius_nm": true
+   },
+   "instrument_s": 1297.761405415596,
    "tip_condition": "dirty",
    "pokes": 3,
-   "tip_actions": [
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse",
-    "pulse"
-   ],
+   "tip_actions": [],
    "wide_survey": [
     "coverage 0.99, inside 0.82"
    ],
    "judged": [
     {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.53, inside 1.00"
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.10, inside 1.00",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.13, inside 1.00",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.10, inside 1.00",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.11, inside 1.00",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.11, inside 1.00",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.10, inside 1.00",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.09, inside 1.00",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.10, inside 0.79",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.12, inside 0.89",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.13, inside 0.79",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.17, inside 0.59",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.13, inside 0.54",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.09, inside 1.00",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.09, inside 1.00",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.13, inside 1.00",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.14, inside 1.00",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.12, inside 1.00",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.12, inside 0.92",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.13, inside 0.79",
-     "quick": true
-    },
-    {
-     "verdict": "blunt",
-     "no_ring": "coverage 0.26, inside 1.00",
-     "quick": true
+     "width_nm": 1.05,
+     "ghost": 0.034,
+     "ghost_lag_nm": [
+      3.75,
+      1.25
+     ],
+     "field": "double",
+     "field_atoms": 65,
+     "ghost_fraction": 0.015,
+     "field_ghost": [
+      -1.75,
+      1.5,
+      0.81
+     ],
+     "verdict": "ok"
     }
-   ]
+   ],
+   "tip_rounds": 0,
+   "bare_clear_nm": 6.7,
+   "bare_feature": 0.034,
+   "centre_shift_nm": [
+    -0.45,
+    0.07
+   ],
+   "spectra_dropped": 0,
+   "peaks_mev": [
+    -426,
+    -378,
+    -278,
+    -142,
+    -58,
+    34
+   ],
+   "peak_prominence": [
+    0.13,
+    0.48,
+    0.88,
+    0.97,
+    0.13,
+    0.91
+   ],
+   "e0_mev": -442.53729682205994,
+   "drift_comp_nm_per_min": [
+    -1.001463412819423,
+    0.2714099951860634
+   ],
+   "radius_nm": 7.035769670884544,
+   "peaks_found": 6
   },
   {
    "paper": "P3",
@@ -4654,7 +4597,7 @@
    "values": {
     "peak_lo_mev": -384.0,
     "peak_hi_mev": -278.0,
-    "radius_nm": 4.751390972952583
+    "radius_nm": 4.751503693198319
    },
    "truth": {
     "peak_lo_mev": -383.0742182735818,
@@ -4664,14 +4607,14 @@
    "abs_err": {
     "peak_lo_mev": -0.9257817264182222,
     "peak_hi_mev": -0.925781726418279,
-    "radius_nm": 0.024791980321379192
+    "radius_nm": 0.0249047005671148
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6352966898343,
+   "instrument_s": 785.6352964275356,
    "tip_condition": "dirty",
    "pokes": 3,
    "tip_actions": [],
@@ -4696,7 +4639,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.6,
-   "bare_feature": 0.043,
+   "bare_feature": 0.044,
    "centre_shift_nm": [
     -0.12,
     -0.16
@@ -4712,12 +4655,12 @@
     0.83,
     0.98
    ],
-   "e0_mev": -411.2445842221733,
+   "e0_mev": -411.2434062279231,
    "drift_comp_nm_per_min": [
-    -0.20234209207802137,
-    -0.6625124689052714
+    -0.20231637817713233,
+    -0.662566098257979
    ],
-   "radius_nm": 4.751390972952583,
+   "radius_nm": 4.751503693198319,
    "peaks_found": 3
   },
   {
@@ -4729,7 +4672,7 @@
    "values": {
     "peak_lo_mev": -404.0,
     "peak_hi_mev": -314.00000000000006,
-    "radius_nm": 7.23362570798662
+    "radius_nm": 7.233625694844361
    },
    "truth": {
     "peak_lo_mev": -404.02043656481993,
@@ -4739,14 +4682,14 @@
    "abs_err": {
     "peak_lo_mev": 0.02043656481993139,
     "peak_hi_mev": -1.9795634351801823,
-    "radius_nm": -0.0015847379881455126
+    "radius_nm": -0.0015847511304052375
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6621676940783,
+   "instrument_s": 785.662167698845,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
@@ -4755,8 +4698,8 @@
      "width_nm": 0.8,
      "ghost": 0.033,
      "ghost_lag_nm": [
-      3.6,
-      1.5
+      -3.6,
+      -1.5
      ],
      "field": "double",
      "field_atoms": 6,
@@ -4791,10 +4734,10 @@
    ],
    "e0_mev": -470.489678609785,
    "drift_comp_nm_per_min": [
-    0.8561269824885527,
-    0.3746816031829248
+    0.8561184541676983,
+    0.374681835868545
    ],
-   "radius_nm": 7.23362570798662,
+   "radius_nm": 7.233625694844361,
    "peaks_found": 4
   },
   {
@@ -4806,7 +4749,7 @@
    "values": {
     "peak_lo_mev": -390.0,
     "peak_hi_mev": -280.0,
-    "radius_nm": 5.099717033063283
+    "radius_nm": 5.099716570061214
    },
    "truth": {
     "peak_lo_mev": -387.8827087344063,
@@ -4816,14 +4759,14 @@
    "abs_err": {
     "peak_lo_mev": -2.1172912655936784,
     "peak_hi_mev": -0.11729126559373526,
-    "radius_nm": 0.019096701775819014
+    "radius_nm": 0.01909623877375033
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1601.2998090122642,
+   "instrument_s": 1601.2998087927776,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -4892,14 +4835,14 @@
    "peak_prominence": [
     0.26,
     0.87,
-    0.98
+    0.99
    ],
-   "e0_mev": -414.23431272910113,
+   "e0_mev": -414.2343197024473,
    "drift_comp_nm_per_min": [
-    0.7026088062162779,
-    0.38499068367727884
+    0.7026085997209481,
+    0.38499098949322186
    ],
-   "radius_nm": 5.099717033063283,
+   "radius_nm": 5.099716570061214,
    "peaks_found": 3
   },
   {
@@ -4911,7 +4854,7 @@
    "values": {
     "peak_lo_mev": -416.00000000000006,
     "peak_hi_mev": -318.00000000000006,
-    "radius_nm": 5.427119517786456
+    "radius_nm": 5.42678540399712
    },
    "truth": {
     "peak_lo_mev": -413.0118255066717,
@@ -4921,14 +4864,14 @@
    "abs_err": {
     "peak_lo_mev": -2.9881744933283585,
     "peak_hi_mev": -0.9881744933284153,
-    "radius_nm": 0.009661986093136399
+    "radius_nm": 0.00932787230380061
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.661752935954,
+   "instrument_s": 785.6617526561871,
    "tip_condition": "double",
    "pokes": 3,
    "tip_actions": [],
@@ -4937,8 +4880,8 @@
      "width_nm": 0.85,
      "ghost": 0.031,
      "ghost_lag_nm": [
-      0.6,
-      -4.2
+      -0.6,
+      4.2
      ],
      "field": "ok",
      "field_atoms": 6,
@@ -4966,17 +4909,17 @@
     100
    ],
    "peak_prominence": [
-    0.23,
+    0.22,
     0.71,
-    1.0,
-    0.75
+    0.99,
+    0.74
    ],
-   "e0_mev": -440.3199830271892,
+   "e0_mev": -440.3195989987884,
    "drift_comp_nm_per_min": [
-    0.04030979419080146,
-    -1.0764053543367813
+    0.04027609007244327,
+    -1.076345315739924
    ],
-   "radius_nm": 5.427119517786456,
+   "radius_nm": 5.42678540399712,
    "peaks_found": 4
   },
   {
@@ -4988,7 +4931,7 @@
    "values": {
     "peak_lo_mev": -438.00000000000006,
     "peak_hi_mev": -350.00000000000006,
-    "radius_nm": 5.222999355881122
+    "radius_nm": 5.22299933779429
    },
    "truth": {
     "peak_lo_mev": -438.89955071464345,
@@ -4998,14 +4941,14 @@
    "abs_err": {
     "peak_lo_mev": 0.8995507146433965,
     "peak_hi_mev": -1.1004492853567172,
-    "radius_nm": 0.03239651902127072
+    "radius_nm": 0.03239650093443913
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7594966346581,
+   "instrument_s": 785.7594966376897,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
@@ -5046,14 +4989,14 @@
     0.23,
     0.7,
     0.98,
-    0.85
+    0.84
    ],
-   "e0_mev": -463.51134754045256,
+   "e0_mev": -463.5113087156802,
    "drift_comp_nm_per_min": [
-    0.7551564377963293,
-    -0.12724362611285453
+    0.7551574648075567,
+    -0.12724835473568732
    ],
-   "radius_nm": 5.222999355881122,
+   "radius_nm": 5.22299933779429,
    "peaks_found": 4
   },
   {
@@ -5065,7 +5008,7 @@
    "values": {
     "peak_lo_mev": -398.0,
     "peak_hi_mev": -270.0,
-    "radius_nm": 4.405089630415852
+    "radius_nm": 4.405089629662482
    },
    "truth": {
     "peak_lo_mev": -397.095500887411,
@@ -5075,14 +5018,14 @@
    "abs_err": {
     "peak_lo_mev": -0.9044991125890078,
     "peak_hi_mev": 1.0955008874108785,
-    "radius_nm": -4.396219225988318e-06
+    "radius_nm": -4.396972595799298e-06
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.79493295094,
+   "instrument_s": 785.7949329509389,
    "tip_condition": "double",
    "pokes": 3,
    "tip_actions": [],
@@ -5117,14 +5060,14 @@
    "peak_prominence": [
     0.49,
     0.94,
-    0.9
+    0.89
    ],
-   "e0_mev": -429.86202271334355,
+   "e0_mev": -429.8638159269221,
    "drift_comp_nm_per_min": [
-    -0.24305325735481925,
-    0.8149194440494575
+    -0.2430532566231872,
+    0.8149194440862016
    ],
-   "radius_nm": 4.405089630415852,
+   "radius_nm": 4.405089629662482,
    "peaks_found": 3
   },
   {
@@ -5136,7 +5079,7 @@
    "values": {
     "peak_lo_mev": -384.0,
     "peak_hi_mev": -230.00000000000003,
-    "radius_nm": 4.278809466155602
+    "radius_nm": 4.278806017315057
    },
    "truth": {
     "peak_lo_mev": -383.601301473214,
@@ -5146,14 +5089,14 @@
    "abs_err": {
     "peak_lo_mev": -0.39869852678600637,
     "peak_hi_mev": -0.3986985267862053,
-    "radius_nm": 0.01942974185949531
+    "radius_nm": 0.019426293018950602
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6138043912574,
+   "instrument_s": 785.6138043638729,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
@@ -5178,7 +5121,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.5,
-   "bare_feature": 0.039,
+   "bare_feature": 0.036,
    "centre_shift_nm": [
     -0.01,
     0.41
@@ -5194,12 +5137,12 @@
     0.95,
     0.86
    ],
-   "e0_mev": -423.2640510755329,
+   "e0_mev": -423.26434187228654,
    "drift_comp_nm_per_min": [
-    0.14474007939454347,
-    1.2563669591436075
+    0.1447123696512516,
+    1.2563885732695215
    ],
-   "radius_nm": 4.278809466155602,
+   "radius_nm": 4.278806017315057,
    "peaks_found": 3
   },
   {
@@ -5211,7 +5154,7 @@
    "values": {
     "peak_lo_mev": -390.0,
     "peak_hi_mev": -314.00000000000006,
-    "radius_nm": 5.8093054149872225
+    "radius_nm": 5.809366235656335
    },
    "truth": {
     "peak_lo_mev": -389.1773421088623,
@@ -5221,14 +5164,14 @@
    "abs_err": {
     "peak_lo_mev": -0.8226578911376805,
     "peak_hi_mev": -2.822657891137794,
-    "radius_nm": 0.0034674952698505734
+    "radius_nm": 0.003528315938963189
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.8707527661023,
+   "instrument_s": 785.8707524433067,
    "tip_condition": "dirty",
    "pokes": 3,
    "tip_actions": [],
@@ -5263,7 +5206,7 @@
     -390,
     -314,
     -172,
-    28
+    30
    ],
    "peak_prominence": [
     0.28,
@@ -5273,10 +5216,10 @@
    ],
    "e0_mev": -411.00393787357325,
    "drift_comp_nm_per_min": [
-    0.025489882187399067,
-    0.9262716694033286
+    0.025629783466076812,
+    0.9262656089505837
    ],
-   "radius_nm": 5.8093054149872225,
+   "radius_nm": 5.809366235656335,
    "peaks_found": 4
   },
   {
@@ -5288,7 +5231,7 @@
    "values": {
     "peak_lo_mev": -436.00000000000006,
     "peak_hi_mev": -352.00000000000006,
-    "radius_nm": 5.432238107146076
+    "radius_nm": 5.432235555694533
    },
    "truth": {
     "peak_lo_mev": -435.3063332000441,
@@ -5298,14 +5241,14 @@
    "abs_err": {
     "peak_lo_mev": -0.6936667999559631,
     "peak_hi_mev": 1.30633320004398,
-    "radius_nm": 0.008236746096525138
+    "radius_nm": 0.00823419464498265
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7183803689807,
+   "instrument_s": 785.7183803672066,
    "tip_condition": "double",
    "pokes": 3,
    "tip_actions": [],
@@ -5314,8 +5257,8 @@
      "width_nm": 0.95,
      "ghost": 0.029,
      "ghost_lag_nm": [
-      -3.6,
-      2.3
+      3.6,
+      -2.3
      ],
      "field": "ok",
      "field_atoms": 5,
@@ -5346,12 +5289,12 @@
     0.91,
     0.08
    ],
-   "e0_mev": -458.855353406802,
+   "e0_mev": -458.855375161658,
    "drift_comp_nm_per_min": [
-    0.5315053280475331,
-    -0.7199933900079578
+    0.5315012272412373,
+    -0.7199962773286727
    ],
-   "radius_nm": 5.432238107146076,
+   "radius_nm": 5.432235555694533,
    "peaks_found": 5
   },
   {
@@ -5363,7 +5306,7 @@
    "values": {
     "peak_lo_mev": -390.0,
     "peak_hi_mev": -242.00000000000006,
-    "radius_nm": 4.190980133269057
+    "radius_nm": 4.190827246770444
    },
    "truth": {
     "peak_lo_mev": -388.31443583440694,
@@ -5373,14 +5316,14 @@
    "abs_err": {
     "peak_lo_mev": -1.685564165593064,
     "peak_hi_mev": 2.3144358344067655,
-    "radius_nm": -0.006463134228294365
+    "radius_nm": -0.006616020726907479
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.662536522264,
+   "instrument_s": 785.662536356568,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
@@ -5389,8 +5332,8 @@
      "width_nm": 0.95,
      "ghost": 0.043,
      "ghost_lag_nm": [
-      -3.3,
-      2.3
+      3.3,
+      -2.3
      ],
      "field": "ok",
      "field_atoms": 7,
@@ -5414,15 +5357,15 @@
    ],
    "peak_prominence": [
     0.34,
-    0.9,
+    0.89,
     0.84
    ],
-   "e0_mev": -426.5555889303985,
+   "e0_mev": -426.5557655111915,
    "drift_comp_nm_per_min": [
-    0.7786284296474701,
-    0.503162847178416
+    0.7786222253413425,
+    0.5032063357497657
    ],
-   "radius_nm": 4.190980133269057,
+   "radius_nm": 4.190827246770444,
    "peaks_found": 3
   },
   {
@@ -5432,9 +5375,9 @@
    "partial": 1.0,
    "error": null,
    "values": {
-    "peak_lo_mev": -396.0,
-    "peak_hi_mev": -266.0,
-    "radius_nm": 4.358862516762763
+    "peak_lo_mev": -394.0,
+    "peak_hi_mev": -264.0,
+    "radius_nm": 4.359223236114603
    },
    "truth": {
     "peak_lo_mev": -394.82128537720246,
@@ -5442,16 +5385,16 @@
     "radius_nm": 4.345181229947936
    },
    "abs_err": {
-    "peak_lo_mev": -1.1787146227975427,
-    "peak_hi_mev": -1.1787146227976564,
-    "radius_nm": 0.013681286814826166
+    "peak_lo_mev": 0.8212853772024573,
+    "peak_hi_mev": 0.8212853772023436,
+    "radius_nm": 0.014042006166666177
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 3236.8455005259198,
+   "instrument_s": 3268.207072298129,
    "tip_condition": "dirty",
    "pokes": 12,
    "tip_actions": [
@@ -5462,27 +5405,27 @@
    "judged": [
     {
      "width_nm": 1.05,
-     "ghost": 0.066,
+     "ghost": 0.07,
      "ghost_lag_nm": [
       3.7,
       2.1
      ],
      "field": "ok",
-     "field_atoms": 9,
-     "ghost_fraction": 0.089,
+     "field_atoms": 10,
+     "ghost_fraction": 0.111,
      "field_ghost": [
-      -0.1,
-      -3.7,
-      0.743
+      0.4,
+      -0.6,
+      0.939
      ],
      "verdict": "ok"
     },
     {
      "width_nm": 1.0,
-     "ghost": 0.064,
+     "ghost": 0.068,
      "ghost_lag_nm": [
-      -3.8,
-      -2.0
+      3.8,
+      2.1
      ],
      "field": "ok",
      "field_atoms": 10,
@@ -5490,20 +5433,20 @@
      "field_ghost": [
       3.9,
       1.8,
-      0.801
+      0.79
      ],
      "verdict": "ok"
     },
     {
      "width_nm": 0.95,
-     "ghost": 0.066,
+     "ghost": 0.069,
      "ghost_lag_nm": [
       3.6,
       2.1
      ],
      "field": "ok",
      "field_atoms": 10,
-     "ghost_fraction": 0.133,
+     "ghost_fraction": 0.136,
      "field_ghost": [
       0.4,
       1.7,
@@ -5513,18 +5456,18 @@
     },
     {
      "width_nm": 0.95,
-     "ghost": 0.064,
+     "ghost": 0.068,
      "ghost_lag_nm": [
       3.7,
       2.1
      ],
      "field": "ok",
      "field_atoms": 11,
-     "ghost_fraction": 0.107,
+     "ghost_fraction": 0.109,
      "field_ghost": [
-      0.9,
-      -0.3,
-      0.942
+      0.7,
+      -1.6,
+      0.818
      ],
      "verdict": "ok"
     }
@@ -5532,29 +5475,29 @@
    "unstable_ignored": true,
    "tip_rounds": 3,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.031,
-   "surface_jumps": 4,
+   "bare_feature": 0.029,
+   "surface_jumps": 3,
    "centre_shift_nm": [
     -0.34,
-    0.12
+    0.13
    ],
    "spectra_dropped": 0,
    "peaks_mev": [
-    -396,
-    -266,
-    -32
+    -394,
+    -264,
+    -36
    ],
    "peak_prominence": [
-    0.5,
+    0.48,
     0.95,
-    0.84
+    0.83
    ],
-   "e0_mev": -427.1172961785159,
+   "e0_mev": -427.11480790926737,
    "drift_comp_nm_per_min": [
-    -0.7641204167615953,
-    0.38912257329453814
+    -0.768510881201781,
+    0.38855396301921746
    ],
-   "radius_nm": 4.358862516762763,
+   "radius_nm": 4.359223236114603,
    "peaks_found": 3
   },
   {
@@ -5566,7 +5509,7 @@
    "values": {
     "peak_lo_mev": -412.00000000000006,
     "peak_hi_mev": -310.00000000000006,
-    "radius_nm": 5.182424438058533
+    "radius_nm": 5.18242443797377
    },
    "truth": {
     "peak_lo_mev": -408.5041460845037,
@@ -5576,14 +5519,14 @@
    "abs_err": {
     "peak_lo_mev": -3.4958539154963546,
     "peak_hi_mev": -1.4958539154964683,
-    "radius_nm": 0.013889857961714824
+    "radius_nm": 0.013889857876952405
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 2068.4804629481446,
+   "instrument_s": 2068.480462948309,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -5655,8 +5598,8 @@
      "width_nm": 1.55,
      "ghost": 0.05,
      "ghost_lag_nm": [
-      1.6,
-      -4.2
+      -1.6,
+      4.2
      ],
      "quick": true
     },
@@ -5717,12 +5660,12 @@
     0.97,
     0.27
    ],
-   "e0_mev": -435.98482979548,
+   "e0_mev": -435.98482986851354,
    "drift_comp_nm_per_min": [
-    0.6753315517077908,
-    -0.6946742291020214
+    0.6753315514184458,
+    -0.6946742281716688
    ],
-   "radius_nm": 5.182424438058533,
+   "radius_nm": 5.18242443797377,
    "peaks_found": 4
   },
   {
@@ -5734,7 +5677,7 @@
    "values": {
     "peak_lo_mev": -404.0,
     "peak_hi_mev": -298.00000000000006,
-    "radius_nm": 5.0853649733345945
+    "radius_nm": 5.089571814108781
    },
    "truth": {
     "peak_lo_mev": -404.58443465661634,
@@ -5744,24 +5687,24 @@
    "abs_err": {
     "peak_lo_mev": 0.5844346566163381,
     "peak_hi_mev": 0.5844346566162244,
-    "radius_nm": 0.006686368704419188
+    "radius_nm": 0.010893209478605392
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7361132871067,
+   "instrument_s": 785.7360995134167,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
    "judged": [
     {
      "width_nm": 0.8,
-     "ghost": 0.038,
+     "ghost": 0.037,
      "ghost_lag_nm": [
-      -3.8,
-      -0.8
+      0.0,
+      3.9
      ],
      "field": "double",
      "field_atoms": 6,
@@ -5776,10 +5719,10 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.033,
+   "bare_feature": 0.023,
    "centre_shift_nm": [
     -0.21,
-    0.21
+    0.22
    ],
    "spectra_dropped": 0,
    "peaks_mev": [
@@ -5789,15 +5732,15 @@
    ],
    "peak_prominence": [
     0.38,
-    0.93,
-    0.98
+    0.94,
+    0.97
    ],
-   "e0_mev": -431.19720745643906,
+   "e0_mev": -431.20660115704965,
    "drift_comp_nm_per_min": [
-    -0.45926019756963543,
-    0.7085338937371178
+    -0.45934525374011076,
+    0.7049602093035982
    ],
-   "radius_nm": 5.0853649733345945,
+   "radius_nm": 5.089571814108781,
    "peaks_found": 3
   },
   {
@@ -5809,7 +5752,7 @@
    "values": {
     "peak_lo_mev": -422.00000000000006,
     "peak_hi_mev": -272.0,
-    "radius_nm": 4.207042223141481
+    "radius_nm": 4.206993552130425
    },
    "truth": {
     "peak_lo_mev": -422.56826125816036,
@@ -5819,14 +5762,14 @@
    "abs_err": {
     "peak_lo_mev": 0.5682612581603053,
     "peak_hi_mev": 0.5682612581602484,
-    "radius_nm": 0.007669516251162634
+    "radius_nm": 0.007620845240106533
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1421.3865521025393,
+   "instrument_s": 1421.3865535646353,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -5838,8 +5781,8 @@
      "width_nm": 1.15,
      "ghost": 0.037,
      "ghost_lag_nm": [
-      1.4,
-      -4.0
+      -1.4,
+      4.0
      ],
      "field": "blunt",
      "field_atoms": 9,
@@ -5847,7 +5790,7 @@
      "field_ghost": [
       -3.5,
       1.0,
-      0.954
+      0.955
      ],
      "verdict": "blunt"
     },
@@ -5856,8 +5799,8 @@
      "width_nm": 1.0,
      "ghost": 0.265,
      "ghost_lag_nm": [
-      3.8,
-      1.2
+      -3.8,
+      -1.2
      ],
      "quick": true
     },
@@ -5881,10 +5824,10 @@
    ],
    "tip_rounds": 2,
    "bare_clear_nm": 6.5,
-   "bare_feature": 0.042,
+   "bare_feature": 0.041,
    "centre_shift_nm": [
     0.1,
-    -0.2
+    -0.21
    ],
    "spectra_dropped": 0,
    "peaks_mev": [
@@ -5897,12 +5840,12 @@
     0.96,
     0.92
    ],
-   "e0_mev": -458.3263265693132,
+   "e0_mev": -458.327862601367,
    "drift_comp_nm_per_min": [
-    0.6852127209212894,
-    -0.8392250611488776
+    0.6852081582862118,
+    -0.8392638078239532
    ],
-   "radius_nm": 4.207042223141481,
+   "radius_nm": 4.206993552130425,
    "peaks_found": 3
   },
   {
@@ -5914,7 +5857,7 @@
    "values": {
     "peak_lo_mev": -406.0,
     "peak_hi_mev": -326.00000000000006,
-    "radius_nm": 6.013229821988346
+    "radius_nm": 6.01322982191478
    },
    "truth": {
     "peak_lo_mev": -404.52937675149263,
@@ -5924,14 +5867,14 @@
    "abs_err": {
     "peak_lo_mev": -1.4706232485073656,
     "peak_hi_mev": 0.5293767514925207,
-    "radius_nm": -0.0016223535764927632
+    "radius_nm": -0.0016223536500588054
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1421.4420678931206,
+   "instrument_s": 1421.4420678931288,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -5961,8 +5904,8 @@
      "width_nm": 1.2,
      "ghost": 0.044,
      "ghost_lag_nm": [
-      3.8,
-      -1.9
+      -3.8,
+      1.9
      ],
      "quick": true
     },
@@ -6000,12 +5943,12 @@
     0.94,
     0.97
    ],
-   "e0_mev": -427.70116932937464,
+   "e0_mev": -427.69876879150456,
    "drift_comp_nm_per_min": [
-    0.7748708512915715,
-    -0.754395740683617
+    0.7748708322233034,
+    -0.7543957412453615
    ],
-   "radius_nm": 6.013229821988346,
+   "radius_nm": 6.01322982191478,
    "peaks_found": 4
   },
   {
@@ -6017,7 +5960,7 @@
    "values": {
     "peak_lo_mev": -422.00000000000006,
     "peak_hi_mev": -370.00000000000006,
-    "radius_nm": 9.736640007527699
+    "radius_nm": 9.736928127708769
    },
    "truth": {
     "peak_lo_mev": -414.8806101400547,
@@ -6027,14 +5970,14 @@
    "abs_err": {
     "peak_lo_mev": -7.119389859945329,
     "peak_hi_mev": -3.119389859945386,
-    "radius_nm": 0.010049943771219816
+    "radius_nm": 0.010338063952289644
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6589829954174,
+   "instrument_s": 785.6589878268469,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
@@ -6059,7 +6002,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.5,
-   "bare_feature": 0.025,
+   "bare_feature": 0.026,
    "centre_shift_nm": [
     0.1,
     -0.18
@@ -6077,16 +6020,16 @@
     0.22,
     0.51,
     0.7,
-    0.82,
-    0.95,
-    0.96
+    0.83,
+    0.96,
+    0.97
    ],
-   "e0_mev": -453.762498972145,
+   "e0_mev": -453.76240682009416,
    "drift_comp_nm_per_min": [
-    0.34622774163782044,
-    -0.7009887382003989
+    0.3461906470734077,
+    -0.7010182100450454
    ],
-   "radius_nm": 9.736640007527699,
+   "radius_nm": 9.736928127708769,
    "peaks_found": 6
   },
   {
@@ -6098,7 +6041,7 @@
    "values": {
     "peak_lo_mev": -378.0,
     "peak_hi_mev": -228.00000000000003,
-    "radius_nm": 4.37996458918602
+    "radius_nm": 4.3799608524333
    },
    "truth": {
     "peak_lo_mev": -379.77827476634246,
@@ -6108,14 +6051,14 @@
    "abs_err": {
     "peak_lo_mev": 1.778274766342463,
     "peak_hi_mev": -0.22172523365770758,
-    "radius_nm": 0.009424588617798157
+    "radius_nm": 0.009420851865077573
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.673219844225,
+   "instrument_s": 785.6732196873228,
    "tip_condition": "dirty",
    "pokes": 3,
    "tip_actions": [],
@@ -6136,7 +6079,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.038,
+   "bare_feature": 0.033,
    "centre_shift_nm": [
     -0.1,
     -0.18
@@ -6152,12 +6095,12 @@
     0.94,
     0.86
    ],
-   "e0_mev": -417.9552150850608,
+   "e0_mev": -417.95459023844427,
    "drift_comp_nm_per_min": [
-    -0.16624255672288882,
-    -0.7709546469000647
+    -0.1662392235858947,
+    -0.7709205006954826
    ],
-   "radius_nm": 4.37996458918602,
+   "radius_nm": 4.3799608524333,
    "peaks_found": 3
   },
   {
@@ -6169,7 +6112,7 @@
    "values": {
     "peak_lo_mev": -350.00000000000006,
     "peak_hi_mev": -232.00000000000003,
-    "radius_nm": 6.378089190575542
+    "radius_nm": 6.378059026749162
    },
    "truth": {
     "peak_lo_mev": -351.45364680132946,
@@ -6179,14 +6122,14 @@
    "abs_err": {
     "peak_lo_mev": 1.4536468013293984,
     "peak_hi_mev": -0.5463531986706869,
-    "radius_nm": -0.025397937181160124
+    "radius_nm": -0.025428101007539894
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1343.5685636198814,
+   "instrument_s": 1343.5685637073414,
    "tip_condition": "double",
    "pokes": 3,
    "tip_actions": [
@@ -6206,7 +6149,7 @@
      "field_ghost": [
       2.5,
       0.7,
-      0.317
+      0.314
      ],
      "verdict": "double"
     },
@@ -6226,7 +6169,7 @@
    ],
    "tip_rounds": 1,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.063,
+   "bare_feature": 0.064,
    "centre_shift_nm": [
     0.17,
     0.17
@@ -6241,15 +6184,15 @@
    "peak_prominence": [
     0.15,
     0.51,
-    0.83,
+    0.84,
     1.0
    ],
-   "e0_mev": -437.41626108622245,
+   "e0_mev": -437.4165065993066,
    "drift_comp_nm_per_min": [
-    0.6768485423066718,
-    0.5546696560502667
+    0.6768849658123862,
+    0.5546428618107433
    ],
-   "radius_nm": 6.378089190575542,
+   "radius_nm": 6.378059026749162,
    "peaks_found": 4
   },
   {
@@ -6261,7 +6204,7 @@
    "values": {
     "peak_lo_mev": -406.0,
     "peak_hi_mev": -312.00000000000006,
-    "radius_nm": 5.425926422984717
+    "radius_nm": 5.425933443662697
    },
    "truth": {
     "peak_lo_mev": -406.6794119481475,
@@ -6271,14 +6214,14 @@
    "abs_err": {
     "peak_lo_mev": 0.6794119481475036,
     "peak_hi_mev": 0.6794119481473331,
-    "radius_nm": 0.00812909883385693
+    "radius_nm": 0.008136119511837236
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1343.505380480308,
+   "instrument_s": 1343.5053804852776,
    "tip_condition": "double",
    "pokes": 3,
    "tip_actions": [
@@ -6287,10 +6230,10 @@
    "judged": [
     {
      "width_nm": 0.95,
-     "ghost": 0.03,
+     "ghost": 0.029,
      "ghost_lag_nm": [
-      0.6,
-      4.3
+      -0.6,
+      -4.3
      ],
      "field": "double",
      "field_atoms": 0,
@@ -6304,7 +6247,7 @@
     },
     {
      "width_nm": 1.0,
-     "ghost": 0.03,
+     "ghost": 0.029,
      "ghost_lag_nm": [
       -2.7,
       3.6
@@ -6322,7 +6265,7 @@
    ],
    "tip_rounds": 1,
    "bare_clear_nm": 6.5,
-   "bare_feature": 0.045,
+   "bare_feature": 0.046,
    "centre_shift_nm": [
     -0.28,
     0.05
@@ -6337,15 +6280,15 @@
    "peak_prominence": [
     0.36,
     0.9,
-    0.98,
-    0.71
+    0.97,
+    0.73
    ],
-   "e0_mev": -431.72872186262117,
+   "e0_mev": -431.72998853845115,
    "drift_comp_nm_per_min": [
-    -0.7604903028506113,
-    0.17043447337979897
+    -0.7604767010109733,
+    0.17043308668300075
    ],
-   "radius_nm": 5.425926422984717,
+   "radius_nm": 5.425933443662697,
    "peaks_found": 4
   },
   {
@@ -6357,7 +6300,7 @@
    "values": {
     "peak_lo_mev": -398.0,
     "peak_hi_mev": -340.00000000000006,
-    "radius_nm": 6.4022126605036345
+    "radius_nm": 6.402343738229289
    },
    "truth": {
     "peak_lo_mev": -398.3754701147962,
@@ -6367,24 +6310,24 @@
    "abs_err": {
     "peak_lo_mev": 0.37547011479620096,
     "peak_hi_mev": 0.3754701147960873,
-    "radius_nm": 0.00885694090972855
+    "radius_nm": 0.008988018635383455
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6588628637808,
+   "instrument_s": 785.6463283172051,
    "tip_condition": "unstable",
    "pokes": 3,
    "tip_actions": [],
    "judged": [
     {
      "width_nm": 1.0,
-     "ghost": 0.032,
+     "ghost": 0.034,
      "ghost_lag_nm": [
-      2.8,
-      -3.1
+      -2.6,
+      3.1
      ],
      "field": "ok",
      "field_atoms": 4,
@@ -6394,8 +6337,8 @@
     }
    ],
    "tip_rounds": 0,
-   "bare_clear_nm": 6.7,
-   "bare_feature": 0.023,
+   "bare_clear_nm": 6.5,
+   "bare_feature": 0.022,
    "centre_shift_nm": [
     -0.0,
     -0.25
@@ -6409,18 +6352,18 @@
     106
    ],
    "peak_prominence": [
-    0.25,
+    0.26,
     0.61,
     0.9,
     0.96,
-    0.66
+    0.67
    ],
-   "e0_mev": -415.10003309083885,
+   "e0_mev": -415.1058537122995,
    "drift_comp_nm_per_min": [
-    0.2868173494582464,
-    -1.1101301280331142
+    0.2871899333140212,
+    -1.1096815949654737
    ],
-   "radius_nm": 6.4022126605036345,
+   "radius_nm": 6.402343738229289,
    "peaks_found": 5
   },
   {
@@ -6432,7 +6375,7 @@
    "values": {
     "peak_lo_mev": -330.00000000000006,
     "peak_hi_mev": -208.00000000000003,
-    "radius_nm": 6.034419148464546
+    "radius_nm": 6.034443090929897
    },
    "truth": {
     "peak_lo_mev": -329.6698346425608,
@@ -6442,14 +6385,14 @@
    "abs_err": {
     "peak_lo_mev": -0.33016535743928443,
     "peak_hi_mev": -0.3301653574393697,
-    "radius_nm": 0.00913949876856357
+    "radius_nm": 0.009163441233914327
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1576.9569802415551,
+   "instrument_s": 1576.956979814614,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -6510,8 +6453,8 @@
      "width_nm": 1.1,
      "ghost": 0.033,
      "ghost_lag_nm": [
-      1.2,
-      -4.1
+      -1.2,
+      4.1
      ],
      "field": "ok",
      "field_atoms": 12,
@@ -6542,12 +6485,12 @@
     0.87,
     0.94
    ],
-   "e0_mev": -402.7324349336348,
+   "e0_mev": -402.732019707899,
    "drift_comp_nm_per_min": [
-    0.9528182921919153,
-    -0.43636180911026134
+    0.9530319088312682,
+    -0.4364022794558816
    ],
-   "radius_nm": 6.034419148464546,
+   "radius_nm": 6.034443090929897,
    "peaks_found": 3
   },
   {
@@ -6559,7 +6502,7 @@
    "values": {
     "peak_lo_mev": -398.0,
     "peak_hi_mev": -284.00000000000006,
-    "radius_nm": 4.705153539205686
+    "radius_nm": 4.705153539213811
    },
    "truth": {
     "peak_lo_mev": -395.92679439035294,
@@ -6569,14 +6512,14 @@
    "abs_err": {
     "peak_lo_mev": -2.0732056096470615,
     "peak_hi_mev": -0.073205609647232,
-    "radius_nm": 0.007948409993451477
+    "radius_nm": 0.007948410001576534
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1666.1951206100975,
+   "instrument_s": 1666.195120610051,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -6605,8 +6548,8 @@
      "width_nm": 1.15,
      "ghost": 0.039,
      "ghost_lag_nm": [
-      3.7,
-      1.9
+      -3.7,
+      -1.9
      ],
      "field": "blunt",
      "field_atoms": 13,
@@ -6654,12 +6597,12 @@
     0.96,
     0.93
    ],
-   "e0_mev": -447.39627579150493,
+   "e0_mev": -447.3870510124526,
    "drift_comp_nm_per_min": [
-    -0.0790807226370622,
-    1.1209933305092037
+    -0.0790807226932502,
+    1.1209933305615565
    ],
-   "radius_nm": 4.705153539205686,
+   "radius_nm": 4.705153539213811,
    "peaks_found": 3
   },
   {
@@ -6670,8 +6613,8 @@
    "error": null,
    "values": {
     "peak_lo_mev": -394.0,
-    "peak_hi_mev": -296.00000000000006,
-    "radius_nm": 7.07574129504332
+    "peak_hi_mev": -298.00000000000006,
+    "radius_nm": 7.075741293662773
    },
    "truth": {
     "peak_lo_mev": -393.0059089524837,
@@ -6680,15 +6623,15 @@
    },
    "abs_err": {
     "peak_lo_mev": -0.9940910475162923,
-    "peak_hi_mev": 1.005908952483594,
-    "radius_nm": -0.002508799940559747
+    "peak_hi_mev": -0.994091047516406,
+    "radius_nm": -0.0025088013211069793
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1601.3398846423768,
+   "instrument_s": 1601.3398846421755,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -6700,11 +6643,11 @@
      "width_nm": 1.15,
      "ghost": 0.034,
      "ghost_lag_nm": [
-      1.2,
-      -3.9
+      -1.2,
+      3.9
      ],
      "field": "blunt",
-     "field_atoms": 8,
+     "field_atoms": 7,
      "ghost_fraction": 0.114,
      "field_ghost": [
       0.6,
@@ -6750,7 +6693,7 @@
    ],
    "tip_rounds": 2,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.021,
+   "bare_feature": 0.023,
    "centre_shift_nm": [
     0.23,
     -0.09
@@ -6759,23 +6702,23 @@
    "peaks_mev": [
     -448,
     -394,
-    -296,
+    -298,
     -160,
     22
    ],
    "peak_prominence": [
     0.14,
-    0.53,
-    0.86,
-    0.96,
-    0.93
+    0.52,
+    0.85,
+    0.97,
+    0.92
    ],
-   "e0_mev": -461.208508621935,
+   "e0_mev": -461.208025084937,
    "drift_comp_nm_per_min": [
-    1.1074919345556666,
-    -0.34756465073712245
+    1.1074919293610832,
+    -0.34756465067785103
    ],
-   "radius_nm": 7.07574129504332,
+   "radius_nm": 7.075741293662773,
    "peaks_found": 5
   },
   {
@@ -6787,7 +6730,7 @@
    "values": {
     "peak_lo_mev": -426.00000000000006,
     "peak_hi_mev": -278.0,
-    "radius_nm": 4.108717422209257
+    "radius_nm": 4.1087174222005105
    },
    "truth": {
     "peak_lo_mev": -426.96670347489555,
@@ -6797,14 +6740,14 @@
    "abs_err": {
     "peak_lo_mev": 0.9667034748954961,
     "peak_hi_mev": 0.9667034748954393,
-    "radius_nm": 0.023221830530101073
+    "radius_nm": 0.023221830521354292
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 3078.170127863875,
+   "instrument_s": 3078.170127863877,
    "tip_condition": "dirty",
    "pokes": 12,
    "tip_actions": [
@@ -6834,8 +6777,8 @@
      "width_nm": 1.1,
      "ghost": 0.033,
      "ghost_lag_nm": [
-      0.3,
-      4.1
+      -0.3,
+      -4.1
      ],
      "field": "ok",
      "field_atoms": 7,
@@ -6851,8 +6794,8 @@
      "width_nm": 0.95,
      "ghost": 0.031,
      "ghost_lag_nm": [
-      0.3,
-      4.2
+      -0.3,
+      -4.2
      ],
      "field": "ok",
      "field_atoms": 7,
@@ -6902,12 +6845,12 @@
     0.94,
     0.75
    ],
-   "e0_mev": -463.6565367999,
+   "e0_mev": -463.65664766869077,
    "drift_comp_nm_per_min": [
-    -0.3070763261161555,
-    -0.6420795068529563
+    -0.3070763260338676,
+    -0.642079506821833
    ],
-   "radius_nm": 4.108717422209257,
+   "radius_nm": 4.1087174222005105,
    "peaks_found": 3
   },
   {
@@ -6919,7 +6862,7 @@
    "values": {
     "peak_lo_mev": -368.00000000000006,
     "peak_hi_mev": -256.00000000000006,
-    "radius_nm": 6.3399551835229495
+    "radius_nm": 6.340182823974016
    },
    "truth": {
     "peak_lo_mev": -367.65545793638165,
@@ -6929,14 +6872,14 @@
    "abs_err": {
     "peak_lo_mev": -0.34454206361840534,
     "peak_hi_mev": -0.3445420636184906,
-    "radius_nm": 0.012621638307225957
+    "radius_nm": 0.012849278758292115
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6423471160836,
+   "instrument_s": 785.6423466543954,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [],
@@ -6945,8 +6888,8 @@
      "width_nm": 1.1,
      "ghost": 0.029,
      "ghost_lag_nm": [
-      2.1,
-      3.7
+      -2.1,
+      -3.7
      ],
      "field": "ok",
      "field_atoms": 16,
@@ -6961,7 +6904,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 7.0,
-   "bare_feature": 0.029,
+   "bare_feature": 0.028,
    "centre_shift_nm": [
     -0.27,
     0.04
@@ -6981,12 +6924,12 @@
     1.0,
     0.55
    ],
-   "e0_mev": -449.322644941601,
+   "e0_mev": -449.322629635411,
    "drift_comp_nm_per_min": [
-    -0.6937951352341338,
-    0.15498520164311078
+    -0.6937958571795877,
+    0.15498370077947937
    ],
-   "radius_nm": 6.3399551835229495,
+   "radius_nm": 6.340182823974016,
    "peaks_found": 5
   },
   {
@@ -6998,7 +6941,7 @@
    "values": {
     "peak_lo_mev": -382.0,
     "peak_hi_mev": -322.00000000000006,
-    "radius_nm": 8.2154939807785
+    "radius_nm": 8.215569612745309
    },
    "truth": {
     "peak_lo_mev": -383.1398001406573,
@@ -7008,14 +6951,14 @@
    "abs_err": {
     "peak_lo_mev": 1.1398001406573144,
     "peak_hi_mev": -0.8601998593427993,
-    "radius_nm": 0.006324998311507457
+    "radius_nm": 0.006400630278315944
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1499.2401004458802,
+   "instrument_s": 1499.2400998607245,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -7042,8 +6985,8 @@
      "width_nm": 1.3,
      "ghost": 0.034,
      "ghost_lag_nm": [
-      -2.1,
-      3.5
+      2.1,
+      -3.5
      ],
      "quick": true
     },
@@ -7052,8 +6995,8 @@
      "width_nm": 1.15,
      "ghost": 0.036,
      "ghost_lag_nm": [
-      -3.3,
-      -2.2
+      3.3,
+      2.2
      ],
      "quick": true
     },
@@ -7099,12 +7042,12 @@
     0.94,
     0.08
    ],
-   "e0_mev": -428.9821376716529,
+   "e0_mev": -428.98072908962763,
    "drift_comp_nm_per_min": [
-    -0.8936656165737178,
-    0.4135853365114858
+    -0.8936601181607449,
+    0.41358771472233735
    ],
-   "radius_nm": 8.2154939807785,
+   "radius_nm": 8.215569612745309,
    "peaks_found": 6
   },
   {
@@ -7116,7 +7059,7 @@
    "values": {
     "peak_lo_mev": -334.00000000000006,
     "peak_hi_mev": -222.00000000000003,
-    "radius_nm": 6.373889094084662
+    "radius_nm": 6.373786386407613
    },
    "truth": {
     "peak_lo_mev": -331.7079658862996,
@@ -7126,14 +7069,14 @@
    "abs_err": {
     "peak_lo_mev": -2.292034113700481,
     "peak_hi_mev": -0.292034113700538,
-    "radius_nm": -0.01650052334069496
+    "radius_nm": -0.016603231017743525
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1343.5349862390276,
+   "instrument_s": 1343.5349845162189,
    "tip_condition": "double",
    "pokes": 3,
    "tip_actions": [
@@ -7144,8 +7087,8 @@
      "width_nm": 1.45,
      "ghost": 0.037,
      "ghost_lag_nm": [
-      3.8,
-      1.9
+      -3.8,
+      -1.9
      ],
      "field": "double",
      "field_atoms": 7,
@@ -7153,7 +7096,7 @@
      "field_ghost": [
       0.1,
       -1.1,
-      0.674
+      0.673
      ],
      "verdict": "double"
     },
@@ -7161,8 +7104,8 @@
      "width_nm": 0.95,
      "ghost": 0.032,
      "ghost_lag_nm": [
-      3.8,
-      1.9
+      0.2,
+      4.0
      ],
      "field": "ok",
      "field_atoms": 7,
@@ -7173,7 +7116,7 @@
    ],
    "tip_rounds": 1,
    "bare_clear_nm": 6.6,
-   "bare_feature": 0.025,
+   "bare_feature": 0.032,
    "centre_shift_nm": [
     -0.15,
     0.2
@@ -7186,17 +7129,17 @@
     -64
    ],
    "peak_prominence": [
-    0.19,
-    0.51,
+    0.2,
+    0.52,
     0.85,
     0.97
    ],
-   "e0_mev": -411.57506123779945,
+   "e0_mev": -411.574770575663,
    "drift_comp_nm_per_min": [
-    -0.28219344964044757,
-    0.6279992361076621
+    -0.28229472333083194,
+    0.6279956708723573
    ],
-   "radius_nm": 6.373889094084662,
+   "radius_nm": 6.373786386407613,
    "peaks_found": 4
   },
   {
@@ -7208,7 +7151,7 @@
    "values": {
     "peak_lo_mev": -356.00000000000006,
     "peak_hi_mev": -276.0,
-    "radius_nm": 7.661118496787949
+    "radius_nm": 7.661118496517194
    },
    "truth": {
     "peak_lo_mev": -354.2621357592383,
@@ -7218,14 +7161,14 @@
    "abs_err": {
     "peak_lo_mev": -1.7378642407617804,
     "peak_hi_mev": 0.26213575923821963,
-    "radius_nm": -0.004816089179133343
+    "radius_nm": -0.004816089449888317
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1343.4730931217136,
+   "instrument_s": 1343.473093121712,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -7236,8 +7179,8 @@
      "width_nm": 1.35,
      "ghost": 0.059,
      "ghost_lag_nm": [
-      3.9,
-      1.9
+      -3.9,
+      -1.9
      ],
      "field": "unknown",
      "field_atoms": 0,
@@ -7261,7 +7204,7 @@
    ],
    "tip_rounds": 1,
    "bare_clear_nm": 6.5,
-   "bare_feature": 0.043,
+   "bare_feature": 0.042,
    "centre_shift_nm": [
     0.03,
     -0.0
@@ -7276,15 +7219,15 @@
    "peak_prominence": [
     0.36,
     0.61,
-    0.89,
+    0.88,
     0.99
    ],
-   "e0_mev": -411.7007216481985,
+   "e0_mev": -411.7098967170301,
    "drift_comp_nm_per_min": [
-    0.38699046521946495,
-    0.022776169936527098
+    0.38699046541929827,
+    0.02277617049330502
    ],
-   "radius_nm": 7.661118496787949,
+   "radius_nm": 7.661118496517194,
    "peaks_found": 4
   },
   {
@@ -7296,7 +7239,7 @@
    "values": {
     "peak_lo_mev": -422.00000000000006,
     "peak_hi_mev": -312.00000000000006,
-    "radius_nm": 4.998238509431654
+    "radius_nm": 4.998300608134334
    },
    "truth": {
     "peak_lo_mev": -421.6228988005676,
@@ -7306,14 +7249,14 @@
    "abs_err": {
     "peak_lo_mev": -0.37710119943244536,
     "peak_hi_mev": -0.3771011994325022,
-    "radius_nm": 0.016397440952578002
+    "radius_nm": 0.01645953965525848
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.769746330664,
+   "instrument_s": 785.7697467344506,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
@@ -7338,7 +7281,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.036,
+   "bare_feature": 0.04,
    "centre_shift_nm": [
     0.02,
     0.22
@@ -7351,15 +7294,15 @@
    ],
    "peak_prominence": [
     0.3,
-    0.83,
+    0.82,
     0.98
    ],
-   "e0_mev": -450.3450412189286,
+   "e0_mev": -450.3437796097637,
    "drift_comp_nm_per_min": [
-    0.27694565481503924,
-    0.7459611458847404
+    0.2769605541261021,
+    0.7459938791998807
    ],
-   "radius_nm": 4.998238509431654,
+   "radius_nm": 4.998300608134334,
    "peaks_found": 3
   },
   {
@@ -7371,7 +7314,7 @@
    "values": {
     "peak_lo_mev": -422.00000000000006,
     "peak_hi_mev": -278.0,
-    "radius_nm": 4.349391659801585
+    "radius_nm": 4.3493890050629185
    },
    "truth": {
     "peak_lo_mev": -424.4753475156035,
@@ -7381,14 +7324,14 @@
    "abs_err": {
     "peak_lo_mev": 2.4753475156034597,
     "peak_hi_mev": 0.4753475156034028,
-    "radius_nm": 0.013540514430854245
+    "radius_nm": 0.013537859692188015
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1601.211923347354,
+   "instrument_s": 1601.2119224445719,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -7417,8 +7360,8 @@
      "width_nm": 0.95,
      "ghost": 0.039,
      "ghost_lag_nm": [
-      1.6,
-      -3.9
+      -1.6,
+      3.9
      ],
      "field": "blunt",
      "field_atoms": 11,
@@ -7464,14 +7407,14 @@
    "peak_prominence": [
     0.35,
     0.93,
-    0.92
+    0.93
    ],
-   "e0_mev": -460.7826231965787,
+   "e0_mev": -460.7825334308188,
    "drift_comp_nm_per_min": [
-    -0.4506061902846076,
-    -0.1016697818722082
+    -0.4506041170403203,
+    -0.10167979094361163
    ],
-   "radius_nm": 4.349391659801585,
+   "radius_nm": 4.3493890050629185,
    "peaks_found": 3
   },
   {
@@ -7483,7 +7426,7 @@
    "values": {
     "peak_lo_mev": -326.00000000000006,
     "peak_hi_mev": -258.00000000000006,
-    "radius_nm": 9.395790215544844
+    "radius_nm": 9.395695620668109
    },
    "truth": {
     "peak_lo_mev": -327.6960479683793,
@@ -7493,21 +7436,21 @@
    "abs_err": {
     "peak_lo_mev": 1.6960479683792187,
     "peak_hi_mev": -2.3039520316208666,
-    "radius_nm": 0.021066749633622095
+    "radius_nm": 0.02097215475688685
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7433953791601,
+   "instrument_s": 785.7878324839202,
    "tip_condition": "dirty",
    "pokes": 3,
    "tip_actions": [],
    "judged": [
     {
-     "width_nm": 1.05,
-     "ghost": 0.051,
+     "width_nm": 1.1,
+     "ghost": 0.046,
      "ghost_lag_nm": [
       1.8,
       3.4
@@ -7520,7 +7463,7 @@
     }
    ],
    "tip_rounds": 0,
-   "bare_clear_nm": 6.7,
+   "bare_clear_nm": 6.5,
    "bare_feature": 0.024,
    "centre_shift_nm": [
     -0.42,
@@ -7532,23 +7475,23 @@
     -326,
     -258,
     -166,
-    -52,
+    -50,
     82
    ],
    "peak_prominence": [
     0.16,
     0.47,
-    0.65,
+    0.64,
     0.9,
     0.96,
-    0.88
+    0.89
    ],
-   "e0_mev": -412.31878787366816,
+   "e0_mev": -412.7501801865124,
    "drift_comp_nm_per_min": [
-    -1.2058445296279683,
-    0.00920526766268515
+    -1.2074652971717663,
+    0.009812443449791165
    ],
-   "radius_nm": 9.395790215544844,
+   "radius_nm": 9.395695620668109,
    "peaks_found": 6
   },
   {
@@ -7560,7 +7503,7 @@
    "values": {
     "peak_lo_mev": -422.00000000000006,
     "peak_hi_mev": -266.0,
-    "radius_nm": 4.146300030055106
+    "radius_nm": 4.146299253219651
    },
    "truth": {
     "peak_lo_mev": -421.46201810527066,
@@ -7570,14 +7513,14 @@
    "abs_err": {
     "peak_lo_mev": -0.5379818947293984,
     "peak_hi_mev": 1.4620181052705448,
-    "radius_nm": 0.02062795694606745
+    "radius_nm": 0.02062718011061282
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6940885643637,
+   "instrument_s": 785.6940885739225,
    "tip_condition": "dirty",
    "pokes": 3,
    "tip_actions": [],
@@ -7586,8 +7529,8 @@
      "width_nm": 1.05,
      "ghost": 0.03,
      "ghost_lag_nm": [
-      2.0,
-      -3.5
+      -2.0,
+      3.5
      ],
      "field": "ok",
      "field_atoms": 7,
@@ -7598,7 +7541,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.5,
-   "bare_feature": 0.031,
+   "bare_feature": 0.03,
    "centre_shift_nm": [
     0.17,
     -0.06
@@ -7614,12 +7557,12 @@
     0.96,
     0.77
    ],
-   "e0_mev": -460.6627050060285,
+   "e0_mev": -460.66259790321976,
    "drift_comp_nm_per_min": [
-    0.9060132602912002,
-    -0.23567060655422806
+    0.9059927676258785,
+    -0.2356891902705964
    ],
-   "radius_nm": 4.146300030055106,
+   "radius_nm": 4.146299253219651,
    "peaks_found": 3
   },
   {
@@ -7631,7 +7574,7 @@
    "values": {
     "peak_lo_mev": -430.00000000000006,
     "peak_hi_mev": -294.00000000000006,
-    "radius_nm": 4.537946881938294
+    "radius_nm": 4.538146945268977
    },
    "truth": {
     "peak_lo_mev": -431.67367136006243,
@@ -7641,14 +7584,14 @@
    "abs_err": {
     "peak_lo_mev": 1.6736713600623716,
     "peak_hi_mev": -0.3263286399377989,
-    "radius_nm": 0.02257451504252117
+    "radius_nm": 0.022774578373204513
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6466903776599,
+   "instrument_s": 785.6466874348396,
    "tip_condition": "dirty",
    "pokes": 3,
    "tip_actions": [],
@@ -7657,8 +7600,8 @@
      "width_nm": 0.85,
      "ghost": 0.025,
      "ghost_lag_nm": [
-      -0.1,
-      4.3
+      0.1,
+      -4.3
      ],
      "field": "ok",
      "field_atoms": 9,
@@ -7682,15 +7625,15 @@
    ],
    "peak_prominence": [
     0.32,
-    0.86,
+    0.87,
     0.98
    ],
-   "e0_mev": -465.7234157114354,
+   "e0_mev": -465.7233490215115,
    "drift_comp_nm_per_min": [
-    0.4310367885495523,
-    0.3147163243023002
+    0.4310075197072018,
+    0.31476907710782265
    ],
-   "radius_nm": 4.537946881938294,
+   "radius_nm": 4.538146945268977,
    "peaks_found": 3
   },
   {
@@ -7702,7 +7645,7 @@
    "values": {
     "peak_lo_mev": -346.00000000000006,
     "peak_hi_mev": -190.00000000000006,
-    "radius_nm": 5.592018415966425
+    "radius_nm": 5.591883408532916
    },
    "truth": {
     "peak_lo_mev": -344.29168414409446,
@@ -7712,14 +7655,14 @@
    "abs_err": {
     "peak_lo_mev": -1.708315855905596,
     "peak_hi_mev": 0.2916841440942619,
-    "radius_nm": 0.012150935106827632
+    "radius_nm": 0.012015927673318494
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.8177993206668,
+   "instrument_s": 785.8177988454738,
    "tip_condition": "dirty",
    "pokes": 3,
    "tip_actions": [],
@@ -7744,7 +7687,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.041,
+   "bare_feature": 0.039,
    "centre_shift_nm": [
     -0.06,
     0.33
@@ -7760,14 +7703,14 @@
     0.16,
     0.7,
     0.97,
-    0.82
+    0.81
    ],
-   "e0_mev": -453.92570649552346,
+   "e0_mev": -453.9256338201256,
    "drift_comp_nm_per_min": [
-    0.033761601094858866,
-    1.0163452676223887
+    0.03374995194237172,
+    1.0163086858371166
    ],
-   "radius_nm": 5.592018415966425,
+   "radius_nm": 5.591883408532916,
    "peaks_found": 4
   },
   {
@@ -7779,7 +7722,7 @@
    "values": {
     "peak_lo_mev": -392.0,
     "peak_hi_mev": -314.00000000000006,
-    "radius_nm": 5.94002703206963
+    "radius_nm": 5.9400270306603025
    },
    "truth": {
     "peak_lo_mev": -389.91407290467623,
@@ -7789,14 +7732,14 @@
    "abs_err": {
     "peak_lo_mev": -2.0859270953237683,
     "peak_hi_mev": 1.914072904676118,
-    "radius_nm": 0.013177452750112728
+    "radius_nm": 0.013177451340784962
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7700946315296,
+   "instrument_s": 785.7700946316661,
    "tip_condition": "unstable",
    "pokes": 3,
    "tip_actions": [],
@@ -7841,10 +7784,10 @@
    ],
    "e0_mev": -411.20984149496286,
    "drift_comp_nm_per_min": [
-    0.559254072926101,
-    0.5233927894416609
+    0.559254053282695,
+    0.5233927888281299
    ],
-   "radius_nm": 5.94002703206963,
+   "radius_nm": 5.9400270306603025,
    "peaks_found": 4
   },
   {
@@ -7856,7 +7799,7 @@
    "values": {
     "peak_lo_mev": -350.00000000000006,
     "peak_hi_mev": -260.00000000000006,
-    "radius_nm": 6.9233963063942
+    "radius_nm": 6.9234504806458705
    },
    "truth": {
     "peak_lo_mev": -349.6292608214201,
@@ -7866,24 +7809,24 @@
    "abs_err": {
     "peak_lo_mev": -0.3707391785799814,
     "peak_hi_mev": -2.3707391785800382,
-    "radius_nm": 0.01405450541550124
+    "radius_nm": 0.014108679667171664
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6732439587912,
+   "instrument_s": 785.6732443956547,
    "tip_condition": "dirty",
    "pokes": 3,
    "tip_actions": [],
    "judged": [
     {
      "width_nm": 0.8,
-     "ghost": 0.027,
+     "ghost": 0.026,
      "ghost_lag_nm": [
-      -3.9,
-      -1.6
+      3.9,
+      1.6
      ],
      "field": "ok",
      "field_atoms": 10,
@@ -7898,7 +7841,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.0,
-   "bare_feature": 0.033,
+   "bare_feature": 0.032,
    "centre_shift_nm": [
     -0.29,
     -0.04
@@ -7916,14 +7859,14 @@
     0.37,
     0.72,
     0.97,
-    0.94
+    0.93
    ],
-   "e0_mev": -416.30775945540125,
+   "e0_mev": -416.29609070981354,
    "drift_comp_nm_per_min": [
-    -0.8744024441687711,
-    -0.19923501296411059
+    -0.8743924756461371,
+    -0.1992348063568781
    ],
-   "radius_nm": 6.9233963063942,
+   "radius_nm": 6.9234504806458705,
    "peaks_found": 5
   },
   {
@@ -7935,7 +7878,7 @@
    "values": {
     "peak_lo_mev": -422.00000000000006,
     "peak_hi_mev": -328.00000000000006,
-    "radius_nm": 5.046819806141337
+    "radius_nm": 5.04681980684203
    },
    "truth": {
     "peak_lo_mev": -421.2233947494404,
@@ -7945,14 +7888,14 @@
    "abs_err": {
     "peak_lo_mev": -0.776605250559669,
     "peak_hi_mev": -0.7766052505597827,
-    "radius_nm": 0.0014444011554912706
+    "radius_nm": 0.0014444018561841077
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7606489019655,
+   "instrument_s": 785.7606488997975,
    "tip_condition": "unstable",
    "pokes": 3,
    "tip_actions": [],
@@ -7997,10 +7940,10 @@
    ],
    "e0_mev": -446.54096428036485,
    "drift_comp_nm_per_min": [
-    0.851624923868847,
-    -0.5565918314818173
+    0.8516246289646938,
+    -0.5565918285624942
    ],
-   "radius_nm": 5.046819806141337,
+   "radius_nm": 5.04681980684203,
    "peaks_found": 4
   },
   {
@@ -8012,7 +7955,7 @@
    "values": {
     "peak_lo_mev": -402.0,
     "peak_hi_mev": -244.00000000000006,
-    "radius_nm": 4.176061986351138
+    "radius_nm": 4.176338107843179
    },
    "truth": {
     "peak_lo_mev": -399.406033312885,
@@ -8022,14 +7965,14 @@
    "abs_err": {
     "peak_lo_mev": -2.593966687115028,
     "peak_hi_mev": -0.5939666871151985,
-    "radius_nm": 0.01639460118632652
+    "radius_nm": 0.016670722678367333
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6631789539243,
+   "instrument_s": 785.6631788506,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
@@ -8050,7 +7993,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.0,
-   "bare_feature": 0.053,
+   "bare_feature": 0.056,
    "centre_shift_nm": [
     -0.19,
     0.21
@@ -8066,12 +8009,12 @@
     0.89,
     0.87
    ],
-   "e0_mev": -437.8091890538427,
+   "e0_mev": -437.8052407749291,
    "drift_comp_nm_per_min": [
-    -0.396865521150108,
-    0.7081575596451745
+    -0.39686272692308044,
+    0.7081636807506545
    ],
-   "radius_nm": 4.176061986351138,
+   "radius_nm": 4.176338107843179,
    "peaks_found": 3
   },
   {
@@ -8179,7 +8122,7 @@
    "values": {
     "peak_lo_mev": -432.00000000000006,
     "peak_hi_mev": -314.00000000000006,
-    "radius_nm": 4.5106513128451455
+    "radius_nm": 4.510582196411617
    },
    "truth": {
     "peak_lo_mev": -432.6046754390459,
@@ -8189,14 +8132,14 @@
    "abs_err": {
     "peak_lo_mev": 0.6046754390458204,
     "peak_hi_mev": 0.6046754390457636,
-    "radius_nm": 0.011736002466248507
+    "radius_nm": 0.011666886032720036
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6529309286213,
+   "instrument_s": 785.6529303066853,
    "tip_condition": "dirty",
    "pokes": 3,
    "tip_actions": [],
@@ -8205,8 +8148,8 @@
      "width_nm": 1.0,
      "ghost": 0.032,
      "ghost_lag_nm": [
-      3.9,
-      2.0
+      -3.9,
+      -2.0
      ],
      "field": "ok",
      "field_atoms": 7,
@@ -8217,7 +8160,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.027,
+   "bare_feature": 0.026,
    "centre_shift_nm": [
     -0.3,
     0.21
@@ -8230,15 +8173,15 @@
    ],
    "peak_prominence": [
     0.32,
-    0.86,
+    0.85,
     0.93
    ],
-   "e0_mev": -464.147360407138,
+   "e0_mev": -464.1490888792902,
    "drift_comp_nm_per_min": [
-    -0.7382253579202138,
-    0.7025590017013967
+    -0.7382351235045331,
+    0.7024956879468204
    ],
-   "radius_nm": 4.5106513128451455,
+   "radius_nm": 4.510582196411617,
    "peaks_found": 3
   },
   {
@@ -8250,7 +8193,7 @@
    "values": {
     "peak_lo_mev": -426.00000000000006,
     "peak_hi_mev": -262.0,
-    "radius_nm": 4.072698276573361
+    "radius_nm": 4.073203933545143
    },
    "truth": {
     "peak_lo_mev": -426.59259603478637,
@@ -8260,14 +8203,14 @@
    "abs_err": {
     "peak_lo_mev": 0.5925960347863111,
     "peak_hi_mev": -1.4074039652137458,
-    "radius_nm": 0.019867947602225655
+    "radius_nm": 0.020373604574007942
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1679.3138004712227,
+   "instrument_s": 1679.313800599852,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -8291,10 +8234,10 @@
     },
     {
      "width_nm": 1.0,
-     "ghost": 0.032,
+     "ghost": 0.033,
      "ghost_lag_nm": [
-      -3.5,
-      2.0
+      3.5,
+      -2.0
      ],
      "field": "blunt",
      "field_atoms": 9,
@@ -8304,12 +8247,12 @@
     },
     {
      "verdict": "blunt",
-     "no_ring": "coverage 0.66, inside 1.00",
+     "no_ring": "coverage 0.67, inside 1.00",
      "quick": true
     },
     {
      "width_nm": 0.9,
-     "ghost": 0.031,
+     "ghost": 0.03,
      "ghost_lag_nm": [
       -0.4,
       3.9
@@ -8320,7 +8263,7 @@
      "field_ghost": [
       0.5,
       -3.7,
-      0.455
+      0.452
      ],
      "verdict": "ok"
     }
@@ -8341,14 +8284,14 @@
    "peak_prominence": [
     0.6,
     0.97,
-    0.84
+    0.83
    ],
-   "e0_mev": -465.7678381863519,
+   "e0_mev": -465.77587769954306,
    "drift_comp_nm_per_min": [
-    0.7136568340758105,
-    -0.5080068258639749
+    0.71365109268376,
+    -0.5080865512229448
    ],
-   "radius_nm": 4.072698276573361,
+   "radius_nm": 4.073203933545143,
    "peaks_found": 3
   },
   {
@@ -8360,7 +8303,7 @@
    "values": {
     "peak_lo_mev": -358.00000000000006,
     "peak_hi_mev": -278.0,
-    "radius_nm": 7.377637871089823
+    "radius_nm": 7.377706272766247
    },
    "truth": {
     "peak_lo_mev": -359.064703292516,
@@ -8370,14 +8313,14 @@
    "abs_err": {
     "peak_lo_mev": 1.0647032925159579,
     "peak_hi_mev": 1.064703292515901,
-    "radius_nm": 0.011602138853140431
+    "radius_nm": 0.011670540529563844
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1343.4136800201582,
+   "instrument_s": 1343.413680451445,
    "tip_condition": "double",
    "pokes": 3,
    "tip_actions": [
@@ -8434,17 +8377,17 @@
    "peak_prominence": [
     0.17,
     0.52,
-    0.68,
+    0.67,
     0.9,
-    0.9,
+    0.89,
     0.12
    ],
-   "e0_mev": -415.56890114881907,
+   "e0_mev": -415.56895494554965,
    "drift_comp_nm_per_min": [
-    -0.12295853364186081,
-    -1.1605487732514406
+    -0.12296330263752638,
+    -1.16054911989899
    ],
-   "radius_nm": 7.377637871089823,
+   "radius_nm": 7.377706272766247,
    "peaks_found": 6
   },
   {
@@ -8456,7 +8399,7 @@
    "values": {
     "peak_lo_mev": -326.00000000000006,
     "peak_hi_mev": -250.00000000000006,
-    "radius_nm": 9.219619795276085
+    "radius_nm": 9.219619793046391
    },
    "truth": {
     "peak_lo_mev": -322.4813532377526,
@@ -8466,14 +8409,14 @@
    "abs_err": {
     "peak_lo_mev": -3.5186467622474424,
     "peak_hi_mev": 0.4813532377525007,
-    "radius_nm": 0.005269375914114249
+    "radius_nm": 0.005269373684420486
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6454770705358,
+   "instrument_s": 785.6454770704469,
    "tip_condition": "good",
    "pokes": 3,
    "tip_actions": [],
@@ -8511,17 +8454,17 @@
    "peak_prominence": [
     0.17,
     0.43,
-    0.6,
+    0.61,
     0.83,
     0.99,
-    0.94
+    0.95
    ],
-   "e0_mev": -412.39788189689017,
+   "e0_mev": -412.40312118126394,
    "drift_comp_nm_per_min": [
-    0.11475248346505944,
-    0.6689381777241442
+    0.1147525029219198,
+    0.6689381555342215
    ],
-   "radius_nm": 9.219619795276085,
+   "radius_nm": 9.219619793046391,
    "peaks_found": 6
   },
   {
@@ -8533,7 +8476,7 @@
    "values": {
     "peak_lo_mev": -378.0,
     "peak_hi_mev": -318.00000000000006,
-    "radius_nm": 9.403788942323692
+    "radius_nm": 9.403905905544422
    },
    "truth": {
     "peak_lo_mev": -377.9139902128801,
@@ -8543,14 +8486,14 @@
    "abs_err": {
     "peak_lo_mev": -0.08600978711990592,
     "peak_hi_mev": 1.9139902128799804,
-    "radius_nm": 0.0014823349746215797
+    "radius_nm": 0.0015992981953516505
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1421.5049090584675,
+   "instrument_s": 1421.5049123621627,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -8562,8 +8505,8 @@
      "width_nm": 1.3,
      "ghost": 0.039,
      "ghost_lag_nm": [
-      -0.3,
-      4.3
+      0.3,
+      -4.3
      ],
      "field": "blunt",
      "field_atoms": 6,
@@ -8580,8 +8523,8 @@
      "width_nm": 1.0,
      "ghost": 0.321,
      "ghost_lag_nm": [
-      -2.6,
-      -2.9
+      2.6,
+      2.9
      ],
      "quick": true
     },
@@ -8605,7 +8548,7 @@
    ],
    "tip_rounds": 2,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.037,
+   "bare_feature": 0.035,
    "centre_shift_nm": [
     0.01,
     0.23
@@ -8625,12 +8568,12 @@
     0.92,
     0.99
    ],
-   "e0_mev": -418.38497881556117,
+   "e0_mev": -418.38883478018283,
    "drift_comp_nm_per_min": [
-    0.2588641819970015,
-    0.7206484037998332
+    0.2588626396125486,
+    0.7206566747522158
    ],
-   "radius_nm": 9.403788942323692,
+   "radius_nm": 9.403905905544422,
    "peaks_found": 5
   },
   {
@@ -8642,7 +8585,7 @@
    "values": {
     "peak_lo_mev": -424.00000000000006,
     "peak_hi_mev": -270.0,
-    "radius_nm": 4.247737385861889
+    "radius_nm": 4.2477373849763955
    },
    "truth": {
     "peak_lo_mev": -427.445305164222,
@@ -8652,14 +8595,14 @@
    "abs_err": {
     "peak_lo_mev": 3.4453051642219634,
     "peak_hi_mev": -0.5546948357780934,
-    "radius_nm": 0.008053588148253077
+    "radius_nm": 0.00805358726275962
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.6100778352481,
+   "instrument_s": 785.6100778351599,
    "tip_condition": "double",
    "pokes": 3,
    "tip_actions": [],
@@ -8668,8 +8611,8 @@
      "width_nm": 1.05,
      "ghost": 0.045,
      "ghost_lag_nm": [
-      2.7,
-      -3.3
+      -2.7,
+      3.3
      ],
      "field": "ok",
      "field_atoms": 7,
@@ -8680,7 +8623,7 @@
    ],
    "tip_rounds": 0,
    "bare_clear_nm": 6.7,
-   "bare_feature": 0.053,
+   "bare_feature": 0.052,
    "centre_shift_nm": [
     0.07,
     0.19
@@ -8696,12 +8639,12 @@
     0.95,
     0.99
    ],
-   "e0_mev": -465.78417131900824,
+   "e0_mev": -465.78660288027,
    "drift_comp_nm_per_min": [
-    0.4778627852829304,
-    0.6400271595296682
+    0.4778627847812924,
+    0.6400271593223068
    ],
-   "radius_nm": 4.247737385861889,
+   "radius_nm": 4.2477373849763955,
    "peaks_found": 3
   },
   {
@@ -8713,7 +8656,7 @@
    "values": {
     "peak_lo_mev": -348.00000000000006,
     "peak_hi_mev": -264.0,
-    "radius_nm": 9.16824553401097
+    "radius_nm": 9.168230058677183
    },
    "truth": {
     "peak_lo_mev": -344.0158197961059,
@@ -8723,14 +8666,14 @@
    "abs_err": {
     "peak_lo_mev": -3.984180203894141,
     "peak_hi_mev": 0.01581979610585904,
-    "radius_nm": -0.0027904355508177048
+    "radius_nm": -0.0028059108846036906
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 3340.1640696108843,
+   "instrument_s": 3340.1640598656872,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -8755,12 +8698,12 @@
       0.0
      ],
      "field": "blunt",
-     "field_atoms": 22,
+     "field_atoms": 23,
      "ghost_fraction": 0.043,
      "field_ghost": [
-      4.0,
-      -1.75,
-      0.95
+      -2.75,
+      -2.75,
+      0.843
      ],
      "verdict": "blunt"
     },
@@ -8888,15 +8831,15 @@
     0.38,
     0.73,
     0.92,
-    0.96,
-    0.58
+    0.95,
+    0.56
    ],
-   "e0_mev": -437.94938498403116,
+   "e0_mev": -437.83895100188596,
    "drift_comp_nm_per_min": [
-    -0.6353483800062577,
-    -0.8248322546550059
+    -0.6353459400132554,
+    -0.8248347749266493
    ],
-   "radius_nm": 9.16824553401097,
+   "radius_nm": 9.168230058677183,
    "peaks_found": 6
   },
   {
@@ -8908,7 +8851,7 @@
    "values": {
     "peak_lo_mev": -368.00000000000006,
     "peak_hi_mev": -266.0,
-    "radius_nm": 6.73976820716643
+    "radius_nm": 6.739746681799167
    },
    "truth": {
     "peak_lo_mev": -365.3542185288955,
@@ -8918,14 +8861,14 @@
    "abs_err": {
     "peak_lo_mev": -2.6457814711045557,
     "peak_hi_mev": 3.3542185288953874,
-    "radius_nm": 0.008589706155386345
+    "radius_nm": 0.008568180788122604
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 785.7202946585478,
+   "instrument_s": 785.7202948169586,
    "tip_condition": "unstable",
    "pokes": 3,
    "tip_actions": [],
@@ -8934,8 +8877,8 @@
      "width_nm": 0.85,
      "ghost": 0.027,
      "ghost_lag_nm": [
-      -4.1,
-      -1.5
+      4.1,
+      1.5
      ],
      "field": "ok",
      "field_atoms": 8,
@@ -8943,7 +8886,7 @@
      "field_ghost": [
       -1.7,
       -0.5,
-      0.991
+      0.992
      ],
      "verdict": "ok"
     }
@@ -8972,10 +8915,10 @@
    ],
    "e0_mev": -436.17750699184865,
    "drift_comp_nm_per_min": [
-    0.2340728363461246,
-    0.6495759990150549
+    0.23404077941251808,
+    0.6494118765325178
    ],
-   "radius_nm": 6.73976820716643,
+   "radius_nm": 6.739746681799167,
    "peaks_found": 5
   },
   {
@@ -8987,7 +8930,7 @@
    "values": {
     "peak_lo_mev": -442.00000000000006,
     "peak_hi_mev": -364.00000000000006,
-    "radius_nm": 5.747341484074463
+    "radius_nm": 5.747341337941894
    },
    "truth": {
     "peak_lo_mev": -445.40619269659504,
@@ -8997,14 +8940,14 @@
    "abs_err": {
     "peak_lo_mev": 3.406192696594985,
     "peak_hi_mev": -2.5938073034050717,
-    "radius_nm": -0.0030667013094882734
+    "radius_nm": -0.00306684744205743
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1421.4048243522896,
+   "instrument_s": 1421.4048245310046,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -9019,8 +8962,8 @@
       1.4,
       4.0
      ],
-     "field": "unknown",
-     "field_atoms": 0,
+     "field": "blunt",
+     "field_atoms": 1,
      "ghost_fraction": 0.12,
      "field_ghost": [
       1.0,
@@ -9059,7 +9002,7 @@
    ],
    "tip_rounds": 2,
    "bare_clear_nm": 6.5,
-   "bare_feature": 0.071,
+   "bare_feature": 0.07,
    "centre_shift_nm": [
     -0.27,
     -0.07
@@ -9073,16 +9016,16 @@
    ],
    "peak_prominence": [
     0.21,
-    0.77,
+    0.76,
     0.96,
     0.88
    ],
-   "e0_mev": -463.78250079105885,
+   "e0_mev": -463.785851114303,
    "drift_comp_nm_per_min": [
-    -0.7687818074484044,
-    -0.27309248345437975
+    -0.7687818306187579,
+    -0.27309327744274825
    ],
-   "radius_nm": 5.747341484074463,
+   "radius_nm": 5.747341337941894,
    "peaks_found": 4
   },
   {
@@ -9094,7 +9037,7 @@
    "values": {
     "peak_lo_mev": -408.00000000000006,
     "peak_hi_mev": -344.0,
-    "radius_nm": 7.901275778605641
+    "radius_nm": 7.901274193350611
    },
    "truth": {
     "peak_lo_mev": -410.37292621998955,
@@ -9104,14 +9047,14 @@
    "abs_err": {
     "peak_lo_mev": 2.3729262199894947,
     "peak_hi_mev": -1.6270737800105053,
-    "radius_nm": -0.019956084110043015
+    "radius_nm": -0.01995766936507337
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1834.9461352751687,
+   "instrument_s": 1834.9461350915335,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -9126,8 +9069,8 @@
      "width_nm": 1.25,
      "ghost": 0.031,
      "ghost_lag_nm": [
-      -3.9,
-      -2.1
+      3.9,
+      2.1
      ],
      "field": "blunt",
      "field_atoms": 6,
@@ -9140,8 +9083,8 @@
      "width_nm": 1.5,
      "ghost": 0.066,
      "ghost_lag_nm": [
-      -3.9,
-      -2.3
+      3.9,
+      2.3
      ],
      "quick": true
     },
@@ -9179,8 +9122,8 @@
      "width_nm": 1.05,
      "ghost": 0.005,
      "ghost_lag_nm": [
-      -2.7,
-      -4.0
+      2.7,
+      4.0
      ],
      "field": "ok",
      "field_atoms": 4,
@@ -9191,7 +9134,7 @@
    ],
    "tip_rounds": 5,
    "bare_clear_nm": 6.0,
-   "bare_feature": 0.034,
+   "bare_feature": 0.036,
    "centre_shift_nm": [
     0.3,
     0.03
@@ -9211,12 +9154,12 @@
     0.97,
     0.95
    ],
-   "e0_mev": -461.68057106153526,
+   "e0_mev": -461.6807988003878,
    "drift_comp_nm_per_min": [
-    1.3135642883167862,
-    0.13331609528011068
+    1.313538593823752,
+    0.13330241575465626
    ],
-   "radius_nm": 7.901275778605641,
+   "radius_nm": 7.901274193350611,
    "peaks_found": 5
   },
   {
@@ -9228,24 +9171,24 @@
    "values": {
     "peak_lo_mev": -378.0,
     "peak_hi_mev": -298.00000000000006,
-    "radius_nm": 7.460292348908342
+    "radius_nm": 7.459955092521545
    },
    "truth": {
     "peak_lo_mev": -379.6789831053479,
-    "peak_hi_mev": -297.67898310534787,
+    "peak_hi_mev": -299.67898310534787,
     "radius_nm": 7.454160894481913
    },
    "abs_err": {
     "peak_lo_mev": 1.6789831053479247,
-    "peak_hi_mev": -0.32101689465218897,
-    "radius_nm": 0.006131454426428817
+    "peak_hi_mev": 1.678983105347811,
+    "radius_nm": 0.0057941980396316595
    },
    "claims_ok": {
     "peak_lo_mev": true,
     "peak_hi_mev": true,
     "radius_nm": true
    },
-   "instrument_s": 1912.9607983876401,
+   "instrument_s": 1912.9608049250137,
    "tip_condition": "blunt",
    "pokes": 3,
    "tip_actions": [
@@ -9327,8 +9270,8 @@
      "width_nm": 1.05,
      "ghost": 0.043,
      "ghost_lag_nm": [
-      3.0,
-      2.6
+      -3.0,
+      -2.6
      ],
      "field": "ok",
      "field_atoms": 12,
@@ -9341,7 +9284,7 @@
    "bare_clear_nm": 6.7,
    "bare_feature": 0.027,
    "centre_shift_nm": [
-    0.01,
+    0.02,
     0.28
    ],
    "spectra_dropped": 0,
@@ -9357,14 +9300,14 @@
     0.48,
     0.82,
     0.95,
-    0.9
+    0.91
    ],
-   "e0_mev": -436.1860140091134,
+   "e0_mev": -436.18613930863387,
    "drift_comp_nm_per_min": [
-    0.24882584641933145,
-    0.8966869769620155
+    0.24891700727230842,
+    0.8967145386308348
    ],
-   "radius_nm": 7.460292348908342,
+   "radius_nm": 7.459955092521545,
    "peaks_found": 5
   }
  ]

@@ -1,0 +1,6361 @@
+{
+ "summary": {
+  "n": 100,
+  "success_rate": 0.99,
+  "by_tip": {
+   "blunt": {
+    "success": 34,
+    "n": 34
+   },
+   "dirty": {
+    "success": 10,
+    "n": 10
+   },
+   "double": {
+    "success": 27,
+    "n": 28
+   },
+   "good": {
+    "success": 16,
+    "n": 16
+   },
+   "unstable": {
+    "success": 12,
+    "n": 12
+   }
+  },
+  "instrument_s": {
+   "median": 638.6443959335519,
+   "p90": 1178.552737153925,
+   "max": 1538.5496642392195
+  },
+  "failures": {
+   "claims failed: domain_b_orientation_deg": 1
+  }
+ },
+ "runs": [
+  {
+   "paper": "P1",
+   "seed": 0,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.56470121331964,
+    "periods": [
+     6.578502667028098,
+     6.561608926200403,
+     6.554965348564554,
+     6.547285872918563,
+     6.5689967526546615,
+     6.583447911794965,
+     6.567793500438876,
+     6.556052201902719,
+     6.540717581027692,
+     6.571289379179057
+    ],
+    "stripe_orientation_deg": 161.2457468727878,
+    "domain_a_orientation_deg": 161.2457468727878,
+    "domain_b_orientation_deg": 40.98720498286139
+   },
+   "abs_err": {
+    "period_nm": 0.05149040849958375,
+    "stripe_orientation_deg_deg": 0.17725312721219666,
+    "domain_a_orientation_deg_deg": 0.17725312721219666,
+    "domain_b_orientation_deg_deg": 0.43579501713861646
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.8257099170205,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.825,
+     1.348
+    ]
+   ],
+   "atom_nm": 53.5,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 272,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 1,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.063634323292074,
+    "periods": [
+     6.063321350594742,
+     6.06435314709645,
+     6.052132521116122,
+     6.066368920017416,
+     6.047333973605593,
+     6.071363333957762,
+     6.063947295989407,
+     6.04737480539234,
+     6.0737992880642535,
+     6.051086136686122
+    ],
+    "stripe_orientation_deg": 93.56277112973291,
+    "domain_a_orientation_deg": 93.56277112973291,
+    "domain_b_orientation_deg": 34.416972733684446
+   },
+   "abs_err": {
+    "period_nm": 0.030997931296627534,
+    "stripe_orientation_deg_deg": 1.1672288702670954,
+    "domain_a_orientation_deg_deg": 1.1672288702670954,
+    "domain_b_orientation_deg_deg": 1.2729727336844405
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6618706586153,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     1.539,
+     0.109
+    ]
+   ],
+   "atom_nm": 22.7,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 184,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 2,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.232595661552313,
+    "periods": [
+     6.233258224364684,
+     6.233651150295399,
+     6.232404039832805,
+     6.232787283271821,
+     6.229075355171677,
+     6.235726651054551,
+     6.233485858699804,
+     6.232350201015715,
+     6.230238053327148,
+     6.226128891054099
+    ],
+    "stripe_orientation_deg": 74.03315921559707,
+    "domain_a_orientation_deg": 74.03315921559707,
+    "domain_b_orientation_deg": 136.44968572373176
+   },
+   "abs_err": {
+    "period_nm": 0.0015674493878767848,
+    "stripe_orientation_deg_deg": 0.2098407844029282,
+    "domain_a_orientation_deg_deg": 0.2098407844029282,
+    "domain_b_orientation_deg_deg": 0.28531427626825234
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.3422667650459,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.034,
+     -0.783
+    ]
+   ],
+   "atom_nm": 8.5,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 291,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 3,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.075925318426867,
+    "periods": [
+     6.078954468856595,
+     6.0819288059514784,
+     6.075504875655473,
+     6.075327649382677,
+     6.075803941277573,
+     6.077125863579913,
+     6.077026098711833,
+     6.070517019565788,
+     6.071486428358479,
+     6.076046695576161,
+     6.074262253014136,
+     6.0762358867417126
+    ],
+    "stripe_orientation_deg": 97.2311058095634,
+    "domain_a_orientation_deg": 97.2311058095634,
+    "domain_b_orientation_deg": 154.7895953202963
+   },
+   "abs_err": {
+    "period_nm": 0.03030047023976401,
+    "stripe_orientation_deg_deg": 0.6081058095633978,
+    "domain_a_orientation_deg_deg": 0.6081058095633978,
+    "domain_b_orientation_deg_deg": 0.9994046797036731
+   },
+   "actions": 17,
+   "budget_s": 10800.0,
+   "instrument_s": 818.5171928298868,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.54,
+     -0.604
+    ]
+   ],
+   "atom_nm": 30.1,
+   "frames": 2,
+   "centres": [
+    {
+     "frames": 2,
+     "places": 43,
+     "windows": 12,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 4,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.335303675873435,
+    "periods": [
+     6.335027681397987,
+     6.33624125126679,
+     6.3378527444051995,
+     6.332031334126479,
+     6.332670823807234,
+     6.335579670348883,
+     6.337089163273709,
+     6.338222104310736,
+     6.329299984393755,
+     6.330866680253546
+    ],
+    "stripe_orientation_deg": 128.1148723586559,
+    "domain_a_orientation_deg": 128.1148723586559,
+    "domain_b_orientation_deg": 66.43511835509447
+   },
+   "abs_err": {
+    "period_nm": -0.003968721826090871,
+    "stripe_orientation_deg_deg": 0.515127641344094,
+    "domain_a_orientation_deg_deg": 0.515127641344094,
+    "domain_b_orientation_deg_deg": 0.3851183550944768
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.564134698949,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.742,
+     0.279
+    ]
+   ],
+   "atom_nm": 29.7,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 156,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 5,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 5.928912752349673,
+    "periods": [
+     5.930945993716818,
+     5.926863410774679,
+     5.9281326390584015,
+     5.929579378518948,
+     5.928089861606824,
+     5.9334908652805085,
+     5.924752485046974,
+     5.930784953353312,
+     5.928450339736452,
+     5.9293751649628925
+    ],
+    "stripe_orientation_deg": 158.1519188949683,
+    "domain_a_orientation_deg": 158.1519188949683,
+    "domain_b_orientation_deg": 40.09616002578324
+   },
+   "abs_err": {
+    "period_nm": -0.018486325073356902,
+    "stripe_orientation_deg_deg": 0.5399188949683094,
+    "domain_a_orientation_deg_deg": 0.5399188949683094,
+    "domain_b_orientation_deg_deg": 0.22583997421676827
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.5318045550889,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.085,
+     0.309
+    ]
+   ],
+   "atom_nm": 47.0,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 132,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 6,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.440919823348905,
+    "periods": [
+     6.435777037505452,
+     6.440087476619266,
+     6.425580334276601,
+     6.444421281225944,
+     6.435508416667235,
+     6.437589536054501,
+     6.4449631345941505,
+     6.418783859314785,
+     6.449044531596025,
+     6.437628943004717,
+     6.4321338881888295,
+     6.449505297251512,
+     6.440595986315912,
+     6.440840244850041,
+     6.440999401847768,
+     6.442517121236633,
+     6.444424858488044,
+     6.443272200420668,
+     6.439298397447899,
+     6.441913720780353,
+     6.457730304280471,
+     6.460677715473434,
+     6.4583316021598565,
+     6.455891037733874,
+     6.459985731530301,
+     6.4558280319643,
+     6.467669890798995,
+     6.456116045267935,
+     6.459283569191197,
+     6.457998515377708,
+     6.408358726396396,
+     6.409601338314777,
+     6.4047099492653485,
+     6.409247067389943,
+     6.41362739858748,
+     6.407581115052065,
+     6.40543003642969,
+     6.403332973929274
+    ],
+    "stripe_orientation_deg": 158.99860475400166,
+    "domain_a_orientation_deg": 158.99860475400166,
+    "domain_b_orientation_deg": 38.583937838615455
+   },
+   "abs_err": {
+    "period_nm": 0.03265433617692004,
+    "stripe_orientation_deg_deg": 1.3336047540016693,
+    "domain_a_orientation_deg_deg": 1.3336047540016693,
+    "domain_b_orientation_deg_deg": 1.612062161384543
+   },
+   "actions": 20,
+   "budget_s": 10800.0,
+   "instrument_s": 1358.5457374824105,
+   "tip_condition": "good",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     1.563,
+     0.227
+    ]
+   ],
+   "atom_nm": 25.2,
+   "frames": 5,
+   "centres": [
+    {
+     "frames": 5,
+     "places": 404,
+     "windows": 38,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 7,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.626297935676186,
+    "periods": [
+     6.631894893793002,
+     6.6252720831611525,
+     6.6633506351229155,
+     6.611058714509632,
+     6.627764273042105,
+     6.62600087394488,
+     6.626594997407492,
+     6.707323914130549,
+     6.603248145994106,
+     6.623789298979862
+    ],
+    "stripe_orientation_deg": 44.47695193359575,
+    "domain_a_orientation_deg": 44.47695193359575,
+    "domain_b_orientation_deg": 106.29107474903793
+   },
+   "abs_err": {
+    "period_nm": 0.03569248605829145,
+    "stripe_orientation_deg_deg": 1.909048066404253,
+    "domain_a_orientation_deg_deg": 1.909048066404253,
+    "domain_b_orientation_deg_deg": 0.0949252509620635
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.4896490742923,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.539,
+     0.334
+    ]
+   ],
+   "atom_nm": 6.3,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 40,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 8,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.062654329362891,
+    "periods": [
+     6.062294013980055,
+     6.044892722631672,
+     6.062401330970621,
+     6.065425690757533,
+     6.067809471505193,
+     6.06343458956979,
+     6.042131463892279,
+     6.06290732775516,
+     6.067688807348557,
+     6.061959890928842
+    ],
+    "stripe_orientation_deg": 121.00832169640785,
+    "domain_a_orientation_deg": 121.00832169640785,
+    "domain_b_orientation_deg": 60.248619935069264
+   },
+   "abs_err": {
+    "period_nm": 0.015845490783275018,
+    "stripe_orientation_deg_deg": 0.04967830359215952,
+    "domain_a_orientation_deg_deg": 0.04967830359215952,
+    "domain_b_orientation_deg_deg": 0.6036199350692613
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.7729511322461,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.226,
+     -0.081
+    ]
+   ],
+   "atom_nm": 40.9,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 228,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 9,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.419567044135051,
+    "periods": [
+     6.419567044135051,
+     6.418761395011139,
+     6.417697145205939,
+     6.405423321232337,
+     6.430937066510432,
+     6.417046032769436,
+     6.4057881365219576,
+     6.410767651548605,
+     6.4074154359498605,
+     6.442482851438038,
+     6.452388721127462,
+     6.4442660110507335,
+     6.441448865051449,
+     6.448580068704204,
+     6.465962728961308
+    ],
+    "stripe_orientation_deg": 135.77379640912358,
+    "domain_a_orientation_deg": 135.77379640912358,
+    "domain_b_orientation_deg": 17.13809135539985
+   },
+   "abs_err": {
+    "period_nm": 0.005493688387280926,
+    "stripe_orientation_deg_deg": 2.5802035908764367,
+    "domain_a_orientation_deg_deg": 2.5802035908764367,
+    "domain_b_orientation_deg_deg": 1.2159086446001481
+   },
+   "actions": 17,
+   "budget_s": 10800.0,
+   "instrument_s": 818.5264404671685,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.838,
+     0.515
+    ]
+   ],
+   "atom_nm": 27.0,
+   "frames": 2,
+   "centres": [
+    {
+     "frames": 2,
+     "places": 96,
+     "windows": 15,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 10,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.325963724164937,
+    "periods": [
+     6.326099929447877,
+     6.324648956488064,
+     6.3272829082647775,
+     6.328265948410975,
+     6.328871275847906,
+     6.322753680326149,
+     6.3203870244802305,
+     6.3252695201795675,
+     6.329159068395886,
+     6.325827518881996
+    ],
+    "stripe_orientation_deg": 156.47881202806283,
+    "domain_a_orientation_deg": 156.47881202806283,
+    "domain_b_orientation_deg": 100.3129650961879
+   },
+   "abs_err": {
+    "period_nm": 0.0017771324963771207,
+    "stripe_orientation_deg_deg": 0.4581879719371784,
+    "domain_a_orientation_deg_deg": 0.4581879719371784,
+    "domain_b_orientation_deg_deg": 0.43096509618789014
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.4445308800557,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.526,
+     0.18
+    ]
+   ],
+   "atom_nm": 19.7,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 352,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 11,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.550847918921598,
+    "periods": [
+     6.552133893331111,
+     6.553327553052961,
+     6.547118203581039,
+     6.549561944512084,
+     6.55319908024589,
+     6.559601825668135,
+     6.555050689515334,
+     6.5455356808044005,
+     6.548673320252503,
+     6.546133519283243
+    ],
+    "stripe_orientation_deg": 19.933831793994564,
+    "domain_a_orientation_deg": 19.933831793994564,
+    "domain_b_orientation_deg": 145.46790924963753
+   },
+   "abs_err": {
+    "period_nm": 0.011150306814275979,
+    "stripe_orientation_deg_deg": 0.772168206005432,
+    "domain_a_orientation_deg_deg": 0.772168206005432,
+    "domain_b_orientation_deg_deg": 1.2589092496375258
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.5943811316122,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -1.216,
+     -1.163
+    ]
+   ],
+   "atom_nm": 14.1,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 157,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 12,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.004279720403536,
+    "periods": [
+     6.004279720403536,
+     6.00052622508128,
+     6.005197916752039,
+     6.004861976135972,
+     6.009115248495143,
+     6.004058179026998,
+     5.995723292992412,
+     6.004173059667019,
+     6.002891727269342,
+     6.013775529465804,
+     6.0014227382809455,
+     6.005351773165362,
+     5.998429753757199,
+     6.004418169996398,
+     6.003615720444437,
+     5.997902652558716,
+     6.005248577988071,
+     5.994007855479167,
+     6.002981967148492,
+     6.000404805133463,
+     6.028423583211043,
+     6.034111604684984,
+     6.019890074413853,
+     6.028616700906489,
+     6.027616773674479,
+     5.987606774745224,
+     6.0279912196657115,
+     6.039382806205723,
+     6.035176368904353,
+     6.043645865995444,
+     6.028517787767109,
+     6.045030438775086,
+     6.041000093182521,
+     6.030079625707165,
+     6.046626213332798,
+     6.024401565057134,
+     6.052445172573677,
+     5.973846723088434,
+     5.9823456538701345,
+     5.974773770476818,
+     5.976997514352875,
+     5.97404393549088,
+     5.967768858190517,
+     5.986098318097445,
+     5.968872544612899,
+     5.974591471473658,
+     5.968724734837899
+    ],
+    "stripe_orientation_deg": 164.29687586966855,
+    "domain_a_orientation_deg": 164.29687586966855,
+    "domain_b_orientation_deg": 44.22817893996774
+   },
+   "abs_err": {
+    "period_nm": 0.00921596496140964,
+    "stripe_orientation_deg_deg": 0.5841241303314462,
+    "domain_a_orientation_deg_deg": 0.5841241303314462,
+    "domain_b_orientation_deg_deg": 1.826821060032259
+   },
+   "actions": 20,
+   "budget_s": 10800.0,
+   "instrument_s": 1358.460964205898,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.27,
+     -0.927
+    ]
+   ],
+   "atom_nm": 11.0,
+   "frames": 5,
+   "centres": [
+    {
+     "frames": 5,
+     "places": 748,
+     "windows": 47,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 13,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.439840031455359,
+    "periods": [
+     6.4377424611972565,
+     6.444430111722243,
+     6.4400224696349335,
+     6.442846623968382,
+     6.453047837379468,
+     6.431482356847433,
+     6.438119772870042,
+     6.4370148750163905,
+     6.439657593275785,
+     6.454091685351814
+    ],
+    "stripe_orientation_deg": 80.27389274783785,
+    "domain_a_orientation_deg": 80.27389274783785,
+    "domain_b_orientation_deg": 141.60004183066687
+   },
+   "abs_err": {
+    "period_nm": 0.004011188514949637,
+    "stripe_orientation_deg_deg": 1.6151072521621472,
+    "domain_a_orientation_deg_deg": 1.6151072521621472,
+    "domain_b_orientation_deg_deg": 0.2889581693331422
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.5399361106796,
+   "tip_condition": "good",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.035,
+     0.609
+    ]
+   ],
+   "atom_nm": 8.4,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 105,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 14,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.134369134003308,
+    "periods": [
+     6.134008804244495,
+     6.129214971480255,
+     6.134729463762122,
+     6.127995911246865,
+     6.145786771829809,
+     6.139239608835345,
+     6.134781068911486,
+     6.122090788005157,
+     6.1330773892044315,
+     6.142129849156148
+    ],
+    "stripe_orientation_deg": 160.99573213718332,
+    "domain_a_orientation_deg": 160.99573213718332,
+    "domain_b_orientation_deg": 36.26608548994051
+   },
+   "abs_err": {
+    "period_nm": 0.009151520338614105,
+    "stripe_orientation_deg_deg": 0.27673213718333045,
+    "domain_a_orientation_deg_deg": 0.27673213718333045,
+    "domain_b_orientation_deg_deg": 0.5969145100594915
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.7043333678535,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.013,
+     0.767
+    ]
+   ],
+   "atom_nm": 4.2,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 190,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 15,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.348737594604902,
+    "periods": [
+     6.348439714875181,
+     6.348873534368668,
+     6.349092295608883,
+     6.351907483103785,
+     6.3481934239525515,
+     6.350896436075569,
+     6.346010409436847,
+     6.348601654841137,
+     6.3472839858178345,
+     6.3534969454976755
+    ],
+    "stripe_orientation_deg": 31.973256002040237,
+    "domain_a_orientation_deg": 31.973256002040237,
+    "domain_b_orientation_deg": 89.98133423680189
+   },
+   "abs_err": {
+    "period_nm": 0.0039484704890755395,
+    "stripe_orientation_deg_deg": 1.2712560020402321,
+    "domain_a_orientation_deg_deg": 1.2712560020402321,
+    "domain_b_orientation_deg_deg": 0.5826657631981078
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6486172335461,
+   "tip_condition": "good",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.034,
+     0.73
+    ]
+   ],
+   "atom_nm": 6.4,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 202,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 16,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.114483225751826,
+    "periods": [
+     6.114603391767129,
+     6.124660691726011,
+     6.111379830785129,
+     6.114363059736524,
+     6.107409298846699,
+     6.116710700957609,
+     6.128055524126233,
+     6.108212897709301,
+     6.116760901440976,
+     6.10536695279608
+    ],
+    "stripe_orientation_deg": 17.59095892849286,
+    "domain_a_orientation_deg": 17.59095892849286,
+    "domain_b_orientation_deg": 79.0197808308032
+   },
+   "abs_err": {
+    "period_nm": 0.03328207902122049,
+    "stripe_orientation_deg_deg": 0.9569589284928668,
+    "domain_a_orientation_deg_deg": 0.9569589284928668,
+    "domain_b_orientation_deg_deg": 1.0032191691967967
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.7176647735963,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.679,
+     0.935
+    ]
+   ],
+   "atom_nm": 30.3,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 226,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 17,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.352679294492148,
+    "periods": [
+     6.353365136162186,
+     6.356556901049731,
+     6.345530563803019,
+     6.363338423617777,
+     6.344365457899161,
+     6.353776418843064,
+     6.35199345282211,
+     6.342761137939564,
+     6.383075310651929,
+     6.342505684337138
+    ],
+    "stripe_orientation_deg": 61.44275451702127,
+    "domain_a_orientation_deg": 61.44275451702127,
+    "domain_b_orientation_deg": 1.1253809440308797
+   },
+   "abs_err": {
+    "period_nm": 0.03983621013927685,
+    "stripe_orientation_deg_deg": 0.5077545170212687,
+    "domain_a_orientation_deg_deg": 0.5077545170212687,
+    "domain_b_orientation_deg_deg": 0.19038094403087769
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.747692188072,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -1.018,
+     1.056
+    ]
+   ],
+   "atom_nm": 34.2,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 361,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 18,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.0448276761299695,
+    "periods": [
+     6.082193744474192,
+     6.0460239883201465,
+     6.043516337248013,
+     6.039519658083365,
+     6.0453952533389295,
+     6.044260098921009
+    ],
+    "stripe_orientation_deg": 153.1065822074681,
+    "domain_a_orientation_deg": 153.1065822074681,
+    "domain_b_orientation_deg": 94.4415826673484
+   },
+   "abs_err": {
+    "period_nm": 0.007425340794184443,
+    "stripe_orientation_deg_deg": 1.426417792531879,
+    "domain_a_orientation_deg_deg": 1.426417792531879,
+    "domain_b_orientation_deg_deg": 1.2075826673484045
+   },
+   "actions": 18,
+   "budget_s": 10800.0,
+   "instrument_s": 998.6207663249779,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.838,
+     -0.741
+    ]
+   ],
+   "atom_nm": 22.5,
+   "frames": 3,
+   "centres": [
+    {
+     "frames": 3,
+     "places": 374,
+     "windows": 6,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 19,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.375459478886096,
+    "periods": [
+     6.373809004734085,
+     6.375817360899567,
+     6.3729124365890595,
+     6.3765975369323495,
+     6.370955631167267,
+     6.383902076433659,
+     6.375538412444747,
+     6.3836700272768665,
+     6.386864852201046,
+     6.3716087875775145,
+     6.361363922783569,
+     6.375380545327445,
+     6.372479087121736,
+     6.377925822449901,
+     6.372625710677996,
+     6.375895323106752,
+     6.378938161072558,
+     6.368662930159594,
+     6.381112124669993,
+     6.375253807450941,
+     6.37438527823183,
+     6.384404531314323
+    ],
+    "stripe_orientation_deg": 13.735452137735276,
+    "domain_a_orientation_deg": 13.735452137735276,
+    "domain_b_orientation_deg": 69.94180682854832
+   },
+   "abs_err": {
+    "period_nm": -0.008080534668343908,
+    "stripe_orientation_deg_deg": 1.0834521377352786,
+    "domain_a_orientation_deg_deg": 1.0834521377352786,
+    "domain_b_orientation_deg_deg": 1.8071931714516722
+   },
+   "actions": 18,
+   "budget_s": 10800.0,
+   "instrument_s": 998.7320073897922,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     1.542,
+     -0.686
+    ]
+   ],
+   "atom_nm": 42.6,
+   "frames": 3,
+   "centres": [
+    {
+     "frames": 3,
+     "places": 317,
+     "windows": 22,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 20,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.0827492117390864,
+    "periods": [
+     6.080401586560663,
+     6.084347134528659,
+     6.0784139114347715,
+     6.087575834582832,
+     6.082335817999924,
+     6.077288580644543,
+     6.084634173317126,
+     6.072900320159019,
+     6.089364516131473,
+     6.083162605478249
+    ],
+    "stripe_orientation_deg": 94.70759324574733,
+    "domain_a_orientation_deg": 94.70759324574733,
+    "domain_b_orientation_deg": 155.70514710869162
+   },
+   "abs_err": {
+    "period_nm": 0.011919478593824806,
+    "stripe_orientation_deg_deg": 1.0835932457473376,
+    "domain_a_orientation_deg_deg": 1.0835932457473376,
+    "domain_b_orientation_deg_deg": 1.3908528913083842
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6766309025802,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.51,
+     -1.501
+    ]
+   ],
+   "atom_nm": 11.6,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 226,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 21,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.457951012567144,
+    "periods": [
+     6.457947020292014,
+     6.452266827018058,
+     6.450464755548167,
+     6.457955004842274,
+     6.460933445593086,
+     6.461398227590139,
+     6.452827154877585,
+     6.4538521735074275,
+     6.471068496684935,
+     6.482430506208347
+    ],
+    "stripe_orientation_deg": 76.02635194069018,
+    "domain_a_orientation_deg": 76.02635194069018,
+    "domain_b_orientation_deg": 130.31576129474433
+   },
+   "abs_err": {
+    "period_nm": 0.00949763328409503,
+    "stripe_orientation_deg_deg": 1.0593519406901777,
+    "domain_a_orientation_deg_deg": 1.0593519406901777,
+    "domain_b_orientation_deg_deg": 1.3132387052556567
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.7015854949823,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.577,
+     0.215
+    ]
+   ],
+   "atom_nm": 12.3,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 153,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 22,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.244050058376352,
+    "periods": [
+     6.243840825702788,
+     6.252963560898485,
+     6.225730653794125,
+     6.244745112550527,
+     6.22280233479051,
+     6.2458533758625965,
+     6.260890260496549,
+     6.2251144949522415,
+     6.244259291049915,
+     6.2258383967006905
+    ],
+    "stripe_orientation_deg": 167.45572308045283,
+    "domain_a_orientation_deg": 167.45572308045283,
+    "domain_b_orientation_deg": 47.442247731479426
+   },
+   "abs_err": {
+    "period_nm": 0.02855420729961189,
+    "stripe_orientation_deg_deg": 0.32727691954715965,
+    "domain_a_orientation_deg_deg": 0.32727691954715965,
+    "domain_b_orientation_deg_deg": 0.34075226852057483
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.5843543240178,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.109,
+     -0.275
+    ]
+   ],
+   "atom_nm": 6.2,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 326,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 23,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.12016512360586,
+    "periods": [
+     6.1139899194285166,
+     6.122638858184516,
+     6.1283830329128,
+     6.113247968474681,
+     6.118103765848854,
+     6.101076368744277,
+     6.1222264813628655,
+     6.135890278026131,
+     6.123806359575937,
+     6.1177790374461285
+    ],
+    "stripe_orientation_deg": 14.048521441506525,
+    "domain_a_orientation_deg": 14.048521441506525,
+    "domain_b_orientation_deg": 68.46718994048541
+   },
+   "abs_err": {
+    "period_nm": -0.013373583534904476,
+    "stripe_orientation_deg_deg": 1.3415214415065293,
+    "domain_a_orientation_deg_deg": 1.3415214415065293,
+    "domain_b_orientation_deg_deg": 0.9878100595145867
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.524401371346,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.324,
+     0.584
+    ]
+   ],
+   "atom_nm": 7.0,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 226,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 24,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.132929126244827,
+    "periods": [
+     6.132968573300009,
+     6.1369994301840585,
+     6.13819839747026,
+     6.1299757179560554,
+     6.132889679189644,
+     6.127977859244543,
+     6.136232550113745,
+     6.137290707547226,
+     6.1249667960892245,
+     6.128067004199727
+    ],
+    "stripe_orientation_deg": 179.95088266516697,
+    "domain_a_orientation_deg": 179.95088266516697,
+    "domain_b_orientation_deg": 124.22726559169521
+   },
+   "abs_err": {
+    "period_nm": -0.010367770703956225,
+    "stripe_orientation_deg_deg": 0.04611733483304192,
+    "domain_a_orientation_deg_deg": 0.04611733483304192,
+    "domain_b_orientation_deg_deg": 0.7042655916952185
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.5959845324123,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.698,
+     -0.693
+    ]
+   ],
+   "atom_nm": 7.6,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 345,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 25,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.699498550989958,
+    "periods": [
+     6.699356922305893,
+     6.706901684431816,
+     6.697598525698551,
+     6.696594428039427,
+     6.699640179674022,
+     6.700324521966008,
+     6.704097929906435,
+     6.693420440066276,
+     6.69433524852814,
+     6.700416091737278
+    ],
+    "stripe_orientation_deg": 0.18517765553270843,
+    "domain_a_orientation_deg": 0.18517765553270843,
+    "domain_b_orientation_deg": 126.41658501340598
+   },
+   "abs_err": {
+    "period_nm": 0.004926529384722045,
+    "stripe_orientation_deg_deg": 0.4838223444672849,
+    "domain_a_orientation_deg_deg": 0.4838223444672849,
+    "domain_b_orientation_deg_deg": 1.9525850134059795
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.419544713571,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.423,
+     -0.863
+    ]
+   ],
+   "atom_nm": 56.3,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 183,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 26,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.060525307374429,
+    "periods": [
+     6.060525307374429,
+     6.066666496350057,
+     6.061198983278712,
+     6.0514112619456,
+     6.057913020244597
+    ],
+    "stripe_orientation_deg": 129.92649239760942,
+    "domain_a_orientation_deg": 129.92649239760942,
+    "domain_b_orientation_deg": 66.36799015524596
+   },
+   "abs_err": {
+    "period_nm": -0.005809771083510995,
+    "stripe_orientation_deg_deg": 0.4365076023905772,
+    "domain_a_orientation_deg_deg": 0.4365076023905772,
+    "domain_b_orientation_deg_deg": 0.2340098447540413
+   },
+   "actions": 18,
+   "budget_s": 10800.0,
+   "instrument_s": 998.5089190296161,
+   "tip_condition": "good",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.326,
+     -0.179
+    ]
+   ],
+   "atom_nm": 23.1,
+   "frames": 3,
+   "centres": [
+    {
+     "frames": 3,
+     "places": 493,
+     "windows": 5,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 27,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.474728130946023,
+    "periods": [
+     6.476471954460133,
+     6.499062823308416,
+     6.472984307431912,
+     6.4967338295699335,
+     6.452295771190521,
+     6.471879638996444,
+     6.500498814091988,
+     6.471411906278333,
+     6.492194842140852,
+     6.4402711432264255
+    ],
+    "stripe_orientation_deg": 104.29776535335519,
+    "domain_a_orientation_deg": 104.29776535335519,
+    "domain_b_orientation_deg": 45.162543376266505
+   },
+   "abs_err": {
+    "period_nm": -0.05865702095378378,
+    "stripe_orientation_deg_deg": 0.08923464664481173,
+    "domain_a_orientation_deg_deg": 0.08923464664481173,
+    "domain_b_orientation_deg_deg": 0.7515433762665111
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.549070986401,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.029,
+     0.915
+    ]
+   ],
+   "atom_nm": 0.6,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 266,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 28,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.274071773350235,
+    "periods": [
+     6.275439919933318,
+     6.271530353041402,
+     6.28351159792177,
+     6.272703626767151,
+     6.280948773665341,
+     6.271263476908305,
+     6.265957114934895,
+     6.2871394103825775,
+     6.265395010145063,
+     6.281576664950306
+    ],
+    "stripe_orientation_deg": 0.7378242764523192,
+    "domain_a_orientation_deg": 0.7378242764523192,
+    "domain_b_orientation_deg": 121.74242280866986
+   },
+   "abs_err": {
+    "period_nm": -0.021812388790447557,
+    "stripe_orientation_deg_deg": 0.4431757235476823,
+    "domain_a_orientation_deg_deg": 0.4431757235476823,
+    "domain_b_orientation_deg_deg": 1.2334228086698573
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.7103860530742,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.787,
+     0.196
+    ]
+   ],
+   "atom_nm": 33.4,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 245,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 29,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.062625842142897,
+    "periods": [
+     6.06769466683256,
+     6.059250022024245,
+     6.0598736462960305,
+     6.063619199942593,
+     6.071011316078044,
+     6.064006302808631,
+     6.062807895376338,
+     6.071658110619449,
+     6.060946252413924,
+     6.061731994076738,
+     6.062056633012557,
+     6.061530959193614,
+     6.062625842142897,
+     6.061730228490311,
+     6.062108371250841,
+     6.069908900302833,
+     6.062244631423895,
+     6.067658104416619,
+     6.063851500957375
+    ],
+    "stripe_orientation_deg": 61.8051841181586,
+    "domain_a_orientation_deg": 61.8051841181586,
+    "domain_b_orientation_deg": 118.83807859526819
+   },
+   "abs_err": {
+    "period_nm": -0.001005135260443879,
+    "stripe_orientation_deg_deg": 0.30781588184140674,
+    "domain_a_orientation_deg_deg": 0.30781588184140674,
+    "domain_b_orientation_deg_deg": 0.8459214047318113
+   },
+   "actions": 18,
+   "budget_s": 10800.0,
+   "instrument_s": 998.491750593581,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.533,
+     -0.383
+    ]
+   ],
+   "atom_nm": 24.1,
+   "frames": 3,
+   "centres": [
+    {
+     "frames": 3,
+     "places": 456,
+     "windows": 19,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 30,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 5.9408384281704185,
+    "periods": [
+     5.940329428451334,
+     5.925588913662796,
+     5.945513176846936,
+     5.9343465085264455,
+     5.943409369195553,
+     5.941347427889503,
+     5.91903138615549,
+     5.947625621764418,
+     5.936896526454943,
+     5.946658606032859
+    ],
+    "stripe_orientation_deg": 115.84808249216167,
+    "domain_a_orientation_deg": 115.84808249216167,
+    "domain_b_orientation_deg": 175.6969848509426
+   },
+   "abs_err": {
+    "period_nm": 0.002086251633130587,
+    "stripe_orientation_deg_deg": 1.2560824921616671,
+    "domain_a_orientation_deg_deg": 1.2560824921616671,
+    "domain_b_orientation_deg_deg": 0.8280151490573928
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.5915120060633,
+   "tip_condition": "good",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.182,
+     -1.041
+    ]
+   ],
+   "atom_nm": 4.7,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 133,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 31,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.063485646573092,
+    "periods": [
+     6.0638644036907206,
+     6.058433363697234,
+     6.063106889455464,
+     6.082747403094458,
+     6.082244153757698,
+     6.053005220477023,
+     6.046815654356065,
+     6.057567492252736,
+     6.078938503304623,
+     6.080575292807742
+    ],
+    "stripe_orientation_deg": 26.629417912457487,
+    "domain_a_orientation_deg": 26.629417912457487,
+    "domain_b_orientation_deg": 85.95145822443686
+   },
+   "abs_err": {
+    "period_nm": -0.030620277019250075,
+    "stripe_orientation_deg_deg": 0.9184179124574854,
+    "domain_a_orientation_deg_deg": 0.9184179124574854,
+    "domain_b_orientation_deg_deg": 0.24045822443686404
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6443959335519,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -1.067,
+     0.684
+    ]
+   ],
+   "atom_nm": 4.3,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 250,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 32,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.307375162769933,
+    "periods": [
+     6.306756731809481,
+     6.303957312222925,
+     6.314460626908175,
+     6.302577996701401,
+     6.3074663315720585,
+     6.315450069462326,
+     6.301005003031892,
+     6.3168504705441535,
+     6.3072839939678085,
+     6.317291331913334
+    ],
+    "stripe_orientation_deg": 3.9345071364148194,
+    "domain_a_orientation_deg": 3.9345071364148194,
+    "domain_b_orientation_deg": 123.24877972026464
+   },
+   "abs_err": {
+    "period_nm": 0.0252633469681669,
+    "stripe_orientation_deg_deg": 1.7665071364148162,
+    "domain_a_orientation_deg_deg": 1.7665071364148162,
+    "domain_b_orientation_deg_deg": 0.9612202797353575
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.4739651368195,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.564,
+     -0.769
+    ]
+   ],
+   "atom_nm": 1.4,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 88,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 33,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.617189131772745,
+    "periods": [
+     6.617271681589761,
+     6.61710658195573,
+     6.616169509433584,
+     6.617053644462573,
+     6.617549604759844,
+     6.618451285263645,
+     6.615380949729969,
+     6.618329713120895,
+     6.616002487723452,
+     6.618901901999702
+    ],
+    "stripe_orientation_deg": 29.404130430725395,
+    "domain_a_orientation_deg": 29.404130430725395,
+    "domain_b_orientation_deg": 151.6883075565215
+   },
+   "abs_err": {
+    "period_nm": 0.015143050341029252,
+    "stripe_orientation_deg_deg": 0.42986956927460085,
+    "domain_a_orientation_deg_deg": 0.42986956927460085,
+    "domain_b_orientation_deg_deg": 0.6053075565214954
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.4525034393362,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.725,
+     -0.263
+    ]
+   ],
+   "atom_nm": 35.4,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 212,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 34,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.382117958334383,
+    "periods": [
+     6.383423560928517,
+     6.380497156128448,
+     6.38661947611618,
+     6.377111292759147,
+     6.3808123557402485,
+     6.386600415146153,
+     6.379695802017858,
+     6.391692412118931,
+     6.374283236059878,
+     6.386585672687041
+    ],
+    "stripe_orientation_deg": 147.48990301342678,
+    "domain_a_orientation_deg": 147.48990301342678,
+    "domain_b_orientation_deg": 27.864997978489704
+   },
+   "abs_err": {
+    "period_nm": 0.05736689264236006,
+    "stripe_orientation_deg_deg": 2.2159030134267823,
+    "domain_a_orientation_deg_deg": 2.2159030134267823,
+    "domain_b_orientation_deg_deg": 0.7650020215102984
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6435967575094,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.579,
+     0.349
+    ]
+   ],
+   "atom_nm": 69.5,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 69,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 35,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.371698964832667,
+    "periods": [
+     6.37258900368837,
+     6.365462242046233,
+     6.370808925976966,
+     6.38012958562809,
+     6.403688292328866,
+     6.36332942019086,
+     6.360746949073209,
+     6.360641502593862,
+     6.37788066197387,
+     6.39841167222787
+    ],
+    "stripe_orientation_deg": 105.1483187925967,
+    "domain_a_orientation_deg": 105.1483187925967,
+    "domain_b_orientation_deg": 161.29853214178846
+   },
+   "abs_err": {
+    "period_nm": 0.0072083455805405094,
+    "stripe_orientation_deg_deg": 0.6283187925967013,
+    "domain_a_orientation_deg_deg": 0.6283187925967013,
+    "domain_b_orientation_deg_deg": 0.6034678582115305
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6273420097607,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.915,
+     -1.194
+    ]
+   ],
+   "atom_nm": 4.5,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 341,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 36,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.281705281125838,
+    "periods": [
+     6.279649727269777,
+     6.274998179204299,
+     6.292326768287251,
+     6.276661301119628,
+     6.2837608349819,
+     6.276873047469123,
+     6.270487085461708,
+     6.297952541816466,
+     6.287621835537868,
+     6.288588665596841
+    ],
+    "stripe_orientation_deg": 75.92768451451714,
+    "domain_a_orientation_deg": 75.92768451451714,
+    "domain_b_orientation_deg": 133.19164212782238
+   },
+   "abs_err": {
+    "period_nm": -0.004859756327302733,
+    "stripe_orientation_deg_deg": 0.6196845145171324,
+    "domain_a_orientation_deg_deg": 0.6196845145171324,
+    "domain_b_orientation_deg_deg": 0.5193578721776362
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.458602992936,
+   "tip_condition": "good",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.221,
+     -0.684
+    ]
+   ],
+   "atom_nm": 44.1,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 190,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 37,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.3619424144927645,
+    "periods": [
+     6.360966205770372,
+     6.359575297271899,
+     6.363561748354359,
+     6.360160204986068,
+     6.360378743518913,
+     6.366202310420586,
+     6.356792183223213,
+     6.3623493055798725,
+     6.359841691498893,
+     6.356413304444544,
+     6.383351114837027,
+     6.366704709027524,
+     6.380387423123447,
+     6.363089327643523,
+     6.364835188751182,
+     6.364642193063963,
+     6.364350931758049,
+     6.361535523405657,
+     6.363383432288533,
+     6.3634384607097045,
+     6.362666091631655,
+     6.36662642989794,
+     6.358895366662515,
+     6.387075873540986,
+     6.381549453245368,
+     6.394279428014376,
+     6.375051670392831,
+     6.393325485961456,
+     6.329496312341672,
+     6.326061321137706,
+     6.3316891346206114,
+     6.329639670417739,
+     6.334967298819283,
+     6.328497257764797,
+     6.3222525572268635,
+     6.336257735409442,
+     6.327820928809756,
+     6.335900625090474
+    ],
+    "stripe_orientation_deg": 165.14713566266067,
+    "domain_a_orientation_deg": 165.14713566266067,
+    "domain_b_orientation_deg": 45.303190830390825
+   },
+   "abs_err": {
+    "period_nm": 0.08776286611117001,
+    "stripe_orientation_deg_deg": 0.9091356626606739,
+    "domain_a_orientation_deg_deg": 0.9091356626606739,
+    "domain_b_orientation_deg_deg": 0.46280916960917295
+   },
+   "actions": 23,
+   "budget_s": 10800.0,
+   "instrument_s": 1382.9493309546856,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.626,
+     1.147
+    ]
+   ],
+   "atom_nm": 77.3,
+   "frames": 5,
+   "centres": [
+    {
+     "frames": 5,
+     "places": 48,
+     "windows": 38,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 38,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.386021561526228,
+    "periods": [
+     6.385494348765909,
+     6.384370147683699,
+     6.3804741583987665,
+     6.389344905153831,
+     6.392946040567725,
+     6.386548774286547,
+     6.3791288365381575,
+     6.375117838636533,
+     6.389360659081176,
+     6.3977515719643785
+    ],
+    "stripe_orientation_deg": 29.86779734616515,
+    "domain_a_orientation_deg": 29.86779734616515,
+    "domain_b_orientation_deg": 89.87543953121767
+   },
+   "abs_err": {
+    "period_nm": 0.040576902029314965,
+    "stripe_orientation_deg_deg": 0.9987973461651478,
+    "domain_a_orientation_deg_deg": 0.9987973461651478,
+    "domain_b_orientation_deg_deg": 0.5325604687823358
+   },
+   "actions": 19,
+   "budget_s": 10800.0,
+   "instrument_s": 662.9761413736624,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.744,
+     0.344
+    ]
+   ],
+   "atom_nm": 43.3,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 325,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 39,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.240505931506445,
+    "periods": [
+     6.240245737600086,
+     6.240860549074792,
+     6.229193454188735,
+     6.245194537584231,
+     6.2404734124766135,
+     6.240538450536277,
+     6.23918309728221,
+     6.226175988452831,
+     6.251749507138772,
+     6.242323136989149
+    ],
+    "stripe_orientation_deg": 49.43355069828301,
+    "domain_a_orientation_deg": 49.43355069828301,
+    "domain_b_orientation_deg": 109.90430019492021
+   },
+   "abs_err": {
+    "period_nm": 0.010412139761998063,
+    "stripe_orientation_deg_deg": 0.5595506982830045,
+    "domain_a_orientation_deg_deg": 0.5595506982830045,
+    "domain_b_orientation_deg_deg": 1.0303001949202155
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6688285308585,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.707,
+     0.366
+    ]
+   ],
+   "atom_nm": 11.9,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 142,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 40,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.187901272548869,
+    "periods": [
+     6.186098217632546,
+     6.183098426640988,
+     6.183499444677302,
+     6.187863472447742,
+     6.18320561413055,
+     6.191263909853849,
+     6.185375543096826,
+     6.183623862793157,
+     6.190435946075102,
+     6.183305945091349,
+     6.187563926235863,
+     6.186757116536013,
+     6.187939072649996,
+     6.185010621664856,
+     6.186912472422927,
+     6.190638995355964,
+     6.185558128608065,
+     6.1874877718093435,
+     6.185047265331703,
+     6.191302175269083,
+     6.187778746574969,
+     6.189836794355041,
+     6.219708097795077,
+     6.223711076819835,
+     6.214805227064008,
+     6.233111709868622,
+     6.218214087962378,
+     6.239407035752033,
+     6.230401594615774,
+     6.213707147593916,
+     6.238904864664169,
+     6.216958956997729
+    ],
+    "stripe_orientation_deg": 142.36972116525317,
+    "domain_a_orientation_deg": 142.36972116525317,
+    "domain_b_orientation_deg": 23.723348729186494
+   },
+   "abs_err": {
+    "period_nm": 0.018545466020201573,
+    "stripe_orientation_deg_deg": 0.9517211652531614,
+    "domain_a_orientation_deg_deg": 0.9517211652531614,
+    "domain_b_orientation_deg_deg": 0.01334872918648955
+   },
+   "actions": 19,
+   "budget_s": 10800.0,
+   "instrument_s": 1178.552737153925,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.045,
+     0.935
+    ]
+   ],
+   "atom_nm": 29.6,
+   "frames": 4,
+   "centres": [
+    {
+     "frames": 4,
+     "places": 314,
+     "windows": 32,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 41,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.433053268587752,
+    "periods": [
+     6.433234124914343,
+     6.43424945031558,
+     6.429031230459303,
+     6.433272291832174,
+     6.433707548848116,
+     6.432419698609648,
+     6.432872412261162,
+     6.427201280418194,
+     6.431715252112219,
+     6.43335239181392
+    ],
+    "stripe_orientation_deg": 137.67192315929327,
+    "domain_a_orientation_deg": 137.67192315929327,
+    "domain_b_orientation_deg": 80.84393488390043
+   },
+   "abs_err": {
+    "period_nm": 0.01347937527021692,
+    "stripe_orientation_deg_deg": 0.43807684070674213,
+    "domain_a_orientation_deg_deg": 0.43807684070674213,
+    "domain_b_orientation_deg_deg": 0.12693488390043228
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6234151117922,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -1.132,
+     0.55
+    ]
+   ],
+   "atom_nm": 38.1,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 284,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 42,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.254398377009229,
+    "periods": [
+     6.2552485497273,
+     6.277210481728782,
+     6.266896171714423,
+     6.242367018740867,
+     6.223248981103823,
+     6.2535482042911585,
+     6.28513837113721,
+     6.2657926467405645,
+     6.237366759387708,
+     6.209244911715253
+    ],
+    "stripe_orientation_deg": 42.552527451938076,
+    "domain_a_orientation_deg": 42.552527451938076,
+    "domain_b_orientation_deg": 103.06862987532365
+   },
+   "abs_err": {
+    "period_nm": -0.026831742639192413,
+    "stripe_orientation_deg_deg": 1.3725274519380832,
+    "domain_a_orientation_deg_deg": 1.3725274519380832,
+    "domain_b_orientation_deg_deg": 0.9583701246763496
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6991697075248,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.241,
+     0.461
+    ]
+   ],
+   "atom_nm": 44.1,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 86,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 43,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.065648760116234,
+    "periods": [
+     6.06523844108179,
+     6.065982751362609,
+     6.065413762400552,
+     6.067242783009021,
+     6.065775610935619,
+     6.062514470181088,
+     6.06552190929685,
+     6.066128853973401,
+     6.071052719573987,
+     6.065069806196479,
+     6.073782419133003,
+     6.074053419684448,
+     6.074129273199253,
+     6.074036945230743,
+     6.07405378958085,
+     6.073128732672858,
+     6.074863449870252,
+     6.073774509814094,
+     6.074103222830039,
+     6.075209320217164,
+     6.0567587067143185,
+     6.057184249755233,
+     6.055294353406794,
+     6.054700912369045,
+     6.056706848304762,
+     6.05935946575187,
+     6.062048889512837,
+     6.054061240756377,
+     6.051257153279016,
+     6.05738356975641
+    ],
+    "stripe_orientation_deg": 83.5582387695291,
+    "domain_a_orientation_deg": 83.5582387695291,
+    "domain_b_orientation_deg": 142.16642664647463
+   },
+   "abs_err": {
+    "period_nm": 0.015543226432781054,
+    "stripe_orientation_deg_deg": 0.4012387695291011,
+    "domain_a_orientation_deg_deg": 0.4012387695291011,
+    "domain_b_orientation_deg_deg": 1.532573353525379
+   },
+   "actions": 18,
+   "budget_s": 10800.0,
+   "instrument_s": 998.5222797449733,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.81,
+     0.543
+    ]
+   ],
+   "atom_nm": 27.6,
+   "frames": 3,
+   "centres": [
+    {
+     "frames": 3,
+     "places": 159,
+     "windows": 30,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 44,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.252159819867608,
+    "periods": [
+     6.250858268384035,
+     6.258008998759402,
+     6.254594559535923,
+     6.258857416861213,
+     6.248753696836644,
+     6.249221510033653,
+     6.253411215857588,
+     6.250908423877629,
+     6.2589423191939195,
+     6.2448802714126055
+    ],
+    "stripe_orientation_deg": 45.91370160600989,
+    "domain_a_orientation_deg": 45.91370160600989,
+    "domain_b_orientation_deg": 166.05047718868755
+   },
+   "abs_err": {
+    "period_nm": -0.006164285348343235,
+    "stripe_orientation_deg_deg": 0.8927016060098936,
+    "domain_a_orientation_deg_deg": 0.8927016060098936,
+    "domain_b_orientation_deg_deg": 1.029477188687565
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.4579004303811,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.619,
+     -0.993
+    ]
+   ],
+   "atom_nm": 13.5,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 85,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 45,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 5.965094734412517,
+    "periods": [
+     5.969029535060137,
+     5.963241019933517,
+     5.9698854546007,
+     5.9654176444390625,
+     6.006423891015386,
+     5.964752016600545,
+     5.961226719502422,
+     5.964771824385971,
+     5.951237742352488,
+     6.018647561450777
+    ],
+    "stripe_orientation_deg": 133.09820946777228,
+    "domain_a_orientation_deg": 133.09820946777228,
+    "domain_b_orientation_deg": 10.197638277648812
+   },
+   "abs_err": {
+    "period_nm": -0.006722458583926283,
+    "stripe_orientation_deg_deg": 0.34879053222772427,
+    "domain_a_orientation_deg_deg": 0.34879053222772427,
+    "domain_b_orientation_deg_deg": 0.6256382776488181
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.5152997483101,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.722,
+     0.202
+    ]
+   ],
+   "atom_nm": 6.3,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 311,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 46,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.067797176018753,
+    "periods": [
+     6.078277199893548,
+     6.057168404898959,
+     6.067797176018753,
+     6.061983246828129,
+     6.076668927915794
+    ],
+    "stripe_orientation_deg": 1.034094475227018,
+    "domain_a_orientation_deg": 1.034094475227018,
+    "domain_b_orientation_deg": 121.01741251712808
+   },
+   "abs_err": {
+    "period_nm": 0.01763261176248676,
+    "stripe_orientation_deg_deg": 0.38390552477298456,
+    "domain_a_orientation_deg_deg": 0.38390552477298456,
+    "domain_b_orientation_deg_deg": 0.8464125171280727
+   },
+   "actions": 17,
+   "budget_s": 10800.0,
+   "instrument_s": 818.6974899994877,
+   "tip_condition": "good",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -1.309,
+     0.697
+    ]
+   ],
+   "atom_nm": 64.1,
+   "frames": 2,
+   "centres": [
+    {
+     "frames": 2,
+     "places": 382,
+     "windows": 5,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 47,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.200328678754744,
+    "periods": [
+     6.20052953950106,
+     6.200187515474801,
+     6.1985922085139205,
+     6.2056325762848505,
+     6.201121909067361,
+     6.198412233588291,
+     6.200469842034687,
+     6.191906242682456,
+     6.208081548127702,
+     6.194832605946194
+    ],
+    "stripe_orientation_deg": 150.9583266993665,
+    "domain_a_orientation_deg": 150.9583266993665,
+    "domain_b_orientation_deg": 29.56386457758114
+   },
+   "abs_err": {
+    "period_nm": -0.003270200702230497,
+    "stripe_orientation_deg_deg": 0.7293266993664815,
+    "domain_a_orientation_deg_deg": 0.7293266993664815,
+    "domain_b_orientation_deg_deg": 0.0991354224188683
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.5515062220442,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.024,
+     0.389
+    ]
+   ],
+   "atom_nm": 6.5,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 203,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 48,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.509160804713579,
+    "periods": [
+     6.510100687576802,
+     6.508080126014425,
+     6.508124953729387,
+     6.5132004290793,
+     6.5123624048539694,
+     6.508220921850355,
+     6.50603942555784,
+     6.506783153491486,
+     6.514562457847286,
+     6.513787572238784
+    ],
+    "stripe_orientation_deg": 172.4819552439163,
+    "domain_a_orientation_deg": 172.4819552439163,
+    "domain_b_orientation_deg": 112.96840216227838
+   },
+   "abs_err": {
+    "period_nm": 0.00855112715285511,
+    "stripe_orientation_deg_deg": 0.8020447560836885,
+    "domain_a_orientation_deg_deg": 0.8020447560836885,
+    "domain_b_orientation_deg_deg": 0.7104021622783847
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.4237762107824,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     1.061,
+     -0.598
+    ]
+   ],
+   "atom_nm": 21.0,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 180,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 49,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.029697052966648,
+    "periods": [
+     6.030788673895195,
+     6.021035716298605,
+     6.0286054320381,
+     6.021295539736708,
+     6.032039277884471,
+     6.038985810672442,
+     6.022127884949174,
+     6.032627991227531,
+     6.020611776411305,
+     6.040599446939938
+    ],
+    "stripe_orientation_deg": 7.64606041627154,
+    "domain_a_orientation_deg": 7.64606041627154,
+    "domain_b_orientation_deg": 125.44635964271069
+   },
+   "abs_err": {
+    "period_nm": 0.007490412519373102,
+    "stripe_orientation_deg_deg": 0.22893958372846157,
+    "domain_a_orientation_deg_deg": 0.22893958372846157,
+    "domain_b_orientation_deg_deg": 0.5583596427106841
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6254138970976,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     1.014,
+     -0.861
+    ]
+   ],
+   "atom_nm": 3.9,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 291,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 50,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.079912609507998,
+    "periods": [
+     6.081258856729216,
+     6.076672570632477,
+     6.091181972390338,
+     6.0789280925130065,
+     6.086384425335186,
+     6.075447566450591,
+     6.080552157289185,
+     6.097033015756712,
+     6.076276952128375,
+     6.079273061726812
+    ],
+    "stripe_orientation_deg": 98.99135294658636,
+    "domain_a_orientation_deg": 98.99135294658636,
+    "domain_b_orientation_deg": 41.43282629832952
+   },
+   "abs_err": {
+    "period_nm": -0.004185085196827032,
+    "stripe_orientation_deg_deg": 1.196647053413642,
+    "domain_a_orientation_deg_deg": 1.196647053413642,
+    "domain_b_orientation_deg_deg": 0.2228262983295224
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.610135320688,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.222,
+     0.681
+    ]
+   ],
+   "atom_nm": 14.1,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 125,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 51,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.364847068454564,
+    "periods": [
+     6.359000180216405,
+     6.363369363527959,
+     6.363636642337676,
+     6.355666173907379,
+     6.355387848409845,
+     6.353338312398143,
+     6.359862709276059,
+     6.364449849127625,
+     6.350683504455266,
+     6.351369846279376,
+     6.369461286451653,
+     6.368871354288861,
+     6.3711168955697195,
+     6.373165837308272,
+     6.369101464674779,
+     6.3660937480451905,
+     6.364805921220916,
+     6.3672499951801695,
+     6.374209154563902,
+     6.365971371636632,
+     6.378368097803243,
+     6.364888215688213,
+     6.357030216953516,
+     6.361896247845014,
+     6.4138358533917685,
+     6.375984662054614,
+     6.364472638044204,
+     6.3661044352168785
+    ],
+    "stripe_orientation_deg": 165.42510303333492,
+    "domain_a_orientation_deg": 165.42510303333492,
+    "domain_b_orientation_deg": 106.71944714224877
+   },
+   "abs_err": {
+    "period_nm": 0.024401686497792063,
+    "stripe_orientation_deg_deg": 1.4428969666650744,
+    "domain_a_orientation_deg_deg": 1.4428969666650744,
+    "domain_b_orientation_deg_deg": 0.14855285775122695
+   },
+   "actions": 18,
+   "budget_s": 10800.0,
+   "instrument_s": 998.6479243689834,
+   "tip_condition": "good",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.941,
+     0.555
+    ]
+   ],
+   "atom_nm": 17.5,
+   "frames": 3,
+   "centres": [
+    {
+     "frames": 3,
+     "places": 124,
+     "windows": 28,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 52,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 5.913775657463942,
+    "periods": [
+     5.913476953149299,
+     5.915163545544412,
+     5.907701527109164,
+     5.9170506325034085,
+     5.913652603622417,
+     5.9138987113054675,
+     5.917135843953483,
+     5.903632823332205,
+     5.917498040217997,
+     5.913499852658231
+    ],
+    "stripe_orientation_deg": 76.13701716726442,
+    "domain_a_orientation_deg": 76.13701716726442,
+    "domain_b_orientation_deg": 137.81032360362272
+   },
+   "abs_err": {
+    "period_nm": -0.013366933058561514,
+    "stripe_orientation_deg_deg": 0.05301716726441441,
+    "domain_a_orientation_deg_deg": 0.05301716726441441,
+    "domain_b_orientation_deg_deg": 0.5066763963772871
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6042766419001,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.381,
+     0.428
+    ]
+   ],
+   "atom_nm": 6.2,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 304,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 53,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.283892556435078,
+    "periods": [
+     6.283357982559682,
+     6.279023069457434,
+     6.288527644917476,
+     6.280233972974036,
+     6.289475284620657,
+     6.284427130310474,
+     6.271593254227543,
+     6.292044331537926,
+     6.275039323455008,
+     6.294871413933272
+    ],
+    "stripe_orientation_deg": 154.73469856979673,
+    "domain_a_orientation_deg": 154.73469856979673,
+    "domain_b_orientation_deg": 30.579385205255974
+   },
+   "abs_err": {
+    "period_nm": 0.006080886203045033,
+    "stripe_orientation_deg_deg": 0.5526985697967461,
+    "domain_a_orientation_deg_deg": 0.5526985697967461,
+    "domain_b_orientation_deg_deg": 0.3066147947440214
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.8350967757377,
+   "tip_condition": "good",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -1.299,
+     0.233
+    ]
+   ],
+   "atom_nm": 50.5,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 268,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 54,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.121916347603518,
+    "periods": [
+     6.128393967200144,
+     6.109804553824883,
+     6.121916347603518,
+     6.12215255380574,
+     6.119264547382238
+    ],
+    "stripe_orientation_deg": 130.10630596350563,
+    "domain_a_orientation_deg": 130.10630596350563,
+    "domain_b_orientation_deg": 72.30735118295242
+   },
+   "abs_err": {
+    "period_nm": -0.01009303783309523,
+    "stripe_orientation_deg_deg": 0.0673059635056461,
+    "domain_a_orientation_deg_deg": 0.0673059635056461,
+    "domain_b_orientation_deg_deg": 0.18235118295241648
+   },
+   "actions": 18,
+   "budget_s": 10800.0,
+   "instrument_s": 998.6480554604808,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.528,
+     -1.279
+    ]
+   ],
+   "atom_nm": 15.2,
+   "frames": 3,
+   "centres": [
+    {
+     "frames": 3,
+     "places": 708,
+     "windows": 5,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 55,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.078295132699632,
+    "periods": [
+     6.080468067435232,
+     6.074815010089051,
+     6.07161621639725,
+     6.084755850221466,
+     6.08386771943529,
+     6.0761221979640325,
+     6.070040861767873,
+     6.065914261659235,
+     6.089504911096797,
+     6.085407258511479
+    ],
+    "stripe_orientation_deg": 126.8619436308193,
+    "domain_a_orientation_deg": 126.8619436308193,
+    "domain_b_orientation_deg": 70.42686238372373
+   },
+   "abs_err": {
+    "period_nm": 0.0016027380792058565,
+    "stripe_orientation_deg_deg": 0.46005636918070536,
+    "domain_a_orientation_deg_deg": 0.46005636918070536,
+    "domain_b_orientation_deg_deg": 0.2711376162762633
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.4724038431049,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.091,
+     0.641
+    ]
+   ],
+   "atom_nm": 55.9,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 326,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 56,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.541485040151224,
+    "periods": [
+     6.543212734889961,
+     6.549393905799462,
+     6.543234998661244,
+     6.544176079332936,
+     6.550652828358519,
+     6.535871325991954,
+     6.549396145071868,
+     6.534656139444825,
+     6.53603109393445,
+     6.552000658474142,
+     6.535953179920077,
+     6.52583032370999,
+     6.54117132653577,
+     6.5375824574488774,
+     6.539816250024685,
+     6.5417987537666775,
+     6.518547901517261,
+     6.526525645895293,
+     6.5464098082399005,
+     6.543754464090011
+    ],
+    "stripe_orientation_deg": 24.395948734922793,
+    "domain_a_orientation_deg": 24.395948734922793,
+    "domain_b_orientation_deg": 141.50958874788466
+   },
+   "abs_err": {
+    "period_nm": -0.016585151800121878,
+    "stripe_orientation_deg_deg": 1.4579487349227946,
+    "domain_a_orientation_deg_deg": 1.4579487349227946,
+    "domain_b_orientation_deg_deg": 1.3984112521153236
+   },
+   "actions": 17,
+   "budget_s": 10800.0,
+   "instrument_s": 818.8299135232766,
+   "tip_condition": "good",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.568,
+     0.666
+    ]
+   ],
+   "atom_nm": 47.8,
+   "frames": 2,
+   "centres": [
+    {
+     "frames": 2,
+     "places": 99,
+     "windows": 20,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 57,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.170376620575179,
+    "periods": [
+     6.170912516339997,
+     6.169840724810361,
+     6.175533009734945,
+     6.168240998678981,
+     6.17594249604953,
+     6.169041140182186,
+     6.167863139092385,
+     6.174463469136609,
+     6.164161823465315,
+     6.177457188118643
+    ],
+    "stripe_orientation_deg": 172.95760222581666,
+    "domain_a_orientation_deg": 172.95760222581666,
+    "domain_b_orientation_deg": 52.65542571826499
+   },
+   "abs_err": {
+    "period_nm": -0.01639821315678791,
+    "stripe_orientation_deg_deg": 0.28360222581665084,
+    "domain_a_orientation_deg_deg": 0.28360222581665084,
+    "domain_b_orientation_deg_deg": 0.822574281735001
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.5292737318391,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.11,
+     1.179
+    ]
+   ],
+   "atom_nm": 30.4,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 316,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 58,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 5.978435395383849,
+    "periods": [
+     5.977648196351487,
+     5.984524251679178,
+     5.9783433284922065,
+     5.985506676538904,
+     5.9723947337625,
+     5.978527462275492,
+     5.9855090489660325,
+     5.977613993876973,
+     5.984844001934475,
+     5.96313616558289
+    ],
+    "stripe_orientation_deg": 44.86720762014322,
+    "domain_a_orientation_deg": 44.86720762014322,
+    "domain_b_orientation_deg": 108.6945719131299
+   },
+   "abs_err": {
+    "period_nm": -0.011691922677978361,
+    "stripe_orientation_deg_deg": 0.2552076201432101,
+    "domain_a_orientation_deg_deg": 0.2552076201432101,
+    "domain_b_orientation_deg_deg": 0.20057191312990597
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.4465433979556,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.457,
+     -0.427
+    ]
+   ],
+   "atom_nm": 4.5,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 290,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 59,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.090331409334377,
+    "periods": [
+     6.090588489184452,
+     6.097763461640417,
+     6.08418735892302,
+     6.083462279896139,
+     6.083993657797391,
+     6.100480994281342,
+     6.113288070965263,
+     6.085347465105123,
+     6.090321569671736,
+     6.090341248997019
+    ],
+    "stripe_orientation_deg": 38.14422997472784,
+    "domain_a_orientation_deg": 38.14422997472784,
+    "domain_b_orientation_deg": 160.4125151314078
+   },
+   "abs_err": {
+    "period_nm": 0.03263094822347501,
+    "stripe_orientation_deg_deg": 0.7282299747278387,
+    "domain_a_orientation_deg_deg": 0.7282299747278387,
+    "domain_b_orientation_deg_deg": 0.8374848685922132
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6060836875083,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.764,
+     1.153
+    ]
+   ],
+   "atom_nm": 34.2,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 306,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 60,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.105000981662412,
+    "periods": [
+     6.106340473761868,
+     6.105597744772887,
+     6.104404218551938,
+     6.100433722427858,
+     6.097082703994884,
+     6.110114917924382,
+     6.109142391232382,
+     6.105662218768728,
+     6.0986729439119145,
+     6.099510268847057
+    ],
+    "stripe_orientation_deg": 154.35235810756348,
+    "domain_a_orientation_deg": 154.35235810756348,
+    "domain_b_orientation_deg": 98.00917561450379
+   },
+   "abs_err": {
+    "period_nm": 0.009182508439396386,
+    "stripe_orientation_deg_deg": 0.8546418924365184,
+    "domain_a_orientation_deg_deg": 0.8546418924365184,
+    "domain_b_orientation_deg_deg": 0.29317561450379515
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6190176278265,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.616,
+     -1.146
+    ]
+   ],
+   "atom_nm": 8.2,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 295,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 61,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.250983111329534,
+    "periods": [
+     6.251257814304004,
+     6.250073047372353,
+     6.2527288512069,
+     6.255079731690203,
+     6.252646001184372,
+     6.245735223254481,
+     6.248203852164524,
+     6.250708408355065,
+     6.253740413031652,
+     6.24939682064692
+    ],
+    "stripe_orientation_deg": 33.2560321221938,
+    "domain_a_orientation_deg": 33.2560321221938,
+    "domain_b_orientation_deg": 153.52166251037562
+   },
+   "abs_err": {
+    "period_nm": -0.0026389138537705747,
+    "stripe_orientation_deg_deg": 0.8119678778061967,
+    "domain_a_orientation_deg_deg": 0.8119678778061967,
+    "domain_b_orientation_deg_deg": 0.546337489624392
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.455987904435,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.791,
+     -0.656
+    ]
+   ],
+   "atom_nm": 6.3,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 195,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 62,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.317157162037526,
+    "periods": [
+     6.321891097471117,
+     6.33138729798504,
+     6.309253892506218,
+     6.313718585016581,
+     6.31776560936366,
+     6.325795535958025,
+     6.340482606419234,
+     6.314332503756554,
+     6.304532657031793,
+     6.316548714711394
+    ],
+    "stripe_orientation_deg": 131.11828418649074,
+    "domain_a_orientation_deg": 131.11828418649074,
+    "domain_b_orientation_deg": 72.50299036348046
+   },
+   "abs_err": {
+    "period_nm": -0.022148803558287966,
+    "stripe_orientation_deg_deg": 0.41271581350926567,
+    "domain_a_orientation_deg_deg": 0.41271581350926567,
+    "domain_b_orientation_deg_deg": 0.14400963651954157
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6163991185115,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.753,
+     0.412
+    ]
+   ],
+   "atom_nm": 5.8,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 331,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 63,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.460151846092658,
+    "periods": [
+     6.460194394380168,
+     6.457561292495136,
+     6.455796105362205,
+     6.460151846092658,
+     6.463377510718019,
+     6.459700354487455,
+     6.456403161728316,
+     6.453896076997091,
+     6.458236797272233,
+     6.460979837096344,
+     6.455539895917583,
+     6.449896386292629,
+     6.459837417715117,
+     6.454357666469081,
+     6.454038065378662,
+     6.447819465833043,
+     6.447602918645951,
+     6.46250492339391,
+     6.454441162186913,
+     6.480649871515614,
+     6.4817069469727295,
+     6.478351297207459,
+     6.473740726313117,
+     6.478200275920084,
+     6.480480708413199,
+     6.481440985601784,
+     6.4774963734612445,
+     6.4841897274329465,
+     6.4735927809717495
+    ],
+    "stripe_orientation_deg": 26.246077994169493,
+    "domain_a_orientation_deg": 26.246077994169493,
+    "domain_b_orientation_deg": 144.0708943552643
+   },
+   "abs_err": {
+    "period_nm": 0.046822205044477094,
+    "stripe_orientation_deg_deg": 1.4660779941694955,
+    "domain_a_orientation_deg_deg": 1.4660779941694955,
+    "domain_b_orientation_deg_deg": 1.6681056447357037
+   },
+   "actions": 18,
+   "budget_s": 10800.0,
+   "instrument_s": 998.5805806272274,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.953,
+     0.382
+    ]
+   ],
+   "atom_nm": 21.7,
+   "frames": 3,
+   "centres": [
+    {
+     "frames": 3,
+     "places": 70,
+     "windows": 29,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 64,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.165799239935641,
+    "periods": [
+     6.1667319322803085,
+     6.169767142470676,
+     6.174885442972174,
+     6.164866547590973,
+     6.164319949222204,
+     6.162243773670287,
+     6.169369814408526,
+     6.17484629410369,
+     6.1603175121123455,
+     6.160145815384966
+    ],
+    "stripe_orientation_deg": 148.45370303402413,
+    "domain_a_orientation_deg": 148.45370303402413,
+    "domain_b_orientation_deg": 90.82539255138823
+   },
+   "abs_err": {
+    "period_nm": -0.006592307255733232,
+    "stripe_orientation_deg_deg": 1.319296965975866,
+    "domain_a_orientation_deg_deg": 1.319296965975866,
+    "domain_b_orientation_deg_deg": 1.0323925513882273
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6254872425343,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.522,
+     0.388
+    ]
+   ],
+   "atom_nm": 11.5,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 202,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 65,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 5.946359298149781,
+    "periods": [
+     5.946437306141384,
+     5.935495767870632,
+     5.937320174517089,
+     5.956335049411708,
+     5.946281290158177,
+     5.948278404550487,
+     5.937474146553737,
+     5.934008055198155,
+     5.966065938621553,
+     5.946551514116266
+    ],
+    "stripe_orientation_deg": 29.997904966883006,
+    "domain_a_orientation_deg": 29.997904966883006,
+    "domain_b_orientation_deg": 149.11134676390222
+   },
+   "abs_err": {
+    "period_nm": 0.008994368230501593,
+    "stripe_orientation_deg_deg": 0.807904966883001,
+    "domain_a_orientation_deg_deg": 0.807904966883001,
+    "domain_b_orientation_deg_deg": 0.07865323609777874
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.4599669583554,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.761,
+     -0.604
+    ]
+   ],
+   "atom_nm": 12.9,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 257,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 66,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.008068218648019,
+    "periods": [
+     6.006432716199324,
+     6.009703721096715,
+     6.006163102294285,
+     6.011635187935066,
+     6.012655397624075,
+     5.999939239517637,
+     6.006028985613394,
+     6.003682775578874,
+     6.010706596040749,
+     6.00991224076703
+    ],
+    "stripe_orientation_deg": 174.2958857819001,
+    "domain_a_orientation_deg": 174.2958857819001,
+    "domain_b_orientation_deg": 54.88958016350846
+   },
+   "abs_err": {
+    "period_nm": -0.004651768496267472,
+    "stripe_orientation_deg_deg": 1.1248857819001046,
+    "domain_a_orientation_deg_deg": 1.1248857819001046,
+    "domain_b_orientation_deg_deg": 1.6144198364915354
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.5074094216627,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.551,
+     0.243
+    ]
+   ],
+   "atom_nm": 3.8,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 134,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 67,
+   "success": false,
+   "partial": 0.75,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": false
+   },
+   "reported": {
+    "period_nm": 6.465855590015526,
+    "periods": [
+     6.467138480578048,
+     6.456315093076358,
+     6.47247456694337,
+     6.473620151266293,
+     6.470584434328873,
+     6.46328880444934,
+     6.457954685593575,
+     6.48247303983666,
+     6.482472594142445,
+     6.4670517249157236,
+     6.4892107782722075,
+     6.435423343604161,
+     6.440022789782804,
+     6.435479597486897,
+     6.438350473681676,
+     6.442009795816648,
+     6.431724617966422,
+     6.4508385743583805,
+     6.430179113646127,
+     6.4378200367946095,
+     6.4381997054364115,
+     6.505972743218338,
+     6.512391294191321,
+     6.496509836282888,
+     6.496188130443851,
+     6.500665989998716,
+     6.514846384450059,
+     6.529762065546826,
+     6.491941827533663,
+     6.486289086911823,
+     6.507826055760411,
+     6.380051653053307,
+     6.439474815174413,
+     6.4284048679718175,
+     6.37491574536226,
+     6.464659455115328
+    ],
+    "stripe_orientation_deg": 169.4274802123397,
+    "domain_a_orientation_deg": 169.4274802123397,
+    "domain_b_orientation_deg": 44.044125548997535
+   },
+   "abs_err": {
+    "period_nm": 0.04423148362058171,
+    "stripe_orientation_deg_deg": 1.3244802123396937,
+    "domain_a_orientation_deg_deg": 1.3244802123396937,
+    "domain_b_orientation_deg_deg": 3.172874451002457
+   },
+   "actions": 20,
+   "budget_s": 10800.0,
+   "instrument_s": 1358.5399609694296,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     1.168,
+     -0.475
+    ]
+   ],
+   "atom_nm": 5.1,
+   "frames": 5,
+   "centres": [
+    {
+     "frames": 5,
+     "places": 474,
+     "windows": 36,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 68,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.450836237254325,
+    "periods": [
+     6.4503347482767275,
+     6.446972840700248,
+     6.443878442795428,
+     6.4547472600137725,
+     6.455879845853139,
+     6.451337726231924,
+     6.449186576116669,
+     6.4407351428442405,
+     6.4595029055789945,
+     6.4626603504936
+    ],
+    "stripe_orientation_deg": 70.62951893872824,
+    "domain_a_orientation_deg": 70.62951893872824,
+    "domain_b_orientation_deg": 126.04562125478466
+   },
+   "abs_err": {
+    "period_nm": 0.012639288122405112,
+    "stripe_orientation_deg_deg": 1.0235189387282446,
+    "domain_a_orientation_deg_deg": 1.0235189387282446,
+    "domain_b_orientation_deg_deg": 0.5153787452153438
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6851604201054,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.673,
+     -0.271
+    ]
+   ],
+   "atom_nm": 32.0,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 128,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 69,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.512598600602308,
+    "periods": [
+     6.511406382849292,
+     6.502853322772785,
+     6.512794141557982,
+     6.512403059646635,
+     6.51610457907072,
+     6.512031316763966,
+     6.498601435307822,
+     6.515627371112473,
+     6.513768217573949,
+     6.519350598327579
+    ],
+    "stripe_orientation_deg": 21.99831334548665,
+    "domain_a_orientation_deg": 21.99831334548665,
+    "domain_b_orientation_deg": 78.74499837829644
+   },
+   "abs_err": {
+    "period_nm": -0.009440235998870783,
+    "stripe_orientation_deg_deg": 0.513313345486651,
+    "domain_a_orientation_deg_deg": 0.513313345486651,
+    "domain_b_orientation_deg_deg": 0.7120016217035499
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.4993986427145,
+   "tip_condition": "good",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.826,
+     0.344
+    ]
+   ],
+   "atom_nm": 5.9,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 292,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 70,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.153436230624925,
+    "periods": [
+     6.155990330747793,
+     6.1538110831241335,
+     6.152189395107268,
+     6.158430241614916,
+     6.141944692952737,
+     6.153061378125717,
+     6.151090420562005,
+     6.158615477320929,
+     6.134311633122091,
+     6.1574645805141195
+    ],
+    "stripe_orientation_deg": 13.174633260543416,
+    "domain_a_orientation_deg": 13.174633260543416,
+    "domain_b_orientation_deg": 133.79152682412567
+   },
+   "abs_err": {
+    "period_nm": 0.009302488521744756,
+    "stripe_orientation_deg_deg": 0.5793667394565887,
+    "domain_a_orientation_deg_deg": 0.5793667394565887,
+    "domain_b_orientation_deg_deg": 0.809526824125669
+   },
+   "actions": 19,
+   "budget_s": 10800.0,
+   "instrument_s": 1178.5689862757486,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.774,
+     -0.622
+    ]
+   ],
+   "atom_nm": 13.4,
+   "frames": 3,
+   "centres": [
+    {
+     "frames": 3,
+     "places": 385,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 71,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.283914175758079,
+    "periods": [
+     6.281930869867315,
+     6.285289017816844,
+     6.291490305499139,
+     6.283286530928979,
+     6.2874839091512,
+     6.271716405711152,
+     6.279074159162685,
+     6.290193510221638,
+     6.27873492941105,
+     6.2845418205871795
+    ],
+    "stripe_orientation_deg": 64.7188325701935,
+    "domain_a_orientation_deg": 64.7188325701935,
+    "domain_b_orientation_deg": 124.2894299210979
+   },
+   "abs_err": {
+    "period_nm": -0.008491377216703455,
+    "stripe_orientation_deg_deg": 0.24383257019350424,
+    "domain_a_orientation_deg_deg": 0.24383257019350424,
+    "domain_b_orientation_deg_deg": 0.38457007890210093
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.620555026097,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.264,
+     -0.551
+    ]
+   ],
+   "atom_nm": 5.8,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 340,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 72,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.391345533523808,
+    "periods": [
+     6.388784546331652,
+     6.397718994524637,
+     6.3913529159389935,
+     6.390658626786936,
+     6.394003684358981,
+     6.391338151108621,
+     6.3950841284829085,
+     6.38786185010342,
+     6.385379284993959,
+     6.399686220690339
+    ],
+    "stripe_orientation_deg": 122.01570635548198,
+    "domain_a_orientation_deg": 122.01570635548198,
+    "domain_b_orientation_deg": 1.944327946028674
+   },
+   "abs_err": {
+    "period_nm": -0.009559878163083013,
+    "stripe_orientation_deg_deg": 0.2592936445180243,
+    "domain_a_orientation_deg_deg": 0.2592936445180243,
+    "domain_b_orientation_deg_deg": 0.3306720539713268
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6592521492714,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.026,
+     0.706
+    ]
+   ],
+   "atom_nm": 21.7,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 361,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 73,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.5266959881208235,
+    "periods": [
+     6.5266959881208235,
+     6.529050881554832,
+     6.5227289569104085,
+     6.5248489111077275,
+     6.526900407857406,
+     6.529493694581114,
+     6.535113230912061,
+     6.522593625212536,
+     6.524310953539205
+    ],
+    "stripe_orientation_deg": 136.32177812066027,
+    "domain_a_orientation_deg": 136.32177812066027,
+    "domain_b_orientation_deg": 77.16024398795336
+   },
+   "abs_err": {
+    "period_nm": -0.024507017099453243,
+    "stripe_orientation_deg_deg": 0.9112218793397346,
+    "domain_a_orientation_deg_deg": 0.9112218793397346,
+    "domain_b_orientation_deg_deg": 0.6142439879533583
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.5303919928058,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     1.454,
+     -0.064
+    ]
+   ],
+   "atom_nm": 23.2,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 136,
+     "windows": 9,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 74,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.105995631872817,
+    "periods": [
+     6.102827556788408,
+     6.09293569617763,
+     6.116910851492716,
+     6.082083159755404,
+     6.117836410617969,
+     6.109163706957226,
+     6.09386651277509,
+     6.125750664424551,
+     6.074272030458736,
+     6.127240467432803
+    ],
+    "stripe_orientation_deg": 166.6664194940063,
+    "domain_a_orientation_deg": 166.6664194940063,
+    "domain_b_orientation_deg": 48.43852261580832
+   },
+   "abs_err": {
+    "period_nm": 0.02009392468025517,
+    "stripe_orientation_deg_deg": 0.7224194940063171,
+    "domain_a_orientation_deg_deg": 0.7224194940063171,
+    "domain_b_orientation_deg_deg": 0.8434773841916865
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.592755357297,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.899,
+     0.33
+    ]
+   ],
+   "atom_nm": 6.5,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 172,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 75,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.46513675990006,
+    "periods": [
+     6.46336001920992,
+     6.464950166721957,
+     6.463522256514461,
+     6.46498752053893,
+     6.455189215606627,
+     6.465154700650524,
+     6.463144752076765,
+     6.465118819149597,
+     6.465312700315474,
+     6.449939840076342,
+     6.462169841335556,
+     6.45295590399655,
+     6.464622664517048,
+     6.454574527245801,
+     6.4615237964981675,
+     6.466859972073808,
+     6.452636347515547,
+     6.471629307416681,
+     6.451282869830553,
+     6.468999198623355,
+     6.490523929527241,
+     6.4879276057922,
+     6.483980254638796,
+     6.493256062670448,
+     6.4924549988304525,
+     6.495168379706503,
+     6.486272265032264,
+     6.482333920676634,
+     6.497005057139808,
+     6.494869746458867
+    ],
+    "stripe_orientation_deg": 9.540124645978615,
+    "domain_a_orientation_deg": 9.540124645978615,
+    "domain_b_orientation_deg": 65.31613371199751
+   },
+   "abs_err": {
+    "period_nm": 0.025470563362124388,
+    "stripe_orientation_deg_deg": 1.6491246459786169,
+    "domain_a_orientation_deg_deg": 1.6491246459786169,
+    "domain_b_orientation_deg_deg": 0.2728662880024899
+   },
+   "actions": 18,
+   "budget_s": 10800.0,
+   "instrument_s": 998.6903835402103,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.038,
+     -0.712
+    ]
+   ],
+   "atom_nm": 30.4,
+   "frames": 3,
+   "centres": [
+    {
+     "frames": 3,
+     "places": 292,
+     "windows": 30,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 76,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.05607157202088,
+    "periods": [
+     6.053054699444754,
+     6.05210865835328,
+     6.05779581919042,
+     6.054771609272602,
+     6.053871963567199,
+     6.04781513461749,
+     6.044051268964587,
+     6.057659026060695,
+     6.053846588771834,
+     6.054806941759916,
+     6.058573159565033,
+     6.061051547966354,
+     6.060415497845846,
+     6.05628243095027,
+     6.0583746321029315,
+     6.05586071309149,
+     6.063574073472914,
+     6.059514488179185,
+     6.052748425610432,
+     6.0565839808595525
+    ],
+    "stripe_orientation_deg": 20.245896563449296,
+    "domain_a_orientation_deg": 20.245896563449296,
+    "domain_b_orientation_deg": 75.90612126649732
+   },
+   "abs_err": {
+    "period_nm": 0.005652989512497264,
+    "stripe_orientation_deg_deg": 0.8108965634492904,
+    "domain_a_orientation_deg_deg": 0.8108965634492904,
+    "domain_b_orientation_deg_deg": 1.8568787335026826
+   },
+   "actions": 18,
+   "budget_s": 10800.0,
+   "instrument_s": 998.5681856207643,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.741,
+     1.425
+    ]
+   ],
+   "atom_nm": 3.8,
+   "frames": 2,
+   "centres": [
+    {
+     "frames": 2,
+     "places": 396,
+     "windows": 20,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 77,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.127229075126953,
+    "periods": [
+     6.131502388748072,
+     6.129266592206499,
+     6.12880009031297,
+     6.130785467666707,
+     6.1358261207714095,
+     6.132966000763404,
+     6.128248817200965,
+     6.129669305819868,
+     6.126209333052941,
+     6.138238989072518,
+     6.114245249981696,
+     6.125786500241064,
+     6.130988204250907,
+     6.124955234138563,
+     6.106244710916601,
+     6.1111657876396,
+     6.125938447957633,
+     6.145947554272967,
+     6.124328585012513,
+     6.088105556199517,
+     6.107831610061144,
+     6.111391684132734,
+     6.134072699597922,
+     6.134949605597577,
+     6.133832912209858,
+     6.133961517614336,
+     6.132649082388128,
+     6.133183897161692,
+     6.134047293833058,
+     6.132839253323325,
+     6.13253920475988,
+     6.1308339241919985,
+     6.086833163262006,
+     6.093861442471072,
+     6.095345834611126,
+     6.0919687979127914,
+     6.082402906280847,
+     6.077187565869413,
+     6.086717905581275,
+     6.090180441098009,
+     6.0972558519361995,
+     6.077273367528203
+    ],
+    "stripe_orientation_deg": 169.56045732549336,
+    "domain_a_orientation_deg": 169.56045732549336,
+    "domain_b_orientation_deg": 50.17042898805471
+   },
+   "abs_err": {
+    "period_nm": 0.010334020279386458,
+    "stripe_orientation_deg_deg": 2.5695426745066356,
+    "domain_a_orientation_deg_deg": 2.5695426745066356,
+    "domain_b_orientation_deg_deg": 1.959571011945286
+   },
+   "actions": 20,
+   "budget_s": 10800.0,
+   "instrument_s": 1358.65889248557,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.512,
+     1.09
+    ]
+   ],
+   "atom_nm": 5.9,
+   "frames": 5,
+   "centres": [
+    {
+     "frames": 5,
+     "places": 119,
+     "windows": 42,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 78,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.222507895968956,
+    "periods": [
+     6.194997332445093,
+     6.206034150582062,
+     6.218474297645076,
+     6.184160348618916,
+     6.19626884199667,
+     6.186003025426031,
+     6.204870919653247,
+     6.220205749033524,
+     6.149644949836407,
+     6.1912670868774855,
+     6.226681637797791,
+     6.221663157253558,
+     6.216181798660906,
+     6.223227250241285,
+     6.222211801610302,
+     6.416977627137647,
+     6.242775482440672,
+     6.293222858665819,
+     6.261366010043213,
+     6.261461101279105,
+     6.234822031588434,
+     6.234721872755986,
+     6.2241790215774655,
+     6.240368427966995,
+     6.235638467391294,
+     6.237054697519879,
+     6.236403814583597,
+     6.223830411862852,
+     6.248555700142257,
+     6.234300093771989,
+     6.239133091355635,
+     6.208274651592346,
+     6.207350303067904,
+     6.222507895968956,
+     6.212760301178,
+     6.204963539657087,
+     6.220282312650518
+    ],
+    "stripe_orientation_deg": 156.50242514549439,
+    "domain_a_orientation_deg": 156.50242514549439,
+    "domain_b_orientation_deg": 100.61533237525343
+   },
+   "abs_err": {
+    "period_nm": 0.016860715103679702,
+    "stripe_orientation_deg_deg": 1.6245748545056244,
+    "domain_a_orientation_deg_deg": 1.6245748545056244,
+    "domain_b_orientation_deg_deg": 0.7003323752534243
+   },
+   "actions": 20,
+   "budget_s": 10800.0,
+   "instrument_s": 1358.5613110966024,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.605,
+     -0.186
+    ]
+   ],
+   "atom_nm": 9.6,
+   "frames": 5,
+   "centres": [
+    {
+     "frames": 5,
+     "places": 359,
+     "windows": 37,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 79,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.578081139137758,
+    "periods": [
+     6.583464704495781,
+     6.584146644821926,
+     6.581658018362908,
+     6.58644488117163,
+     6.583674511638684,
+     6.582051657975409,
+     6.57942221388809,
+     6.578081139137758,
+     6.584962602073739,
+     6.580759320885666,
+     6.579839653513522,
+     6.575946436878999,
+     6.56450108443805,
+     6.566436086028645,
+     6.568225776298562,
+     6.567321085294983,
+     6.567301303426581,
+     6.558639921498239,
+     6.56032395728267,
+     6.567166583174368,
+     6.561549640057766,
+     6.563124370829826,
+     6.5981639924228945,
+     6.597846942259649,
+     6.597559810767715,
+     6.598365576807439,
+     6.599363247576685,
+     6.598392677912426,
+     6.596932875090325,
+     6.592080251317433,
+     6.5947169366308644,
+     6.5951420779303636,
+     6.5472449745361425,
+     6.550031926835077,
+     6.5475577650014065,
+     6.540171901543738,
+     6.544376126385164,
+     6.554099766013477,
+     6.545455025210247,
+     6.54670484870935,
+     6.53188290234929
+    ],
+    "stripe_orientation_deg": 8.061369554731032,
+    "domain_a_orientation_deg": 8.061369554731032,
+    "domain_b_orientation_deg": 133.064609161292
+   },
+   "abs_err": {
+    "period_nm": 0.054464675590843115,
+    "stripe_orientation_deg_deg": 1.5486304452689694,
+    "domain_a_orientation_deg_deg": 1.5486304452689694,
+    "domain_b_orientation_deg_deg": 2.1826091612919925
+   },
+   "actions": 20,
+   "budget_s": 10800.0,
+   "instrument_s": 1358.3353114672282,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.637,
+     0.58
+    ]
+   ],
+   "atom_nm": 39.2,
+   "frames": 5,
+   "centres": [
+    {
+     "frames": 5,
+     "places": 181,
+     "windows": 41,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 80,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.136395632701589,
+    "periods": [
+     6.139637375556782,
+     6.119275776952503,
+     6.181090332464794,
+     6.111602453159353,
+     6.1336789074625395,
+     6.139112357940639,
+     6.108102440149741,
+     6.222761137360487,
+     6.113601953928517,
+     6.150262457010078
+    ],
+    "stripe_orientation_deg": 177.06707382339488,
+    "domain_a_orientation_deg": 177.06707382339488,
+    "domain_b_orientation_deg": 53.9513463559158
+   },
+   "abs_err": {
+    "period_nm": 0.0160943534986302,
+    "stripe_orientation_deg_deg": 1.1400738233948857,
+    "domain_a_orientation_deg_deg": 1.1400738233948857,
+    "domain_b_orientation_deg_deg": 0.965653644084199
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.729177660409,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.488,
+     0.458
+    ]
+   ],
+   "atom_nm": 15.3,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 143,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 81,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.412957426225706,
+    "periods": [
+     6.413133468311361,
+     6.413838917661927,
+     6.415791683653357,
+     6.407394310965421,
+     6.405243309171654,
+     6.412781384140049,
+     6.413446653576594,
+     6.4195845560645,
+     6.407082619822491,
+     6.404921288347858
+    ],
+    "stripe_orientation_deg": 112.22938643276908,
+    "domain_a_orientation_deg": 112.22938643276908,
+    "domain_b_orientation_deg": 51.00342889299694
+   },
+   "abs_err": {
+    "period_nm": 0.0024140106675041295,
+    "stripe_orientation_deg_deg": 0.10438643276907555,
+    "domain_a_orientation_deg_deg": 0.10438643276907555,
+    "domain_b_orientation_deg_deg": 0.15542889299695162
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.4225997251181,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.88,
+     -0.384
+    ]
+   ],
+   "atom_nm": 5.0,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 361,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 82,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 5.997765494412231,
+    "periods": [
+     5.997427104232169,
+     6.000856567831221,
+     5.994002067929457,
+     6.003471443411278,
+     5.998327134738175,
+     5.995785874838813,
+     5.998103884592293,
+     5.989657001513077,
+     6.001294864157945,
+     5.995048816357049
+    ],
+    "stripe_orientation_deg": 167.46680849253923,
+    "domain_a_orientation_deg": 167.46680849253923,
+    "domain_b_orientation_deg": 46.42572221477452
+   },
+   "abs_err": {
+    "period_nm": 0.005557527654300287,
+    "stripe_orientation_deg_deg": 0.6158084925392302,
+    "domain_a_orientation_deg_deg": 0.6158084925392302,
+    "domain_b_orientation_deg_deg": 1.0452777852254798
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.5949275068783,
+   "tip_condition": "good",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -1.429,
+     0.162
+    ]
+   ],
+   "atom_nm": 8.4,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 222,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 83,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.522581747238033,
+    "periods": [
+     6.523124994347427,
+     6.522309502897671,
+     6.510712160954944,
+     6.5310553473555695,
+     6.522853991578395,
+     6.5214664434560055,
+     6.518291112524919,
+     6.511220151679681,
+     6.53413771778345,
+     6.526557456616237
+    ],
+    "stripe_orientation_deg": 150.68431186948314,
+    "domain_a_orientation_deg": 150.68431186948314,
+    "domain_b_orientation_deg": 93.21688815336333
+   },
+   "abs_err": {
+    "period_nm": -0.008348244296803031,
+    "stripe_orientation_deg_deg": 0.7566881305168636,
+    "domain_a_orientation_deg_deg": 0.7566881305168636,
+    "domain_b_orientation_deg_deg": 0.2808881533633212
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.4785798834799,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.488,
+     -0.915
+    ]
+   ],
+   "atom_nm": 17.8,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 243,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 84,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 5.951989929863439,
+    "periods": [
+     5.933883117480197,
+     5.937225581693202,
+     5.950281155925735,
+     5.932975358929026,
+     5.94479863577775,
+     5.930094818539842,
+     5.927619301398316,
+     5.942775141882874,
+     5.92676324931402,
+     5.94320952782274,
+     6.0535615638683815,
+     6.018868907173844,
+     6.03389945889422,
+     5.997609533644082,
+     6.0282010459597615,
+     6.09877547801383,
+     6.041301430759168,
+     6.060005132829511,
+     6.0020267084147525,
+     6.0572071689154665,
+     5.950617761098383,
+     5.953362098628496,
+     5.957913138985209,
+     5.931248578576514,
+     5.947536876080892,
+     5.959952456299067,
+     5.95579095003515,
+     5.953553862157049,
+     5.930445684732195,
+     5.948592964856608
+    ],
+    "stripe_orientation_deg": 53.402972902746804,
+    "domain_a_orientation_deg": 53.402972902746804,
+    "domain_b_orientation_deg": 117.28943013838139
+   },
+   "abs_err": {
+    "period_nm": 0.004805085448314372,
+    "stripe_orientation_deg_deg": 0.12602709725319983,
+    "domain_a_orientation_deg_deg": 0.12602709725319983,
+    "domain_b_orientation_deg_deg": 0.36043013838138904
+   },
+   "actions": 18,
+   "budget_s": 10800.0,
+   "instrument_s": 998.6357359488433,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.152,
+     0.603
+    ]
+   ],
+   "atom_nm": 15.9,
+   "frames": 3,
+   "centres": [
+    {
+     "frames": 3,
+     "places": 227,
+     "windows": 30,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 85,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.560179342396792,
+    "periods": [
+     6.561815603374159,
+     6.546926996993497,
+     6.563319862804318,
+     6.548588284356661,
+     6.5398524945244745,
+     6.587388535918341,
+     6.57222570678792,
+     6.59443524375335,
+     6.558543081419424,
+     6.536611656989073
+    ],
+    "stripe_orientation_deg": 176.47063386346457,
+    "domain_a_orientation_deg": 176.47063386346457,
+    "domain_b_orientation_deg": 122.7190407180768
+   },
+   "abs_err": {
+    "period_nm": 0.03866468018409641,
+    "stripe_orientation_deg_deg": 2.0433661365354396,
+    "domain_a_orientation_deg_deg": 2.0433661365354396,
+    "domain_b_orientation_deg_deg": 1.3170407180767967
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6087480199159,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.89,
+     -0.528
+    ]
+   ],
+   "atom_nm": 22.9,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 88,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 86,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.288058038155688,
+    "periods": [
+     6.288027420936103,
+     6.284804596056702,
+     6.286271558611666,
+     6.292529386258363,
+     6.2880886553752715,
+     6.2885705107844245,
+     6.285606105933324,
+     6.286659837241523,
+     6.290507202007317,
+     6.2890775825243175
+    ],
+    "stripe_orientation_deg": 24.220183085728895,
+    "domain_a_orientation_deg": 24.220183085728895,
+    "domain_b_orientation_deg": 145.10120194973337
+   },
+   "abs_err": {
+    "period_nm": -0.009646682747636248,
+    "stripe_orientation_deg_deg": 0.031816914271104224,
+    "domain_a_orientation_deg_deg": 0.031816914271104224,
+    "domain_b_orientation_deg_deg": 0.21020194973337425
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6729799767531,
+   "tip_condition": "dirty",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.763,
+     0.287
+    ]
+   ],
+   "atom_nm": 29.6,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 312,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 87,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.152852010034131,
+    "periods": [
+     6.179854660437904,
+     6.152852010034131,
+     6.14465541160623
+    ],
+    "stripe_orientation_deg": 41.488312022535375,
+    "domain_a_orientation_deg": 41.488312022535375,
+    "domain_b_orientation_deg": 161.23513272845742
+   },
+   "abs_err": {
+    "period_nm": -0.006279578037529099,
+    "stripe_orientation_deg_deg": 0.8573120225353819,
+    "domain_a_orientation_deg_deg": 0.8573120225353819,
+    "domain_b_orientation_deg_deg": 0.6041327284574152
+   },
+   "actions": 20,
+   "budget_s": 10800.0,
+   "instrument_s": 1358.641541818039,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.433,
+     0.241
+    ]
+   ],
+   "atom_nm": 68.8,
+   "frames": 5,
+   "centres": [
+    {
+     "frames": 5,
+     "places": 467,
+     "windows": 3,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 88,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 5.928641806728071,
+    "periods": [
+     5.929334580676446,
+     5.925338966027656,
+     5.927949032779695,
+     5.9192177977479945,
+     5.934218107197371,
+     5.932647238105085,
+     5.927391685772516,
+     5.9333166127909145,
+     5.91669896230319,
+     5.940029960705711
+    ],
+    "stripe_orientation_deg": 149.45419443153506,
+    "domain_a_orientation_deg": 149.45419443153506,
+    "domain_b_orientation_deg": 87.51217439585244
+   },
+   "abs_err": {
+    "period_nm": -0.01509339042648783,
+    "stripe_orientation_deg_deg": 0.4808055684649446,
+    "domain_a_orientation_deg_deg": 0.4808055684649446,
+    "domain_b_orientation_deg_deg": 0.4601743958524338
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.5701777390534,
+   "tip_condition": "good",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.611,
+     -0.59
+    ]
+   ],
+   "atom_nm": 34.1,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 356,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 89,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.268151460385649,
+    "periods": [
+     6.260749477832805,
+     6.274054503870672,
+     6.274704793780747,
+     6.271340579622778,
+     6.265970903299361,
+     6.247565037625872,
+     6.275037914896629,
+     6.263290370759611,
+     6.270332017471938,
+     6.245067633229568
+    ],
+    "stripe_orientation_deg": 119.57469330514269,
+    "domain_a_orientation_deg": 119.57469330514269,
+    "domain_b_orientation_deg": 0.9497340333521994
+   },
+   "abs_err": {
+    "period_nm": -0.004143055225465098,
+    "stripe_orientation_deg_deg": 0.6796933051426919,
+    "domain_a_orientation_deg_deg": 0.6796933051426919,
+    "domain_b_orientation_deg_deg": 0.5892659666478011
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.7120459323801,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.471,
+     1.003
+    ]
+   ],
+   "atom_nm": 33.0,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 203,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 90,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.177289918223154,
+    "periods": [
+     6.1772842883574555,
+     6.175573427481007,
+     6.18027958802095,
+     6.176832088349655,
+     6.179184305561156,
+     6.174575020140274,
+     6.1747734424864085,
+     6.184364558000315,
+     6.1772955480888525,
+     6.179075619047963
+    ],
+    "stripe_orientation_deg": 46.57327533448705,
+    "domain_a_orientation_deg": 46.57327533448705,
+    "domain_b_orientation_deg": 106.60859745852044
+   },
+   "abs_err": {
+    "period_nm": 0.000566332333464814,
+    "stripe_orientation_deg_deg": 0.7972753344870398,
+    "domain_a_orientation_deg_deg": 0.7972753344870398,
+    "domain_b_orientation_deg_deg": 1.4684025414795627
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.5819461093082,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.367,
+     -0.865
+    ]
+   ],
+   "atom_nm": 30.2,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 100,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 91,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.303584914252734,
+    "periods": [
+     6.302193419480919,
+     6.303793231881127,
+     6.308464874089316,
+     6.308781357841289,
+     6.30337659662434,
+     6.297982534496189,
+     6.302120188795274,
+     6.310748044163275,
+     6.3088120252328945,
+     6.299690485890724
+    ],
+    "stripe_orientation_deg": 1.203121663238909,
+    "domain_a_orientation_deg": 1.203121663238909,
+    "domain_b_orientation_deg": 126.20420648220667
+   },
+   "abs_err": {
+    "period_nm": 0.045175089705519866,
+    "stripe_orientation_deg_deg": 0.650878336761096,
+    "domain_a_orientation_deg_deg": 0.650878336761096,
+    "domain_b_orientation_deg_deg": 1.3202064822066717
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.6953879723447,
+   "tip_condition": "good",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.062,
+     -0.143
+    ]
+   ],
+   "atom_nm": 81.5,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 182,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 92,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.6143386259567265,
+    "periods": [
+     6.613399859596163,
+     6.613082772187905,
+     6.619697120242495,
+     6.617226249797058,
+     6.61516948484134,
+     6.611763483065977,
+     6.610827781701995,
+     6.620354301716657,
+     6.614399359876782,
+     6.614277892036671
+    ],
+    "stripe_orientation_deg": 138.4251061451729,
+    "domain_a_orientation_deg": 138.4251061451729,
+    "domain_b_orientation_deg": 83.84914849845077
+   },
+   "abs_err": {
+    "period_nm": -0.02541660755661468,
+    "stripe_orientation_deg_deg": 0.7478938548271117,
+    "domain_a_orientation_deg_deg": 0.7478938548271117,
+    "domain_b_orientation_deg_deg": 1.6201484984507744
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.688428544647,
+   "tip_condition": "good",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.04,
+     0.142
+    ]
+   ],
+   "atom_nm": 70.7,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 210,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 93,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.449115390829718,
+    "periods": [
+     6.4499585362028435,
+     6.449098614837737,
+     6.449178451575682,
+     6.449132166821697,
+     6.455039878029467,
+     6.447900843344103,
+     6.448154334567239,
+     6.448528507620799,
+     6.448417436230773,
+     6.455841774405638
+    ],
+    "stripe_orientation_deg": 128.00522492923704,
+    "domain_a_orientation_deg": 128.00522492923704,
+    "domain_b_orientation_deg": 66.25277972275342
+   },
+   "abs_err": {
+    "period_nm": -0.004902834263987188,
+    "stripe_orientation_deg_deg": 0.1642249292370508,
+    "domain_a_orientation_deg_deg": 0.1642249292370508,
+    "domain_b_orientation_deg_deg": 0.10322027724657801
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.7344940003779,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.376,
+     -0.176
+    ]
+   ],
+   "atom_nm": 6.1,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 210,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 94,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.428086470102846,
+    "periods": [
+     6.426124323507577,
+     6.4298356725609445,
+     6.429106211444621,
+     6.428396128084489,
+     6.422805855728843,
+     6.424732174844192,
+     6.429288648603708,
+     6.425837640035945,
+     6.430632651029823,
+     6.417093744143336,
+     6.4482403031411,
+     6.449993840430677,
+     6.449128011849152,
+     6.440060078581272,
+     6.451537471655658,
+     6.454029433375199,
+     6.447160899846763,
+     6.443394549733649,
+     6.4339096152985285,
+     6.427633851102079,
+     6.427717705405468,
+     6.430434995418597,
+     6.423991964764558,
+     6.428749492261423,
+     6.426088872954564,
+     6.428086470102846,
+     6.430179648901318,
+     6.422586018746964,
+     6.427349272267981,
+     6.462967087113564,
+     6.466936307408619,
+     6.463930160818457,
+     6.456746546076958,
+     6.421321273128086,
+     6.421104020929515,
+     6.422498631367851,
+     6.4170233259649905,
+     6.421490326652138,
+     6.4232880853247964,
+     6.420585920026591,
+     6.422266658745254,
+     6.4138691837343575,
+     6.422414096148916
+    ],
+    "stripe_orientation_deg": 169.63465602280743,
+    "domain_a_orientation_deg": 169.63465602280743,
+    "domain_b_orientation_deg": 115.9325144444842
+   },
+   "abs_err": {
+    "period_nm": 0.017462270236523025,
+    "stripe_orientation_deg_deg": 2.396343977192572,
+    "domain_a_orientation_deg_deg": 2.396343977192572,
+    "domain_b_orientation_deg_deg": 2.0255144444842017
+   },
+   "actions": 21,
+   "budget_s": 10800.0,
+   "instrument_s": 1538.5496642392195,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.226,
+     -0.577
+    ]
+   ],
+   "atom_nm": 20.8,
+   "frames": 5,
+   "centres": [
+    {
+     "frames": 5,
+     "places": 58,
+     "windows": 43,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 95,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.342192174790804,
+    "periods": [
+     6.3413445870792025,
+     6.342526438380819,
+     6.341224646627727,
+     6.343280488684033,
+     6.343029284793705,
+     6.337769930754872,
+     6.338737065352954,
+     6.339135453964214,
+     6.341523279899281,
+     6.3425076884187375,
+     6.342963946354902,
+     6.341890680695973,
+     6.341516768162341,
+     6.342192174790804,
+     6.34258702473019,
+     6.341176569798412,
+     6.342642867739056,
+     6.340222836265577,
+     6.340133164028591,
+     6.337812121962439,
+     6.335501541507228,
+     6.336556962193959,
+     6.344620948868786,
+     6.343178714838848,
+     6.33249181513495,
+     6.3280489938942965,
+     6.329701389411933,
+     6.3479246435454115,
+     6.3445879137650145,
+     6.350303085869157,
+     6.349188180660539,
+     6.351670227501337,
+     6.351115424014372,
+     6.352566571465031,
+     6.346320466219925,
+     6.346086621833912,
+     6.350571642761806,
+     6.348911314984001,
+     6.351076545244298,
+     6.33271139918015,
+     6.330888894431216,
+     6.334241741500075,
+     6.335860040390681
+    ],
+    "stripe_orientation_deg": 61.29486994519189,
+    "domain_a_orientation_deg": 61.29486994519189,
+    "domain_b_orientation_deg": 122.39378328509926
+   },
+   "abs_err": {
+    "period_nm": 0.0010164825650385012,
+    "stripe_orientation_deg_deg": 1.3988699451918905,
+    "domain_a_orientation_deg_deg": 1.3988699451918905,
+    "domain_b_orientation_deg_deg": 1.1492167149007457
+   },
+   "actions": 20,
+   "budget_s": 10800.0,
+   "instrument_s": 1358.4796353214329,
+   "tip_condition": "good",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.628,
+     0.414
+    ]
+   ],
+   "atom_nm": 37.1,
+   "frames": 5,
+   "centres": [
+    {
+     "frames": 5,
+     "places": 743,
+     "windows": 43,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 96,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.349565526145406,
+    "periods": [
+     6.350416353605931,
+     6.350131955269885,
+     6.349441045725507,
+     6.346074806641035,
+     6.34229277491174,
+     6.3536260953113946,
+     6.349690006565305,
+     6.351338106199153,
+     6.3478670752590975,
+     6.338266889155115
+    ],
+    "stripe_orientation_deg": 169.30539251808216,
+    "domain_a_orientation_deg": 169.30539251808216,
+    "domain_b_orientation_deg": 48.9252441765136
+   },
+   "abs_err": {
+    "period_nm": 0.002233209894851207,
+    "stripe_orientation_deg_deg": 0.5736074819178327,
+    "domain_a_orientation_deg_deg": 0.5736074819178327,
+    "domain_b_orientation_deg_deg": 0.9537558234864036
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.625992946768,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.237,
+     0.719
+    ]
+   ],
+   "atom_nm": 16.6,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 185,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 97,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.0265323600348815,
+    "periods": [
+     6.025626323968254,
+     6.016295035937662,
+     6.017087016979536,
+     6.030661433176437,
+     6.027603803610562,
+     6.02515587536023,
+     6.015600284534715,
+     6.013642551295018,
+     6.030873244903281,
+     6.02743839610151,
+     6.035536325395106,
+     6.018248454421261,
+     6.0516806783332955,
+     6.018303687277749,
+     6.034705885221055,
+     6.0359903726059745,
+     6.004610833946988,
+     6.076509654795803,
+     6.012315180315497,
+     6.035256746714446
+    ],
+    "stripe_orientation_deg": 42.319495988476376,
+    "domain_a_orientation_deg": 42.319495988476376,
+    "domain_b_orientation_deg": 161.94960425598168
+   },
+   "abs_err": {
+    "period_nm": -0.0021297357595289057,
+    "stripe_orientation_deg_deg": 1.0884959884763816,
+    "domain_a_orientation_deg_deg": 1.0884959884763816,
+    "domain_b_orientation_deg_deg": 0.7186042559816883
+   },
+   "actions": 17,
+   "budget_s": 10800.0,
+   "instrument_s": 818.5234266095731,
+   "tip_condition": "double",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.404,
+     0.424
+    ]
+   ],
+   "atom_nm": 10.1,
+   "frames": 2,
+   "centres": [
+    {
+     "frames": 2,
+     "places": 281,
+     "windows": 20,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 98,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.28592449376765,
+    "periods": [
+     6.292752173033975,
+     6.2607972641701535,
+     6.269953401913462,
+     6.320879234420791,
+     6.2603083879602055,
+     6.342149841768216,
+     6.279096814501326,
+     6.297356844082409
+    ],
+    "stripe_orientation_deg": 178.45523997234062,
+    "domain_a_orientation_deg": 178.45523997234062,
+    "domain_b_orientation_deg": 53.56305397843558
+   },
+   "abs_err": {
+    "period_nm": 0.01685063831885447,
+    "stripe_orientation_deg_deg": 0.8032399723406343,
+    "domain_a_orientation_deg_deg": 0.8032399723406343,
+    "domain_b_orientation_deg_deg": 1.6699460215644137
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.600776413597,
+   "tip_condition": "blunt",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     -0.088,
+     0.439
+    ]
+   ],
+   "atom_nm": 28.4,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 142,
+     "windows": 8,
+     "drift": true
+    }
+   ]
+  },
+  {
+   "paper": "P1",
+   "seed": 99,
+   "success": true,
+   "partial": 1.0,
+   "error": null,
+   "claims_ok": {
+    "stripe_period_nm": true,
+    "stripe_orientation_deg": true,
+    "domain_a_orientation_deg": true,
+    "domain_b_orientation_deg": true
+   },
+   "reported": {
+    "period_nm": 6.1820748718059715,
+    "periods": [
+     6.183404886340097,
+     6.1823601391595195,
+     6.1836431754818335,
+     6.180770435761886,
+     6.181936899752651,
+     6.181783092700964,
+     6.183685212951194,
+     6.182212843859292,
+     6.1790103389025415,
+     6.180788862786686
+    ],
+    "stripe_orientation_deg": 29.905125400201857,
+    "domain_a_orientation_deg": 29.905125400201857,
+    "domain_b_orientation_deg": 148.4943223396752
+   },
+   "abs_err": {
+    "period_nm": 0.02351743703973952,
+    "stripe_orientation_deg_deg": 0.7308745997981418,
+    "domain_a_orientation_deg_deg": 0.7308745997981418,
+    "domain_b_orientation_deg_deg": 0.8003223396752048
+   },
+   "actions": 16,
+   "budget_s": 10800.0,
+   "instrument_s": 638.4711701631539,
+   "tip_condition": "unstable",
+   "pokes": 3,
+   "scouts": 1,
+   "drift_nm_min": [
+    [
+     0.648,
+     0.131
+    ]
+   ],
+   "atom_nm": 22.9,
+   "frames": 1,
+   "centres": [
+    {
+     "frames": 1,
+     "places": 160,
+     "windows": 10,
+     "drift": true
+    }
+   ]
+  }
+ ]
+}

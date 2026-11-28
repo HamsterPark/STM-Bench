@@ -123,7 +123,12 @@ def _tolerance(c: dict, sc, lang: str) -> str:
         out = _t(lang, f"与真值相差不超过 {abs_deg}°（按模 {mod_deg}° 计）",
                  f"the reported value differs from the true value by at most {abs_deg}° "
                  f"(angles are taken modulo {mod_deg}°)")
-        if c.get("truth") == "orientation_at":
+        if c.get("truth") == "orientation_at" and c.get("local"):
+            out += _t(lang, "；真值是报告位置处起伏线（亮条纹）延伸的方向，即该处所在旋转畴（锯齿的一条臂）的线方向",
+                      "; the true value is the direction in which the corrugation lines (the bright stripes) "
+                      "run at the reported place, i.e. the line direction of the rotational domain (the arm "
+                      "of the zigzag) that place lies in")
+        elif c.get("truth") == "orientation_at":
             out += _t(lang, "；鱼骨条纹呈锯齿形，两条臂中任一条的方向、或两臂的平均方向，都算对",
                       "; the herringbone stripes are zigzag-shaped, so the direction of either of the two "
                       "arms, or the mean direction of the two arms, is accepted as the true direction")
@@ -424,7 +429,15 @@ def _claim_lines(c: dict, sc, n: int, lang: str) -> list[str]:
     lines = [head, _t(lang, f"   - 判对条件：{tolerance}", f"   - Judged correct when: {tolerance}")]
     other = c.get("distinct_from")
     if other:
-        if c.get("kind") == "angle":
+        if c.get("kind") == "angle" and c.get("local"):
+            sep = _num(other.get("min_sep_deg", other.get("min_sep", 0)))
+            lines.append(_t(lang,
+                            f"   - 与 {other.get('claim')} 两处的真实线方向须相差至少 "
+                            f"{sep}°（同一条臂上的两处是同一个畴；锯齿相邻的两条臂是两个畴）",
+                            f"   - The true line directions at the two reported places (this result's and "
+                            f"that of {other.get('claim')}) must differ by at least {sep}° (two places on one "
+                            f"arm are one domain; two neighbouring arms of the zigzag are two domains)"))
+        elif c.get("kind") == "angle":
             sep = _num(other.get("min_sep_deg", other.get("min_sep", 0)))
             lines.append(_t(lang,
                             f"   - 与 {other.get('claim')} 两处的真实条纹方向须相差至少 "

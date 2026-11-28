@@ -42,7 +42,7 @@ On seeds 0-29, run locally at df705e6 (2026-11-27, the simulator with both surfa
 of that day): 30/30 reproduced, |E0 error| p90 2.0 meV (max 2.3), |m* error| p90 0.7 % (max
 0.85 %), 1213 s of instrument time (median; p90 1401 s), about 25 s of wall clock per seed.
 Every terrace was >= 60 nm wide. The validation run on khwu is recorded in docs/DESIGN.md
-(section 9.10) and docs/results/p2_reference_seeds_0-29.json.
+(section 9.12) and docs/results/p2_reference_seeds_0-29.json.
 """
 from __future__ import annotations
 

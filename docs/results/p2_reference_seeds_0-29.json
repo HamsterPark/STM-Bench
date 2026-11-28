@@ -1,5 +1,5 @@
 {
- "note": "P2 privileged reference (stmbench/reference/p2.py, the truth navigates), seeds 0-29; code 6ea5e18 (bench/p2-reference), the simulator with both surface-state fixes of 2026-11-27 (scipy's struve(0) hole stepped over; the step's standing wave a function of the distance across the local edge); run on khwu, job 70512 (one node, 16 processes), 2026-11-28; judge run on every seed. Every seed's success and instrument time are the same as in the local run at df705e6 (Windows, the same behaviour); the reported values differ by at most 1.3e-9 (relative). Percentiles as stmbench.reference.summarize (numpy, linear). See docs/DESIGN.md section 9.10.",
+ "note": "P2 privileged reference (stmbench/reference/p2.py, the truth navigates), seeds 0-29; code 6ea5e18 (bench/p2-reference), the simulator with both surface-state fixes of 2026-11-27 (scipy's struve(0) hole stepped over; the step's standing wave a function of the distance across the local edge); run on khwu, job 70512 (one node, 16 processes), 2026-11-28; judge run on every seed. Every seed's success and instrument time are the same as in the local run at df705e6 (Windows, the same behaviour); the reported values differ by at most 1.3e-9 (relative). Percentiles as stmbench.reference.summarize (numpy, linear). See docs/DESIGN.md section 9.12.",
  "summary": {
   "n": 30,
   "errors": [],

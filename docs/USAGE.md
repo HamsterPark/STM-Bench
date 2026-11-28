@@ -577,6 +577,9 @@ P3's repair spectra in 43 %, P2 in 16 % (all knowledge claims) and P5 in 13 %;
 P1's measurement claims together passed 4.3 %. After recalibration on 2026-10-13 against
 their reference solutions (below), the joint value-check acceptance rates for P5 and P3
 were 4.3 % each.
+P1's orientation claims, judged since 2026-11-27 on the line direction at the reported place
+with a 3° tolerance, pass together 0.70 % in-sample on seeds 0–1999 and 0.20 % held out
+(`--holdout`: the sheet chosen on seeds 0–999, scored on 1000–1999).
 
 ### Reference solutions
 
@@ -584,6 +587,7 @@ were 4.3 % each.
 python -m stmbench.cli reference --paper P5 --seeds 30 --jobs 4 --json p5.json
 python -m stmbench.cli reference --paper P3 --seeds 30 --jobs 4
 python -m stmbench.cli reference --paper P4 --seeds 30 --jobs 4
+python -m stmbench.cli reference --paper P1 --seeds 30 --jobs 4
 python -m stmbench.cli reference --paper P2 --seeds 30 --jobs 4
 ```
 
@@ -592,14 +596,17 @@ the atom is, which nearby spot is bare surface, how far the sample has drifted, 
 tip needs a poke — but every number it reports is measured through the instrument and
 computed by `stmbench.analysis`. Over many seeds it shows whether a paper is
 solvable, the error spread of a careful measurement (tolerances are set at about twice its
-p90) and the instrument time it takes. P5 (2026-10-13, seeds 0–29): 30/30 reproduced, |error|
+p90) and the instrument time it takes. P5 (2026-10-13, seeds 0–29; re-run 2026-11-27 on 539e5e3: the same figures): 30/30 reproduced, |error|
 p90 5.9 % (F_min), 3.7 % (decay length), 8.7 % (E_b), 354 s of instrument time. P3 (seeds
-0–29, re-run 2026-11-24 on the current code): 30/30; |error| p90 2.7 / 2.5 meV (the two resonances),
+0–29, re-run 2026-11-27 on 0f4e8f8; the same figures as the 2026-11-24 re-run): 30/30; |error| p90 2.7 / 2.5 meV (the two resonances),
 0.037 nm (the ring's radius), 485 s. P4 (seeds 0–149): 150/150 — no atom's threshold read (a resistance ladder from
 400 kΩ down), the goal site computed from the lattice the other atoms in a survey give
 (`stmbench.analysis.adatoms`); the reported place |error| p90 0.016 nm against the judge's
 0.6 nm (0.16 nm before the judge mapped positions through the imaging apex, 2026-10-14);
-879 s median, 1428 s p90. P2 (seeds 0–29, 2026-11-28): 30/30 — the truth picks a straight step edge
+879 s median, 1428 s p90. P1 (2026-11-27, seeds 0–59, the zigzag of Barth et al. 1990): 60/60; |error| p90
+0.021 nm (the period) and 1.23° (the line direction at the reported place, against 3°); 723 s median; two places
+in the middle of neighbouring arms, found in one frame by `stmbench.analysis.herringbone`.
+P2 (seeds 0–29, 2026-11-28): 30/30 — the truth picks a straight step edge
 with a terrace ≥ 60 nm on the profile's side and predicts the drift; eight dI/dV maps across the edge,
 each row aligned at its own edge, a standing-wave fit with a free phase
 (`stmbench.analysis.standing_waves`); |error| p90 0.66 % (m*) and 2.0 meV (E0), 1213 s median.
@@ -610,6 +617,8 @@ Per-seed results: `docs/results/`.
 ```bash
 python -m stmbench.cli baseline --paper P4 --seeds 30 --jobs 4 --json p4-baseline.json
 python -m stmbench.cli baseline --paper P3 --seeds 200 --jobs 8 --json p3-baseline.json
+python -m stmbench.cli baseline --paper P1 --seeds 100 --jobs 8 --json p1-baseline.json
+python -m stmbench.cli baseline --paper P5 --seeds 100 --jobs 8 --json p5-baseline.json
 python -m stmbench.cli baseline --paper P2 --seeds 30 --first-seed 300 --jobs 4 --json p2-baseline.json
 ```
 
@@ -624,7 +633,13 @@ the earlier held-out rounds: `docs/results/p4_baseline_seeds_*.json`, DESIGN §9
 P3 (corral, DESIGN §9.7): the ring is found in a 60 nm survey, the tip judged from the ring and the spare
 atoms (`stmbench.analysis.corral`: ring width, ghost ring), the drift from two frames of the ring, the band bottom
 from a bare-terrace spectrum; results and per-seed records: `docs/results/p3_baseline_seeds_0-199.json`.
-P2 (standing waves, DESIGN §9.10): the staircase from a 400 nm survey, a place with a wide terrace and a
+P1 (DESIGN §9.11): a survey, a step-free square with an adatom for the drift, one measurement frame; two places in
+the middle of neighbouring arms chosen by the strength of the lines around them (a region wall, where the true
+direction jumps, weakens them); 99/100 on seeds 0–99, 29/30 on the held-out 430–459 (run once); per-seed records:
+`docs/results/p1_baseline_seeds_0-99.json`, `…_430-459.json`. P5 (DESIGN §9.10): the tip placed on an adatom from its
+images and from the force itself, then the reference's measurement; 100/100 on seeds 0–99, 30/30 on the held-out
+460–489; per-seed records: `docs/results/p5_baseline_seeds_0-99.json`, `…_460-489.json`.
+P2 (standing waves, DESIGN §9.12): the staircase from a 400 nm survey, a place with a wide terrace and a
 straight edge, the tip judged by steps drawn twice and by how one straight edge's wave fits a trial map,
 each map's k corrected for the tilt of its own edge; 66/70 on development seeds 0–69 and 30/30 on seeds
 300–329, held out until the code was final (2026-11-28); per-seed records:

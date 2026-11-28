@@ -100,7 +100,7 @@ notes: |
   (physisorption to chemisorption), a 7–25 /nm (decay 40–143 pm) — so that F_min spans
   roughly −55…−785 pN and E_b 50–540 meV. Chance (best fixed sheet, exact, seeds 0–299):
   F_min 16.0 %, decay 17.7 %, E_b 21.0 %, all three 4.3 % (was 14.0 % at the old draws and
-  a 25 % decay tolerance).
+  a 25 % decay tolerance; re-run 2026-11-27 on code efbf454, khwu: unchanged).
 
   Background subtraction is defined the way an experimenter does it: the atom curve minus the
   clean-surface curve at the same tip height. The van der Waals term is common to both and
@@ -109,3 +109,16 @@ notes: |
 
   Round 1 does not model CO flexibility or the tip's own relaxation, so this reproduces the
   force spectroscopy, not the physisorption-to-chemisorption transition of the 2019 paper.
+
+  No-truth baseline (2026-11-27, stmbench/baselines/p5.py; docs/DESIGN.md 9.10): only what an
+  agent gets. It finds an isolated atom and two bare spots in frames, measures the drift on
+  atoms, judges and conditions the tip from images, and places the tip on the bond from the
+  force itself: a double or unstable tip images the atom 0.1-0.2 nm from the bond (the bond is
+  the tip body's), and a one-direction frame puts the atom about 0.05 nm off along the fast axis
+  (about 7 % of F_min), so it averages forward and backward images and fits the bond centre on
+  a grid of coarse curves against the bare curve. Development seeds 0-99: 100/100, |error| p90
+  F_min 5.1 %, decay length 2.2 %, E_b 8.2 %, instrument time p50 1230 s, at most 2706 s.
+  Held out, each range run once on the cluster: 400-429 29/30 and 430-459 29/30 (both failures
+  the weakest bonds, refused by the baseline's own acceptance rules, fixed each time), 460-489
+  30/30 on the final code (p90 4.4 / 1.4 / 6.2 %). The decay tolerance has the thinnest margin:
+  at most 6.9 % against 8 % over the passing runs.

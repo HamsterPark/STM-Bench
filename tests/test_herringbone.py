@@ -112,6 +112,126 @@ def test_layout_gives_three_orientations_and_boundaries():
     assert got == pytest.approx((d[1] - d[0]) / 2 * 1e9, rel=1e-9)
 
 
+def _mean_peak_over_strongest(params: HerringboneParams, site, centre_m, size_nm=120.0, px_m=0.4e-9) -> float:
+    """Power of the strongest spectral line ON the mean stripe wavevector (within 3 deg) over the
+    strongest line of the stripe band, for a square window of the pure height field (Hann window,
+    4x zero padding; row 0 = the top edge)."""
+    n = int(round(size_nm * 1e-9 / px_m))
+    c = (np.arange(n) - n / 2) * px_m
+    x, y = np.meshgrid(centre_m[0] + c, centre_m[1] - c)
+    z = height(x, y, site, params)
+    z = z - z.mean()
+    m = 4 * n
+    p = np.abs(np.fft.fft2(z * np.outer(np.hanning(n), np.hanning(n)), s=(m, m))) ** 2
+    k = np.fft.fftfreq(m, d=px_m * 1e9)
+    kx, ky = np.meshgrid(k, -k)
+    th = site.lattice_angle + math.pi / 6
+    ku = kx * math.cos(th) + ky * math.sin(th)
+    kv = -kx * math.sin(th) + ky * math.cos(th)
+    kk = np.hypot(ku, kv)
+    band = (kk > 1 / 12) & (kk < 1 / 4) & (ku > 0)
+    on_mean = band & (np.abs(np.degrees(np.arctan2(kv, ku))) < 3.0)
+    return float(p[on_mean].max(initial=0.0) / p[band].max())
+
+
+#: the corners of P1's ranges since 2026-11-27 (alpha, chevron period, T), from Barth et al. 1990
+P1_CORNERS = [(28.0, 40.0, 6.9), (28.0, 60.0, 7.6), (32.0, 40.0, 7.6), (32.0, 60.0, 6.9), (30.0, 50.0, 7.3)]
+
+
+@pytest.mark.parametrize("arm_deg,chevron_nm,period_nm", P1_CORNERS)
+def test_continuous_elbows_leave_no_strong_peak_on_the_mean(arm_deg, chevron_nm, period_nm):
+    """The jump elbows (zig·v) leave a spectral peak on the mean direction, as strong as an arm
+    and on P1's seed 0 the strongest (2026-11-27: relative strength 0.35-1.0 on seeds 0-3; the
+    strongest in 36 of 300 draws of the old ranges). Bent without a jump, with the paper's
+    geometry, the mean line stays weak: over 300 draws of the new ranges it reached at most 0.19
+    of the strongest line in 120 nm windows (p99 0.17) and 0.18 in 64 nm ones. 0.3 separates the
+    two with room for the window position."""
+    s = Surface("Au(111)", seed=7, adsorbate_density_per_um2=0.0)
+    for centre in [(0.0, 0.0), (130e-9, -260e-9), (-310e-9, 170e-9)]:
+        continuous = HerringboneParams.from_nm({"period_nm": period_nm, "chevron_period_nm": chevron_nm,
+                                                "arm_half_angle_deg": arm_deg, "amp_pm": 12.0,
+                                                "elbow": "continuous"})
+        assert _mean_peak_over_strongest(continuous, s.site, centre) < 0.3
+        assert _mean_peak_over_strongest(continuous, s.site, centre, size_nm=64.0) < 0.3
+
+
+def test_the_jump_elbows_put_the_strongest_peak_on_the_mean_somewhere():
+    """The case the change is for: with the legacy elbows and P1's old ranges a window can have
+    its strongest line on the mean direction (a reading of the strongest peak then gives T, not
+    the arm period T cos alpha)."""
+    s = Surface("Au(111)", seed=7, adsorbate_density_per_um2=0.0)
+    jump = HerringboneParams.from_nm({"period_nm": 6.3, "chevron_period_nm": 28.0,
+                                      "arm_half_angle_deg": 13.0, "amp_pm": 12.0})
+    worst = max(_mean_peak_over_strongest(jump, s.site, (0.0, v * 1e-9)) for v in range(100, 400, 25))
+    assert worst > 0.9
+
+
+@pytest.mark.parametrize("arm_deg,chevron_nm,period_nm", P1_CORNERS)
+def test_the_lines_of_an_arm_are_t_cos_alpha_apart(arm_deg, chevron_nm, period_nm):
+    """The claim's quantity: within one arm the bright lines are T·cos(alpha) apart
+    perpendicular to themselves (Barth et al. 1990: 63 A between the lines, p. 9310). Measured
+    on the field itself, along the arm's normal through the middle of an arm, between successive
+    maxima."""
+    params = HerringboneParams.from_nm({"period_nm": period_nm, "chevron_period_nm": chevron_nm,
+                                        "arm_half_angle_deg": arm_deg, "amp_pm": 12.0,
+                                        "elbow": "continuous"})
+    s = Surface("Au(111)", seed=7, adsorbate_density_per_um2=0.0)
+    th = s.site.lattice_angle + math.pi / 6
+    big_l = chevron_nm * 1e-9
+    for arm, v_mid in ((+1.0, big_l / 4), (-1.0, 3 * big_l / 4)):        # sin(2 pi v / L) = +1 / -1
+        sh = arm * params.shear
+        nu, nv = 1.0 / math.hypot(1.0, sh), sh / math.hypot(1.0, sh)        # the arm's normal in (u, v)
+        t = np.linspace(-9e-9, 9e-9, 18001)                                 # stays inside the arm
+        u, v = t * nu, v_mid + t * nv
+        x = u * math.cos(th) - v * math.sin(th)
+        y = u * math.sin(th) + v * math.cos(th)
+        z = height(x, y, s.site, params)
+        peaks = t[1:-1][(z[1:-1] > z[:-2]) & (z[1:-1] >= z[2:])]
+        spacing = float(np.median(np.diff(peaks)))
+        assert spacing == pytest.approx(period_nm * 1e-9 * math.cos(math.radians(arm_deg)), abs=0.002e-9)
+
+
+def test_p1s_new_ranges_keep_every_draw_and_its_order():
+    """AGENTS.md invariants 1-2: P1's herringbone ranges changed on 2026-11-27 (alpha 8-18 ->
+    28-32 deg, chevron 22-34 -> 40-60 nm, T 6.0-6.6 -> 6.9-7.6 nm) but no key was added or
+    removed, so every seed draws the same numbers in the same order: an unchanged key keeps its
+    value and a changed one keeps its place in its range."""
+    from stmsim.scenario import Scenario, resolve_hidden
+    sc = Scenario.load("stmbench/trackB/scenarios/P1_barth1990_au111.yaml")
+    new = sc.hidden
+    old = {b: dict(v) for b, v in new.items()}
+    old["herringbone"].update({"arm_half_angle_deg": [8.0, 18.0], "chevron_period_nm": [22.0, 34.0],
+                               "period_nm": [6.0, 6.6]})
+    for seed in range(20):
+        a, b = resolve_hidden(old, seed, sc.id), resolve_hidden(new, seed, sc.id)
+        assert a.keys() == b.keys()
+        for block in a:
+            assert a[block].keys() == b[block].keys()
+            for key, va in a[block].items():
+                vb = b[block][key]
+                lo_a, hi_a = (old[block][key] if isinstance(old[block][key], list) else (None, None))
+                lo_b, hi_b = (new[block][key] if isinstance(new[block][key], list) else (None, None))
+                if (lo_a, hi_a) != (lo_b, hi_b):
+                    assert (vb - lo_b) / (hi_b - lo_b) == pytest.approx((va - lo_a) / (hi_a - lo_a), abs=1e-12)
+                else:
+                    assert va == vb
+
+
+def test_p1_bends_without_a_jump_and_the_b_scenarios_keep_the_legacy_field(tmp_path):
+    """Only P1 asks for continuous elbows (initial.surface.herringbone); every Au(111) skill
+    scenario keeps the material's single-domain legacy field."""
+    from stmsim.scenario import Scenario
+    w = Scenario.load("stmbench/trackB/scenarios/P1_barth1990_au111.yaml").build_world(0, tmp_path / "p1",
+                                                                                     virtual_clock=True)
+    assert w.surface.herringbone.elbow == "continuous"
+    assert w.truth()["herringbone"]["elbow"] == "continuous"
+    for name in ("B3_find_flat_terrace", "B4_atomic_resolution"):
+        wb = Scenario.load(f"stmbench/trackB/scenarios/{name}.yaml").build_world(0, tmp_path / name,
+                                                                                virtual_clock=True)
+        hb = wb.surface.herringbone
+        assert hb is None or (hb.elbow == "jump" and hb.domain_spacing_m is None)
+
+
 def test_rendered_frame_matches_the_orientation_truth(tmp_path):
     """The whole chain — renderer, drift, pixel geometry — has to land on the same angle the
     judge reads out of the truth, or a right answer would be failed for a convention."""

@@ -3,8 +3,11 @@
 The reconstruction compresses the top layer along one of the three ⟨1̄10⟩ directions, so a
 real Au(111) surface is tiled with domains whose stripe direction differs by 60° (the three
 are equivalent modulo 180°). Within a domain the stripe pattern zigzags: the compression
-direction alternates between two arms ±α about the mean, with the elbows repeating every
-``chevron_period``. Both are what Barth et al. (PRB 42, 9307, 1990) measured.
+direction alternates between two arms ±α about the mean, and the arm changes every half
+``chevron_period`` (an elbow every L/2, a full zigzag every L). Barth et al. (PRB 42, 9307,
+1990) measured the lines bending by ±120° (unoriented lines 60° apart: α = 30°, each arm along
+a ⟨11̄2⟩ direction) with about 250 Å between the elbow lines (L ≈ 500 Å), and a line period of
+63 Å perpendicular to the lines of an arm (T·cos α) — p. 9307 (abstract) and p. 9310.
 
 Model (all vectorised; one orientation per evaluated point):
 
@@ -12,14 +15,27 @@ Model (all vectorised; one orientation per evaluated point):
     th   = lattice_angle + π/6 + label·π/3        # the domain's compression direction
     u, v = rotate((x, y), th)                     # u ∥ stripe wavevector, v ∥ stripe lines
     zig  = sign(sin(2π(v/L + phase_v)))           # which arm we are on
-    ph   = 2π((u + shear·zig·v)/T + phase_u)
+    g    = zig·v                                  # elbow "jump" (the legacy expression)
+         | −(L/2π)·arcsin(cos 2π(v/L + phase_v))  # elbow "continuous": slope zig, |g| ≤ L/4
+    ph   = 2π((u + shear·g)/T + phase_u)
     env  = 1 − 0.5·exp(−d_edge²/2w²)              # amplitude dips at a domain wall
     h    = A·env·(cos ph + h2·cos 2ph)
 
+``elbow`` chooses how an arm turns into the next. ``"jump"`` (the default) keeps the expression
+the simulator has used since before domains: ``g = zig·v`` is unbounded, so at every elbow the
+stripes jump by ``2·shear·v`` and the phase drifts along the stripes; the jumps leave a third
+spectral peak on the mean direction, often as strong as an arm, which real Au(111) does not
+show. ``"continuous"`` is a bounded triangle wave with the same slope ``zig``: the stripes bend
+without a jump, as the corrugation lines of the paper do. With the paper's geometry (α ≈ 30°,
+L ≈ 50 nm, T ≈ 7.3 nm) the spectrum is then two combs of lines 1/L apart around the arms and
+almost nothing on the mean; with small bends (α 8–18°, L 22–34 nm) a continuous zigzag would
+put the strongest peak on the mean instead (2026-11-27, docs/DESIGN.md, P1 section).
+
 With ``domain_spacing_m=None`` (the default for every pre-existing scenario), ``env ≡ 1``,
-``phase_u = phase_v = 0`` and ``second_harmonic = 0``, the expression is **bit-identical** to
-the single-orientation cosine the simulator used before domains existed — the degenerate case
-of one function, not a second code path (``tests/test_herringbone.py`` pins that to 1e-15).
+``phase_u = phase_v = 0``, ``second_harmonic = 0`` and ``elbow="jump"``, the expression is
+**bit-identical** to the single-orientation cosine the simulator used before domains existed —
+the degenerate case of one function, not a second code path (``tests/test_herringbone.py`` pins
+that to 1e-15).
 
 The domain layout is drawn from ``default_rng([site.seed, LAYOUT_STREAM])`` and never touches
 ``Site.rng``: ``Site.__post_init__`` and ``Surface._populate`` share that generator, so a draw
@@ -39,9 +55,15 @@ BOUNDARY_DIP = 0.5                  # amplitude fraction lost at the centre of a
 K_CONVENTION = "k_deg = stripe_deg - 90 (mod 180); stage frame, CCW from +x"
 
 
+#: how an arm turns into the next (see the module docstring); "jump" is the legacy expression
+ELBOWS = ("jump", "continuous")
+
+
 @dataclass(frozen=True)
 class HerringboneParams:
-    """SI. ``domain_spacing_m=None`` ⇒ a single domain (the legacy field)."""
+    """SI. ``domain_spacing_m=None`` ⇒ a single domain (the legacy field). ``elbow``: ``"jump"``
+    (the legacy expression, every pre-existing scenario) or ``"continuous"`` (the bounded zigzag
+    a scenario asks for in ``initial.surface.herringbone``; no random draw involved)."""
     period_m: float = 6.3e-9
     chevron_period_m: float = 30e-9
     shear: float = LEGACY_SHEAR
@@ -49,6 +71,11 @@ class HerringboneParams:
     second_harmonic: float = 0.0
     domain_spacing_m: float | None = None
     boundary_width_m: float = 3e-9
+    elbow: str = "jump"
+
+    def __post_init__(self):
+        if self.elbow not in ELBOWS:
+            raise ValueError(f"unknown herringbone elbow {self.elbow!r} (known: {ELBOWS})")
 
     @property
     def arm_half_angle_deg(self) -> float:
@@ -80,6 +107,8 @@ class HerringboneParams:
             d["domain_spacing_m"] = float(cfg["domain_spacing_nm"]) * 1e-9
         if "boundary_width_nm" in cfg:
             d["boundary_width_m"] = float(cfg["boundary_width_nm"]) * 1e-9
+        if "elbow" in cfg:
+            d["elbow"] = str(cfg["elbow"])
         return cls(**d)
 
     def with_defaults_from(self, material) -> "HerringboneParams":
@@ -199,8 +228,14 @@ def height(x: np.ndarray, y: np.ndarray, site, params: HerringboneParams) -> np.
     v = -x * s + y * c
     # the grouping matters: with zero phases this has to reduce *exactly* to the pre-domain
     # expression, so the phase is added as a separate term rather than inside the division
-    zig = np.sign(np.sin(2 * np.pi * v / params.chevron_period_m + 2 * np.pi * ph_v))
-    ph = 2 * np.pi * (u + params.shear * zig * v) / params.period_m + 2 * np.pi * ph_u
+    xc = 2 * np.pi * v / params.chevron_period_m + 2 * np.pi * ph_v
+    if params.elbow == "continuous":
+        # a triangle wave of slope sign(sin xc) (the arm, as zig below) and amplitude L/4: the
+        # stripes bend at the elbows without the jump of zig·v; deterministic, no draw
+        g = -(params.chevron_period_m / (2 * np.pi)) * np.arcsin(np.clip(np.cos(xc), -1.0, 1.0))
+    else:
+        g = np.sign(np.sin(xc)) * v
+    ph = 2 * np.pi * (u + params.shear * g) / params.period_m + 2 * np.pi * ph_u
     out = np.cos(ph)
     if params.second_harmonic:
         out = out + params.second_harmonic * np.cos(2 * ph)
@@ -254,6 +289,7 @@ def snapshot(site, params: HerringboneParams, *, cx: float = 0.0, cy: float = 0.
         # perpendicular to them — and it is the one a claim can be checked against.
         "period_along_arm_nm": params.period_m * 1e9 * math.cos(math.atan(params.shear)),
         "chevron_period_nm": params.chevron_period_m * 1e9,
+        "elbow": params.elbow,
         "arm_half_angle_deg": params.arm_half_angle_deg,
         "amp_pm": params.amp_m * 1e12,
         "second_harmonic": params.second_harmonic,

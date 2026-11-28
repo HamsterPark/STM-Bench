@@ -88,6 +88,12 @@ def _sample_seed(args) -> dict:
         if c.get("truth") == "orientation_at":
             x, y = spots[cid]
             info = w.surface.orientation_at(x * 1e-9, y * 1e-9) or {}
+            if c.get("local"):
+                # judged on the line direction at the place (one arm = one domain): it alone is the
+                # truth, the accepted answer and what a distinct_from compares
+                local = info.get("stripe_local_deg")
+                out[cid] = None if local is None else {"stripe_deg": float(local), "accept": [float(local)]}
+                continue
             stripe = info.get("stripe_deg")
             out[cid] = None if stripe is None else {
                 "stripe_deg": float(stripe), "accept": [float(stripe), *map(float, info.get("arms_deg") or [])]}
@@ -296,7 +302,7 @@ def _best_pair_plus_one(grids: Sequence[ClaimGrid], free: int) -> tuple[list[int
     n = g.passes.shape[1]
     marg = g.passes.sum(axis=1)
     best_val, best = -1.0, [0, 0, 0]
-    for i in np.argsort(-marg):
+    for i in np.argsort(-marg, kind="stable"):         # ties in index order (see best_joint)
         if marg[i] <= best_val:
             break
         counts = _pair_counts(_masked(grids[a], g.passes[i]), _masked(grids[b], g.passes[i]))
@@ -318,7 +324,7 @@ def _best_triple(grids: Sequence[ClaimGrid]) -> tuple[list[int], float]:
     p2t = g2.passes.astype(np.float32).T
     marg = g0.passes.sum(axis=1)
     best_val, best = -1.0, [0, 0, 0]
-    for i in np.argsort(-marg):
+    for i in np.argsort(-marg, kind="stable"):         # ties in index order (see best_joint)
         if marg[i] <= best_val:
             break
         m = (p1 * g0.passes[i][None, :]) @ p2t
@@ -336,7 +342,14 @@ def best_joint(grids: Sequence[ClaimGrid], *, sweeps: int = 8, restarts: int = 5
     (:func:`_best_pair_plus_one`). Otherwise coordinate ascent, each
     step exact, from the per-claim optima and from the next-best candidates of each claim; the
     result is then a lower bound on the best sheet (on P5, before the exact search, ascent
-    reported 4.0 % at a looser tolerance and 4.3 % at a tighter one)."""
+    reported 4.0 % at a looser tolerance and 4.3 % at a tighter one).
+
+    Several sheets can pass the same number of seeds. The searches visit candidates in decreasing
+    order of their own pass count and keep the first strict improvement, so which of the tied
+    sheets is kept depends on the order of equal counts: a stable sort keeps index order on every
+    machine. numpy's default sort does not, and the hold-out estimate (the sheet chosen on one
+    half, scored on the other) differed between two machines because of it (P1 at 3 degrees,
+    2026-11-27: 1/1000 and 2/1000 held out, the same 14/2000 in-sample)."""
     if not grids:
         return [], 0.0
     n = grids[0].passes.shape[1]
@@ -359,7 +372,7 @@ def best_joint(grids: Sequence[ClaimGrid], *, sweeps: int = 8, restarts: int = 5
     base = [int(np.argmax(m)) for m in marg]
     starts = [base]
     for c, m in enumerate(marg):
-        for i in np.argsort(-m)[1:restarts]:
+        for i in np.argsort(-m, kind="stable")[1:restarts]:
             starts.append(base[:c] + [int(i)] + base[c + 1:])
     best_choice, best_val = list(base), float(joint_pass(grids, base).mean())
     for start in starts:
@@ -394,16 +407,22 @@ def sheet_pass(claims: Sequence[dict], sheet: dict[str, float], truths: list[dic
     """Per seed: does the fixed ``sheet`` pass every measure claim and the pairwise rules (``distinct_from``,
     ``greater_than``) on these truths? Each claim is checked with the judge's own tolerance helper, as
     :func:`joint_pass` does for the search's candidate grid; unlike it, the sheet may be any value, so a sheet
-    chosen on some seeds can be scored on others. Scalar and peak claims only (the P3 family)."""
+    chosen on some seeds can be scored on others. Scalar, peak and angle claims (the P3, P7 and P1 families)."""
     n = len(truths)
     ok = np.ones(n, bool)
     ranks: dict[str, np.ndarray] = {}
+    angles: dict[str, list] = {}
     for c in claims:
         cid = str(c["id"])
         if claim_policy(c) != "measure":
             continue
         v, tol, vals = float(sheet[cid]), c.get("tol") or {}, [s.get(cid) for s in truths]
-        if c["kind"] == "peak_in_list":
+        if c.get("truth") == "orientation_at" or c["kind"] == "angle":
+            # as _angle_grid: the answer is within the tolerance of one accepted direction
+            angles[cid] = vals
+            ok &= np.asarray([bool(info) and any(C.within_angle(v, float(a), tol) for a in info["accept"])
+                              for info in vals], bool)
+        elif c["kind"] == "peak_in_list":
             r = np.full(n, -1, int)
             for j, peaks in enumerate(vals):
                 for k, p in reversed(list(enumerate((peaks or [])[: int(c.get("rank_max", 3))]))):
@@ -425,6 +444,11 @@ def sheet_pass(claims: Sequence[dict], sheet: dict[str, float], truths: list[dic
         other = c.get("distinct_from")
         if other and str(other.get("claim")) in ranks and cid in ranks:
             ok &= ranks[cid] != ranks[str(other["claim"])]
+        elif other and str(other.get("claim")) in angles and cid in angles:
+            # as _truths_apart: the judge compares the truths at the two places, not the answers
+            sep = float(other.get("min_sep_deg", other.get("min_sep", 0.0)))
+            ok &= np.asarray([bool(a and b and C.angle_diff(a["stripe_deg"], b["stripe_deg"]) >= sep)
+                              for a, b in zip(angles[cid], angles[str(other["claim"])])], bool)
         gt = c.get("greater_than")
         if gt and str(gt) in sheet and not float(sheet[cid]) > float(sheet[str(gt)]):
             ok &= False

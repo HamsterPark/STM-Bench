@@ -10,28 +10,28 @@
     "err_median": 1.3460302204390473,
     "err_p90": 3.1329683113628963,
     "err_max": 3.79627335755373,
-    "signed_median": 0.752235463765814
+    "signed_median": 0.9279056937491674
    },
    "peak_lo_mev": {
     "relative": false,
     "pass_rate": 1.0,
-    "err_median": 1.9812179935929635,
-    "err_p90": 3.1037829523383555,
+    "err_median": 2.0516655505907124,
+    "err_p90": 3.4188733298274716,
     "err_max": 3.7962733575538437,
     "signed_median": 0.194952155566682
    },
    "radius_nm": {
     "relative": false,
     "pass_rate": 1.0,
-    "err_median": 0.0215669683894415,
-    "err_p90": 0.07866879154056969,
-    "err_max": 0.13007494623545046,
-    "signed_median": 0.012227431360032348
+    "err_median": 0.021452013324388286,
+    "err_p90": 0.06717254854014404,
+    "err_max": 0.13003432663107706,
+    "signed_median": 0.012427169460255794
    }
   },
   "instrument_s": {
-   "median": 1318.311879262591,
-   "p90": 2631.9146865791363
+   "median": 1318.3246110991245,
+   "p90": 2631.909173606864
   }
  },
  "runs": [
@@ -41,9 +41,9 @@
    "success": true,
    "partial": 1.0,
    "values": {
-    "peak_lo_mev": -368.00000000000006,
+    "peak_lo_mev": -370.00000000000006,
     "peak_hi_mev": -304.00000000000006,
-    "radius_nm": 8.857731757634916
+    "radius_nm": 8.936758003926485
    },
    "truth": {
     "peak_lo_mev": -366.5972963566543,
@@ -51,9 +51,9 @@
     "radius_nm": 8.950362412195725
    },
    "abs_err": {
-    "peak_lo_mev": -1.4027036433457738,
+    "peak_lo_mev": -3.402703643345774,
     "peak_hi_mev": 0.5972963566541694,
-    "radius_nm": -0.09263065456080888
+    "radius_nm": -0.013604408269239698
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -64,16 +64,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 6,
    "radius_nm": 8.950362412195725,
-   "instrument_s": 1774.5639492316068,
-   "tip_rounds": 2,
-   "track_lost": 1,
+   "instrument_s": 2564.438468045551,
+   "tip_rounds": 7,
+   "track_lost": 3,
    "pickups": 0,
    "placed": 6,
    "spares_seen": 6,
    "sites": 6,
-   "gap_width_nm": 5.36943411861395,
-   "spacing_nm": 0.8949056864356583,
-   "ring_radius_fit_nm": 8.853365474111913,
+   "gap_width_nm": 5.4118821239284705,
+   "spacing_nm": 0.9019803539880784,
+   "ring_radius_fit_nm": 8.884354647241613,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -112,7 +112,7 @@
     },
     {
      "r_kohm": 104.9,
-     "spikes": 13,
+     "spikes": 12,
      "in": false
     },
     {
@@ -147,12 +147,7 @@
     },
     {
      "r_kohm": 85.9,
-     "spikes": 8,
-     "in": true
-    },
-    {
-     "r_kohm": 85.9,
-     "spikes": 3,
+     "spikes": 9,
      "in": true
     },
     {
@@ -162,22 +157,27 @@
     },
     {
      "r_kohm": 110.0,
-     "spikes": 2,
+     "spikes": 13,
      "in": false
     },
     {
      "r_kohm": 110.0,
-     "spikes": 23,
+     "spikes": 8,
      "in": false
     },
     {
      "r_kohm": 110.0,
-     "spikes": 4,
+     "spikes": 7,
      "in": true
     },
     {
      "r_kohm": 110.0,
-     "spikes": 5,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 110.0,
+     "spikes": 3,
      "in": true
     },
     {
@@ -202,48 +202,73 @@
     },
     {
      "r_kohm": 90.1,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 72.1,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 72.1,
+     "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 72.1,
+     "spikes": 6,
+     "in": false
+    },
+    {
+     "r_kohm": 72.1,
+     "spikes": 6,
+     "in": true
+    },
+    {
+     "r_kohm": 72.1,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 72.1,
+     "spikes": 3,
+     "in": true
+    },
+    {
+     "r_kohm": 115.3,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 115.3,
      "spikes": 0,
      "in": false
-    },
-    {
-     "r_kohm": 72.1,
-     "spikes": 6,
-     "in": false
-    },
-    {
-     "r_kohm": 72.1,
-     "spikes": 6,
-     "in": false
-    },
-    {
-     "r_kohm": 57.6,
-     "spikes": 5,
-     "in": false
-    },
-    {
-     "r_kohm": 57.6,
-     "spikes": 9,
-     "in": true
     },
     {
      "r_kohm": 92.2,
-     "spikes": 0,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 92.2,
+     "spikes": 2,
      "in": false
     },
     {
      "r_kohm": 73.8,
-     "spikes": 12,
+     "spikes": 17,
      "in": false
     },
     {
      "r_kohm": 73.8,
-     "spikes": 11,
-     "in": false
-    },
-    {
-     "r_kohm": 73.8,
-     "spikes": 9,
+     "spikes": 8,
      "in": true
+    },
+    {
+     "r_kohm": 118.1,
+     "spikes": 1,
+     "in": false
     },
     {
      "r_kohm": 118.1,
@@ -252,37 +277,32 @@
     },
     {
      "r_kohm": 94.4,
-     "spikes": 2,
+     "spikes": 3,
      "in": false
     },
     {
      "r_kohm": 94.4,
-     "spikes": 9,
+     "spikes": 1,
      "in": false
     },
     {
      "r_kohm": 75.6,
-     "spikes": 15,
+     "spikes": 23,
      "in": false
     },
     {
      "r_kohm": 75.6,
-     "spikes": 2,
-     "in": true
-    },
-    {
-     "r_kohm": 75.6,
-     "spikes": 9,
+     "spikes": 8,
      "in": true
     }
    ],
    "site_fill": [
     1.3,
-    1.4,
-    1.23,
-    1.21,
-    1.26,
-    1.18
+    1.37,
+    1.19,
+    1.08,
+    1.15,
+    1.21
    ],
    "diag": {
     "tol_nm": 0.469,
@@ -309,13 +329,13 @@
       "status": "on_surface"
      },
      {
-      "to_nearest_gap_site_nm": 0.26,
-      "off_circle_nm": -0.13,
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.11,
       "status": "on_surface"
      },
      {
-      "to_nearest_gap_site_nm": 0.25,
-      "off_circle_nm": -0.14,
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": 0.1,
       "status": "on_surface"
      }
     ],
@@ -326,7 +346,7 @@
      10.4,
      16.2,
      22.0,
-     27.8,
+     27.9,
      358.8
     ],
     "gap_deg": [
@@ -338,13 +358,13 @@
      358.9
     ]
    },
-   "e0_mev": -411.5967346184216,
-   "radius_measured_nm": 8.857731757634916,
-   "peaks_found": 5,
+   "e0_mev": -411.297129119712,
+   "radius_measured_nm": 8.936758003926485,
+   "peaks_found": 7,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.0728054338583469,
-    0.2083079285173965
+    0.0015816908172195591,
+    0.6042130427876217
    ],
    "tip_condition": "double"
   },
@@ -356,7 +376,7 @@
    "values": {
     "peak_lo_mev": -380.0,
     "peak_hi_mev": -266.0,
-    "radius_nm": 6.429728712366334
+    "radius_nm": 6.429730752832302
    },
    "truth": {
     "peak_lo_mev": -381.12176465526807,
@@ -366,7 +386,7 @@
    "abs_err": {
     "peak_lo_mev": 1.1217646552680662,
     "peak_hi_mev": 3.1217646552680094,
-    "radius_nm": 0.011841305281008019
+    "radius_nm": 0.011843345746976652
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -377,16 +397,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 4,
    "radius_nm": 6.417887407085326,
-   "instrument_s": 1434.6662356850927,
+   "instrument_s": 1434.6646372156658,
    "tip_rounds": 2,
    "track_lost": 1,
    "pickups": 0,
    "placed": 4,
    "spares_seen": 4,
    "sites": 4,
-   "gap_width_nm": 2.950712313447536,
-   "spacing_nm": 0.737678078361884,
-   "ring_radius_fit_nm": 6.423357391064106,
+   "gap_width_nm": 2.9508168060484445,
+   "spacing_nm": 0.7377042015121111,
+   "ring_radius_fit_nm": 6.423351843687325,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -540,13 +560,13 @@
      358.1
     ]
    },
-   "e0_mev": -459.97844662418953,
-   "radius_measured_nm": 6.429728712366334,
+   "e0_mev": -459.97756734263675,
+   "radius_measured_nm": 6.429730752832302,
    "peaks_found": 7,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    1.0076904788548169,
-    0.08250959390773152
+    1.007698010888745,
+    0.08253091247594344
    ],
    "tip_condition": "double"
   },
@@ -558,7 +578,7 @@
    "values": {
     "peak_lo_mev": -318.00000000000006,
     "peak_hi_mev": -174.00000000000006,
-    "radius_nm": 5.767230718560747
+    "radius_nm": 5.767118372883718
    },
    "truth": {
     "peak_lo_mev": -317.4984825232144,
@@ -568,7 +588,7 @@
    "abs_err": {
     "peak_lo_mev": -0.5015174767856365,
     "peak_hi_mev": 1.4984825232142498,
-    "radius_nm": 0.0433506209330865
+    "radius_nm": 0.043238275256056724
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -579,16 +599,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 6,
    "radius_nm": 5.723880097627661,
-   "instrument_s": 3814.1745458470145,
+   "instrument_s": 3814.0661694291393,
    "tip_rounds": 13,
    "track_lost": 6,
    "pickups": 0,
    "placed": 6,
    "spares_seen": 6,
    "sites": 6,
-   "gap_width_nm": 4.747444329859147,
-   "spacing_nm": 0.7912407216431911,
-   "ring_radius_fit_nm": 5.751343271838387,
+   "gap_width_nm": 4.748038164873676,
+   "spacing_nm": 0.7913396941456127,
+   "ring_radius_fit_nm": 5.751081431934366,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -884,7 +904,7 @@
     "planned_deg": [
      303.3,
      311.2,
-     319.0,
+     319.1,
      326.9,
      334.8,
      342.7
@@ -898,13 +918,13 @@
      341.6
     ]
    },
-   "e0_mev": -418.72183760252574,
-   "radius_measured_nm": 5.767230718560747,
+   "e0_mev": -418.72549163697084,
+   "radius_measured_nm": 5.767118372883718,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.010344170947188926,
-    -0.6984717413450228
+    0.010167369662782118,
+    -0.6985420134347164
    ],
    "tip_condition": "blunt"
   },
@@ -916,7 +936,7 @@
    "values": {
     "peak_lo_mev": -364.00000000000006,
     "peak_hi_mev": -280.0,
-    "radius_nm": 7.839680501005479
+    "radius_nm": 7.839496027400061
    },
    "truth": {
     "peak_lo_mev": -364.7861287003673,
@@ -926,7 +946,7 @@
    "abs_err": {
     "peak_lo_mev": 0.7861287003672714,
     "peak_hi_mev": 2.7861287003672146,
-    "radius_nm": -0.0020121745702308402
+    "radius_nm": -0.0021966481756487966
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -937,16 +957,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 5,
    "radius_nm": 7.84169267557571,
-   "instrument_s": 3404.9508455068562,
+   "instrument_s": 3405.004444866825,
    "tip_rounds": 7,
    "track_lost": 5,
    "pickups": 0,
    "placed": 5,
    "spares_seen": 5,
    "sites": 5,
-   "gap_width_nm": 4.166864261284434,
-   "spacing_nm": 0.8333728522568868,
-   "ring_radius_fit_nm": 7.840608809863877,
+   "gap_width_nm": 4.165573729854249,
+   "spacing_nm": 0.8331147459708499,
+   "ring_radius_fit_nm": 7.8405999507155935,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -1203,13 +1223,13 @@
      329.5
     ]
    },
-   "e0_mev": -424.00301439451164,
-   "radius_measured_nm": 7.839680501005479,
+   "e0_mev": -424.00460973410543,
+   "radius_measured_nm": 7.839496027400061,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.2932912711929035,
-    -0.4939550558393332
+    -0.29318520722141567,
+    -0.49413815391556337
    ],
    "tip_condition": "double"
   },
@@ -1221,7 +1241,7 @@
    "values": {
     "peak_lo_mev": -334.00000000000006,
     "peak_hi_mev": -222.00000000000003,
-    "radius_nm": 6.684755390758642
+    "radius_nm": 6.684612697360039
    },
    "truth": {
     "peak_lo_mev": -336.20535300148293,
@@ -1231,7 +1251,7 @@
    "abs_err": {
     "peak_lo_mev": 2.2053530014828766,
     "peak_hi_mev": 0.20535300148279134,
-    "radius_nm": 0.01008609815885908
+    "radius_nm": 0.009943404760255348
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -1242,16 +1262,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 4,
    "radius_nm": 6.674669292599783,
-   "instrument_s": 867.5808437718954,
+   "instrument_s": 867.5549383938269,
    "tip_rounds": 0,
    "track_lost": 0,
    "pickups": 0,
    "placed": 4,
    "spares_seen": 4,
    "sites": 4,
-   "gap_width_nm": 3.6227057492584684,
-   "spacing_nm": 0.9056764373146171,
-   "ring_radius_fit_nm": 6.678956964067607,
+   "gap_width_nm": 3.6217115227421814,
+   "spacing_nm": 0.9054278806855454,
+   "ring_radius_fit_nm": 6.679317299287662,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -1420,7 +1440,7 @@
     }
    ],
    "site_fill": [
-    0.96,
+    0.95,
     0.89,
     0.85,
     1.03
@@ -1465,13 +1485,13 @@
      274.1
     ]
    },
-   "e0_mev": -417.1480319265042,
-   "radius_measured_nm": 6.684755390758642,
+   "e0_mev": -417.14689326671396,
+   "radius_measured_nm": 6.684612697360039,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.6669529065992742,
-    0.4741808566569509
+    -0.6647546496661219,
+    0.4743593289634273
    ],
    "tip_condition": "good"
   },
@@ -1483,7 +1503,7 @@
    "values": {
     "peak_lo_mev": -374.00000000000006,
     "peak_hi_mev": -248.00000000000006,
-    "radius_nm": 5.829384464198333
+    "radius_nm": 5.82975465028209
    },
    "truth": {
     "peak_lo_mev": -371.62679142022773,
@@ -1493,7 +1513,7 @@
    "abs_err": {
     "peak_lo_mev": -2.3732085797723244,
     "peak_hi_mev": -2.3732085797724096,
-    "radius_nm": -0.0024293475350116722
+    "radius_nm": -0.002059161451255065
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -1504,16 +1524,16 @@
    "ring_occupancy": 0.9743589743589743,
    "gap_sites": 5,
    "radius_nm": 5.831813811733345,
-   "instrument_s": 2979.702949427994,
+   "instrument_s": 2979.647815598951,
    "tip_rounds": 6,
    "track_lost": 3,
    "pickups": 1,
    "placed": 4,
    "spares_seen": 5,
    "sites": 5,
-   "gap_width_nm": 4.6587160089989315,
-   "spacing_nm": 0.9317432017997863,
-   "ring_radius_fit_nm": 5.8410356072043745,
+   "gap_width_nm": 4.658688736187532,
+   "spacing_nm": 0.9317377472375064,
+   "ring_radius_fit_nm": 5.8417390556285405,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -1709,7 +1729,7 @@
    "site_fill": [
     1.07,
     -0.01,
-    0.89,
+    0.9,
     1.3,
     1.14
    ],
@@ -1765,13 +1785,13 @@
      264.0
     ]
    },
-   "e0_mev": -462.2275386616315,
-   "radius_measured_nm": 5.829384464198333,
+   "e0_mev": -462.2324792194343,
+   "radius_measured_nm": 5.82975465028209,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.12593343864160275,
-    0.6112269524319041
+    -0.1285055943482336,
+    0.6149966039890055
    ],
    "tip_condition": "double"
   },
@@ -1783,7 +1803,7 @@
    "values": {
     "peak_lo_mev": -400.0,
     "peak_hi_mev": -318.00000000000006,
-    "radius_nm": 7.659305069347807
+    "radius_nm": 7.659224388285694
    },
    "truth": {
     "peak_lo_mev": -397.74078124357766,
@@ -1793,7 +1813,7 @@
    "abs_err": {
     "peak_lo_mev": -2.2592187564223423,
     "peak_hi_mev": -0.25921875642245595,
-    "radius_nm": 0.021909046495508733
+    "radius_nm": 0.021828365433395724
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -1804,16 +1824,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 4,
    "radius_nm": 7.637396022852299,
-   "instrument_s": 1152.6913708551392,
+   "instrument_s": 1152.7196589556302,
    "tip_rounds": 1,
    "track_lost": 0,
    "pickups": 0,
    "placed": 4,
    "spares_seen": 4,
    "sites": 4,
-   "gap_width_nm": 3.942265000150178,
-   "spacing_nm": 0.9855662500375445,
-   "ring_radius_fit_nm": 7.647565653496279,
+   "gap_width_nm": 3.940950772430387,
+   "spacing_nm": 0.9852376931075968,
+   "ring_radius_fit_nm": 7.647495434889356,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -1992,13 +2012,13 @@
      86.2
     ]
    },
-   "e0_mev": -454.4266936812852,
-   "radius_measured_nm": 7.659305069347807,
+   "e0_mev": -454.4219108639723,
+   "radius_measured_nm": 7.659224388285694,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    1.2343041506740173,
-    0.08582022555186758
+    1.2330122947916047,
+    0.0855965080293137
    ],
    "tip_condition": "dirty"
   },
@@ -2010,7 +2030,7 @@
    "values": {
     "peak_lo_mev": -372.00000000000006,
     "peak_hi_mev": -308.00000000000006,
-    "radius_nm": 8.577574702482055
+    "radius_nm": 8.577978441539326
    },
    "truth": {
     "peak_lo_mev": -370.95324074156935,
@@ -2020,7 +2040,7 @@
    "abs_err": {
     "peak_lo_mev": -1.0467592584307113,
     "peak_hi_mev": -1.0467592584307681,
-    "radius_nm": -0.03106364475438106
+    "radius_nm": -0.03065990569711019
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -2031,16 +2051,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 6,
    "radius_nm": 8.608638347236436,
-   "instrument_s": 2491.804240741633,
+   "instrument_s": 2491.8845633006426,
    "tip_rounds": 8,
    "track_lost": 3,
    "pickups": 0,
    "placed": 6,
    "spares_seen": 6,
    "sites": 6,
-   "gap_width_nm": 7.825003208784405,
-   "spacing_nm": 1.3041672014640675,
-   "ring_radius_fit_nm": 8.56155112678306,
+   "gap_width_nm": 7.823073135896147,
+   "spacing_nm": 1.3038455226493577,
+   "ring_radius_fit_nm": 8.561336639588054,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -2249,11 +2269,11 @@
     }
    ],
    "site_fill": [
-    1.6,
+    1.61,
     1.86,
     1.89,
-    1.93,
-    1.91,
+    1.94,
+    1.92,
     1.74
    ],
    "diag": {
@@ -2310,13 +2330,13 @@
      351.9
     ]
    },
-   "e0_mev": -419.9666320050172,
-   "radius_measured_nm": 8.577574702482055,
+   "e0_mev": -419.9658871532293,
+   "radius_measured_nm": 8.577978441539326,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.4037453588971373,
-    0.3986049646821262
+    0.4036799285289975,
+    0.39858118882703203
    ],
    "tip_condition": "blunt"
   },
@@ -2328,7 +2348,7 @@
    "values": {
     "peak_lo_mev": -422.00000000000006,
     "peak_hi_mev": -376.0,
-    "radius_nm": 8.951305459523187
+    "radius_nm": 8.951156230455194
    },
    "truth": {
     "peak_lo_mev": -424.7661987837832,
@@ -2338,7 +2358,7 @@
    "abs_err": {
     "peak_lo_mev": 2.766198783783125,
     "peak_hi_mev": -3.233801216216875,
-    "radius_nm": 0.021224890283374265
+    "radius_nm": 0.021075661215380848
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -2349,16 +2369,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 6,
    "radius_nm": 8.930080569239813,
-   "instrument_s": 1786.8571097164133,
+   "instrument_s": 1786.8523058671854,
    "tip_rounds": 4,
    "track_lost": 1,
    "pickups": 0,
    "placed": 6,
    "spares_seen": 6,
    "sites": 6,
-   "gap_width_nm": 9.49887642358566,
-   "spacing_nm": 1.58314607059761,
-   "ring_radius_fit_nm": 8.93118099473452,
+   "gap_width_nm": 9.499038343596965,
+   "spacing_nm": 1.5831730572661609,
+   "ring_radius_fit_nm": 8.93116413742922,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -2593,13 +2613,13 @@
      351.8
     ]
    },
-   "e0_mev": -465.1402509523364,
-   "radius_measured_nm": 8.951305459523187,
+   "e0_mev": -465.1471539672969,
+   "radius_measured_nm": 8.951156230455194,
    "peaks_found": 6,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.28693739448869326,
-    -0.48000866365249983
+    0.2872703887885253,
+    -0.4814099132618986
    ],
    "tip_condition": "double"
   },
@@ -2611,7 +2631,7 @@
    "values": {
     "peak_lo_mev": -382.0,
     "peak_hi_mev": -284.00000000000006,
-    "radius_nm": 6.757020001100014
+    "radius_nm": 6.758185935864919
    },
    "truth": {
     "peak_lo_mev": -383.5460899997046,
@@ -2621,7 +2641,7 @@
    "abs_err": {
     "peak_lo_mev": 1.5460899997045772,
     "peak_hi_mev": 1.5460899997044066,
-    "radius_nm": -0.005032754949206186
+    "radius_nm": -0.0038668201843012895
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -2632,16 +2652,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 4,
    "radius_nm": 6.76205275604922,
-   "instrument_s": 667.5656472559414,
+   "instrument_s": 667.5792705219221,
    "tip_rounds": 0,
    "track_lost": 0,
    "pickups": 0,
    "placed": 4,
    "spares_seen": 4,
    "sites": 4,
-   "gap_width_nm": 3.5523963689564533,
-   "spacing_nm": 0.8880990922391133,
-   "ring_radius_fit_nm": 6.749631557032978,
+   "gap_width_nm": 3.5528178329246907,
+   "spacing_nm": 0.8882044582311727,
+   "ring_radius_fit_nm": 6.750020755850786,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -2775,13 +2795,13 @@
      24.7
     ]
    },
-   "e0_mev": -453.79811129132224,
-   "radius_measured_nm": 6.757020001100014,
+   "e0_mev": -453.79611532937406,
+   "radius_measured_nm": 6.758185935864919,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.5097678465667093,
-    0.28874299556519745
+    -0.5116913107626775,
+    0.2946964816736464
    ],
    "tip_condition": "good"
   },
@@ -2793,7 +2813,7 @@
    "values": {
     "peak_lo_mev": -352.00000000000006,
     "peak_hi_mev": -262.0,
-    "radius_nm": 6.96204869307234
+    "radius_nm": 6.9620486931174765
    },
    "truth": {
     "peak_lo_mev": -353.92808143908263,
@@ -2803,7 +2823,7 @@
    "abs_err": {
     "peak_lo_mev": 1.9280814390825753,
     "peak_hi_mev": -0.0719185609174815,
-    "radius_nm": 0.023989557319538335
+    "radius_nm": 0.023989557364674674
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -2814,16 +2834,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 6,
    "radius_nm": 6.938059135752802,
-   "instrument_s": 2593.271546262596,
+   "instrument_s": 2593.2715467188536,
    "tip_rounds": 4,
    "track_lost": 3,
    "pickups": 0,
    "placed": 6,
    "spares_seen": 6,
    "sites": 6,
-   "gap_width_nm": 6.313514128734859,
-   "spacing_nm": 1.0522523547891431,
-   "ring_radius_fit_nm": 6.964676483427202,
+   "gap_width_nm": 6.313514126245386,
+   "spacing_nm": 1.052252354374231,
+   "ring_radius_fit_nm": 6.96467648014125,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -3083,13 +3103,13 @@
      299.8
     ]
    },
-   "e0_mev": -420.27668725626427,
-   "radius_measured_nm": 6.96204869307234,
+   "e0_mev": -420.27668763942836,
+   "radius_measured_nm": 6.9620486931174765,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.2130500523578759,
-    0.15294429807846513
+    -0.21305005317764172,
+    0.15294429938617873
    ],
    "tip_condition": "double"
   },
@@ -3101,7 +3121,7 @@
    "values": {
     "peak_lo_mev": -384.0,
     "peak_hi_mev": -296.00000000000006,
-    "radius_nm": 7.230501697842029
+    "radius_nm": 7.230499570919955
    },
    "truth": {
     "peak_lo_mev": -384.99812677922745,
@@ -3111,7 +3131,7 @@
    "abs_err": {
     "peak_lo_mev": 0.998126779227448,
     "peak_hi_mev": -1.0018732207726657,
-    "radius_nm": 0.034529953688121395
+    "radius_nm": 0.034527826766047376
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -3122,16 +3142,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 5,
    "radius_nm": 7.1959717441539075,
-   "instrument_s": 2357.1424037186375,
+   "instrument_s": 2357.160489254347,
    "tip_rounds": 4,
    "track_lost": 3,
    "pickups": 0,
    "placed": 5,
    "spares_seen": 5,
    "sites": 5,
-   "gap_width_nm": 4.478976202554373,
-   "spacing_nm": 0.8957952405108746,
-   "ring_radius_fit_nm": 7.229368135243763,
+   "gap_width_nm": 4.478951389669363,
+   "spacing_nm": 0.8957902779338726,
+   "ring_radius_fit_nm": 7.229300648953992,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -3297,7 +3317,7 @@
    "site_fill": [
     1.03,
     1.02,
-    0.94,
+    0.95,
     0.99,
     1.11
    ],
@@ -3348,13 +3368,13 @@
      303.6
     ]
    },
-   "e0_mev": -447.9207188982223,
-   "radius_measured_nm": 7.230501697842029,
+   "e0_mev": -447.91743334015166,
+   "radius_measured_nm": 7.230499570919955,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.8164316729111114,
-    -0.7977361878412529
+    -0.8163883936864174,
+    -0.7977152822258678
    ],
    "tip_condition": "double"
   },
@@ -3366,7 +3386,7 @@
    "values": {
     "peak_lo_mev": -398.0,
     "peak_hi_mev": -314.00000000000006,
-    "radius_nm": 7.890083846393651
+    "radius_nm": 7.8901527796014905
    },
    "truth": {
     "peak_lo_mev": -395.5148571640046,
@@ -3376,7 +3396,7 @@
    "abs_err": {
     "peak_lo_mev": -2.4851428359954184,
     "peak_hi_mev": 1.514857164004468,
-    "radius_nm": 0.050880610704303386
+    "radius_nm": 0.050949543912143014
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -3387,16 +3407,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 4,
    "radius_nm": 7.8392032356893475,
-   "instrument_s": 1195.0762097831487,
+   "instrument_s": 1195.0823682260595,
    "tip_rounds": 5,
    "track_lost": 0,
    "pickups": 0,
    "placed": 4,
    "spares_seen": 4,
    "sites": 4,
-   "gap_width_nm": 3.3377371789692463,
-   "spacing_nm": 0.8344342947423116,
-   "ring_radius_fit_nm": 7.878333192790939,
+   "gap_width_nm": 3.3372771104783276,
+   "spacing_nm": 0.8343192776195819,
+   "ring_radius_fit_nm": 7.878382094785564,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -3523,7 +3543,7 @@
     0.89,
     0.84,
     0.89,
-    1.11
+    1.1
    ],
    "diag": {
     "tol_nm": 0.41,
@@ -3565,13 +3585,13 @@
      244.4
     ]
    },
-   "e0_mev": -454.97317362145054,
-   "radius_measured_nm": 7.890083846393651,
+   "e0_mev": -454.97105956900333,
+   "radius_measured_nm": 7.8901527796014905,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.08415797691556297,
-    -0.8110719280464369
+    -0.09138212969976978,
+    -0.8102893204934283
    ],
    "tip_condition": "blunt"
   },
@@ -4219,7 +4239,7 @@
    "values": {
     "peak_lo_mev": -332.00000000000006,
     "peak_hi_mev": -190.00000000000006,
-    "radius_nm": 6.081576182257524
+    "radius_nm": 6.081066606683299
    },
    "truth": {
     "peak_lo_mev": -329.2355807156904,
@@ -4229,7 +4249,7 @@
    "abs_err": {
     "peak_lo_mev": -2.7644192843096675,
     "peak_hi_mev": 3.2355807156901903,
-    "radius_nm": 0.010399429854110132
+    "radius_nm": 0.009889854279885313
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -4240,16 +4260,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 3,
    "radius_nm": 6.071176752403414,
-   "instrument_s": 1076.2343483879356,
+   "instrument_s": 1076.3492477853204,
    "tip_rounds": 2,
    "track_lost": 0,
    "pickups": 0,
    "placed": 3,
    "spares_seen": 3,
    "sites": 3,
-   "gap_width_nm": 2.786444267585863,
-   "spacing_nm": 0.9288147558619544,
-   "ring_radius_fit_nm": 6.0749767710021345,
+   "gap_width_nm": 2.7831484181015167,
+   "spacing_nm": 0.9277161393671722,
+   "ring_radius_fit_nm": 6.073885641927599,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -4381,7 +4401,7 @@
     "r_nm": 6.071176752403414,
     "planned_deg": [
      124.1,
-     132.8,
+     132.9,
      141.6
     ],
     "gap_deg": [
@@ -4390,13 +4410,13 @@
      141.3
     ]
    },
-   "e0_mev": -428.0219199092126,
-   "radius_measured_nm": 6.081576182257524,
+   "e0_mev": -428.02294850549737,
+   "radius_measured_nm": 6.081066606683299,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.3605406086884039,
-    0.5034146058978249
+    0.36057831430786624,
+    0.5033777307652765
    ],
    "tip_condition": "unstable"
   },
@@ -4408,7 +4428,7 @@
    "values": {
     "peak_lo_mev": -360.00000000000006,
     "peak_hi_mev": -264.0,
-    "radius_nm": 7.262668579073995
+    "radius_nm": 7.2671562933281315
    },
    "truth": {
     "peak_lo_mev": -357.89446039224833,
@@ -4418,7 +4438,7 @@
    "abs_err": {
     "peak_lo_mev": -2.105539607751723,
     "peak_hi_mev": -0.10553960775177984,
-    "radius_nm": 0.02043125563158643
+    "radius_nm": 0.024918969885723286
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -4429,16 +4449,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 6,
    "radius_nm": 7.242237323442408,
-   "instrument_s": 2140.8471414865544,
+   "instrument_s": 2195.9805084002783,
    "tip_rounds": 5,
    "track_lost": 2,
    "pickups": 0,
    "placed": 6,
    "spares_seen": 6,
    "sites": 6,
-   "gap_width_nm": 7.217546294483056,
-   "spacing_nm": 1.2029243824138427,
-   "ring_radius_fit_nm": 7.224544203827064,
+   "gap_width_nm": 7.2109894012795985,
+   "spacing_nm": 1.201831566879933,
+   "ring_radius_fit_nm": 7.224453690472422,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -4532,12 +4552,12 @@
     },
     {
      "r_kohm": 110.0,
-     "spikes": 4,
+     "spikes": 3,
      "in": true
     },
     {
      "r_kohm": 110.0,
-     "spikes": 9,
+     "spikes": 10,
      "in": true
     },
     {
@@ -4597,12 +4617,12 @@
     },
     {
      "r_kohm": 92.2,
-     "spikes": 14,
+     "spikes": 16,
      "in": false
     },
     {
      "r_kohm": 92.2,
-     "spikes": 8,
+     "spikes": 7,
      "in": true
     },
     {
@@ -4617,17 +4637,32 @@
     },
     {
      "r_kohm": 94.4,
-     "spikes": 20,
+     "spikes": 2,
      "in": false
     },
     {
      "r_kohm": 94.4,
-     "spikes": 6,
+     "spikes": 14,
      "in": false
     },
     {
      "r_kohm": 94.4,
-     "spikes": 3,
+     "spikes": 2,
+     "in": false
+    },
+    {
+     "r_kohm": 94.4,
+     "spikes": 9,
+     "in": false
+    },
+    {
+     "r_kohm": 94.4,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 94.4,
+     "spikes": 5,
      "in": true
     },
     {
@@ -4637,12 +4672,12 @@
     }
    ],
    "site_fill": [
-    1.23,
-    1.2,
-    1.32,
-    1.29,
+    1.21,
+    1.17,
+    1.31,
+    1.27,
     1.4,
-    1.46
+    1.49
    ],
    "diag": {
     "tol_nm": 0.599,
@@ -4670,7 +4705,7 @@
      },
      {
       "to_nearest_gap_site_nm": 0.25,
-      "off_circle_nm": -0.08,
+      "off_circle_nm": 0.18,
       "status": "on_surface"
      },
      {
@@ -4685,9 +4720,9 @@
      104.7,
      114.2,
      123.7,
-     133.3,
+     133.2,
      142.8,
-     152.4
+     152.3
     ],
     "gap_deg": [
      104.3,
@@ -4698,13 +4733,13 @@
      151.9
     ]
    },
-   "e0_mev": -424.7353327613309,
-   "radius_measured_nm": 7.262668579073995,
+   "e0_mev": -424.7231141669967,
+   "radius_measured_nm": 7.2671562933281315,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.719118218747242,
-    0.604274385564839
+    0.7208126913191301,
+    0.6036854040437767
    ],
    "tip_condition": "double"
   },
@@ -4964,7 +4999,7 @@
    "values": {
     "peak_lo_mev": -400.0,
     "peak_hi_mev": -340.00000000000006,
-    "radius_nm": 8.674820969936267
+    "radius_nm": 8.675501583368515
    },
    "truth": {
     "peak_lo_mev": -399.4532910191726,
@@ -4974,7 +5009,7 @@
    "abs_err": {
     "peak_lo_mev": -0.5467089808274181,
     "peak_hi_mev": 1.4532910191724682,
-    "radius_nm": 0.012613557439056677
+    "radius_nm": 0.0132941708713048
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -4985,16 +5020,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 3,
    "radius_nm": 8.66220741249721,
-   "instrument_s": 752.3807394659771,
+   "instrument_s": 752.3205497711319,
    "tip_rounds": 0,
    "track_lost": 0,
    "pickups": 0,
    "placed": 3,
    "spares_seen": 3,
    "sites": 3,
-   "gap_width_nm": 2.9160472140914844,
-   "spacing_nm": 0.9720157380304948,
-   "ring_radius_fit_nm": 8.661101576299004,
+   "gap_width_nm": 2.918806390138497,
+   "spacing_nm": 0.972935463379499,
+   "ring_radius_fit_nm": 8.661256600832095,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -5104,7 +5139,7 @@
    ],
    "site_fill": [
     0.96,
-    0.92,
+    0.91,
     0.91
    ],
    "diag": {
@@ -5140,13 +5175,13 @@
      249.2
     ]
    },
-   "e0_mev": -443.1207353543025,
-   "radius_measured_nm": 8.674820969936267,
+   "e0_mev": -443.11842843507446,
+   "radius_measured_nm": 8.675501583368515,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.3540032211300449,
-    -0.5350594735656891
+    0.353392747467071,
+    -0.5337526767449737
    ],
    "tip_condition": "good"
   },
@@ -5158,7 +5193,7 @@
    "values": {
     "peak_lo_mev": -372.00000000000006,
     "peak_hi_mev": -270.0,
-    "radius_nm": 6.5356540568543515
+    "radius_nm": 6.535654420558712
    },
    "truth": {
     "peak_lo_mev": -375.5644005081628,
@@ -5168,7 +5203,7 @@
    "abs_err": {
     "peak_lo_mev": 3.5644005081627483,
     "peak_hi_mev": 1.5644005081626915,
-    "radius_nm": 0.0557100433493547
+    "radius_nm": 0.05571040705371555
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -5179,16 +5214,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 4,
    "radius_nm": 6.479944013504997,
-   "instrument_s": 1135.1683587107075,
+   "instrument_s": 1135.1742605014279,
    "tip_rounds": 2,
    "track_lost": 0,
    "pickups": 0,
    "placed": 4,
    "spares_seen": 4,
    "sites": 4,
-   "gap_width_nm": 2.94042876949496,
-   "spacing_nm": 0.73510719237374,
-   "ring_radius_fit_nm": 6.506325837152199,
+   "gap_width_nm": 2.9403084855319386,
+   "spacing_nm": 0.7350771213829846,
+   "ring_radius_fit_nm": 6.506267445083597,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -5377,13 +5412,13 @@
      358.0
     ]
    },
-   "e0_mev": -448.1157305141726,
-   "radius_measured_nm": 6.5356540568543515,
+   "e0_mev": -448.10344068534187,
+   "radius_measured_nm": 6.535654420558712,
    "peaks_found": 6,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.5676421067448584,
-    -0.090707103075874
+    0.5676473138500481,
+    -0.09070821789856366
    ],
    "tip_condition": "blunt"
   },
@@ -5395,7 +5430,7 @@
    "values": {
     "peak_lo_mev": -336.00000000000006,
     "peak_hi_mev": -216.00000000000003,
-    "radius_nm": 6.4997048946256415
+    "radius_nm": 6.499664275021268
    },
    "truth": {
     "peak_lo_mev": -337.3516062907165,
@@ -5405,7 +5440,7 @@
    "abs_err": {
     "peak_lo_mev": 1.351606290716461,
     "peak_hi_mev": 1.3516062907164041,
-    "radius_nm": 0.13007494623545046
+    "radius_nm": 0.13003432663107706
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -5416,16 +5451,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 6,
    "radius_nm": 6.369629948390191,
-   "instrument_s": 1063.642654867569,
+   "instrument_s": 1063.705346109498,
    "tip_rounds": 1,
    "track_lost": 0,
    "pickups": 0,
    "placed": 6,
    "spares_seen": 6,
    "sites": 6,
-   "gap_width_nm": 6.035143924245745,
-   "spacing_nm": 1.0058573207076242,
-   "ring_radius_fit_nm": 6.477532930105762,
+   "gap_width_nm": 6.037615144205525,
+   "spacing_nm": 1.0062691907009207,
+   "ring_radius_fit_nm": 6.476924968340374,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -5569,12 +5604,12 @@
     }
    ],
    "site_fill": [
-    0.88,
-    0.95,
+    0.87,
     0.94,
-    0.97,
+    0.94,
+    0.96,
     0.98,
-    0.97
+    0.96
    ],
    "diag": {
     "tol_nm": 0.476,
@@ -5614,8 +5649,8 @@
     "n_ring": 42,
     "r_nm": 6.369629948390191,
     "planned_deg": [
-     309.9,
-     318.8,
+     309.8,
+     318.7,
      327.6,
      336.5,
      345.4,
@@ -5630,13 +5665,13 @@
      353.4
     ]
    },
-   "e0_mev": -422.1429166127044,
-   "radius_measured_nm": 6.4997048946256415,
+   "e0_mev": -422.16177241545216,
+   "radius_measured_nm": 6.499664275021268,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.11633145754733944,
-    -0.40942277366903945
+    0.11658816883019757,
+    -0.4089659128408925
    ],
    "tip_condition": "dirty"
   },
@@ -5648,17 +5683,17 @@
    "values": {
     "peak_lo_mev": -396.0,
     "peak_hi_mev": -334.00000000000006,
-    "radius_nm": 8.558225485326513
+    "radius_nm": 8.584142780627781
    },
    "truth": {
     "peak_lo_mev": -398.948636816621,
-    "peak_hi_mev": -332.94863681662093,
+    "peak_hi_mev": -334.94863681662093,
     "radius_nm": 8.518075223741755
    },
    "abs_err": {
     "peak_lo_mev": 2.94863681662099,
-    "peak_hi_mev": -1.0513631833791237,
-    "radius_nm": 0.040150261584757985
+    "peak_hi_mev": 0.9486368166208763,
+    "radius_nm": 0.06606755688602561
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -5669,16 +5704,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 4,
    "radius_nm": 8.518075223741755,
-   "instrument_s": 1517.0626085989065,
+   "instrument_s": 1495.81473091549,
    "tip_rounds": 3,
    "track_lost": 1,
    "pickups": 0,
    "placed": 4,
    "spares_seen": 4,
    "sites": 4,
-   "gap_width_nm": 6.153649048285685,
-   "spacing_nm": 1.5384122620714213,
-   "ring_radius_fit_nm": 8.551911120786723,
+   "gap_width_nm": 6.155234081440487,
+   "spacing_nm": 1.5388085203601218,
+   "ring_radius_fit_nm": 8.551482060196662,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -5742,23 +5777,23 @@
     },
     {
      "r_kohm": 209.7,
-     "spikes": 11,
+     "spikes": 6,
      "in": false
     },
     {
      "r_kohm": 209.7,
      "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 209.7,
+     "spikes": 5,
      "in": true
     },
     {
      "r_kohm": 209.7,
-     "spikes": 4,
+     "spikes": 6,
      "in": true
-    },
-    {
-     "r_kohm": 335.5,
-     "spikes": 1,
-     "in": false
     },
     {
      "r_kohm": 335.5,
@@ -5767,7 +5802,7 @@
     },
     {
      "r_kohm": 268.4,
-     "spikes": 1,
+     "spikes": 2,
      "in": false
     },
     {
@@ -5777,12 +5812,12 @@
     },
     {
      "r_kohm": 214.7,
-     "spikes": 20,
+     "spikes": 18,
      "in": false
     },
     {
      "r_kohm": 214.7,
-     "spikes": 9,
+     "spikes": 8,
      "in": true
     },
     {
@@ -5797,7 +5832,7 @@
     },
     {
      "r_kohm": 219.9,
-     "spikes": 2,
+     "spikes": 5,
      "in": false
     },
     {
@@ -5807,7 +5842,7 @@
     },
     {
      "r_kohm": 175.9,
-     "spikes": 21,
+     "spikes": 18,
      "in": false
     },
     {
@@ -5817,10 +5852,10 @@
     }
    ],
    "site_fill": [
-    1.57,
-    1.47,
+    1.58,
+    1.48,
     1.32,
-    1.25
+    1.22
    ],
    "diag": {
     "tol_nm": 0.743,
@@ -5838,7 +5873,7 @@
      },
      {
       "to_nearest_gap_site_nm": 0.26,
-      "off_circle_nm": -0.02,
+      "off_circle_nm": 0.22,
       "status": "on_surface"
      },
      {
@@ -5862,13 +5897,13 @@
      67.9
     ]
    },
-   "e0_mev": -448.4525594337412,
-   "radius_measured_nm": 8.558225485326513,
-   "peaks_found": 5,
+   "e0_mev": -448.4600477757036,
+   "radius_measured_nm": 8.584142780627781,
+   "peaks_found": 6,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.014754519125487718,
-    0.5065293302021022
+    -0.4238801118155642,
+    0.6146846739220917
    ],
    "tip_condition": "unstable"
   },
@@ -5880,7 +5915,7 @@
    "values": {
     "peak_lo_mev": -392.0,
     "peak_hi_mev": -328.00000000000006,
-    "radius_nm": 8.291774368558194
+    "radius_nm": 8.291814897730431
    },
    "truth": {
     "peak_lo_mev": -388.9473967760866,
@@ -5890,7 +5925,7 @@
    "abs_err": {
     "peak_lo_mev": -3.0526032239134224,
     "peak_hi_mev": -1.0526032239135361,
-    "radius_nm": 0.015960036214021756
+    "radius_nm": 0.016000565386258714
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -5901,16 +5936,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 6,
    "radius_nm": 8.275814332344172,
-   "instrument_s": 1346.7110291624506,
+   "instrument_s": 1346.7364928355178,
    "tip_rounds": 1,
    "track_lost": 0,
    "pickups": 0,
    "placed": 6,
    "spares_seen": 6,
    "sites": 6,
-   "gap_width_nm": 5.4273041351454205,
-   "spacing_nm": 0.9045506891909034,
-   "ring_radius_fit_nm": 8.290172847452773,
+   "gap_width_nm": 5.4261045000377495,
+   "spacing_nm": 0.9043507500062916,
+   "ring_radius_fit_nm": 8.29017798578071,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -6155,13 +6190,13 @@
      158.0
     ]
    },
-   "e0_mev": -434.68295549388324,
-   "radius_measured_nm": 8.291774368558194,
+   "e0_mev": -434.68157219664465,
+   "radius_measured_nm": 8.291814897730431,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.4689893395968597,
-    -0.46310307950299107
+    0.4688625845077829,
+    -0.4633799822938951
    ],
    "tip_condition": "dirty"
   },
@@ -6173,7 +6208,7 @@
    "values": {
     "peak_lo_mev": -390.0,
     "peak_hi_mev": -322.00000000000006,
-    "radius_nm": 7.758093238226313
+    "radius_nm": 7.76171650776431
    },
    "truth": {
     "peak_lo_mev": -390.31618710124025,
@@ -6183,7 +6218,7 @@
    "abs_err": {
     "peak_lo_mev": 0.31618710124024574,
     "peak_hi_mev": 0.3161871012400752,
-    "radius_nm": -0.11330553694134071
+    "radius_nm": -0.1096822674033433
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -6194,16 +6229,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 3,
    "radius_nm": 7.871398775167654,
-   "instrument_s": 1234.2455225086142,
+   "instrument_s": 1234.4265660200783,
    "tip_rounds": 1,
    "track_lost": 0,
    "pickups": 0,
    "placed": 3,
    "spares_seen": 3,
    "sites": 3,
-   "gap_width_nm": 3.6483350230335514,
-   "spacing_nm": 1.216111674344517,
-   "ring_radius_fit_nm": 7.796627173391373,
+   "gap_width_nm": 3.6413717076549403,
+   "spacing_nm": 1.2137905692183135,
+   "ring_radius_fit_nm": 7.795375403863988,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -6303,7 +6338,7 @@
    ],
    "site_fill": [
     1.15,
-    1.18,
+    1.17,
     1.11
    ],
    "diag": {
@@ -6339,13 +6374,13 @@
      94.6
     ]
    },
-   "e0_mev": -438.8625658849506,
-   "radius_measured_nm": 7.758093238226313,
-   "peaks_found": 6,
+   "e0_mev": -438.860253502187,
+   "radius_measured_nm": 7.76171650776431,
+   "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.0008709846889636577,
-    0.10039250456561999
+    -0.005878718926298796,
+    0.0976991383727833
    ],
    "tip_condition": "double"
   },
@@ -6680,7 +6715,7 @@
    "values": {
     "peak_lo_mev": -372.00000000000006,
     "peak_hi_mev": -244.00000000000006,
-    "radius_nm": 5.811190700867975
+    "radius_nm": 5.811243351767188
    },
    "truth": {
     "peak_lo_mev": -372.90717457087766,
@@ -6690,7 +6725,7 @@
    "abs_err": {
     "peak_lo_mev": 0.9071745708776007,
     "peak_hi_mev": 0.9071745708774586,
-    "radius_nm": 0.04042154978944268
+    "radius_nm": 0.04047420068865559
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -6701,16 +6736,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 3,
    "radius_nm": 5.770769151078532,
-   "instrument_s": 1475.941359909654,
+   "instrument_s": 1475.9793689082483,
    "tip_rounds": 4,
    "track_lost": 1,
    "pickups": 0,
    "placed": 3,
    "spares_seen": 3,
    "sites": 3,
-   "gap_width_nm": 2.178806400804205,
-   "spacing_nm": 0.7262688002680684,
-   "ring_radius_fit_nm": 5.808412059709199,
+   "gap_width_nm": 2.176559840890307,
+   "spacing_nm": 0.7255199469634356,
+   "ring_radius_fit_nm": 5.808588729880708,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -6819,7 +6854,7 @@
     }
    ],
    "site_fill": [
-    1.09,
+    1.08,
     1.03,
     1.07
    ],
@@ -6856,13 +6891,13 @@
      219.0
     ]
    },
-   "e0_mev": -463.07044884866207,
-   "radius_measured_nm": 5.811190700867975,
+   "e0_mev": -463.0681443731541,
+   "radius_measured_nm": 5.811243351767188,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.3405980314110154,
-    -0.42487207738878524
+    -0.33998815823551404,
+    -0.42462097377995905
    ],
    "tip_condition": "unstable"
   },
@@ -6874,7 +6909,7 @@
    "values": {
     "peak_lo_mev": -374.00000000000006,
     "peak_hi_mev": -282.0,
-    "radius_nm": 7.086890816185085
+    "radius_nm": 7.0846769739263955
    },
    "truth": {
     "peak_lo_mev": -371.9656454518967,
@@ -6884,7 +6919,7 @@
    "abs_err": {
     "peak_lo_mev": -2.0343545481033516,
     "peak_hi_mev": -0.03435454810340843,
-    "radius_nm": 0.015224835432224637
+    "radius_nm": 0.013010993173534935
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -6895,16 +6930,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 4,
    "radius_nm": 7.071665980752861,
-   "instrument_s": 880.7591782418784,
+   "instrument_s": 907.8372409169544,
    "tip_rounds": 0,
    "track_lost": 0,
    "pickups": 0,
    "placed": 4,
    "spares_seen": 4,
    "sites": 4,
-   "gap_width_nm": 5.107478847325848,
-   "spacing_nm": 1.276869711831462,
-   "ring_radius_fit_nm": 7.083966899107574,
+   "gap_width_nm": 5.056296951747348,
+   "spacing_nm": 1.264074237936837,
+   "ring_radius_fit_nm": 7.085087101810588,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -6943,12 +6978,7 @@
     },
     {
      "r_kohm": 131.1,
-     "spikes": 7,
-     "in": true
-    },
-    {
-     "r_kohm": 131.1,
-     "spikes": 5,
+     "spikes": 9,
      "in": true
     },
     {
@@ -6963,62 +6993,77 @@
     },
     {
      "r_kohm": 134.2,
-     "spikes": 5,
-     "in": false
-    },
-    {
-     "r_kohm": 134.2,
      "spikes": 0,
      "in": false
     },
     {
      "r_kohm": 107.4,
-     "spikes": 9,
-     "in": false
-    },
-    {
-     "r_kohm": 107.4,
-     "spikes": 8,
-     "in": false
-    },
-    {
-     "r_kohm": 107.4,
-     "spikes": 3,
-     "in": false
-    },
-    {
-     "r_kohm": 107.4,
-     "spikes": 2,
-     "in": true
-    },
-    {
-     "r_kohm": 107.4,
-     "spikes": 2,
-     "in": true
-    },
-    {
-     "r_kohm": 85.9,
-     "spikes": 8,
-     "in": true
-    },
-    {
-     "r_kohm": 137.4,
      "spikes": 5,
      "in": false
     },
     {
-     "r_kohm": 137.4,
-     "spikes": 9,
-     "in": false
-    },
-    {
-     "r_kohm": 110.0,
+     "r_kohm": 107.4,
      "spikes": 11,
      "in": false
     },
     {
+     "r_kohm": 107.4,
+     "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 6,
+     "in": true
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 107.4,
+     "spikes": 2,
+     "in": true
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 4,
+     "in": false
+    },
+    {
+     "r_kohm": 171.8,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 7,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 9,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 5,
+     "in": false
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 1,
+     "in": true
+    },
+    {
+     "r_kohm": 137.4,
+     "spikes": 2,
+     "in": true
+    },
+    {
      "r_kohm": 110.0,
-     "spikes": 8,
+     "spikes": 10,
      "in": true
     },
     {
@@ -7028,32 +7073,27 @@
     },
     {
      "r_kohm": 175.9,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
+     "spikes": 1,
+     "in": false
+    },
+    {
+     "r_kohm": 140.7,
      "spikes": 0,
      "in": false
     },
     {
-     "r_kohm": 140.7,
-     "spikes": 3,
-     "in": false
-    },
-    {
-     "r_kohm": 140.7,
-     "spikes": 1,
-     "in": false
-    },
-    {
      "r_kohm": 112.6,
-     "spikes": 21,
+     "spikes": 20,
      "in": false
     },
     {
      "r_kohm": 112.6,
      "spikes": 8,
-     "in": true
-    },
-    {
-     "r_kohm": 112.6,
-     "spikes": 2,
      "in": true
     },
     {
@@ -7068,9 +7108,9 @@
     }
    ],
    "site_fill": [
-    1.65,
-    0.78,
-    1.22,
+    1.62,
+    0.96,
+    1.31,
     1.5
    ],
    "diag": {
@@ -7088,8 +7128,8 @@
       "status": "on_surface"
      },
      {
-      "to_nearest_gap_site_nm": 0.25,
-      "off_circle_nm": 0.19,
+      "to_nearest_gap_site_nm": 0.0,
+      "off_circle_nm": -0.07,
       "status": "on_surface"
      },
      {
@@ -7101,10 +7141,10 @@
     "n_ring": 36,
     "r_nm": 7.071665980752861,
     "planned_deg": [
-     117.0,
-     127.3,
-     137.6,
-     147.9
+     117.3,
+     127.6,
+     137.8,
+     148.0
     ],
     "gap_deg": [
      117.8,
@@ -7113,13 +7153,13 @@
      146.5
     ]
    },
-   "e0_mev": -437.37577414238865,
-   "radius_measured_nm": 7.086890816185085,
+   "e0_mev": -437.37566516036696,
+   "radius_measured_nm": 7.0846769739263955,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    0.16975450485240579,
-    -0.057248119769021805
+    0.16906458204725333,
+    -0.05442670489213136
    ],
    "tip_condition": "good"
   },
@@ -7358,7 +7398,7 @@
    "values": {
     "peak_lo_mev": -356.00000000000006,
     "peak_hi_mev": -218.00000000000003,
-    "radius_nm": 5.793448149514228
+    "radius_nm": 5.793049843298543
    },
    "truth": {
     "peak_lo_mev": -358.06897655307813,
@@ -7368,7 +7408,7 @@
    "abs_err": {
     "peak_lo_mev": 2.0689765530780733,
     "peak_hi_mev": 2.0689765530779596,
-    "radius_nm": -0.0024935972639461568
+    "radius_nm": -0.00289190347963153
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -7379,16 +7419,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 4,
    "radius_nm": 5.795941746778174,
-   "instrument_s": 848.9461220245015,
+   "instrument_s": 848.9320301428529,
    "tip_rounds": 0,
    "track_lost": 0,
    "pickups": 0,
    "placed": 4,
    "spares_seen": 4,
    "sites": 4,
-   "gap_width_nm": 2.6951840032514642,
-   "spacing_nm": 0.6737960008128661,
-   "ring_radius_fit_nm": 5.794205975300817,
+   "gap_width_nm": 2.6957088016403947,
+   "spacing_nm": 0.6739272004100987,
+   "ring_radius_fit_nm": 5.794219663428678,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -7577,13 +7617,13 @@
      68.0
     ]
    },
-   "e0_mev": -454.241572033697,
-   "radius_measured_nm": 5.793448149514228,
+   "e0_mev": -454.23838644167097,
+   "radius_measured_nm": 5.793049843298543,
    "peaks_found": 4,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.4142812993823196,
-    0.5331702988612009
+    -0.41391866703055186,
+    0.5318489802075586
    ],
    "tip_condition": "good"
   },
@@ -7595,7 +7635,7 @@
    "values": {
     "peak_lo_mev": -404.0,
     "peak_hi_mev": -340.00000000000006,
-    "radius_nm": 8.655994450376546
+    "radius_nm": 8.655965761486101
    },
    "truth": {
     "peak_lo_mev": -407.79627335755384,
@@ -7605,7 +7645,7 @@
    "abs_err": {
     "peak_lo_mev": 3.7962733575538437,
     "peak_hi_mev": 3.79627335755373,
-    "radius_nm": 0.006199101487441183
+    "radius_nm": 0.006170412596995689
    },
    "claims_ok": {
     "ring_occupancy": true,
@@ -7616,16 +7656,16 @@
    "ring_occupancy": 1.0,
    "gap_sites": 3,
    "radius_nm": 8.649795348889105,
-   "instrument_s": 1116.7226983293401,
+   "instrument_s": 1116.7278797229424,
    "tip_rounds": 1,
    "track_lost": 0,
    "pickups": 0,
    "placed": 3,
    "spares_seen": 3,
    "sites": 3,
-   "gap_width_nm": 2.941090425668966,
-   "spacing_nm": 0.9803634752229886,
-   "ring_radius_fit_nm": 8.65980182463341,
+   "gap_width_nm": 2.941199493949547,
+   "spacing_nm": 0.9803998313165158,
+   "ring_radius_fit_nm": 8.65968568181846,
    "attempts": [
     {
      "r_kohm": 400.0,
@@ -7756,13 +7796,13 @@
      320.3
     ]
    },
-   "e0_mev": -455.6270997541224,
-   "radius_measured_nm": 8.655994450376546,
+   "e0_mev": -455.629979449531,
+   "radius_measured_nm": 8.655965761486101,
    "peaks_found": 5,
    "spectra": 4,
    "drift_comp_nm_per_min": [
-    -0.818000566454765,
-    -0.2984973493068911
+    -0.8180084513732879,
+    -0.2985129058626228
    ],
    "tip_condition": "dirty"
   }
