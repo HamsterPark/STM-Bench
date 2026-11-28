@@ -156,6 +156,11 @@ notes: |
     development failures are the baseline's own: a second apex its repairs did not remove (two
     seeds), a tip that kept changing on a bent stretch of edge until no new round was started,
     and a set of maps mixed from two rounds across a bend of the edge.
+  * Re-run at 8482ad1 (khwu job 70525: after the merge of the integration head c320987, with the 5 h
+    budget below): the files of seeds 0-29, 0-69 and 300-329 came out byte for byte the same. In the
+    same job the reference reached 200/200 on seeds 0-199 (|m* error| p90 0.63 %, max 1.23 %) and the
+    baseline 122/130 on seeds 70-199, which it had never been run on (all eight failures started with
+    a double or an unstable tip).
   * The 2 % on m* is three times the reference's p90 and about twice the baseline's; it stays. The
     15 meV on E0 is seven times the reference's p90; it stays too (a material constant, knowledge
     allowed, no chance gate). The budget was 3 h: 7.7 times the reference's p90 but only 1.9-2.1
