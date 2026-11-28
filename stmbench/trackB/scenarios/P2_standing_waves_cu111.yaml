@@ -33,7 +33,7 @@ task_en: >-
   fit the band bottom E0 (meV) and the effective mass m* (in units of the electron mass) of the
   surface state from the variation of the standing-wave wavelength with energy, and report them
   with ReportResult.
-budget: {sim_hours: 3.0, wire_cmds: 400000}
+budget: {sim_hours: 5.0, wire_cmds: 670000}
 hidden:
   surface:
     # dense enough that a 100 nm survey frame holds two to four isolated scatterers. The
@@ -136,3 +136,44 @@ notes: |
   agent can locate: ``ExtractClusters`` reports cluster positions, while nothing in
   the stack reports the geometry of a step. Eight spectra at six distinct places spanning
   −0.5…+0.1 V is the minimum that constrains a dispersion at all.
+
+  **2026-11-28: the instrument delivers it — a reference solution and a baseline.** The
+  paragraphs above are the history of 2026-09-07 and stay as written; ``LocateStepEdge`` and
+  ``ExtractClusters`` are skills of that MAST-era scripted baseline, not part of this repository.
+  Since 2026-10-13 the simulator fills a lock-in dI/dV channel and the evidence accepts dI/dV
+  maps (``any_of``). Both current solutions take that route, the 1993 one: eight maps from -0.30
+  to +0.12 V, 24 nm at 0.2 nm/px, the fast axis across a step edge (found in the topograph) with a
+  terrace >= 60 nm wide on the profile's side, every row aligned at its own edge, a standing-wave
+  fit with a free phase (cos phi J0 + sin phi H0), k^2 against E (``stmbench.analysis.standing_waves``;
+  docs/DESIGN.md section 9.12). Code 6ea5e18 on khwu, job 70512:
+
+  * Reference (``reference --paper P2``, the truth navigates), seeds 0-29: 30/30; |m* error|
+    median 0.28 %, p90 0.66 %, max 0.85 %; |E0 error| median 0.85, p90 2.0, max 2.3 meV;
+    instrument time median 1213 s, p90 1401 s.
+  * Baseline (``baseline --paper P2``, no truth): development seeds 0-69 66/70; held-out seeds
+    300-329, run once on the final code, 30/30 (|m* error| p90 1.00 %, max 1.93 %; |E0 error| p90
+    2.3 meV; instrument time of the successes median 2097 s, p90 5816 s, max 7229 s). The four
+    development failures are the baseline's own: a second apex its repairs did not remove (two
+    seeds), a tip that kept changing on a bent stretch of edge until no new round was started,
+    and a set of maps mixed from two rounds across a bend of the edge.
+  * Re-run at 8482ad1 (khwu job 70525: after the merge of the integration head c320987, with the 5 h
+    budget below): the files of seeds 0-29, 0-69 and 300-329 came out byte for byte the same. In the
+    same job the reference reached 200/200 on seeds 0-199 (|m* error| p90 0.63 %, max 1.23 %) and the
+    baseline 122/130 on seeds 70-199, which it had never been run on (all eight failures started with
+    a double or an unstable tip).
+  * The 2 % on m* is three times the reference's p90 and about twice the baseline's; it stays. The
+    15 meV on E0 is seven times the reference's p90; it stays too (a material constant, knowledge
+    allowed, no chance gate). The budget was 3 h: 7.7 times the reference's p90 but only 1.9-2.1
+    times the baseline's; no run failed on it, and the baseline starts no new round after 6500 s.
+  * **Budget 3 h -> 5 h (2026-11-28)**, wire_cmds 400000 -> 670000 with it. A budget is set at
+    about three times the p90 of the instrument time of the truth-free baseline's successes (P3's
+    repair variant 3.05, P4 3.4, P3 2.9-3.3): 3 h was 1.9 times P2's held-out p90 of 5816 s, 5 h
+    is 3.1 times it. The budget is not drawn from the hidden block, so the worlds and the
+    fixed-answer audit are unchanged; the baseline's 6500 s cut-off is a fixed number, not a share
+    of the budget, and no run reached 3 h, so the results above hold under 5 h as they are.
+  * Two simulator fixes came out of this work (docs/DESIGN.md section 9.3): scipy 1.18.1's
+    struve(0, z) returns NaN on an interval at z = 25.765, which blanked whole dI/dV maps; and the
+    step's standing wave is now a function of the distance across the local edge, where it was the
+    distance along the mean normal (across a bent stretch of step, a profile across the local edge
+    read k up to 4 % high, m* about twice that). The hidden block and the scenario id have not
+    changed since the chance audit of 2026-10-12 (16 %, docs/DESIGN.md section 2), so it holds.

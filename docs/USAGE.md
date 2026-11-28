@@ -588,6 +588,7 @@ python -m stmbench.cli reference --paper P5 --seeds 30 --jobs 4 --json p5.json
 python -m stmbench.cli reference --paper P3 --seeds 30 --jobs 4
 python -m stmbench.cli reference --paper P4 --seeds 30 --jobs 4
 python -m stmbench.cli reference --paper P1 --seeds 30 --jobs 4
+python -m stmbench.cli reference --paper P2 --seeds 30 --jobs 4
 ```
 
 A privileged reference solution (`stmbench.reference`) may use the truth to navigate — where
@@ -604,8 +605,12 @@ p90 5.9 % (F_min), 3.7 % (decay length), 8.7 % (E_b), 354 s of instrument time. 
 0.6 nm (0.16 nm before the judge mapped positions through the imaging apex, 2026-10-14);
 879 s median, 1428 s p90. P1 (2026-11-27, seeds 0–59, the zigzag of Barth et al. 1990): 60/60; |error| p90
 0.021 nm (the period) and 1.23° (the line direction at the reported place, against 3°); 723 s median; two places
-in the middle of neighbouring arms, found in one frame by `stmbench.analysis.herringbone`. Per-seed results:
-`docs/results/`.
+in the middle of neighbouring arms, found in one frame by `stmbench.analysis.herringbone`.
+P2 (seeds 0–29, 2026-11-28): 30/30 — the truth picks a straight step edge
+with a terrace ≥ 60 nm on the profile's side and predicts the drift; eight dI/dV maps across the edge,
+each row aligned at its own edge, a standing-wave fit with a free phase
+(`stmbench.analysis.standing_waves`); |error| p90 0.66 % (m*) and 2.0 meV (E0), 1213 s median.
+Per-seed results: `docs/results/`.
 
 ### Scripted baselines
 
@@ -614,6 +619,7 @@ python -m stmbench.cli baseline --paper P4 --seeds 30 --jobs 4 --json p4-baselin
 python -m stmbench.cli baseline --paper P3 --seeds 200 --jobs 8 --json p3-baseline.json
 python -m stmbench.cli baseline --paper P1 --seeds 100 --jobs 8 --json p1-baseline.json
 python -m stmbench.cli baseline --paper P5 --seeds 100 --jobs 8 --json p5-baseline.json
+python -m stmbench.cli baseline --paper P2 --seeds 30 --first-seed 300 --jobs 4 --json p2-baseline.json
 ```
 
 A scripted baseline (`stmbench.baselines`) drives the instrument an agent gets over MCP and
@@ -633,6 +639,11 @@ direction jumps, weakens them); 99/100 on seeds 0–99, 29/30 on the held-out 43
 `docs/results/p1_baseline_seeds_0-99.json`, `…_430-459.json`. P5 (DESIGN §9.10): the tip placed on an adatom from its
 images and from the force itself, then the reference's measurement; 100/100 on seeds 0–99, 30/30 on the held-out
 460–489; per-seed records: `docs/results/p5_baseline_seeds_0-99.json`, `…_460-489.json`.
+P2 (standing waves, DESIGN §9.12): the staircase from a 400 nm survey, a place with a wide terrace and a
+straight edge, the tip judged by steps drawn twice and by how one straight edge's wave fits a trial map,
+each map's k corrected for the tilt of its own edge; 66/70 on development seeds 0–69 and 30/30 on seeds
+300–329, held out until the code was final (2026-11-28); per-seed records:
+`docs/results/p2_baseline_seeds_*.json`.
 
 ### Run directory
 
